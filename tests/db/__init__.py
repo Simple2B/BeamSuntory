@@ -1,3 +1,4 @@
+# flake8: noqa F501
 from typing import Generator
 from faker import Faker
 from sqlalchemy import func
@@ -33,14 +34,13 @@ def gen_test_items(num_objects: int) -> Generator[str, None, None]:
         dns_org = fake.random_choices(elements=DOMAINS, length=1)[0]
 
         # email formatting
-        yield f"{first_name}{i}".lower(), f"{first_name}.{last_name}{i}@{company}.{dns_org}".lower()
+        yield f"{first_name}{i}".lower(), f"{first_name}.{last_name}{i}@{company}.{dns_org}".lower(), f"{first_name} {last_name}".lower()
 
 
 def populate(count: int = NUM_TEST_USERS):
-    for username, email in gen_test_items(count):
+    for username, email, full_name in gen_test_items(count):
         m.User(
-            username=username,
-            email=email,
+            username=username, email=email, full_name=full_name, role="MANAGER"
         ).save(False)
 
     db.session.commit()

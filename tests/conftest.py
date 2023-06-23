@@ -51,6 +51,8 @@ def populate(client: FlaskClient):
             username=f"user{i+1}",
             email=f"user{i+1}@mail.com",
             password="password",
+            full_name=f"user{i+1} suntory",
+            role="MANAGER",
         ).save(False)
     db.session.commit()
     yield client

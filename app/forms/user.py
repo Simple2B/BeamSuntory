@@ -51,6 +51,8 @@ class NewUserForm(FlaskForm):
     email = StringField("email", [DataRequired(), Email()])
     activated = BooleanField("activated")
     username = StringField("Username", [DataRequired()])
+    full_name = StringField("Full name", validators=[DataRequired(), Length(2, 30)])
+    role = StringField("Role", validators=[DataRequired(), Length(2, 30)])
     password = PasswordField("Password", validators=[DataRequired(), Length(6, 30)])
     password_confirmation = PasswordField(
         "Confirm Password",

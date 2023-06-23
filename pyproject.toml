@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "flask.app"
+name = "beam-suntory"
 version = "0.1.0"
 description = ""
-authors = ["denys <denysburimov@gmail.com>"]
+authors = ["petro <xavrais312@gmail.com>", "andrii <andrey.berezyanskiy@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.11"
