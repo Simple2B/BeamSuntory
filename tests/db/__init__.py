@@ -1,3 +1,4 @@
+# flake8: noqa F501
 from typing import Generator
 from faker import Faker
 from sqlalchemy import func
