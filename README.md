@@ -1,4 +1,4 @@
-# Simple Flask App
+# Beam Suntory
 
 1. Run
 
@@ -7,7 +7,6 @@ poetry install
 ```
 
 2. Create '.env' file (simply copy file .env.sample):
-
 
 3. Run
 
