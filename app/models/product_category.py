@@ -17,7 +17,7 @@ class ProductCategory(db.Model, ModelMixin):
         unique=True,
         nullable=False,
     )
-    quontity: orm.Mapped[int] = orm.mapped_column(sa.Integer())
+    quantity: orm.Mapped[int] = orm.mapped_column(sa.Integer())
     description: orm.Mapped[str] = orm.mapped_column(sa.String(258))
     active: orm.Mapped[bool] = orm.mapped_column(sa.Boolean())
     created_at: orm.Mapped[datetime] = orm.mapped_column(

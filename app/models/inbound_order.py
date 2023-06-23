@@ -24,7 +24,7 @@ class InboundOrders(db.Model, ModelMixin):
     active_date: orm.Mapped[datetime] = orm.mapped_column(sa.DateTime)
     active_time: orm.Mapped[datetime] = orm.mapped_column(sa.DateTime)
     item_type: orm.Mapped[str] = orm.mapped_column(sa.String(64))
-    quontity: orm.Mapped[int] = orm.mapped_column()
+    quantity: orm.Mapped[int] = orm.mapped_column()
 
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
