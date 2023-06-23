@@ -1,6 +1,5 @@
 from datetime import datetime
 from uuid import uuid4
-from enum import Enum
 
 from flask_login import UserMixin, AnonymousUserMixin
 import sqlalchemy as sa
@@ -12,12 +11,6 @@ from app.database import db
 from .utils import ModelMixin
 from app.logger import log
 from app import schema as s
-
-
-class UserRole(Enum):
-    ADMIN = "admin"
-    MANAGER = "manager"
-    SALES_REP = "sales rep"
 
 
 # NOTE or alternative to Enum
@@ -63,7 +56,7 @@ class User(db.Model, UserMixin, ModelMixin):
     full_name: orm.Mapped[str] = orm.mapped_column(sa.String(255))
     # TODO deside use link to some storage or png base64
     image: orm.Mapped[str] = orm.mapped_column(sa.String(255))
-    role: orm.Mapped[UserRole]
+    role: orm.Mapped[s.UserRole]
 
     @hybrid_property
     def password(self):
