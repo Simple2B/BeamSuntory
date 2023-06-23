@@ -37,9 +37,9 @@ class Supplier(db.Model, ModelMixin):
     )
 
     country_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("str_values.id"))
-    country: orm.Mapped[StrValue] = orm.relationship()
+    country: orm.Mapped[StrValue] = orm.relationship(foreign_keys=[country_id])
     region_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("str_values.id"))
-    region: orm.Mapped[StrValue] = orm.relationship()
+    region: orm.Mapped[StrValue] = orm.relationship(foreign_keys=[region_id])
 
     def __repr__(self):
         return f"<{self.id}: {self.name}>"

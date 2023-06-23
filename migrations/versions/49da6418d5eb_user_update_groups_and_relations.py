@@ -61,7 +61,7 @@ def upgrade():
         batch_op.add_column(
             sa.Column("full_name", sa.String(length=255), nullable=False)
         )
-        batch_op.add_column(sa.Column("image", sa.String(length=255), nullable=False))
+        batch_op.add_column(sa.Column("image", sa.String(length=255), nullable=True))
         batch_op.add_column(
             sa.Column(
                 "role",

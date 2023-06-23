@@ -33,6 +33,8 @@ def test_register(client):
                 email=TEST_EMAIL,
                 password="password",
                 password_confirmation="password",
+                full_name="sam suntory",
+                role="MANAGER",
             ),
             follow_redirects=True,
         )
@@ -84,6 +86,8 @@ def test_forgot(client):
         username="sam",
         email=TEST_EMAIL,
         password="password",
+        full_name="sam suntory",
+        role="MANAGER",
     )
     user.save()
     with mail.record_messages() as outbox:

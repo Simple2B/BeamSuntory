@@ -21,15 +21,15 @@ class Product(db.Model, ModelMixin):
     product_type: orm.Mapped[s.ProductType]
 
     brand_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("str_values.id"))
-    brand: orm.Mapped[StrValue] = orm.relationship()
+    brand: orm.Mapped[StrValue] = orm.relationship(foreign_keys=[brand_id])
     sub_brand_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("str_values.id"))
-    sub_brand: orm.Mapped[StrValue] = orm.relationship()
+    sub_brand: orm.Mapped[StrValue] = orm.relationship(foreign_keys=[sub_brand_id])
     category_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("product_categories.id")
     )
     category: orm.Mapped[ProductCategory] = orm.relationship()
     language_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("str_values.id"))
-    language: orm.Mapped[StrValue] = orm.relationship()
+    language: orm.Mapped[StrValue] = orm.relationship(foreign_keys=[language_id])
 
     # vendor: orm.Mapped[str] = orm.mapped_column(sa.String(64)) # TODO do we need it??
     currency: orm.Mapped[s.Currency]

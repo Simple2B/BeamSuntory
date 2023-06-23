@@ -31,9 +31,9 @@ class Warehouse(db.Model, ModelMixin):
     manager_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("users.id"))
     manager: orm.Mapped[User] = orm.relationship()
     country_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("str_values.id"))
-    country: orm.Mapped[StrValue | None] = orm.relationship()
+    country: orm.Mapped[StrValue | None] = orm.relationship(foreign_keys=[country_id])
     region_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("str_values.id"))
-    region: orm.Mapped[StrValue | None] = orm.relationship()
+    region: orm.Mapped[StrValue | None] = orm.relationship(foreign_keys=[region_id])
 
     def __repr__(self):
         return f"<{self.id}: {self.name}>"

@@ -20,6 +20,8 @@ def register():
             username=form.username.data,
             email=form.email.data,
             password=form.password.data,
+            full_name=form.full_name.data,
+            role=form.role.data,
         )
         log(log.INFO, "Form submitted. User: [%s]", user)
         user.save()

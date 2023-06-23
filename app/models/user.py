@@ -55,7 +55,9 @@ class User(db.Model, UserMixin, ModelMixin):
     )
     full_name: orm.Mapped[str] = orm.mapped_column(sa.String(255))
     # TODO deside use link to some storage or png base64
-    image: orm.Mapped[str] = orm.mapped_column(sa.String(255))
+    image: orm.Mapped[str] = orm.mapped_column(
+        sa.String(255), nullable=True, default="png"
+    )
     role: orm.Mapped[s.UserRole]
 
     @hybrid_property
