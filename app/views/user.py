@@ -5,12 +5,14 @@ from flask import (
     flash,
     redirect,
     url_for,
+    current_app as app,
 )
 from flask_login import login_required
+from flask_mail import Message
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
-from app import models as m, db
+from app import models as m, db, mail
 from app import forms as f
 from app.logger import log
 
@@ -84,14 +86,33 @@ def create():
         user = m.User(
             username=form.username.data,
             email=form.email.data,
-            password=form.password.data,
             full_name=form.full_name.data,
             role=form.role.data,
+            password=app.config["DEFAULT_USER_PASSWORD"],
             activated=form.activated.data,
         )
         log(log.INFO, "Form submitted. User: [%s]", user)
         flash("User added!", "success")
         user.save()
+        # create e-mail message
+        msg = Message(
+            subject="New password",
+            sender=app.config["MAIL_DEFAULT_SENDER"],
+            recipients=[user.email],
+        )
+        url = url_for(
+            "auth.password_recovery",
+            reset_password_uid=user.unique_id,
+            _external=True,
+        )
+
+        msg.html = render_template(
+            "email/remind.html",
+            user=user,
+            url=url,
+        )
+        mail.send(msg)
+
         return redirect(url_for("user.get_all"))
 
 

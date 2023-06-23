@@ -124,7 +124,7 @@ def forgot_pass():
             _external=True,
         )
         msg.html = render_template(
-            "email/remind.htm",
+            "email/remind.html",
             user=user,
             url=url,
         )
