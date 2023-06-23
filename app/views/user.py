@@ -88,7 +88,7 @@ def create():
             email=form.email.data,
             full_name=form.full_name.data,
             role=form.role.data,
-            password=app.config["DEFAULT_USER_PASSWORD"],
+            password=form.password.data,
             activated=form.activated.data,
         )
         log(log.INFO, "Form submitted. User: [%s]", user)

@@ -1,3 +1,4 @@
+import os
 from flask_wtf import FlaskForm
 from wtforms import (
     StringField,
@@ -10,6 +11,8 @@ from wtforms.validators import DataRequired, Email, Length, EqualTo
 
 from app import models as m
 from app import db
+
+DEFAULT_USER_PASSWORD = os.environ.get("DEFAULT_USER_PASSWORD")
 
 
 class UserForm(FlaskForm):
@@ -53,13 +56,13 @@ class NewUserForm(FlaskForm):
     username = StringField("Username", [DataRequired()])
     full_name = StringField("Full name", validators=[DataRequired(), Length(2, 30)])
     role = StringField("Role", validators=[DataRequired(), Length(2, 30)])
-    password = PasswordField("Password", validators=[DataRequired(), Length(6, 30)])
+    password = PasswordField(
+        "Password",
+        default=DEFAULT_USER_PASSWORD,
+    )
     password_confirmation = PasswordField(
         "Confirm Password",
-        validators=[
-            DataRequired(),
-            EqualTo("password", message="Password do not match."),
-        ],
+        default=DEFAULT_USER_PASSWORD,
     )
     submit = SubmitField("Save")
 
