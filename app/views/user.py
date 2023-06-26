@@ -82,6 +82,9 @@ def save():
 @login_required
 def create():
     form = f.NewUserForm()
+    if not form.validate_on_submit():
+        flash("This username or email is already taken.", "danger")
+        return redirect(url_for("user.get_all"))
     if form.validate_on_submit():
         user = m.User(
             username=form.username.data,
@@ -114,6 +117,9 @@ def create():
         mail.send(msg)
 
         return redirect(url_for("user.get_all"))
+
+    flash("Something went wrong!", "danger")
+    return redirect(url_for("user.get_all"))
 
 
 @bp.route("/delete/<int:id>", methods=["DELETE"])
