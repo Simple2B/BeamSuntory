@@ -65,17 +65,17 @@ jobs:
           push: true
           tags: simple2b/beam-suntory-app:latest
 
-  # deploy:
-  #   runs-on: Linux
-  #   needs: build
-  #   steps:
-  #     - name: Deploy beam-suntory-app
-  #       uses: appleboy/ssh-action@master
-  #       with:
-  #         host: ${{ secrets.SSH_HOST_IP_PROD }}
-  #         username: ${{ secrets.SSH_USER }}
-  #         key: ${{ secrets.SSH_KEY }}
-  #         port: ${{ secrets.SSH_PORT }}
-  #         script: |
-  #           cd app
-  #           ./up
+  deploy:
+    runs-on: Linux
+    needs: build
+    steps:
+      - name: Deploy beam-suntory-app
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST_IP_PROD }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd BeamSuntory
+            ./up.sh
