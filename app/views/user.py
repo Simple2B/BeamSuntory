@@ -107,7 +107,7 @@ def create():
         )
 
         msg.html = render_template(
-            "email/remind.html",
+            "email/set.html",
             user=user,
             url=url,
         )

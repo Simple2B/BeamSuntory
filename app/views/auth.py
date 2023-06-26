@@ -124,7 +124,7 @@ def forgot_pass():
             _external=True,
         )
         msg.html = render_template(
-            "email/remind.html",
+            "email/set.html",
             user=user,
             url=url,
         )
@@ -193,7 +193,7 @@ def password_reset(reset_password_uid):
     )
 
     msg.html = render_template(
-        "email/remind.html",
+        "email/set.html",
         user=user,
         url=url,
     )
