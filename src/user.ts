@@ -90,6 +90,22 @@ deleteButtons.forEach(e => {
   });
 });
 
+const resetPasswordButtons = document.querySelectorAll('.reset-password-user-btn');
+
+resetPasswordButtons.forEach(e => {
+  e.addEventListener('click', async function() {
+    if (confirm('Are sure?')) {
+      let unique_id = e.getAttribute('data-user-unique-id');
+      const response = await fetch(`/password_reset/${unique_id}`, {
+        method: 'GET',
+      });
+      if (response.status == 200) {
+        location.reload();
+      }
+    }
+  });
+});
+
 function editUser(user: IUser) {
   let input: HTMLInputElement = document.querySelector('#user-edit-username');
   input.value = user.username;

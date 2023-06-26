@@ -170,3 +170,33 @@ def password_recovery(reset_password_uid):
         form=form,
         unique_id=reset_password_uid,
     )
+
+
+@auth_blueprint.route("/password_reset/<reset_password_uid>", methods=["GET", "POST"])
+def password_reset(reset_password_uid):
+    query = m.User.select().where(m.User.unique_id == reset_password_uid)
+    user: m.User = db.session.scalar(query)
+
+    if not user:
+        flash("Incorrect reset password link", "danger")
+        return redirect(url_for("main.index"))
+
+    msg = Message(
+        subject="New password",
+        sender=app.config["MAIL_DEFAULT_SENDER"],
+        recipients=[user.email],
+    )
+    url = url_for(
+        "auth.password_recovery",
+        reset_password_uid=user.unique_id,
+        _external=True,
+    )
+
+    msg.html = render_template(
+        "email/remind.html",
+        user=user,
+        url=url,
+    )
+    mail.send(msg)
+    flash("Login successful.", "success")
+    return redirect(url_for("user.get_all"))
