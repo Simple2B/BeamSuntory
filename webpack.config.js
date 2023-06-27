@@ -36,7 +36,27 @@ const userConfig = {
   },
 };
 
-const configs = [baseConfig, userConfig].map(conf =>
+const groupConfig = {
+  entry: {
+    main: './src/group.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/group.js', // <--- Will be compiled to this single file
+  },
+};
+
+const masterGroupConfig = {
+  entry: {
+    main: './src/master_group.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/master_group.js', // <--- Will be compiled to this single file
+  },
+};
+
+const configs = [baseConfig, userConfig, masterGroupConfig].map(conf =>
   merge(defaultConfig, conf),
 );
 

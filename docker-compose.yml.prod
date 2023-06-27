@@ -18,6 +18,8 @@ services:
     image: simple2b/beam-suntory-app:latest
     restart: always
     command: sh ./start_server.sh
+    env_file:
+      - .env
     environment:
       APP_ENV: production
     depends_on:

@@ -11,6 +11,7 @@ from app import db
 
 
 class GroupForm(FlaskForm):
+    next_url = StringField("next_url")
     group_id = StringField("group_id", [DataRequired()])
     name = StringField("Name", [DataRequired()])
     master_group = StringField("Master Group", [DataRequired()])
@@ -36,6 +37,7 @@ class NewGroupForm(FlaskForm):
 
 
 class MasterGroupForm(FlaskForm):
+    next_url = StringField("next_url")
     master_group_id = StringField("master_group_id", [DataRequired()])
     name = StringField("Name", [DataRequired()])
 

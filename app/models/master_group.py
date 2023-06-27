@@ -7,7 +7,7 @@ from sqlalchemy import orm
 from app.database import db
 from .utils import ModelMixin
 from app import schema as s
-from .group import Group
+from app import models as m
 
 
 class MasterGroup(db.Model, ModelMixin):
@@ -24,7 +24,7 @@ class MasterGroup(db.Model, ModelMixin):
         default=datetime.utcnow,
     )
 
-    groups: orm.Mapped[List[Group]] = orm.relationship()
+    groups: orm.Mapped[List[m.Group]] = orm.relationship(back_populates="master_groups")
 
     def __repr__(self):
         return f"<{self.id}: {self.name}>"

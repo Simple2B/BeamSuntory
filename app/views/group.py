@@ -25,7 +25,7 @@ def get_all():
     query = m.Group.select().order_by(m.Group.id)
     count_query = sa.select(sa.func.count()).select_from(m.Group)
     if q:
-        query = m.Group.select().where(m.User.name.like(f"{q}%")).order_by(m.Group.id)
+        query = m.Group.select().where(m.Group.name.like(f"{q}%")).order_by(m.Group.id)
         count_query = (
             sa.select(sa.func.count())
             .where(m.Group.name.like(f"{q}%"))
@@ -34,22 +34,26 @@ def get_all():
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
+    master_groups_rows_objs = db.session.execute(m.MasterGroup.select()).all()
+    master_groups = [row[0] for row in master_groups_rows_objs]
+
     return render_template(
         "group/groups.html",
-        group=db.session.execute(
+        groups=db.session.execute(
             query.offset((pagination.page - 1) * pagination.per_page).limit(
                 pagination.per_page
             )
         ).scalars(),
         page=pagination,
         search_query=q,
+        master_groups=master_groups,
     )
 
 
 @group_blueprint.route("/create", methods=["POST"])
 @login_required
 def create():
-    form = f.GroupForm()
+    form = f.NewGroupForm()
     if form.validate_on_submit():
         group = m.Group(
             name=form.name.data,
@@ -59,6 +63,10 @@ def create():
         group.save()
         flash("Group added!", "success")
         return redirect(url_for("group.get_all"))
+    else:
+        log(log.ERROR, "Group creation errors: [%s]", form.errors)
+        flash(f"{form.errors}", "danger")
+        return redirect(url_for("group.get_all"))
 
 
 @group_blueprint.route("/edit", methods=["POST"])
@@ -66,22 +74,35 @@ def create():
 def save():
     form = f.GroupForm()
     if form.validate_on_submit():
-        query = m.Group.select().where(m.Group.id == int(form.user_id.data))
-        u: m.User | None = db.session.scalar(query)
+        query = m.Group.select().where(m.Group.id == int(form.group_id.data))
+        u: m.Group | None = db.session.scalar(query)
         if not u:
-            log(log.ERROR, "Not found user by id : [%s]", form.user_id.data)
-            flash("Cannot save user data", "danger")
-        u.username = form.username.data
-        u.email = form.email.data
-        u.activated = form.activated.data
-        if form.password.data.strip("*\n "):
-            u.password = form.password.data
+            log(log.ERROR, "Not found group by id : [%s]", form.group_id.data)
+            flash("Cannot save group data", "danger")
+        u.name = form.name.data
+        u.master_group_id = form.master_group.data
         u.save()
         if form.next_url.data:
             return redirect(form.next_url.data)
-        return redirect(url_for("user.get_all"))
+        return redirect(url_for("group.get_all"))
 
     else:
-        log(log.ERROR, "User save errors: [%s]", form.errors)
+        log(log.ERROR, "group save errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
-        return redirect(url_for("user.get_all"))
+        return redirect(url_for("group.get_all"))
+
+
+@group_blueprint.route("/delete/<int:id>", methods=["DELETE"])
+@login_required
+def delete(id: int):
+    u = db.session.scalar(m.Group.select().where(m.Group.id == id))
+    if not u:
+        log(log.INFO, "There is no group with id: [%s]", id)
+        flash("There is no such group", "danger")
+        return "no group", 404
+
+    db.session.delete(u)
+    db.session.commit()
+    log(log.INFO, "Group deleted. Group: [%s]", u)
+    flash("Group deleted!", "success")
+    return "ok", 200

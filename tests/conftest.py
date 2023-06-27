@@ -56,3 +56,23 @@ def populate(client: FlaskClient):
         ).save(False)
     db.session.commit()
     yield client
+
+
+@pytest.fixture
+def mg_g_populate(client: FlaskClient):
+    m.User(
+        username="user1",
+        email="user1@mail.com",
+        password="password",
+        full_name="user1 suntory",
+        role="MANAGER",
+    ).save(False)
+    m.MasterGroup(
+        name="Country",
+    ).save(False)
+    m.Group(
+        name="Maywood",
+        master_group_id="1",
+    ).save(False)
+    db.session.commit()
+    yield client
