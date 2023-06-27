@@ -65,6 +65,7 @@ def save():
         u.username = form.username.data
         u.email = form.email.data
         u.full_name = form.full_name.data
+        u.role = form.role.data
         u.country = form.country.data
         u.city = form.city.data
         u.region = form.region.data
