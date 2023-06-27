@@ -59,6 +59,31 @@ class User(db.Model, UserMixin, ModelMixin):
         sa.String(255), nullable=True, default="png"
     )
     role: orm.Mapped[s.UserRole]
+    country: orm.Mapped[str] = orm.mapped_column(
+        sa.String(255),
+        nullable=False,
+    )
+    region: orm.Mapped[str] = orm.mapped_column(
+        sa.String(255),
+        nullable=False,
+    )
+    city: orm.Mapped[str] = orm.mapped_column(
+        sa.String(255),
+        nullable=False,
+    )
+    zip_code: orm.Mapped[str] = orm.mapped_column(
+        sa.String(255),
+        nullable=False,
+    )
+    street_address: orm.Mapped[str] = orm.mapped_column(
+        sa.String(255),
+        nullable=False,
+    )
+    group: orm.Mapped[str] = orm.mapped_column(
+        sa.String(255),
+        nullable=False,
+    )
+    approval_permission: orm.Mapped[bool] = orm.mapped_column(sa.Boolean, default=False)
 
     @hybrid_property
     def password(self):

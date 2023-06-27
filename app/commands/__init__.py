@@ -38,5 +38,10 @@ def init(app: Flask):
             password=app.config["ADMIN_PASSWORD"],
             full_name="admin",
             role="ADMIN",
+            country="Ukraine",
+            region="Kyiv",
+            city="Kyiv",
+            zip_code="11111",
+            street_address="Khreshchatyk 1"
         ).save()
         print("admin created")
