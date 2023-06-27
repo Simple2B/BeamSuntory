@@ -42,6 +42,9 @@ def init(app: Flask):
             region="Kyiv",
             city="Kyiv",
             zip_code="11111",
-            street_address="Khreshchatyk 1"
+            street_address="Khreshchatyk 1",
+            activated=True,
+            approval_permission=True,
+            group="Country",
         ).save()
         print("admin created")

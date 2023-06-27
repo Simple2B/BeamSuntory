@@ -14,7 +14,20 @@ def register(
     full_name=TEST_ADMIN_FULL_NAME,
     role=TEST_ADMIN_NAME,
 ):
-    user = User(username=username, email=email, full_name=full_name, role=role)
+    user = User(
+        username=username,
+        email=email,
+        full_name=full_name,
+        role=role,
+        activated=True,
+        approval_permission=True,
+        group="Country",
+        street_address="street",
+        country="UK",
+        region="Lv",
+        city="Dro",
+        zip_code="82100",
+    )
     user.password = password
     user.save()
     return user.id

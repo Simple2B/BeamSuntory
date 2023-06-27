@@ -71,6 +71,8 @@ def save():
         u.street_address = form.street_address.data
         u.zip_code = form.zip_code.data
         u.activated = form.activated.data
+        u.approval_permission = (form.approval_permission.data,)
+        u.group = (form.group.data,)
         if form.password.data.strip("*\n "):
             u.password = form.password.data
         u.save()
@@ -104,6 +106,8 @@ def create():
             city=form.city.data,
             zip_code=form.zip_code.data,
             street_address=form.street_address.data,
+            approval_permission=form.approval_permission.data,
+            group=form.group.data,
         )
         log(log.INFO, "Form submitted. User: [%s]", user)
         flash("User added!", "success")
