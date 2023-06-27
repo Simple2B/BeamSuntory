@@ -19,9 +19,17 @@ def register():
         user = m.User(
             username=form.username.data,
             email=form.email.data,
-            password=form.password.data,
             full_name=form.full_name.data,
             role=form.role.data,
+            password=form.password.data,
+            activated=form.activated.data,
+            country=form.country.data,
+            region=form.region.data,
+            city=form.city.data,
+            zip_code=form.zip_code.data,
+            street_address=form.street_address.data,
+            approval_permission=form.approval_permission.data,
+            group=form.group.data,
         )
         log(log.INFO, "Form submitted. User: [%s]", user)
         user.save()
