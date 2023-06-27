@@ -2093,6 +2093,18 @@ input:checked + .toggle-bg {
   color: red;
 }
 
+.dropdown-close {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease-out;
+}
+
+.dropdown-open {
+  max-height: 300px;
+  overflow: hidden;
+  transition: max-height 0.5s ease-in;
+}
+
 .hover\:border-gray-300:hover {
   --tw-border-opacity: 1;
   border-color: rgb(209 213 219 / var(--tw-border-opacity));
