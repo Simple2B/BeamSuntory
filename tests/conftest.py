@@ -74,6 +74,14 @@ def mg_g_populate(client: FlaskClient):
         password="password",
         full_name="user1 suntory",
         role="MANAGER",
+        activated=True,
+        approval_permission=True,
+        group="Country",
+        street_address="street",
+        country="UK",
+        region="Lv",
+        city="Dro",
+        zip_code="82100",
     ).save(False)
     m.MasterGroup(
         name="Country",
