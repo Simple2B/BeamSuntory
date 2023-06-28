@@ -11,13 +11,11 @@ def register(
     username=TEST_ADMIN_NAME,
     email=TEST_ADMIN_EMAIL,
     password=TEST_ADMIN_PASSWORD,
-    full_name=TEST_ADMIN_FULL_NAME,
     role=TEST_ADMIN_NAME,
 ):
     user = User(
         username=username,
         email=email,
-        full_name=full_name,
         role=role,
         activated=True,
         approval_permission=True,
@@ -27,6 +25,7 @@ def register(
         region="Lv",
         city="Dro",
         zip_code="82100",
+        locker_address="Address locker",
     )
     user.password = password
     user.save()

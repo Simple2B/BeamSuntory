@@ -38,11 +38,11 @@ def gen_test_items(num_objects: int) -> Generator[str, None, None]:
 
 
 def populate(count: int = NUM_TEST_USERS):
-    for username, email, full_name in gen_test_items(count):
+    for username, email in gen_test_items(count):
         m.User(
             username=username,
             email=email,
-            full_name=full_name,
+            password="password",
             role="MANAGER",
             activated=True,
             approval_permission=True,
@@ -52,6 +52,8 @@ def populate(count: int = NUM_TEST_USERS):
             region="Lv",
             city="Dro",
             zip_code="82100",
+            locker_address="Address locker",
+            sales_rep=False
         ).save(False)
 
     db.session.commit()

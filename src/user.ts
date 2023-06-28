@@ -13,14 +13,15 @@ interface IUser {
   username: string;
   email: string;
   activated: boolean;
-  approval: boolean;
+  approval_permission: boolean;
   role: string;
-  full_name: string;
   country: string;
   region: string;
   city: string;
   zip_code: string;
   street_address: string;
+  sales_rep: boolean;
+  locker_address: string;
 }
 
 const $modalElement: HTMLElement = document.querySelector('#editUserModal');
@@ -119,6 +120,14 @@ resetPasswordButtons.forEach(e => {
 });
 
 function editUser(user: IUser) {
+  const lockerAddressContainer = document.querySelector('#user-edit-locker-address-container');
+  const sales_rep = document.querySelector('#user-edit-sales_rep');
+
+  sales_rep.addEventListener('click', () => {
+    console.log("click");
+    lockerAddressContainer.classList.toggle('invisible')
+  })
+
   let input: HTMLInputElement = document.querySelector('#user-edit-username');
   input.value = user.username;
   input = document.querySelector('#user-edit-id');
@@ -127,8 +136,6 @@ function editUser(user: IUser) {
   input.value = user.email;
   input = document.querySelector('#user-edit-role');
   input.value = user.role.toUpperCase();
-  input = document.querySelector('#user-edit-full_name');
-  input.value = user.full_name;
   input = document.querySelector('#user-edit-password');
   input.value = '*******';
   input = document.querySelector('#user-edit-password_confirmation');
@@ -143,8 +150,19 @@ function editUser(user: IUser) {
   input.value = user.zip_code;
   input = document.querySelector('#user-edit-street_address');
   input.value = user.street_address;
+
+  if (user.sales_rep) {
+    lockerAddressContainer.classList.remove('invisible')
+    input = document.querySelector('#user-edit-locker-address');
+    input.value = user.locker_address;
+  }
+
   input = document.querySelector('#user-edit-activated');
   input.checked = user.activated;
+  input = document.querySelector('#user-edit-sales_rep');
+  input.checked = user.sales_rep;
+  input = document.querySelector('#user-edit-approval_permission');
+  input.checked = user.approval_permission;
   input = document.querySelector('#user-edit-next_url');
   input.value = window.location.href;
   modal.show();
@@ -154,7 +172,14 @@ const viewUserButtonElements = document.querySelectorAll('.user-view-button');
 viewUserButtonElements.forEach(e =>
   e.addEventListener('click', () => {
     const user = JSON.parse(e.getAttribute('data-target'));
+    const lockerAddressContainer = document.querySelector('#user-view-locker-address-container');
+
+    user.sales_rep
+      ? lockerAddressContainer.classList.remove('hidden')
+      : lockerAddressContainer.classList.add('hidden');
+
     console.log(user);
+    user.sales_rep
     let div: HTMLDivElement = document.querySelector('#user-view-username');
     div.innerHTML = user.username;
     div = document.querySelector('#user-view-id');
@@ -163,6 +188,12 @@ viewUserButtonElements.forEach(e =>
     div.innerHTML = user.email;
     div = document.querySelector('#user-view-role');
     div.innerHTML = user.role.toUpperCase();
+    div = document.querySelector('#user-view-status');
+
+    user.activated
+      ? div.innerHTML = "Active"
+      : div.innerHTML = "Offline";
+
     div = document.querySelector('#user-view-country');
     div.innerHTML = user.country;
     div = document.querySelector('#user-view-region');
@@ -173,11 +204,21 @@ viewUserButtonElements.forEach(e =>
     div.innerHTML = user.zip_code;
     div = document.querySelector('#user-view-street_address');
     div.innerHTML = user.street_address;
+
+    if(user.sales_rep) {
+      div = document.querySelector('#user-view-locker-address');
+      div.innerHTML = user.locker_address;
+    }
+
     div = document.querySelector('#user-view-group');
     div.innerHTML = user.group;
-    let input: HTMLInputElement = document.querySelector('#user-view-activated');
-    input.checked = user.activated;
-    input = document.querySelector('#user-view-approval-permission');
-    input.checked = user.activated;
   }),
 );
+
+const lockerAddressContainer = document.querySelector('#user-add-locker-address-container');
+const salesRepAddUser = document.querySelector('#user-add-sales_rep');
+
+salesRepAddUser.addEventListener('click', () => {
+  console.log("click");
+  lockerAddressContainer.classList.toggle('invisible')
+})

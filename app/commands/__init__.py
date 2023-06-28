@@ -36,15 +36,16 @@ def init(app: Flask):
             username=app.config["ADMIN_USERNAME"],
             email=app.config["ADMIN_EMAIL"],
             password=app.config["ADMIN_PASSWORD"],
-            full_name="admin",
             role="ADMIN",
             country="Ukraine",
             region="Kyiv",
             city="Kyiv",
             zip_code="11111",
-            street_address="Khreshchatyk 1",
+            street_address="Address 1",
             activated=True,
             approval_permission=True,
             group="Country",
+            sales_rep=False,
+            locker_address=" locker address",
         ).save()
         print("admin created")
