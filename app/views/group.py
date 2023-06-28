@@ -25,7 +25,20 @@ def get_all():
     query = m.Group.select().order_by(m.Group.id)
     count_query = sa.select(sa.func.count()).select_from(m.Group)
     if q:
-        query = m.Group.select().where(m.Group.name.like(f"{q}%")).order_by(m.Group.id)
+        master_group_query = db.session.execute(
+            m.MasterGroup.select()
+            .where(m.MasterGroup.name.like(f"{q}%"))
+            .order_by(m.MasterGroup.id)
+        ).scalar()
+        # TODO consider something better then in_
+        query = (
+            m.Group.select()
+            .where(
+                m.Group.name.like(f"{q}%")
+                | m.Group.master_group_id.in_([master_group_query.id])
+            )
+            .order_by(m.Group.id)
+        )
         count_query = (
             sa.select(sa.func.count())
             .where(m.Group.name.like(f"{q}%"))
@@ -47,6 +60,7 @@ def get_all():
         page=pagination,
         search_query=q,
         master_groups=master_groups,
+        main_master_groups=master_groups,
     )
 
 

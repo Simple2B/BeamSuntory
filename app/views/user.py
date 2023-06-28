@@ -41,6 +41,7 @@ def get_all():
     pagination = create_pagination(total=db.session.scalar(count_query))
 
     groups_rows = db.session.execute(sa.select(m.Group)).all()
+    master_groups_rows = db.session.execute(sa.select(m.MasterGroup)).all()
 
     return render_template(
         "user/users.html",
@@ -52,6 +53,7 @@ def get_all():
         page=pagination,
         search_query=q,
         groups=[i[0] for i in groups_rows],
+        main_master_groups=[i[0] for i in master_groups_rows],
     )
 
 

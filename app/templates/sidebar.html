@@ -483,22 +483,6 @@
               </a>
             </li>
             <li>
-              <!-- TODO do we need this route in sidebar? -->
-              <a
-                href="{{ url_for('group.create') }}"
-                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
-                <svg
-                  class="flex-shrink-0 w-4 h-4 ml-1 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
-                  fill="currentColor"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 512 512">
-                  <path
-                    d="M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256z" />
-                </svg>
-                <span class="flex-1 ml-4 whitespace-nowrap">Add Group</span>
-              </a>
-            </li>
-            <li>
               <a
                 href="{{ url_for('group.get_all') }}"
                 class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
@@ -513,6 +497,7 @@
                 <span class="flex-1 ml-4 whitespace-nowrap">All Groups</span>
               </a>
             </li>
+            {% for master_group in main_master_groups %}
             <li>
               <a
                 href="#"
@@ -525,24 +510,12 @@
                   <path
                     d="M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256z" />
                 </svg>
-                <span class="flex-1 ml-4 whitespace-nowrap">Region</span>
+                <span class="flex-1 ml-4 whitespace-nowrap"
+                  >{{ master_group.name }}</span
+                >
               </a>
             </li>
-            <li>
-              <a
-                href="#"
-                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
-                <svg
-                  class="flex-shrink-0 w-4 h-4 ml-1 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
-                  fill="currentColor"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 512 512">
-                  <path
-                    d="M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256z" />
-                </svg>
-                <span class="flex-1 ml-4 whitespace-nowrap">Language</span>
-              </a>
-            </li>
+            {% endfor %}
           </ul>
         </div>
       </li>
@@ -612,7 +585,9 @@
               </a>
             </li>
             <li>
-              <a href="{{ url_for('user.get_all') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+              <a
+                href="{{ url_for('user.get_all') }}"
+                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
                 <svg
                   class="flex-shrink-0 w-4 h-4 ml-1 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
                   fill="currentColor"
