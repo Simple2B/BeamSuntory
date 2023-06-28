@@ -25,6 +25,5 @@ class User(BaseModel):
     sales_rep: bool
     locker_address: str
 
-
     class Config:
         orm_mode = True
