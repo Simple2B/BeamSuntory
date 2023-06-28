@@ -1121,38 +1121,6 @@ input:checked + .toggle-bg {
   grid-column: span 6 / span 6;
 }
 
-.col-span-2 {
-  grid-column: span 2 / span 2;
-}
-
-.col-span-4 {
-  grid-column: span 4 / span 4;
-}
-
-.col-start-1 {
-  grid-column-start: 1;
-}
-
-.col-start-3 {
-  grid-column-start: 3;
-}
-
-.col-start-5 {
-  grid-column-start: 5;
-}
-
-.col-end-2 {
-  grid-column-end: 2;
-}
-
-.col-end-4 {
-  grid-column-end: 4;
-}
-
-.col-end-6 {
-  grid-column-end: 6;
-}
-
 .-mx-1 {
   margin-left: -0.25rem;
   margin-right: -0.25rem;
@@ -2147,6 +2115,11 @@ input:checked + .toggle-bg {
   background-color: rgb(225 239 254 / var(--tw-bg-opacity));
 }
 
+.hover\:bg-blue-700:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(26 86 219 / var(--tw-bg-opacity));
+}
+
 .hover\:bg-blue-800:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(30 66 159 / var(--tw-bg-opacity));
@@ -2180,16 +2153,6 @@ input:checked + .toggle-bg {
 .hover\:bg-yellow-500:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(194 120 3 / var(--tw-bg-opacity));
-}
-
-.hover\:bg-blue-600:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(28 100 242 / var(--tw-bg-opacity));
-}
-
-.hover\:bg-blue-700:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(26 86 219 / var(--tw-bg-opacity));
 }
 
 .hover\:text-blue-500:hover {
@@ -2502,18 +2465,6 @@ input:checked + .toggle-bg {
 @media (min-width: 640px) {
   .sm\:col-span-3 {
     grid-column: span 3 / span 3;
-  }
-
-  .sm\:col-start-1 {
-    grid-column-start: 1;
-  }
-
-  .sm\:col-start-3 {
-    grid-column-start: 3;
-  }
-
-  .sm\:col-start-5 {
-    grid-column-start: 5;
   }
 
   .sm\:ml-64 {

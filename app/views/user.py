@@ -69,6 +69,7 @@ def save():
         u.city = form.city.data
         u.region = form.region.data
         u.street_address = form.street_address.data
+        u.office_address = form.office_address.data
         u.zip_code = form.zip_code.data
         u.activated = form.activated.data
         u.approval_permission = form.approval_permission.data
@@ -107,6 +108,7 @@ def create():
             city=form.city.data,
             zip_code=form.zip_code.data,
             street_address=form.street_address.data,
+            office_address=form.office_address.data,
             approval_permission=form.approval_permission.data,
             sales_rep=form.sales_rep.data,
             locker_address=form.locker_address.data,

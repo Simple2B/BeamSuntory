@@ -27,6 +27,7 @@ def register():
             city=form.city.data,
             zip_code=form.zip_code.data,
             street_address=form.street_address.data,
+            office_address=form.office_address.data,
             approval_permission=form.approval_permission.data,
             group=form.group.data,
             locker_address=form.locker_address.data,

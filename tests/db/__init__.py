@@ -48,6 +48,7 @@ def populate(count: int = NUM_TEST_USERS):
             approval_permission=True,
             group="Country",
             street_address="street",
+            office_address="office",
             country="UK",
             region="Lv",
             city="Dro",
