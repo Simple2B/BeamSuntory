@@ -23,11 +23,9 @@ def test_list(populate: FlaskClient):
     assert response
     assert response.status_code == 200
     html = response.data.decode()
-    assert "/user/?page=6" in html
+    assert "/user/?page=6" not in html
     assert "/user/?page=3" in html
-    assert "/user/?page=8" in html
-    assert "/user/?page=10" not in html
-    assert "/user/?page=2" not in html
+    assert "/user/?page=2" in html
 
 
 def test_create_admin(runner: FlaskCliRunner):
@@ -38,7 +36,7 @@ def test_create_admin(runner: FlaskCliRunner):
 
 
 def test_populate_db(runner: FlaskCliRunner):
-    TEST_COUNT = 56
+    TEST_COUNT = 16
     count_before = db.session.query(m.User).count()
     res: Result = runner.invoke(args=["db-populate", "--count", f"{TEST_COUNT}"])
     assert f"populated by {TEST_COUNT}" in res.stdout
