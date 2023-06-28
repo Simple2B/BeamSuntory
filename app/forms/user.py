@@ -32,13 +32,14 @@ class UserForm(FlaskForm):
         ],
     )
     role = StringField("Role", validators=[DataRequired(), Length(2, 30)])
-    full_name = StringField("Full name", validators=[DataRequired(), Length(2, 30)])
     country = StringField("Country", [DataRequired()])
     region = StringField("Region", [DataRequired()])
     city = StringField("City", [DataRequired()])
     zip_code = StringField("Zip Code", [DataRequired()])
     street_address = StringField("Street Address", [DataRequired()])
     submit = SubmitField("Save")
+    locker_address = StringField("Locker Address")
+    sales_rep = BooleanField("Sales Rep")
 
     def validate_username(self, field):
         query = (
@@ -74,12 +75,13 @@ class NewUserForm(FlaskForm):
         default=DEFAULT_USER_PASSWORD,
     )
     role = StringField("Role", validators=[DataRequired(), Length(2, 30)])
-    full_name = StringField("Full name", validators=[DataRequired(), Length(2, 30)])
     country = StringField("Country", [DataRequired()])
     region = StringField("Region", [DataRequired()])
     city = StringField("City", [DataRequired()])
     zip_code = StringField("Zip Code", [DataRequired()])
     street_address = StringField("Street Address", [DataRequired()])
+    locker_address = StringField("Locker Address")
+    sales_rep = BooleanField("Sales Rep")
     submit = SubmitField("Save")
 
     def validate_username(self, field):

@@ -53,7 +53,6 @@ class User(db.Model, UserMixin, ModelMixin):
         sa.String(64),
         default=gen_password_reset_id,
     )
-    full_name: orm.Mapped[str] = orm.mapped_column(sa.String(255))
     # TODO deside use link to some storage or png base64
     image: orm.Mapped[str] = orm.mapped_column(
         sa.String(255), nullable=True, default="png"
@@ -84,6 +83,10 @@ class User(db.Model, UserMixin, ModelMixin):
         nullable=False,
     )
     approval_permission: orm.Mapped[bool] = orm.mapped_column(sa.Boolean, default=False)
+    sales_rep: orm.Mapped[bool] = orm.mapped_column(sa.Boolean, default=False)
+    locker_address: orm.Mapped[str] = orm.mapped_column(
+        sa.String(255),
+    )
 
     @hybrid_property
     def password(self):
