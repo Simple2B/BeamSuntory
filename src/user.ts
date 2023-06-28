@@ -48,10 +48,6 @@ const modalOptions: ModalOptions = {
 
 const modal: ModalInterface = new Modal($modalElement, modalOptions);
 const addModal: ModalInterface = new Modal($addUserModalElement, modalOptions);
-const viewModal: ModalInterface = new Modal(
-  $viewUserModalElement,
-  modalOptions,
-);
 
 const $buttonElements = document.querySelectorAll('.user-edit-button');
 $buttonElements.forEach(e =>
@@ -154,52 +150,34 @@ function editUser(user: IUser) {
   modal.show();
 }
 
-//view modal window
-
-// const viewUserButtons = document.querySelectorAll('.user-view-button');
-
-// function viewUser() {
-//   viewModal.show()
-// }
-
-// viewUserButtons.forEach(e => {
-//   e.addEventListener('click', () => {
-//     console.log('click view')
-//     viewUser()
-//   })
-// })
 const viewUserButtonElements = document.querySelectorAll('.user-view-button');
 viewUserButtonElements.forEach(e =>
   e.addEventListener('click', () => {
     const user = JSON.parse(e.getAttribute('data-target'));
-    // editUser(JSON.parse(e.getAttribute('data-target')));
     console.log(user);
-    // viewModal.show()
-    let input: HTMLInputElement = document.querySelector('#user-view-username');
-    input.value = user.username;
-    input = document.querySelector('#user-view-id');
-    input.value = user.id.toString();
-    input = document.querySelector('#user-view-email');
-    input.value = user.email;
-    input = document.querySelector('#user-view-full_name');
-    input.value = user.full_name;
-    input = document.querySelector('#user-edit-role');
-    input.value = user.role.toUpperCase();
-    input = document.querySelector('#user-view-password');
-    input.value = '*******';
-    input = document.querySelector('#user-view-country');
-    input.value = user.country;
-    input = document.querySelector('#user-view-region');
-    input.value = user.region;
-    input = document.querySelector('#user-view-city');
-    input.value = user.city;
-    input = document.querySelector('#user-view-zip_code');
-    input.value = user.zip_code;
-    input = document.querySelector('#user-view-street_address');
-    input.value = user.street_address;
-    input = document.querySelector('#user-view-activated');
+    let div: HTMLDivElement = document.querySelector('#user-view-username');
+    div.innerHTML = user.username;
+    div = document.querySelector('#user-view-id');
+    div.innerHTML = user.id.toString();
+    div = document.querySelector('#user-view-email');
+    div.innerHTML = user.email;
+    div = document.querySelector('#user-view-role');
+    div.innerHTML = user.role.toUpperCase();
+    div = document.querySelector('#user-view-country');
+    div.innerHTML = user.country;
+    div = document.querySelector('#user-view-region');
+    div.innerHTML = user.region;
+    div = document.querySelector('#user-view-city');
+    div.innerHTML = user.city;
+    div = document.querySelector('#user-view-zip_code');
+    div.innerHTML = user.zip_code;
+    div = document.querySelector('#user-view-street_address');
+    div.innerHTML = user.street_address;
+    div = document.querySelector('#user-view-group');
+    div.innerHTML = user.group;
+    let input: HTMLInputElement = document.querySelector('#user-view-activated');
     input.checked = user.activated;
-    input = document.querySelector('#user-view-next_url');
-    input.value = window.location.href;
+    input = document.querySelector('#user-view-approval-permission');
+    input.checked = user.activated;
   }),
 );
