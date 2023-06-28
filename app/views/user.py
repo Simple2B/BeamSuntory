@@ -40,6 +40,8 @@ def get_all():
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
+    groups_rows = db.session.execute(sa.select(m.Group)).all()
+
     return render_template(
         "user/users.html",
         users=db.session.execute(
@@ -49,6 +51,7 @@ def get_all():
         ).scalars(),
         page=pagination,
         search_query=q,
+        groups=[i[0] for i in groups_rows],
     )
 
 
@@ -73,10 +76,12 @@ def save():
         u.zip_code = form.zip_code.data
         u.activated = form.activated.data
         u.approval_permission = form.approval_permission.data
-        u.group = form.group.data
+        u.group_id = form.group.data
         if form.password.data.strip("*\n "):
             u.password = form.password.data
         u.save()
+
+        m.UserGroup(left_id=u.id, right_id=form.group.data).save()
         if form.next_url.data:
             return redirect(form.next_url.data)
         return redirect(url_for("user.get_all"))
@@ -108,11 +113,12 @@ def create():
             zip_code=form.zip_code.data,
             street_address=form.street_address.data,
             approval_permission=form.approval_permission.data,
-            group=form.group.data,
+            group_id=form.group.data,
         )
         log(log.INFO, "Form submitted. User: [%s]", user)
         flash("User added!", "success")
         user.save()
+        m.UserGroup(left_id=user.id, right_id=form.group.data).save()
         # create e-mail message
         msg = Message(
             subject="New password",

@@ -61,11 +61,11 @@
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="street-address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Group</label >
-            <select type="text" name="street_address" id="user-edit-street_address" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Street Address" required>
-              <option value="1">Brand</option>
-              <option value="2">Language</option>
-              <option value="3">Region</option>
-            </select>
+              <select type="text" name="group" id="user-edit-group" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Group" required>
+                {% for group in groups %}
+                <option value="{{ group.id }}">{{ group.name }}</option>
+                {% endfor %}
+              </select>
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="activated" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Approval Permission</label >

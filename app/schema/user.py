@@ -17,7 +17,7 @@ class User(BaseModel):
     role: UserRole
     activated: bool
     approval_permission: bool
-    group: str
+    group_id: int
     street_address: str
     country: str
     region: str

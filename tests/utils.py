@@ -21,7 +21,7 @@ def register(
         role=role,
         activated=True,
         approval_permission=True,
-        group="Country",
+        group_id=1,
         street_address="street",
         country="UK",
         region="Lv",

@@ -29,7 +29,7 @@ def register():
             zip_code=form.zip_code.data,
             street_address=form.street_address.data,
             approval_permission=form.approval_permission.data,
-            group=form.group.data,
+            group_id=form.group.data,
         )
         log(log.INFO, "Form submitted. User: [%s]", user)
         user.save()

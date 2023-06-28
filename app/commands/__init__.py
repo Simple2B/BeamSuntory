@@ -45,6 +45,6 @@ def init(app: Flask):
             street_address="Khreshchatyk 1",
             activated=True,
             approval_permission=True,
-            group="Country",
+            group_id=1,
         ).save()
         print("admin created")
