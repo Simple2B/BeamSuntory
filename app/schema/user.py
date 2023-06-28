@@ -16,6 +16,13 @@ class User(BaseModel):
     image: str
     role: UserRole
     activated: bool
+    approval_permission: bool
+    group: str
+    street_address: str
+    country: str
+    region: str
+    city: str
+    zip_code: str
 
     class Config:
         orm_mode = True

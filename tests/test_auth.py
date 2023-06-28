@@ -35,6 +35,14 @@ def test_register(client):
                 password_confirmation="password",
                 full_name="sam suntory",
                 role="MANAGER",
+                activated=True,
+                approval_permission=True,
+                group="Country",
+                street_address="street",
+                country="UK",
+                region="Lv",
+                city="Dro",
+                zip_code="82100",
             ),
             follow_redirects=True,
         )
@@ -88,6 +96,14 @@ def test_forgot(client):
         password="password",
         full_name="sam suntory",
         role="MANAGER",
+        activated=True,
+        approval_permission=True,
+        group="Country",
+        street_address="street",
+        country="UK",
+        region="Lv",
+        city="Dro",
+        zip_code="82100",
     )
     user.save()
     with mail.record_messages() as outbox:

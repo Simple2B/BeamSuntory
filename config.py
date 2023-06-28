@@ -17,18 +17,21 @@ class BaseConfig(BaseSettings):
     WTF_CSRF_ENABLED: bool = False
 
     # Mail config
-    MAIL_SERVER: str
-    MAIL_PORT: int
-    MAIL_USE_TLS: bool
-    MAIL_USE_SSL: bool
-    MAIL_USERNAME: str
-    MAIL_PASSWORD: str
-    MAIL_DEFAULT_SENDER: str
+    MAIL_SERVER: str = os.environ.get("MAIL_SERVER")
+    MAIL_PORT: int = os.environ.get("MAIL_PORT")
+    MAIL_USE_TLS: bool = True
+    MAIL_USE_SSL: bool = False
+    MAIL_USERNAME: str = os.environ.get("MAIL_USERNAME")
+    MAIL_PASSWORD: str = os.environ.get("MAIL_PASSWORD")
+    MAIL_DEFAULT_SENDER: str = os.environ.get("MAIL_DEFAULT_SENDER")
 
     # Super admin
     ADMIN_USERNAME: str
     ADMIN_EMAIL: str
     ADMIN_PASSWORD: str
+
+    # Default user password
+    DEFAULT_USER_PASSWORD: str = os.environ.get("DEFAULT_USER_PASSWORD")
 
     # Pagination
     DEFAULT_PAGE_SIZE: int
@@ -83,7 +86,7 @@ class ProductionConfig(BaseConfig):
     ALCHEMICAL_DATABASE_URL: str = os.environ.get(
         "DATABASE_URL", "sqlite:///" + os.path.join(BASE_DIR, "database.sqlite3")
     )
-    WTF_CSRF_ENABLED = True
+    WTF_CSRF_ENABLED = False
 
     class Config:
         fields = {

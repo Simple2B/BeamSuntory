@@ -5,12 +5,14 @@ from flask import (
     flash,
     redirect,
     url_for,
+    current_app as app,
 )
 from flask_login import login_required
+from flask_mail import Message
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
-from app import models as m, db
+from app import models as m, db, mail
 from app import forms as f
 from app.logger import log
 
@@ -62,7 +64,16 @@ def save():
             flash("Cannot save user data", "danger")
         u.username = form.username.data
         u.email = form.email.data
+        u.full_name = form.full_name.data
+        u.role = form.role.data
+        u.country = form.country.data
+        u.city = form.city.data
+        u.region = form.region.data
+        u.street_address = form.street_address.data
+        u.zip_code = form.zip_code.data
         u.activated = form.activated.data
+        u.approval_permission = form.approval_permission.data
+        u.group = form.group.data
         if form.password.data.strip("*\n "):
             u.password = form.password.data
         u.save()
@@ -80,19 +91,51 @@ def save():
 @login_required
 def create():
     form = f.NewUserForm()
+    if not form.validate_on_submit():
+        flash("This username or email is already taken.", "danger")
+        return redirect(url_for("user.get_all"))
     if form.validate_on_submit():
         user = m.User(
             username=form.username.data,
             email=form.email.data,
-            password=form.password.data,
             full_name=form.full_name.data,
             role=form.role.data,
+            password=form.password.data,
             activated=form.activated.data,
+            country=form.country.data,
+            region=form.region.data,
+            city=form.city.data,
+            zip_code=form.zip_code.data,
+            street_address=form.street_address.data,
+            approval_permission=form.approval_permission.data,
+            group=form.group.data,
         )
         log(log.INFO, "Form submitted. User: [%s]", user)
         flash("User added!", "success")
         user.save()
+        # create e-mail message
+        msg = Message(
+            subject="New password",
+            sender=app.config["MAIL_DEFAULT_SENDER"],
+            recipients=[user.email],
+        )
+        url = url_for(
+            "auth.password_recovery",
+            reset_password_uid=user.unique_id,
+            _external=True,
+        )
+
+        msg.html = render_template(
+            "email/set.html",
+            user=user,
+            url=url,
+        )
+        mail.send(msg)
+
         return redirect(url_for("user.get_all"))
+
+    flash("Something went wrong!", "danger")
+    return redirect(url_for("user.get_all"))
 
 
 @bp.route("/delete/<int:id>", methods=["DELETE"])

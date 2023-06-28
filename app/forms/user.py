@@ -1,3 +1,4 @@
+import os
 from flask_wtf import FlaskForm
 from wtforms import (
     StringField,
@@ -11,14 +12,18 @@ from wtforms.validators import DataRequired, Email, Length, EqualTo
 from app import models as m
 from app import db
 
+DEFAULT_USER_PASSWORD = os.environ.get("DEFAULT_USER_PASSWORD")
+
 
 class UserForm(FlaskForm):
     next_url = StringField("next_url")
     user_id = StringField("user_id", [DataRequired()])
     email = StringField("email", [DataRequired(), Email()])
     activated = BooleanField("activated")
+    approval_permission = BooleanField("activated")
+    group = StringField("Group", [DataRequired()], default="Brand")
     username = StringField("Username", [DataRequired()])
-    password = PasswordField("Password", validators=[DataRequired(), Length(6, 30)])
+    password = PasswordField("Password", validators=[DataRequired(), Length(6, 40)])
     password_confirmation = PasswordField(
         "Confirm Password",
         validators=[
@@ -26,6 +31,13 @@ class UserForm(FlaskForm):
             EqualTo("password", message="Password do not match."),
         ],
     )
+    role = StringField("Role", validators=[DataRequired(), Length(2, 30)])
+    full_name = StringField("Full name", validators=[DataRequired(), Length(2, 30)])
+    country = StringField("Country", [DataRequired()])
+    region = StringField("Region", [DataRequired()])
+    city = StringField("City", [DataRequired()])
+    zip_code = StringField("Zip Code", [DataRequired()])
+    street_address = StringField("Street Address", [DataRequired()])
     submit = SubmitField("Save")
 
     def validate_username(self, field):
@@ -50,17 +62,24 @@ class UserForm(FlaskForm):
 class NewUserForm(FlaskForm):
     email = StringField("email", [DataRequired(), Email()])
     activated = BooleanField("activated")
+    approval_permission = BooleanField("activated")
+    group = StringField("Group", [DataRequired()], default="Brand")
     username = StringField("Username", [DataRequired()])
-    full_name = StringField("Full name", validators=[DataRequired(), Length(2, 30)])
-    role = StringField("Role", validators=[DataRequired(), Length(2, 30)])
-    password = PasswordField("Password", validators=[DataRequired(), Length(6, 40)])
+    password = PasswordField(
+        "Password",
+        default=DEFAULT_USER_PASSWORD,
+    )
     password_confirmation = PasswordField(
         "Confirm Password",
-        validators=[
-            DataRequired(),
-            EqualTo("password", message="Password do not match."),
-        ],
+        default=DEFAULT_USER_PASSWORD,
     )
+    role = StringField("Role", validators=[DataRequired(), Length(2, 30)])
+    full_name = StringField("Full name", validators=[DataRequired(), Length(2, 30)])
+    country = StringField("Country", [DataRequired()])
+    region = StringField("Region", [DataRequired()])
+    city = StringField("City", [DataRequired()])
+    zip_code = StringField("Zip Code", [DataRequired()])
+    street_address = StringField("Street Address", [DataRequired()])
     submit = SubmitField("Save")
 
     def validate_username(self, field):

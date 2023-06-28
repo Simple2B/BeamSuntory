@@ -19,9 +19,17 @@ def register():
         user = m.User(
             username=form.username.data,
             email=form.email.data,
-            password=form.password.data,
             full_name=form.full_name.data,
             role=form.role.data,
+            password=form.password.data,
+            activated=form.activated.data,
+            country=form.country.data,
+            region=form.region.data,
+            city=form.city.data,
+            zip_code=form.zip_code.data,
+            street_address=form.street_address.data,
+            approval_permission=form.approval_permission.data,
+            group=form.group.data,
         )
         log(log.INFO, "Form submitted. User: [%s]", user)
         user.save()
@@ -39,7 +47,7 @@ def register():
         )
 
         msg.html = render_template(
-            "email/confirm.htm",
+            "email/confirm.html",
             user=user,
             url=url,
         )
@@ -124,7 +132,7 @@ def forgot_pass():
             _external=True,
         )
         msg.html = render_template(
-            "email/remind.htm",
+            "email/set.html",
             user=user,
             url=url,
         )
@@ -170,3 +178,33 @@ def password_recovery(reset_password_uid):
         form=form,
         unique_id=reset_password_uid,
     )
+
+
+@auth_blueprint.route("/password_reset/<reset_password_uid>", methods=["GET", "POST"])
+def password_reset(reset_password_uid):
+    query = m.User.select().where(m.User.unique_id == reset_password_uid)
+    user: m.User = db.session.scalar(query)
+
+    if not user:
+        flash("Incorrect reset password link", "danger")
+        return redirect(url_for("main.index"))
+
+    msg = Message(
+        subject="New password",
+        sender=app.config["MAIL_DEFAULT_SENDER"],
+        recipients=[user.email],
+    )
+    url = url_for(
+        "auth.password_recovery",
+        reset_password_uid=user.unique_id,
+        _external=True,
+    )
+
+    msg.html = render_template(
+        "email/set.html",
+        user=user,
+        url=url,
+    )
+    mail.send(msg)
+    flash("Login successful.", "success")
+    return redirect(url_for("user.get_all"))
