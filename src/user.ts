@@ -22,6 +22,7 @@ interface IUser {
   street_address: string;
   sales_rep: boolean;
   locker_address: string;
+  group: string;
 }
 
 const $modalElement: HTMLElement = document.querySelector('#editUserModal');
@@ -128,12 +129,51 @@ function editUser(user: IUser) {
     lockerAddressContainer.classList.toggle('invisible')
   })
 
+  const userAddDropdownBtn = document.querySelector('#user-edit-dropdown-btn');
+const options = document.querySelector('#user-edit-dropdown-options');
+const optionItems = document.querySelectorAll('.user-edit-dropdown-option');
+const selectedOptions = [];
+
+
+userAddDropdownBtn.addEventListener('click', () => {
+  console.log("click");
+  options.classList.toggle('hidden');
+})
+
+function selectOption(event) {
+  const option = event.target;
+  const value = option.textContent;
+  let input = document.getElementById("user-edit-group");
+
+  if (selectedOptions.includes(value)) {
+    const index = selectedOptions.indexOf(value);
+    if (index > -1) {
+      selectedOptions.splice(index, 1);
+    }
+    option.classList.remove('bg-blue-600');
+  } else {
+    selectedOptions.push(value);
+    option.classList.add('bg-blue-600');
+  }
+
+  const joinedOptions = selectedOptions.join(",")
+  const joinedOptionsBtn = selectedOptions.join(", ")
+  input.value = joinedOptions
+  userAddDropdownBtn.innerHTML = joinedOptionsBtn;
+}
+
+optionItems.forEach((optionItem) => {
+  optionItem.addEventListener('click', selectOption);
+});
+
   let input: HTMLInputElement = document.querySelector('#user-edit-username');
   input.value = user.username;
   input = document.querySelector('#user-edit-id');
   input.value = user.id.toString();
   input = document.querySelector('#user-edit-email');
   input.value = user.email;
+  input = document.querySelector('#user-edit-group');
+  input.value = user.group;
   input = document.querySelector('#user-edit-role');
   input.value = user.role.toUpperCase();
   input = document.querySelector('#user-edit-password');
@@ -150,6 +190,8 @@ function editUser(user: IUser) {
   input.value = user.zip_code;
   input = document.querySelector('#user-edit-street_address');
   input.value = user.street_address;
+  let div: HTMLDivElement = document.querySelector('#user-edit-dropdown-btn');
+    div.innerHTML = user.group;
 
   if (user.sales_rep) {
     lockerAddressContainer.classList.remove('invisible')
@@ -222,3 +264,40 @@ salesRepAddUser.addEventListener('click', () => {
   console.log("click");
   lockerAddressContainer.classList.toggle('invisible')
 })
+
+
+const userAddDropdownBtn = document.querySelector('#user-add-dropdown-btn');
+const options = document.querySelector('#user-add-dropdown-options');
+const optionItems = document.querySelectorAll('.user-add-dropdown-option');
+const selectedOptions = [];
+
+userAddDropdownBtn.addEventListener('click', () => {
+  console.log("click");
+  options.classList.toggle('hidden');
+})
+
+function selectOption(event) {
+  const option = event.target;
+  const value = option.textContent;
+  let input = document.getElementById("user-add-group");
+
+  if (selectedOptions.includes(value)) {
+    const index = selectedOptions.indexOf(value);
+    if (index > -1) {
+      selectedOptions.splice(index, 1);
+    }
+    option.classList.remove('bg-blue-600');
+  } else {
+    selectedOptions.push(value);
+    option.classList.add('bg-blue-600');
+  }
+
+  const joinedOptions = selectedOptions.join(",")
+  const joinedOptionsBtn = selectedOptions.join(", ")
+  input.value = joinedOptions
+  userAddDropdownBtn.innerHTML = joinedOptionsBtn;
+}
+
+optionItems.forEach((optionItem) => {
+  optionItem.addEventListener('click', selectOption);
+});
