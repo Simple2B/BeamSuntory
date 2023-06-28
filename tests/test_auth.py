@@ -33,7 +33,6 @@ def test_register(client):
                 email=TEST_EMAIL,
                 password="password",
                 password_confirmation="password",
-                full_name="sam suntory",
                 role="MANAGER",
                 activated=True,
                 approval_permission=True,
@@ -43,6 +42,8 @@ def test_register(client):
                 region="Lv",
                 city="Dro",
                 zip_code="82100",
+                locker_address="Address locker",
+                sales_rep=False,
             ),
             follow_redirects=True,
         )
@@ -94,7 +95,6 @@ def test_forgot(client):
         username="sam",
         email=TEST_EMAIL,
         password="password",
-        full_name="sam suntory",
         role="MANAGER",
         activated=True,
         approval_permission=True,
@@ -104,6 +104,8 @@ def test_forgot(client):
         region="Lv",
         city="Dro",
         zip_code="82100",
+        locker_address="Address locker",
+        sales_rep=False,
     )
     user.save()
     with mail.record_messages() as outbox:

@@ -12,7 +12,6 @@ class User(BaseModel):
     id: int
     username: str
     email: str
-    full_name: str
     image: str
     role: UserRole
     activated: bool
@@ -23,6 +22,8 @@ class User(BaseModel):
     region: str
     city: str
     zip_code: str
+    sales_rep: bool
+    locker_address: str
 
     class Config:
         orm_mode = True

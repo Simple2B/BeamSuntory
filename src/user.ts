@@ -13,14 +13,16 @@ interface IUser {
   username: string;
   email: string;
   activated: boolean;
-  approval: boolean;
+  approval_permission: boolean;
   role: string;
-  full_name: string;
   country: string;
   region: string;
   city: string;
   zip_code: string;
   street_address: string;
+  sales_rep: boolean;
+  locker_address: string;
+  group: string;
 }
 
 const $modalElement: HTMLElement = document.querySelector('#editUserModal');
@@ -48,10 +50,6 @@ const modalOptions: ModalOptions = {
 
 const modal: ModalInterface = new Modal($modalElement, modalOptions);
 const addModal: ModalInterface = new Modal($addUserModalElement, modalOptions);
-const viewModal: ModalInterface = new Modal(
-  $viewUserModalElement,
-  modalOptions,
-);
 
 const $buttonElements = document.querySelectorAll('.user-edit-button');
 $buttonElements.forEach(e =>
@@ -123,16 +121,61 @@ resetPasswordButtons.forEach(e => {
 });
 
 function editUser(user: IUser) {
+  const lockerAddressContainer = document.querySelector('#user-edit-locker-address-container');
+  const sales_rep = document.querySelector('#user-edit-sales_rep');
+
+  sales_rep.addEventListener('click', () => {
+    console.log("click");
+    lockerAddressContainer.classList.toggle('invisible')
+  })
+
+  const userAddDropdownBtn = document.querySelector('#user-edit-dropdown-btn');
+const options = document.querySelector('#user-edit-dropdown-options');
+const optionItems = document.querySelectorAll('.user-edit-dropdown-option');
+const selectedOptions = [];
+
+
+userAddDropdownBtn.addEventListener('click', () => {
+  console.log("click");
+  options.classList.toggle('hidden');
+})
+
+function selectOption(event) {
+  const option = event.target;
+  const value = option.textContent;
+  let input = document.getElementById("user-edit-group");
+
+  if (selectedOptions.includes(value)) {
+    const index = selectedOptions.indexOf(value);
+    if (index > -1) {
+      selectedOptions.splice(index, 1);
+    }
+    option.classList.remove('bg-blue-600');
+  } else {
+    selectedOptions.push(value);
+    option.classList.add('bg-blue-600');
+  }
+
+  const joinedOptions = selectedOptions.join(",")
+  const joinedOptionsBtn = selectedOptions.join(", ")
+  input.value = joinedOptions
+  userAddDropdownBtn.innerHTML = joinedOptionsBtn;
+}
+
+optionItems.forEach((optionItem) => {
+  optionItem.addEventListener('click', selectOption);
+});
+
   let input: HTMLInputElement = document.querySelector('#user-edit-username');
   input.value = user.username;
   input = document.querySelector('#user-edit-id');
   input.value = user.id.toString();
   input = document.querySelector('#user-edit-email');
   input.value = user.email;
+  input = document.querySelector('#user-edit-group');
+  input.value = user.group;
   input = document.querySelector('#user-edit-role');
   input.value = user.role.toUpperCase();
-  input = document.querySelector('#user-edit-full_name');
-  input.value = user.full_name;
   input = document.querySelector('#user-edit-password');
   input.value = '*******';
   input = document.querySelector('#user-edit-password_confirmation');
@@ -147,59 +190,114 @@ function editUser(user: IUser) {
   input.value = user.zip_code;
   input = document.querySelector('#user-edit-street_address');
   input.value = user.street_address;
+  let div: HTMLDivElement = document.querySelector('#user-edit-dropdown-btn');
+    div.innerHTML = user.group;
+
+  if (user.sales_rep) {
+    lockerAddressContainer.classList.remove('invisible')
+    input = document.querySelector('#user-edit-locker-address');
+    input.value = user.locker_address;
+  }
+
   input = document.querySelector('#user-edit-activated');
   input.checked = user.activated;
+  input = document.querySelector('#user-edit-sales_rep');
+  input.checked = user.sales_rep;
+  input = document.querySelector('#user-edit-approval_permission');
+  input.checked = user.approval_permission;
   input = document.querySelector('#user-edit-next_url');
   input.value = window.location.href;
   modal.show();
 }
 
-//view modal window
-
-// const viewUserButtons = document.querySelectorAll('.user-view-button');
-
-// function viewUser() {
-//   viewModal.show()
-// }
-
-// viewUserButtons.forEach(e => {
-//   e.addEventListener('click', () => {
-//     console.log('click view')
-//     viewUser()
-//   })
-// })
 const viewUserButtonElements = document.querySelectorAll('.user-view-button');
 viewUserButtonElements.forEach(e =>
   e.addEventListener('click', () => {
     const user = JSON.parse(e.getAttribute('data-target'));
-    // editUser(JSON.parse(e.getAttribute('data-target')));
+    const lockerAddressContainer = document.querySelector('#user-view-locker-address-container');
+
+    user.sales_rep
+      ? lockerAddressContainer.classList.remove('hidden')
+      : lockerAddressContainer.classList.add('hidden');
+
     console.log(user);
-    // viewModal.show()
-    let input: HTMLInputElement = document.querySelector('#user-view-username');
-    input.value = user.username;
-    input = document.querySelector('#user-view-id');
-    input.value = user.id.toString();
-    input = document.querySelector('#user-view-email');
-    input.value = user.email;
-    input = document.querySelector('#user-view-full_name');
-    input.value = user.full_name;
-    input = document.querySelector('#user-edit-role');
-    input.value = user.role.toUpperCase();
-    input = document.querySelector('#user-view-password');
-    input.value = '*******';
-    input = document.querySelector('#user-view-country');
-    input.value = user.country;
-    input = document.querySelector('#user-view-region');
-    input.value = user.region;
-    input = document.querySelector('#user-view-city');
-    input.value = user.city;
-    input = document.querySelector('#user-view-zip_code');
-    input.value = user.zip_code;
-    input = document.querySelector('#user-view-street_address');
-    input.value = user.street_address;
-    input = document.querySelector('#user-view-activated');
-    input.checked = user.activated;
-    input = document.querySelector('#user-view-next_url');
-    input.value = window.location.href;
+    user.sales_rep
+    let div: HTMLDivElement = document.querySelector('#user-view-username');
+    div.innerHTML = user.username;
+    div = document.querySelector('#user-view-id');
+    div.innerHTML = user.id.toString();
+    div = document.querySelector('#user-view-email');
+    div.innerHTML = user.email;
+    div = document.querySelector('#user-view-role');
+    div.innerHTML = user.role.toUpperCase();
+    div = document.querySelector('#user-view-status');
+
+    user.activated
+      ? div.innerHTML = "Active"
+      : div.innerHTML = "Offline";
+
+    div = document.querySelector('#user-view-country');
+    div.innerHTML = user.country;
+    div = document.querySelector('#user-view-region');
+    div.innerHTML = user.region;
+    div = document.querySelector('#user-view-city');
+    div.innerHTML = user.city;
+    div = document.querySelector('#user-view-zip_code');
+    div.innerHTML = user.zip_code;
+    div = document.querySelector('#user-view-street_address');
+    div.innerHTML = user.street_address;
+
+    if(user.sales_rep) {
+      div = document.querySelector('#user-view-locker-address');
+      div.innerHTML = user.locker_address;
+    }
+
+    div = document.querySelector('#user-view-group');
+    div.innerHTML = user.group;
   }),
 );
+
+const lockerAddressContainer = document.querySelector('#user-add-locker-address-container');
+const salesRepAddUser = document.querySelector('#user-add-sales_rep');
+
+salesRepAddUser.addEventListener('click', () => {
+  console.log("click");
+  lockerAddressContainer.classList.toggle('invisible')
+})
+
+
+const userAddDropdownBtn = document.querySelector('#user-add-dropdown-btn');
+const options = document.querySelector('#user-add-dropdown-options');
+const optionItems = document.querySelectorAll('.user-add-dropdown-option');
+const selectedOptions = [];
+
+userAddDropdownBtn.addEventListener('click', () => {
+  console.log("click");
+  options.classList.toggle('hidden');
+})
+
+function selectOption(event) {
+  const option = event.target;
+  const value = option.textContent;
+  let input = document.getElementById("user-add-group");
+
+  if (selectedOptions.includes(value)) {
+    const index = selectedOptions.indexOf(value);
+    if (index > -1) {
+      selectedOptions.splice(index, 1);
+    }
+    option.classList.remove('bg-blue-600');
+  } else {
+    selectedOptions.push(value);
+    option.classList.add('bg-blue-600');
+  }
+
+  const joinedOptions = selectedOptions.join(",")
+  const joinedOptionsBtn = selectedOptions.join(", ")
+  input.value = joinedOptions
+  userAddDropdownBtn.innerHTML = joinedOptionsBtn;
+}
+
+optionItems.forEach((optionItem) => {
+  optionItem.addEventListener('click', selectOption);
+});

@@ -21,7 +21,6 @@ class LoginForm(FlaskForm):
 class RegistrationForm(FlaskForm):
     username = StringField("Username", validators=[DataRequired(), Length(2, 30)])
     email = StringField("Email Address", validators=[DataRequired(), Email()])
-    full_name = StringField("Full name", validators=[DataRequired(), Length(2, 30)])
     role = StringField("Role", validators=[DataRequired(), Length(2, 30)])
     password = PasswordField("Password", validators=[DataRequired(), Length(6, 30)])
     password_confirmation = PasswordField(
@@ -31,7 +30,6 @@ class RegistrationForm(FlaskForm):
             EqualTo("password", message="Password do not match."),
         ],
     )
-    full_name = StringField("Full name", validators=[DataRequired(), Length(2, 30)])
     country = StringField("Country", [DataRequired()])
     region = StringField("Region", [DataRequired()])
     city = StringField("City", [DataRequired()])
@@ -40,6 +38,8 @@ class RegistrationForm(FlaskForm):
     activated = BooleanField("activated")
     approval_permission = BooleanField("activated")
     group = StringField("Group", [DataRequired()], default="Brand")
+    locker_address = StringField("Locker Address")
+    sales_rep = BooleanField("Sales Rep")
     submit = SubmitField("Register")
 
     def validate_username(form, field):

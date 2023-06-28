@@ -51,7 +51,6 @@ def populate(client: FlaskClient):
             username=f"user{i+1}",
             email=f"user{i+1}@mail.com",
             password="password",
-            full_name=f"user{i+1} suntory",
             role="MANAGER",
             activated=True,
             approval_permission=True,
@@ -61,6 +60,8 @@ def populate(client: FlaskClient):
             region="Lv",
             city="Dro",
             zip_code="82100",
+            locker_address="Address locker",
+            sales_rep=False
         ).save(False)
     db.session.commit()
     yield client

@@ -69,7 +69,6 @@ def save():
             flash("Cannot save user data", "danger")
         u.username = form.username.data
         u.email = form.email.data
-        u.full_name = form.full_name.data
         u.role = form.role.data
         u.country = form.country.data
         u.city = form.city.data
@@ -79,6 +78,8 @@ def save():
         u.activated = form.activated.data
         u.approval_permission = form.approval_permission.data
         u.group_id = form.group.data
+        u.sales_rep = form.sales_rep.data
+        u.locker_address = form.locker_address.data
         if form.password.data.strip("*\n "):
             u.password = form.password.data
         u.save()
@@ -105,7 +106,6 @@ def create():
         user = m.User(
             username=form.username.data,
             email=form.email.data,
-            full_name=form.full_name.data,
             role=form.role.data,
             password=form.password.data,
             activated=form.activated.data,
@@ -116,6 +116,8 @@ def create():
             street_address=form.street_address.data,
             approval_permission=form.approval_permission.data,
             group_id=form.group.data,
+            sales_rep=form.sales_rep.data,
+            locker_address=form.locker_address.data,
         )
         log(log.INFO, "Form submitted. User: [%s]", user)
         flash("User added!", "success")

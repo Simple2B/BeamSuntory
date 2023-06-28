@@ -19,10 +19,6 @@
             <input type="text" name="username" id="user-edit-username" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Name" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="full_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Full name</label >
-            <input type="text" name="full_name" id="user-edit-full_name" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Full Name" required />
-          </div>
-          <div class="col-span-6 sm:col-span-3">
             <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Current Password</label >
             <input type="password" name="password" id="user-edit-password" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="••••••••" />
           </div>
@@ -37,7 +33,11 @@
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="role" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Role</label >
-            <input type="text" name="role" id="user-edit-role" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Role" required />
+            <select type="text" name="role" id="user-edit-role" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Street Address" required>
+              <option value="ADMIN">Admin</option>
+              <option value="MANAGER">Manager</option>
+              <option value="SALES_REP">Sales Rep</option>
+            </select>
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="country" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Country</label >
@@ -59,22 +59,35 @@
             <label for="street-address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Street Address</label >
             <input type="text" name="street_address" id="user-edit-street_address" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Street Address" required />
           </div>
-          <div class="col-span-6 sm:col-span-3">
-            <label for="street-address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Group</label >
-              <select type="text" name="group" id="user-edit-group" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Group" required>
-                {% for group in groups %}
-                <option value="{{ group.id }}">{{ group.name }}</option>
-                {% endfor %}
-              </select>
+          <div class="col-span-6 sm:col-span-3 relative">
+            <label for="group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Group</label >
+            <input type="text" name="group" id="user-edit-group" hidden>
+            <div id="user-edit-dropdown-btn" class="cursor-pointer shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Street Address">
+              Select Group
+            </div>
+            <ul id="user-edit-dropdown-options" class="absolute hidden shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              {% for group in groups %}
+                <li class="user-edit-dropdown-option cursor-pointer hover:bg-blue-700 ">{{ group.name }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          <div id="user-edit-locker-address-container" class="invisible col-span-6 sm:col-span-3">
+            <label for="locker_address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Locker Address</label >
+            <input type="text" name="locker_address" id="user-edit-locker-address" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Locker Address"/>
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="activated" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Approval Permission</label >
-            <input type="checkbox" name="activated" id="user-edit-activated" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+            <label for="approval_permission" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Approval Permission</label >
+            <input type="checkbox" name="approval_permission" id="user-edit-approval_permission" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="activated" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Activated</label >
-            <input type="checkbox" name="activated" id="user-edit-activated" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block  p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
+            <input type="checkbox" name="activated" id="user-edit-activated" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block  p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
           </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="sales_rep" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Sales Rep</label >
+            <input type="checkbox" name="sales_rep" id="user-edit-sales_rep" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+          </div>
+
         </div>
       </div>
       <!-- Modal footer -->
