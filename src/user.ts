@@ -21,16 +21,12 @@ interface IUser {
   zip_code: string;
   street_address: string;
   sales_rep: boolean;
-  locker_address: string;
-  office_address: string;
   group_name: string;
 }
 
 const $modalElement: HTMLElement = document.querySelector('#editUserModal');
 const $addUserModalElement: HTMLElement =
   document.querySelector('#add-user-modal');
-const $viewUserModalElement: HTMLElement =
-  document.querySelector('#viewUserModal');
 
 const modalOptions: ModalOptions = {
   placement: 'bottom-right',
@@ -125,21 +121,17 @@ function editUser(user: IUser) {
   const lockerAddressContainer = document.querySelector(
     '#user-edit-locker-address-container',
   );
-  const officeAddressContainer = document.querySelector(
-    '#user-edit-office-address-container',
-  );
   const sales_rep = document.querySelector('#user-edit-sales_rep');
 
   sales_rep.addEventListener('click', () => {
     console.log('click');
-    lockerAddressContainer.classList.toggle('invisible');
-    officeAddressContainer.classList.toggle('invisible');
+    lockerAddressContainer.classList.toggle('hidden');
   });
 
   const userAddDropdownBtn = document.querySelector('#user-edit-dropdown-btn');
   const options = document.querySelector('#user-edit-dropdown-options');
   const optionItems = document.querySelectorAll('.user-edit-dropdown-option');
-  const selectedOptions = [];
+  const selectedOptions: string[] = [];
 
   userAddDropdownBtn.addEventListener('click', () => {
     console.log('click');
@@ -147,7 +139,6 @@ function editUser(user: IUser) {
   });
 
   function selectOption(event) {
-    console.log({optionItems});
     const option = event.target;
     const value = option.textContent;
     let input = document.getElementById('user-edit-group');
@@ -169,9 +160,40 @@ function editUser(user: IUser) {
     userAddDropdownBtn.innerHTML = joinedOptionsBtn;
   }
 
+  // function selectOption(event: Event, inputUser: string, selectedOptionArray:string[], userDropdownBtn: Element) {
+  //   const option = event.target;
+  //   const value = option.textContent;
+  //   let input: HTMLInputElement = document.getElementById(inputUser);
+
+  //   if (selectedOptionArray.includes(value)) {
+  //     const index = selectedOptionArray.indexOf(value);
+  //     if (index > -1) {
+  //       selectedOptionArray.splice(index, 1);
+  //     }
+  //     option.classList.remove('bg-blue-600');
+  //   } else {
+  //     selectedOptionArray.push(value);
+  //     option.classList.add('bg-blue-600');
+  //   }
+
+  //   const joinedOptions = selectedOptionArray.join(', ');
+  //   const joinedOptionsBtn = selectedOptionArray.join(', ');
+  //   input.value = joinedOptions;
+  //   userDropdownBtn.innerHTML = joinedOptionsBtn;
+  // }
+
   optionItems.forEach(optionItem => {
     optionItem.addEventListener('click', selectOption);
   });
+
+  // optionItems.forEach(optionItem => {
+  //   optionItem.addEventListener('click', (event) => selectOption(
+  //     event,
+  //     'user-edit-group',
+  //     selectedOptions,
+  //     userAddDropdownBtn,
+  //   ));
+  // });
 
   let input: HTMLInputElement = document.querySelector('#user-edit-username');
   input.value = user.username;
@@ -201,21 +223,7 @@ function editUser(user: IUser) {
   div.innerHTML = user.group_name;
 
   if (user.sales_rep) {
-    lockerAddressContainer.classList.remove('invisible');
-    officeAddressContainer.classList.remove('invisible');
-    input = document.querySelector('#user-edit-locker-address');
-    input.value = user.locker_address;
-    input.required = true;
-    input = document.querySelector('#user-edit-office-address');
-    input.value = user.office_address;
-    input.required = true;
-  } else {
-    input = document.querySelector('#user-edit-locker-address');
-    input.value = '';
-    input.required = false;
-    input = document.querySelector('#user-edit-office-address');
-    input.value = '';
-    input.required = false;
+    lockerAddressContainer.classList.remove('hidden');
   }
 
   input = document.querySelector('#user-edit-activated');
@@ -236,16 +244,11 @@ viewUserButtonElements.forEach(e =>
     const lockerAddressContainer = document.querySelector(
       '#user-view-locker-address-container',
     );
-    const officeAddressContainer = document.querySelector(
-      '#user-view-office-address-container',
-    );
 
     if (user.sales_rep) {
       lockerAddressContainer.classList.remove('hidden');
-      officeAddressContainer.classList.remove('hidden');
     } else {
       lockerAddressContainer.classList.add('hidden');
-      officeAddressContainer.classList.add('hidden');
     }
 
     console.log(user);
@@ -274,10 +277,8 @@ viewUserButtonElements.forEach(e =>
     div.innerHTML = user.street_address;
 
     if (user.sales_rep) {
-      div = document.querySelector('#user-view-locker-address');
-      div.innerHTML = user.locker_address;
-      div = document.querySelector('#user-view-office-address');
-      div.innerHTML = user.office_address;
+      // div = document.querySelector('#user-view-locker-address');
+      // div.innerHTML = user.locker_address;
     }
 
     div = document.querySelector('#user-view-group');
@@ -288,15 +289,11 @@ viewUserButtonElements.forEach(e =>
 const lockerAddressContainer = document.querySelector(
   '#user-add-locker-address-container',
 );
-const officeAddressContainer = document.querySelector(
-  '#user-add-office-address-container',
-);
 const salesRepAddUser = document.querySelector('#user-add-sales_rep');
 
 salesRepAddUser.addEventListener('click', () => {
   console.log('click');
-  lockerAddressContainer.classList.toggle('invisible');
-  officeAddressContainer.classList.toggle('invisible');
+  lockerAddressContainer.classList.toggle('hidden');
 });
 
 const userAddDropdownBtn = document.querySelector('#user-add-dropdown-btn');
@@ -334,3 +331,11 @@ function selectOption(event) {
 optionItems.forEach(optionItem => {
   optionItem.addEventListener('click', selectOption);
 });
+
+
+// Disable pop up window on mouse click
+// window.addEventListener('mouseup', (event) => {
+//   if (event.target !== options && !options.contains(event.target)) {
+//     options.style.display = "invisible";
+//   }
+// })

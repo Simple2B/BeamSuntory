@@ -55,10 +55,8 @@ def init(app: Flask):
             city="Kyiv",
             zip_code="11111",
             street_address="Address 1",
-            office_address=" Office Address 1",
             activated=True,
             approval_permission=True,
             sales_rep=False,
-            locker_address=" locker address",
         ).save()
         print("admin created")

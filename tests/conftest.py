@@ -55,12 +55,10 @@ def populate(client: FlaskClient):
             activated=True,
             approval_permission=True,
             street_address="street",
-            office_address="office",
             country="UK",
             region="Lv",
             city="Dro",
             zip_code="82100",
-            locker_address="Address locker",
             sales_rep=False,
         ).save(False)
     db.session.commit()
@@ -81,7 +79,6 @@ def mg_g_populate(client: FlaskClient):
         region="Lv",
         city="Dro",
         zip_code="82100",
-        locker_address="Address locker",
         sales_rep=False,
     ).save(False)
     m.MasterGroup(
