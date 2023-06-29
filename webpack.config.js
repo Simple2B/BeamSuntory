@@ -56,6 +56,16 @@ const masterGroupConfig = {
   },
 };
 
+const productConfig = {
+  entry: {
+    main: './src/product.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/product.js', // <--- Will be compiled to this single file
+  },
+};
+
 const configs = [baseConfig, userConfig, masterGroupConfig].map(conf =>
   merge(defaultConfig, conf),
 );
