@@ -69,6 +69,11 @@ def get_all():
 def create():
     form = f.NewGroupForm()
     if form.validate_on_submit():
+        query = m.Group.select().where(m.Group.name == form.name.data)
+        gr: m.Group | None = db.session.scalar(query)
+        if gr:
+            flash("This group name is already taken.", "danger")
+            return redirect(url_for("group.get_all"))
         group = m.Group(
             name=form.name.data,
             master_group_id=form.master_group.data,

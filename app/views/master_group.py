@@ -57,6 +57,11 @@ def get_all():
 def create():
     form = f.NewMasterGroupForm()
     if form.validate_on_submit():
+        query = m.MasterGroup.select().where(m.MasterGroup.name == form.name.data)
+        mgr: m.MasterGroup | None = db.session.scalar(query)
+        if mgr:
+            flash("This master group name is already taken.", "danger")
+            return redirect(url_for("master_group.get_all"))
         master_group = m.MasterGroup(
             name=form.name.data,
         )
