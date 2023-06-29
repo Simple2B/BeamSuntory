@@ -17,13 +17,11 @@ class User(BaseModel):
     activated: bool
     approval_permission: bool
     street_address: str
-    office_address: str
     country: str
     region: str
     city: str
     zip_code: str
     sales_rep: bool
-    locker_address: str
 
     class Config:
         orm_mode = True
