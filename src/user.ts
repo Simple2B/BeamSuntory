@@ -118,14 +118,30 @@ resetPasswordButtons.forEach(e => {
 });
 
 function editUser(user: IUser) {
+  console.log(user)
   const lockerAddressContainer = document.querySelector(
     '#user-edit-locker-address-container',
-  );
-  const sales_rep = document.querySelector('#user-edit-sales_rep');
+    );
+  const userRole = document.querySelector('#user-edit-role');
+  const salesRep = document.querySelector('#user-edit-sales_rep');
+  const isCheckedSalesRep = salesRep.checked
+  const salesRepContainer = document.querySelector('#user-edit-sales_rep-container');
 
-  sales_rep.addEventListener('click', () => {
-    console.log('click');
-    lockerAddressContainer.classList.toggle('hidden');
+  userRole.addEventListener('change', () => {
+    const role = userRole.value;
+
+    if (role !== "SALES_REP") {
+      lockerAddressContainer.classList.add('hidden');
+      salesRepContainer.classList.add('hidden');
+    } else {
+      lockerAddressContainer.classList.remove('hidden');
+      salesRepContainer.classList.remove('hidden');
+    }
+  })
+
+  salesRep.addEventListener('click', () => {
+    console.log('ischeked', isCheckedSalesRep)
+    lockerAddressContainer.classList.toggle('dropdown-close');
   });
 
   const userAddDropdownBtn = document.querySelector('#user-edit-dropdown-btn');
@@ -138,10 +154,12 @@ function editUser(user: IUser) {
     options.classList.toggle('hidden');
   });
 
-  function selectOption(event) {
+  optionItems.forEach(optionItem => {
+    optionItem.addEventListener('click', (event) => {
     const option = event.target;
     const value = option.textContent;
     let input = document.getElementById('user-edit-group');
+    console.log("before", value)
 
     if (selectedOptions.includes(value)) {
       const index = selectedOptions.indexOf(value);
@@ -156,44 +174,12 @@ function editUser(user: IUser) {
 
     const joinedOptions = selectedOptions.join(', ');
     const joinedOptionsBtn = selectedOptions.join(', ');
+    console.log("before ", value)
+
     input.value = joinedOptions;
     userAddDropdownBtn.innerHTML = joinedOptionsBtn;
-  }
-
-  // function selectOption(event: Event, inputUser: string, selectedOptionArray:string[], userDropdownBtn: Element) {
-  //   const option = event.target;
-  //   const value = option.textContent;
-  //   let input: HTMLInputElement = document.getElementById(inputUser);
-
-  //   if (selectedOptionArray.includes(value)) {
-  //     const index = selectedOptionArray.indexOf(value);
-  //     if (index > -1) {
-  //       selectedOptionArray.splice(index, 1);
-  //     }
-  //     option.classList.remove('bg-blue-600');
-  //   } else {
-  //     selectedOptionArray.push(value);
-  //     option.classList.add('bg-blue-600');
-  //   }
-
-  //   const joinedOptions = selectedOptionArray.join(', ');
-  //   const joinedOptionsBtn = selectedOptionArray.join(', ');
-  //   input.value = joinedOptions;
-  //   userDropdownBtn.innerHTML = joinedOptionsBtn;
-  // }
-
-  optionItems.forEach(optionItem => {
-    optionItem.addEventListener('click', selectOption);
+    });
   });
-
-  // optionItems.forEach(optionItem => {
-  //   optionItem.addEventListener('click', (event) => selectOption(
-  //     event,
-  //     'user-edit-group',
-  //     selectedOptions,
-  //     userAddDropdownBtn,
-  //   ));
-  // });
 
   let input: HTMLInputElement = document.querySelector('#user-edit-username');
   input.value = user.username;
@@ -223,7 +209,7 @@ function editUser(user: IUser) {
   div.innerHTML = user.group_name;
 
   if (user.sales_rep) {
-    lockerAddressContainer.classList.remove('hidden');
+    lockerAddressContainer.classList.add('hidden');
   }
 
   input = document.querySelector('#user-edit-activated');
@@ -245,10 +231,11 @@ viewUserButtonElements.forEach(e =>
       '#user-view-locker-address-container',
     );
 
-    if (user.sales_rep) {
-      lockerAddressContainer.classList.remove('hidden');
-    } else {
+    if (user.role !== "sales_rep") {
+      console.log('user role view', user.role)
       lockerAddressContainer.classList.add('hidden');
+    } else {
+      lockerAddressContainer.classList.remove('hidden');
     }
 
     console.log(user);
@@ -275,26 +262,33 @@ viewUserButtonElements.forEach(e =>
     div.innerHTML = user.zip_code;
     div = document.querySelector('#user-view-street_address');
     div.innerHTML = user.street_address;
-
-    if (user.sales_rep) {
-      // div = document.querySelector('#user-view-locker-address');
-      // div.innerHTML = user.locker_address;
-    }
-
     div = document.querySelector('#user-view-group');
     div.innerHTML = user.group_name;
-  }),
+  })
 );
 
-const lockerAddressContainer = document.querySelector(
-  '#user-add-locker-address-container',
-);
 const salesRepAddUser = document.querySelector('#user-add-sales_rep');
+const salesRepAddUserContainer = document.querySelector('#user-add-sales_rep-container');
+const salesAddRepContainer = document.querySelector('#user-add-locker-address-container');
+const userRole = document.querySelector('#user-add-role');
 
 salesRepAddUser.addEventListener('click', () => {
-  console.log('click');
-  lockerAddressContainer.classList.toggle('hidden');
+  salesAddRepContainer.classList.toggle('hidden');
 });
+
+userRole.addEventListener('change', () => {
+  const role = userRole.value;
+
+  if (role !== "SALES_REP") {
+    console.log("input role", typeof userRole.value)
+    console.log("container", salesAddRepContainer)
+    salesAddRepContainer.classList.add('hidden');
+    salesRepAddUserContainer.classList.add('hidden');
+  } else {
+    salesAddRepContainer.classList.remove('hidden');
+    salesRepAddUserContainer.classList.remove('hidden');
+  }
+})
 
 const userAddDropdownBtn = document.querySelector('#user-add-dropdown-btn');
 const options = document.querySelector('#user-add-dropdown-options');
@@ -331,6 +325,7 @@ function selectOption(event) {
 optionItems.forEach(optionItem => {
   optionItem.addEventListener('click', selectOption);
 });
+
 
 
 // Disable pop up window on mouse click
