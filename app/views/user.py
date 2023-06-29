@@ -67,6 +67,8 @@ def save():
         if not u:
             log(log.ERROR, "Not found user by id : [%s]", form.user_id.data)
             flash("Cannot save user data", "danger")
+        query = m.Group.select().where(m.Group.name == form.group.data)
+        group_obj: m.Group | None = db.session.scalar(query)
         u.username = form.username.data
         u.email = form.email.data
         u.role = form.role.data
@@ -78,14 +80,14 @@ def save():
         u.zip_code = form.zip_code.data
         u.activated = form.activated.data
         u.approval_permission = form.approval_permission.data
-        u.group_id = form.group.data
+        u.group_id = group_obj.id
         u.sales_rep = form.sales_rep.data
         u.locker_address = form.locker_address.data
         if form.password.data.strip("*\n "):
             u.password = form.password.data
         u.save()
 
-        m.UserGroup(left_id=u.id, right_id=form.group.data).save()
+        m.UserGroup(left_id=u.id, right_id=group_obj.id).save()
         if form.next_url.data:
             return redirect(form.next_url.data)
         return redirect(url_for("user.get_all"))
@@ -104,6 +106,8 @@ def create():
         flash("This username or email is already taken.", "danger")
         return redirect(url_for("user.get_all"))
     if form.validate_on_submit():
+        query = m.Group.select().where(m.Group.name == form.group.data)
+        group_obj: m.Group | None = db.session.scalar(query)
         user = m.User(
             username=form.username.data,
             email=form.email.data,
@@ -117,14 +121,14 @@ def create():
             street_address=form.street_address.data,
             office_address=form.office_address.data,
             approval_permission=form.approval_permission.data,
-            group_id=form.group.data,
+            group_id=group_obj.id,
             sales_rep=form.sales_rep.data,
             locker_address=form.locker_address.data,
         )
         log(log.INFO, "Form submitted. User: [%s]", user)
         flash("User added!", "success")
         user.save()
-        m.UserGroup(left_id=user.id, right_id=form.group.data).save()
+        m.UserGroup(left_id=user.id, right_id=group_obj.id).save()
         # create e-mail message
         msg = Message(
             subject="New password",

@@ -84,7 +84,7 @@ class User(db.Model, UserMixin, ModelMixin):
     )
     group_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("groups.id"),
-        nullable=False,
+        nullable=True,
     )
     approval_permission: orm.Mapped[bool] = orm.mapped_column(sa.Boolean, default=False)
     sales_rep: orm.Mapped[bool] = orm.mapped_column(sa.Boolean, default=False)

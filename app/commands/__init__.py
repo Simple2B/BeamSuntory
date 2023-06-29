@@ -32,6 +32,19 @@ def init(app: Flask):
         if db.session.execute(query).first():
             print(f"User with e-mail: [{app.config['ADMIN_EMAIL']}] already exists")
             return
+        master_group_name = "Country"
+        mg_query = m.MasterGroup.select().where(m.MasterGroup.name == master_group_name)
+        if not db.session.execute(mg_query).first():
+            m.MasterGroup(
+                name=master_group_name,
+            ).save()
+        group_name = "Canada"
+        g_query = m.Group.select().where(m.Group.name == group_name)
+        if not db.session.execute(g_query).first():
+            m.Group(
+                name=group_name,
+                master_group_id="1",
+            ).save()
         m.User(
             username=app.config["ADMIN_USERNAME"],
             email=app.config["ADMIN_EMAIL"],
