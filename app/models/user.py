@@ -78,6 +78,10 @@ class User(db.Model, UserMixin, ModelMixin):
         sa.String(255),
         nullable=False,
     )
+    office_address: orm.Mapped[str] = orm.mapped_column(
+        sa.String(255),
+        nullable=True,
+    )
     group_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("groups.id"),
         nullable=False,

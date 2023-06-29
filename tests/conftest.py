@@ -56,6 +56,7 @@ def populate(client: FlaskClient):
             approval_permission=True,
             group_id=1,
             street_address="street",
+            office_address="office",
             country="UK",
             region="Lv",
             city="Dro",

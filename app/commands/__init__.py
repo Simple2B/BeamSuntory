@@ -42,6 +42,7 @@ def init(app: Flask):
             city="Kyiv",
             zip_code="11111",
             street_address="Address 1",
+            office_address=" Office Address 1",
             activated=True,
             approval_permission=True,
             group_id=1,
