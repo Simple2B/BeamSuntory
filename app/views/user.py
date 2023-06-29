@@ -1,3 +1,4 @@
+from typing import List
 from flask import (
     Blueprint,
     render_template,
@@ -40,6 +41,9 @@ def get_all():
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
+    groups_rows = db.session.execute(sa.select(m.Group)).all()
+    master_groups_rows = db.session.execute(sa.select(m.MasterGroup)).all()
+
     return render_template(
         "user/users.html",
         users=db.session.execute(
@@ -49,6 +53,8 @@ def get_all():
         ).scalars(),
         page=pagination,
         search_query=q,
+        groups=[i[0] for i in groups_rows],
+        main_master_groups=[i[0] for i in master_groups_rows],
     )
 
 
@@ -62,6 +68,7 @@ def save():
         if not u:
             log(log.ERROR, "Not found user by id : [%s]", form.user_id.data)
             flash("Cannot save user data", "danger")
+
         u.username = form.username.data
         u.email = form.email.data
         u.role = form.role.data
@@ -75,10 +82,34 @@ def save():
         u.approval_permission = form.approval_permission.data
         u.sales_rep = form.sales_rep.data
         u.locker_address = form.locker_address.data
-        u.group = form.group.data
         if form.password.data.strip("*\n "):
             u.password = form.password.data
         u.save()
+
+        # delete old groups from user_group relational table
+        # and add new groups to user_group relational table
+        g_query = m.Group.select().where(
+            m.Group.name.in_(str(form.group.data).split(", "))
+        )
+        group_obj: m.Group | None = db.session.scalars(g_query)
+        group_ids = [g.id for g in group_obj]
+
+        user_groups: m.UserGroup = db.session.execute(
+            m.UserGroup.select().where(m.UserGroup.left_id == u.id)
+        ).scalars()
+        user_group_ids = [ug.id for ug in user_groups]
+
+        for user_group in user_groups:
+            if user_group.right_id not in group_ids:
+                db.session.execute(
+                    delete(m.UserGroup).where(
+                        m.UserGroup.right_id == user_group.right_id
+                    )
+                )
+        for group_id in group_ids:
+            if group_id not in user_group_ids:
+                m.UserGroup(left_id=u.id, right_id=group_id).save()
+
         if form.next_url.data:
             return redirect(form.next_url.data)
         return redirect(url_for("user.get_all"))
@@ -112,11 +143,17 @@ def create():
             approval_permission=form.approval_permission.data,
             sales_rep=form.sales_rep.data,
             locker_address=form.locker_address.data,
-            group=form.group.data,
         )
         log(log.INFO, "Form submitted. User: [%s]", user)
         flash("User added!", "success")
         user.save()
+        g_query = m.Group.select().where(
+            m.Group.name.in_(str(form.group.data).split(", "))
+        )
+        group_obj: m.Group | None = db.session.scalars(g_query)
+        group_ids: List[m.Group] = [g.id for g in group_obj]
+        for group_id in group_ids:
+            m.UserGroup(left_id=user.id, right_id=group_id).save()
         # create e-mail message
         msg = Message(
             subject="New password",

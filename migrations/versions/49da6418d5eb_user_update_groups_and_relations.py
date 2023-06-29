@@ -43,6 +43,7 @@ def upgrade():
     )
     op.create_table(
         "user_group",
+        sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("left_id", sa.Integer(), nullable=False),
         sa.Column("right_id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
@@ -51,7 +52,7 @@ def upgrade():
         sa.ForeignKeyConstraint(
             ["right_id"], ["groups.id"], name=op.f("fk_user_group_right_id_groups")
         ),
-        sa.PrimaryKeyConstraint("left_id", "right_id", name=op.f("pk_user_group")),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_user_group")),
     )
 
     role = postgresql.ENUM("ADMIN", "MANAGER", "SALES_REP", name="userrole")

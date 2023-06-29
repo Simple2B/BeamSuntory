@@ -45,7 +45,7 @@ def runner(app, client):
 
 @pytest.fixture
 def populate(client: FlaskClient):
-    NUM_TEST_USERS = 100
+    NUM_TEST_USERS = 16
     for i in range(NUM_TEST_USERS):
         m.User(
             username=f"user{i+1}",
@@ -54,7 +54,6 @@ def populate(client: FlaskClient):
             role="MANAGER",
             activated=True,
             approval_permission=True,
-            group="Country",
             street_address="street",
             office_address="office",
             country="UK",
@@ -62,7 +61,35 @@ def populate(client: FlaskClient):
             city="Dro",
             zip_code="82100",
             locker_address="Address locker",
-            sales_rep=False
+            sales_rep=False,
         ).save(False)
+    db.session.commit()
+    yield client
+
+
+@pytest.fixture
+def mg_g_populate(client: FlaskClient):
+    m.User(
+        username="user1",
+        email="user1@mail.com",
+        password="password",
+        role="MANAGER",
+        activated=True,
+        approval_permission=True,
+        street_address="street",
+        country="UK",
+        region="Lv",
+        city="Dro",
+        zip_code="82100",
+        locker_address="Address locker",
+        sales_rep=False,
+    ).save(False)
+    m.MasterGroup(
+        name="Country",
+    ).save(False)
+    m.Group(
+        name="Maywood",
+        master_group_id="1",
+    ).save(False)
     db.session.commit()
     yield client

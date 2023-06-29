@@ -65,7 +65,7 @@ class NewUserForm(FlaskForm):
     email = StringField("email", [DataRequired(), Email()])
     activated = BooleanField("activated")
     approval_permission = BooleanField("activated")
-    group = StringField("Group", [DataRequired()], default="Brand")
+    group = StringField("Group")
     username = StringField("Username", [DataRequired()])
     password = PasswordField(
         "Password",

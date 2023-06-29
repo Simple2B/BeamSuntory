@@ -49,15 +49,15 @@
             <input type="text" name="street_address" id="user-add-street_address" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Street Address" required />
           </div>
           <div class="col-span-6 sm:col-span-3 relative">
-            <label for="street-address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Group</label >
+            <label for="group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Group</label >
             <input type="text" name="group" id="user-add-group" hidden>
             <div id="user-add-dropdown-btn" class="cursor-pointer shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Street Address" required">
               Select Group
             </div>
             <ul id="user-add-dropdown-options" class="absolute hidden shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-              <li class="user-add-dropdown-option cursor-pointer hover:bg-blue-700 ">Brand</li>
-              <li class="user-add-dropdown-option cursor-pointer hover:bg-blue-700">Language</li>
-              <li class="user-add-dropdown-option cursor-pointer hover:bg-blue-700">Region</li>
+              {% for group in groups %}
+              <li class="user-add-dropdown-option cursor-pointer hover:bg-blue-700 ">{{ group.name }}</li>
+              {% endfor %}
             </ul>
           </div>
           <div id="user-add-locker-address-container" class="invisible col-span-6 sm:col-span-3">

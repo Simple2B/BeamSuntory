@@ -1,5 +1,7 @@
 from datetime import datetime
 from uuid import uuid4
+import json
+from typing import List
 
 from flask_login import UserMixin, AnonymousUserMixin
 import sqlalchemy as sa
@@ -9,6 +11,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from app.database import db
 from .utils import ModelMixin
+from .group import Group
+from .user_group import UserGroup
 from app.logger import log
 from app import schema as s
 
@@ -82,10 +86,6 @@ class User(db.Model, UserMixin, ModelMixin):
         sa.String(255),
         nullable=True,
     )
-    group: orm.Mapped[str] = orm.mapped_column(
-        sa.String(255),
-        nullable=False,
-    )
     approval_permission: orm.Mapped[bool] = orm.mapped_column(sa.Boolean, default=False)
     sales_rep: orm.Mapped[bool] = orm.mapped_column(sa.Boolean, default=False)
     locker_address: orm.Mapped[str] = orm.mapped_column(
@@ -124,7 +124,27 @@ class User(db.Model, UserMixin, ModelMixin):
     @property
     def json(self):
         u = s.User.from_orm(self)
-        return u.json()
+        # insert group_name to result json
+        ujs = u.json()
+        u_dict = json.loads(ujs)
+
+        user_group: List[UserGroup] = [
+            ug
+            for ug in db.session.execute(
+                UserGroup.select().where(UserGroup.left_id == u_dict["id"])
+            ).scalars()
+        ]
+
+        if len(user_group) > 0:
+            groups_obj: Group = db.session.execute(
+                Group.select().where(
+                    Group.id.in_([ugid.right_id for ugid in user_group])
+                )
+            ).scalars()
+            u_dict["group_name"] = ", ".join([g.name for g in groups_obj])
+        else:
+            u_dict["group_name"] = "Without group"
+        return json.dumps(u_dict)
 
 
 class AnonymousUser(AnonymousUserMixin):

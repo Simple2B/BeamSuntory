@@ -12,3 +12,4 @@ from .ship_request import ShipRequest
 from .store import Store
 from .supplier import Supplier
 from .warehouse import Warehouse
+from .user_group import UserGroup

@@ -16,7 +16,6 @@ class User(BaseModel):
     role: UserRole
     activated: bool
     approval_permission: bool
-    group: str
     street_address: str
     office_address: str
     country: str
