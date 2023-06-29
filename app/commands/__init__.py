@@ -58,7 +58,6 @@ def init(app: Flask):
             office_address=" Office Address 1",
             activated=True,
             approval_permission=True,
-            group_id=1,
             sales_rep=False,
             locker_address=" locker address",
         ).save()

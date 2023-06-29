@@ -7,13 +7,15 @@ from sqlalchemy import orm
 from app.database import db
 from .utils import ModelMixin
 from app import schema as s
-from .user_group import UserGroup
 
 
+# avoid circular import during initialization
 if TYPE_CHECKING:
     from .master_group import MasterGroup
+    from .user_group import UserGroup
 else:
     MasterGroup = "MasterGroup"
+    UserGroup = "UserGroup"
 
 
 class Group(db.Model, ModelMixin):

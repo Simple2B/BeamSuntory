@@ -29,7 +29,6 @@ def register():
             street_address=form.street_address.data,
             office_address=form.office_address.data,
             approval_permission=form.approval_permission.data,
-            group_id=form.group.data,
             locker_address=form.locker_address.data,
         )
         log(log.INFO, "Form submitted. User: [%s]", user)
