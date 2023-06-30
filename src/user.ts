@@ -117,17 +117,25 @@ resetPasswordButtons.forEach(e => {
   });
 });
 
+// -----user edit modal window----
 function editUser(user: IUser) {
-  console.log(user)
   const lockerAddressContainer = document.querySelector(
     '#user-edit-locker-address-container',
     );
-  const userRole = document.querySelector('#user-edit-role');
-  const salesRep = document.querySelector('#user-edit-sales_rep');
-  const isCheckedSalesRep = salesRep.checked
+  const userRole: HTMLInputElement = document.querySelector('#user-edit-role');
+  const salesRep: HTMLInputElement = document.querySelector('#user-edit-sales_rep');
   const salesRepContainer = document.querySelector('#user-edit-sales_rep-container');
 
-  userRole.addEventListener('change', () => {
+  // function to show locker address only for sales rep
+  if (userRole.value !== "SALES_REP") {
+      lockerAddressContainer.classList.add('hidden');
+      salesRepContainer.classList.add('hidden');
+    } else {
+      lockerAddressContainer.classList.remove('hidden');
+      salesRepContainer.classList.remove('hidden');
+    }
+
+    userRole.addEventListener('change', () => {
     const role = userRole.value;
 
     if (role !== "SALES_REP") {
@@ -140,26 +148,36 @@ function editUser(user: IUser) {
   })
 
   salesRep.addEventListener('click', () => {
-    console.log('ischeked', isCheckedSalesRep)
     lockerAddressContainer.classList.toggle('dropdown-close');
   });
 
+  // function to select and add group in dropdown list
   const userAddDropdownBtn = document.querySelector('#user-edit-dropdown-btn');
-  const options = document.querySelector('#user-edit-dropdown-options');
   const optionItems = document.querySelectorAll('.user-edit-dropdown-option');
   const selectedOptions: string[] = [];
+  const options = document.querySelector('#user-edit-dropdown-options');
 
   userAddDropdownBtn.addEventListener('click', () => {
-    console.log('click');
     options.classList.toggle('hidden');
+    console.log("innerOptions before joined", selectedOptions)
+    console.log("group name", user.group_name)
+    console.log("input before", input.value)
+    console.log("input after", input.value)
+
   });
 
-  optionItems.forEach(optionItem => {
+  optionItems.forEach((optionItem: HTMLElement) => {
     optionItem.addEventListener('click', (event) => {
-    const option = event.target;
+    const option: HTMLElement = event.target as HTMLElement;
     const value = option.textContent;
-    let input = document.getElementById('user-edit-group');
-    console.log("before", value)
+    let input: HTMLInputElement = document.getElementById('user-edit-group') as HTMLInputElement;
+
+    window.addEventListener('mouseup', (event: MouseEvent) => {
+      if (event.target !== options && !options.contains(event.target as Node)) {
+        options.classList.add('hidden');
+        console.log("mouse click")
+      }
+    })
 
     if (selectedOptions.includes(value)) {
       const index = selectedOptions.indexOf(value);
@@ -172,12 +190,13 @@ function editUser(user: IUser) {
       option.classList.add('bg-blue-600');
     }
 
+    console.log("innerOptions before joined", selectedOptions)
+    console.log("group name", user.group_name)
+    console.log("input before", input.value)
     const joinedOptions = selectedOptions.join(', ');
-    const joinedOptionsBtn = selectedOptions.join(', ');
-    console.log("before ", value)
-
     input.value = joinedOptions;
-    userAddDropdownBtn.innerHTML = joinedOptionsBtn;
+    console.log("input after", input.value)
+    userAddDropdownBtn.innerHTML = joinedOptions;
     });
   });
 
@@ -223,10 +242,11 @@ function editUser(user: IUser) {
   modal.show();
 }
 
+// ----view user modal window----
 const viewUserButtonElements = document.querySelectorAll('.user-view-button');
 viewUserButtonElements.forEach(e =>
   e.addEventListener('click', () => {
-    const user = JSON.parse(e.getAttribute('data-target'));
+    const user: IUser = JSON.parse(e.getAttribute('data-target'));
     const lockerAddressContainer = document.querySelector(
       '#user-view-locker-address-container',
     );
@@ -238,7 +258,6 @@ viewUserButtonElements.forEach(e =>
       lockerAddressContainer.classList.remove('hidden');
     }
 
-    console.log(user);
     user.sales_rep;
     let div: HTMLDivElement = document.querySelector('#user-view-username');
     div.innerHTML = user.username;
@@ -267,10 +286,12 @@ viewUserButtonElements.forEach(e =>
   })
 );
 
+//   ---add user modal window----
+// function to show additional locker address only for sales rep
 const salesRepAddUser = document.querySelector('#user-add-sales_rep');
 const salesRepAddUserContainer = document.querySelector('#user-add-sales_rep-container');
 const salesAddRepContainer = document.querySelector('#user-add-locker-address-container');
-const userRole = document.querySelector('#user-add-role');
+const userRole: HTMLInputElement = document.querySelector('#user-add-role');
 
 salesRepAddUser.addEventListener('click', () => {
   salesAddRepContainer.classList.toggle('hidden');
@@ -290,47 +311,42 @@ userRole.addEventListener('change', () => {
   }
 })
 
+// function to select and add group in dropdown list
 const userAddDropdownBtn = document.querySelector('#user-add-dropdown-btn');
-const options = document.querySelector('#user-add-dropdown-options');
 const optionItems = document.querySelectorAll('.user-add-dropdown-option');
-const selectedOptions = [];
+const selectedOptions: string[] = [];
+const options = document.querySelector('#user-add-dropdown-options');
 
 userAddDropdownBtn.addEventListener('click', () => {
-  console.log('click');
   options.classList.toggle('hidden');
 });
 
-function selectOption(event) {
-  const option = event.target;
-  const value = option.textContent;
-  let input = document.getElementById('user-add-group');
+optionItems.forEach((optionItem: HTMLElement) => {
+  optionItem.addEventListener('click', (event) => {
+    const option: HTMLElement = event.target as HTMLElement;
+    const value = option.textContent;
+    let input: HTMLInputElement = document.getElementById('user-add-group') as HTMLInputElement;
 
-  if (selectedOptions.includes(value)) {
-    const index = selectedOptions.indexOf(value);
-    if (index > -1) {
-      selectedOptions.splice(index, 1);
+    window.addEventListener('mouseup', (event: MouseEvent) => {
+      if (event.target !== options && !options.contains(event.target as Node)) {
+        options.classList.add('hidden');
+      }
+    })
+
+    if (selectedOptions.includes(value)) {
+      const index = selectedOptions.indexOf(value);
+      if (index > -1) {
+        selectedOptions.splice(index, 1);
+      }
+      option.classList.remove('bg-blue-600');
+    } else {
+      selectedOptions.push(value);
+      option.classList.add('bg-blue-600');
     }
-    option.classList.remove('bg-blue-600');
-  } else {
-    selectedOptions.push(value);
-    option.classList.add('bg-blue-600');
-  }
 
-  const joinedOptions = selectedOptions.join(', ');
-  const joinedOptionsBtn = selectedOptions.join(', ');
-  input.value = joinedOptions;
-  userAddDropdownBtn.innerHTML = joinedOptionsBtn;
-}
-
-optionItems.forEach(optionItem => {
-  optionItem.addEventListener('click', selectOption);
+    const joinedOptions = selectedOptions.join(', ');
+    input.value = joinedOptions;
+    userAddDropdownBtn.innerHTML = joinedOptions;
+  });
 });
 
-
-
-// Disable pop up window on mouse click
-// window.addEventListener('mouseup', (event) => {
-//   if (event.target !== options && !options.contains(event.target)) {
-//     options.style.display = "invisible";
-//   }
-// })
