@@ -21,16 +21,12 @@ interface IUser {
   zip_code: string;
   street_address: string;
   sales_rep: boolean;
-  locker_address: string;
-  office_address: string;
   group_name: string;
 }
 
 const $modalElement: HTMLElement = document.querySelector('#editUserModal');
 const $addUserModalElement: HTMLElement =
   document.querySelector('#add-user-modal');
-const $viewUserModalElement: HTMLElement =
-  document.querySelector('#viewUserModal');
 
 const modalOptions: ModalOptions = {
   placement: 'bottom-right',
@@ -122,35 +118,48 @@ resetPasswordButtons.forEach(e => {
 });
 
 function editUser(user: IUser) {
+  console.log(user)
   const lockerAddressContainer = document.querySelector(
     '#user-edit-locker-address-container',
-  );
-  const officeAddressContainer = document.querySelector(
-    '#user-edit-office-address-container',
-  );
-  const sales_rep = document.querySelector('#user-edit-sales_rep');
+    );
+  const userRole = document.querySelector('#user-edit-role');
+  const salesRep = document.querySelector('#user-edit-sales_rep');
+  const isCheckedSalesRep = salesRep.checked
+  const salesRepContainer = document.querySelector('#user-edit-sales_rep-container');
 
-  sales_rep.addEventListener('click', () => {
-    console.log('click');
-    lockerAddressContainer.classList.toggle('invisible');
-    officeAddressContainer.classList.toggle('invisible');
+  userRole.addEventListener('change', () => {
+    const role = userRole.value;
+
+    if (role !== "SALES_REP") {
+      lockerAddressContainer.classList.add('hidden');
+      salesRepContainer.classList.add('hidden');
+    } else {
+      lockerAddressContainer.classList.remove('hidden');
+      salesRepContainer.classList.remove('hidden');
+    }
+  })
+
+  salesRep.addEventListener('click', () => {
+    console.log('ischeked', isCheckedSalesRep)
+    lockerAddressContainer.classList.toggle('dropdown-close');
   });
 
   const userAddDropdownBtn = document.querySelector('#user-edit-dropdown-btn');
   const options = document.querySelector('#user-edit-dropdown-options');
   const optionItems = document.querySelectorAll('.user-edit-dropdown-option');
-  const selectedOptions = [];
+  const selectedOptions: string[] = [];
 
   userAddDropdownBtn.addEventListener('click', () => {
     console.log('click');
     options.classList.toggle('hidden');
   });
 
-  function selectOption(event) {
-    console.log({optionItems});
+  optionItems.forEach(optionItem => {
+    optionItem.addEventListener('click', (event) => {
     const option = event.target;
     const value = option.textContent;
     let input = document.getElementById('user-edit-group');
+    console.log("before", value)
 
     if (selectedOptions.includes(value)) {
       const index = selectedOptions.indexOf(value);
@@ -165,12 +174,11 @@ function editUser(user: IUser) {
 
     const joinedOptions = selectedOptions.join(', ');
     const joinedOptionsBtn = selectedOptions.join(', ');
+    console.log("before ", value)
+
     input.value = joinedOptions;
     userAddDropdownBtn.innerHTML = joinedOptionsBtn;
-  }
-
-  optionItems.forEach(optionItem => {
-    optionItem.addEventListener('click', selectOption);
+    });
   });
 
   let input: HTMLInputElement = document.querySelector('#user-edit-username');
@@ -201,21 +209,7 @@ function editUser(user: IUser) {
   div.innerHTML = user.group_name;
 
   if (user.sales_rep) {
-    lockerAddressContainer.classList.remove('invisible');
-    officeAddressContainer.classList.remove('invisible');
-    input = document.querySelector('#user-edit-locker-address');
-    input.value = user.locker_address;
-    input.required = true;
-    input = document.querySelector('#user-edit-office-address');
-    input.value = user.office_address;
-    input.required = true;
-  } else {
-    input = document.querySelector('#user-edit-locker-address');
-    input.value = '';
-    input.required = false;
-    input = document.querySelector('#user-edit-office-address');
-    input.value = '';
-    input.required = false;
+    lockerAddressContainer.classList.add('hidden');
   }
 
   input = document.querySelector('#user-edit-activated');
@@ -236,16 +230,12 @@ viewUserButtonElements.forEach(e =>
     const lockerAddressContainer = document.querySelector(
       '#user-view-locker-address-container',
     );
-    const officeAddressContainer = document.querySelector(
-      '#user-view-office-address-container',
-    );
 
-    if (user.sales_rep) {
-      lockerAddressContainer.classList.remove('hidden');
-      officeAddressContainer.classList.remove('hidden');
-    } else {
+    if (user.role !== "sales_rep") {
+      console.log('user role view', user.role)
       lockerAddressContainer.classList.add('hidden');
-      officeAddressContainer.classList.add('hidden');
+    } else {
+      lockerAddressContainer.classList.remove('hidden');
     }
 
     console.log(user);
@@ -272,32 +262,33 @@ viewUserButtonElements.forEach(e =>
     div.innerHTML = user.zip_code;
     div = document.querySelector('#user-view-street_address');
     div.innerHTML = user.street_address;
-
-    if (user.sales_rep) {
-      div = document.querySelector('#user-view-locker-address');
-      div.innerHTML = user.locker_address;
-      div = document.querySelector('#user-view-office-address');
-      div.innerHTML = user.office_address;
-    }
-
     div = document.querySelector('#user-view-group');
     div.innerHTML = user.group_name;
-  }),
+  })
 );
 
-const lockerAddressContainer = document.querySelector(
-  '#user-add-locker-address-container',
-);
-const officeAddressContainer = document.querySelector(
-  '#user-add-office-address-container',
-);
 const salesRepAddUser = document.querySelector('#user-add-sales_rep');
+const salesRepAddUserContainer = document.querySelector('#user-add-sales_rep-container');
+const salesAddRepContainer = document.querySelector('#user-add-locker-address-container');
+const userRole = document.querySelector('#user-add-role');
 
 salesRepAddUser.addEventListener('click', () => {
-  console.log('click');
-  lockerAddressContainer.classList.toggle('invisible');
-  officeAddressContainer.classList.toggle('invisible');
+  salesAddRepContainer.classList.toggle('hidden');
 });
+
+userRole.addEventListener('change', () => {
+  const role = userRole.value;
+
+  if (role !== "SALES_REP") {
+    console.log("input role", typeof userRole.value)
+    console.log("container", salesAddRepContainer)
+    salesAddRepContainer.classList.add('hidden');
+    salesRepAddUserContainer.classList.add('hidden');
+  } else {
+    salesAddRepContainer.classList.remove('hidden');
+    salesRepAddUserContainer.classList.remove('hidden');
+  }
+})
 
 const userAddDropdownBtn = document.querySelector('#user-add-dropdown-btn');
 const options = document.querySelector('#user-add-dropdown-options');
@@ -334,3 +325,12 @@ function selectOption(event) {
 optionItems.forEach(optionItem => {
   optionItem.addEventListener('click', selectOption);
 });
+
+
+
+// Disable pop up window on mouse click
+// window.addEventListener('mouseup', (event) => {
+//   if (event.target !== options && !options.contains(event.target)) {
+//     options.style.display = "invisible";
+//   }
+// })

@@ -47,12 +47,10 @@ def populate(count: int = NUM_TEST_USERS):
             activated=True,
             approval_permission=True,
             street_address="street",
-            office_address="office",
             country="UK",
             region="Lv",
             city="Dro",
             zip_code="82100",
-            locker_address="Address locker",
             sales_rep=False,
         ).save(False)
 

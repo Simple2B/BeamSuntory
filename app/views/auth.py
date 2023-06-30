@@ -27,9 +27,7 @@ def register():
             city=form.city.data,
             zip_code=form.zip_code.data,
             street_address=form.street_address.data,
-            office_address=form.office_address.data,
             approval_permission=form.approval_permission.data,
-            locker_address=form.locker_address.data,
         )
         log(log.INFO, "Form submitted. User: [%s]", user)
         user.save()

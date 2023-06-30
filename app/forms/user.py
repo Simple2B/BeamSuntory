@@ -37,9 +37,7 @@ class UserForm(FlaskForm):
     city = StringField("City", [DataRequired()])
     zip_code = StringField("Zip Code", [DataRequired()])
     street_address = StringField("Street Address", [DataRequired()])
-    office_address = StringField("Office Address")
     submit = SubmitField("Save")
-    locker_address = StringField("Locker Address")
     sales_rep = BooleanField("Sales Rep")
 
     def validate_username(self, field):
@@ -81,8 +79,6 @@ class NewUserForm(FlaskForm):
     city = StringField("City", [DataRequired()])
     zip_code = StringField("Zip Code", [DataRequired()])
     street_address = StringField("Street Address", [DataRequired()])
-    office_address = StringField("Office Address")
-    locker_address = StringField("Locker Address")
     sales_rep = BooleanField("Sales Rep")
     submit = SubmitField("Save")
 

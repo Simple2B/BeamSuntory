@@ -1113,10 +1113,6 @@ input:checked + .toggle-bg {
   z-index: 50;
 }
 
-.col-span-3 {
-  grid-column: span 3 / span 3;
-}
-
 .col-span-6 {
   grid-column: span 6 / span 6;
 }
@@ -2103,6 +2099,10 @@ input:checked + .toggle-bg {
   max-height: 300px;
   overflow: hidden;
   transition: max-height 0.5s ease-in;
+}
+
+.close {
+  display: none;
 }
 
 .hover\:border-gray-300:hover {

@@ -49,28 +49,39 @@
             <label for="street-address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Street Address</label >
             <div id="user-view-street_address"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>  
           </div>
-          <div id="user-view-locker-address-container" class="hidden col-span-6 sm:col-span-3">
-            <label for="locker_address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Locker Address</label >
-            <div id="user-view-locker-address"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>  
-            <!-- <input type="text" name="locker_address" id="user-view-locker-address" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Street Address" required /> -->
-          </div>
-          <div id="user-view-office-address-container" class="hidden col-span-6 sm:col-span-3">
-            <label for="office_address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Office Address</label >
-            <div id="user-view-office-address"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>  
-            <!-- <input type="text" name="locker_address" id="user-view-locker-address" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Street Address" required /> -->
-          </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="street-address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Group</label >
             <div id="user-view-group"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>  
           </div>
-          <!-- <div class="col-span-6 sm:col-span-3">
-            <label for="activated" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Approval Permission</label >
-            <input type="checkbox" name="activated" id="user-view-approval-permission" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+        </div>
+      </div>
+      <div id="user-view-locker-address-container" class="hidden">
+        <div class="flex items-start justify-between p-4 border-t rounded-t dark:border-gray-600">
+          <h4 class="text-xl font-semibold text-gray-900 dark:text-white">Store Locator / Shipping Address :</h4>
+        </div>
+        <div  class="p-6 space-y-6">
+          <div class="grid grid-cols-6 gap-6">
+            <div class="col-span-6 sm:col-span-3">
+              <label for="country" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Country</label >
+              <input type="text" name="country" id="user-add-country" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Country" required />
+            </div>
+            <div class="col-span-6 sm:col-span-3">
+              <label for="region" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Region/Province</label >
+              <input type="text" name="region" id="user-add-region" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Region or Province" required />
+            </div>
+            <div class="col-span-6 sm:col-span-3">
+              <label for="city" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >City</label >
+              <input type="text" name="city" id="user-add-city" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="City" required />
+            </div>
+            <div class="col-span-6 sm:col-span-3">
+              <label for="zip-code" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Zip Code/Postal Code</label >
+              <input type="text" name="zip_code" id="user-add-zip_code" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Zip Code or Postal Code" required />
+            </div>
+            <div class="col-span-6 sm:col-span-3">
+              <label for="street-address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Street Address</label >
+              <input type="text" name="street_address" id="user-add-street_address" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Street Address" required />
+            </div>
           </div>
-          <div class="col-span-3 sm:col-span-3">
-            <label for="activated" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Activated</label >
-            <input type="checkbox" name="activated" id="user-view-activated" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block  p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
-          </div> -->
         </div>
       </div>
       <!-- Modal footer -->
