@@ -71,8 +71,6 @@ def create():
             product_type=form.product_type.data,  # Mapped[s.ProductType]
             brand_id=form.brand.data,  # ForeignKey("str_values.id"))
             # brand=form.brand.data,  # relationship(foreign_keys=[brand_id])
-            sub_brand_id=form.sub_brand.data,  # ForeignKey("str_values.id"))
-            # sub_brand=form.sub_brand.data,  # relationship(foreign_keys=[sub_brand_id])
             category_id=form.category.data,  # sa.ForeignKey("product_categories.id")
             # category=form.category.data,  # orm.relationship(),
             language_id=form.language.data,  # ForeignKey("str_values.id")),
@@ -86,7 +84,6 @@ def create():
             # General Info ->
             SKU=form.SKU.data,  # String(64)),
             low_stock_level=form.low_stock_level.data,  # Integer()),
-            stock_status=form.stock_status.data,  # Mapped[s.StockStatus],
             shelf_life=datetime.now(),  # form.shelf_life.data,  # DateTime()),  # TODO calendar
             program_year=form.program_year.data,  # Integer()),
             premises=form.premises.data,  # Mapped[s.Premises],
@@ -125,8 +122,6 @@ def save():
 
         u.brand_id = form.brand.data  # ForeignKey("str_values.id"))
         # u.brand = form.brand_id.data  # relationship(foreign_keys=[brand_id])
-        u.sub_brand_id = form.sub_brand.data  # ForeignKey("str_values.id"))
-        # u.sub_brand = (form.sub_brand.data,)  # relationshipforeign_keys=[sub_brand_id])
         u.category_id = (form.category.data,)  # sa.ForeignKey("product_categories.id")
         # u.category = form.category.data  # orm.relationship(),
         u.language_id = form.language.data  # ForeignKey("str_values.id")),
@@ -142,7 +137,6 @@ def save():
         # General Info ->
         u.SKU = form.SKU.data  # String(64)),
         u.low_stock_level = form.low_stock_level.data  # Integer()),
-        u.stock_status = form.stock_status.data  # Mapped[s.StockStatus],
         u.shelf_life = datetime.now()  # DateTime()),  # calendar
         u.program_year = form.program_year.data  # Integer()),
         u.premises = form.premises.data  # Mapped[s.Premises],

@@ -23,8 +23,6 @@ class Product(db.Model, ModelMixin):
 
     brand_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("str_values.id"))
     brand: orm.Mapped[StrValue] = orm.relationship(foreign_keys=[brand_id])
-    sub_brand_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("str_values.id"))
-    sub_brand: orm.Mapped[StrValue] = orm.relationship(foreign_keys=[sub_brand_id])
     category_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("product_categories.id")
     )
@@ -50,7 +48,6 @@ class Product(db.Model, ModelMixin):
     # General Info ->
     SKU: orm.Mapped[str] = orm.mapped_column(sa.String(64))
     low_stock_level: orm.Mapped[int] = orm.mapped_column(sa.Integer())
-    stock_status: orm.Mapped[s.StockStatus]
     shelf_life: orm.Mapped[datetime] = orm.mapped_column(sa.DateTime())  # calendar
     program_year: orm.Mapped[int] = orm.mapped_column(sa.Integer())
     premises: orm.Mapped[s.Premises]
@@ -74,7 +71,6 @@ class Product(db.Model, ModelMixin):
         mg_dict = json.loads(ujs)
 
         mg_dict["brand"] = mg.brand.value
-        mg_dict["sub_brand"] = mg.sub_brand.value
         mg_dict["category"] = mg.category.name
         mg_dict["language"] = mg.language.value
         return json.dumps(mg_dict)

@@ -20,7 +20,6 @@ class ProductForm(FlaskForm):
     name = StringField("Name", [DataRequired()])
     product_type = StringField("Product type", [DataRequired()])
     brand = IntegerField("Brand ID", [DataRequired()])
-    sub_brand = IntegerField("Subbrand ID", [DataRequired()])
     category = StringField("Category ID", [DataRequired()])
     language = IntegerField("Language ID", [DataRequired()])
     # vendor=orm.Mapped[str] = orm.mapped_column(sa.String(64)) # TODO do we need it??
@@ -32,7 +31,6 @@ class ProductForm(FlaskForm):
     # General Info ->
     SKU = StringField("SKU", [DataRequired()])
     low_stock_level = IntegerField("Low stock level", [DataRequired()])
-    stock_status = StringField("Stock status", [DataRequired()])
     shelf_life = IntegerField("Shelf life", [DataRequired()])  # calendar
     program_year = IntegerField("Program year", [DataRequired()])
     premises = StringField("Premises", [DataRequired()])
@@ -63,10 +61,6 @@ class NewProductForm(FlaskForm):
     )  # Mapped[s.ProductType]
     brand = IntegerField("Brand ID", [DataRequired()])  # ForeignKey("str_values.id"))
     # brand = (form.brand_id.data,)  # relationship(foreign_keys=[brand_id])
-    sub_brand = IntegerField(
-        "Subbrand ID", [DataRequired()]
-    )  # ForeignKey("str_values.id"))
-    # sub_brand = (form.sub_brand.data,)  # relationship(foreign_keys=[sub_brand_id])
     category = StringField(
         "Category ID", [DataRequired()]
     )  # sa.ForeignKey("product_categories.id")
@@ -85,10 +79,7 @@ class NewProductForm(FlaskForm):
     description = StringField("Description", [DataRequired()])  # String(256)),
     # General Info ->
     SKU = StringField("SKU", [DataRequired()])  # String(64)),
-    low_stock_level = IntegerField("Low stock level", [DataRequired()])  # Integer()),
-    stock_status = StringField(
-        "Stock status", [DataRequired()]
-    )  # Mapped[s.StockStatus],
+    low_stock_level = IntegerField("Low stock level", [DataRequired()])  # Integer()),s
     shelf_life = IntegerField(
         "Shelf life", [DataRequired()]
     )  # DateTime()),  # calendar

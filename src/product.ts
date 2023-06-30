@@ -13,7 +13,6 @@ interface IProduct {
   name: string;
   product_type: string;
   brand: number;
-  sub_brand: number;
   category: string;
   language: number;
   // vendor: str # TODO do we need it
@@ -25,8 +24,7 @@ interface IProduct {
   // General Info ->
   SKU: string;
   low_stock_level: number;
-  stock_status: string;
-  shelf_life: Date;
+  shelf_life: number;
   program_year: number;
   premises: string;
   package_qty: number;
@@ -129,8 +127,6 @@ function editProduct(product: IProduct) {
   input.value = product.product_type;
   input = document.querySelector('#product-edit-brand');
   input.value = product.brand.toString();
-  input = document.querySelector('#product-edit-sub_brand');
-  input.value = product.sub_brand.toString();
   input = document.querySelector('#product-edit-category');
   input.value = product.category.toString();
   input = document.querySelector('#product-edit-language');
@@ -151,10 +147,8 @@ function editProduct(product: IProduct) {
   input.value = product.SKU;
   input = document.querySelector('#product-edit-low_stock_level');
   input.value = product.low_stock_level.toString();
-  input = document.querySelector('#product-edit-stock_status');
-  input.value = product.stock_status;
   input = document.querySelector('#product-edit-shelf_life');
-  input.value = product.shelf_life;
+  input.value = product.shelf_life.toString();
   input = document.querySelector('#product-edit-program_year');
   input.value = product.program_year.toString();
   input = document.querySelector('#product-edit-premises');

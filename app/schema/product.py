@@ -42,8 +42,6 @@ class Product(CustomBase):
     product_type: ProductType
     brand: Optional[Any]  # = Field(exclude=True)
     brand_id: int
-    sub_brand: Optional[Any]  # = Field(exclude=True)
-    sub_brand_id: int
     language: Optional[Any]  # = Field(exclude=True)
     language_id: int
     category: Optional[Any]  # = Field(exclude=True)
@@ -73,4 +71,4 @@ class Product(CustomBase):
 
     class Config:
         orm_mode = True
-        exclude = {"brand", "sub_brand", "language", "category"}
+        exclude = {"brand", "language", "category"}
