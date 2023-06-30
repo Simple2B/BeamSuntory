@@ -180,7 +180,7 @@ def upgrade():
         sa.Column("weight", sa.Float(), nullable=False),
         sa.Column("length", sa.Float(), nullable=False),
         sa.Column("width", sa.Float(), nullable=False),
-        sa.Column("hight", sa.Float(), nullable=False),
+        sa.Column("height", sa.Float(), nullable=False),
         sa.ForeignKeyConstraint(
             ["brand_id"],
             ["str_values.id"],

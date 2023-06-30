@@ -1,6 +1,18 @@
 from datetime import datetime
+from typing import Optional, Any
 from enum import Enum
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+
+class CustomBase(BaseModel):
+    def json(self, **kwargs):
+        include = getattr(self.Config, "include", set())
+        if len(include) == 0:
+            include = None
+        exclude = getattr(self.Config, "exclude", set())
+        if len(exclude) == 0:
+            exclude = None
+        return super().json(include=include, exclude=exclude, **kwargs)
 
 
 class ProductType(Enum):
@@ -24,10 +36,18 @@ class Premises(Enum):
     OFF_PREMISE = "Off Premise"
 
 
-class Product(BaseModel):
+class Product(CustomBase):
     id: int
     name: str
-    type: ProductType
+    product_type: ProductType
+    brand: Optional[Any]  # = Field(exclude=True)
+    brand_id: int
+    sub_brand: Optional[Any]  # = Field(exclude=True)
+    sub_brand_id: int
+    language: Optional[Any]  # = Field(exclude=True)
+    language_id: int
+    category: Optional[Any]  # = Field(exclude=True)
+    category_id: int
     # vendor: str # TODO do we need it
     currency: Currency
     regular_price: float
@@ -49,7 +69,8 @@ class Product(BaseModel):
     weight: float
     length: float
     width: float
-    hight: float
+    height: float
 
     class Config:
         orm_mode = True
+        exclude = {"brand", "sub_brand", "language", "category"}

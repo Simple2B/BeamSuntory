@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import (
     Blueprint,
     render_template,
@@ -68,13 +69,13 @@ def create():
         product: m.Product = m.Product(
             name=form.name.data,
             product_type=form.product_type.data,  # Mapped[s.ProductType]
-            brand_id=form.brand_id.data,  # ForeignKey("str_values.id"))
-            brand=form.brand_id.data,  # relationship(foreign_keys=[brand_id])
-            sub_brand_id=form.sub_brand_id.data,  # ForeignKey("str_values.id"))
+            brand_id=form.brand.data,  # ForeignKey("str_values.id"))
+            # brand=form.brand.data,  # relationship(foreign_keys=[brand_id])
+            sub_brand_id=form.sub_brand.data,  # ForeignKey("str_values.id"))
             # sub_brand=form.sub_brand.data,  # relationship(foreign_keys=[sub_brand_id])
-            category_id=form.category_id.data,  # sa.ForeignKey("product_categories.id")
+            category_id=form.category.data,  # sa.ForeignKey("product_categories.id")
             # category=form.category.data,  # orm.relationship(),
-            language_id=form.language_id.data,  # ForeignKey("str_values.id")),
+            language_id=form.language.data,  # ForeignKey("str_values.id")),
             # language=form.language.data,  # relationship(foreign_keys=[language_id]),
             # vendor=orm.Mapped[str] = orm.mapped_column(sa.String(64)) # TODO do we need it??
             currency=form.currency.data,  # Mapped[s.Currency],
@@ -86,7 +87,7 @@ def create():
             SKU=form.SKU.data,  # String(64)),
             low_stock_level=form.low_stock_level.data,  # Integer()),
             stock_status=form.stock_status.data,  # Mapped[s.StockStatus],
-            shelf_life=form.shelf_life.data,  # DateTime()),  # calendar
+            shelf_life=datetime.now(),  # form.shelf_life.data,  # DateTime()),  # TODO calendar
             program_year=form.program_year.data,  # Integer()),
             premises=form.premises.data,  # Mapped[s.Premises],
             package_qty=form.package_qty.data,  # Integer()),
@@ -97,7 +98,7 @@ def create():
             weight=form.weight.data,  # Float()),
             length=form.length.data,  # Float()),
             width=form.width.data,  # Float()),
-            hight=form.hight.data,  # Float()),
+            height=form.height.data,  # Float()),
         )
         log(log.INFO, "Form submitted. Product: [%s]", product)
         product.save()
@@ -122,15 +123,13 @@ def save():
         u.name = form.name.data
         u.product_type = form.product_type.data  # Mapped[s.ProductType]
 
-        u.brand_id = form.brand_id.data  # ForeignKey("str_values.id"))
+        u.brand_id = form.brand.data  # ForeignKey("str_values.id"))
         # u.brand = form.brand_id.data  # relationship(foreign_keys=[brand_id])
-        u.sub_brand_id = form.sub_brand_id.data  # ForeignKey("str_values.id"))
+        u.sub_brand_id = form.sub_brand.data  # ForeignKey("str_values.id"))
         # u.sub_brand = (form.sub_brand.data,)  # relationshipforeign_keys=[sub_brand_id])
-        u.category_id = (
-            form.category_id.data,
-        )  # sa.ForeignKey("product_categories.id")
+        u.category_id = (form.category.data,)  # sa.ForeignKey("product_categories.id")
         # u.category = form.category.data  # orm.relationship(),
-        u.language_id = form.language_id.data  # ForeignKey("str_values.id")),
+        u.language_id = form.language.data  # ForeignKey("str_values.id")),
         # u.language = form.language.data  # relationship(foreign_keys=[language_id]),
 
         # vendor=orm.Mapped[str] = orm.mapped_column(sa.String(64)) # TODO do we need it??
@@ -144,7 +143,7 @@ def save():
         u.SKU = form.SKU.data  # String(64)),
         u.low_stock_level = form.low_stock_level.data  # Integer()),
         u.stock_status = form.stock_status.data  # Mapped[s.StockStatus],
-        u.shelf_life = form.shelf_life.data  # DateTime()),  # calendar
+        u.shelf_life = datetime.now()  # DateTime()),  # calendar
         u.program_year = form.program_year.data  # Integer()),
         u.premises = form.premises.data  # Mapped[s.Premises],
         u.package_qty = form.package_qty.data  # Integer()),
@@ -157,7 +156,7 @@ def save():
         u.weight = form.weight.data  # Float()),
         u.length = form.length.data  # Float()),
         u.width = form.width.data  # Float()),
-        u.hight = form.hight.data  # Float()),
+        u.height = form.height.data  # Float()),
         u.save()
         if form.next_url.data:
             return redirect(form.next_url.data)

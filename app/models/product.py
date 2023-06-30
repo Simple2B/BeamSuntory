@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 
 import sqlalchemy as sa
 from sqlalchemy import orm
@@ -61,7 +62,7 @@ class Product(db.Model, ModelMixin):
     weight: orm.Mapped[float] = orm.mapped_column(sa.Float())
     length: orm.Mapped[float] = orm.mapped_column(sa.Float())
     width: orm.Mapped[float] = orm.mapped_column(sa.Float())
-    hight: orm.Mapped[float] = orm.mapped_column(sa.Float())
+    height: orm.Mapped[float] = orm.mapped_column(sa.Float())
 
     def __repr__(self):
         return f"<{self.id}: {self.name}>"
@@ -69,4 +70,11 @@ class Product(db.Model, ModelMixin):
     @property
     def json(self):
         mg = s.Product.from_orm(self)
-        return mg.json()
+        ujs = mg.json()
+        mg_dict = json.loads(ujs)
+
+        mg_dict["brand"] = mg.brand.value
+        mg_dict["sub_brand"] = mg.sub_brand.value
+        mg_dict["category"] = mg.category.name
+        mg_dict["language"] = mg.language.value
+        return json.dumps(mg_dict)

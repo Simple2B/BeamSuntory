@@ -11,7 +11,11 @@ import type {ModalOptions, ModalInterface} from 'flowbite';
 interface IProduct {
   id: number;
   name: string;
-  type: string;
+  product_type: string;
+  brand: number;
+  sub_brand: number;
+  category: string;
+  language: number;
   // vendor: str # TODO do we need it
   currency: string;
   regular_price: number;
@@ -22,7 +26,7 @@ interface IProduct {
   SKU: string;
   low_stock_level: number;
   stock_status: string;
-  shelf_life: string;
+  shelf_life: Date;
   program_year: number;
   premises: string;
   package_qty: number;
@@ -33,7 +37,7 @@ interface IProduct {
   weight: number;
   length: number;
   width: number;
-  hight: number;
+  height: number;
 }
 
 const $modalElement: HTMLElement = document.querySelector('#editProductModal');
@@ -121,6 +125,57 @@ function editProduct(product: IProduct) {
   input.value = product.name;
   input = document.querySelector('#product-edit-id');
   input.value = product.id.toString();
+  input = document.querySelector('#product-edit-product_type');
+  input.value = product.product_type;
+  input = document.querySelector('#product-edit-brand');
+  input.value = product.brand.toString();
+  input = document.querySelector('#product-edit-sub_brand');
+  input.value = product.sub_brand.toString();
+  input = document.querySelector('#product-edit-category');
+  input.value = product.category.toString();
+  input = document.querySelector('#product-edit-language');
+  input.value = product.language.toString();
+  // vendor: str # TODO do we need it
+  input = document.querySelector('#product-edit-currency');
+  input.value = product.currency;
+  input = document.querySelector('#product-edit-regular_price');
+  input.value = product.regular_price.toString();
+  input = document.querySelector('#product-edit-retail_price');
+  input.value = product.retail_price.toString();
+  input = document.querySelector('#product-edit-image');
+  input.value = product.image;
+  input = document.querySelector('#product-edit-description');
+  input.value = product.description;
+  // General Info ->
+  input = document.querySelector('#product-edit-SKU');
+  input.value = product.SKU;
+  input = document.querySelector('#product-edit-low_stock_level');
+  input.value = product.low_stock_level.toString();
+  input = document.querySelector('#product-edit-stock_status');
+  input.value = product.stock_status;
+  input = document.querySelector('#product-edit-shelf_life');
+  input.value = product.shelf_life;
+  input = document.querySelector('#product-edit-program_year');
+  input.value = product.program_year.toString();
+  input = document.querySelector('#product-edit-premises');
+  input.value = product.premises;
+  input = document.querySelector('#product-edit-package_qty');
+  input.value = product.package_qty.toString();
+  input = document.querySelector('#product-edit-numb_of_items_per_case');
+  input.value = product.numb_of_items_per_case.toString();
+  input = document.querySelector('#product-edit-numb_of_cases_per_outer_case');
+  input.value = product.numb_of_cases_per_outer_case.toString();
+  input = document.querySelector('#product-edit-comments');
+  input.value = product.comments;
+  // shipping
+  input = document.querySelector('#product-edit-weight');
+  input.value = product.weight.toString();
+  input = document.querySelector('#product-edit-length');
+  input.value = product.length.toString();
+  input = document.querySelector('#product-edit-width');
+  input.value = product.width.toString();
+  input = document.querySelector('#product-edit-height');
+  input.value = product.height.toString();
   input = document.querySelector('#product-edit-next_url');
   input.value = window.location.href;
   modal.show();

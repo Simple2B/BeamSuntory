@@ -13,8 +13,134 @@
       <div class="p-6 space-y-6">
         <div class="grid grid-cols-6 gap-6">
           <div class="col-span-6 sm:col-span-3">
-            <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Name</label >
+            <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Product Name</label >
             <input type="text" name="name" id="product-add-name" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Name" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="product_type" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Product Type</label >
+            <select type="text" name="product_type" id="group-add-product_type" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Product type" required >
+              <option value="SIMPLE_PRODUCT">Simple Product</option>
+              <option value="VARIABLE_PRODUCT">Variable Product</option>
+            </select>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="brand" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Brand</label >
+            <select type="text" name="brand" id="product-add-brand" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Brand" required >
+              <option value="1">ADL</option>
+              <option value="2">Brugal</option>
+              <option value="3">Sauza</option>
+            </select>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="sub_brand" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Sub-brand</label >
+            <select type="text" name="sub_brand" id="product-add-sub_brand" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Sub-brand" required >
+              <option value="1">ADL spice</option>
+              <option value="2">Brugal special</option>
+              <option value="3">Sauza premium</option>
+            </select>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Category</label >
+            <select type="text" name="category" id="product-add-category" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Category" required >
+              <!-- TODO Screate a loop for categories -->
+              <option value="1">Barware</option>
+              <option value="2">Drink</option>
+              <option value="3">Other</option>
+            </select>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="language" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Language</label >
+            <select type="text" name="language" id="product-add-language" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Language" required >
+              <option value="1">English</option>
+              <option value="2">French</option>
+              <option value="3">Bilingual</option>
+            </select>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="currency" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Currency</label >
+            <select type="text" name="currency" id="product-add-currency" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Currency" required >
+              <option value="CAD">CAD</option>
+              <option value="USD">USD</option>
+            </select>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="regular_price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Regular Price</label >
+            <input type="text" name="regular_price" id="product-add-regular_price" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Regular Price" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="retail_price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Retail Price</label >
+            <input type="text" name="retail_price" id="product-add-retail_price" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Retail Price" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="image" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Image</label >
+            <input type="text" name="image" id="product-add-image" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Image" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Description</label >
+            <input type="text" name="description" id="product-add-description" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Description" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="SKU" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >SKU</label >
+            <input type="text" name="SKU" id="product-add-SKU" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="SKU" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="low_stock_level" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Low Stock Level</label >
+            <input type="text" name="low_stock_level" id="product-add-low_stock_level" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Low Stock Level" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="stock_status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Stock status</label >
+            <select type="text" name="stock_status" id="product-add-stock_status" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Stock status" required >
+              <option value="IN_STOCK">In Stock</option>
+              <option value="LOW_STOCK">Low Stock</option>
+              <option value="OUT_OF_STOCK">Out of Stock</option>
+            </select>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="shelf_life" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Shelf life</label >
+            <input type="text" name="shelf_life" id="product-add-shelf_life" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Shelf life" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="program_year" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Program Year</label >
+            <input type="text" name="program_year" id="product-add-program_year" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Program Year" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="premises" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Premises</label >
+            <select type="text" name="premises" id="product-add-premises" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Premises" required >
+              <option value="ON_PREMISE">On Premise</option>
+              <option value="OFF_PREMISE">Off Premise</option>
+            </select>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="package_qty" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Package Qty.</label >
+            <input type="text" name="package_qty" id="product-add-package_qty" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Package Qty." required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="numb_of_items_per_case" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >No. Of Items Per Case</label >
+            <input type="text" name="numb_of_items_per_case" id="product-add-numb_of_items_per_case" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="No. Of Items Per Case" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="numb_of_cases_per_outer_case" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >No. Of Cases Per Outer Case</label >
+            <input type="text" name="numb_of_cases_per_outer_case" id="product-add-numb_of_cases_per_outer_case" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="No. Of Cases Per Outer Case" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="comments" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Comments</label >
+            <input type="text" name="comments" id="product-add-comments" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Comments" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="weight" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Weight (in gm)</label >
+            <input type="text" name="weight" id="product-add-weight" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Weight" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="length" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Length (in cm)</label >
+            <input type="text" name="length" id="product-add-length" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Length" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="width" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Width (in cm)</label >
+            <input type="text" name="width" id="product-add-width" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Width" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="height" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Height (in cm)</label >
+            <input type="text" name="height" id="product-add-height" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Height" required />
           </div>
         </div>
       </div>
