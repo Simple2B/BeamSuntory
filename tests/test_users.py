@@ -2,7 +2,7 @@ from flask import current_app as app
 from flask.testing import FlaskClient, FlaskCliRunner
 from click.testing import Result
 from app import models as m, db
-from tests.utils import login
+from tests.utils import login, register
 
 
 def test_list(populate: FlaskClient):
@@ -33,6 +33,32 @@ def test_create_admin(runner: FlaskCliRunner):
     assert "admin created" in res.output
     query = m.User.select().where(m.User.username == app.config["ADMIN_USERNAME"])
     assert db.session.scalar(query)
+
+
+def test_create_user(client):
+    register("test", "tes@gmail.com")
+    login(client, "test")
+
+    response = client.post(
+        "/user/create",
+        data=dict(
+            username="test_name",
+            email="test_mail",
+            role="test_role",
+            password="test_password",
+            activated=True,
+            country="test_country",
+            region="test_region",
+            city="test_city",
+            zip_code="test_zip_code",
+            street_address="test_street_address",
+            approval_permission=True,
+            sales_rep=True,
+        ),
+    )
+    assert response.status_code == 302
+    user_rows_objs = db.session.execute(m.User.select()).all()
+    assert len(user_rows_objs) > 1
 
 
 def test_populate_db(runner: FlaskCliRunner):
