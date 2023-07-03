@@ -92,20 +92,18 @@ def save():
         group_obj: m.Group | None = db.session.scalars(g_query)
         group_ids = [g.id for g in group_obj]
 
-        user_groups: m.UserGroup = db.session.execute(
+        user_groups_obj: m.UserGroup = db.session.execute(
             m.UserGroup.select().where(m.UserGroup.left_id == u.id)
         ).scalars()
-        user_group_ids = [ug.id for ug in user_groups]
+        user_group_group_ids = [ug.right_id for ug in user_groups_obj]
 
-        for user_group in user_groups:
-            if user_group.right_id not in group_ids:
+        for user_group_id in user_group_group_ids:
+            if user_group_id not in group_ids:
                 db.session.execute(
-                    delete(m.UserGroup).where(
-                        m.UserGroup.right_id == user_group.right_id
-                    )
+                    sa.delete(m.UserGroup).where(m.UserGroup.right_id == user_group_id)
                 )
         for group_id in group_ids:
-            if group_id not in user_group_ids:
+            if group_id not in user_group_group_ids:
                 m.UserGroup(left_id=u.id, right_id=group_id).save()
 
         if form.next_url.data:
@@ -143,6 +141,7 @@ def create():
         log(log.INFO, "Form submitted. User: [%s]", user)
         flash("User added!", "success")
         user.save()
+
         g_query = m.Group.select().where(
             m.Group.name.in_(str(form.group.data).split(", "))
         )
@@ -183,6 +182,9 @@ def delete(id: int):
         log(log.INFO, "There is no user with id: [%s]", id)
         flash("There is no such user", "danger")
         return "no user", 404
+
+    delete_u = sa.delete(m.UserGroup).where(m.UserGroup.left_id == u.id)
+    db.session.execute(delete_u)
 
     db.session.delete(u)
     db.session.commit()
