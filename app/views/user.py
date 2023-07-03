@@ -184,8 +184,8 @@ def delete(id: int):
         flash("There is no such user", "danger")
         return "no user", 404
 
-    delete_stmt = sa.delete(m.UserGroup).where(m.UserGroup.left_id == u.id)
-    db.session.execute(delete_stmt)
+    delete_u = sa.delete(m.UserGroup).where(m.UserGroup.left_id == u.id)
+    db.session.execute(delete_u)
 
     db.session.delete(u)
     db.session.commit()

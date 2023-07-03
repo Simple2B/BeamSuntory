@@ -95,11 +95,6 @@ def test_edit_user(populate_one_user: FlaskClient):
     user: m.User = db.session.execute(
         select(m.User).where(m.User.username == "user")
     ).first()[0]
-    # user_groups = db.session.execute(
-    #     select(m.UserGroup).where(m.UserGroup.left_id == user.id)
-    # ).all()
-    # list_groups = [group[0].right_name for group in user_groups]
-    # query_groups = select(m.Group).where(m.Group.name == "group")
 
     response = populate_one_user.post(
         "/user/save",
