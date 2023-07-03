@@ -175,7 +175,7 @@ def upgrade():
         ),
         sa.Column("package_qty", sa.Integer(), nullable=False),
         sa.Column("numb_of_items_per_case", sa.Integer(), nullable=False),
-        sa.Column("numb_of_casess_per_outer_case", sa.Integer(), nullable=False),
+        sa.Column("numb_of_cases_per_outer_case", sa.Integer(), nullable=False),
         sa.Column("comments", sa.String(length=128), nullable=False),
         sa.Column("weight", sa.Float(), nullable=False),
         sa.Column("length", sa.Float(), nullable=False),

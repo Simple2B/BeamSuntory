@@ -89,7 +89,7 @@ def create():
             premises=form.premises.data,  # Mapped[s.Premises],
             package_qty=form.package_qty.data,  # Integer()),
             numb_of_items_per_case=form.numb_of_items_per_case.data,  # Integer()),
-            numb_of_casess_per_outer_case=form.numb_of_cases_per_outer_case.data,  # Integer()),
+            numb_of_cases_per_outer_case=form.numb_of_cases_per_outer_case.data,  # Integer()),
             comments=form.comments.data,  # String(128)),
             # shipping
             weight=form.weight.data,  # Float()),
@@ -142,7 +142,7 @@ def save():
         u.premises = form.premises.data  # Mapped[s.Premises],
         u.package_qty = form.package_qty.data  # Integer()),
         u.numb_of_items_per_case = form.numb_of_items_per_case.data  # Integer()),
-        u.numb_of_casess_per_outer_case = (
+        u.numb_of_cases_per_outer_case = (
             form.numb_of_cases_per_outer_case.data
         )  # Integer()),
         u.comments = form.comments.data  # String(128)),

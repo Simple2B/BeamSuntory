@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, Any
 from enum import Enum
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class CustomBase(BaseModel):
@@ -25,12 +25,6 @@ class Currency(Enum):
     CAD = "CAD"
 
 
-class StockStatus(Enum):
-    IN_STOCK = "In Stock"
-    LOW_STOCK = "Low Stock"
-    OUT_OF_STOCK = "Out of Stock"
-
-
 class Premises(Enum):
     ON_PREMISE = "On Premise"
     OFF_PREMISE = "Off Premise"
@@ -40,7 +34,7 @@ class Product(CustomBase):
     id: int
     name: str
     product_type: ProductType
-    brand: Optional[Any]  # = Field(exclude=True)
+    brand: Optional[Any]  # = Field(exclude=True) from pydantic import Field
     brand_id: int
     language: Optional[Any]  # = Field(exclude=True)
     language_id: int
@@ -55,13 +49,12 @@ class Product(CustomBase):
     # General Info ->
     SKU: str
     low_stock_level: int
-    stock_status: StockStatus
     shelf_life: datetime
     program_year: int
     premises: Premises
     package_qty: int
     numb_of_items_per_case: int
-    numb_of_casess_per_outer_case: int
+    numb_of_cases_per_outer_case: int
     comments: str
     # shipping
     weight: float

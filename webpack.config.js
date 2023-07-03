@@ -66,8 +66,8 @@ const productConfig = {
   },
 };
 
-const configs = [baseConfig, userConfig, masterGroupConfig].map(conf =>
-  merge(defaultConfig, conf),
+const configs = [baseConfig, userConfig, masterGroupConfig, productConfig].map(
+  conf => merge(defaultConfig, conf),
 );
 
 module.exports = configs;

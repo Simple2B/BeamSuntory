@@ -124,10 +124,12 @@ function editProduct(product: IProduct) {
   input = document.querySelector('#product-edit-id');
   input.value = product.id.toString();
   input = document.querySelector('#product-edit-product_type');
+  console.log(product.product_type);
   input.value = product.product_type;
   input = document.querySelector('#product-edit-brand');
   input.value = product.brand.toString();
   input = document.querySelector('#product-edit-category');
+  console.log(product.category);
   input.value = product.category.toString();
   input = document.querySelector('#product-edit-language');
   input.value = product.language.toString();
@@ -152,6 +154,7 @@ function editProduct(product: IProduct) {
   input = document.querySelector('#product-edit-program_year');
   input.value = product.program_year.toString();
   input = document.querySelector('#product-edit-premises');
+  console.log(product.premises);
   input.value = product.premises;
   input = document.querySelector('#product-edit-package_qty');
   input.value = product.package_qty.toString();

@@ -53,7 +53,7 @@ class Product(db.Model, ModelMixin):
     premises: orm.Mapped[s.Premises]
     package_qty: orm.Mapped[int] = orm.mapped_column(sa.Integer())
     numb_of_items_per_case: orm.Mapped[int] = orm.mapped_column(sa.Integer())
-    numb_of_casess_per_outer_case: orm.Mapped[int] = orm.mapped_column(sa.Integer())
+    numb_of_cases_per_outer_case: orm.Mapped[int] = orm.mapped_column(sa.Integer())
     comments: orm.Mapped[str] = orm.mapped_column(sa.String(128))
     # shipping
     weight: orm.Mapped[float] = orm.mapped_column(sa.Float())
