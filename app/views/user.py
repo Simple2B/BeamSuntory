@@ -102,7 +102,7 @@ def save():
             if user_group_id not in group_ids:
                 db.session.execute(
                     sa.delete(m.UserGroup).where(m.UserGroup.right_id == user_group_id)
-                )                
+                )
         for group_id in group_ids:
             if group_id not in user_group_group_ids:
                 m.UserGroup(left_id=u.id, right_id=group_id).save()
@@ -142,6 +142,7 @@ def create():
         log(log.INFO, "Form submitted. User: [%s]", user)
         flash("User added!", "success")
         user.save()
+
         g_query = m.Group.select().where(
             m.Group.name.in_(str(form.group.data).split(", "))
         )
@@ -182,6 +183,9 @@ def delete(id: int):
         log(log.INFO, "There is no user with id: [%s]", id)
         flash("There is no such user", "danger")
         return "no user", 404
+
+    delete_stmt = sa.delete(m.UserGroup).where(m.UserGroup.left_id == u.id)
+    db.session.execute(delete_stmt)
 
     db.session.delete(u)
     db.session.commit()
