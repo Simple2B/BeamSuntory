@@ -95,7 +95,6 @@ def save():
         user_groups_obj: m.UserGroup = db.session.execute(
             m.UserGroup.select().where(m.UserGroup.left_id == u.id)
         ).scalars()
-        # user_groups = [ug for ug in user_groups_obj]
         user_group_group_ids = [ug.right_id for ug in user_groups_obj]
 
         for user_group_id in user_group_group_ids:

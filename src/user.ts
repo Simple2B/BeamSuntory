@@ -159,11 +159,6 @@ function editUser(user: IUser) {
 
   userAddDropdownBtn.addEventListener('click', () => {
     options.classList.toggle('hidden');
-    console.log("innerOptions before joined", selectedOptions)
-    console.log("group name", user.group_name)
-    console.log("input before", input.value)
-    console.log("input after", input.value)
-
   });
 
   optionItems.forEach((optionItem: HTMLElement) => {
@@ -175,7 +170,6 @@ function editUser(user: IUser) {
     window.addEventListener('mouseup', (event: MouseEvent) => {
       if (event.target !== options && !options.contains(event.target as Node)) {
         options.classList.add('hidden');
-        console.log("mouse click")
       }
     })
 
@@ -190,12 +184,8 @@ function editUser(user: IUser) {
       option.classList.add('bg-blue-600');
     }
 
-    console.log("innerOptions before joined", selectedOptions)
-    console.log("group name", user.group_name)
-    console.log("input before", input.value)
     const joinedOptions = selectedOptions.join(', ');
     input.value = joinedOptions;
-    console.log("input after", input.value)
     userAddDropdownBtn.innerHTML = joinedOptions;
     });
   });
@@ -252,7 +242,6 @@ viewUserButtonElements.forEach(e =>
     );
 
     if (user.role !== "sales_rep") {
-      console.log('user role view', user.role)
       lockerAddressContainer.classList.add('hidden');
     } else {
       lockerAddressContainer.classList.remove('hidden');
@@ -301,8 +290,6 @@ userRole.addEventListener('change', () => {
   const role = userRole.value;
 
   if (role !== "SALES_REP") {
-    console.log("input role", typeof userRole.value)
-    console.log("container", salesAddRepContainer)
     salesAddRepContainer.classList.add('hidden');
     salesRepAddUserContainer.classList.add('hidden');
   } else {
