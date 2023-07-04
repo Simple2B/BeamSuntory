@@ -1,4 +1,5 @@
-from datetime import datetime
+import time
+import datetime
 from flask import (
     Blueprint,
     render_template,
@@ -66,6 +67,19 @@ def create():
         if gr:
             flash("This product name is already taken.", "danger")
             return redirect(url_for("product.get_all"))
+        shelf_life_str_start = form.shelf_life_start.data
+        shelf_life_str_end = form.shelf_life_end.data
+        shelf_life_stamp_start = datetime.datetime.strptime(
+            shelf_life_str_start, "%m/%d/%Y"
+        )
+        shelf_life_stamp_end = datetime.datetime.strptime(
+            shelf_life_str_end, "%m/%d/%Y"
+        )
+
+        # NOTE return timestamp Float
+        # shelf_life_stamp_end = time.mktime(
+        #     datetime.datetime.strptime(shelf_life_str_end, "%m/%d/%Y").timetuple()
+        # )
         product: m.Product = m.Product(
             name=form.name.data,
             product_type=form.product_type.data,  # Mapped[s.ProductType]
@@ -84,7 +98,12 @@ def create():
             # General Info ->
             SKU=form.SKU.data,  # String(64)),
             low_stock_level=form.low_stock_level.data,  # Integer()),
-            shelf_life=datetime.now(),  # form.shelf_life.data,  # DateTime()),  # TODO calendar
+            shelf_life_start=str(
+                shelf_life_stamp_start
+            ),  # form.shelf_life.data,  # DateTime()),  # TODO calendar
+            shelf_life_end=str(
+                shelf_life_stamp_end
+            ),  # form.shelf_life.data,  # DateTime()),  # TODO calendar
             program_year=form.program_year.data,  # Integer()),
             premises=form.premises.data,  # Mapped[s.Premises],
             package_qty=form.package_qty.data,  # Integer()),
@@ -117,6 +136,14 @@ def save():
         if not u:
             log(log.ERROR, "Not found product by id : [%s]", form.product_id.data)
             flash("Cannot save product data", "danger")
+        shelf_life_str_start = form.shelf_life_start.data
+        shelf_life_str_end = form.shelf_life_end.data
+        shelf_life_stamp_start = datetime.datetime.strptime(
+            shelf_life_str_start, "%m/%d/%Y"
+        )
+        shelf_life_stamp_end = datetime.datetime.strptime(
+            shelf_life_str_end, "%m/%d/%Y"
+        )
         u.name = form.name.data
         u.product_type = form.product_type.data  # Mapped[s.ProductType]
 
@@ -137,7 +164,8 @@ def save():
         # General Info ->
         u.SKU = form.SKU.data  # String(64)),
         u.low_stock_level = form.low_stock_level.data  # Integer()),
-        u.shelf_life = datetime.now()  # DateTime()),  # calendar
+        u.shelf_life_start = shelf_life_stamp_start  # DateTime()),  # calendar
+        u.shelf_life_end = shelf_life_stamp_end  # DateTime()),  # calendar
         u.program_year = form.program_year.data  # Integer()),
         u.premises = form.premises.data  # Mapped[s.Premises],
         u.package_qty = form.package_qty.data  # Integer()),

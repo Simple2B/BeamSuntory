@@ -49,7 +49,8 @@ class Product(CustomBase):
     # General Info ->
     SKU: str
     low_stock_level: int
-    shelf_life: datetime
+    shelf_life_start: datetime
+    shelf_life_end: datetime
     program_year: int
     premises: Premises
     package_qty: int

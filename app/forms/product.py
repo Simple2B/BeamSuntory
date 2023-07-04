@@ -31,7 +31,8 @@ class ProductForm(FlaskForm):
     # General Info ->
     SKU = StringField("SKU", [DataRequired()])
     low_stock_level = IntegerField("Low stock level", [DataRequired()])
-    shelf_life = IntegerField("Shelf life", [DataRequired()])  # calendar
+    shelf_life_start = StringField("Shelf life start", [DataRequired()])  # calendar
+    shelf_life_end = StringField("Shelf life end", [DataRequired()])  # calendar
     program_year = IntegerField("Program year", [DataRequired()])
     premises = StringField("Premises", [DataRequired()])
     package_qty = IntegerField("Package qty", [DataRequired()])
@@ -80,8 +81,11 @@ class NewProductForm(FlaskForm):
     # General Info ->
     SKU = StringField("SKU", [DataRequired()])  # String(64)),
     low_stock_level = IntegerField("Low stock level", [DataRequired()])  # Integer()),s
-    shelf_life = IntegerField(
-        "Shelf life", [DataRequired()]
+    shelf_life_start = StringField(
+        "Shelf life start", [DataRequired()]
+    )  # DateTime()),  # calendar
+    shelf_life_end = StringField(
+        "Shelf life end", [DataRequired()]
     )  # DateTime()),  # calendar
     program_year = IntegerField("Program year", [DataRequired()])  # Integer()),
     premises = StringField("Premises", [DataRequired()])  # Mapped[s.Premises],

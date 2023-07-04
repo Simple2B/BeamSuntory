@@ -48,7 +48,10 @@ class Product(db.Model, ModelMixin):
     # General Info ->
     SKU: orm.Mapped[str] = orm.mapped_column(sa.String(64))
     low_stock_level: orm.Mapped[int] = orm.mapped_column(sa.Integer())
-    shelf_life: orm.Mapped[datetime] = orm.mapped_column(sa.DateTime())  # calendar
+    shelf_life_start: orm.Mapped[datetime] = orm.mapped_column(
+        sa.DateTime()
+    )  # calendar
+    shelf_life_end: orm.Mapped[datetime] = orm.mapped_column(sa.DateTime())  # calendar
     program_year: orm.Mapped[int] = orm.mapped_column(sa.Integer())
     premises: orm.Mapped[s.Premises]
     package_qty: orm.Mapped[int] = orm.mapped_column(sa.Integer())
