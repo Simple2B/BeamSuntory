@@ -8,7 +8,7 @@ from flask import (
     redirect,
     url_for,
 )
-from flask_login import login_required
+from flask_login import login_required, current_user
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
@@ -41,8 +41,16 @@ def get_all():
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
-    master_groups_rows_objs = db.session.execute(m.MasterGroup.select()).all()
-    master_groups = [row[0] for row in master_groups_rows_objs]
+    master_groups_rows_obj = db.session.execute(m.MasterGroup.select()).all()
+
+    # get all product_groups to list and compare in view.html
+    product_groups_obj = db.session.execute(m.ProductGroup.select()).all()
+
+    # TODO: consider using a join instead of two queries <- Copilot
+    # get all groups ids for current user to compare with product groups ids in view.html
+    current_user_groups_rows = db.session.execute(
+        m.UserGroup.select().where(m.UserGroup.left_id == current_user.id)
+    ).all()
 
     return render_template(
         "product/products.html",
@@ -53,7 +61,10 @@ def get_all():
         ).scalars(),
         page=pagination,
         search_query=q,
-        main_master_groups=master_groups,
+        main_master_groups=[row[0] for row in master_groups_rows_obj],
+        product_groups=[row[0] for row in product_groups_obj],
+        current_user=current_user,
+        current_user_groups_ids=[i[0].right_id for i in current_user_groups_rows],
     )
 
 
@@ -89,7 +100,7 @@ def create():
             # category=form.category.data,  # orm.relationship(),
             language_id=form.language.data,  # ForeignKey("str_values.id")),
             # language=form.language.data,  # relationship(foreign_keys=[language_id]),
-            # vendor=orm.Mapped[str] = orm.mapped_column(sa.String(64)) # TODO do we need it??
+            # vendor=orm.Mapped[str] = orm.mapped_column(sa.String(64)), # TODO do we need it??
             currency=form.currency.data,  # Mapped[s.Currency],
             regular_price=form.regular_price.data,  # sa.Float()
             retail_price=form.retail_price.data,  # sa.Float(),

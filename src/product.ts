@@ -200,40 +200,24 @@ viewProductButtonElements.forEach(e =>
     div.innerHTML = product.name;
     div = document.querySelector('#product-view-id');
     div.innerHTML = product.id.toString();
-    div = document.querySelector('#product-view-product_type');
-    console.log(product.product_type);
-    div.innerHTML = product.product_type;
-    div = document.querySelector('#product-view-brand');
-    div.innerHTML = product.brand.toString();
-    div = document.querySelector('#product-view-category');
-    console.log(product.category);
-    div.innerHTML = product.category;
-    div = document.querySelector('#product-view-language');
-    div.innerHTML = product.language.toString();
-    // vendor: str # TODO do we need it
-    div = document.querySelector('#product-view-currency');
-    div.innerHTML = product.currency;
+    // div = document.querySelector('#product-view-brand');
+    // div.innerHTML = product.brand.toString();
+    // div = document.querySelector('#product-view-category');
+    // div.innerHTML = product.category;
     div = document.querySelector('#product-view-regular_price');
     div.innerHTML = product.regular_price.toString();
     div = document.querySelector('#product-view-retail_price');
     div.innerHTML = product.retail_price.toString();
-    div = document.querySelector('#product-view-image');
-    div.innerHTML = product.image;
     div = document.querySelector('#product-view-description');
     div.innerHTML = product.description;
     // General Info ->
     div = document.querySelector('#product-view-SKU');
     div.innerHTML = product.SKU;
-    div = document.querySelector('#product-view-low_stock_level');
-    div.innerHTML = product.low_stock_level.toString();
     div = document.querySelector('#product-view-shelf_life_start');
     div.innerHTML = convertDate(product.shelf_life_start.toString());
     div = document.querySelector('#product-view-shelf_life_end');
     div.innerHTML = convertDate(product.shelf_life_end.toString());
-    div = document.querySelector('#product-view-program_year');
-    div.innerHTML = product.program_year.toString();
     div = document.querySelector('#product-view-premises');
-    console.log(product.premises);
     div.innerHTML = product.premises;
     div = document.querySelector('#product-view-package_qty');
     div.innerHTML = product.package_qty.toString();
@@ -243,15 +227,6 @@ viewProductButtonElements.forEach(e =>
     div.innerHTML = product.numb_of_cases_per_outer_case.toString();
     div = document.querySelector('#product-view-comments');
     div.innerHTML = product.comments;
-    // shipping
-    div = document.querySelector('#product-view-weight');
-    div.innerHTML = product.weight.toString();
-    div = document.querySelector('#product-view-length');
-    div.innerHTML = product.length.toString();
-    div = document.querySelector('#product-view-width');
-    div.innerHTML = product.width.toString();
-    div = document.querySelector('#product-view-height');
-    div.innerHTML = product.height.toString();
     div = document.querySelector('#product-view-next_url');
     div.innerHTML = window.location.href;
   }),

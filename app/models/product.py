@@ -76,4 +76,5 @@ class Product(db.Model, ModelMixin):
         mg_dict["brand"] = mg.brand.value
         mg_dict["category"] = mg.category.name
         mg_dict["language"] = mg.language.value
+        mg_dict["TEST_ME"] = "TEST_ME"
         return json.dumps(mg_dict)
