@@ -24,7 +24,8 @@ interface IProduct {
   // General Info ->
   SKU: string;
   low_stock_level: number;
-  shelf_life: number;
+  shelf_life_start: number;
+  shelf_life_end: number;
   program_year: number;
   premises: string;
   package_qty: number;
@@ -118,6 +119,15 @@ deleteButtons.forEach(e => {
   });
 });
 
+function convertDate(date: string) {
+  const inputDate = date.split('T')[0];
+  const dateParts = inputDate.split('-');
+  const year = dateParts[0];
+  const month = dateParts[1];
+  const day = dateParts[2];
+  return `${month}/${day}/${year}`;
+}
+
 function editProduct(product: IProduct) {
   let input: HTMLInputElement = document.querySelector('#product-edit-name');
   input.value = product.name;
@@ -149,8 +159,10 @@ function editProduct(product: IProduct) {
   input.value = product.SKU;
   input = document.querySelector('#product-edit-low_stock_level');
   input.value = product.low_stock_level.toString();
-  input = document.querySelector('#product-edit-shelf_life');
-  input.value = product.shelf_life.toString();
+  input = document.querySelector('#product-edit-shelf_life_start');
+  input.value = convertDate(product.shelf_life_start.toString());
+  input = document.querySelector('#product-edit-shelf_life_end');
+  input.value = convertDate(product.shelf_life_end.toString());
   input = document.querySelector('#product-edit-program_year');
   input.value = product.program_year.toString();
   input = document.querySelector('#product-edit-premises');
@@ -184,7 +196,6 @@ const viewProductButtonElements = document.querySelectorAll(
 viewProductButtonElements.forEach(e =>
   e.addEventListener('click', () => {
     const product = JSON.parse(e.getAttribute('data-target'));
-    console.log(product);
     let div: HTMLDivElement = document.querySelector('#product-view-name');
     div.innerHTML = product.name;
     div = document.querySelector('#product-view-id');
@@ -215,8 +226,10 @@ viewProductButtonElements.forEach(e =>
     div.innerHTML = product.SKU;
     div = document.querySelector('#product-view-low_stock_level');
     div.innerHTML = product.low_stock_level.toString();
-    div = document.querySelector('#product-view-shelf_life');
-    div.innerHTML = product.shelf_life.toString();
+    div = document.querySelector('#product-view-shelf_life_start');
+    div.innerHTML = convertDate(product.shelf_life_start.toString());
+    div = document.querySelector('#product-view-shelf_life_end');
+    div.innerHTML = convertDate(product.shelf_life_end.toString());
     div = document.querySelector('#product-view-program_year');
     div.innerHTML = product.program_year.toString();
     div = document.querySelector('#product-view-premises');
