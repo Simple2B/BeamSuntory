@@ -35,6 +35,7 @@ class RegistrationForm(FlaskForm):
     city = StringField("City", [DataRequired()])
     zip_code = StringField("Zip Code", [DataRequired()])
     street_address = StringField("Street Address", [DataRequired()])
+    phone_number = StringField("Phone Number")
     activated = BooleanField("activated")
     approval_permission = BooleanField("activated")
     group = StringField("Group", [DataRequired()], default="Brand")
