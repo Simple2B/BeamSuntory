@@ -84,6 +84,7 @@ class User(db.Model, UserMixin, ModelMixin):
     )
     approval_permission: orm.Mapped[bool] = orm.mapped_column(sa.Boolean, default=False)
     sales_rep: orm.Mapped[bool] = orm.mapped_column(sa.Boolean, default=False)
+    phone_number: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=True)
 
     @hybrid_property
     def password(self):

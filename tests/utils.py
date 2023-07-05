@@ -20,6 +20,7 @@ def register(
         activated=True,
         approval_permission=True,
         street_address="street",
+        phone_number="123456789",
         country="UK",
         region="Lv",
         city="Dro",
