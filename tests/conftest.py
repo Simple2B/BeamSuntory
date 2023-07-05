@@ -67,6 +67,26 @@ def populate(client: FlaskClient):
 
 
 @pytest.fixture
+def populate_one_user(client: FlaskClient):
+    m.User(
+        username="user",
+        email="user@mail.com",
+        password="password",
+        role="MANAGER",
+        activated=True,
+        approval_permission=True,
+        street_address="street",
+        country="UK",
+        region="Lv",
+        city="Dro",
+        zip_code="82100",
+        sales_rep=False,
+    ).save(False)
+    db.session.commit()
+    yield client
+
+
+@pytest.fixture
 def mg_g_populate(client: FlaskClient):
     m.User(
         username="user1",

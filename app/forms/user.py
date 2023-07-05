@@ -21,9 +21,9 @@ class UserForm(FlaskForm):
     email = StringField("email", [DataRequired(), Email()])
     activated = BooleanField("activated")
     approval_permission = BooleanField("activated")
-    group = StringField("Group", [DataRequired()], default="Brand")
+    group = StringField("Group")
     username = StringField("Username", [DataRequired()])
-    password = PasswordField("Password", validators=[DataRequired(), Length(6, 40)])
+    password = PasswordField("Password", validators=[DataRequired()])
     password_confirmation = PasswordField(
         "Confirm Password",
         validators=[
@@ -31,7 +31,7 @@ class UserForm(FlaskForm):
             EqualTo("password", message="Password do not match."),
         ],
     )
-    role = StringField("Role", validators=[DataRequired(), Length(2, 30)])
+    role = StringField("Role", validators=[DataRequired()])
     country = StringField("Country", [DataRequired()])
     region = StringField("Region", [DataRequired()])
     city = StringField("City", [DataRequired()])
