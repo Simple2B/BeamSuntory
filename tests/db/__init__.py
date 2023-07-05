@@ -47,6 +47,7 @@ def populate(count: int = NUM_TEST_USERS):
             activated=True,
             approval_permission=True,
             street_address="street",
+            phone_number="123456789",
             country="UK",
             region="Lv",
             city="Dro",

@@ -80,6 +80,7 @@ def save():
         u.activated = form.activated.data
         u.approval_permission = form.approval_permission.data
         u.sales_rep = form.sales_rep.data
+        u.phone_number = form.phone_number.data
         if form.password.data.strip("*\n "):
             u.password = form.password.data
         u.save()
@@ -139,6 +140,7 @@ def create():
             street_address=form.street_address.data,
             approval_permission=form.approval_permission.data,
             sales_rep=form.sales_rep.data,
+            phone_number=form.phone_number.data,
         )
         log(log.INFO, "Form submitted. User: [%s]", user)
         flash("User added!", "success")

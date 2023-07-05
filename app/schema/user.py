@@ -17,6 +17,7 @@ class User(BaseModel):
     activated: bool
     approval_permission: bool
     street_address: str
+    phone_number: str | None
     country: str
     region: str
     city: str

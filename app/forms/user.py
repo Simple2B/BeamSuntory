@@ -37,6 +37,7 @@ class UserForm(FlaskForm):
     city = StringField("City", [DataRequired()])
     zip_code = StringField("Zip Code", [DataRequired()])
     street_address = StringField("Street Address", [DataRequired()])
+    phone_number = StringField("Phone Number")
     submit = SubmitField("Save")
     sales_rep = BooleanField("Sales Rep")
 
@@ -79,6 +80,7 @@ class NewUserForm(FlaskForm):
     city = StringField("City", [DataRequired()])
     zip_code = StringField("Zip Code", [DataRequired()])
     street_address = StringField("Street Address", [DataRequired()])
+    phone_number = StringField("Phone Number")
     sales_rep = BooleanField("Sales Rep")
     submit = SubmitField("Save")
 

@@ -55,6 +55,7 @@ def init(app: Flask):
             city="Kyiv",
             zip_code="11111",
             street_address="Address 1",
+            phone_number="123456789",
             activated=True,
             approval_permission=True,
             sales_rep=False,

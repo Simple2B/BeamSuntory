@@ -20,6 +20,7 @@ interface IUser {
   city: string;
   zip_code: string;
   street_address: string;
+  phone_number: string;
   sales_rep: boolean;
   group_name: string;
 }
@@ -197,6 +198,8 @@ function editUser(user: IUser) {
   input.value = '*******';
   input = document.querySelector('#user-edit-country');
   input.value = user.country;
+  input = document.querySelector('#user-edit-phone_number');
+  input.value = user.phone_number;
   input = document.querySelector('#user-edit-region');
   input.value = user.region;
   input = document.querySelector('#user-edit-city');
@@ -252,6 +255,8 @@ viewUserButtonElements.forEach(e =>
 
     user.activated ? (div.innerHTML = 'Active') : (div.innerHTML = 'Offline');
 
+    div = document.querySelector('#user-view-phone_number');
+    div.innerHTML = user.phone_number;
     div = document.querySelector('#user-view-country');
     div.innerHTML = user.country;
     div = document.querySelector('#user-view-region');

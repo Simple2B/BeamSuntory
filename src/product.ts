@@ -134,13 +134,23 @@ function editProduct(product: IProduct) {
   input = document.querySelector('#product-edit-id');
   input.value = product.id.toString();
   input = document.querySelector('#product-edit-product_type');
-  console.log(product.product_type);
-  input.value = product.product_type;
+  input.value = product.product_type.toUpperCase().split(' ').join('_');
   input = document.querySelector('#product-edit-brand');
   input.value = product.brand.toString();
   input = document.querySelector('#product-edit-category');
-  console.log(product.category);
-  input.value = product.category;
+  switch (product.category) {
+    case 'Barware':
+      input.value = '1'
+      break;
+    case 'Drink':
+      input.value = '2'
+      break;
+    case 'Other':
+      input.value = '3'
+      break;
+    default:
+      break;
+  }
   input = document.querySelector('#product-edit-language');
   input.value = product.language.toString();
   // vendor: str # TODO do we need it
@@ -166,8 +176,7 @@ function editProduct(product: IProduct) {
   input = document.querySelector('#product-edit-program_year');
   input.value = product.program_year.toString();
   input = document.querySelector('#product-edit-premises');
-  console.log(product.premises);
-  input.value = product.premises;
+  input.value = product.premises.toUpperCase().split(' ').join('_');
   input = document.querySelector('#product-edit-package_qty');
   input.value = product.package_qty.toString();
   input = document.querySelector('#product-edit-numb_of_items_per_case');
@@ -201,12 +210,10 @@ viewProductButtonElements.forEach(e =>
     div = document.querySelector('#product-view-id');
     div.innerHTML = product.id.toString();
     div = document.querySelector('#product-view-product_type');
-    console.log(product.product_type);
     div.innerHTML = product.product_type;
     div = document.querySelector('#product-view-brand');
     div.innerHTML = product.brand.toString();
     div = document.querySelector('#product-view-category');
-    console.log(product.category);
     div.innerHTML = product.category;
     div = document.querySelector('#product-view-language');
     div.innerHTML = product.language.toString();
@@ -233,7 +240,6 @@ viewProductButtonElements.forEach(e =>
     div = document.querySelector('#product-view-program_year');
     div.innerHTML = product.program_year.toString();
     div = document.querySelector('#product-view-premises');
-    console.log(product.premises);
     div.innerHTML = product.premises;
     div = document.querySelector('#product-view-package_qty');
     div.innerHTML = product.package_qty.toString();
