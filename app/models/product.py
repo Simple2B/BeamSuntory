@@ -7,8 +7,11 @@ from sqlalchemy import orm
 from app.database import db
 from app import schema as s
 from .utils import ModelMixin
-from .values import StrValue
+
+# from .supplier import Supplier
+
 from .product_category import ProductCategory
+from .values import StrValue
 
 
 class Product(db.Model, ModelMixin):
@@ -30,7 +33,10 @@ class Product(db.Model, ModelMixin):
     language_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("str_values.id"))
     language: orm.Mapped[StrValue] = orm.relationship(foreign_keys=[language_id])
 
-    # vendor: orm.Mapped[str] = orm.mapped_column(sa.String(64)) # TODO do we need it??
+    # supplier_id: orm.Mapped[str] = orm.mapped_column(
+    #     sa.ForeignKey("suppliers.id")
+    # )  # NOTE vendor = supplier
+    # supplier: orm.Mapped[Supplier] = orm.relationship(foreign_keys=[supplier_id])
     currency: orm.Mapped[s.Currency]
     regular_price: orm.Mapped[float] = orm.mapped_column(
         sa.Float(),

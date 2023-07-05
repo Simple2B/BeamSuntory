@@ -34,7 +34,6 @@ def downgrade():
                 "shelf_life",
                 postgresql.TIMESTAMP(),
                 autoincrement=False,
-                nullable=False,
             )
         )
         batch_op.drop_column("shelf_life_end")

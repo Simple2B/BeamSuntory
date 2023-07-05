@@ -205,8 +205,6 @@ viewProductButtonElements.forEach(e =>
     div.innerHTML = product.regular_price.toString();
     div = document.querySelector('#product-view-retail_price');
     div.innerHTML = product.retail_price.toString();
-    div = document.querySelector('#product-view-description');
-    div.innerHTML = product.description;
     // General Info ->
     div = document.querySelector('#product-view-SKU');
     div.innerHTML = product.SKU;
