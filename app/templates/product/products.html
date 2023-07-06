@@ -65,22 +65,6 @@
             <div class="text-base font-semibold">{{ product.product_type.name }}</div>
           </div>
         </td>
-        <!-- <td
-
-          class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white"
-        >
-          <div class="pl-3">
-            <div class="text-base font-semibold">{{ product.brand.id }}</div>
-          </div>
-        </td> -->
-        <!-- <td
-
-          class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white"
-        >
-          <div class="pl-3">
-            <div class="text-base font-semibold">{{ product.category.name }}</div>
-          </div>
-        </td> -->
         <td
 
           class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white"
@@ -120,6 +104,9 @@
           </button>
         </td>
       </tr>
+      {% with local_product=product %}
+        {% include 'product/view.html' %}
+      {% endwith %}
       {% endfor %}
     </tbody>
   </table>
@@ -191,7 +178,6 @@
 </div>
 {% include 'product/edit.html' %}
 {% include 'product/add.html' %}
-{% include 'product/view.html' %}
 {% include 'product/request_share.html' %}
 {% include 'product/ship.html' %}
 {% include 'product/assign.html' %}

@@ -34,13 +34,9 @@ class Product(CustomBase):
     id: int
     name: str
     product_type: ProductType
-    brand: Optional[Any]  # = Field(exclude=True) from pydantic import Field
-    brand_id: int
-    language: Optional[Any]  # = Field(exclude=True)
-    language_id: int
-    category: Optional[Any]  # = Field(exclude=True)
-    category_id: int
-    # vendor: str # TODO do we need it
+
+    supplier: Optional[Any]  # = Field(exclude=True)
+    supplier_id: int | None
     currency: Currency
     regular_price: float
     retail_price: float

@@ -51,6 +51,22 @@ def get_all():
         m.UserGroup.select().where(m.UserGroup.left_id == current_user.id)
     ).all()
 
+    curr_usr_groups = [row[0].parent for row in current_user_groups_rows]
+    master_groups = [row[0] for row in master_groups_rows_obj]
+    master_groups_groups = {i.name: [f.id for f in i.groups] for i in master_groups}
+
+    # get all master groups and groups available for current user
+    master_groups_groups_available = {}
+    # groups_available = []
+
+    for group in curr_usr_groups:
+        for mast_gr in master_groups_groups:
+            if group.id in master_groups_groups[mast_gr]:
+                if mast_gr not in master_groups_groups_available:
+                    master_groups_groups_available[mast_gr] = [group]
+                else:
+                    master_groups_groups_available[mast_gr].append(group)
+
     return render_template(
         "product/products.html",
         products=db.session.execute(
@@ -60,10 +76,10 @@ def get_all():
         ).scalars(),
         page=pagination,
         search_query=q,
-        main_master_groups=[row[0] for row in master_groups_rows_obj],
+        main_master_groups=master_groups,
         product_groups=[row[0] for row in product_groups_obj],
-        current_user=current_user,
-        current_user_groups_ids=[i[0].right_id for i in current_user_groups_rows],
+        current_user_groups_ids=[row[0].right_id for row in current_user_groups_rows],
+        master_groups_groups_available=master_groups_groups_available,
     )
 
 
@@ -92,39 +108,30 @@ def create():
         # )
         product: m.Product = m.Product(
             name=form.name.data,
-            product_type=form.product_type.data,  # Mapped[s.ProductType]
-            brand_id=form.brand.data,  # ForeignKey("str_values.id"))
-            # brand=form.brand.data,  # relationship(foreign_keys=[brand_id])
-            category_id=form.category.data,  # sa.ForeignKey("product_categories.id")
-            # category=form.category.data,  # orm.relationship(),
-            language_id=form.language.data,  # ForeignKey("str_values.id")),
-            # language=form.language.data,  # relationship(foreign_keys=[language_id]),
-            # vendor=orm.Mapped[str] = orm.mapped_column(sa.String(64)), # TODO do we need it??
-            currency=form.currency.data,  # Mapped[s.Currency],
-            regular_price=form.regular_price.data,  # sa.Float()
-            retail_price=form.retail_price.data,  # sa.Float(),
+            product_type=form.product_type.data,
+            # supplier=form.category.data,  # orm.relationship(),
+            supplier_id=form.supplier.data,
+            currency=form.currency.data,
+            regular_price=form.regular_price.data,
+            retail_price=form.retail_price.data,
             image=form.image.data,  # sa.String(64) # link or png base64 str??
-            description=form.description.data,  # String(256)),
+            description=form.description.data,
             # General Info ->
-            SKU=form.SKU.data,  # String(64)),
-            low_stock_level=form.low_stock_level.data,  # Integer()),
-            shelf_life_start=str(
-                shelf_life_stamp_start
-            ),  # form.shelf_life.data,  # DateTime()),  # TODO calendar
-            shelf_life_end=str(
-                shelf_life_stamp_end
-            ),  # form.shelf_life.data,  # DateTime()),  # TODO calendar
-            program_year=form.program_year.data,  # Integer()),
-            premises=form.premises.data,  # Mapped[s.Premises],
-            package_qty=form.package_qty.data,  # Integer()),
-            numb_of_items_per_case=form.numb_of_items_per_case.data,  # Integer()),
-            numb_of_cases_per_outer_case=form.numb_of_cases_per_outer_case.data,  # Integer()),
-            comments=form.comments.data,  # String(128)),
+            SKU=form.SKU.data,
+            low_stock_level=form.low_stock_level.data,
+            shelf_life_start=shelf_life_stamp_start,
+            shelf_life_end=shelf_life_stamp_end,
+            program_year=form.program_year.data,
+            premises=form.premises.data,
+            package_qty=form.package_qty.data,
+            numb_of_items_per_case=form.numb_of_items_per_case.data,
+            numb_of_cases_per_outer_case=form.numb_of_cases_per_outer_case.data,
+            comments=form.comments.data,
             # shipping
-            weight=form.weight.data,  # Float()),
-            length=form.length.data,  # Float()),
-            width=form.width.data,  # Float()),
-            height=form.height.data,  # Float()),
+            weight=form.weight.data,
+            length=form.length.data,
+            width=form.width.data,
+            height=form.height.data,
         )
         log(log.INFO, "Form submitted. Product: [%s]", product)
         product.save()
@@ -155,41 +162,70 @@ def save():
             shelf_life_str_end, "%m/%d/%Y"
         )
         u.name = form.name.data
-        u.product_type = form.product_type.data  # Mapped[s.ProductType]
+        u.product_type = form.product_type.data
+        # u.supplier=form.category.data  # orm.relationship()
+        u.supplier_id = form.supplier.data
+        u.currency = form.currency.data
+        u.regular_price = form.regular_price.data
+        u.retail_price = form.retail_price.data
 
-        u.brand_id = form.brand.data  # ForeignKey("str_values.id"))
-        # u.brand = form.brand_id.data  # relationship(foreign_keys=[brand_id])
-        u.category_id = (form.category.data,)  # sa.ForeignKey("product_categories.id")
-        # u.category = form.category.data  # orm.relationship(),
-        u.language_id = form.language.data  # ForeignKey("str_values.id")),
-        # u.language = form.language.data  # relationship(foreign_keys=[language_id]),
-
-        # vendor=orm.Mapped[str] = orm.mapped_column(sa.String(64)) # TODO do we need it??
-        u.currency = form.currency.data  # Mapped[s.Currency],
-        u.regular_price = form.regular_price.data  # sa.Float()
-        u.retail_price = form.retail_price.data  # sa.Float(),
-
-        u.image = form.image.data  # sa.String(64) # link or png base64 str??
-        u.description = form.description.data  # String(256)),
+        u.image = form.image.data
+        u.description = form.description.data
         # General Info ->
-        u.SKU = form.SKU.data  # String(64)),
-        u.low_stock_level = form.low_stock_level.data  # Integer()),
-        u.shelf_life_start = shelf_life_stamp_start  # DateTime()),  # calendar
-        u.shelf_life_end = shelf_life_stamp_end  # DateTime()),  # calendar
-        u.program_year = form.program_year.data  # Integer()),
-        u.premises = form.premises.data  # Mapped[s.Premises],
-        u.package_qty = form.package_qty.data  # Integer()),
-        u.numb_of_items_per_case = form.numb_of_items_per_case.data  # Integer()),
-        u.numb_of_cases_per_outer_case = (
-            form.numb_of_cases_per_outer_case.data
-        )  # Integer()),
-        u.comments = form.comments.data  # String(128)),
+        u.SKU = form.SKU.data
+        u.low_stock_level = form.low_stock_level.data
+        u.shelf_life_start = shelf_life_stamp_start
+        u.shelf_life_end = shelf_life_stamp_end
+        u.program_year = form.program_year.data
+        u.premises = form.premises.data
+        u.package_qty = form.package_qty.data
+        u.numb_of_items_per_case = form.numb_of_items_per_case.data
+        u.numb_of_cases_per_outer_case = form.numb_of_cases_per_outer_case.data
+        u.comments = form.comments.data
         # shipping
-        u.weight = form.weight.data  # Float()),
-        u.length = form.length.data  # Float()),
-        u.width = form.width.data  # Float()),
-        u.height = form.height.data  # Float()),
+        u.weight = form.weight.data
+        u.length = form.length.data
+        u.width = form.width.data
+        u.height = form.height.data
         u.save()
+
+        # product_master_groups = {
+        #     i: request.form[i] for i in request.form if "group" in i
+        # }
+        product_master_groups_ids = [
+            int(request.form[i]) for i in request.form if "group" in i
+        ]
+
+        product_groups_obj = db.session.execute(
+            m.ProductGroup.select().where(
+                m.ProductGroup.product_id == int(form.product_id.data)
+            )
+        ).all()
+        product_groups_ids = [group_row[0].group_id for group_row in product_groups_obj]
+
+        for group_row in product_groups_obj:
+            if group_row[0].group_id in product_master_groups_ids:
+                continue
+                # group.value = product_master_groups[group.group_id]
+                # group.save()
+            else:
+                delete_gp = sa.delete(m.ProductGroup).where(
+                    m.ProductGroup.product_id == int(form.product_id.data),
+                    m.ProductGroup.group_id == group_row[0].group_id,
+                )
+                db.session.execute(delete_gp)
+                # db.session.delete(group_row)
+                # db.session.commit()
+
+        for group_id in product_master_groups_ids:
+            if group_id in product_groups_ids:
+                continue
+            else:
+                product_group = m.ProductGroup(
+                    product_id=int(form.product_id.data), group_id=group_id
+                )
+                product_group.save()
+
         if form.next_url.data:
             return redirect(form.next_url.data)
         return redirect(url_for("product.get_all"))

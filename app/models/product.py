@@ -9,9 +9,7 @@ from app import schema as s
 from .utils import ModelMixin
 
 # from .supplier import Supplier
-
-from .product_category import ProductCategory
-from .values import StrValue
+from .product_group import ProductGroup
 
 
 class Product(db.Model, ModelMixin):
@@ -24,18 +22,9 @@ class Product(db.Model, ModelMixin):
     )
     product_type: orm.Mapped[s.ProductType]
 
-    brand_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("str_values.id"))
-    brand: orm.Mapped[StrValue] = orm.relationship(foreign_keys=[brand_id])
-    category_id: orm.Mapped[int] = orm.mapped_column(
-        sa.ForeignKey("product_categories.id")
-    )
-    category: orm.Mapped[ProductCategory] = orm.relationship()
-    language_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("str_values.id"))
-    language: orm.Mapped[StrValue] = orm.relationship(foreign_keys=[language_id])
-
-    # supplier_id: orm.Mapped[str] = orm.mapped_column(
-    #     sa.ForeignKey("suppliers.id")
-    # )  # NOTE vendor = supplier
+    supplier_id: orm.Mapped[str] = orm.mapped_column(
+        sa.ForeignKey("suppliers.id")
+    )  # NOTE vendor = supplier
     # supplier: orm.Mapped[Supplier] = orm.relationship(foreign_keys=[supplier_id])
     currency: orm.Mapped[s.Currency]
     regular_price: orm.Mapped[float] = orm.mapped_column(
@@ -78,9 +67,18 @@ class Product(db.Model, ModelMixin):
         mg = s.Product.from_orm(self)
         ujs = mg.json()
         mg_dict = json.loads(ujs)
+        current_product_products_groups_rows = db.session.execute(
+            ProductGroup.select().where(ProductGroup.product_id == mg_dict["id"])
+        ).all()
+        # here we get dict of current product group_name:master_group_name
+        # example: {'Martini': 'Brand', 'Fr': 'Language', 'US': 'Country'}
+        mstr_groups_groups = {
+            i[0].parent.name: i[0].parent.master_groups.name
+            for i in current_product_products_groups_rows
+        }
 
-        mg_dict["brand"] = mg.brand.value
-        mg_dict["category"] = mg.category.name
-        mg_dict["language"] = mg.language.value
-        mg_dict["TEST_ME"] = "TEST_ME"
+        # mg_dict["brand"] = mg.brand.value
+        # mg_dict["category"] = mg.category.name
+        # mg_dict["language"] = mg.language.value
+        mg_dict["mstr_groups_groups"] = mstr_groups_groups
         return json.dumps(mg_dict)

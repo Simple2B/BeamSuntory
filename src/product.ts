@@ -12,10 +12,7 @@ interface IProduct {
   id: number;
   name: string;
   product_type: string;
-  brand: number;
-  category: string;
-  language: number;
-  // vendor: str # TODO do we need it
+  supplier_id: number;
   currency: string;
   regular_price: number;
   retail_price: number;
@@ -150,13 +147,9 @@ function editProduct(product: IProduct) {
   input.value = product.id.toString();
   input = document.querySelector('#product-edit-product_type');
   input.value = product.product_type.toUpperCase().split(' ').join('_');
-  input = document.querySelector('#product-edit-brand');
-  input.value = product.brand.toString();
-  input = document.querySelector('#product-edit-category');
-  input.value = product.category;
-  input = document.querySelector('#product-edit-language');
-  input.value = product.language.toString();
-  // vendor: str # TODO do we need it
+  // a loop that adds additional fields
+  input = document.querySelector('#product-edit-supplier');
+  input.value = product.supplier_id.toString();
   input = document.querySelector('#product-edit-currency');
   input.value = product.currency;
   input = document.querySelector('#product-edit-regular_price');
@@ -214,10 +207,8 @@ viewProductButtonElements.forEach(e =>
     div.innerHTML = product.name;
     div = document.querySelector('#product-view-id');
     div.innerHTML = product.id.toString();
-    // div = document.querySelector('#product-view-brand');
-    // div.innerHTML = product.brand.toString();
-    // div = document.querySelector('#product-view-category');
-    // div.innerHTML = product.category;
+    div = document.querySelector('#product-edit-product_type');
+    div.innerHTML = product.product_type.toUpperCase().split(' ').join('_');
     div = document.querySelector('#product-view-regular_price');
     div.innerHTML = product.regular_price.toString();
     div = document.querySelector('#product-view-retail_price');
