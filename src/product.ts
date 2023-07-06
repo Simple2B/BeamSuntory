@@ -40,6 +40,9 @@ interface IProduct {
 }
 
 const $modalElement: HTMLElement = document.querySelector('#editProductModal');
+const $requestShareModalElement: HTMLElement = document.querySelector('#request-share-product-modal');
+const $shipModalElement: HTMLElement = document.querySelector('#ship-product-modal');
+const $assignModalElement: HTMLElement = document.querySelector('#assign-product-modal');
 const $addProductModalElement: HTMLElement =
   document.querySelector('#add-product-modal');
 
@@ -63,6 +66,18 @@ const modalOptions: ModalOptions = {
 const modal: ModalInterface = new Modal($modalElement, modalOptions);
 const addModal: ModalInterface = new Modal(
   $addProductModalElement,
+  modalOptions,
+);
+const requestShareModal: ModalInterface = new Modal(
+  $requestShareModalElement,
+  modalOptions,
+);
+const shipModal: ModalInterface = new Modal(
+  $shipModalElement,
+  modalOptions,
+);
+const assignModal: ModalInterface = new Modal(
+  $assignModalElement,
   modalOptions,
 );
 
@@ -193,6 +208,8 @@ const viewProductButtonElements = document.querySelectorAll(
 viewProductButtonElements.forEach(e =>
   e.addEventListener('click', () => {
     const product = JSON.parse(e.getAttribute('data-target'));
+    sessionStorage.setItem('product', JSON.stringify(product));
+
     let div: HTMLDivElement = document.querySelector('#product-view-name');
     div.innerHTML = product.name;
     div = document.querySelector('#product-view-id');
@@ -226,3 +243,88 @@ viewProductButtonElements.forEach(e =>
     div.innerHTML = window.location.href;
   }),
 );
+
+// request share functionality
+const requestShareButtons = document.querySelectorAll('.request-share-product-button');
+requestShareButtons.forEach(e =>
+  e.addEventListener('click', () => {
+    const product = JSON.parse(sessionStorage.product);
+    requestShare(product);
+  }),
+);
+
+function requestShare(product: IProduct) {
+  console.log("product from storage", product);
+
+  let div: HTMLDivElement = document.querySelector('#product-request-share-name');
+  div.innerHTML = product.name;
+  div = document.querySelector('#product-request-share-sku');
+  div.innerHTML = product.SKU;
+  div = document.querySelector('#product-request-share-available-quantity');
+  div.innerHTML = '600';
+  div = document.querySelector('#product-request-share-owner');
+  div.innerHTML = 'Mike';
+  div = document.querySelector('#product-request-share-role');
+  div.innerHTML = 'ADMIN';
+  div = document.querySelector('#product-request-share-batch-no');
+  div.innerHTML = 'BEAM-964-493';
+  // NOTE should we add previous value in this input?
+  // let input: HTMLInputElement = document.querySelector('#product-request-share-batch-no-quantity');
+  // input.value = product.name;
+  div = document.querySelector('#product-request-share-total-available-items');
+  div.innerHTML = '600';
+  sessionStorage.removeItem('product');
+  requestShareModal.show();
+}
+
+// ship functionality
+const shipButtons = document.querySelectorAll('.ship-product-button');
+shipButtons.forEach(e =>
+  e.addEventListener('click', () => {
+    console.log("ship button clicked");
+    const product = JSON.parse(sessionStorage.product);
+    ship(product);
+  }),
+);
+
+function ship(product: IProduct) {
+  console.log("product from storage", product);
+
+  let div: HTMLDivElement = document.querySelector('#product-ship-name');
+  div.innerHTML = product.name;
+  div = document.querySelector('#product-ship-sku');
+  div.innerHTML = product.SKU;
+  div = document.querySelector('#product-ship-available-quantity');
+  div.innerHTML = '600';
+  div = document.querySelector('#product-ship-batch-no');
+  div.innerHTML = 'BEAM-964-493';
+  // NOTE should we add previous value in this input?
+  // let input: HTMLInputElement = document.querySelector('#product-ship-batch-no-quantity');
+  // input.value = product.name;
+  div = document.querySelector('#product-ship-total-available-items');
+  div.innerHTML = '600';
+  sessionStorage.removeItem('product');
+  shipModal.show();
+}
+
+// assign functionality
+const assignButtons = document.querySelectorAll('.assign-product-button');
+assignButtons.forEach(e =>
+  e.addEventListener('click', () => {
+    console.log("assign button clicked");
+    const product = JSON.parse(sessionStorage.product);
+    assign(product);
+  }),
+);
+
+function assign(product: IProduct) {
+  console.log("product from storage", product);
+
+  let div: HTMLDivElement = document.querySelector('#product-assign-name');
+  div.innerHTML = product.name;
+  // NOTE should we add previous value in this input?
+  // let input: HTMLInputElement = document.querySelector('#product-assign-batch-no-quantity');
+  // input.value = product.name;
+  sessionStorage.removeItem('product');
+  assignModal.show();
+}
