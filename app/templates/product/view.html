@@ -18,11 +18,20 @@
              <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Product Name</label >
             <div id="product-view-name"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>  
           </div>
-          <div class="col-span-6 sm:col-span-3">
+          <div class="col-span-6 sm:col-span-3" id="product-view-product_type-container">
             <label for="product_type" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Product Type</label >
               <div id="product-view-product_type"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>  
           </div>
-
+          {% for master_group in master_groups_groups_available %}
+            <div class="col-span-6 sm:col-span-3" id="product-view-product_type-container-{{ master_group }}">
+              <label for="for-group-{{ master_group }}" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >{{ master_group }}</label >
+              <select type="text" name="group-{{ master_group }}" id="product-view-{{ master_group }}" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Some Group" required >
+                {% for group in master_groups_groups_available[master_group] %}
+                  <option value="{{ group.id }}">{{ group.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          {% endfor %}
           <!-- <div class="col-span-6 sm:col-span-3">
             <label for="brand" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Brand</label >
               <div id="product-view-brand"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">JB</div>  
@@ -47,11 +56,11 @@
           </div> -->
           <div class="col-span-6 sm:col-span-3">
             <label for="regular_price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Regular Price</label >
-              <div id="product-view-regular_price"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>
+            <div id="product-view-regular_price"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="retail_price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Retail Price</label >
-              <div id="product-view-retail_price"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>
+            <div id="product-view-retail_price"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="shelf_life_start" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Shelf life start</label >
@@ -63,26 +72,27 @@
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="SKU" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >SKU</label >
-              <div id="product-view-SKU"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>          </div>
+            <div id="product-view-SKU"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div> 
+          </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="premises" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Premises</label >
-              <div id="product-view-premises"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>
+            <div id="product-view-premises"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="package_qty" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Package Qty.</label >
-              <div id="product-view-package_qty"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>
+            <div id="product-view-package_qty"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="numb_of_items_per_case" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >No. Of Items Per Case</label >
-              <div id="product-view-numb_of_items_per_case"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>
+            <div id="product-view-numb_of_items_per_case"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="numb_of_cases_per_outer_case" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >No. Of Cases Per Outer Case</label >
-              <div id="product-view-numb_of_cases_per_outer_case"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>
+            <div id="product-view-numb_of_cases_per_outer_case"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="comments" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Comments</label >
-              <div id="product-view-comments"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>
+            <div id="product-view-comments"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>
           </div>
         </div>
       </div>
