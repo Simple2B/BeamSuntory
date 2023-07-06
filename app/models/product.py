@@ -4,12 +4,15 @@ import json
 import sqlalchemy as sa
 from sqlalchemy import orm
 
+from flask_login import current_user
+
 from app.database import db
 from app import schema as s
 from .utils import ModelMixin
 
 # from .supplier import Supplier
 from .product_group import ProductGroup
+from .user_group import UserGroup
 
 
 class Product(db.Model, ModelMixin):
@@ -70,10 +73,13 @@ class Product(db.Model, ModelMixin):
         current_product_products_groups_rows = db.session.execute(
             ProductGroup.select().where(ProductGroup.product_id == mg_dict["id"])
         ).all()
+        current_user_groups_rows = db.session.execute(
+            UserGroup.select().where(UserGroup.left_id == current_user.id)
+        ).all()
         # here we get dict of current product group_name:master_group_name
         # example: {'Martini': 'Brand', 'Fr': 'Language', 'US': 'Country'}
         mstr_groups_groups = {
-            i[0].parent.name: i[0].parent.master_groups.name
+            i[0].parent.master_groups.name: i[0].parent.name
             for i in current_product_products_groups_rows
         }
 
@@ -81,4 +87,8 @@ class Product(db.Model, ModelMixin):
         # mg_dict["category"] = mg.category.name
         # mg_dict["language"] = mg.language.value
         mg_dict["mstr_groups_groups"] = mstr_groups_groups
+        mg_dict["current_user_groups"] = {
+            grps[0].parent.master_groups.name: grps[0].parent.name
+            for grps in current_user_groups_rows
+        }
         return json.dumps(mg_dict)

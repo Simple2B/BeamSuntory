@@ -34,6 +34,8 @@ interface IProduct {
   length: number;
   width: number;
   height: number;
+  mstr_groups_groups: object;
+  current_user_groups: object;
 }
 
 const $modalElement: HTMLElement = document.querySelector('#editProductModal');
@@ -202,6 +204,7 @@ viewProductButtonElements.forEach(e =>
   e.addEventListener('click', () => {
     const product = JSON.parse(e.getAttribute('data-target'));
     sessionStorage.setItem('product', JSON.stringify(product));
+    console.log(product);
 
     let div: HTMLDivElement = document.querySelector('#product-view-name');
     div.innerHTML = product.name;
