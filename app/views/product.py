@@ -135,6 +135,15 @@ def create():
         )
         log(log.INFO, "Form submitted. Product: [%s]", product)
         product.save()
+
+        product_master_groups_ids = [
+            int(request.form[i]) for i in request.form if "group" in i
+        ]
+
+        for group_id in product_master_groups_ids:
+            product_group = m.ProductGroup(product_id=product.id, group_id=group_id)
+            product_group.save()
+
         flash("Product added!", "success")
         return redirect(url_for("product.get_all"))
     else:
