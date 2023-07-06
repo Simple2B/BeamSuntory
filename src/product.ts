@@ -38,7 +38,6 @@ interface IProduct {
   current_user_groups: object;
 }
 
-const $modalElement: HTMLElement = document.querySelector('#editProductModal');
 const $requestShareModalElement: HTMLElement = document.querySelector('#request-share-product-modal');
 const $shipModalElement: HTMLElement = document.querySelector('#ship-product-modal');
 const $assignModalElement: HTMLElement = document.querySelector('#assign-product-modal');
@@ -71,7 +70,6 @@ const modalOptions: ModalOptions = {
   },
 };
 
-const modal: ModalInterface = new Modal($modalElement, modalOptions);
 const addModal: ModalInterface = new Modal(
   $addProductModalElement,
   modalOptions,
@@ -108,7 +106,7 @@ $buttonElements.forEach(e =>
 const $buttonClose = document.querySelector('#modalCloseButton');
 if ($buttonClose) {
   $buttonClose.addEventListener('click', () => {
-    modal.hide();
+    editModal.hide();
   });
 }
 
@@ -217,7 +215,7 @@ function editProduct(product: IProduct) {
   input.value = product.height.toString();
   input = document.querySelector('#product-edit-next_url');
   input.value = window.location.href;
-  modal.show();
+  editModal.show();
 }
 
 const viewProductButtonElements = document.querySelectorAll(
@@ -279,8 +277,6 @@ function requestShare(product: IProduct) {
   div.innerHTML = 'Mike';
   div = document.querySelector('#product-request-share-role');
   div.innerHTML = 'ADMIN';
-  div = document.querySelector('#product-request-share-batch-no');
-  div.innerHTML = 'BEAM-964-493';
   // NOTE should we add previous value in this input?
   // let input: HTMLInputElement = document.querySelector('#product-request-share-batch-no-quantity');
   // input.value = product.name;
@@ -298,8 +294,6 @@ function ship(product: IProduct) {
   div.innerHTML = product.SKU;
   div = document.querySelector('#product-ship-available-quantity');
   div.innerHTML = '600';
-  div = document.querySelector('#product-ship-batch-no');
-  div.innerHTML = 'BEAM-964-493';
   // NOTE should we add previous value in this input?
   // let input: HTMLInputElement = document.querySelector('#product-ship-batch-no-quantity');
   // input.value = product.name;
