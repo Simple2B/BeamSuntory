@@ -23,29 +23,38 @@
               <option value="VARIABLE_PRODUCT">Variable Product</option>
             </select>
           </div>
-          <div class="col-span-6 sm:col-span-3">
-            <label for="brand" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Brand</label >
-            <select type="text" name="brand" id="product-add-brand" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Brand" required >
-              <option value="1">ADL</option>
-              <option value="2">Brugal</option>
-              <option value="3">Sauza</option>
-            </select>
-          </div>
-          <div class="col-span-6 sm:col-span-3">
+          {% for master_group in master_groups_groups_available %}
+            <div class="col-span-6 sm:col-span-3">
+              <label for="some-group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >{{ master_group }}</label >
+              <select type="text" name="some-group" id="product-add-some-group" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Some Group" required >
+                {% for group in master_groups_groups_available[master_group] %}
+                  <option value="{{ group.id }}">{{ group.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          {% endfor %}
+          <!-- <div class="col-span-6 sm:col-span-3">
             <label for="category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Category</label >
             <select type="text" name="category" id="product-add-category" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Category" required >
-              <!-- TODO Screate a loop for categories -->
               <option value="1">Barware</option>
               <option value="2">Drink</option>
               <option value="3">Other</option>
             </select>
-          </div>
-          <div class="col-span-6 sm:col-span-3">
+          </div> -->
+          <!-- <div class="col-span-6 sm:col-span-3">
             <label for="language" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Language</label >
             <select type="text" name="language" id="product-add-language" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Language" required >
               <option value="1">English</option>
               <option value="2">French</option>
               <option value="3">Bilingual</option>
+            </select>
+          </div> -->
+          <div class="col-span-6 sm:col-span-3">
+            <label for="supplier" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Supplier</label >
+            <select type="text" name="supplier" id="product-add-supplier" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Currency" required >
+              <option value="1">Supplier 1</option>
+              <option value="2">Supplier 2</option>
+              <option value="3">Supplier 2</option>
             </select>
           </div>
           <div class="col-span-6 sm:col-span-3">
@@ -151,5 +160,5 @@
 </div>
 
 {% block scripts %}
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.6/datepicker.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.6/datepicker.min.js"></script>
 {% endblock %}
