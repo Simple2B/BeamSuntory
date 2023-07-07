@@ -8,17 +8,17 @@ from .utils import ModelMixin
 # avoid circular import during initialization
 if TYPE_CHECKING:
     from .product import Product
-    from .group import Group
+    from .group_for_product import GroupProduct
 
 else:
     Product = "Product"
-    Group = "Group"
+    GroupProduct = "GroupProduct"
 
 
 class ProductGroup(db.Model, ModelMixin):
     __tablename__ = "product_group"
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
     product_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("products.id"))
-    group_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("groups.id"))
+    group_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("groups_for_product.id"))
     child: orm.Mapped[Product] = orm.relationship()
-    parent: orm.Mapped[Group] = orm.relationship()
+    parent: orm.Mapped[GroupProduct] = orm.relationship()

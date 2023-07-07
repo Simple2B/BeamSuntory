@@ -66,8 +66,34 @@ const productConfig = {
   },
 };
 
-const configs = [baseConfig, userConfig, masterGroupConfig, productConfig].map(
-  conf => merge(defaultConfig, conf),
-);
+const groupProductConfig = {
+  entry: {
+    main: './src/group_for_product.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/group_for_product.js', // <--- Will be compiled to this single file
+  },
+};
+
+const masterGroupProductConfig = {
+  entry: {
+    main: './src/master_group_for_product.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/master_group_for_product.js', // <--- Will be compiled to this single file
+  },
+};
+
+const configs = [
+  baseConfig,
+  userConfig,
+  groupConfig,
+  masterGroupConfig,
+  productConfig,
+  groupProductConfig,
+  masterGroupProductConfig,
+].map(conf => merge(defaultConfig, conf));
 
 module.exports = configs;
