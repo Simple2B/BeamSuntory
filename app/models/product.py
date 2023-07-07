@@ -91,4 +91,8 @@ class Product(db.Model, ModelMixin):
             grps[0].parent.master_groups.name: grps[0].parent.name
             for grps in current_user_groups_rows
         }
+        mg_dict["groups_ids"] = {
+            i[0].parent.name: i[0].parent.id
+            for i in current_product_products_groups_rows
+        }
         return json.dumps(mg_dict)
