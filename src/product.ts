@@ -55,7 +55,6 @@ const modalOptions: ModalOptions = {
     'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
   closable: true,
   onHide: () => {
-    console.log('modal is hidden');
     const product = JSON.parse(sessionStorage.product);
     const mstrGroups = Object.keys(product.current_user_groups);
     mstrGroups.forEach((e) => {
@@ -63,7 +62,6 @@ const modalOptions: ModalOptions = {
     });
   },
   onShow: () => {
-    console.log('product id: ');
   },
   onToggle: () => {
     console.log('modal has been toggled');
@@ -101,22 +99,6 @@ $buttonElements.forEach(e =>
     editProduct(JSON.parse(e.getAttribute('data-target')));
   }),
 );
-
-// closing add edit modal
-const $buttonClose = document.querySelector('#modalCloseButton');
-if ($buttonClose) {
-  $buttonClose.addEventListener('click', () => {
-    editModal.hide();
-  });
-}
-
-// closing add product modal
-const addModalCloseBtn = document.querySelector('#modalAddCloseButton');
-if (addModalCloseBtn) {
-  addModalCloseBtn.addEventListener('click', () => {
-    addModal.hide();
-  });
-}
 
 // search flow
 const searchInput: HTMLInputElement = document.querySelector(
@@ -225,7 +207,6 @@ viewProductButtonElements.forEach(e =>
   e.addEventListener('click', () => {
     const product = JSON.parse(e.getAttribute('data-target'));
     sessionStorage.setItem('product', JSON.stringify(product));
-    console.log(product);
     const mstrGroups = Object.keys(product.current_user_groups);
     mstrGroups.forEach((groupName) => {
       const isEqualGroup = product.mstr_groups_groups.hasOwnProperty(groupName);
@@ -236,7 +217,7 @@ viewProductButtonElements.forEach(e =>
     div.innerHTML = product.name;
     div = document.querySelector('#product-view-id');
     div.innerHTML = product.id.toString();
-    div = document.querySelector('#product-edit-product_type');
+    div = document.querySelector('#product-view-product_type');
     div.innerHTML = product.product_type.toUpperCase().split(' ').join('_');
     div = document.querySelector('#product-view-regular_price');
     div.innerHTML = product.regular_price.toString();
@@ -363,7 +344,6 @@ function addShipAssignShareButton(isEqual: boolean, modal: string, masterGroup: 
   const shipButtons = document.querySelectorAll('.ship-product-button');
   shipButtons.forEach(e =>
     e.addEventListener('click', () => {
-      console.log("ship button clicked");
       viewModal.hide()
       editModal.hide()
       const product = JSON.parse(sessionStorage.product);
@@ -374,7 +354,6 @@ function addShipAssignShareButton(isEqual: boolean, modal: string, masterGroup: 
   const assignButtons = document.querySelectorAll('.assign-product-button');
   assignButtons.forEach(e =>
     e.addEventListener('click', () => {
-      console.log("assign button clicked");
       viewModal.hide()
       editModal.hide()
       const product = JSON.parse(sessionStorage.product);

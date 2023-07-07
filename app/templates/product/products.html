@@ -104,9 +104,6 @@
           </button>
         </td>
       </tr>
-      {% with local_product=product %}
-        {% include 'product/view.html' %}
-      {% endwith %}
       {% endfor %}
     </tbody>
   </table>
@@ -178,6 +175,7 @@
 </div>
 {% include 'product/edit.html' %}
 {% include 'product/add.html' %}
+{% include 'product/view.html' %}
 {% include 'product/request_share.html' %}
 {% include 'product/ship.html' %}
 {% include 'product/assign.html' %}

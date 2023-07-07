@@ -45,22 +45,6 @@ $buttonElements.forEach(e =>
   }),
 );
 
-// closing add edit modal
-const $buttonClose = document.querySelector('#modalCloseButton');
-if ($buttonClose) {
-  $buttonClose.addEventListener('click', () => {
-    modal.hide();
-  });
-}
-
-// closing add group modal
-const addModalCloseBtn = document.querySelector('#modalAddCloseButton');
-if (addModalCloseBtn) {
-  addModalCloseBtn.addEventListener('click', () => {
-    addModal.hide();
-  });
-}
-
 // search flow
 const searchInput: HTMLInputElement = document.querySelector(
   '#table-search-groups',
