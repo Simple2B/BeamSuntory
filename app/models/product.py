@@ -1,13 +1,18 @@
 from datetime import datetime
+import json
 
 import sqlalchemy as sa
 from sqlalchemy import orm
 
+from flask_login import current_user
+
 from app.database import db
 from app import schema as s
 from .utils import ModelMixin
-from .values import StrValue
-from .product_category import ProductCategory
+
+# from .supplier import Supplier
+from .product_group import ProductGroup
+from .user_group import UserGroup
 
 
 class Product(db.Model, ModelMixin):
@@ -20,18 +25,10 @@ class Product(db.Model, ModelMixin):
     )
     product_type: orm.Mapped[s.ProductType]
 
-    brand_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("str_values.id"))
-    brand: orm.Mapped[StrValue] = orm.relationship(foreign_keys=[brand_id])
-    sub_brand_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("str_values.id"))
-    sub_brand: orm.Mapped[StrValue] = orm.relationship(foreign_keys=[sub_brand_id])
-    category_id: orm.Mapped[int] = orm.mapped_column(
-        sa.ForeignKey("product_categories.id")
-    )
-    category: orm.Mapped[ProductCategory] = orm.relationship()
-    language_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("str_values.id"))
-    language: orm.Mapped[StrValue] = orm.relationship(foreign_keys=[language_id])
-
-    # vendor: orm.Mapped[str] = orm.mapped_column(sa.String(64)) # TODO do we need it??
+    supplier_id: orm.Mapped[str] = orm.mapped_column(
+        sa.ForeignKey("suppliers.id")
+    )  # NOTE vendor = supplier
+    # supplier: orm.Mapped[Supplier] = orm.relationship(foreign_keys=[supplier_id])
     currency: orm.Mapped[s.Currency]
     regular_price: orm.Mapped[float] = orm.mapped_column(
         sa.Float(),
@@ -49,19 +46,21 @@ class Product(db.Model, ModelMixin):
     # General Info ->
     SKU: orm.Mapped[str] = orm.mapped_column(sa.String(64))
     low_stock_level: orm.Mapped[int] = orm.mapped_column(sa.Integer())
-    stock_status: orm.Mapped[s.StockStatus]
-    shelf_life: orm.Mapped[datetime] = orm.mapped_column(sa.DateTime())  # calendar
+    shelf_life_start: orm.Mapped[datetime] = orm.mapped_column(
+        sa.DateTime()
+    )  # calendar
+    shelf_life_end: orm.Mapped[datetime] = orm.mapped_column(sa.DateTime())  # calendar
     program_year: orm.Mapped[int] = orm.mapped_column(sa.Integer())
     premises: orm.Mapped[s.Premises]
     package_qty: orm.Mapped[int] = orm.mapped_column(sa.Integer())
     numb_of_items_per_case: orm.Mapped[int] = orm.mapped_column(sa.Integer())
-    numb_of_casess_per_outer_case: orm.Mapped[int] = orm.mapped_column(sa.Integer())
+    numb_of_cases_per_outer_case: orm.Mapped[int] = orm.mapped_column(sa.Integer())
     comments: orm.Mapped[str] = orm.mapped_column(sa.String(128))
     # shipping
     weight: orm.Mapped[float] = orm.mapped_column(sa.Float())
     length: orm.Mapped[float] = orm.mapped_column(sa.Float())
     width: orm.Mapped[float] = orm.mapped_column(sa.Float())
-    hight: orm.Mapped[float] = orm.mapped_column(sa.Float())
+    height: orm.Mapped[float] = orm.mapped_column(sa.Float())
 
     def __repr__(self):
         return f"<{self.id}: {self.name}>"
@@ -69,4 +68,31 @@ class Product(db.Model, ModelMixin):
     @property
     def json(self):
         mg = s.Product.from_orm(self)
-        return mg.json()
+        ujs = mg.json()
+        mg_dict = json.loads(ujs)
+        current_product_products_groups_rows = db.session.execute(
+            ProductGroup.select().where(ProductGroup.product_id == mg_dict["id"])
+        ).all()
+        current_user_groups_rows = db.session.execute(
+            UserGroup.select().where(UserGroup.left_id == current_user.id)
+        ).all()
+        # here we get dict of current product group_name:master_group_name
+        # example: {'Martini': 'Brand', 'Fr': 'Language', 'US': 'Country'}
+        mstr_groups_groups = {
+            i[0].parent.master_groups_for_product.name: i[0].parent.name
+            for i in current_product_products_groups_rows
+        }
+
+        # mg_dict["brand"] = mg.brand.value
+        # mg_dict["category"] = mg.category.name
+        # mg_dict["language"] = mg.language.value
+        mg_dict["mstr_groups_groups"] = mstr_groups_groups
+        mg_dict["current_user_groups"] = {
+            grps[0].parent.master_groups.name: grps[0].parent.name
+            for grps in current_user_groups_rows
+        }
+        mg_dict["groups_ids"] = {
+            i[0].parent.name: i[0].parent.id
+            for i in current_product_products_groups_rows
+        }
+        return json.dumps(mg_dict)

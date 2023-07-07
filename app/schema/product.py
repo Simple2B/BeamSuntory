@@ -1,6 +1,18 @@
 from datetime import datetime
+from typing import Optional, Any
 from enum import Enum
 from pydantic import BaseModel
+
+
+class CustomBase(BaseModel):
+    def json(self, **kwargs):
+        include = getattr(self.Config, "include", set())
+        if len(include) == 0:
+            include = None
+        exclude = getattr(self.Config, "exclude", set())
+        if len(exclude) == 0:
+            exclude = None
+        return super().json(include=include, exclude=exclude, **kwargs)
 
 
 class ProductType(Enum):
@@ -13,22 +25,18 @@ class Currency(Enum):
     CAD = "CAD"
 
 
-class StockStatus(Enum):
-    IN_STOCK = "In Stock"
-    LOW_STOCK = "Low Stock"
-    OUT_OF_STOCK = "Out of Stock"
-
-
 class Premises(Enum):
     ON_PREMISE = "On Premise"
     OFF_PREMISE = "Off Premise"
 
 
-class Product(BaseModel):
+class Product(CustomBase):
     id: int
     name: str
-    type: ProductType
-    # vendor: str # TODO do we need it
+    product_type: ProductType
+
+    supplier: Optional[Any]  # = Field(exclude=True)
+    supplier_id: int | None
     currency: Currency
     regular_price: float
     retail_price: float
@@ -37,19 +45,22 @@ class Product(BaseModel):
     # General Info ->
     SKU: str
     low_stock_level: int
-    stock_status: StockStatus
-    shelf_life: datetime
+    shelf_life_start: datetime
+    shelf_life_end: datetime
     program_year: int
     premises: Premises
     package_qty: int
     numb_of_items_per_case: int
-    numb_of_casess_per_outer_case: int
+    numb_of_cases_per_outer_case: int
     comments: str
     # shipping
     weight: float
     length: float
     width: float
-    hight: float
+    height: float
+    mstr_groups_groups: Optional[dict]
+    current_user_groups: Optional[dict]
 
     class Config:
         orm_mode = True
+        exclude = {"brand", "language", "category"}

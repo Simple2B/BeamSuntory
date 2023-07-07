@@ -13,3 +13,6 @@ from .store import Store
 from .supplier import Supplier
 from .warehouse import Warehouse
 from .user_group import UserGroup
+from .product_group import ProductGroup
+from .group_for_product import GroupProduct
+from .master_group_for_product import MasterGroupProduct

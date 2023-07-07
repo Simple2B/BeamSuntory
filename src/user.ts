@@ -122,31 +122,35 @@ resetPasswordButtons.forEach(e => {
 function editUser(user: IUser) {
   const lockerAddressContainer = document.querySelector(
     '#user-edit-locker-address-container',
-    );
+  );
   const userRole: HTMLInputElement = document.querySelector('#user-edit-role');
-  const salesRep: HTMLInputElement = document.querySelector('#user-edit-sales_rep');
-  const salesRepContainer = document.querySelector('#user-edit-sales_rep-container');
+  const salesRep: HTMLInputElement = document.querySelector(
+    '#user-edit-sales_rep',
+  );
+  const salesRepContainer = document.querySelector(
+    '#user-edit-sales_rep-container',
+  );
 
   // function to show locker address only for sales rep
-  if (userRole.value !== "SALES_REP") {
-      lockerAddressContainer.classList.add('hidden');
-      salesRepContainer.classList.add('hidden');
-    } else {
-      lockerAddressContainer.classList.remove('hidden');
-      salesRepContainer.classList.remove('hidden');
-    }
+  if (userRole.value !== 'SALES_REP') {
+    lockerAddressContainer.classList.add('hidden');
+    salesRepContainer.classList.add('hidden');
+  } else {
+    lockerAddressContainer.classList.remove('hidden');
+    salesRepContainer.classList.remove('hidden');
+  }
 
-    userRole.addEventListener('change', () => {
+  userRole.addEventListener('change', () => {
     const role = userRole.value;
 
-    if (role !== "SALES_REP") {
+    if (role !== 'SALES_REP') {
       lockerAddressContainer.classList.add('hidden');
       salesRepContainer.classList.add('hidden');
     } else {
       lockerAddressContainer.classList.remove('hidden');
       salesRepContainer.classList.remove('hidden');
     }
-  })
+  });
 
   salesRep.addEventListener('click', () => {
     lockerAddressContainer.classList.toggle('dropdown-close');
@@ -163,31 +167,36 @@ function editUser(user: IUser) {
   });
 
   optionItems.forEach((optionItem: HTMLElement) => {
-    optionItem.addEventListener('click', (event) => {
-    const option: HTMLElement = event.target as HTMLElement;
-    const value = option.textContent;
-    let input: HTMLInputElement = document.getElementById('user-edit-group') as HTMLInputElement;
+    optionItem.addEventListener('click', event => {
+      const option: HTMLElement = event.target as HTMLElement;
+      const value = option.textContent;
+      let input: HTMLInputElement = document.getElementById(
+        'user-edit-group',
+      ) as HTMLInputElement;
 
-    window.addEventListener('mouseup', (event: MouseEvent) => {
-      if (event.target !== options && !options.contains(event.target as Node)) {
-        options.classList.add('hidden');
+      window.addEventListener('mouseup', (event: MouseEvent) => {
+        if (
+          event.target !== options &&
+          !options.contains(event.target as Node)
+        ) {
+          options.classList.add('hidden');
+        }
+      });
+
+      if (selectedOptions.includes(value)) {
+        const index = selectedOptions.indexOf(value);
+        if (index > -1) {
+          selectedOptions.splice(index, 1);
+        }
+        option.classList.remove('bg-blue-600');
+      } else {
+        selectedOptions.push(value);
+        option.classList.add('bg-blue-600');
       }
-    })
 
-    if (selectedOptions.includes(value)) {
-      const index = selectedOptions.indexOf(value);
-      if (index > -1) {
-        selectedOptions.splice(index, 1);
-      }
-      option.classList.remove('bg-blue-600');
-    } else {
-      selectedOptions.push(value);
-      option.classList.add('bg-blue-600');
-    }
-
-    const joinedOptions = selectedOptions.join(', ');
-    input.value = joinedOptions;
-    userAddDropdownBtn.innerHTML = joinedOptions;
+      const joinedOptions = selectedOptions.join(', ');
+      input.value = joinedOptions;
+      userAddDropdownBtn.innerHTML = joinedOptions;
     });
   });
 
@@ -207,8 +216,6 @@ function editUser(user: IUser) {
   input.value = '*******';
   input = document.querySelector('#user-edit-country');
   input.value = user.country;
-  input = document.querySelector('#user-edit-phone_number');
-  input.value = user.phone_number;
   input = document.querySelector('#user-edit-region');
   input.value = user.region;
   input = document.querySelector('#user-edit-city');
@@ -217,6 +224,8 @@ function editUser(user: IUser) {
   input.value = user.zip_code;
   input = document.querySelector('#user-edit-street_address');
   input.value = user.street_address;
+  input = document.querySelector('#user-edit-phone_number');
+  input.value = user.phone_number;
   let div: HTMLDivElement = document.querySelector('#user-edit-dropdown-btn');
   div.innerHTML = user.group_name;
 
@@ -244,7 +253,7 @@ viewUserButtonElements.forEach(e =>
       '#user-view-locker-address-container',
     );
 
-    if (user.role !== "sales_rep") {
+    if (user.role !== 'sales_rep') {
       lockerAddressContainer.classList.add('hidden');
     } else {
       lockerAddressContainer.classList.remove('hidden');
@@ -263,8 +272,6 @@ viewUserButtonElements.forEach(e =>
 
     user.activated ? (div.innerHTML = 'Active') : (div.innerHTML = 'Offline');
 
-    div = document.querySelector('#user-view-phone_number');
-    div.innerHTML = user.phone_number;
     div = document.querySelector('#user-view-country');
     div.innerHTML = user.country;
     div = document.querySelector('#user-view-region');
@@ -275,16 +282,22 @@ viewUserButtonElements.forEach(e =>
     div.innerHTML = user.zip_code;
     div = document.querySelector('#user-view-street_address');
     div.innerHTML = user.street_address;
+    div = document.querySelector('#user-view-phone_number');
+    div.innerHTML = user.phone_number;
     div = document.querySelector('#user-view-group');
     div.innerHTML = user.group_name;
-  })
+  }),
 );
 
 //   ---add user modal window----
 // function to show additional locker address only for sales rep
 const salesRepAddUser = document.querySelector('#user-add-sales_rep');
-const salesRepAddUserContainer = document.querySelector('#user-add-sales_rep-container');
-const salesAddRepContainer = document.querySelector('#user-add-locker-address-container');
+const salesRepAddUserContainer = document.querySelector(
+  '#user-add-sales_rep-container',
+);
+const salesAddRepContainer = document.querySelector(
+  '#user-add-locker-address-container',
+);
 const userRole: HTMLInputElement = document.querySelector('#user-add-role');
 
 salesRepAddUser.addEventListener('click', () => {
@@ -294,14 +307,14 @@ salesRepAddUser.addEventListener('click', () => {
 userRole.addEventListener('change', () => {
   const role = userRole.value;
 
-  if (role !== "SALES_REP") {
+  if (role !== 'SALES_REP') {
     salesAddRepContainer.classList.add('hidden');
     salesRepAddUserContainer.classList.add('hidden');
   } else {
     salesAddRepContainer.classList.remove('hidden');
     salesRepAddUserContainer.classList.remove('hidden');
   }
-})
+});
 
 // function to select and add group in dropdown list
 const userAddDropdownBtn = document.querySelector('#user-add-dropdown-btn');
@@ -314,16 +327,18 @@ userAddDropdownBtn.addEventListener('click', () => {
 });
 
 optionItems.forEach((optionItem: HTMLElement) => {
-  optionItem.addEventListener('click', (event) => {
+  optionItem.addEventListener('click', event => {
     const option: HTMLElement = event.target as HTMLElement;
     const value = option.textContent;
-    let input: HTMLInputElement = document.getElementById('user-add-group') as HTMLInputElement;
+    let input: HTMLInputElement = document.getElementById(
+      'user-add-group',
+    ) as HTMLInputElement;
 
     window.addEventListener('mouseup', (event: MouseEvent) => {
       if (event.target !== options && !options.contains(event.target as Node)) {
         options.classList.add('hidden');
       }
-    })
+    });
 
     if (selectedOptions.includes(value)) {
       const index = selectedOptions.indexOf(value);
@@ -341,4 +356,3 @@ optionItems.forEach((optionItem: HTMLElement) => {
     userAddDropdownBtn.innerHTML = joinedOptions;
   });
 });
-
