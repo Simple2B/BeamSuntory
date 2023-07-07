@@ -58,6 +58,8 @@ class Product(CustomBase):
     length: float
     width: float
     height: float
+    mstr_groups_groups: Optional[dict]
+    current_user_groups: Optional[dict]
 
     class Config:
         orm_mode = True
