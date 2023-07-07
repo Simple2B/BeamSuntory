@@ -289,6 +289,8 @@ function ship(product: IProduct) {
 function assign(product: IProduct) {
   let div: HTMLDivElement = document.querySelector('#product-assign-name');
   div.innerHTML = product.name;
+  // let input: HTMLInputElement = document.querySelector('#product-assign-master-group');
+  // input.value = product.mstr_groups_groups;
   // NOTE should we add previous value in this input?
   // let input: HTMLInputElement = document.querySelector('#product-assign-batch-no-quantity');
   // input.value = product.name;
