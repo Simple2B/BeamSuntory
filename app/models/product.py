@@ -79,7 +79,7 @@ class Product(db.Model, ModelMixin):
         # here we get dict of current product group_name:master_group_name
         # example: {'Martini': 'Brand', 'Fr': 'Language', 'US': 'Country'}
         mstr_groups_groups = {
-            i[0].parent.master_groups.name: i[0].parent.name
+            i[0].parent.master_groups_for_product.name: i[0].parent.name
             for i in current_product_products_groups_rows
         }
 

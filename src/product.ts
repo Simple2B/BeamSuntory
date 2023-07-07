@@ -38,13 +38,20 @@ interface IProduct {
   current_user_groups: object;
 }
 
-const $requestShareModalElement: HTMLElement = document.querySelector('#request-share-product-modal');
-const $shipModalElement: HTMLElement = document.querySelector('#ship-product-modal');
-const $assignModalElement: HTMLElement = document.querySelector('#assign-product-modal');
+const $requestShareModalElement: HTMLElement = document.querySelector(
+  '#request-share-product-modal',
+);
+const $shipModalElement: HTMLElement = document.querySelector(
+  '#ship-product-modal',
+);
+const $assignModalElement: HTMLElement = document.querySelector(
+  '#assign-product-modal',
+);
 const $addProductModalElement: HTMLElement =
   document.querySelector('#add-product-modal');
-const $viewProductModalElement: HTMLElement =
-  document.querySelector('#view-product-modal');
+const $viewProductModalElement: HTMLElement = document.querySelector(
+  '#view-product-modal',
+);
 const $editProductModalElement: HTMLElement =
   document.querySelector('#editProductModal');
 
@@ -56,13 +63,15 @@ const modalOptions: ModalOptions = {
   closable: true,
   onHide: () => {
     const product = JSON.parse(sessionStorage.product);
-    const mstrGroups = Object.keys(product.current_user_groups);
-    mstrGroups.forEach((e) => {
-      deleteShipAssignButton(e);
+    const mstrGroups = Object.keys(product.mstr_groups_groups);
+    console.log('mstrGroups', mstrGroups);
+
+    mstrGroups.forEach(e => {
+      console.log('e', e.replace(/\s/g, '_'));
+      deleteShipAssignButton(e.replace(/\s/g, '_'));
     });
   },
-  onShow: () => {
-  },
+  onShow: () => {},
   onToggle: () => {
     console.log('modal has been toggled');
   },
@@ -84,10 +93,7 @@ const requestShareModal: ModalInterface = new Modal(
   $requestShareModalElement,
   modalOptions,
 );
-const shipModal: ModalInterface = new Modal(
-  $shipModalElement,
-  modalOptions,
-);
+const shipModal: ModalInterface = new Modal($shipModalElement, modalOptions);
 const assignModal: ModalInterface = new Modal(
   $assignModalElement,
   modalOptions,
@@ -140,10 +146,31 @@ function convertDate(date: string) {
 }
 
 function editProduct(product: IProduct) {
-  const mstrGroups = Object.keys(product.current_user_groups);
-  mstrGroups.forEach((groupName) => {
-    const isEqualGroup = product.mstr_groups_groups.hasOwnProperty(groupName);
-    addShipAssignShareButton(isEqualGroup, "edit", groupName);
+  sessionStorage.setItem('product', JSON.stringify(product));
+  console.log('product', product);
+  const mstrGroups = Object.keys(product.mstr_groups_groups);
+  const mstrGroupsValues = Object.values(product.mstr_groups_groups);
+  mstrGroups.forEach(groupName => {
+    // console.log('mstr', groupName);
+    // console.log('curUser', product.current_user_groups);
+    // const isKey= product.current_user_groups.hasOwnProperty(groupName);
+    // const isValue = product.current_user_groups
+    function isEqualGrp() {
+      for (groupName in product.current_user_groups) {
+        if (product.mstr_groups_groups[groupName]) {
+          if (
+            product.mstr_groups_groups[groupName] ===
+            product.current_user_groups[groupName]
+          ) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    const isEqual = isEqualGrp();
+    addShipAssignShareButton(isEqual, 'edit', groupName);
   });
 
   let input: HTMLInputElement = document.querySelector('#product-edit-name');
@@ -207,10 +234,11 @@ viewProductButtonElements.forEach(e =>
   e.addEventListener('click', () => {
     const product = JSON.parse(e.getAttribute('data-target'));
     sessionStorage.setItem('product', JSON.stringify(product));
-    const mstrGroups = Object.keys(product.current_user_groups);
-    mstrGroups.forEach((groupName) => {
-      const isEqualGroup = product.mstr_groups_groups.hasOwnProperty(groupName);
-      addShipAssignShareButton(isEqualGroup, "view", groupName);
+    const mstrGroups = Object.keys(product.mstr_groups_groups);
+    mstrGroups.forEach(groupName => {
+      const isEqualGroup =
+        product.current_user_groups.hasOwnProperty(groupName);
+      addShipAssignShareButton(isEqualGroup, 'view', groupName);
     });
 
     let div: HTMLDivElement = document.querySelector('#product-view-name');
@@ -248,7 +276,9 @@ viewProductButtonElements.forEach(e =>
 
 // function to request share
 function requestShare(product: IProduct) {
-  let div: HTMLDivElement = document.querySelector('#product-request-share-name');
+  let div: HTMLDivElement = document.querySelector(
+    '#product-request-share-name',
+  );
   div.innerHTML = product.name;
   div = document.querySelector('#product-request-share-sku');
   div.innerHTML = product.SKU;
@@ -263,7 +293,7 @@ function requestShare(product: IProduct) {
   // input.value = product.name;
   div = document.querySelector('#product-request-share-total-available-items');
   div.innerHTML = '600';
-  // sessionStorage.removeItem('product');
+  sessionStorage.removeItem('product');
   requestShareModal.show();
 }
 
@@ -281,7 +311,7 @@ function ship(product: IProduct) {
   div = document.querySelector('#product-ship-total-available-items');
   div.innerHTML = '600';
   // should we delete this object from session storage?
-  // sessionStorage.removeItem('product');
+  sessionStorage.removeItem('product');
   shipModal.show();
 }
 
@@ -295,25 +325,45 @@ function assign(product: IProduct) {
   // let input: HTMLInputElement = document.querySelector('#product-assign-batch-no-quantity');
   // input.value = product.name;
   // should we delete this object from session storage?
-  // sessionStorage.removeItem('product');
+  sessionStorage.removeItem('product');
   assignModal.show();
 }
 
 // function to delete ship assign share button
 function deleteShipAssignButton(nameGroup: string) {
-  const shipAssignShareContainer = document.querySelector(`#product-ship-assign-share-container-${nameGroup}`);
-
-  if(shipAssignShareContainer) {
+  const shipAssignShareContainer = document.querySelector(
+    `#product-ship-assign-share-container-${nameGroup}`,
+  );
+  console.log(
+    'shareQuery',
+    `#product-ship-assign-share-container-${nameGroup}`,
+  );
+  console.log('deleteShipAssignButton', shipAssignShareContainer);
+  if (shipAssignShareContainer) {
     shipAssignShareContainer.remove();
   }
 }
 
 // function to add ship, assign, button to view product modal
-function addShipAssignShareButton(isEqual: boolean, modal: string, masterGroup: string) {
-  const productTypeContainer = document.querySelector(`#product-${modal}-product_type-container-${masterGroup}`);
+function addShipAssignShareButton(
+  isEqual: boolean,
+  modal: string,
+  masterGroup: string,
+) {
+  console.log(
+    'productTypeContainer',
+    `#product-${modal}-product_group-container-${masterGroup}`,
+  );
+
+  const productTypeContainer = document.querySelector(
+    `#product-${modal}-product_group-container-${masterGroup}`,
+  );
   const shipAssignContainer = document.createElement('div');
   shipAssignContainer.classList.add('sm:col-span-3');
-  shipAssignContainer.setAttribute('id', `product-ship-assign-share-container-${masterGroup}`);
+  shipAssignContainer.setAttribute(
+    'id',
+    `product-ship-assign-share-container-${masterGroup}`,
+  );
   shipAssignContainer.innerHTML = `
     <label for="product_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Action</label >
     <button type="button"  class="ship-product-button inline-flex items-center mr-2 px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
@@ -328,7 +378,10 @@ function addShipAssignShareButton(isEqual: boolean, modal: string, masterGroup: 
 
   const shareContainer = document.createElement('div');
   shareContainer.classList.add('sm:col-span-3');
-  shareContainer.setAttribute('id', `product-ship-assign-share-container-${masterGroup}`);
+  shareContainer.setAttribute(
+    'id',
+    `product-ship-assign-share-container-${masterGroup}`,
+  );
   shareContainer.innerHTML = `
     <label for="product_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Action</label >
     <button type="button" class="request-share-product-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
@@ -337,17 +390,25 @@ function addShipAssignShareButton(isEqual: boolean, modal: string, masterGroup: 
     </button>
   `;
 
-  if(isEqual) {
-    productTypeContainer.parentNode.insertBefore(shipAssignContainer, productTypeContainer.nextSibling);
+  console.log('productTypeContainer', productTypeContainer);
+
+  if (isEqual) {
+    productTypeContainer.parentNode.insertBefore(
+      shipAssignContainer,
+      productTypeContainer.nextSibling,
+    );
   } else {
-    productTypeContainer.parentNode.insertBefore(shareContainer, productTypeContainer.nextSibling);
+    productTypeContainer.parentNode.insertBefore(
+      shareContainer,
+      productTypeContainer.nextSibling,
+    );
   }
 
   const shipButtons = document.querySelectorAll('.ship-product-button');
   shipButtons.forEach(e =>
     e.addEventListener('click', () => {
-      viewModal.hide()
-      editModal.hide()
+      viewModal.hide();
+      editModal.hide();
       const product = JSON.parse(sessionStorage.product);
       ship(product);
     }),
@@ -356,18 +417,20 @@ function addShipAssignShareButton(isEqual: boolean, modal: string, masterGroup: 
   const assignButtons = document.querySelectorAll('.assign-product-button');
   assignButtons.forEach(e =>
     e.addEventListener('click', () => {
-      viewModal.hide()
-      editModal.hide()
+      viewModal.hide();
+      editModal.hide();
       const product = JSON.parse(sessionStorage.product);
       assign(product);
     }),
   );
 
-  const requestShareButtons = document.querySelectorAll('.request-share-product-button');
+  const requestShareButtons = document.querySelectorAll(
+    '.request-share-product-button',
+  );
   requestShareButtons.forEach(e =>
     e.addEventListener('click', () => {
-      viewModal.hide()
-      editModal.hide()
+      viewModal.hide();
+      editModal.hide();
       const product = JSON.parse(sessionStorage.product);
       requestShare(product);
     }),
