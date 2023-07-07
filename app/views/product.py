@@ -42,6 +42,21 @@ def get_all():
 
     master_groups_rows_obj = db.session.execute(m.MasterGroup.select()).all()
 
+    groups_for_products_obj = db.session.execute(m.GroupProduct.select()).all()
+    mastr_for_prods_groups_for_prods = {}
+    for group in groups_for_products_obj:
+        if (
+            group[0].master_groups_for_product.name
+            not in mastr_for_prods_groups_for_prods
+        ):
+            mastr_for_prods_groups_for_prods[
+                group[0].master_groups_for_product.name
+            ] = [group[0]]
+        else:
+            mastr_for_prods_groups_for_prods[
+                group[0].master_groups_for_product.name
+            ].append(group[0])
+
     # get all product_groups to list and compare in view.html
     product_groups_obj = db.session.execute(m.ProductGroup.select()).all()
 
@@ -51,21 +66,22 @@ def get_all():
         m.UserGroup.select().where(m.UserGroup.left_id == current_user.id)
     ).all()
 
-    curr_usr_groups = [row[0].parent for row in current_user_groups_rows]
+    # TODO remove commented code if not required
+    # curr_usr_groups = [row[0].parent for row in current_user_groups_rows]
     master_groups = [row[0] for row in master_groups_rows_obj]
-    master_groups_groups = {i.name: [f.id for f in i.groups] for i in master_groups}
+    # master_groups_groups = {i.name: [f.id for f in i.groups] for i in master_groups}
 
     # get all master groups and groups available for current user
-    master_groups_groups_available = {}
-    # groups_available = []
+    # master_groups_groups_available = {}
+    # # groups_available = []
 
-    for group in curr_usr_groups:
-        for mast_gr in master_groups_groups:
-            if group.id in master_groups_groups[mast_gr]:
-                if mast_gr not in master_groups_groups_available:
-                    master_groups_groups_available[mast_gr] = [group]
-                else:
-                    master_groups_groups_available[mast_gr].append(group)
+    # for group in curr_usr_groups:
+    #     for mast_gr in master_groups_groups:
+    #         if group.id in master_groups_groups[mast_gr]:
+    #             if mast_gr not in master_groups_groups_available:
+    #                 master_groups_groups_available[mast_gr] = [group]
+    #             else:
+    #                 master_groups_groups_available[mast_gr].append(group)
 
     return render_template(
         "product/products.html",
@@ -79,7 +95,7 @@ def get_all():
         main_master_groups=master_groups,
         product_groups=[row[0] for row in product_groups_obj],
         current_user_groups_ids=[row[0].right_id for row in current_user_groups_rows],
-        master_groups_groups_available=master_groups_groups_available,
+        master_groups_groups_available=mastr_for_prods_groups_for_prods,
     )
 
 
