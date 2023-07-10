@@ -88,7 +88,11 @@ class Product(db.Model, ModelMixin):
         # mg_dict["language"] = mg.language.value
         mg_dict["mstr_groups_groups"] = mstr_groups_groups
         mg_dict["current_user_groups"] = {
-            grps[0].parent.master_groups.name: grps[0].parent.name
+            grps[0].parent.master_groups.name: [
+                g[0].parent.name
+                for g in current_user_groups_rows
+                if grps[0].parent.master_groups.name == g[0].parent.master_groups.name
+            ]
             for grps in current_user_groups_rows
         }
         mg_dict["groups_ids"] = {

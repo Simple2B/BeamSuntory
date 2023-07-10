@@ -107,7 +107,10 @@ const requestShareModal: ModalInterface = new Modal(
   $requestShareModalElement,
   modalShipAssignOptions,
 );
-const shipModal: ModalInterface = new Modal($shipModalElement, modalShipAssignOptions);
+const shipModal: ModalInterface = new Modal(
+  $shipModalElement,
+  modalShipAssignOptions,
+);
 const assignModal: ModalInterface = new Modal(
   $assignModalElement,
   modalShipAssignOptions,
@@ -222,12 +225,12 @@ viewProductButtonElements.forEach(e =>
     const product = JSON.parse(e.getAttribute('data-target'));
     sessionStorage.setItem('product', JSON.stringify(product));
     const mstrGroups = Object.keys(product.mstr_groups_groups);
-    let isEqual = false;
     mstrGroups.forEach(groupName => {
+      let isEqual = false;
       if (product.current_user_groups.hasOwnProperty(groupName)) {
         const currentUserValue = product.current_user_groups[groupName];
         const mstrGroupsValue = product.mstr_groups_groups[groupName];
-        if (currentUserValue === mstrGroupsValue) {
+        if (currentUserValue.includes(mstrGroupsValue)) {
           isEqual = true;
         }
       }
