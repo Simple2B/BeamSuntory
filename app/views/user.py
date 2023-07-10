@@ -101,8 +101,12 @@ def save():
         for user_group_id in user_group_group_ids:
             if user_group_id not in group_ids:
                 db.session.execute(
-                    sa.delete(m.UserGroup).where(m.UserGroup.right_id == user_group_id)
+                    sa.delete(m.UserGroup).where(
+                        m.UserGroup.right_id == user_group_id,
+                        m.UserGroup.left_id == u.id,
+                    )
                 )
+                db.session.commit()
         for group_id in group_ids:
             if group_id not in user_group_group_ids:
                 m.UserGroup(left_id=u.id, right_id=group_id).save()
