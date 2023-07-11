@@ -19,24 +19,22 @@ from app.logger import log
 product_blueprint = Blueprint("product", __name__, url_prefix="/product")
 
 
-@product_blueprint.route("/", methods=["GET"])
-@login_required
-def get_all():
+def get_all_products(request, query=None, count_query=None):
     q = request.args.get("q", type=str, default=None)
-    query = m.Product.select().order_by(m.Product.id)
-    count_query = sa.select(sa.func.count()).select_from(m.Product)
-    if q:
-        # TODO consider something better then in_
-        query = (
-            m.Product.select()
-            .where(m.Product.name.like(f"{q}%"))
-            .order_by(m.Product.id)
-        )
-        count_query = (
-            sa.select(sa.func.count())
-            .where(m.Product.name.like(f"{q}%"))
-            .select_from(m.Product)
-        )
+    if query == None or count_query == None:
+        query = m.Product.select().order_by(m.Product.id)
+        count_query = sa.select(sa.func.count()).select_from(m.Product)
+        if q:
+            query = (
+                m.Product.select()
+                .where(m.Product.name.like(f"{q}%"))
+                .order_by(m.Product.id)
+            )
+            count_query = (
+                sa.select(sa.func.count())
+                .where(m.Product.name.like(f"{q}%"))
+                .select_from(m.Product)
+            )
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
@@ -66,36 +64,57 @@ def get_all():
         m.UserGroup.select().where(m.UserGroup.left_id == current_user.id)
     ).all()
 
-    # TODO remove commented code if not required
-    # curr_usr_groups = [row[0].parent for row in current_user_groups_rows]
     master_groups = [row[0] for row in master_groups_rows_obj]
-    # master_groups_groups = {i.name: [f.id for f in i.groups] for i in master_groups}
+    master_groups_search = {}
+    for group in groups_for_products_obj:
+        if group[0].master_groups_for_product.name not in master_groups_search:
+            master_groups_search[group[0].master_groups_for_product.name] = [
+                group[0].name
+            ]
+        else:
+            master_groups_search[group[0].master_groups_for_product.name].append(
+                group[0].name
+            )
+    return {
+        "query": query,
+        "pagination": pagination,
+        "q": q,
+        "master_groups": master_groups,
+        "product_groups_obj": product_groups_obj,
+        "current_user_groups_rows": current_user_groups_rows,
+        "mastr_for_prods_groups_for_prods": mastr_for_prods_groups_for_prods,
+        "master_groups_search": master_groups_search,
+    }
 
-    # get all master groups and groups available for current user
-    # master_groups_groups_available = {}
-    # # groups_available = []
 
-    # for group in curr_usr_groups:
-    #     for mast_gr in master_groups_groups:
-    #         if group.id in master_groups_groups[mast_gr]:
-    #             if mast_gr not in master_groups_groups_available:
-    #                 master_groups_groups_available[mast_gr] = [group]
-    #             else:
-    #                 master_groups_groups_available[mast_gr].append(group)
+@product_blueprint.route("/", methods=["GET"])
+@login_required
+def get_all():
+    products_object = get_all_products(request)
+    form: f.SortByGroupProductForm = f.SortByGroupProductForm()
 
     return render_template(
         "product/products.html",
         products=db.session.execute(
-            query.offset((pagination.page - 1) * pagination.per_page).limit(
-                pagination.per_page
+            products_object["query"]
+            .offset(
+                (products_object["pagination"].page - 1)
+                * products_object["pagination"].per_page
             )
+            .limit(products_object["pagination"].per_page)
         ).scalars(),
-        page=pagination,
-        search_query=q,
-        main_master_groups=master_groups,
-        product_groups=[row[0] for row in product_groups_obj],
-        current_user_groups_ids=[row[0].right_id for row in current_user_groups_rows],
-        master_groups_groups_available=mastr_for_prods_groups_for_prods,
+        page=products_object["pagination"],
+        search_query=products_object["q"],
+        main_master_groups=products_object["master_groups"],
+        product_groups=[row[0] for row in products_object["product_groups_obj"]],
+        current_user_groups_ids=[
+            row[0].right_id for row in products_object["current_user_groups_rows"]
+        ],
+        master_groups_groups_available=products_object[
+            "mastr_for_prods_groups_for_prods"
+        ],
+        master_groups_search=products_object["master_groups_search"],
+        form=form,
     )
 
 
@@ -275,3 +294,87 @@ def delete(id: int):
     log(log.INFO, "Product deleted. Product: [%s]", u)
     flash("Product deleted!", "success")
     return "ok", 200
+
+
+@product_blueprint.route("/sort", methods=["POST"])
+@login_required
+def sort():
+    form: f.SortByGroupProductForm = f.SortByGroupProductForm()
+    # if form.validate_on_submit():
+    # body = request.json
+    # group_names: list = body.values()
+    group_names: list = form.sort_by.data.values()
+    groups = [
+        grp[0].id
+        for grp in db.session.execute(
+            m.GroupProduct.select().where(m.GroupProduct.name.in_(group_names))
+        ).all()
+    ]
+
+    product_groups = [
+        prg[0]
+        for prg in db.session.execute(
+            m.ProductGroup.select().where(m.ProductGroup.group_id.in_(groups))
+        ).all()
+    ]
+    product_to_group = {
+        pg.product_id: [
+            t.group_id for t in product_groups if t.product_id == pg.product_id
+        ]
+        for pg in product_groups
+    }
+    product_ids_to_return = [
+        pid for pid in product_to_group if len(product_to_group[pid]) == len(groups)
+    ]
+    # products = [prg[0] for prg in db.session.execute(
+    #     m.Product.select().where(
+    #         m.Product.id.in_(product_groups)
+    #     ).order_by(m.Product.id)
+    # ).all()]
+
+    q = request.args.get("q", type=str, default=None)
+    query = (
+        m.Product.select()
+        .where(m.Product.id.in_(product_ids_to_return))
+        .order_by(m.Product.id)
+    )
+    count_query = (
+        sa.select(sa.func.count())
+        .where(m.Product.id.in_(product_ids_to_return))
+        .select_from(m.Product)
+    )
+    if q:
+        query = (
+            m.Product.select()
+            .where(m.Product.name.like(f"{q}%") | m.Product.id.in_(product_ids_to_return))
+            .order_by(m.Product.id)
+        )
+        count_query = (
+            sa.select(sa.func.count())
+            .where(m.Product.name.like(f"{q}%") | m.Product.id.in_(product_ids_to_return))
+            .select_from(m.Product)
+        )
+    products_object = get_all_products(request, query, count_query)
+
+    return render_template(
+        "product/products.html",
+        products=db.session.execute(
+            products_object["query"]
+            .offset(
+                (products_object["pagination"].page - 1)
+                * products_object["pagination"].per_page
+            )
+            .limit(products_object["pagination"].per_page)
+        ).scalars(),
+        page=products_object["pagination"],
+        search_query=products_object["q"],
+        main_master_groups=products_object["master_groups"],
+        product_groups=[row[0] for row in products_object["product_groups_obj"]],
+        current_user_groups_ids=[
+            row[0].right_id for row in products_object["current_user_groups_rows"]
+        ],
+        master_groups_groups_available=products_object[
+            "mastr_for_prods_groups_for_prods"
+        ],
+        master_groups_search=products_object["master_groups_search"],
+    )

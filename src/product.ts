@@ -445,3 +445,92 @@ function addShipAssignShareButton(
     productViewTypeContainer.nextSibling,
   );
 }
+
+// function to filter products by group
+// const filterProductButton = document.querySelector('#filter-product-button');
+// const productFilterRadioButtons = document.querySelectorAll(
+//   '.product-filter-radio-button',
+// );
+// productFilterRadioButtons.forEach(e => {
+//   e.addEventListener('click', () => {
+//     console.log('click', e);
+//     const filterRadioBtnValue = e.getAttribute('data-target');
+//     console.log('filterRadioBtnValue', filterRadioBtnValue);
+//     const filterRadioBtn = document.querySelector(
+//       `#dropdownRadioButton-${filterRadioBtnValue}`,
+//     );
+//     console.log('filterRadioBtn', filterRadioBtn);
+//     const productFilterInputs = document.querySelectorAll(
+//       '.product-filter-input',
+//     );
+//     console.log('productFilterInputs', productFilterInputs);
+//     productFilterInputs.forEach(input => {
+//       input.addEventListener('change', () => {
+//         console.log('input', input);
+//         const filterInputId = input.getAttribute('data-target');
+//         console.log('filterInputId', filterInputId);
+//         const filterInput = document.querySelector(
+//           `#product-filter-input-${filterInputId}`,
+//         );
+//         console.log('filterInput', filterInput);
+//         console.log('filterRadioBtnTExt before', filterRadioBtn.textContent);
+//         filterRadioBtn.textContent = filterInput.value;
+//         console.log('filterRadioBtnTExt after', filterRadioBtn.textContent);
+//       });
+//     });
+//   });
+// });
+
+interface FilterJsonData {
+  [key: string]: string;
+}
+
+const productFilterInputs = document.querySelectorAll('.product-filter-input');
+const filterProductButton = document.querySelector('#product-filter-button');
+const filterJsonData: FilterJsonData = {};
+
+productFilterInputs.forEach(input => {
+  input.addEventListener('change', () => {
+    console.log('input', input);
+    const filterInputDataTarget = input.getAttribute('data-target');
+    console.log('filterInputId', filterInputDataTarget);
+    const filterInputId = filterInputDataTarget
+      .split(',')[0]
+      .replace(/[^a-zA-Z0-9\s\_]/g, '');
+    const filterInputIdString = `#product-filter-input-${filterInputId}`;
+    const filterButtonId = filterInputDataTarget
+      .split(',')[1]
+      .trim()
+      .replace(/[^a-zA-Z0-9\s\_]/g, '');
+    const filterInput = document.querySelector(
+      filterInputIdString,
+    ) as HTMLInputElement;
+    const filterRadioBtn = document.querySelector(
+      `#dropdownRadioButton-${filterButtonId}`,
+    );
+    if (filterInputIdString.includes(filterButtonId)) {
+      console.log('filterInputIdString', filterInputIdString);
+      filterRadioBtn.textContent = filterButtonId.split('_').join(' ');
+      delete filterJsonData[filterButtonId];
+      return;
+     }
+    filterRadioBtn.textContent = filterInput.value.split('_').join(' ');
+    filterJsonData[filterButtonId] = filterInput.value;
+
+    // console.log('filterRadioBtnTExt before', filterRadioBtn.textContent);
+    // filterRadioBtn.textContent = filterInput.value;
+    // console.log('filterRadioBtnTExt after', filterRadioBtn.textContent);
+  });
+});
+
+filterProductButton.addEventListener('click', (e) => {
+  // e.preventDefault();
+  console.log('filterJsonData', filterJsonData);
+  const hiddenInput = document.querySelector('#sort_by') as HTMLInputElement;
+  console.log('hiddenInput', hiddenInput);
+  hiddenInput.value = JSON.stringify(filterJsonData);
+});
+
+function filterOnSubmit() {
+console.log('on submit');
+}
