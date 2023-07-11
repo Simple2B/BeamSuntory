@@ -7,7 +7,7 @@ from app.database import db
 from .utils import ModelMixin
 from app import schema as s
 from .user import User
-from .values import StrValue
+from .group import Group
 
 
 class Warehouse(db.Model, ModelMixin):
@@ -30,10 +30,10 @@ class Warehouse(db.Model, ModelMixin):
 
     manager_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("users.id"))
     manager: orm.Mapped[User] = orm.relationship()
-    country_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("str_values.id"))
-    country: orm.Mapped[StrValue | None] = orm.relationship(foreign_keys=[country_id])
-    region_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("str_values.id"))
-    region: orm.Mapped[StrValue | None] = orm.relationship(foreign_keys=[region_id])
+    # country_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("groups.id"))
+    # country: orm.Mapped[Group | None] = orm.relationship(foreign_keys=[country_id])
+    # region_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("groups.id"))
+    # region: orm.Mapped[Group | None] = orm.relationship(foreign_keys=[region_id])
 
     def __repr__(self):
         return f"<{self.id}: {self.name}>"
