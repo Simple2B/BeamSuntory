@@ -62,6 +62,10 @@ class Product(db.Model, ModelMixin):
     width: orm.Mapped[float] = orm.mapped_column(sa.Float())
     height: orm.Mapped[float] = orm.mapped_column(sa.Float())
 
+    product_groups: orm.Mapped[ProductGroup] = orm.relationship(
+        cascade="all, delete-orphan"
+    )
+
     def __repr__(self):
         return f"<{self.id}: {self.name}>"
 
@@ -88,7 +92,11 @@ class Product(db.Model, ModelMixin):
         # mg_dict["language"] = mg.language.value
         mg_dict["mstr_groups_groups"] = mstr_groups_groups
         mg_dict["current_user_groups"] = {
-            grps[0].parent.master_groups.name: grps[0].parent.name
+            grps[0].parent.master_groups.name: [
+                g[0].parent.name
+                for g in current_user_groups_rows
+                if grps[0].parent.master_groups.name == g[0].parent.master_groups.name
+            ]
             for grps in current_user_groups_rows
         }
         mg_dict["groups_ids"] = {

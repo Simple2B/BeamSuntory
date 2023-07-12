@@ -107,7 +107,10 @@ const requestShareModal: ModalInterface = new Modal(
   $requestShareModalElement,
   modalShipAssignOptions,
 );
-const shipModal: ModalInterface = new Modal($shipModalElement, modalShipAssignOptions);
+const shipModal: ModalInterface = new Modal(
+  $shipModalElement,
+  modalShipAssignOptions,
+);
 const assignModal: ModalInterface = new Modal(
   $assignModalElement,
   modalShipAssignOptions,
@@ -222,12 +225,13 @@ viewProductButtonElements.forEach(e =>
     const product = JSON.parse(e.getAttribute('data-target'));
     sessionStorage.setItem('product', JSON.stringify(product));
     const mstrGroups = Object.keys(product.mstr_groups_groups);
-    let isEqual = false;
+
     mstrGroups.forEach(groupName => {
+      let isEqual = false;
       if (product.current_user_groups.hasOwnProperty(groupName)) {
         const currentUserValue = product.current_user_groups[groupName];
         const mstrGroupsValue = product.mstr_groups_groups[groupName];
-        if (currentUserValue === mstrGroupsValue) {
+        if (currentUserValue.includes(mstrGroupsValue)) {
           isEqual = true;
         }
       }
@@ -337,7 +341,7 @@ function addShipAssignShareButton(
   group: string,
   productParam: IProduct,
 ) {
-  const nameGroupProductId = productParam.groups_ids[group] as IProduct;
+  const groupProductIds = productParam.groups_ids as {[index: string]: string};
   const productTypeContainer = document.querySelector(
     `#product-view-product_type-container`,
   );
@@ -433,7 +437,7 @@ function addShipAssignShareButton(
       class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
       placeholder="Some Group" required
     >
-      <option value="${nameGroupProductId}">${group}</option>
+      <option value="${groupProductIds[group]}">${group}</option>
     </select>
     `;
   productViewTypeContainer.parentNode.insertBefore(

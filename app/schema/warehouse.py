@@ -8,6 +8,7 @@ class Warehouse(BaseModel):
     city: str
     zip: str
     address: str
+    manager_id: int
 
     class Config:
         orm_mode = True

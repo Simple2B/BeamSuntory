@@ -86,6 +86,16 @@ const masterGroupProductConfig = {
   },
 };
 
+const warehouseConfig = {
+  entry: {
+    main: './src/warehouse.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/warehouse.js', // <--- Will be compiled to this single file
+  },
+};
+
 const configs = [
   baseConfig,
   userConfig,
@@ -94,6 +104,7 @@ const configs = [
   productConfig,
   groupProductConfig,
   masterGroupProductConfig,
+  warehouseConfig,
 ].map(conf => merge(defaultConfig, conf));
 
 module.exports = configs;
