@@ -300,81 +300,91 @@ def delete(id: int):
 @login_required
 def sort():
     form: f.SortByGroupProductForm = f.SortByGroupProductForm()
-    # if form.validate_on_submit():
-    # body = request.json
-    # group_names: list = body.values()
-    group_names: list = form.sort_by.data.values()
-    groups = [
-        grp[0].id
-        for grp in db.session.execute(
-            m.GroupProduct.select().where(m.GroupProduct.name.in_(group_names))
-        ).all()
-    ]
-
-    product_groups = [
-        prg[0]
-        for prg in db.session.execute(
-            m.ProductGroup.select().where(m.ProductGroup.group_id.in_(groups))
-        ).all()
-    ]
-    product_to_group = {
-        pg.product_id: [
-            t.group_id for t in product_groups if t.product_id == pg.product_id
+    if form.validate_on_submit():
+        # body = request.json
+        # group_names: list = body.values()
+        group_names: list = form.sort_by.data.values()
+        groups = [
+            grp[0].id
+            for grp in db.session.execute(
+                m.GroupProduct.select().where(m.GroupProduct.name.in_(group_names))
+            ).all()
         ]
-        for pg in product_groups
-    }
-    product_ids_to_return = [
-        pid for pid in product_to_group if len(product_to_group[pid]) == len(groups)
-    ]
-    # products = [prg[0] for prg in db.session.execute(
-    #     m.Product.select().where(
-    #         m.Product.id.in_(product_groups)
-    #     ).order_by(m.Product.id)
-    # ).all()]
 
-    q = request.args.get("q", type=str, default=None)
-    query = (
-        m.Product.select()
-        .where(m.Product.id.in_(product_ids_to_return))
-        .order_by(m.Product.id)
-    )
-    count_query = (
-        sa.select(sa.func.count())
-        .where(m.Product.id.in_(product_ids_to_return))
-        .select_from(m.Product)
-    )
-    if q:
+        product_groups = [
+            prg[0]
+            for prg in db.session.execute(
+                m.ProductGroup.select().where(m.ProductGroup.group_id.in_(groups))
+            ).all()
+        ]
+        product_to_group = {
+            pg.product_id: [
+                t.group_id for t in product_groups if t.product_id == pg.product_id
+            ]
+            for pg in product_groups
+        }
+        product_ids_to_return = [
+            pid for pid in product_to_group if len(product_to_group[pid]) == len(groups)
+        ]
+        # products = [prg[0] for prg in db.session.execute(
+        #     m.Product.select().where(
+        #         m.Product.id.in_(product_groups)
+        #     ).order_by(m.Product.id)
+        # ).all()]
+
+        q = request.args.get("q", type=str, default=None)
         query = (
             m.Product.select()
-            .where(m.Product.name.like(f"{q}%") | m.Product.id.in_(product_ids_to_return))
+            .where(m.Product.id.in_(product_ids_to_return))
             .order_by(m.Product.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(m.Product.name.like(f"{q}%") | m.Product.id.in_(product_ids_to_return))
+            .where(m.Product.id.in_(product_ids_to_return))
             .select_from(m.Product)
         )
-    products_object = get_all_products(request, query, count_query)
-
-    return render_template(
-        "product/products.html",
-        products=db.session.execute(
-            products_object["query"]
-            .offset(
-                (products_object["pagination"].page - 1)
-                * products_object["pagination"].per_page
+        if q:
+            query = (
+                m.Product.select()
+                .where(
+                    m.Product.name.like(f"{q}%")
+                    | m.Product.id.in_(product_ids_to_return)
+                )
+                .order_by(m.Product.id)
             )
-            .limit(products_object["pagination"].per_page)
-        ).scalars(),
-        page=products_object["pagination"],
-        search_query=products_object["q"],
-        main_master_groups=products_object["master_groups"],
-        product_groups=[row[0] for row in products_object["product_groups_obj"]],
-        current_user_groups_ids=[
-            row[0].right_id for row in products_object["current_user_groups_rows"]
-        ],
-        master_groups_groups_available=products_object[
-            "mastr_for_prods_groups_for_prods"
-        ],
-        master_groups_search=products_object["master_groups_search"],
-    )
+            count_query = (
+                sa.select(sa.func.count())
+                .where(
+                    m.Product.name.like(f"{q}%")
+                    | m.Product.id.in_(product_ids_to_return)
+                )
+                .select_from(m.Product)
+            )
+        products_object = get_all_products(request, query, count_query)
+
+        return render_template(
+            "product/products.html",
+            products=db.session.execute(
+                products_object["query"]
+                .offset(
+                    (products_object["pagination"].page - 1)
+                    * products_object["pagination"].per_page
+                )
+                .limit(products_object["pagination"].per_page)
+            ).scalars(),
+            page=products_object["pagination"],
+            search_query=products_object["q"],
+            main_master_groups=products_object["master_groups"],
+            product_groups=[row[0] for row in products_object["product_groups_obj"]],
+            current_user_groups_ids=[
+                row[0].right_id for row in products_object["current_user_groups_rows"]
+            ],
+            master_groups_groups_available=products_object[
+                "mastr_for_prods_groups_for_prods"
+            ],
+            master_groups_search=products_object["master_groups_search"],
+        )
+
+    log(log.INFO, "Wrong sort")
+    flash("Wrong sort", "danger")
+    return redirect(url_for("product.get_all"))
