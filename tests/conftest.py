@@ -1,3 +1,5 @@
+import datetime
+
 import pytest
 from flask import Flask
 from flask.testing import FlaskClient
@@ -110,6 +112,38 @@ def mg_g_populate(client: FlaskClient):
     m.Group(
         name="Maywood",
         master_group_id="1",
+    ).save(False)
+    m.Product(
+        name="populate_test_product",
+        product_type="SIMPLE_PRODUCT",
+        supplier_id=1,
+        currency="CAD",
+        regular_price=11,
+        retail_price=111,
+        image="imgpngbase64str",
+        description="desc",
+        SKU="322ewd3333rf",
+        low_stock_level=11,
+        shelf_life_start=datetime.datetime.now(),
+        shelf_life_end=datetime.datetime.now(),
+        program_year=2023,
+        premises="ON_PREMISE",
+        package_qty=12,
+        numb_of_items_per_case=22,
+        numb_of_cases_per_outer_case=22,
+        comments="comments",
+        weight=11.0,
+        length=11.0,
+        width=11.0,
+        height=11.0,
+    ).save(False)
+    m.Warehouse(
+        name="Junewood warehouse",
+        phone_number="380362470221",
+        city="Bagmom",
+        zip="unzip",
+        address="sserdda",
+        manager_id=1,
     ).save(False)
     db.session.commit()
     yield client

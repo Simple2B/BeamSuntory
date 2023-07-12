@@ -6,7 +6,6 @@ from sqlalchemy import orm
 from app.database import db
 from app import schema as s
 from .utils import ModelMixin
-from .values import StrValue
 
 
 class Supplier(db.Model, ModelMixin):
@@ -36,10 +35,11 @@ class Supplier(db.Model, ModelMixin):
         default=datetime.utcnow,
     )
 
-    country_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("str_values.id"))
-    country: orm.Mapped[StrValue] = orm.relationship(foreign_keys=[country_id])
-    region_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("str_values.id"))
-    region: orm.Mapped[StrValue] = orm.relationship(foreign_keys=[region_id])
+    # TODO switch to group??
+    # country_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("str_values.id"))
+    # country: orm.Mapped[StrValue] = orm.relationship(foreign_keys=[country_id])
+    # region_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("str_values.id"))
+    # sregion: orm.Mapped[StrValue] = orm.relationship(foreign_keys=[region_id])
 
     def __repr__(self):
         return f"<{self.id}: {self.name}>"
