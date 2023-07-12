@@ -30,13 +30,32 @@ def test_create_warehouse(client):
             city="Bagdad",
             zip="unzip",
             address="sserdda",
-            manager_id=1,
+            manager_id=2,
         ),
+        follow_redirects=True,
     )
-    assert response.status_code == 302
-    assert "warehouse" in response.text
+    assert response.status_code == 200
+    assert "Warehouse added!" in response.text
     warehouses_rows_objs = db.session.execute(m.Warehouse.select()).all()
     assert len(warehouses_rows_objs) > 0
+    logout(client)
+
+    register("samm", "samm@test.com", role="MANAGER")
+    login(client, "samm")
+
+    response = client.post(
+        "/warehouse/create",
+        data=dict(
+            name="Manager warehouse",
+            phone_number="380362470229",
+            city="Bagmam",
+            zip="unzip",
+            address="sserdda",
+            manager_id=3,
+        ),
+        follow_redirects=True,
+    )
+    assert "This user is not a warehouse manager" in response.text
 
 
 def test_delete_warehouse(mg_g_populate: FlaskClient):
@@ -51,6 +70,7 @@ def test_delete_warehouse(mg_g_populate: FlaskClient):
 
 def test_edit_warehouse(mg_g_populate: FlaskClient):
     login(mg_g_populate)
+    register("samm", "samm@test.com")
 
     response = mg_g_populate.post(
         "/warehouse/edit",
@@ -60,7 +80,7 @@ def test_edit_warehouse(mg_g_populate: FlaskClient):
             city="Baggranddad",
             zip="unzip",
             address="sserdda",
-            manager_id=1,
+            manager_id=3,
         ),
     )
     assert response.status_code == 302

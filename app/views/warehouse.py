@@ -12,6 +12,7 @@ from app.controllers import create_pagination
 
 from app import models as m, db
 from app import forms as f
+from app.schema import UserRole
 from app.logger import log
 
 
@@ -39,7 +40,12 @@ def get_all():
     pagination = create_pagination(total=db.session.scalar(count_query))
     master_groups_rows = db.session.execute(sa.select(m.MasterGroup)).all()
 
-    managers = [man[0] for man in db.session.execute(sa.select(m.User)).all()]
+    managers = [
+        man[0]
+        for man in db.session.execute(
+            sa.select(m.User).where(m.User.role.in_([UserRole.WAREHOUSE_MANAGER]))
+        ).all()
+    ]
     manager_id_manager_name = {man.id: man.username for man in managers}
 
     return render_template(
@@ -76,6 +82,10 @@ def create():
                 )
             )
         )
+
+        if manager.role != UserRole.WAREHOUSE_MANAGER:
+            flash("This user is not a warehouse manager.", "danger")
+            return redirect(url_for("warehouse.get_all"))
 
         warehouse = m.Warehouse(
             name=form.name.data,
@@ -121,6 +131,10 @@ def save():
                 )
             )
         )
+
+        if manager.role != UserRole.WAREHOUSE_MANAGER:
+            flash("This user is not a warehouse manager.", "danger")
+            return redirect(url_for("warehouse.get_all"))
 
         w.name = form.name.data
         w.phone_number = form.phone_number.data

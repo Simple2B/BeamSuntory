@@ -4,14 +4,14 @@ TEST_ADMIN_NAME = "bob"
 TEST_ADMIN_EMAIL = "bob@test.com"
 TEST_ADMIN_PASSWORD = "password"
 TEST_ADMIN_FULL_NAME = "bob suntory"
-TEST_ADMIN_NAME = "MANAGER"
+TEST_ADMIN_ROLE = "WAREHOUSE_MANAGER"
 
 
 def register(
     username=TEST_ADMIN_NAME,
     email=TEST_ADMIN_EMAIL,
     password=TEST_ADMIN_PASSWORD,
-    role=TEST_ADMIN_NAME,
+    role=TEST_ADMIN_ROLE,
 ):
     user = User(
         username=username,

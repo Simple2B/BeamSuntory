@@ -6,6 +6,7 @@ class UserRole(Enum):
     ADMIN = "admin"
     MANAGER = "manager"
     SALES_REP = "sales_rep"
+    WAREHOUSE_MANAGER = "warehouse_manager"
 
 
 class User(BaseModel):
