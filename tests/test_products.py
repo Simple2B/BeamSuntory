@@ -58,11 +58,13 @@ def test_create_product(client):
 def test_delete_product(mg_g_populate: FlaskClient):
     login(mg_g_populate)
 
+    before_delete_products_rows_objs = db.session.execute(m.Product.select()).all()
+
     response = mg_g_populate.delete("/product/delete/1")
     assert response.status_code == 200
     assert "ok" in response.text
     products_rows_objs = db.session.execute(m.Product.select()).all()
-    assert len(products_rows_objs) == 0
+    assert len(products_rows_objs) < len(before_delete_products_rows_objs)
 
 
 def test_edit_product(mg_g_populate: FlaskClient):
@@ -100,3 +102,33 @@ def test_edit_product(mg_g_populate: FlaskClient):
     assert "product" in response.text
     products_rows_objs = db.session.execute(m.Product.select()).all()
     assert len(products_rows_objs) > 0
+
+
+def test_sort_product(mg_g_populate: FlaskClient):
+    login(mg_g_populate)
+
+    response = mg_g_populate.post(
+        "/product/sort",
+        data=dict(sort_by='{"Country": "Canada", "Brand": "JB"}'),
+    )
+    assert ("populate_test_product" in response.text) is False
+    assert ("populate_test_prod2" in response.text) is False
+    assert response.status_code == 200
+
+    response = mg_g_populate.post(
+        "/product/sort",
+        data=dict(sort_by='{"Brand": "JB"}'),
+    )
+    assert ("populate_test_product" in response.text) is False
+    assert ("populate_test_prod2" in response.text) is True
+    assert response.status_code == 200
+
+    response = mg_g_populate.post(
+        "/product/sort",
+        data=dict(sort_by={"Brand": "JB"}),
+        follow_redirects=True,
+    )
+    assert ("populate_test_product" in response.text) is True
+    assert ("populate_test_prod2" in response.text) is True
+    assert ("Wrong sort" in response.text) is True
+    assert response.status_code == 200

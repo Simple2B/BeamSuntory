@@ -445,3 +445,108 @@ function addShipAssignShareButton(
     productViewTypeContainer.nextSibling,
   );
 }
+
+// function to filter products by group
+interface FilterJsonData {
+  [key: string]: string;
+}
+
+const productFilterInputs = document.querySelectorAll('.product-filter-input');
+const filterProductButton = document.querySelector('#product-filter-button');
+let filterJsonData: FilterJsonData = {};
+const filterRadioButtons = document.querySelectorAll(
+  '.product-filter-radio-button',
+);
+
+filterRadioButtons.forEach(btn => {
+  const filterButtonId = btn.getAttribute('id');
+  const filterJsonDataStorage = sessionStorage.getItem('filterJsonData');
+  const filterJsonDataObject = JSON.parse(filterJsonDataStorage);
+
+  for (const key in filterJsonDataObject) {
+    if (filterButtonId.includes(key)) {
+      btn.innerHTML = `
+        ${filterJsonDataObject[key]}
+        <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+          viewBox="0 0 10 6">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="m1 1 4 4 4-4" />
+        </svg>`;
+    }
+  }
+});
+
+productFilterInputs.forEach(input => {
+  input.addEventListener('change', () => {
+    const filterInputDataTarget = input.getAttribute('data-target');
+    const filterInputId = filterInputDataTarget
+      .split(',')[0]
+      .replace(/[^a-zA-Z0-9\s\_]/g, '');
+    const filterInputIdString = `#product-filter-input-${filterInputId}`;
+    const filterButtonId = filterInputDataTarget
+      .split(',')[1]
+      .trim()
+      .replace(/[^a-zA-Z0-9\s\_]/g, '');
+    const filterInput = document.querySelector(
+      filterInputIdString,
+    ) as HTMLInputElement;
+    const filterRadioBtn = document.querySelector(
+      `#dropdownRadioButton-${filterButtonId}`,
+    );
+    if (filterInputIdString.includes(filterButtonId)) {
+      filterRadioBtn.innerHTML = `
+        ${filterButtonId.split('_').join(' ')}
+        <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+          viewBox="0 0 10 6">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="m1 1 4 4 4-4" />
+        </svg>
+      `;
+      getSessionStorageObject(filterJsonData, 'filterJsonData', 'remove', filterButtonId);
+      return;
+    }
+    filterRadioBtn.innerHTML = `
+      ${filterInput.value.split('_').join(' ')}
+      <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+        viewBox="0 0 10 6">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="m1 1 4 4 4-4" />
+      </svg>
+      `;
+    filterJsonData[filterButtonId] = filterInput.value;
+    getSessionStorageObject(filterJsonData, 'filterJsonData', 'add');
+  });
+});
+
+filterProductButton.addEventListener('click', e => {
+  const hiddenInput = document.querySelector('#sort_by') as HTMLInputElement;
+  const filterJsonDataStorage = sessionStorage.getItem('filterJsonData');
+  const filterDataObject = JSON.parse(filterJsonDataStorage);
+  filterJsonData = filterDataObject;
+  hiddenInput.value = JSON.stringify(filterJsonData);
+  sessionStorage.setItem('filterJsonData', JSON.stringify(filterJsonData));
+});
+
+function getSessionStorageObject(
+  localObject: FilterJsonData,
+  sessionObject: string,
+  method = 'none',
+  objectKey = 'none',
+) {
+  const jsonDataObject = sessionStorage.getItem(sessionObject);
+  const dataObject = JSON.parse(jsonDataObject);
+  switch (method) {
+    case 'add':
+      const newDataObject = {...dataObject, ...localObject};
+      const newJsonData = JSON.stringify(newDataObject);
+      sessionStorage.setItem(sessionObject, newJsonData);
+      break;
+    case 'remove':
+      delete dataObject[objectKey];
+      const newJsonDataObject = JSON.stringify(dataObject);
+      sessionStorage.setItem(sessionObject, newJsonDataObject);
+      break;
+    default:
+      break;
+  }
+}

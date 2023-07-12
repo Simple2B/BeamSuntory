@@ -43,34 +43,49 @@ def test_create_group(client):
 
 def test_delete_group(mg_g_populate: FlaskClient):
     login(mg_g_populate)
+    before_delete_master_groups_rows_objs = db.session.execute(
+        m.MasterGroup.select()
+    ).all()
+
+    response = mg_g_populate.delete("/master_group/delete/1")
+    assert response.status_code == 202
+    assert "can not delete master group" in response.text
+    master_groups_rows_objs = db.session.execute(m.MasterGroup.select()).all()
+    assert len(master_groups_rows_objs) == len(before_delete_master_groups_rows_objs)
+
+    before_delete_groups_rows_objs = db.session.execute(m.Group.select()).all()
 
     response = mg_g_populate.delete("/group/delete/1")
     assert response.status_code == 200
     assert "ok" in response.text
     groups_rows_objs = db.session.execute(m.Group.select()).all()
-    assert len(groups_rows_objs) == 0
+    assert len(groups_rows_objs) < len(before_delete_groups_rows_objs)
+
+    before_delete_master_groups_rows_objs = db.session.execute(
+        m.MasterGroup.select()
+    ).all()
 
     response = mg_g_populate.delete("/master_group/delete/1")
     assert response.status_code == 200
     assert "ok" in response.text
     master_groups_rows_objs = db.session.execute(m.MasterGroup.select()).all()
-    assert len(master_groups_rows_objs) == 0
+    assert len(master_groups_rows_objs) < len(before_delete_master_groups_rows_objs)
 
 
 def test_edit_group(mg_g_populate: FlaskClient):
     login(mg_g_populate)
 
     response = mg_g_populate.post(
-        "/master_group/edit", data=dict(master_group_id=1, name="Brand")
+        "/master_group/edit", data=dict(master_group_id=1, name="Premise")
     )
     assert response.status_code == 302
     assert "master_group" in response.text
     master_groups_rows_objs = db.session.execute(m.MasterGroup.select()).all()
     assert len(master_groups_rows_objs) > 0
-    assert master_groups_rows_objs[0][0].name == "Brand"
+    assert master_groups_rows_objs[0][0].name == "Premise"
 
     response = mg_g_populate.post(
-        "/group/edit", data=dict(group_id=1, name="JB", master_group="1")
+        "/group/edit", data=dict(group_id=1, name="BJ", master_group="1")
     )
     assert response.status_code == 302
     assert "group" in response.text

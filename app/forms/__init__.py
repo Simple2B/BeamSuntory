@@ -2,7 +2,7 @@
 from .auth import LoginForm, RegistrationForm, ForgotForm, ChangePasswordForm
 from .user import UserForm, NewUserForm
 from .group import GroupForm, NewGroupForm, MasterGroupForm, NewMasterGroupForm
-from .product import ProductForm, NewProductForm
+from .product import ProductForm, NewProductForm, SortByGroupProductForm
 from .group_for_product import (
     GroupProductForm,
     NewGroupProductForm,
