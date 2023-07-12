@@ -43,6 +43,15 @@ def test_create_group(client):
 
 def test_delete_group(mg_g_populate: FlaskClient):
     login(mg_g_populate)
+    before_delete_master_groups_rows_objs = db.session.execute(
+        m.MasterGroup.select()
+    ).all()
+
+    response = mg_g_populate.delete("/master_group/delete/1")
+    assert response.status_code == 202
+    assert "can not delete master group" in response.text
+    master_groups_rows_objs = db.session.execute(m.MasterGroup.select()).all()
+    assert len(master_groups_rows_objs) == len(before_delete_master_groups_rows_objs)
 
     before_delete_groups_rows_objs = db.session.execute(m.Group.select()).all()
 

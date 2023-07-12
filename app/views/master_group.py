@@ -112,6 +112,14 @@ def delete(id: int):
         flash("There is no such master group", "danger")
         return "no master group", 404
 
+    query_group = db.session.scalar(
+        m.Group.select().where(m.Group.master_group_id == u.id)
+    )
+
+    if query_group:
+        flash("Can not delete master group, while groups are connected to it", "danger")
+        return "can not delete master group", 202
+
     db.session.delete(u)
     db.session.commit()
     log(log.INFO, "Master group deleted. Master group: [%s]", u)
