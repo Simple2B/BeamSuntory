@@ -1,6 +1,52 @@
 import {Modal} from 'flowbite';
 import type {ModalOptions, ModalInterface} from 'flowbite';
 
+// check if product has filter and display it
+const filterJsonObject = sessionStorage.getItem('filterJsonData');
+const filterData = JSON.parse(filterJsonObject);
+if (Object.keys(filterData).length !== 0) {
+  const referenceTh = document.querySelector('#product-table-th-product-type');
+  const productItemTrs = document.querySelectorAll('.table-product-item-tr');
+
+  for (const key in filterData) {
+    const productFilterTh = document.createElement('th');
+    productFilterTh.classList.add('px-6', 'py-3');
+    productFilterTh.setAttribute('scope', 'col');
+    productFilterTh.innerHTML = key;
+    referenceTh.parentNode.insertBefore(
+      productFilterTh,
+      referenceTh.nextSibling,
+    );
+  }
+
+  productItemTrs.forEach((product: HTMLTableRowElement) => {
+    console.log('product', product);
+    const referenceTd = product.cells[2];
+    console.log('referenceTd', referenceTd);
+    for (const key in filterData) {
+      const productFilterName = filterData[key];
+      const productFilterTd = document.createElement('td');
+      productFilterTd.classList.add(
+        'p-4',
+        'text-base',
+        'font-normal',
+        'text-gray-900',
+        'whitespace-nowrap',
+        'dark:text-white',
+      );
+      productFilterTd.innerHTML = `
+      <div class="pl-3">
+        <div class="text-base font-semibold">${productFilterName}</div>
+      </div>
+    `;
+      referenceTd.parentNode.insertBefore(
+        productFilterTd,
+        referenceTd.nextSibling,
+      );
+    }
+  });
+}
+
 // /*
 //  * $editProductModal: required
 //  * options: optional
@@ -502,7 +548,12 @@ productFilterInputs.forEach(input => {
             d="m1 1 4 4 4-4" />
         </svg>
       `;
-      getSessionStorageObject(filterJsonData, 'filterJsonData', 'remove', filterButtonId);
+      getSessionStorageObject(
+        filterJsonData,
+        'filterJsonData',
+        'remove',
+        filterButtonId,
+      );
       return;
     }
     filterRadioBtn.innerHTML = `
