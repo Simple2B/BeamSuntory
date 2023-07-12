@@ -21,7 +21,7 @@ product_blueprint = Blueprint("product", __name__, url_prefix="/product")
 
 def get_all_products(request, query=None, count_query=None):
     q = request.args.get("q", type=str, default=None)
-    if query == None or count_query == None:
+    if query is None or count_query is None:
         query = m.Product.select().order_by(m.Product.id)
         count_query = sa.select(sa.func.count()).select_from(m.Product)
         if q:
