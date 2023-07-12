@@ -26,6 +26,7 @@ def create_app(environment="development"):
         product_blueprint,
         group_for_product_blueprint,
         master_group_for_product_blueprint,
+        warehouse_blueprint,
     )
     from app import models as m
 
@@ -54,6 +55,7 @@ def create_app(environment="development"):
     app.register_blueprint(product_blueprint)
     app.register_blueprint(group_for_product_blueprint)
     app.register_blueprint(master_group_for_product_blueprint)
+    app.register_blueprint(warehouse_blueprint)
 
     # Set up flask login.
     @login_manager.user_loader

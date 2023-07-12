@@ -7,3 +7,4 @@ from .master_group import master_group_blueprint
 from .product import product_blueprint
 from .group_for_product import group_for_product_blueprint
 from .master_group_for_product import master_group_for_product_blueprint
+from .warehouse import warehouse_blueprint
