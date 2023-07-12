@@ -502,14 +502,9 @@ productFilterInputs.forEach(input => {
             d="m1 1 4 4 4-4" />
         </svg>
       `;
-      const filterJsonDataStorage = sessionStorage.getItem('filterJsonData');
-      const filterDataObject = JSON.parse(filterJsonDataStorage);
-      delete filterDataObject[filterButtonId];
-      const newFilterJsonData = JSON.stringify(filterDataObject);
-      sessionStorage.setItem('filterJsonData', newFilterJsonData);
-      // getSessionStorageObject(filterJsonData, 'filterJsonData', 'delete', filterButtonId);
+      getSessionStorageObject(filterJsonData, 'filterJsonData', 'remove', filterButtonId);
       return;
-     }
+    }
     filterRadioBtn.innerHTML = `
       ${filterInput.value.split('_').join(' ')}
       <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -519,38 +514,30 @@ productFilterInputs.forEach(input => {
       </svg>
       `;
     filterJsonData[filterButtonId] = filterInput.value;
-    const filterJsonDataStorage = sessionStorage.getItem('filterJsonData');
-    const filterJsonDataObject = JSON.parse(filterJsonDataStorage);
-    const newFilterData = { ...filterJsonDataObject, ...filterJsonData };
-    const newFilterJsonData = JSON.stringify(newFilterData);
-    sessionStorage.setItem('filterJsonData', newFilterJsonData);
-    // getSessionStorageObject(filterJsonData, 'filterJsonData', 'add');
-
+    getSessionStorageObject(filterJsonData, 'filterJsonData', 'add');
   });
 });
 
-filterProductButton.addEventListener('click', (e) => {
-  // e.preventDefault();
+filterProductButton.addEventListener('click', e => {
   const hiddenInput = document.querySelector('#sort_by') as HTMLInputElement;
   const filterJsonDataStorage = sessionStorage.getItem('filterJsonData');
-  const filterJsonDataObject = JSON.parse(filterJsonDataStorage);
-  filterJsonData = filterJsonDataObject;
-  console.log('filterJsonData before', filterJsonData);
-  // getSessionStorageObject(filterJsonData, 'filterJsonData');
-  console.log('filterJsonData after', filterJsonData);
+  const filterDataObject = JSON.parse(filterJsonDataStorage);
+  filterJsonData = filterDataObject;
   hiddenInput.value = JSON.stringify(filterJsonData);
-  const filterJsonDataSessionStorage = JSON.stringify(filterJsonData);
-  sessionStorage.setItem('filterJsonData', filterJsonDataSessionStorage);
+  sessionStorage.setItem('filterJsonData', JSON.stringify(filterJsonData));
 });
 
-function getSessionStorageObject(localObject: FilterJsonData, sessionObject: string, method = 'none', objectKey = 'none') {
+function getSessionStorageObject(
+  localObject: FilterJsonData,
+  sessionObject: string,
+  method = 'none',
+  objectKey = 'none',
+) {
   const jsonDataObject = sessionStorage.getItem(sessionObject);
-  console.log('jsonDataObject', jsonDataObject);
-  console.log('localObject', localObject);
   const dataObject = JSON.parse(jsonDataObject);
   switch (method) {
     case 'add':
-      const newDataObject = { ...dataObject, ...localObject };
+      const newDataObject = {...dataObject, ...localObject};
       const newJsonData = JSON.stringify(newDataObject);
       sessionStorage.setItem(sessionObject, newJsonData);
       break;
@@ -558,9 +545,6 @@ function getSessionStorageObject(localObject: FilterJsonData, sessionObject: str
       delete dataObject[objectKey];
       const newJsonDataObject = JSON.stringify(dataObject);
       sessionStorage.setItem(sessionObject, newJsonDataObject);
-      break;
-    case 'none':
-      localObject = dataObject;
       break;
     default:
       break;
