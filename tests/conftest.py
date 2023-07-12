@@ -111,5 +111,14 @@ def mg_g_populate(client: FlaskClient):
         name="Maywood",
         master_group_id="1",
     ).save(False)
+
+    m.Warehouse(
+        name="Junewood warehouse",
+        phone_number="380362470221",
+        city="Bagmom",
+        zip="unzip",
+        address="sserdda",
+        manager_id=1,
+    ).save(False)
     db.session.commit()
     yield client

@@ -7,7 +7,6 @@ from app.database import db
 from .utils import ModelMixin
 from app import schema as s
 from .user import User
-from .group import Group
 
 
 class Warehouse(db.Model, ModelMixin):
@@ -30,10 +29,12 @@ class Warehouse(db.Model, ModelMixin):
 
     manager_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("users.id"))
     manager: orm.Mapped[User] = orm.relationship()
+    # TODO decide where we select country and region. From some fixed list or from groups?
+    # from .group import Group
     # country_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("groups.id"))
     # country: orm.Mapped[Group | None] = orm.relationship(foreign_keys=[country_id])
     # region_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("groups.id"))
-    # region: orm.Mapped[Group | None] = orm.relationship(foreign_keys=[region_id])
+    # sregion: orm.Mapped[Group | None] = orm.relationship(foreign_keys=[region_id])
 
     def __repr__(self):
         return f"<{self.id}: {self.name}>"
