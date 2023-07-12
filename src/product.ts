@@ -447,40 +447,6 @@ function addShipAssignShareButton(
 }
 
 // function to filter products by group
-// const filterProductButton = document.querySelector('#filter-product-button');
-// const productFilterRadioButtons = document.querySelectorAll(
-//   '.product-filter-radio-button',
-// );
-// productFilterRadioButtons.forEach(e => {
-//   e.addEventListener('click', () => {
-//     console.log('click', e);
-//     const filterRadioBtnValue = e.getAttribute('data-target');
-//     console.log('filterRadioBtnValue', filterRadioBtnValue);
-//     const filterRadioBtn = document.querySelector(
-//       `#dropdownRadioButton-${filterRadioBtnValue}`,
-//     );
-//     console.log('filterRadioBtn', filterRadioBtn);
-//     const productFilterInputs = document.querySelectorAll(
-//       '.product-filter-input',
-//     );
-//     console.log('productFilterInputs', productFilterInputs);
-//     productFilterInputs.forEach(input => {
-//       input.addEventListener('change', () => {
-//         console.log('input', input);
-//         const filterInputId = input.getAttribute('data-target');
-//         console.log('filterInputId', filterInputId);
-//         const filterInput = document.querySelector(
-//           `#product-filter-input-${filterInputId}`,
-//         );
-//         console.log('filterInput', filterInput);
-//         console.log('filterRadioBtnTExt before', filterRadioBtn.textContent);
-//         filterRadioBtn.textContent = filterInput.value;
-//         console.log('filterRadioBtnTExt after', filterRadioBtn.textContent);
-//       });
-//     });
-//   });
-// });
-
 interface FilterJsonData {
   [key: string]: string;
 }
@@ -488,6 +454,29 @@ interface FilterJsonData {
 const productFilterInputs = document.querySelectorAll('.product-filter-input');
 const filterProductButton = document.querySelector('#product-filter-button');
 const filterJsonData: FilterJsonData = {};
+const filterRadioButtons = document.querySelectorAll(
+  '.product-filter-radio-button',
+);
+
+filterRadioButtons.forEach(btn => {
+  const filterButtonId = btn.getAttribute('id');
+  const filterJsonDataStorage = sessionStorage.getItem('filterJsonData');
+  const filterJsonDataObject = JSON.parse(filterJsonDataStorage);
+  // console.log('filterButtonId', filterButtonId);
+  // const filterButtonIdString = `#dropdownRadioButton-${filterButtonId}`;
+  console.log('filterJsonDataObject', filterJsonDataObject);
+  for (let key in filterJsonDataObject) {
+    if (filterButtonId.includes(key)) {
+      btn.innerHTML = `
+        ${filterJsonDataObject[key]}
+        <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+          viewBox="0 0 10 6">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="m1 1 4 4 4-4" />
+        </svg>`;
+    }
+  }
+});
 
 productFilterInputs.forEach(input => {
   input.addEventListener('change', () => {
@@ -510,11 +499,25 @@ productFilterInputs.forEach(input => {
     );
     if (filterInputIdString.includes(filterButtonId)) {
       console.log('filterInputIdString', filterInputIdString);
-      filterRadioBtn.textContent = filterButtonId.split('_').join(' ');
+      filterRadioBtn.innerHTML = `
+        ${filterButtonId.split('_').join(' ')}
+        <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+          viewBox="0 0 10 6">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="m1 1 4 4 4-4" />
+        </svg>
+      `;
       delete filterJsonData[filterButtonId];
       return;
      }
-    filterRadioBtn.textContent = filterInput.value.split('_').join(' ');
+    filterRadioBtn.innerHTML = `
+      ${filterInput.value.split('_').join(' ')}
+      <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+        viewBox="0 0 10 6">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="m1 1 4 4 4-4" />
+      </svg>
+      `;
     filterJsonData[filterButtonId] = filterInput.value;
 
     // console.log('filterRadioBtnTExt before', filterRadioBtn.textContent);
@@ -529,6 +532,8 @@ filterProductButton.addEventListener('click', (e) => {
   const hiddenInput = document.querySelector('#sort_by') as HTMLInputElement;
   console.log('hiddenInput', hiddenInput);
   hiddenInput.value = JSON.stringify(filterJsonData);
+  const filterJsonDataSessionStorage = JSON.stringify(filterJsonData);
+  sessionStorage.setItem('filterJsonData', filterJsonDataSessionStorage);
 });
 
 function filterOnSubmit() {
