@@ -462,10 +462,8 @@ filterRadioButtons.forEach(btn => {
   const filterButtonId = btn.getAttribute('id');
   const filterJsonDataStorage = sessionStorage.getItem('filterJsonData');
   const filterJsonDataObject = JSON.parse(filterJsonDataStorage);
-  // console.log('filterButtonId', filterButtonId);
-  // const filterButtonIdString = `#dropdownRadioButton-${filterButtonId}`;
-  console.log('filterJsonDataObject', filterJsonDataObject);
-  for (let key in filterJsonDataObject) {
+
+  for (const key in filterJsonDataObject) {
     if (filterButtonId.includes(key)) {
       btn.innerHTML = `
         ${filterJsonDataObject[key]}
@@ -480,9 +478,7 @@ filterRadioButtons.forEach(btn => {
 
 productFilterInputs.forEach(input => {
   input.addEventListener('change', () => {
-    console.log('input', input);
     const filterInputDataTarget = input.getAttribute('data-target');
-    console.log('filterInputId', filterInputDataTarget);
     const filterInputId = filterInputDataTarget
       .split(',')[0]
       .replace(/[^a-zA-Z0-9\s\_]/g, '');
@@ -498,7 +494,6 @@ productFilterInputs.forEach(input => {
       `#dropdownRadioButton-${filterButtonId}`,
     );
     if (filterInputIdString.includes(filterButtonId)) {
-      console.log('filterInputIdString', filterInputIdString);
       filterRadioBtn.innerHTML = `
         ${filterButtonId.split('_').join(' ')}
         <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -519,23 +514,12 @@ productFilterInputs.forEach(input => {
       </svg>
       `;
     filterJsonData[filterButtonId] = filterInput.value;
-
-    // console.log('filterRadioBtnTExt before', filterRadioBtn.textContent);
-    // filterRadioBtn.textContent = filterInput.value;
-    // console.log('filterRadioBtnTExt after', filterRadioBtn.textContent);
   });
 });
 
 filterProductButton.addEventListener('click', (e) => {
-  // e.preventDefault();
-  console.log('filterJsonData', filterJsonData);
   const hiddenInput = document.querySelector('#sort_by') as HTMLInputElement;
-  console.log('hiddenInput', hiddenInput);
   hiddenInput.value = JSON.stringify(filterJsonData);
   const filterJsonDataSessionStorage = JSON.stringify(filterJsonData);
   sessionStorage.setItem('filterJsonData', filterJsonDataSessionStorage);
 });
-
-function filterOnSubmit() {
-console.log('on submit');
-}
