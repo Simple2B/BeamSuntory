@@ -65,7 +65,7 @@ def create():
         query = m.Warehouse.select().where(m.Warehouse.name == form.name.data)
         mgr: m.Warehouse | None = db.session.scalar(query)
         if mgr:
-            flash("This master group name is already taken.", "danger")
+            flash("This master warehouse name is already taken.", "danger")
             return redirect(url_for("warehouse.get_all"))
 
         manager: m.User = db.session.scalar(
@@ -87,10 +87,10 @@ def create():
         )
         log(log.INFO, "Form submitted. warehouse: [%s]", warehouse)
         warehouse.save()
-        flash("Master group added!", "success")
+        flash("Warehouse added!", "success")
         return redirect(url_for("warehouse.get_all"))
     else:
-        log(log.ERROR, "Master group creation errors: [%s]", form.errors)
+        log(log.ERROR, "Warehouse creation errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("warehouse.get_all"))
 
@@ -107,10 +107,10 @@ def save():
         if not w:
             log(
                 log.ERROR,
-                "Not found master group by id : [%s]",
+                "Not found warehouse by id : [%s]",
                 form.warehouse_id.data,
             )
-            flash("Cannot save master group data", "danger")
+            flash("Cannot save warehouse data", "danger")
             return redirect(url_for("warehouse.get_all"))
 
         manager: m.User = db.session.scalar(
@@ -134,7 +134,7 @@ def save():
         return redirect(url_for("warehouse.get_all"))
 
     else:
-        log(log.ERROR, "Master group save errors: [%s]", form.errors)
+        log(log.ERROR, "Warehouse save errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("warehouse.get_all"))
 
@@ -144,14 +144,14 @@ def save():
 def delete(id: int):
     w = db.session.scalar(m.Warehouse.select().where(m.Warehouse.id == id))
     if not w:
-        log(log.INFO, "There is no master group with id: [%s]", id)
-        flash("There is no such master group", "danger")
-        return "no master group", 404
+        log(log.INFO, "There is no warehouse with id: [%s]", id)
+        flash("There is no such warehouse", "danger")
+        return "no warehouse", 404
 
     delete_w = sa.delete(m.Warehouse).where(m.Warehouse.id == id)
     db.session.execute(delete_w)
 
     db.session.commit()
-    log(log.INFO, "Master group deleted. Master group: [%s]", w)
-    flash("Master group deleted!", "success")
+    log(log.INFO, "Warehouse deleted: [%s]", w)
+    flash("Warehouse deleted!", "success")
     return "ok", 200
