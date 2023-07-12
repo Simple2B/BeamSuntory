@@ -8,7 +8,7 @@ from app import models as m
 
 faker = Faker()
 
-NUM_TEST_USERS = 100
+NUM_TEST_USERS = 40
 
 
 def gen_test_items(num_objects: int) -> Generator[str, None, None]:
@@ -54,5 +54,15 @@ def populate(count: int = NUM_TEST_USERS):
             zip_code="82100",
             sales_rep=False,
         ).save(False)
+
+    m.Supplier(
+        name="test_sup_1",
+        email="sup@email.com",
+        contact_numb="234234234",
+        city="test_city",
+        address="test_supplier_address",
+        zip="3243323",
+        active=True,
+    ).save()
 
     db.session.commit()
