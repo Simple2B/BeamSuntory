@@ -453,7 +453,7 @@ interface FilterJsonData {
 
 const productFilterInputs = document.querySelectorAll('.product-filter-input');
 const filterProductButton = document.querySelector('#product-filter-button');
-const filterJsonData: FilterJsonData = {};
+let filterJsonData: FilterJsonData = {};
 const filterRadioButtons = document.querySelectorAll(
   '.product-filter-radio-button',
 );
@@ -502,7 +502,12 @@ productFilterInputs.forEach(input => {
             d="m1 1 4 4 4-4" />
         </svg>
       `;
-      delete filterJsonData[filterButtonId];
+      const filterJsonDataStorage = sessionStorage.getItem('filterJsonData');
+      const filterDataObject = JSON.parse(filterJsonDataStorage);
+      delete filterDataObject[filterButtonId];
+      const newFilterJsonData = JSON.stringify(filterDataObject);
+      sessionStorage.setItem('filterJsonData', newFilterJsonData);
+      // getSessionStorageObject(filterJsonData, 'filterJsonData', 'delete', filterButtonId);
       return;
      }
     filterRadioBtn.innerHTML = `
@@ -514,12 +519,50 @@ productFilterInputs.forEach(input => {
       </svg>
       `;
     filterJsonData[filterButtonId] = filterInput.value;
+    const filterJsonDataStorage = sessionStorage.getItem('filterJsonData');
+    const filterJsonDataObject = JSON.parse(filterJsonDataStorage);
+    const newFilterData = { ...filterJsonDataObject, ...filterJsonData };
+    const newFilterJsonData = JSON.stringify(newFilterData);
+    sessionStorage.setItem('filterJsonData', newFilterJsonData);
+    // getSessionStorageObject(filterJsonData, 'filterJsonData', 'add');
+
   });
 });
 
 filterProductButton.addEventListener('click', (e) => {
+  // e.preventDefault();
   const hiddenInput = document.querySelector('#sort_by') as HTMLInputElement;
+  const filterJsonDataStorage = sessionStorage.getItem('filterJsonData');
+  const filterJsonDataObject = JSON.parse(filterJsonDataStorage);
+  filterJsonData = filterJsonDataObject;
+  console.log('filterJsonData before', filterJsonData);
+  // getSessionStorageObject(filterJsonData, 'filterJsonData');
+  console.log('filterJsonData after', filterJsonData);
   hiddenInput.value = JSON.stringify(filterJsonData);
   const filterJsonDataSessionStorage = JSON.stringify(filterJsonData);
   sessionStorage.setItem('filterJsonData', filterJsonDataSessionStorage);
 });
+
+function getSessionStorageObject(localObject: FilterJsonData, sessionObject: string, method = 'none', objectKey = 'none') {
+  const jsonDataObject = sessionStorage.getItem(sessionObject);
+  console.log('jsonDataObject', jsonDataObject);
+  console.log('localObject', localObject);
+  const dataObject = JSON.parse(jsonDataObject);
+  switch (method) {
+    case 'add':
+      const newDataObject = { ...dataObject, ...localObject };
+      const newJsonData = JSON.stringify(newDataObject);
+      sessionStorage.setItem(sessionObject, newJsonData);
+      break;
+    case 'remove':
+      delete dataObject[objectKey];
+      const newJsonDataObject = JSON.stringify(dataObject);
+      sessionStorage.setItem(sessionObject, newJsonDataObject);
+      break;
+    case 'none':
+      localObject = dataObject;
+      break;
+    default:
+      break;
+  }
+}
