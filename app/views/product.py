@@ -401,7 +401,7 @@ def sort():
             page=products_object["pagination"],
             search_query=products_object["q"],
             main_master_groups=products_object["master_groups"],
-            product_groups=[row[0] for row in products_object["product_groups_obj"]],
+            product_groups=products_object["product_groups"],
             current_user_groups_ids=[
                 row[0].right_id for row in products_object["current_user_groups_rows"]
             ],
