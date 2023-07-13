@@ -25,11 +25,6 @@ class Currency(Enum):
     CAD = "CAD"
 
 
-class Premises(Enum):
-    ON_PREMISE = "On Premise"
-    OFF_PREMISE = "Off Premise"
-
-
 class Product(CustomBase):
     id: int
     name: str
@@ -48,7 +43,6 @@ class Product(CustomBase):
     shelf_life_start: datetime
     shelf_life_end: datetime
     program_year: int
-    premises: Premises
     package_qty: int
     numb_of_items_per_case: int
     numb_of_cases_per_outer_case: int

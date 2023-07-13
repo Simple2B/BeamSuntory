@@ -157,7 +157,6 @@ def create():
             shelf_life_start=shelf_life_stamp_start,
             shelf_life_end=shelf_life_stamp_end,
             program_year=form.program_year.data,
-            premises=form.premises.data,
             package_qty=form.package_qty.data,
             numb_of_items_per_case=form.numb_of_items_per_case.data,
             numb_of_cases_per_outer_case=form.numb_of_cases_per_outer_case.data,
@@ -221,7 +220,6 @@ def save():
         u.shelf_life_start = shelf_life_stamp_start
         u.shelf_life_end = shelf_life_stamp_end
         u.program_year = form.program_year.data
-        u.premises = form.premises.data
         u.package_qty = form.package_qty.data
         u.numb_of_items_per_case = form.numb_of_items_per_case.data
         u.numb_of_cases_per_outer_case = form.numb_of_cases_per_outer_case.data

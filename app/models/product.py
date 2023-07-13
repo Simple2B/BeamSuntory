@@ -51,7 +51,6 @@ class Product(db.Model, ModelMixin):
     )  # calendar
     shelf_life_end: orm.Mapped[datetime] = orm.mapped_column(sa.DateTime())  # calendar
     program_year: orm.Mapped[int] = orm.mapped_column(sa.Integer())
-    premises: orm.Mapped[s.Premises]
     package_qty: orm.Mapped[int] = orm.mapped_column(sa.Integer())
     numb_of_items_per_case: orm.Mapped[int] = orm.mapped_column(sa.Integer())
     numb_of_cases_per_outer_case: orm.Mapped[int] = orm.mapped_column(sa.Integer())
