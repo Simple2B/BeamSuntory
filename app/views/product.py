@@ -1,4 +1,5 @@
 import datetime
+import json
 from flask import (
     Blueprint,
     render_template,
@@ -75,15 +76,46 @@ def get_all_products(request, query=None, count_query=None):
             master_groups_search[group[0].master_groups_for_product.name].append(
                 group[0].name
             )
+
+    # NOTE: Create json object for "show-all-groups" button in products.html
+    product_groups = [row[0] for row in product_groups_obj]
+    product_mg_g = {
+        p.child.name: {
+            mg.parent.master_groups_for_product.name: "".join(
+                [
+                    g.parent.name
+                    for g in product_groups
+                    if p.child.name == g.child.name
+                    and mg.parent.master_groups_for_product.name
+                    == g.parent.master_groups_for_product.name
+                ]
+            )
+            for mg in product_groups
+            if p.child.name == mg.child.name
+        }
+        for p in product_groups
+    }
+
+    for prod in product_mg_g:
+        for mg in mastr_for_prods_groups_for_prods:
+            if mg not in product_mg_g[prod]:
+                product_mg_g[prod][mg] = ""
+
+    master_group_product_name = [
+        mgp[0].name for mgp in db.session.execute(m.MasterGroupProduct.select()).all()
+    ]
+    product_mg_g["master_group_product_name"] = master_group_product_name
+
     return {
         "query": query,
         "pagination": pagination,
         "q": q,
         "master_groups": master_groups,
-        "product_groups_obj": product_groups_obj,
+        "product_groups": product_groups,
         "current_user_groups_rows": current_user_groups_rows,
         "mastr_for_prods_groups_for_prods": mastr_for_prods_groups_for_prods,
         "master_groups_search": master_groups_search,
+        "product_mg_g": json.dumps(product_mg_g),
     }
 
 
@@ -106,7 +138,7 @@ def get_all():
         page=products_object["pagination"],
         search_query=products_object["q"],
         main_master_groups=products_object["master_groups"],
-        product_groups=[row[0] for row in products_object["product_groups_obj"]],
+        product_groups=products_object["product_groups"],
         current_user_groups_ids=[
             row[0].right_id for row in products_object["current_user_groups_rows"]
         ],
@@ -115,6 +147,7 @@ def get_all():
         ],
         master_groups_search=products_object["master_groups_search"],
         form=form,
+        product_mg_g=products_object["product_mg_g"],
     )
 
 
@@ -299,8 +332,6 @@ def delete(id: int):
 def sort():
     form: f.SortByGroupProductForm = f.SortByGroupProductForm()
     if form.validate_on_submit():
-        # body = request.json
-        # group_names: list = body.values()
         group_names: list = form.sort_by.data.values()
         groups = [
             grp[0].id
@@ -324,11 +355,6 @@ def sort():
         product_ids_to_return = [
             pid for pid in product_to_group if len(product_to_group[pid]) == len(groups)
         ]
-        # products = [prg[0] for prg in db.session.execute(
-        #     m.Product.select().where(
-        #         m.Product.id.in_(product_groups)
-        #     ).order_by(m.Product.id)
-        # ).all()]
 
         q = request.args.get("q", type=str, default=None)
         query = (
@@ -373,7 +399,7 @@ def sort():
             page=products_object["pagination"],
             search_query=products_object["q"],
             main_master_groups=products_object["master_groups"],
-            product_groups=[row[0] for row in products_object["product_groups_obj"]],
+            product_groups=products_object["product_groups"],
             current_user_groups_ids=[
                 row[0].right_id for row in products_object["current_user_groups_rows"]
             ],
@@ -381,6 +407,8 @@ def sort():
                 "mastr_for_prods_groups_for_prods"
             ],
             master_groups_search=products_object["master_groups_search"],
+            product_mg_g=products_object["product_mg_g"],
+            form=form,
         )
 
     log(log.INFO, "Wrong sort")
