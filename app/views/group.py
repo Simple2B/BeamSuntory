@@ -120,7 +120,8 @@ def delete(id: int):
         flash("There is no such group", "danger")
         return "no group", 404
 
-    db.session.delete(u)
+    delete_u = sa.delete(m.Group).where(m.Group.id == id)
+    db.session.execute(delete_u)
     db.session.commit()
     log(log.INFO, "Group deleted. Group: [%s]", u)
     flash("Group deleted!", "success")
