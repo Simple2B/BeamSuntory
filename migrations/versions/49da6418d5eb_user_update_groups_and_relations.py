@@ -55,7 +55,9 @@ def upgrade():
         sa.PrimaryKeyConstraint("id", name=op.f("pk_user_group")),
     )
 
-    role = postgresql.ENUM("ADMIN", "MANAGER", "SALES_REP", name="userrole")
+    role = postgresql.ENUM(
+        "ADMIN", "MANAGER", "SALES_REP", "WAREHOUSE_MANAGER", name="userrole"
+    )
     role.create(op.get_bind())
 
     with op.batch_alter_table("users", schema=None) as batch_op:
@@ -66,7 +68,13 @@ def upgrade():
         batch_op.add_column(
             sa.Column(
                 "role",
-                sa.Enum("ADMIN", "MANAGER", "SALES_REP", name="userrole"),
+                sa.Enum(
+                    "ADMIN",
+                    "MANAGER",
+                    "SALES_REP",
+                    "WAREHOUSE_MANAGER",
+                    name="userrole",
+                ),
                 nullable=False,
             )
         )
