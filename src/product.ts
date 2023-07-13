@@ -2,48 +2,74 @@ import {Modal} from 'flowbite';
 import type {ModalOptions, ModalInterface} from 'flowbite';
 
 // check if product has filter and display it
+interface FilterJsonData {
+  [key: string]: string;
+}
+let filterJsonData: FilterJsonData = {};
 const filterJsonObject = sessionStorage.getItem('filterJsonData');
 const filterData = JSON.parse(filterJsonObject);
 if (filterData !== null || filterData !== undefined) {
-  console.log("filterData", filterData);
-  const referenceTh = document.querySelector('#product-table-th-product-type');
-  const productItemTrs = document.querySelectorAll('.table-product-item-tr');
+  const isVisibleFilterJson = sessionStorage.getItem('isVisibleFilter');
+  let isVisibleFilter = JSON.parse(isVisibleFilterJson);
+  if (isVisibleFilter) {
+    console.log('filterData', filterData);
 
-  for (const key in filterData) {
-    const productFilterTh = document.createElement('th');
-    productFilterTh.classList.add('px-6', 'py-3');
-    productFilterTh.setAttribute('scope', 'col');
-    productFilterTh.innerHTML = key;
-    referenceTh.parentNode.insertBefore(
-      productFilterTh,
-      referenceTh.nextSibling,
+    const referenceTh = document.querySelector(
+      '#product-table-th-product-type',
     );
-  }
+    const productItemTrs = document.querySelectorAll('.table-product-item-tr');
 
-  productItemTrs.forEach((product: HTMLTableRowElement) => {
-    const referenceTd = product.cells[2];
     for (const key in filterData) {
-      const productFilterName = filterData[key];
-      const productFilterTd = document.createElement('td');
-      productFilterTd.classList.add(
-        'p-4',
-        'text-base',
-        'font-normal',
-        'text-gray-900',
-        'whitespace-nowrap',
-        'dark:text-white',
+      const productFilterTh = document.createElement('th');
+      productFilterTh.setAttribute(
+        'id',
+        `product-table-filter-master-group-${key.replace(/ /g, '_')}`,
       );
-      productFilterTd.innerHTML = `
-      <div class="pl-3">
-        <div class="text-base font-semibold">${productFilterName}</div>
-      </div>
-    `;
-      referenceTd.parentNode.insertBefore(
-        productFilterTd,
-        referenceTd.nextSibling,
+      productFilterTh.classList.add('px-6', 'py-3');
+      productFilterTh.setAttribute('scope', 'col');
+      productFilterTh.innerHTML = key;
+      referenceTh.parentNode.insertBefore(
+        productFilterTh,
+        referenceTh.nextSibling,
       );
     }
-  });
+
+    productItemTrs.forEach((product: HTMLTableRowElement) => {
+      const referenceTd = product.cells[2];
+      const productName = product.cells[1].innerText;
+
+      for (const key in filterData) {
+        const productFilterName = filterData[key];
+        const productFilterTd = document.createElement('td');
+        productFilterTd.setAttribute(
+          'id',
+          `product-table-filter-${key}-${productFilterName.replace(
+            / /g,
+            '_',
+          )}-${productName.replace(/ /g, '_')}`,
+        );
+        productFilterTd.classList.add(
+          'p-4',
+          'text-base',
+          'font-normal',
+          'text-gray-900',
+          'whitespace-nowrap',
+          'dark:text-white',
+        );
+        productFilterTd.innerHTML = `
+        <div class="pl-3">
+          <div class="text-base font-semibold">${productFilterName}</div>
+        </div>
+      `;
+        referenceTd.parentNode.insertBefore(
+          productFilterTd,
+          referenceTd.nextSibling,
+        );
+      }
+    });
+    isVisibleFilter = false;
+    sessionStorage.setItem('isVisibleFilter', JSON.stringify(isVisibleFilter));
+  }
 }
 
 // function to show all groups in product
@@ -54,26 +80,38 @@ showAllGroupsProductBtn.addEventListener('click', () => {
   const products = JSON.parse(
     showAllGroupsProductBtn.getAttribute('data-target'),
   );
-  console.log("products", products);
+  console.log('products', products);
   const referenceTh = document.querySelector('#product-table-th-product-type');
   const productItemTrs = document.querySelectorAll('.table-product-item-tr');
 
   if (
     showAllGroupsProductBtn.classList.contains('show-all-groups-in-product')
   ) {
-    showAllGroupsProductBtn.innerHTML = 'Hide all groups in products';
-    for (const product in products) {
-      for (const key in products[product]) {
-        const productFilterTh = document.querySelector(
-          `#product-table-filter-master-group-${key.replace(/ /g, '_')}`,
-        );
-        if (productFilterTh) {
-          productFilterTh.remove();
-        }
+    for (const group of products.master_group_product_name) {
+      const isGroupExist = document.querySelector(
+        `#product-table-filter-master-group-${group.replace(/ /g, '_')}`,
+      );
+      if (isGroupExist) {
+        isGroupExist.remove();
       }
-      break;
     }
 
+    productItemTrs.forEach((product: HTMLTableRowElement) => {
+      const productName = product.cells[1].innerText;
+      for (const group of products.master_group_product_name) {
+        const groupName = products[productName][group] || '-';
+        const isGroupExist = document.querySelector(
+          `#product-table-filter-${group.replace(
+            / /g,
+            '_',
+          )}-${groupName.replace(/ /g, '_')}-${productName.replace(/ /g, '_')}`,
+        );
+
+        if (isGroupExist) {
+          isGroupExist.remove();
+        }
+      }
+    });
     productItemTrs.forEach((product: HTMLTableRowElement) => {
       const productName = product.cells[1].innerText;
       for (const key in products[productName]) {
@@ -100,56 +138,69 @@ showAllGroupsProductBtn.addEventListener('click', () => {
       Show all groups in products
     `;
   } else {
-    for (const product in products) {
-      for (const key in products[product]) {
+    for (const group of products.master_group_product_name) {
+      const isGroupExist = document.querySelector(
+        `#product-table-filter-master-group-${group.replace(/ /g, '_')}`,
+      );
+      if (!isGroupExist) {
         const productFilterTh = document.createElement('th');
         productFilterTh.setAttribute(
           'id',
-          `product-table-filter-master-group-${key.replace(/ /g, '_')}`,
+          `product-table-filter-master-group-${group.replace(/ /g, '_')}`,
         );
         productFilterTh.classList.add('px-6', 'py-3');
         productFilterTh.setAttribute('scope', 'col');
-        productFilterTh.innerHTML = key;
+        productFilterTh.innerHTML = group;
         referenceTh.parentNode.insertBefore(
           productFilterTh,
           referenceTh.nextSibling,
         );
       }
-      break;
     }
 
     productItemTrs.forEach((product: HTMLTableRowElement) => {
       const referenceTd = product.cells[2];
       const productName = product.cells[1].innerText;
-      for (const key in products[productName]) {
-        const productFilterName = products[productName][key];
-        const productFilterTd = document.createElement('td');
-        productFilterTd.setAttribute(
-          'id',
-          `product-table-filter-${productFilterName.replace(
+      for (const group of products.master_group_product_name) {
+        const groupName = products[productName][group] || '-';
+        const isGroupExist = document.querySelector(
+          `#product-table-filter-${group.replace(
             / /g,
             '_',
-          )}-${productName.replace(/ /g, '_')}`,
+          )}-${groupName.replace(/ /g, '_')}-${productName.replace(/ /g, '_')}`,
         );
-        productFilterTd.classList.add(
-          'p-4',
-          'text-base',
-          'font-normal',
-          'text-gray-900',
-          'whitespace-nowrap',
-          'dark:text-white',
-        );
-        productFilterTd.innerHTML = `
-          <div class="pl-3">
-            <div class="text-base font-semibold">${
-              productFilterName || '-'
-            }</div>
-          </div>
-        `;
-        referenceTd.parentNode.insertBefore(
-          productFilterTd,
-          referenceTd.nextSibling,
-        );
+
+        if (!isGroupExist) {
+          const productFilterName = products[productName][group] || '-';
+          const productFilterTd = document.createElement('td');
+          productFilterTd.setAttribute(
+            'id',
+            `product-table-filter-${group.replace(
+              / /g,
+              '_',
+            )}-${groupName.replace(/ /g, '_')}-${productName.replace(
+              / /g,
+              '_',
+            )}`,
+          );
+          productFilterTd.classList.add(
+            'p-4',
+            'text-base',
+            'font-normal',
+            'text-gray-900',
+            'whitespace-nowrap',
+            'dark:text-white',
+          );
+          productFilterTd.innerHTML = `
+            <div class="pl-3">
+              <div class="text-base font-semibold">${productFilterName}</div>
+            </div>
+          `;
+          referenceTd.parentNode.insertBefore(
+            productFilterTd,
+            referenceTd.nextSibling,
+          );
+        }
       }
     });
     showAllGroupsProductBtn.innerHTML = `
@@ -612,13 +663,9 @@ function addShipAssignShareButton(
 }
 
 // function to filter products by group
-interface FilterJsonData {
-  [key: string]: string;
-}
 
 const productFilterInputs = document.querySelectorAll('.product-filter-input');
 const filterProductButton = document.querySelector('#product-filter-button');
-let filterJsonData: FilterJsonData = {};
 const filterRadioButtons = document.querySelectorAll(
   '.product-filter-radio-button',
 );
@@ -695,6 +742,8 @@ filterProductButton.addEventListener('click', e => {
   filterJsonData = filterDataObject;
   hiddenInput.value = JSON.stringify(filterJsonData);
   sessionStorage.setItem('filterJsonData', JSON.stringify(filterJsonData));
+  const isVisibleFilter = true;
+  sessionStorage.setItem('isVisibleFilter', JSON.stringify(isVisibleFilter));
 });
 
 function getSessionStorageObject(
