@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 from sqlalchemy import ForeignKey, orm
 
-from app import db
+from app import db, schema as s
 from .utils import ModelMixin
 
 
@@ -22,3 +22,8 @@ class ProductGroup(db.Model, ModelMixin):
     group_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("groups_for_product.id"))
     child: orm.Mapped[Product] = orm.relationship()
     parent: orm.Mapped[GroupProduct] = orm.relationship()
+
+    @property
+    def json(self):
+        mg = s.ProductGroup.from_orm(self)
+        return mg.json()
