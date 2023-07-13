@@ -1,4 +1,5 @@
 import datetime
+import json
 from flask import (
     Blueprint,
     render_template,
@@ -93,6 +94,31 @@ def get_all():
     products_object = get_all_products(request)
     form: f.SortByGroupProductForm = f.SortByGroupProductForm()
 
+    product_groups = [row[0] for row in products_object["product_groups_obj"]]
+
+    # NOTE: Create json object for "show-all-groups" button in products.html
+    product_mg_g = {
+        p.child.name: {
+            mg.parent.master_groups_for_product.name: "".join(
+                [
+                    g.parent.name
+                    for g in product_groups
+                    if p.child.name == g.child.name
+                    and mg.parent.master_groups_for_product.name
+                    == g.parent.master_groups_for_product.name
+                ]
+            )
+            for mg in product_groups
+            if p.child.name == mg.child.name
+        }
+        for p in product_groups
+    }
+
+    for prod in product_mg_g:
+        for mg in products_object["mastr_for_prods_groups_for_prods"]:
+            if mg not in product_mg_g[prod]:
+                product_mg_g[prod][mg] = ""
+
     return render_template(
         "product/products.html",
         products=db.session.execute(
@@ -106,7 +132,7 @@ def get_all():
         page=products_object["pagination"],
         search_query=products_object["q"],
         main_master_groups=products_object["master_groups"],
-        product_groups=[row[0] for row in products_object["product_groups_obj"]],
+        product_groups=product_groups,
         current_user_groups_ids=[
             row[0].right_id for row in products_object["current_user_groups_rows"]
         ],
@@ -115,6 +141,7 @@ def get_all():
         ],
         master_groups_search=products_object["master_groups_search"],
         form=form,
+        product_mg_g=json.dumps(product_mg_g),
     )
 
 
