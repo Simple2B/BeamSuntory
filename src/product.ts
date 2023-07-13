@@ -4,7 +4,8 @@ import type {ModalOptions, ModalInterface} from 'flowbite';
 // check if product has filter and display it
 const filterJsonObject = sessionStorage.getItem('filterJsonData');
 const filterData = JSON.parse(filterJsonObject);
-if (Object.keys(filterData).length !== 0) {
+if (filterData !== null || filterData !== undefined) {
+  console.log("filterData", filterData);
   const referenceTh = document.querySelector('#product-table-th-product-type');
   const productItemTrs = document.querySelectorAll('.table-product-item-tr');
 
@@ -53,6 +54,7 @@ showAllGroupsProductBtn.addEventListener('click', () => {
   const products = JSON.parse(
     showAllGroupsProductBtn.getAttribute('data-target'),
   );
+  console.log("products", products);
   const referenceTh = document.querySelector('#product-table-th-product-type');
   const productItemTrs = document.querySelectorAll('.table-product-item-tr');
 
@@ -325,6 +327,7 @@ function convertDate(date: string) {
 }
 
 function editProduct(product: IProduct) {
+  console.log('product in edit modal', product);
   let input: HTMLInputElement = document.querySelector('#product-edit-name');
   input.value = product.name;
   input = document.querySelector('#product-edit-id');
