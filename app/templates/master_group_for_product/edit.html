@@ -4,6 +4,7 @@
   <div class="relative w-full max-w-2xl max-h-full">
     <!-- Modal content -->
     <form action="{{url_for('master_group_product.save')}}" method="post" class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+      {{ form_edit.hidden_tag() }}
       <input type="hidden" name="master_group_product_id" id="master-group-product-edit-id" value="0" />
       <input type="hidden" name="next_url" id="master-group-product-edit-next_url" value="" />
       <!-- Modal header -->

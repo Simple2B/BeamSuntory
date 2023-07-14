@@ -4,6 +4,7 @@
   <div class="relative w-full max-w-2xl max-h-full">
     <!-- Modal content -->
     <form action="{{url_for('warehouse.save')}}" method="post" class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+      {{ form_edit.hidden_tag() }}
       <input type="hidden" name="warehouse_id" id="warehouse-edit-id" value="0" />
       <input type="hidden" name="next_url" id="warehouse-edit-next_url" value="" />
       <!-- Modal header -->

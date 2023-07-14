@@ -23,6 +23,9 @@ master_group_for_product_blueprint = Blueprint(
 @master_group_for_product_blueprint.route("/", methods=["GET"])
 @login_required
 def get_all():
+    form_create: f.NewMasterGroupProductForm = f.NewMasterGroupProductForm()
+    form_edit: f.MasterGroupProductForm = f.MasterGroupProductForm()
+
     q = request.args.get("q", type=str, default=None)
     query = m.MasterGroupProduct.select().order_by(m.MasterGroupProduct.id)
     count_query = sa.select(sa.func.count()).select_from(m.MasterGroupProduct)
@@ -51,6 +54,8 @@ def get_all():
         page=pagination,
         search_query=q,
         main_master_groups=[i[0] for i in master_groups_rows],
+        form_create=form_create,
+        form_edit=form_edit,
     )
 
 

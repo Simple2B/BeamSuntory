@@ -21,6 +21,9 @@ master_group_blueprint = Blueprint("master_group", __name__, url_prefix="/master
 @master_group_blueprint.route("/", methods=["GET"])
 @login_required
 def get_all():
+    form_create = f.NewMasterGroupForm()
+    form_edit = f.MasterGroupForm()
+
     q = request.args.get("q", type=str, default=None)
     query = m.MasterGroup.select().order_by(m.MasterGroup.id)
     count_query = sa.select(sa.func.count()).select_from(m.MasterGroup)
@@ -49,6 +52,8 @@ def get_all():
         page=pagination,
         search_query=q,
         main_master_groups=[i[0] for i in master_groups_rows],
+        form_create=form_create,
+        form_edit=form_edit,
     )
 
 

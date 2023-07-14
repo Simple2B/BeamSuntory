@@ -24,6 +24,9 @@ bp = Blueprint("user", __name__, url_prefix="/user")
 @bp.route("/", methods=["GET"])
 @login_required
 def get_all():
+    form_create: f.NewUserForm = f.NewUserForm()
+    form_edit: f.UserForm = f.UserForm()
+
     q = request.args.get("q", type=str, default=None)
     query = m.User.select().order_by(m.User.id)
     count_query = sa.select(sa.func.count()).select_from(m.User)
@@ -64,6 +67,8 @@ def get_all():
         search_query=q,
         groups=[i[0] for i in groups_rows],
         main_master_groups=[i[0] for i in master_groups_rows],
+        form_create=form_create,
+        form_edit=form_edit,
     )
 
 
