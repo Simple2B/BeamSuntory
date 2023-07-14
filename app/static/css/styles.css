@@ -1831,6 +1831,11 @@ input:checked + .toggle-bg {
      object-fit: cover;
 }
 
+.object-fill {
+  -o-object-fit: fill;
+     object-fit: fill;
+}
+
 .p-1 {
   padding: 0.25rem;
 }
@@ -2160,6 +2165,10 @@ input:checked + .toggle-bg {
 
 .close {
   display: none;
+}
+
+.max-height-image-container {
+  max-height: 164px;
 }
 
 .hover\:border-gray-300:hover {
