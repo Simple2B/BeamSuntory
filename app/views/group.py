@@ -21,6 +21,9 @@ group_blueprint = Blueprint("group", __name__, url_prefix="/group")
 @group_blueprint.route("/", methods=["GET"])
 @login_required
 def get_all():
+    form_create = f.NewGroupForm()
+    form_edit = f.GroupForm()
+
     q = request.args.get("q", type=str, default=None)
     query = m.Group.select().order_by(m.Group.id)
     count_query = sa.select(sa.func.count()).select_from(m.Group)
@@ -61,6 +64,8 @@ def get_all():
         search_query=q,
         master_groups=master_groups,
         main_master_groups=master_groups,
+        form_create=form_create,
+        form_edit=form_edit,
     )
 
 

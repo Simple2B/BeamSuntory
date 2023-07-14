@@ -124,7 +124,9 @@ def get_all_products(request, query=None, count_query=None):
 @login_required
 def get_all():
     products_object = get_all_products(request)
-    form: f.SortByGroupProductForm = f.SortByGroupProductForm()
+    form_sort: f.SortByGroupProductForm = f.SortByGroupProductForm()
+    form_create: f.NewProductForm = f.NewProductForm()
+    form_edit: f.ProductForm = f.ProductForm()
 
     return render_template(
         "product/products.html",
@@ -147,8 +149,10 @@ def get_all():
             "mastr_for_prods_groups_for_prods"
         ],
         master_groups_search=products_object["master_groups_search"],
-        form=form,
         product_mg_g=products_object["product_mg_g"],
+        form_sort=form_sort,
+        form_create=form_create,
+        form_edit=form_edit,
     )
 
 
@@ -178,14 +182,13 @@ def create():
         image = request.files['image']
         image_string = base64.b64encode(image.read()).decode()
         product: m.Product = m.Product(
-            name=form.name.data,
+            name=str(form.name.data).strip(" "),
             product_type=form.product_type.data,
-            # supplier=form.category.data,  # orm.relationship(),
             supplier_id=form.supplier.data,
             currency=form.currency.data,
             regular_price=form.regular_price.data,
             retail_price=form.retail_price.data,
-            image=image_string,  # sa.String(64) # link or png base64 str??
+            image=image_string,
             description=form.description.data,
             # General Info ->
             SKU=form.SKU.data,
@@ -193,7 +196,6 @@ def create():
             shelf_life_start=shelf_life_stamp_start,
             shelf_life_end=shelf_life_stamp_end,
             program_year=form.program_year.data,
-            premises=form.premises.data,
             package_qty=form.package_qty.data,
             numb_of_items_per_case=form.numb_of_items_per_case.data,
             numb_of_cases_per_outer_case=form.numb_of_cases_per_outer_case.data,
@@ -243,9 +245,8 @@ def save():
         )
         image = request.files['image']
         image_string = base64.b64encode(image.read()).decode()
-        u.name = form.name.data
+        u.name = str(form.name.data).strip(" ")
         u.product_type = form.product_type.data
-        # u.supplier=form.category.data  # orm.relationship()
         u.supplier_id = form.supplier.data
         u.currency = form.currency.data
         u.regular_price = form.regular_price.data
@@ -259,7 +260,6 @@ def save():
         u.shelf_life_start = shelf_life_stamp_start
         u.shelf_life_end = shelf_life_stamp_end
         u.program_year = form.program_year.data
-        u.premises = form.premises.data
         u.package_qty = form.package_qty.data
         u.numb_of_items_per_case = form.numb_of_items_per_case.data
         u.numb_of_cases_per_outer_case = form.numb_of_cases_per_outer_case.data
@@ -271,9 +271,6 @@ def save():
         u.height = form.height.data
         u.save()
 
-        # product_master_groups = {
-        #     i: request.form[i] for i in request.form if "group" in i
-        # }
         product_master_groups_ids = [
             int(request.form[i]) for i in request.form if "group" in i
         ]
@@ -288,16 +285,12 @@ def save():
         for group_row in product_groups_obj:
             if group_row[0].group_id in product_master_groups_ids:
                 continue
-                # group.value = product_master_groups[group.group_id]
-                # group.save()
             else:
                 delete_gp = sa.delete(m.ProductGroup).where(
                     m.ProductGroup.product_id == int(form.product_id.data),
                     m.ProductGroup.group_id == group_row[0].group_id,
                 )
                 db.session.execute(delete_gp)
-                # db.session.delete(group_row)
-                # db.session.commit()
 
         for group_id in product_master_groups_ids:
             if group_id in product_groups_ids:
@@ -334,10 +327,14 @@ def delete(id: int):
     return "ok", 200
 
 
-@product_blueprint.route("/sort", methods=["POST"])
+@product_blueprint.route("/sort", methods=["GET", "POST"])
 @login_required
 def sort():
+    if request.method == "GET":
+        return redirect(url_for("product.get_all"))
     form: f.SortByGroupProductForm = f.SortByGroupProductForm()
+    form_create: f.NewProductForm = f.NewProductForm()
+    form_edit: f.ProductForm = f.ProductForm()
     if form.validate_on_submit():
         group_names: list = form.sort_by.data.values()
         groups = [
@@ -415,7 +412,9 @@ def sort():
             ],
             master_groups_search=products_object["master_groups_search"],
             product_mg_g=products_object["product_mg_g"],
-            form=form,
+            form_sort=form,
+            form_create=form_create,
+            form_edit=form_edit,
         )
 
     log(log.INFO, "Wrong sort")

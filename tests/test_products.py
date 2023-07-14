@@ -85,7 +85,6 @@ def test_edit_product(mg_g_populate: FlaskClient):
             shelf_life_start="10/14/2023",
             shelf_life_end="10/15/2023",
             program_year=2023,
-            premises="ON_PREMISE",
             package_qty=12,
             numb_of_items_per_case=22,
             numb_of_cases_per_outer_case=22,

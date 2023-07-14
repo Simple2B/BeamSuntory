@@ -31,7 +31,6 @@ class ProductForm(FlaskForm):
     shelf_life_start = StringField("Shelf life start", [DataRequired()])
     shelf_life_end = StringField("Shelf life end", [DataRequired()])
     program_year = IntegerField("Program year", [DataRequired()])
-    premises = StringField("Premises", [DataRequired()])
     package_qty = IntegerField("Package qty", [DataRequired()])
     numb_of_items_per_case = IntegerField("Number of items per case", [DataRequired()])
     numb_of_cases_per_outer_case = IntegerField(
@@ -67,7 +66,6 @@ class NewProductForm(FlaskForm):
     shelf_life_start = StringField("Shelf life start", [DataRequired()])
     shelf_life_end = StringField("Shelf life end", [DataRequired()])
     program_year = IntegerField("Program year", [DataRequired()])
-    premises = StringField("Premises", [DataRequired()])
     package_qty = IntegerField("Package qty", [DataRequired()])
     numb_of_items_per_case = IntegerField("Number of items per case", [DataRequired()])
     numb_of_cases_per_outer_case = IntegerField(

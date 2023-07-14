@@ -86,7 +86,7 @@ class ProductionConfig(BaseConfig):
     ALCHEMICAL_DATABASE_URL: str = os.environ.get(
         "DATABASE_URL", "sqlite:///" + os.path.join(BASE_DIR, "database.sqlite3")
     )
-    WTF_CSRF_ENABLED = False
+    WTF_CSRF_ENABLED = True
 
     class Config:
         fields = {

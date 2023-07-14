@@ -23,6 +23,9 @@ group_for_product_blueprint = Blueprint(
 @group_for_product_blueprint.route("/", methods=["GET"])
 @login_required
 def get_all():
+    form_create: f.NewGroupProductForm = f.NewGroupProductForm()
+    form_edit: f.GroupProductForm = f.GroupProductForm()
+
     q = request.args.get("q", type=str, default=None)
     query = m.GroupProduct.select().order_by(m.GroupProduct.id)
     count_query = sa.select(sa.func.count()).select_from(m.GroupProduct)
@@ -63,6 +66,8 @@ def get_all():
         search_query=q,
         master_groups=master_groups,
         main_master_groups=master_groups,
+        form_create=form_create,
+        form_edit=form_edit,
     )
 
 
@@ -128,7 +133,8 @@ def delete(id: int):
         flash("There is no such group_for_product", "danger")
         return "no group_for_product", 404
 
-    db.session.delete(u)
+    delete_u = sa.delete(m.GroupProduct).where(m.GroupProduct.id == id)
+    db.session.execute(delete_u)
     db.session.commit()
     log(log.INFO, "Group deleted. Group for product: [%s]", u)
     flash("Group_for_product deleted!", "success")

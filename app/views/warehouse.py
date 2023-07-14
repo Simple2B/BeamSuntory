@@ -22,6 +22,9 @@ warehouse_blueprint = Blueprint("warehouse", __name__, url_prefix="/warehouse")
 @warehouse_blueprint.route("/", methods=["GET"])
 @login_required
 def get_all():
+    form_create: f.NewWarehouseForm = f.NewWarehouseForm()
+    form_edit: f.WarehouseForm = f.WarehouseForm()
+
     q = request.args.get("q", type=str, default=None)
     query = m.Warehouse.select().order_by(m.Warehouse.id)
     count_query = sa.select(sa.func.count()).select_from(m.Warehouse)
@@ -60,6 +63,8 @@ def get_all():
         main_master_groups=[i[0] for i in master_groups_rows],
         managers=managers,
         manager_id_manager_name=manager_id_manager_name,
+        form_create=form_create,
+        form_edit=form_edit,
     )
 
 

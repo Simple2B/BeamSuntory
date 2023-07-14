@@ -245,7 +245,6 @@ interface IProduct {
   shelf_life_start: number;
   shelf_life_end: number;
   program_year: number;
-  premises: string;
   package_qty: number;
   numb_of_items_per_case: number;
   numb_of_cases_per_outer_case: number;
@@ -419,8 +418,6 @@ function editProduct(product: IProduct) {
   input.value = convertDate(product.shelf_life_end.toString());
   input = document.querySelector('#product-edit-program_year');
   input.value = product.program_year.toString();
-  input = document.querySelector('#product-edit-premises');
-  input.value = product.premises.toUpperCase().split(' ').join('_');
   input = document.querySelector('#product-edit-package_qty');
   input.value = product.package_qty.toString();
   input = document.querySelector('#product-edit-numb_of_items_per_case');
@@ -491,8 +488,6 @@ viewProductButtonElements.forEach(e =>
     div.innerHTML = convertDate(product.shelf_life_start.toString());
     div = document.querySelector('#product-view-shelf_life_end');
     div.innerHTML = convertDate(product.shelf_life_end.toString());
-    div = document.querySelector('#product-view-premises');
-    div.innerHTML = product.premises;
     div = document.querySelector('#product-view-package_qty');
     div.innerHTML = product.package_qty.toString();
     div = document.querySelector('#product-view-numb_of_items_per_case');
