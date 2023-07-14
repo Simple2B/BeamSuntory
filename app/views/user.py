@@ -31,7 +31,6 @@ def get_all():
     query = m.User.select().order_by(m.User.id)
     count_query = sa.select(sa.func.count()).select_from(m.User)
     if q:
-        {role.name: role for role in s.UserRole}
         query = (
             m.User.select()
             .where(

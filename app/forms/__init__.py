@@ -10,3 +10,4 @@ from .group_for_product import (
     NewMasterGroupProductForm,
 )
 from .warehouse import WarehouseForm, NewWarehouseForm
+from .delivery_agent import DeliveryAgentForm, NewDeliveryAgentForm
