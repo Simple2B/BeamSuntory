@@ -128,7 +128,8 @@ def delete(id: int):
         flash("There is no such group_for_product", "danger")
         return "no group_for_product", 404
 
-    db.session.delete(u)
+    delete_u = sa.delete(m.GroupProduct).where(m.GroupProduct.id == id)
+    db.session.execute(delete_u)
     db.session.commit()
     log(log.INFO, "Group deleted. Group for product: [%s]", u)
     flash("Group_for_product deleted!", "success")
