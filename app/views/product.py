@@ -1,3 +1,4 @@
+import base64
 import datetime
 import json
 from flask import (
@@ -178,6 +179,8 @@ def create():
         # shelf_life_stamp_end = time.mktime(
         #     datetime.datetime.strptime(shelf_life_str_end, "%m/%d/%Y").timetuple()
         # )
+        image = request.files['image']
+        image_string = base64.b64encode(image.read()).decode()
         product: m.Product = m.Product(
             name=str(form.name.data).strip(" "),
             product_type=form.product_type.data,
@@ -185,7 +188,7 @@ def create():
             currency=form.currency.data,
             regular_price=form.regular_price.data,
             retail_price=form.retail_price.data,
-            image=form.image.data,
+            image=image_string,
             description=form.description.data,
             # General Info ->
             SKU=form.SKU.data,
@@ -240,6 +243,8 @@ def save():
         shelf_life_stamp_end = datetime.datetime.strptime(
             shelf_life_str_end, "%m/%d/%Y"
         )
+        image = request.files['image']
+        image_string = base64.b64encode(image.read()).decode()
         u.name = str(form.name.data).strip(" ")
         u.product_type = form.product_type.data
         u.supplier_id = form.supplier.data
@@ -247,7 +252,7 @@ def save():
         u.regular_price = form.regular_price.data
         u.retail_price = form.retail_price.data
 
-        u.image = form.image.data
+        u.image = image_string
         u.description = form.description.data
         # General Info ->
         u.SKU = form.SKU.data

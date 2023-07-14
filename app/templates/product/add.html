@@ -3,8 +3,8 @@
 <div id="add-product-modal" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
   <div class="relative w-full max-w-2xl max-h-full">
     <!-- Modal content -->
-    <form action="{{url_for('product.create')}}" method="post" class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-      {{ form_create.hidden_tag() }}
+    <form action="{{url_for('product.create')}}" method="post" enctype="multipart/form-data" class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+    {{ form_create.hidden_tag() }}
       <!-- Modal header -->
       <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Add new product </h3>
@@ -33,22 +33,6 @@
               </select>
             </div>
           {% endfor %}
-          <!-- <div class="col-span-6 sm:col-span-3">
-            <label for="category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Category</label >
-            <select type="text" name="category" id="product-add-category" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Category" required >
-              <option value="1">Barware</option>
-              <option value="2">Drink</option>
-              <option value="3">Other</option>
-            </select>
-          </div> -->
-          <!-- <div class="col-span-6 sm:col-span-3">
-            <label for="language" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Language</label >
-            <select type="text" name="language" id="product-add-language" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Language" required >
-              <option value="1">English</option>
-              <option value="2">French</option>
-              <option value="3">Bilingual</option>
-            </select>
-          </div> -->
           <div class="col-span-6 sm:col-span-3">
             <label for="supplier" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Supplier</label >
             <select type="text" name="supplier" id="product-add-supplier" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Currency" required >
@@ -74,7 +58,7 @@
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="image" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Image</label >
-            <input type="text" name="image" id="product-add-image" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Image" required />
+            <input type="file" name="image" id="product-add-image" accept="image/png, image/gif, image/jpeg" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Image" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Description</label >

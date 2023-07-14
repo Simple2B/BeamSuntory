@@ -1,3 +1,4 @@
+import io
 from flask.testing import FlaskClient
 from app import models as m, db
 from tests.utils import login, register, logout
@@ -21,32 +22,33 @@ def test_products_pages(client):
 def test_create_product(client):
     register("samg", "samg@test.com")
     login(client, "samg")
-
+    data = dict(
+        name="test_product",
+        product_type="SIMPLE_PRODUCT",
+        supplier=1,
+        currency="CAD",
+        regular_price=11,
+        retail_price=111,
+        description="desc",
+        SKU="322ewd3333rf",
+        low_stock_level=11,
+        shelf_life_start="10/13/2023",
+        shelf_life_end="10/13/2023",
+        program_year=2023,
+        premises="ON_PREMISE",
+        package_qty=12,
+        numb_of_items_per_case=22,
+        numb_of_cases_per_outer_case=22,
+        comments="comments",
+        weight=11.0,
+        length=11.0,
+        width=11.0,
+        height=11.0,
+    )
+    data["image"] = (io.BytesIO(b"abcdef"), "test.png")
     response = client.post(
         "/product/create",
-        data=dict(
-            name="test_product",
-            product_type="SIMPLE_PRODUCT",
-            supplier=1,
-            currency="CAD",
-            regular_price=11,
-            retail_price=111,
-            image="imgpngbase64str",
-            description="desc",
-            SKU="322ewd3333rf",
-            low_stock_level=11,
-            shelf_life_start="10/13/2023",
-            shelf_life_end="10/13/2023",
-            program_year=2023,
-            package_qty=12,
-            numb_of_items_per_case=22,
-            numb_of_cases_per_outer_case=22,
-            comments="comments",
-            weight=11.0,
-            length=11.0,
-            width=11.0,
-            height=11.0,
-        ),
+        data=data,
     )
     assert response.status_code == 302
     assert "product" in response.text
@@ -68,10 +70,7 @@ def test_delete_product(mg_g_populate: FlaskClient):
 
 def test_edit_product(mg_g_populate: FlaskClient):
     login(mg_g_populate)
-
-    response = mg_g_populate.post(
-        "/product/edit",
-        data=dict(
+    data = dict(
             product_id=1,
             name="test_product_edited",
             product_type="SIMPLE_PRODUCT",
@@ -94,7 +93,12 @@ def test_edit_product(mg_g_populate: FlaskClient):
             length=11.0,
             width=11.0,
             height=11.0,
-        ),
+        )
+    data["image"] = (io.BytesIO(b"abcdef"), "test.png")
+
+    response = mg_g_populate.post(
+        "/product/edit",
+        data=data,
     )
     assert response.status_code == 302
     assert "product" in response.text
