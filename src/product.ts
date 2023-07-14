@@ -1,5 +1,11 @@
 import {Modal} from 'flowbite';
-import type {ModalOptions, ModalInterface} from 'flowbite';
+import type { ModalOptions, ModalInterface } from 'flowbite';
+
+// TODO: clean console.log after milestone
+
+// variable to set default image to brand dynamically in modal window. Can we get link from the internet?
+const defaultBrandImage =
+  'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png';
 
 // check if product has filter and display it
 interface FilterJsonData {
@@ -379,6 +385,12 @@ function convertDate(date: string) {
 
 function editProduct(product: IProduct) {
   console.log('product in edit modal', product);
+  const img: HTMLImageElement = document.querySelector(
+    '#product-edit-show-image',
+  );
+  product.image.length > 100
+    ? (img.src = `data:image/png;base64, ${product.image}`)
+    : (img.src = defaultBrandImage);
   let input: HTMLInputElement = document.querySelector('#product-edit-name');
   input.value = product.name;
   input = document.querySelector('#product-edit-id');
@@ -394,8 +406,6 @@ function editProduct(product: IProduct) {
   input.value = product.regular_price.toString();
   input = document.querySelector('#product-edit-retail_price');
   input.value = product.retail_price.toString();
-  input = document.querySelector('#product-edit-image');
-  input.value = product.image;
   input = document.querySelector('#product-edit-description');
   input.value = product.description;
   // General Info ->
@@ -439,6 +449,7 @@ const viewProductButtonElements = document.querySelectorAll(
 viewProductButtonElements.forEach(e =>
   e.addEventListener('click', () => {
     const product = JSON.parse(e.getAttribute('data-target'));
+    console.log('product', product);
     sessionStorage.setItem('product', JSON.stringify(product));
     const mstrGroups = Object.keys(product.mstr_groups_groups);
 
@@ -463,6 +474,10 @@ viewProductButtonElements.forEach(e =>
     div.innerHTML = product.name;
     div = document.querySelector('#product-view-id');
     div.innerHTML = product.id.toString();
+    const img: HTMLImageElement = document.querySelector('#product-view-image');
+    product.image.length > 100
+      ? (img.src = `data:image/png;base64, ${product.image}`)
+      : (img.src = defaultBrandImage);
     div = document.querySelector('#product-view-product_type');
     div.innerHTML = product.product_type.toUpperCase().split(' ').join('_');
     div = document.querySelector('#product-view-regular_price');
@@ -494,6 +509,12 @@ viewProductButtonElements.forEach(e =>
 
 // function to request share
 function requestShare(product: IProduct) {
+  const img: HTMLImageElement = document.querySelector(
+    '#product-request-share-image',
+  );
+  product.image.length > 100
+    ? (img.src = `data:image/png;base64, ${product.image}`)
+    : (img.src = defaultBrandImage);
   let div: HTMLDivElement = document.querySelector(
     '#product-request-share-name',
   );
@@ -513,6 +534,10 @@ function requestShare(product: IProduct) {
 
 // function to ship
 function ship(product: IProduct) {
+  const img: HTMLImageElement = document.querySelector('#product-ship-image');
+  product.image.length > 100
+    ? (img.src = `data:image/png;base64, ${product.image}`)
+    : (img.src = defaultBrandImage)
   let div: HTMLDivElement = document.querySelector('#product-ship-name');
   div.innerHTML = product.name;
   div = document.querySelector('#product-ship-sku');
@@ -537,10 +562,13 @@ function assign(product: IProduct) {
 // function to delete ship assign share button
 function deleteShipAssignButton(nameGroup: string, nameGroupValue: string) {
   const shipAssignShareContainer = document.querySelector(
-    `#product-ship-assign-share-container-${nameGroup}`,
+    `#product-ship-assign-share-container-${nameGroup.replace(/ /g, '_')}`,
   );
   const groupContainer = document.querySelector(
-    `#product-view-product_group-container-${nameGroupValue}`,
+    `#product-view-product_group-container-${nameGroupValue.replace(
+      / /g,
+      '_',
+    )}`,
   );
   if (shipAssignShareContainer) {
     shipAssignShareContainer.remove();
@@ -565,7 +593,7 @@ function addShipAssignShareButton(
   shipAssignContainer.classList.add('sm:col-span-3');
   shipAssignContainer.setAttribute(
     'id',
-    `product-ship-assign-share-container-${masterGroup}`,
+    `product-ship-assign-share-container-${masterGroup.replace(/ /g, '_')}`,
   );
   shipAssignContainer.innerHTML = `
     <label for="product_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Action</label >
@@ -583,7 +611,7 @@ function addShipAssignShareButton(
   shareContainer.classList.add('sm:col-span-3');
   shareContainer.setAttribute(
     'id',
-    `product-ship-assign-share-container-${masterGroup}`,
+    `product-ship-assign-share-container-${masterGroup.replace(/ /g, '_')}`,
   );
   shareContainer.innerHTML = `
     <label for="product_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Action</label >
@@ -643,7 +671,7 @@ function addShipAssignShareButton(
   productMasterGroupContainer.classList.add('sm:col-span-3');
   productMasterGroupContainer.setAttribute(
     'id',
-    `product-view-product_group-container-${group}`,
+    `product-view-product_group-container-${group.replace(/ /g, '_')}`,
   );
 
   productMasterGroupContainer.innerHTML = `
