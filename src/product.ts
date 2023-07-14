@@ -1,5 +1,5 @@
 import {Modal} from 'flowbite';
-import type { ModalOptions, ModalInterface } from 'flowbite';
+import type {ModalOptions, ModalInterface} from 'flowbite';
 
 // TODO: clean console.log after milestone
 
@@ -537,7 +537,7 @@ function ship(product: IProduct) {
   const img: HTMLImageElement = document.querySelector('#product-ship-image');
   product.image.length > 100
     ? (img.src = `data:image/png;base64, ${product.image}`)
-    : (img.src = defaultBrandImage)
+    : (img.src = defaultBrandImage);
   let div: HTMLDivElement = document.querySelector('#product-ship-name');
   div.innerHTML = product.name;
   div = document.querySelector('#product-ship-sku');
