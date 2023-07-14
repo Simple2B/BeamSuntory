@@ -22,3 +22,7 @@
 .close {
     display: none;
 }
+
+.max-height-image-container {
+  max-height: 164px;
+}
