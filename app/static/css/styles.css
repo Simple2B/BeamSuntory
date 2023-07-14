@@ -2463,6 +2463,10 @@ input:checked + .toggle-bg {
   --tw-ring-offset-color: #1F2937;
 }
 
+:is(.dark .dark\:ring-offset-gray-700) {
+  --tw-ring-offset-color: #374151;
+}
+
 :is(.dark .dark\:hover\:border-gray-600:hover) {
   --tw-border-opacity: 1;
   border-color: rgb(75 85 99 / var(--tw-border-opacity));
@@ -2545,6 +2549,10 @@ input:checked + .toggle-bg {
 
 :is(.dark .dark\:focus\:ring-offset-gray-800:focus) {
   --tw-ring-offset-color: #1F2937;
+}
+
+:is(.dark .dark\:focus\:ring-offset-gray-700:focus) {
+  --tw-ring-offset-color: #374151;
 }
 
 :is(.dark .group:hover .dark\:group-hover\:text-white) {

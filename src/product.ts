@@ -222,6 +222,16 @@ showAllGroupsProductBtn.addEventListener('click', () => {
   }
 });
 
+// function to display product master group in product table
+const checkboxFilterProductMasterGroups = document.querySelectorAll(
+  '.products-filter-product-master-group-checkbox',
+);
+checkboxFilterProductMasterGroups.forEach(checkbox => {
+  checkbox.addEventListener('change', e => {
+    console.log(checkbox.value);
+  });
+});
+
 // /*
 //  * $editProductModal: required
 //  * options: optional
