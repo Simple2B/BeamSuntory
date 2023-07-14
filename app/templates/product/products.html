@@ -134,6 +134,7 @@
     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
       <tr>
         <th scope="col" class="px-6 py-3">#</th>
+        <th scope="col" class="px-6 py-3">Image</th>
         <th scope="col" class="px-6 py-3">Name</th>
         <th id="product-table-th-product-type" scope="col" class="px-6 py-3">Description</th>
         <th scope="col" class="px-6 py-3">Currency</th>
@@ -149,6 +150,16 @@
         <td class="w-4 p-4">
           <div class="flex items-center">
             {{ loop.index + page.skip }}
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            {% if product.image|length > 100 %}
+            <img src="data:image/png;base64, {{ product.image }}" alt="{{ product.name }}" class="w-14 h-14">
+            {% else %}
+            <img src="{{ url_for('static', filename='img/default_image_brand.png') }}" alt="{{ product.name }}"
+              class="w-14 h-14">
+            {% endif %}
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
