@@ -90,7 +90,7 @@ deleteButtons.forEach(e => {
   e.addEventListener('click', async () => {
     if (confirm('Are sure?')) {
       let id = e.getAttribute('data-master-group-product-id');
-      const response = await fetch(`/master_group_product/delete/${id}`, {
+      const response = await fetch(`/master_group_for_product/delete/${id}`, {
         method: 'DELETE',
       });
       if (response.status == 200) {

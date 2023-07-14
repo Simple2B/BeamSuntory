@@ -123,7 +123,8 @@ def delete(id: int):
         flash("There is no such master group", "danger")
         return "no master group", 404
 
-    db.session.delete(u)
+    delete_u = sa.delete(m.MasterGroupProduct).where(m.MasterGroupProduct.id == id)
+    db.session.execute(delete_u)
     db.session.commit()
     log(log.INFO, "Master group deleted. Master group: [%s]", u)
     flash("Master group deleted!", "success")
