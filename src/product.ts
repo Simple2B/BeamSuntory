@@ -228,7 +228,99 @@ const checkboxFilterProductMasterGroups = document.querySelectorAll(
 );
 checkboxFilterProductMasterGroups.forEach(checkbox => {
   checkbox.addEventListener('change', e => {
-    console.log(checkbox.value);
+    const masterGroupName = checkbox.getAttribute('data-target-group-name');
+    const productMgG = JSON.parse(
+      checkbox.getAttribute('data-target-product-mg-g'),
+    );
+    const referenceTh = document.querySelector(
+      '#product-table-th-product-type',
+    );
+    const productItemTrs = document.querySelectorAll('.table-product-item-tr');
+    console.log('productMgG', productMgG);
+    console.log('groupName', masterGroupName);
+    console.log('checkbox', checkbox);
+    console.log('e', e);
+    console.log('checkboxValue', e.checked);
+    const isActive = e.target.checked;
+
+    if (isActive) {
+      const isGroupExist = document.querySelector(
+        `#product-table-filter-master-group-${masterGroupName}`,
+      );
+      if (!isGroupExist) {
+        const productFilterTh = document.createElement('th');
+        productFilterTh.setAttribute(
+          'id',
+          `product-table-filter-master-group-${masterGroupName}`,
+        );
+        productFilterTh.classList.add('px-6', 'py-3');
+        productFilterTh.setAttribute('scope', 'col');
+        productFilterTh.innerHTML = masterGroupName.replace(/_/g, ' ');
+        referenceTh.parentNode.insertBefore(
+          productFilterTh,
+          referenceTh.nextSibling,
+        );
+        productItemTrs.forEach((productItem: HTMLTableRowElement) => {
+          const referenceTd = productItem.cells[3];
+          const productName = productItem.cells[2].innerText;
+          console.log('productName', productItem.cells[2].innerText);
+          console.log('productMgG', productMgG);
+          console.log(
+            'productMgG[masterGroupName]',
+            productMgG[masterGroupName],
+          );
+          const productFilterName =
+            productMgG[productName][masterGroupName] || '-';
+          const productFilterTd = document.createElement('td');
+          productFilterTd.setAttribute(
+            'id',
+            `product-table-filter-${masterGroupName}-${productFilterName.replace(
+              / /g,
+              '_',
+            )}-${productName.replace(/ /g, '_')}`,
+          );
+          productFilterTd.classList.add(
+            'p-4',
+            'text-base',
+            'font-normal',
+            'text-gray-900',
+            'whitespace-nowrap',
+            'dark:text-white',
+          );
+          productFilterTd.innerHTML = `
+            <div class="pl-3">
+              <div class="text-base font-semibold">${productFilterName}</div>
+            </div>
+          `;
+          referenceTd.parentNode.insertBefore(
+            productFilterTd,
+            referenceTd.nextSibling,
+          );
+        });
+      }
+    }
+    if (!isActive) {
+      const isMasterGroupExist = document.querySelector(
+        `#product-table-filter-master-group-${masterGroupName}`,
+      );
+      if (isMasterGroupExist) {
+        isMasterGroupExist.remove();
+        productItemTrs.forEach((productItem: HTMLTableRowElement) => {
+          const productName = productItem.cells[2].innerText;
+          const productFilterName =
+            productMgG[productName][masterGroupName] || '-';
+          const isProductFilterExist = document.querySelector(
+            `#product-table-filter-${masterGroupName}-${productFilterName.replace(
+              / /g,
+              '_',
+            )}-${productName.replace(/ /g, '_')}`,
+          );
+          if (isProductFilterExist) {
+            isProductFilterExist.remove();
+          }
+        });
+      }
+    }
   });
 });
 
