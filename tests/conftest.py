@@ -197,5 +197,18 @@ def mg_g_populate(client: FlaskClient):
         street_address="sserdda",
         active=True,
     ).save(False)
+
+    m.Supplier(
+        name="sup_test",
+        email="sup_test@email.com",
+        contact_number="380362470225",
+        country="Cat",
+        region="Albe",
+        city="Kam",
+        address="st.2",
+        zip="45773",
+        active=True,
+    ).save(False)
+
     db.session.commit()
     yield client

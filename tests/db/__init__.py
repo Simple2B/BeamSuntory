@@ -58,7 +58,9 @@ def populate(count: int = NUM_TEST_USERS):
     m.Supplier(
         name="test_sup_1",
         email="sup@email.com",
-        contact_numb="234234234",
+        contact_number="234234234",
+        country="test_country",
+        region="test_region",
         city="test_city",
         address="test_supplier_address",
         zip="3243323",

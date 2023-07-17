@@ -21,10 +21,12 @@ class Supplier(db.Model, ModelMixin):
         sa.String(64),
         nullable=False,
     )
-    contact_numb: orm.Mapped[str] = orm.mapped_column(
+    contact_number: orm.Mapped[str] = orm.mapped_column(
         sa.String(64),
         nullable=False,
     )
+    country: orm.Mapped[str] = orm.mapped_column(sa.String(64))
+    region: orm.Mapped[str] = orm.mapped_column(sa.String(64))
     city: orm.Mapped[int] = orm.mapped_column(sa.String(64))
     address: orm.Mapped[int] = orm.mapped_column(sa.String(64))
     zip: orm.Mapped[int] = orm.mapped_column(sa.String(64))
@@ -34,12 +36,6 @@ class Supplier(db.Model, ModelMixin):
         sa.DateTime,
         default=datetime.utcnow,
     )
-
-    # TODO switch to group??
-    # country_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("str_values.id"))
-    # country: orm.Mapped[StrValue] = orm.relationship(foreign_keys=[country_id])
-    # region_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("str_values.id"))
-    # sregion: orm.Mapped[StrValue] = orm.relationship(foreign_keys=[region_id])
 
     def __repr__(self):
         return f"<{self.id}: {self.name}>"
