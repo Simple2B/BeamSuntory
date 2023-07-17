@@ -23,7 +23,7 @@ class ProductForm(FlaskForm):
     currency = StringField("Currency", [DataRequired()])
     regular_price = FloatField("Regular price", [DataRequired()])
     retail_price = FloatField("Retail price", [DataRequired()])
-    image = FileField("Image")  # link or png base64 str??
+    image = FileField("Image")
     description = StringField("Description", [DataRequired()])
     # General Info ->
     SKU = StringField("SKU", [DataRequired()])
@@ -58,7 +58,7 @@ class NewProductForm(FlaskForm):
     currency = StringField("Currency", [DataRequired()])
     regular_price = FloatField("Regular price", [DataRequired()])
     retail_price = FloatField("Retail price", [DataRequired()])
-    image = FileField("Image", [DataRequired()])  # link or png base64 str??
+    image = FileField("Image")
     description = StringField("Description", [DataRequired()])
     # General Info ->
     SKU = StringField("SKU", [DataRequired()])
