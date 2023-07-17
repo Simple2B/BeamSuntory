@@ -4,6 +4,7 @@ import sqlalchemy as sa
 from sqlalchemy import orm
 
 from app.database import db
+from app import schema as s
 from .utils import ModelMixin
 
 
@@ -27,6 +28,14 @@ class DeliveryAgent(db.Model, ModelMixin):
         sa.String(64),
         nullable=False,
     )
+    contact_number: orm.Mapped[str] = orm.mapped_column(
+        sa.String(64),
+        nullable=False,
+    )
+    street_address: orm.Mapped[str] = orm.mapped_column(
+        sa.String(64),
+        nullable=False,
+    )
     active: orm.Mapped[bool] = orm.mapped_column(
         sa.Boolean(),
     )
@@ -38,3 +47,8 @@ class DeliveryAgent(db.Model, ModelMixin):
 
     def __repr__(self):
         return f"<{self.id}: {self.username}>"
+
+    @property
+    def json(self):
+        mg = s.DeliveryAgent.from_orm(self)
+        return mg.json()

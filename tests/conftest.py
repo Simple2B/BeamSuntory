@@ -187,5 +187,15 @@ def mg_g_populate(client: FlaskClient):
         address="sserdda",
         manager_id=1,
     ).save(False)
+
+    m.DeliveryAgent(
+        first_name="May",
+        last_name="Wood",
+        username="maywood",
+        email="maywood@test.com",
+        contact_number="380362470223",
+        street_address="sserdda",
+        active=True,
+    ).save(False)
     db.session.commit()
     yield client

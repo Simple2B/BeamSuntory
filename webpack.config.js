@@ -96,6 +96,16 @@ const warehouseConfig = {
   },
 };
 
+const deliveryAgentConfig = {
+  entry: {
+    main: './src/delivery_agent.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/delivery_agent.js', // <--- Will be compiled to this single file
+  },
+};
+
 const configs = [
   baseConfig,
   userConfig,
@@ -105,6 +115,7 @@ const configs = [
   groupProductConfig,
   masterGroupProductConfig,
   warehouseConfig,
+  deliveryAgentConfig,
 ].map(conf => merge(defaultConfig, conf));
 
 module.exports = configs;

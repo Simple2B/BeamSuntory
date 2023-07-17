@@ -70,20 +70,44 @@ def test_delete_warehouse(mg_g_populate: FlaskClient):
 
 def test_edit_warehouse(mg_g_populate: FlaskClient):
     login(mg_g_populate)
-    register("samm", "samm@test.com")
 
     response = mg_g_populate.post(
         "/warehouse/edit",
         data=dict(
+            warehouse_id=1,
             name="Julywood warehouse",
             phone_number="380362470223",
             city="Baggranddad",
             zip="unzip",
             address="sserdda",
-            manager_id=3,
+            manager_id=2,
         ),
+        follow_redirects=True,
     )
-    assert response.status_code == 302
-    assert "warehouse" in response.text
-    warehouses_rows_objs = db.session.execute(m.Warehouse.select()).all()
+    assert response.status_code == 200
+    assert "This user is not a warehouse manager." in response.text
+    warehouses_rows_objs = db.session.execute(
+        m.Warehouse.select().where(m.Warehouse.name == "Julywood warehouse")
+    ).all()
+
+    assert len(warehouses_rows_objs) == 0
+
+    response = mg_g_populate.post(
+        "/warehouse/edit",
+        data=dict(
+            warehouse_id=1,
+            name="Julywood warehouse",
+            phone_number="380362470223",
+            city="Baggranddad",
+            zip="unzip",
+            address="sserdda",
+            manager_id=1,
+        ),
+        follow_redirects=True,
+    )
+    assert response.status_code == 200
+    assert "ok" in response.text
+    warehouses_rows_objs = db.session.execute(
+        m.Warehouse.select().where(m.Warehouse.name == "Julywood warehouse")
+    ).all()
     assert len(warehouses_rows_objs) > 0
