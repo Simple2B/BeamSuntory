@@ -22,10 +22,17 @@ class ShipRequest(db.Model, ModelMixin):
     status: orm.Mapped[str] = orm.mapped_column(
         sa.String(64),
     )
+    store_category: orm.Mapped[str] = orm.mapped_column(
+        sa.String(64),
+    )
     order_type: orm.Mapped[str] = orm.mapped_column(
         sa.String(128),
         nullable=False,
     )  # TODO enum??? ask client
+    # NOTE: should we add quantity?
+    # quantity: orm.Mapped[int] = orm.mapped_column(
+    #     sa.Integer,
+    # )
 
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,

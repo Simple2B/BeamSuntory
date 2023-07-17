@@ -1,0 +1,134 @@
+<!-- View ship request modal -->
+<!-- prettier-ignore-->
+<div id="view-ship-request-modal" tabindex="-1" aria-hidden="true"
+  class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
+  <div class="relative w-full max-w-2xl max-h-full">
+    <!-- Modal content -->
+    <!-- TODO change action for view form -->
+    <form action="#" method="get" class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+      <input type="hidden" name="ship_request_id" id="ship-request-view-id" value="0" />
+      <input type="hidden" name="next_url" id="ship-request-view-next_url" value="" />
+      <!-- Modal header -->
+      <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> View ship request </h3>
+      </div>
+      <!-- Modal body -->
+      <div class="p-6 space-y-6">
+        <div class="grid grid-cols-6 gap-6">
+          <div class="col-span-6 sm:col-span-2 sm:row-span-2 max-height-image-container">
+            <img id="ship-request-view-image" class="w-full h-full object-cover">
+          </div>
+          <div class="col-span-6 sm:col-span-4">
+            <label for="order_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Order Number</label>
+            <div id="ship-request-view-order_name"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
+          </div>
+          <div class="col-span-6 sm:col-span-4">
+            <label for="item" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Item</label>
+            <div id="ship-request-view-item"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status</label>
+            <div id="ship-request-view-status"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="sku" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">SKU</label>
+            <div id="ship-request-view-sku"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="created_date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Created Date</label>
+            <div id="ship-request-view-created_date"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="expiry_date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Expiry Date</label>
+            <div id="ship-request-view-expiry_date"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="retatil_price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Retail Price</label>
+            <div id="ship-request-view-retatil_price"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="regular_price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Regular Price</label>
+            <div id="ship-request-view-regular_price"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="quantity" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
+            <div id="ship-request-view-quantity"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="total" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Total</label>
+            <div id="ship-request-view-total"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="store" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store</label>
+            <div id="ship-request-view-store"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="supplier" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Supplier</label>
+            <div id="ship-request-view-supplier"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="store_address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store Address</label>
+            <div id="ship-request-view-store_address"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="store_phone" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store Phone</label>
+            <div id="ship-request-view-store_phone"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="store_country" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store Country</label>
+            <div id="ship-request-view-store_country"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="store_province" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store Province</label>
+            <div id="ship-request-view-store_province"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="store_city" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store City</label>
+            <div id="ship-request-view-store_city"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="store_zip_code" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store Zip Code</label>
+            <div id="ship-request-view-store_zip_code"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Modal footer -->
+    </form>
+  </div>
+</div>
