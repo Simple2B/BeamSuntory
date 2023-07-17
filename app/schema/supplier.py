@@ -6,7 +6,9 @@ class Supplier(BaseModel):
     id: int
     name: str
     email: str
-    contact_numb: str
+    contact_number: str
+    country: str
+    region: str
     city: str
     address: str
     zip: str

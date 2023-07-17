@@ -11,3 +11,4 @@ from .group_for_product import (
 )
 from .warehouse import WarehouseForm, NewWarehouseForm
 from .delivery_agent import DeliveryAgentForm, NewDeliveryAgentForm
+from .supplier import SupplierForm, NewSupplierForm
