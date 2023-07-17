@@ -117,6 +117,7 @@ def get_all_products(request, query=None, count_query=None):
         "mastr_for_prods_groups_for_prods": mastr_for_prods_groups_for_prods,
         "master_groups_search": master_groups_search,
         "product_mg_g": json.dumps(product_mg_g),
+        "master_product_groups_name": master_group_product_name,
     }
 
 
@@ -150,6 +151,7 @@ def get_all():
         ],
         master_groups_search=products_object["master_groups_search"],
         product_mg_g=products_object["product_mg_g"],
+        master_group_product_name=products_object["master_product_groups_name"],
         form_sort=form_sort,
         form_create=form_create,
         form_edit=form_edit,
@@ -179,7 +181,7 @@ def create():
         # shelf_life_stamp_end = time.mktime(
         #     datetime.datetime.strptime(shelf_life_str_end, "%m/%d/%Y").timetuple()
         # )
-        image = request.files['image']
+        image = request.files["image"]
         image_string = base64.b64encode(image.read()).decode()
         product: m.Product = m.Product(
             name=str(form.name.data).strip(" "),
@@ -243,7 +245,7 @@ def save():
         shelf_life_stamp_end = datetime.datetime.strptime(
             shelf_life_str_end, "%m/%d/%Y"
         )
-        image = request.files['image']
+        image = request.files["image"]
         image_string = base64.b64encode(image.read()).decode()
         u.name = str(form.name.data).strip(" ")
         u.product_type = form.product_type.data
@@ -412,6 +414,7 @@ def sort():
             ],
             master_groups_search=products_object["master_groups_search"],
             product_mg_g=products_object["product_mg_g"],
+            master_group_product_name=products_object["master_product_groups_name"],
             form_sort=form,
             form_create=form_create,
             form_edit=form_edit,
