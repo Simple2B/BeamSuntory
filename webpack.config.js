@@ -116,6 +116,16 @@ const supplierConfig = {
   },
 };
 
+const inboundOrderConfig = {
+  entry: {
+    main: './src/inbound_order.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/inbound_order.js', // <--- Will be compiled to this single file
+  },
+};
+
 const configs = [
   baseConfig,
   userConfig,
@@ -127,6 +137,7 @@ const configs = [
   warehouseConfig,
   deliveryAgentConfig,
   supplierConfig,
+  inboundOrderConfig,
 ].map(conf => merge(defaultConfig, conf));
 
 module.exports = configs;

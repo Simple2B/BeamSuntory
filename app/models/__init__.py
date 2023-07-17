@@ -7,7 +7,7 @@ from .product_category import ProductCategory
 from .product import Product
 from .property import Property
 from .delivery_agent import DeliveryAgent
-from .inbound_order import InboundOrders
+from .inbound_order import InboundOrder
 from .ship_request import ShipRequest
 from .store import Store
 from .supplier import Supplier

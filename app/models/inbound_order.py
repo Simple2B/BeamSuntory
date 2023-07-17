@@ -12,7 +12,7 @@ from .warehouse import Warehouse
 from .product import Product
 
 
-class InboundOrders(db.Model, ModelMixin):
+class InboundOrder(db.Model, ModelMixin):
     __tablename__ = "inbound_orders"
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
@@ -23,8 +23,12 @@ class InboundOrders(db.Model, ModelMixin):
     )
     active_date: orm.Mapped[datetime] = orm.mapped_column(sa.DateTime)
     active_time: orm.Mapped[datetime] = orm.mapped_column(sa.DateTime)
-    item_type: orm.Mapped[str] = orm.mapped_column(sa.String(64))
+    order_title: orm.Mapped[str] = orm.mapped_column(
+        sa.String(64),
+        nullable=False,
+    )
     quantity: orm.Mapped[int] = orm.mapped_column()
+    delivery_date: orm.Mapped[datetime] = orm.mapped_column(sa.DateTime)
 
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,

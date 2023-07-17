@@ -1,0 +1,64 @@
+<!-- Adding inbound order modal -->
+<!-- prettier-ignore-->
+<div id="add-inbound-order-modal" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
+  <div class="relative w-full max-w-2xl max-h-full">
+    <!-- Modal content -->
+    <form action="{{url_for('inbound_order.create')}}" method="post" class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+      {{ form_create.hidden_tag() }}
+      <!-- Modal header -->
+      <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Add new inbound order </h3>
+      </div>
+      <!-- Modal body -->
+      <div class="p-6 space-y-6">
+        <div class="grid grid-cols-6 gap-6">
+          <div class="col-span-6 sm:col-span-3">
+            <label for="order_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Order ID</label >
+            <input type="text" name="order_id" id="inbound-order-add-order_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Order ID" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="active_date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Active date</label >
+            <input type="text" name="active_date" id="inbound-order-add-active_date" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Active date" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="active_time" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Active time</label >
+            <input type="text" name="active_time" id="inbound-order-add-active_time" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Active time" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="order_title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Order title</label >
+            <input type="text" name="order_title" id="inbound-order-add-order_title" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Order title" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="quantity" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Quantity</label >
+            <input type="text" name="quantity" id="inbound-order-add-quantity" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Quantity" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="delivery_date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Delivery date</label >
+            <input type="text" name="delivery_date" id="inbound-order-add-delivery_date" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Delivery date" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="supplier_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Supplier</label >
+            <input type="text" name="supplier_id" id="inbound-order-add-supplier_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Supplier" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="delivery_agent_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Delivery agent</label >
+            <input type="text" name="delivery_agent_id" id="inbound-order-add-delivery_agent_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Delivery agent" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="warehouse_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Warehouse</label >
+            <input type="text" name="warehouse_id" id="inbound-order-add-warehouse_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Warehouse" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="product_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Product</label >
+            <input type="text" name="product_id" id="inbound-order-add-product_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Product" required />
+          </div>
+
+        </div>
+      </div>
+      <!-- Modal footer -->
+      <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+        <button name="submit" type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"> Save all </button>
+      </div>
+    </form>
+  </div>
+</div>
