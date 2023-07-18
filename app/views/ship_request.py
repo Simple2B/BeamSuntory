@@ -40,9 +40,8 @@ def get_all():
         )
 
     pagination = create_pagination(total=db.session.scalar(count_query))
-
-    # TODO: delete comment
-    # master_groups_rows = db.session.execute(sa.select(m.MasterGroup)).all()
+    suppliers_rows = db.session.execute(sa.select(m.Supplier)).all()
+    suppliers = [row[0] for row in suppliers_rows]
 
     return render_template(
         "ship_request/ship_requests.html",
@@ -53,7 +52,7 @@ def get_all():
         ).scalars(),
         page=pagination,
         search_query=q,
-        # main_master_groups=[i[0] for i in master_groups_rows],
+        suppliers=suppliers,
         form_create=form_create,
         form_edit=form_edit,
     )
@@ -72,6 +71,7 @@ def create():
             order_numb=f"BEAM-DO{datetime.datetime.now().timestamp()}",
             # NOTE: what status is default?
             status="In Progress",
+            supplier_id=form.supplier.data,
             # store=form.store.data,
             store_category=form.store_category.data,
             order_type=form.order_type.data,

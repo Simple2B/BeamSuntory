@@ -3,6 +3,11 @@ import type {ModalOptions, ModalInterface} from 'flowbite';
 
 interface IShipRequest {
   id: number;
+  order_numb: string;
+  status: string;
+  order_type: string;
+  supplier_id: number;
+  created_at: string;
 }
 
 const modalOptions: ModalOptions = {
@@ -25,9 +30,11 @@ const modalOptions: ModalOptions = {
 // TODO: change to actual id when view modal will be ready
 // search flow
 const searchInput: HTMLInputElement = document.querySelector(
-  '#table-search-users',
+  '#table-search-ship-request',
 );
-const searchInputButton = document.querySelector('#table-search-user-button');
+const searchInputButton = document.querySelector(
+  '#table-search-ship-request-button',
+);
 if (searchInputButton && searchInput) {
   searchInputButton.addEventListener('click', () => {
     const url = new URL(window.location.href);
@@ -37,13 +44,13 @@ if (searchInputButton && searchInput) {
 }
 
 // TODO: change to actual id when view modal will be ready
-const deleteButtons = document.querySelectorAll('.delete-user-btn');
+const deleteButtons = document.querySelectorAll('.delete-ship-request-btn');
 
 deleteButtons.forEach(e => {
   e.addEventListener('click', async () => {
     if (confirm('Are sure?')) {
-      let id = e.getAttribute('data-user-id');
-      const response = await fetch(`/user/delete/${id}`, {
+      let id = e.getAttribute('data-ship-request-id');
+      const response = await fetch(`/ship_request/delete/${id}`, {
         method: 'DELETE',
       });
       if (response.status == 200) {
@@ -52,3 +59,22 @@ deleteButtons.forEach(e => {
     }
   });
 });
+
+const viewShipRequestButtonElements = document.querySelectorAll(
+  '.ship-request-view-button',
+);
+viewShipRequestButtonElements.forEach(e =>
+  e.addEventListener('click', () => {
+    const shipRequest: IShipRequest = JSON.parse(e.getAttribute('data-target'));
+
+    let div: HTMLDivElement = document.querySelector(
+      '#ship-request-view-order-number',
+    );
+    div.innerHTML = shipRequest.order_numb;
+    div = document.querySelector('#ship-request-view-status');
+    div.innerHTML = shipRequest.status;
+    div = document.querySelector('#ship-request-view-created-date');
+    div.innerHTML = shipRequest.created_at;
+  }),
+);
+

@@ -7,6 +7,7 @@ class ShipRequest(BaseModel):
     order_numb: str
     status: str  # enum??
     order_type: str  # enum??? ask client
+    supplier_id: int
 
     created_at: datetime
 
