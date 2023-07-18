@@ -8,6 +8,7 @@ interface IShipRequest {
   order_type: string;
   supplier_id: number;
   created_at: string;
+  quantity: number;
 }
 
 const modalOptions: ModalOptions = {
@@ -27,7 +28,6 @@ const modalOptions: ModalOptions = {
   },
 };
 
-// TODO: change to actual id when view modal will be ready
 // search flow
 const searchInput: HTMLInputElement = document.querySelector(
   '#table-search-ship-request',
@@ -43,7 +43,6 @@ if (searchInputButton && searchInput) {
   });
 }
 
-// TODO: change to actual id when view modal will be ready
 const deleteButtons = document.querySelectorAll('.delete-ship-request-btn');
 
 deleteButtons.forEach(e => {
@@ -74,7 +73,9 @@ viewShipRequestButtonElements.forEach(e =>
     div = document.querySelector('#ship-request-view-status');
     div.innerHTML = shipRequest.status;
     div = document.querySelector('#ship-request-view-created-date');
-    div.innerHTML = shipRequest.created_at;
+    div.innerHTML = shipRequest.created_at.slice(0, 10);
+    div = document.querySelector('#ship-request-view-quantity');
+    div.innerHTML = shipRequest.quantity.toString();
   }),
 );
 

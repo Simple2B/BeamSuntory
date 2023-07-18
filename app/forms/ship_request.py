@@ -3,6 +3,7 @@ from wtforms import (
     StringField,
     SubmitField,
     ValidationError,
+    IntegerField,
 )
 from wtforms.validators import DataRequired
 
@@ -16,10 +17,10 @@ class NewShipRequestForm(FlaskForm):
     store_category = StringField("Store", [DataRequired()])
     order_type = StringField("Store", [DataRequired()])
     supplier = StringField("Supplier", [DataRequired()])
+    quantity = IntegerField("Quantity", [DataRequired()])
     # NOTE: what field we need? delete unnecessary in the future
     # retail_price = FloatField("Retail price", [DataRequired()])
     # regular_price = FloatField("Regular price", [DataRequired()])
-    # quantity = IntegerField("Quantity", [DataRequired()])
 
     submit = SubmitField("Save")
 

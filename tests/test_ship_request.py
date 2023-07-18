@@ -29,6 +29,7 @@ def test_create_ship_request(client):
             store_category="Drinks",
             order_type="test type",
             supplier="1",
+            quantity=1,
         ),
     )
     assert response.status_code == 302

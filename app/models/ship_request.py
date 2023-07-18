@@ -6,6 +6,7 @@ from sqlalchemy import orm
 from app.database import db
 from app import schema as s
 from .utils import ModelMixin
+
 # NOTE: we need it when will be created store
 # from .store import Store
 from .supplier import Supplier
@@ -30,6 +31,7 @@ class ShipRequest(db.Model, ModelMixin):
         sa.String(128),
         nullable=False,
     )  # TODO enum??? ask client
+    quantity: orm.Mapped[int] = orm.mapped_column(sa.Integer())
 
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,

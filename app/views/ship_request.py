@@ -29,12 +29,22 @@ def get_all():
     if q:
         query = (
             m.ShipRequest.select()
-            .where(m.ShipRequest.order_numb.like(f"{q}%"))
+            .where(
+                m.ShipRequest.order_numb.like(f"{q}%")
+                | m.ShipRequest.store_category.like(f"{q}%")
+                | m.ShipRequest.order_type.like(f"{q}%")
+                | m.ShipRequest.status.like(f"{q}%")
+            )
             .order_by(m.ShipRequest.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(m.ShipRequest.order_numb.like(f"{q}%"))
+            .where(
+                m.ShipRequest.order_numb.like(f"{q}%")
+                | m.ShipRequest.store_category.like(f"{q}%")
+                | m.ShipRequest.order_type.like(f"{q}%")
+                | m.ShipRequest.status.like(f"{q}%")
+            )
             .select_from(m.MasterGroup)
         )
 
@@ -61,8 +71,7 @@ def get_all():
 def create():
     form: f.NewShipRequestForm = f.NewShipRequestForm()
     if not form.validate_on_submit():
-        # TODO: what to do here?
-        # flash("This username or email is already taken.", "danger")
+        flash("Validation failed", "danger")
         return redirect(url_for("ship_request.get_all"))
     if form.validate_on_submit():
         ship_request = m.ShipRequest(
@@ -70,13 +79,14 @@ def create():
             # NOTE: what status is default?
             status="In Progress",
             supplier_id=form.supplier.data,
+            # NOTE: commented, until store is created
             # store=form.store.data,
             store_category=form.store_category.data,
             order_type=form.order_type.data,
-            # quantity=form.quantity.data,
+            quantity=int(form.quantity.data),
         )
-        # log(log.INFO, "Form submitted. Ship Request: [%s]", ship_request)
-        flash("Delivery Agent added!", "success")
+        log(log.INFO, "Form submitted. Ship Request: [%s]", ship_request)
+        flash("Ship request added!", "success")
         ship_request.save()
 
         return redirect(url_for("ship_request.get_all"))
