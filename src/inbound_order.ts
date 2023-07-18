@@ -16,6 +16,7 @@ interface IInboundOrder {
   order_title: string;
   quantity: number;
   delivery_date: string;
+  status: string;
   supplier_id: number;
   delivery_agent_id: number;
   warehouse_id: number;
@@ -91,7 +92,7 @@ deleteButtons.forEach(e => {
 
 function editInboundOrder(inboundOrder: IInboundOrder) {
   let input: HTMLInputElement = document.querySelector(
-    '#inbound-order-edit-order-id',
+    '#inbound-order-edit-order_id',
   );
   input.value = inboundOrder.order_id;
   input = document.querySelector('#inbound-order-edit-id');
@@ -106,6 +107,8 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
   input.value = inboundOrder.quantity.toString();
   input = document.querySelector('#inbound-order-edit-delivery_date');
   input.value = inboundOrder.delivery_date;
+  input = document.querySelector('#inbound-order-edit-status');
+  input.value = inboundOrder.status;
   input = document.querySelector('#inbound-order-edit-supplier_id');
   input.value = inboundOrder.supplier_id.toString();
   input = document.querySelector('#inbound-order-edit-delivery_agent_id');
@@ -132,25 +135,27 @@ viewInboundOrderButtonElements.forEach(e =>
       '#inbound-order-view-order_id',
     );
     div.innerHTML = inboundOrder.order_id;
-    div = document.querySelector('#inbound-order-edit-id');
+    div = document.querySelector('#inbound-order-view-id');
     div.innerHTML = inboundOrder.id.toString();
-    div = document.querySelector('#inbound-order-edit-active_date');
+    div = document.querySelector('#inbound-order-view-active_date');
     div.innerHTML = inboundOrder.active_date;
-    div = document.querySelector('#inbound-order-edit-active_time');
+    div = document.querySelector('#inbound-order-view-active_time');
     div.innerHTML = inboundOrder.active_time;
-    div = document.querySelector('#inbound-order-edit-order_title');
+    div = document.querySelector('#inbound-order-view-order_title');
     div.innerHTML = inboundOrder.order_title;
-    div = document.querySelector('#inbound-order-edit-quantity');
+    div = document.querySelector('#inbound-order-view-quantity');
     div.innerHTML = inboundOrder.quantity.toString();
-    div = document.querySelector('#inbound-order-edit-delivery_date');
+    div = document.querySelector('#inbound-order-view-delivery_date');
     div.innerHTML = inboundOrder.delivery_date;
-    div = document.querySelector('#inbound-order-edit-supplier_id');
+    div = document.querySelector('#inbound-order-view-status');
+    div.innerHTML = inboundOrder.status;
+    div = document.querySelector('#inbound-order-view-supplier_id');
     div.innerHTML = inboundOrder.supplier_id.toString();
-    div = document.querySelector('#inbound-order-edit-delivery_agent_id');
+    div = document.querySelector('#inbound-order-view-delivery_agent_id');
     div.innerHTML = inboundOrder.delivery_agent_id.toString();
-    div = document.querySelector('#inbound-order-edit-warehouse_id');
+    div = document.querySelector('#inbound-order-view-warehouse_id');
     div.innerHTML = inboundOrder.warehouse_id.toString();
-    div = document.querySelector('#inbound-order-edit-product_id');
+    div = document.querySelector('#inbound-order-view-product_id');
     div.innerHTML = inboundOrder.product_id.toString();
   }),
 );

@@ -29,6 +29,7 @@ class InboundOrder(db.Model, ModelMixin):
     )
     quantity: orm.Mapped[int] = orm.mapped_column()
     delivery_date: orm.Mapped[datetime] = orm.mapped_column(sa.DateTime)
+    status: orm.Mapped[str] = orm.mapped_column(sa.String(64))
 
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,

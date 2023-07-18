@@ -10,6 +10,7 @@ class InboundOrder(BaseModel):
     order_title: str
     quantity: int
     delivery_date: datetime
+    status: str
     supplier_id: int
     delivery_agent_id: int
     warehouse_id: int

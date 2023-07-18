@@ -58,6 +58,18 @@ def get_all():
         ).scalars(),
         page=pagination,
         search_query=q,
+        suppliers=db.session.execute(
+            m.Supplier.select().order_by(m.Supplier.id)
+        ).scalars(),
+        delivery_agents=db.session.execute(
+            m.DeliveryAgent.select().order_by(m.DeliveryAgent.id)
+        ).scalars(),
+        warehouses=db.session.execute(
+            m.Warehouse.select().order_by(m.Warehouse.id)
+        ).scalars(),
+        products=db.session.execute(
+            m.Product.select().order_by(m.Product.id)
+        ).scalars(),
         form_create=form_create,
         form_edit=form_edit,
     )
@@ -86,6 +98,7 @@ def save():
         io.order_title = form.order_title.data
         io.quantity = form.quantity.data
         io.delivery_date = form.delivery_date.data
+        io.status = form.status.data
         io.supplier_id = form.supplier_id.data
         io.delivery_agent_id = form.delivery_agent_id.data
         io.warehouse_id = form.warehouse_id.data
@@ -117,6 +130,7 @@ def create():
             order_title=form.order_title.data,
             quantity=form.quantity.data,
             delivery_date=form.delivery_date.data,
+            status=form.status.data,
             supplier_id=form.supplier_id.data,
             delivery_agent_id=form.delivery_agent_id.data,
             warehouse_id=form.warehouse_id.data,

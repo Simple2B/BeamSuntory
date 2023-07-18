@@ -19,6 +19,16 @@
             <input type="text" name="order_id" id="inbound-order-edit-order_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Order ID" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
+            <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Status</label >
+            <select type="text" name="status" id="inbound-order-edit-status" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Status" required>
+              <option selected="selected" value="" disabled>Choose Status</option>
+              <option value="Draft">Draft</option>
+              <option value="Assigned to pickup">Assigned to pickup</option>
+              <option value="Delivered">Delivered</option>
+              <option value="In transit">In transit</option>
+            </select>          
+          </div>
+          <div class="col-span-6 sm:col-span-3">
             <label for="active_date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Active date</label >
             <input type="text" name="active_date" id="inbound-order-edit-active_date" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Active date" required />
           </div>

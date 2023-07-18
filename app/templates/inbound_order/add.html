@@ -17,6 +17,16 @@
             <input type="text" name="order_id" id="inbound-order-add-order_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Order ID" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
+            <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Status</label >
+            <select type="text" name="status" id="inbound-order-add-status" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Status" required>
+              <option selected="selected" value="" disabled>Choose Status</option>
+              <option value="Draft">Draft</option>
+              <option value="Assigned to pickup">Assigned to pickup</option>
+              <option value="Delivered">Delivered</option>
+              <option value="In transit">In transit</option>
+            </select>          
+          </div>
+          <div class="col-span-6 sm:col-span-3">
             <label for="active_date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Active date</label >
             <input type="text" name="active_date" id="inbound-order-add-active_date" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Active date" required />
           </div>
@@ -38,19 +48,35 @@
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="supplier_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Supplier</label >
-            <input type="text" name="supplier_id" id="inbound-order-add-supplier_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Supplier" required />
+            <select type="text" name="supplier_id" id="inbound-order-add-supplier_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Supplier" required >
+              {% for supplier in suppliers %}
+                <option value="{{ supplier.id }}">{{ supplier.name }}</option>
+              {% endfor %}
+            </select>
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="delivery_agent_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Delivery agent</label >
-            <input type="text" name="delivery_agent_id" id="inbound-order-add-delivery_agent_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Delivery agent" required />
+            <select type="text" name="delivery_agent_id" id="inbound-order-add-delivery_agent_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Delivery agent" required >
+              {% for delivery_agent in delivery_agents %}
+                <option value="{{ delivery_agent.id }}">{{ delivery_agent.username }}</option>
+              {% endfor %}
+            </select>
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="warehouse_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Warehouse</label >
-            <input type="text" name="warehouse_id" id="inbound-order-add-warehouse_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Warehouse" required />
+            <select type="text" name="warehouse_id" id="inbound-order-add-warehouse_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Warehouse" required >
+              {% for warehouse in warehouses %}
+                <option value="{{ warehouse.id }}">{{ warehouse.name }}</option>
+              {% endfor %}
+            </select>
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="product_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Product</label >
-            <input type="text" name="product_id" id="inbound-order-add-product_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Product" required />
+            <select type="text" name="product_id" id="inbound-order-add-product_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Product" required >
+              {% for product in products %}
+                <option value="{{ product.id }}">{{ product.name }}</option>
+              {% endfor %}
+            </select>
           </div>
 
         </div>
