@@ -210,5 +210,14 @@ def mg_g_populate(client: FlaskClient):
         active=True,
     ).save(False)
 
+    m.ShipRequest(
+        order_numb=f"Order{datetime.datetime.now().timestamp()}",
+        status="In Progress",
+        store_category="Drinks",
+        order_type="Regular",
+        supplier_id=1,
+        quantity=1,
+    ).save(False)
+
     db.session.commit()
     yield client
