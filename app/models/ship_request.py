@@ -41,8 +41,8 @@ class ShipRequest(db.Model, ModelMixin):
 
     supplier_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("suppliers.id"))
     supplier: orm.Mapped[Supplier] = orm.relationship()
-    store_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("stores.id"))
-    store: orm.Mapped[Store] = orm.relationship()
+    # store_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("stores.id"))
+    # store: orm.Mapped[Store] = orm.relationship()
 
     def __repr__(self):
         return f"<{self.id}: {self.store_name}>"

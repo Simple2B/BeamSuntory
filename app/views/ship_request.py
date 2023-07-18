@@ -72,12 +72,12 @@ def create():
             order_numb=f"BEAM-DO{datetime.datetime.now().timestamp()}",
             # NOTE: what status is default?
             status="In Progress",
-            store=form.store.data,
+            # store=form.store.data,
             store_category=form.store_category.data,
             order_type=form.order_type.data,
             # quantity=form.quantity.data,
         )
-        log(log.INFO, "Form submitted. Ship Request: [%s]", ship_request)
+        # log(log.INFO, "Form submitted. Ship Request: [%s]", ship_request)
         flash("Delivery Agent added!", "success")
         ship_request.save()
 

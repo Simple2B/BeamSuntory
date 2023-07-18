@@ -30,9 +30,9 @@ class ShipRequestForm(FlaskForm):
 
 
 class NewShipRequestForm(FlaskForm):
-    next_url = StringField("next_url")
     store = StringField("Store", [DataRequired()])
     store_category = StringField("Store", [DataRequired()])
+    order_type = StringField("Store", [DataRequired()])
     # NOTE: what field we need? delete unnecessary in the future
     # supplier = IntegerField("Supplier ID", [DataRequired()])
     # retail_price = FloatField("Retail price", [DataRequired()])
