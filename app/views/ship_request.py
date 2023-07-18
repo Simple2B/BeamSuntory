@@ -22,7 +22,6 @@ ship_request_blueprint = Blueprint("ship_request", __name__, url_prefix="/ship_r
 @login_required
 def get_all():
     form_create: f.NewShipRequestForm = f.NewShipRequestForm()
-    form_edit: f.ShipRequestForm = f.ShipRequestForm()
 
     q = request.args.get("q", type=str, default=None)
     query = m.ShipRequest.select().order_by(m.ShipRequest.id)
@@ -54,7 +53,6 @@ def get_all():
         search_query=q,
         suppliers=suppliers,
         form_create=form_create,
-        form_edit=form_edit,
     )
 
 

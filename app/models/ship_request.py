@@ -43,7 +43,7 @@ class ShipRequest(db.Model, ModelMixin):
     # store: orm.Mapped[Store] = orm.relationship()
 
     def __repr__(self):
-        return f"<{self.id}: {self.store_name}>"
+        return f"<{self.id}: {self.order_numb}>"
 
     @property
     def json(self):
