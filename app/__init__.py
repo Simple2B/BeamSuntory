@@ -28,6 +28,7 @@ def create_app(environment="development"):
         master_group_for_product_blueprint,
         warehouse_blueprint,
         delivery_agent_blueprint,
+        ship_request_blueprint,
         supplier_blueprint,
         inbound_order_blueprint,
     )
@@ -60,6 +61,7 @@ def create_app(environment="development"):
     app.register_blueprint(master_group_for_product_blueprint)
     app.register_blueprint(warehouse_blueprint)
     app.register_blueprint(delivery_agent_blueprint)
+    app.register_blueprint(ship_request_blueprint)
     app.register_blueprint(supplier_blueprint)
     app.register_blueprint(inbound_order_blueprint)
 

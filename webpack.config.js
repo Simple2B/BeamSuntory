@@ -106,6 +106,16 @@ const deliveryAgentConfig = {
   },
 };
 
+const shipRequestConfig = {
+  entry: {
+    main: './src/ship_request.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/ship_request.js', // <--- Will be compiled to this single file
+  },
+};
+
 const supplierConfig = {
   entry: {
     main: './src/supplier.ts',
@@ -136,6 +146,7 @@ const configs = [
   masterGroupProductConfig,
   warehouseConfig,
   deliveryAgentConfig,
+  shipRequestConfig,
   supplierConfig,
   inboundOrderConfig,
 ].map(conf => merge(defaultConfig, conf));

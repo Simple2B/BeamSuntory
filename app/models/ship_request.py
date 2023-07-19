@@ -6,7 +6,9 @@ from sqlalchemy import orm
 from app.database import db
 from app import schema as s
 from .utils import ModelMixin
-from .store import Store
+
+# NOTE: we need it when will be created store
+# from .store import Store
 from .supplier import Supplier
 
 
@@ -22,10 +24,14 @@ class ShipRequest(db.Model, ModelMixin):
     status: orm.Mapped[str] = orm.mapped_column(
         sa.String(64),
     )
+    store_category: orm.Mapped[str] = orm.mapped_column(
+        sa.String(64),
+    )
     order_type: orm.Mapped[str] = orm.mapped_column(
         sa.String(128),
         nullable=False,
     )  # TODO enum??? ask client
+    quantity: orm.Mapped[int] = orm.mapped_column(sa.Integer())
 
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
@@ -34,11 +40,12 @@ class ShipRequest(db.Model, ModelMixin):
 
     supplier_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("suppliers.id"))
     supplier: orm.Mapped[Supplier] = orm.relationship()
-    store_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("stores.id"))
-    store: orm.Mapped[Store] = orm.relationship()
+    # NOTE: we need it when will be created store
+    # store_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("stores.id"))
+    # store: orm.Mapped[Store] = orm.relationship()
 
     def __repr__(self):
-        return f"<{self.id}: {self.store_name}>"
+        return f"<{self.id}: {self.order_numb}>"
 
     @property
     def json(self):
