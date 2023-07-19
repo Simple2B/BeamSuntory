@@ -109,10 +109,8 @@ deleteButtons.forEach(e => {
 
 function editInboundOrder(inboundOrder: IInboundOrder) {
   let input: HTMLInputElement = document.querySelector(
-    '#inbound-order-edit-order_id',
+    '#inbound-order-edit-id',
   );
-  input.value = inboundOrder.order_id;
-  input = document.querySelector('#inbound-order-edit-id');
   input.value = inboundOrder.id.toString();
   input = document.querySelector('#inbound-order-edit-active_date');
   input.value = convertDate(inboundOrder.active_date.toString());

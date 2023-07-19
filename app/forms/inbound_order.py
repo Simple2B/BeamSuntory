@@ -8,7 +8,6 @@ from app import models as m, db
 class InboundOrderForm(FlaskForm):
     next_url = StringField("next_url")
     inbound_order_id = StringField("inbound_order_id", [DataRequired()])
-    order_id = StringField("Order ID", [DataRequired()])
     active_date = StringField("Active date", [DataRequired()])  # datetime
     active_time = StringField("Active time", [DataRequired()])  # datetime
     order_title = StringField("Order title", [DataRequired()])
@@ -33,7 +32,6 @@ class InboundOrderForm(FlaskForm):
 
 
 class NewInboundOrderForm(FlaskForm):
-    order_id = StringField("Order ID", [DataRequired()])
     active_date = StringField("Active date", [DataRequired()])  # datetime
     active_time = StringField("Active time", [DataRequired()])  # datetime
     order_title = StringField("Order title", [DataRequired()])

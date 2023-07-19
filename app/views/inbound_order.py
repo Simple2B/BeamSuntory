@@ -1,3 +1,5 @@
+import datetime
+
 from flask import (
     Blueprint,
     render_template,
@@ -92,12 +94,13 @@ def save():
             )
             flash("Cannot save inbound order data", "danger")
 
-        io.order_id = form.order_id.data
-        io.active_date = form.active_date.data
+        io.active_date = datetime.datetime.strptime(form.active_date.data, "%m/%d/%Y")
         io.active_time = form.active_time.data
         io.order_title = form.order_title.data
         io.quantity = form.quantity.data
-        io.delivery_date = form.delivery_date.data
+        io.delivery_date = datetime.datetime.strptime(
+            form.delivery_date.data, "%m/%d/%Y"
+        )
         io.status = form.status.data
         io.supplier_id = form.supplier_id.data
         io.delivery_agent_id = form.delivery_agent_id.data
@@ -124,12 +127,14 @@ def create():
         return redirect(url_for("inbound_order.get_all"))
     if form.validate_on_submit():
         inbound_order = m.InboundOrder(
-            order_id=form.order_id.data,
-            active_date=form.active_date.data,
+            order_id=f"IO-BEAM-{int(datetime.datetime.now().timestamp())}",
+            active_date=datetime.datetime.strptime(form.active_date.data, "%m/%d/%Y"),
             active_time=form.active_time.data,
             order_title=form.order_title.data,
             quantity=form.quantity.data,
-            delivery_date=form.delivery_date.data,
+            delivery_date=datetime.datetime.strptime(
+                form.delivery_date.data, "%m/%d/%Y"
+            ),
             status=form.status.data,
             supplier_id=form.supplier_id.data,
             delivery_agent_id=form.delivery_agent_id.data,
