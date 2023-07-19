@@ -126,6 +126,16 @@ const supplierConfig = {
   },
 };
 
+const cartConfig = {
+  entry: {
+    main: './src/cart.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/cart.js', // <--- Will be compiled to this single file
+  },
+};
+
 const configs = [
   baseConfig,
   userConfig,
@@ -138,6 +148,7 @@ const configs = [
   deliveryAgentConfig,
   shipRequestConfig,
   supplierConfig,
+  cartConfig,
 ].map(conf => merge(defaultConfig, conf));
 
 module.exports = configs;

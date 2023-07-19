@@ -4,12 +4,13 @@
   <div class="relative w-full max-w-2xl max-h-full">
     <!-- Modal content -->
     <!-- TODO : Change the action url -->
-    <form action="#" method="post" class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+    <form action="{{ url_for('cart.create')}}" method="post" class="relative bg-white rounded-lg shadow dark:bg-gray-700">
       <!-- TODO add csrf -->
       <!-- Modal header -->
       <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Ship</h3>
       </div>
+      <input type="text" hidden name="product_id" id="product-ship-product-id">
       <div class="p-6 space-y-6">
         <div class="grid grid-cols-6 gap-5">
           <div class="col-span-6 sm:col-span-2 sm:row-span-2 max-height-image-container">
@@ -28,8 +29,8 @@
             <div id="product-ship-available-quantity"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>  
           </div>
           <div class="col-span-6 sm:col-span-2">
-            <label for="product-ship-batch-no" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Desire Quantity</label >
-            <input type="text" name="product-ship-batch-no-quantity" id="product-ship-batch-no-quantity" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Quantity" required />
+            <label for="product-ship-desire-quantity" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Desire Quantity</label >
+            <input type="text" name="quantity" id="product-ship-desire-quantity" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Quantity" required />
           </div>
           <div class="col-span-6 sm:col-span-2">
             <label for="product-ship-total-available-items" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Total Available Items</label >

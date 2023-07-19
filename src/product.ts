@@ -585,6 +585,8 @@ function ship(product: IProduct) {
   div.innerHTML = '600';
   div = document.querySelector('#product-ship-total-available-items');
   div.innerHTML = '600';
+  let input: HTMLInputElement = document.querySelector('#product-ship-product-id');
+  input.value = product.id.toString();
   shipModal.show();
 }
 

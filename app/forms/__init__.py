@@ -13,3 +13,4 @@ from .warehouse import WarehouseForm, NewWarehouseForm
 from .delivery_agent import DeliveryAgentForm, NewDeliveryAgentForm
 from .ship_request import NewShipRequestForm
 from .supplier import SupplierForm, NewSupplierForm
+from .cart import CartForm, NewCartForm

@@ -45,7 +45,7 @@ def get_all():
                 | m.ShipRequest.order_type.like(f"{q}%")
                 | m.ShipRequest.status.like(f"{q}%")
             )
-            .select_from(m.MasterGroup)
+            .select_from(m.ShipRequest)
         )
 
     pagination = create_pagination(total=db.session.scalar(count_query))
