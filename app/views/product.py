@@ -107,6 +107,8 @@ def get_all_products(request, query=None, count_query=None):
     ]
     product_mg_g["master_group_product_name"] = master_group_product_name
 
+    suppliers = db.session.execute(m.Supplier.select()).scalars()
+
     return {
         "query": query,
         "pagination": pagination,
@@ -118,6 +120,7 @@ def get_all_products(request, query=None, count_query=None):
         "master_groups_search": master_groups_search,
         "product_mg_g": json.dumps(product_mg_g),
         "master_product_groups_name": master_group_product_name,
+        "suppliers": suppliers,
     }
 
 
@@ -152,6 +155,7 @@ def get_all():
         master_groups_search=products_object["master_groups_search"],
         product_mg_g=products_object["product_mg_g"],
         master_group_product_name=products_object["master_product_groups_name"],
+        suppliers=products_object["suppliers"],
         form_sort=form_sort,
         form_create=form_create,
         form_edit=form_edit,
@@ -415,6 +419,7 @@ def sort():
             master_groups_search=products_object["master_groups_search"],
             product_mg_g=products_object["product_mg_g"],
             master_group_product_name=products_object["master_product_groups_name"],
+            suppliers=products_object["suppliers"],
             form_sort=form,
             form_create=form_create,
             form_edit=form_edit,
