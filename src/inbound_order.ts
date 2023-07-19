@@ -1,6 +1,14 @@
 import {Modal} from 'flowbite';
 import type {ModalOptions, ModalInterface} from 'flowbite';
+import {Input, Timepicker, initTE} from 'tw-elements';
 
+initTE({Input, Timepicker});
+
+const pickerInline = document.querySelector('#timepicker-inline-12');
+const timepickerMaxMin = new Timepicker(pickerInline, {
+  format12: true,
+  inline: true,
+});
 // /*
 //  * $editInboundOrderModal: required
 //  * options: optional
@@ -11,7 +19,7 @@ import type {ModalOptions, ModalInterface} from 'flowbite';
 interface IInboundOrder {
   id: number;
   order_id: string;
-  active_date: string;
+  active_date: number;
   active_time: string;
   order_title: string;
   quantity: number;
@@ -21,6 +29,15 @@ interface IInboundOrder {
   delivery_agent_id: number;
   warehouse_id: number;
   product_id: number;
+}
+
+function convertDate(date: string) {
+  const inputDate = date.split('T')[0];
+  const dateParts = inputDate.split('-');
+  const year = dateParts[0];
+  const month = dateParts[1];
+  const day = dateParts[2];
+  return `${month}/${day}/${year}`;
 }
 
 const $modalElement: HTMLElement = document.querySelector(
@@ -98,7 +115,7 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
   input = document.querySelector('#inbound-order-edit-id');
   input.value = inboundOrder.id.toString();
   input = document.querySelector('#inbound-order-edit-active_date');
-  input.value = inboundOrder.active_date;
+  input.value = convertDate(inboundOrder.active_date.toString());
   input = document.querySelector('#inbound-order-edit-active_time');
   input.value = inboundOrder.active_time;
   input = document.querySelector('#inbound-order-edit-order_title');
@@ -106,7 +123,7 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
   input = document.querySelector('#inbound-order-edit-quantity');
   input.value = inboundOrder.quantity.toString();
   input = document.querySelector('#inbound-order-edit-delivery_date');
-  input.value = inboundOrder.delivery_date;
+  input.value = convertDate(inboundOrder.delivery_date.toString());
   input = document.querySelector('#inbound-order-edit-status');
   input.value = inboundOrder.status;
   input = document.querySelector('#inbound-order-edit-supplier_id');
@@ -138,7 +155,7 @@ viewInboundOrderButtonElements.forEach(e =>
     div = document.querySelector('#inbound-order-view-id');
     div.innerHTML = inboundOrder.id.toString();
     div = document.querySelector('#inbound-order-view-active_date');
-    div.innerHTML = inboundOrder.active_date;
+    div.innerHTML = convertDate(inboundOrder.active_date.toString());
     div = document.querySelector('#inbound-order-view-active_time');
     div.innerHTML = inboundOrder.active_time;
     div = document.querySelector('#inbound-order-view-order_title');
@@ -146,7 +163,7 @@ viewInboundOrderButtonElements.forEach(e =>
     div = document.querySelector('#inbound-order-view-quantity');
     div.innerHTML = inboundOrder.quantity.toString();
     div = document.querySelector('#inbound-order-view-delivery_date');
-    div.innerHTML = inboundOrder.delivery_date;
+    div.innerHTML = convertDate(inboundOrder.delivery_date.toString());
     div = document.querySelector('#inbound-order-view-status');
     div.innerHTML = inboundOrder.status;
     div = document.querySelector('#inbound-order-view-supplier_id');

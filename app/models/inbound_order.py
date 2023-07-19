@@ -22,7 +22,7 @@ class InboundOrder(db.Model, ModelMixin):
         nullable=False,
     )
     active_date: orm.Mapped[datetime] = orm.mapped_column(sa.DateTime)
-    active_time: orm.Mapped[datetime] = orm.mapped_column(sa.DateTime)
+    active_time: orm.Mapped[str] = orm.mapped_column(sa.String(64))
     order_title: orm.Mapped[str] = orm.mapped_column(
         sa.String(64),
         nullable=False,

@@ -6,7 +6,7 @@ class InboundOrder(BaseModel):
     id: int
     order_id: str
     active_date: datetime
-    active_time: datetime
+    active_time: str
     order_title: str
     quantity: int
     delivery_date: datetime
