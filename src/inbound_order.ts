@@ -16,6 +16,13 @@ const timepickerMaxMin = new Timepicker(pickerInline, {
 
 // // For your js code
 
+interface SupDAWhProd {
+  supplier: string;
+  delivery_agent: string;
+  warehouse: string;
+  product: string;
+}
+
 interface IInboundOrder {
   id: number;
   order_id: string;
@@ -29,6 +36,7 @@ interface IInboundOrder {
   delivery_agent_id: number;
   warehouse_id: number;
   product_id: number;
+  sup_da_wh_prod_objs: SupDAWhProd;
 }
 
 function convertDate(date: string) {
@@ -165,12 +173,12 @@ viewInboundOrderButtonElements.forEach(e =>
     div = document.querySelector('#inbound-order-view-status');
     div.innerHTML = inboundOrder.status;
     div = document.querySelector('#inbound-order-view-supplier_id');
-    div.innerHTML = inboundOrder.supplier_id.toString();
+    div.innerHTML = inboundOrder.sup_da_wh_prod_objs.supplier;
     div = document.querySelector('#inbound-order-view-delivery_agent_id');
-    div.innerHTML = inboundOrder.delivery_agent_id.toString();
+    div.innerHTML = inboundOrder.sup_da_wh_prod_objs.delivery_agent;
     div = document.querySelector('#inbound-order-view-warehouse_id');
-    div.innerHTML = inboundOrder.warehouse_id.toString();
+    div.innerHTML = inboundOrder.sup_da_wh_prod_objs.warehouse;
     div = document.querySelector('#inbound-order-view-product_id');
-    div.innerHTML = inboundOrder.product_id.toString();
+    div.innerHTML = inboundOrder.sup_da_wh_prod_objs.product;
   }),
 );

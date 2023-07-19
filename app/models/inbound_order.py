@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 
 import sqlalchemy as sa
 from sqlalchemy import orm
@@ -53,4 +54,16 @@ class InboundOrder(db.Model, ModelMixin):
     @property
     def json(self):
         mg = s.InboundOrder.from_orm(self)
-        return mg.json()
+        ujs = mg.json()
+        mg_dict = json.loads(ujs)
+        current_io: InboundOrder = db.session.execute(
+            InboundOrder.select().where(InboundOrder.id == mg_dict["id"])
+        ).scalar()
+
+        mg_dict["sup_da_wh_prod_objs"] = {
+            "supplier": current_io.supplier.name,
+            "delivery_agent": current_io.delivery_agent.username,
+            "warehouse": current_io.warehouse.name,
+            "product": current_io.product.name,
+        }
+        return json.dumps(mg_dict)
