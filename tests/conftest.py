@@ -222,6 +222,7 @@ def mg_g_populate(client: FlaskClient):
         delivery_agent_id=1,
         warehouse_id=1,
         product_id=1,
+    ).save(False)
 
     m.ShipRequest(
         order_numb=f"Order{datetime.datetime.now().timestamp()}",
@@ -230,6 +231,7 @@ def mg_g_populate(client: FlaskClient):
         order_type="Regular",
         supplier_id=1,
         quantity=1,
+    ).save(False)
 
     db.session.commit()
     yield client
