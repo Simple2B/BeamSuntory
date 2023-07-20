@@ -9,6 +9,8 @@ class Store(BaseModel):
     contact_person: str
     email: str
     phone_numb: str
+    country: str
+    region: str
     city: str
     address: str
     zip: str

@@ -233,5 +233,19 @@ def mg_g_populate(client: FlaskClient):
         quantity=1,
     ).save(False)
 
+    m.Store(
+        store_category="restaurant",
+        store_name="JB-restaurant",
+        contact_person="Johnny",
+        email="storejb@email.com",
+        phone_numb="380362470231",
+        country="Can",
+        region="Alba",
+        city="Kan",
+        address="st.1",
+        zip="45778",
+        active=True,
+    ).save(False)
+
     db.session.commit()
     yield client
