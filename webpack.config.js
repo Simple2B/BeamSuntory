@@ -136,6 +136,16 @@ const inboundOrderConfig = {
   },
 };
 
+const storeConfig = {
+  entry: {
+    main: './src/store.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/store.js', // <--- Will be compiled to this single file
+  },
+};
+
 const configs = [
   baseConfig,
   userConfig,
@@ -149,6 +159,7 @@ const configs = [
   shipRequestConfig,
   supplierConfig,
   inboundOrderConfig,
+  storeConfig,
 ].map(conf => merge(defaultConfig, conf));
 
 module.exports = configs;
