@@ -6,7 +6,6 @@ from sqlalchemy import orm
 from app.database import db
 from app import schema as s
 from .utils import ModelMixin
-from .values import StrValue
 
 
 class Store(db.Model, ModelMixin):
