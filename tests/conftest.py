@@ -230,7 +230,7 @@ def mg_g_populate(client: FlaskClient):
         store_category="Drinks",
         order_type="Regular",
         supplier_id=1,
-        quantity=1,
+        user_id=1,
     ).save(False)
 
     m.Store(
