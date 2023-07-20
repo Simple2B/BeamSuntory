@@ -35,6 +35,8 @@ class Store(db.Model, ModelMixin):
         sa.String(64),
         nullable=False,
     )
+    country: orm.Mapped[str] = orm.mapped_column(sa.String(64))
+    region: orm.Mapped[str] = orm.mapped_column(sa.String(64))
     city: orm.Mapped[str] = orm.mapped_column(sa.String(64))
     address: orm.Mapped[str] = orm.mapped_column(sa.String(64))
     zip: orm.Mapped[str] = orm.mapped_column(sa.String(64))
@@ -44,11 +46,6 @@ class Store(db.Model, ModelMixin):
         sa.DateTime,
         default=datetime.utcnow,
     )
-
-    country_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("str_values.id"))
-    country: orm.Mapped[StrValue] = orm.relationship(foreign_keys=[country_id])
-    region_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("str_values.id"))
-    region: orm.Mapped[StrValue] = orm.relationship(foreign_keys=[region_id])
 
     def __repr__(self):
         return f"<{self.id}: {self.store_name}>"
