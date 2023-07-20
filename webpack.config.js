@@ -133,6 +133,8 @@ const cartConfig = {
   output: {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/cart.js', // <--- Will be compiled to this single file
+  },
+};
 
 const inboundOrderConfig = {
   entry: {
