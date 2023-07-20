@@ -3,7 +3,6 @@ from wtforms import (
     StringField,
     SubmitField,
     ValidationError,
-    IntegerField,
 )
 from wtforms.validators import DataRequired
 
