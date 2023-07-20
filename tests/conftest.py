@@ -210,6 +210,20 @@ def mg_g_populate(client: FlaskClient):
         active=True,
     ).save(False)
 
+    m.InboundOrder(
+        order_id=f"IO-BEAM-{int(datetime.datetime.now().timestamp())}",
+        active_date=datetime.datetime.strptime("07/20/2023", "%m/%d/%Y"),
+        active_time="12:00 AM",
+        order_title="Inbound Order test",
+        quantity=5,
+        delivery_date=datetime.datetime.strptime("07/19/2023", "%m/%d/%Y"),
+        status="Delivered",
+        supplier_id=1,
+        delivery_agent_id=1,
+        warehouse_id=1,
+        product_id=1,
+    ).save(False)
+
     m.ShipRequest(
         order_numb=f"Order{datetime.datetime.now().timestamp()}",
         status="In Progress",
@@ -217,6 +231,20 @@ def mg_g_populate(client: FlaskClient):
         order_type="Regular",
         supplier_id=1,
         quantity=1,
+    ).save(False)
+
+    m.Store(
+        store_category="restaurant",
+        store_name="JB-restaurant",
+        contact_person="Johnny",
+        email="storejb@email.com",
+        phone_numb="380362470231",
+        country="Can",
+        region="Alba",
+        city="Kan",
+        address="st.1",
+        zip="45778",
+        active=True,
     ).save(False)
 
     db.session.commit()

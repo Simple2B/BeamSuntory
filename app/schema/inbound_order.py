@@ -6,9 +6,15 @@ class InboundOrder(BaseModel):
     id: int
     order_id: str
     active_date: datetime
-    active_time: datetime
-    item_type: str
-    quantity: int  # TODO enum??
+    active_time: str
+    order_title: str
+    quantity: int
+    delivery_date: datetime
+    status: str
+    supplier_id: int
+    delivery_agent_id: int
+    warehouse_id: int
+    product_id: int
     created_at: datetime
 
     class Config:

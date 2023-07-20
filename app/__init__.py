@@ -31,6 +31,8 @@ def create_app(environment="development"):
         ship_request_blueprint,
         supplier_blueprint,
         cart_blueprint,
+        inbound_order_blueprint,
+        store_blueprint,
     )
     from app import models as m
 
@@ -64,6 +66,8 @@ def create_app(environment="development"):
     app.register_blueprint(ship_request_blueprint)
     app.register_blueprint(supplier_blueprint)
     app.register_blueprint(cart_blueprint)
+    app.register_blueprint(inbound_order_blueprint)
+    app.register_blueprint(store_blueprint)
 
     # Set up flask login.
     @login_manager.user_loader

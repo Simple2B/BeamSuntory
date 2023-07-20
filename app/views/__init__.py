@@ -12,3 +12,5 @@ from .delivery_agent import delivery_agent_blueprint
 from .ship_request import ship_request_blueprint
 from .supplier import supplier_blueprint
 from .cart import cart_blueprint
+from .inbound_order import inbound_order_blueprint
+from .store import store_blueprint

@@ -133,6 +133,24 @@ const cartConfig = {
   output: {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/cart.js', // <--- Will be compiled to this single file
+
+const inboundOrderConfig = {
+  entry: {
+    main: './src/inbound_order.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/inbound_order.js', // <--- Will be compiled to this single file
+  },
+};
+
+const storeConfig = {
+  entry: {
+    main: './src/store.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/store.js', // <--- Will be compiled to this single file
   },
 };
 
@@ -149,6 +167,8 @@ const configs = [
   shipRequestConfig,
   supplierConfig,
   cartConfig,
+  inboundOrderConfig,
+  storeConfig,
 ].map(conf => merge(defaultConfig, conf));
 
 module.exports = configs;

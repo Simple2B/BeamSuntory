@@ -14,3 +14,5 @@ from .delivery_agent import DeliveryAgentForm, NewDeliveryAgentForm
 from .ship_request import NewShipRequestForm
 from .supplier import SupplierForm, NewSupplierForm
 from .cart import CartForm, NewCartForm
+from .inbound_order import InboundOrderForm, NewInboundOrderForm
+from .store import StoreForm, NewStoreForm
