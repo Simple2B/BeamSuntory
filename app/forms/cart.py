@@ -24,9 +24,8 @@ class NewCartForm(FlaskForm):
 
 
 class CartForm(FlaskForm):
-    product_id = IntegerField("Store", [DataRequired()])
+    cart_id = IntegerField("Store", [DataRequired()])
     comments = StringField("Comments")
-    status = StringField("Status", [DataRequired()])
     quantity = IntegerField("Quantity", [DataRequired()])
 
     submit = SubmitField("Save")

@@ -1,5 +1,4 @@
 from datetime import datetime
-import json
 
 import sqlalchemy as sa
 from sqlalchemy import orm
@@ -19,11 +18,12 @@ class Cart(db.Model, ModelMixin):
     product: orm.Mapped[Product] = orm.relationship()
     comments: orm.Mapped[str] = orm.mapped_column(sa.String(256), default="")
     quantity: orm.Mapped[int] = orm.mapped_column(sa.Integer)
-    status: orm.Mapped[str] = orm.mapped_column(sa.String(64), default="pending")  # in progress, completed, removed
+    status: orm.Mapped[str] = orm.mapped_column(
+        sa.String(64), default="pending"
+    )  # in progress, completed, removed
     user_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("users.id"))
-
+    order_numb: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=True)
     created_at: orm.Mapped[datetime] = orm.mapped_column(
-
         sa.DateTime,
         default=datetime.utcnow,
     )
@@ -31,7 +31,7 @@ class Cart(db.Model, ModelMixin):
     def __repr__(self):
         return f"<{self.id}: {self.product_id}>"
 
-    # @property
-    # def json(self):
-    #     mg = s.Cart.from_orm(self)
-    #     return mg.json()
+    @property
+    def json(self):
+        c = s.Cart.from_orm(self)
+        return c.json()

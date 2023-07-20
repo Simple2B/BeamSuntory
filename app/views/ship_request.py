@@ -7,7 +7,7 @@ from flask import (
     redirect,
     url_for,
 )
-from flask_login import login_required
+from flask_login import login_required, current_user
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
@@ -52,13 +52,25 @@ def get_all():
     suppliers_rows = db.session.execute(sa.select(m.Supplier)).all()
     suppliers = [row[0] for row in suppliers_rows]
 
+    ship_requests = [i for i in db.session.execute(
+        query.offset((pagination.page - 1) * pagination.per_page).limit(
+            pagination.per_page
+        )
+    ).scalars()]
+    current_order_carts = {
+        spr.order_numb: [
+            cart
+            for cart in db.session.execute(
+                m.Cart.select().where(m.Cart.order_numb == spr.order_numb)
+            ).scalars()
+        ]
+        for spr in ship_requests
+    }
+
     return render_template(
         "ship_request/ship_requests.html",
-        ship_requests=db.session.execute(
-            query.offset((pagination.page - 1) * pagination.per_page).limit(
-                pagination.per_page
-            )
-        ).scalars(),
+        ship_requests=ship_requests,
+        current_order_carts=current_order_carts,
         page=pagination,
         search_query=q,
         suppliers=suppliers,
@@ -75,19 +87,34 @@ def create():
         return redirect(url_for("ship_request.get_all"))
     if form.validate_on_submit():
         ship_request = m.ShipRequest(
-            order_numb=f"BEAM-DO{datetime.datetime.now().timestamp()}",
+            order_numb=f"BEAM-DO{int(datetime.datetime.now().timestamp())}",
             # NOTE: what status is default?
-            status="In Progress",
+            status="pending",
             supplier_id=form.supplier.data,
             # NOTE: commented, until store is created
             # store=form.store.data,
             store_category=form.store_category.data,
-            order_type=form.order_type.data,
-            quantity=int(form.quantity.data),
+            # TODO: ask client about store_delivery
+            order_type="store_delivery",
+            user_id=current_user.id,
         )
         log(log.INFO, "Form submitted. Ship Request: [%s]", ship_request)
         flash("Ship request added!", "success")
         ship_request.save()
+
+        query_cart = db.session.execute(
+            m.Cart.select().where(
+                m.Cart.user_id == current_user.id, m.Cart.status == "pending"
+            )
+        ).scalars()
+
+        carts = [c for c in query_cart]
+        for cart in carts:
+            cart.status = "completed"
+            cart.order_numb = ship_request.order_numb
+            cart.save()
+
+        db.session.commit()
 
         return redirect(url_for("ship_request.get_all"))
 

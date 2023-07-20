@@ -27,13 +27,11 @@ def get_all():
     form = f.CartForm()
 
     q = request.args.get("q", type=str, default=None)
-    query = m.Cart.select().order_by(m.Cart.id)
+    query = m.Cart.select().where(m.Cart.status == "pending").order_by(m.Cart.id)
     count_query = sa.select(sa.func.count()).select_from(m.Cart)
     if q:
         query = (
-            m.Cart.select()
-            .where(m.ShipRequest.order_numb.like(f"{q}%"))
-            .order_by(m.Cart.id)
+            m.Cart.select().where(m.Cart.order_numb.like(f"{q}%")).order_by(m.Cart.id)
         )
         count_query = (
             sa.select(sa.func.count())
@@ -41,6 +39,12 @@ def get_all():
             .select_from(m.Cart)
         )
     pagination = create_pagination(total=db.session.scalar(count_query))
+
+    delivery_agents_rows = db.session.execute(sa.select(m.DeliveryAgent)).all()
+    delivery_agents = [row[0] for row in delivery_agents_rows]
+
+    warehouses_rows = db.session.execute(sa.select(m.Warehouse)).all()
+    warehouses = [row[0] for row in warehouses_rows]
 
     return render_template(
         "cart.html",
@@ -52,6 +56,8 @@ def get_all():
         page=pagination,
         search_query=q,
         form=form,
+        delivery_agents=delivery_agents,
+        warehouses=warehouses,
     )
 
 
@@ -83,38 +89,38 @@ def create():
 @cart_blueprint.route("/edit", methods=["POST"])
 @login_required
 def save():
-    form = f.GroupForm()
+    form = f.CartForm()
     if form.validate_on_submit():
-        query = m.Cart.select().where(m.Cart.id == int(form.group_id.data))
-        u: m.Group | None = db.session.scalar(query)
-        if not u:
-            log(log.ERROR, "Not found group by id : [%s]", form.group_id.data)
-            flash("Cannot save group data", "danger")
-        u.name = form.name.data
-        u.master_group_id = form.master_group.data
-        u.save()
+        query = m.Cart.select().where(m.Cart.id == int(form.cart_id.data))
+        c: m.Cart | None = db.session.scalar(query)
+        if not c:
+            log(log.ERROR, "Not found cart item by id : [%s]", form.cart_id.data)
+            flash("Cannot save item data", "danger")
+        c.comments = form.comments.data
+        c.quantity = form.quantity.data
+        c.save()
         if form.next_url.data:
             return redirect(form.next_url.data)
         return redirect(url_for("group.get_all"))
 
     else:
-        log(log.ERROR, "group save errors: [%s]", form.errors)
+        log(log.ERROR, "Cart item save errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
-        return redirect(url_for("group.get_all"))
+        return redirect(url_for("cart.get_all"))
 
 
 @cart_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
 def delete(id: int):
-    u = db.session.scalar(m.Group.select().where(m.Group.id == id))
-    if not u:
-        log(log.INFO, "There is no group with id: [%s]", id)
-        flash("There is no such group", "danger")
-        return "no group", 404
+    c = db.session.scalar(m.Cart.select().where(m.Cart.id == id))
+    if not c:
+        log(log.INFO, "There is no cart item with id: [%s]", id)
+        flash("There is no such item", "danger")
+        return "no item", 404
 
-    delete_u = sa.delete(m.Group).where(m.Group.id == id)
-    db.session.execute(delete_u)
+    delete_c = sa.delete(m.Cart).where(m.Cart.id == id)
+    db.session.execute(delete_c)
     db.session.commit()
-    log(log.INFO, "Group deleted. Group: [%s]", u)
-    flash("Group deleted!", "success")
+    log(log.INFO, "Cart item deleted. Group: [%s]", c)
+    flash("Item deleted!", "success")
     return "ok", 200

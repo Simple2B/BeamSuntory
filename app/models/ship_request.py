@@ -1,4 +1,6 @@
 from datetime import datetime
+import json
+
 
 import sqlalchemy as sa
 from sqlalchemy import orm
@@ -10,6 +12,7 @@ from .utils import ModelMixin
 # NOTE: we need it when will be created store
 # from .store import Store
 from .supplier import Supplier
+from .cart import Cart
 
 
 class ShipRequest(db.Model, ModelMixin):
@@ -31,7 +34,7 @@ class ShipRequest(db.Model, ModelMixin):
         sa.String(128),
         nullable=False,
     )  # TODO enum??? ask client
-    quantity: orm.Mapped[int] = orm.mapped_column(sa.Integer())
+    user_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("users.id"))
 
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
@@ -50,4 +53,19 @@ class ShipRequest(db.Model, ModelMixin):
     @property
     def json(self):
         mg = s.ShipRequest.from_orm(self)
-        return mg.json()
+        ujs = mg.json()
+        mg_dict = json.loads(ujs)
+        mg_dict["current_order_carts"] = [
+            {
+                "name": cart.product.name,
+                "SKU": cart.product.SKU,
+                "price": cart.product.regular_price,
+                "quantity": cart.quantity,
+                "comment": cart.comments,
+                "image": cart.product.image,
+            }
+            for cart in db.session.execute(
+                Cart.select().where(Cart.order_numb == mg_dict["order_numb"])
+            ).scalars()
+        ]
+        return json.dumps(mg_dict)

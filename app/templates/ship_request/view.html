@@ -2,7 +2,7 @@
 <!-- prettier-ignore-->
 <div id="view-ship-request-modal" tabindex="-1" aria-hidden="true"
   class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
-  <div class="relative w-full max-w-2xl max-h-full">
+  <div class="relative w-full max-w-6xl max-h-full">
     <!-- Modal content -->
     <!-- TODO change action for view form -->
     <form action="#" method="get" class="relative bg-white rounded-lg shadow dark:bg-gray-700">
@@ -15,18 +15,9 @@
       <!-- Modal body -->
       <div class="p-6 space-y-6">
         <div class="grid grid-cols-6 gap-6">
-          <div class="col-span-6 sm:col-span-2 sm:row-span-2 max-height-image-container">
-            <img id="ship-request-view-image" class="w-full h-full object-cover">
-          </div>
-          <div class="col-span-6 sm:col-span-4">
+          <div class="col-span-3 sm:col-span-3">
             <label for="order_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Order Number</label>
             <div id="ship-request-view-order-number"
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            </div>
-          </div>
-          <div class="col-span-6 sm:col-span-4">
-            <label for="item" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Item</label>
-            <div id="ship-request-view-item"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
           </div>
@@ -37,50 +28,26 @@
             </div>
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="sku" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">SKU</label>
-            <div id="ship-request-view-sku"
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            </div>
-          </div>
-          <div class="col-span-6 sm:col-span-3">
             <label for="created_date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Created Date</label>
             <div id="ship-request-view-created-date"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="expiry_date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Expiry Date</label>
-            <div id="ship-request-view-expiry_date"
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            </div>
-          </div>
-          <div class="col-span-6 sm:col-span-3">
-            <label for="retatil_price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Retail Price</label>
-            <div id="ship-request-view-retatil_price"
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            </div>
-          </div>
-          <div class="col-span-6 sm:col-span-3">
-            <label for="regular_price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Regular Price</label>
-            <div id="ship-request-view-regular_price"
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            </div>
-          </div>
-          <div class="col-span-6 sm:col-span-3">
-            <label for="quantity" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
-            <div id="ship-request-view-quantity"
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            </div>
-          </div>
-          <div class="col-span-6 sm:col-span-3">
-            <label for="total" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Total</label>
-            <div id="ship-request-view-total"
+            <label for="expiry_date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Type</label>
+            <div id="ship-request-view-type"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="store" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store</label>
             <div id="ship-request-view-store"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="warehouse" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Warehouse</label>
+            <div id="ship-request-view-warehouse"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
           </div>
@@ -129,6 +96,22 @@
         </div>
       </div>
       <!-- Modal footer -->
+      <table class="w-full mb-1 text-sm text-left text-gray-500 dark:text-gray-400">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+          <tr>
+            <th scope="col" class="px-6 py-3">#</th>
+            <th scope="col" class="px-6 py-3">Image</th>
+            <th scope="col" class="px-6 py-3">Name</th>
+            <th scope="col" class="px-6 py-3">SKU</th>
+            <th scope="col" class="px-6 py-3">Expiry Date</th>
+            <th scope="col" class="px-6 py-3">Price</th>
+            <th scope="col" class="px-6 py-3">Comments</th>
+            <th scope="col" class="px-6 py-3">Quantity</th>
+          </tr>
+        </thead>
+        <tbody id="table-ship-request-body">
+        </tbody>
+      </table>
     </form>
   </div>
 </div>
