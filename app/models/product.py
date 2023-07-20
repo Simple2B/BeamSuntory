@@ -39,9 +39,7 @@ class Product(db.Model, ModelMixin):
         nullable=False,
     )
 
-    image: orm.Mapped[str] = orm.mapped_column(
-        sa.Text()
-    )  # link or png base64 str??
+    image: orm.Mapped[str] = orm.mapped_column(sa.Text())  # link or png base64 str??
     description: orm.Mapped[str] = orm.mapped_column(sa.String(256))
     # General Info ->
     SKU: orm.Mapped[str] = orm.mapped_column(sa.String(64))
@@ -86,9 +84,6 @@ class Product(db.Model, ModelMixin):
             for i in current_product_products_groups_rows
         }
 
-        # mg_dict["brand"] = mg.brand.value
-        # mg_dict["category"] = mg.category.name
-        # mg_dict["language"] = mg.language.value
         mg_dict["mstr_groups_groups"] = mstr_groups_groups
         mg_dict["current_user_groups"] = {
             grps[0].parent.master_groups.name: [
