@@ -301,6 +301,8 @@ interface IProduct {
   mstr_groups_groups: object;
   current_user_groups: object;
   groups_ids: object;
+  available_quantity: number;
+  total_available_items: number;
 }
 
 const $requestShareModalElement: HTMLElement = document.querySelector(
@@ -561,13 +563,13 @@ function requestShare(product: IProduct) {
   div = document.querySelector('#product-request-share-sku');
   div.innerHTML = product.SKU;
   div = document.querySelector('#product-request-share-available-quantity');
-  div.innerHTML = '600';
+  div.innerHTML = product.available_quantity.toString();
   div = document.querySelector('#product-request-share-owner');
   div.innerHTML = 'Mike';
   div = document.querySelector('#product-request-share-role');
   div.innerHTML = 'ADMIN';
   div = document.querySelector('#product-request-share-total-available-items');
-  div.innerHTML = '600';
+  div.innerHTML = product.total_available_items.toString();
   requestShareModal.show();
 }
 
@@ -581,11 +583,15 @@ function ship(product: IProduct) {
   div.innerHTML = product.name;
   div = document.querySelector('#product-ship-sku');
   div.innerHTML = product.SKU;
+  console.log('product.available_quantity', product.available_quantity);
+
   div = document.querySelector('#product-ship-available-quantity');
-  div.innerHTML = '600';
+  div.innerHTML = product.available_quantity.toString();
   div = document.querySelector('#product-ship-total-available-items');
-  div.innerHTML = '600';
-  let input: HTMLInputElement = document.querySelector('#product-ship-product-id');
+  div.innerHTML = product.total_available_items.toString();
+  let input: HTMLInputElement = document.querySelector(
+    '#product-ship-product-id',
+  );
   input.value = product.id.toString();
   shipModal.show();
 }
