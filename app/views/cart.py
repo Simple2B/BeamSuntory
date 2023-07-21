@@ -42,7 +42,7 @@ def get_all():
 
     warehouses_rows = db.session.execute(sa.select(m.Warehouse)).all()
     warehouses = [row[0] for row in warehouses_rows]
-    
+
     stores_rows = db.session.execute(sa.select(m.Store)).all()
     stores = [row[0] for row in stores_rows]
 

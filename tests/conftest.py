@@ -229,7 +229,8 @@ def mg_g_populate(client: FlaskClient):
         status="In Progress",
         store_category="Drinks",
         order_type="Regular",
-        supplier_id=1,
+        store_id=1,
+        warehouse_id=1,
         user_id=1,
     ).save(False)
 

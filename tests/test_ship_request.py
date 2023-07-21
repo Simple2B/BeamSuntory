@@ -28,7 +28,8 @@ def test_create_ship_request(client):
             status="In Progress",
             store_category="Drinks",
             order_type="test type",
-            supplier="1",
+            store=1,
+            warehouse=1,
             quantity=1,
         ),
     )
