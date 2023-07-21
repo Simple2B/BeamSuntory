@@ -6,10 +6,22 @@ interface IShipRequest {
   order_numb: string;
   status: string;
   order_type: string;
-  supplier_id: number;
+  store_id: number;
+  warehouse_id: number;
+  warehouse_name: string;
   created_at: string;
   quantity: number;
-  current_order_carts: object[];
+  current_order_carts: IProduct[];
+}
+
+interface IProduct {
+  id: number;
+  name: string;
+  quantity: string;
+  price: number;
+  image: string;
+  SKU: string;
+  comment: string;
 }
 
 const $modalViewElement: HTMLElement = document.querySelector(
@@ -27,7 +39,7 @@ const modalOptions: ModalOptions = {
     const tableShipRequestBody = document.querySelector(
       '#table-ship-request-body',
     );
-    while(tableShipRequestBody.firstChild) {
+    while (tableShipRequestBody.firstChild) {
       tableShipRequestBody.removeChild(tableShipRequestBody.firstChild);
     }
   },
@@ -56,6 +68,7 @@ if (searchInputButton && searchInput) {
   });
 }
 
+// --delete ship request item--
 const deleteButtons = document.querySelectorAll('.delete-ship-request-btn');
 
 deleteButtons.forEach(e => {
@@ -72,16 +85,14 @@ deleteButtons.forEach(e => {
   });
 });
 
+// ----view modal-----
 const viewShipRequestButtonElements = document.querySelectorAll(
   '.ship-request-view-button',
 );
 viewShipRequestButtonElements.forEach(e =>
   e.addEventListener('click', () => {
     const shipRequest: IShipRequest = JSON.parse(e.getAttribute('data-target'));
-    // const supplier = JSON.parse(e.getAttribute('data-target-supplier'));
-    const order_numb = e.getAttribute('data-target-current-order');
-
-    console.log('ship_request', shipRequest);
+    const store = JSON.parse(e.getAttribute('data-target-store'));
 
     let div: HTMLDivElement = document.querySelector(
       '#ship-request-view-order-number',
@@ -93,8 +104,22 @@ viewShipRequestButtonElements.forEach(e =>
     div.innerHTML = shipRequest.created_at.slice(0, 10);
     div = document.querySelector('#ship-request-view-type');
     div.innerHTML = shipRequest.order_type;
-    // div = document.querySelector('#ship-request-view-quantity');
-    // div.innerHTML = shipRequest.quantity.toString();
+    div = document.querySelector('#ship-request-view-warehouse-name');
+    div.innerHTML = shipRequest.warehouse_name;
+    div = document.querySelector('#ship-request-view-store');
+    div.innerHTML = store.store_name;
+    div = document.querySelector('#ship-request-view-store_address');
+    div.innerHTML = store.address;
+    div = document.querySelector('#ship-request-view-store_phone');
+    div.innerHTML = store.phone_numb;
+    div = document.querySelector('#ship-request-view-store_country');
+    div.innerHTML = store.country;
+    div = document.querySelector('#ship-request-view-store_province');
+    div.innerHTML = store.region;
+    div = document.querySelector('#ship-request-view-store_city');
+    div.innerHTML = store.city;
+    div = document.querySelector('#ship-request-view-store_zip_code');
+    div.innerHTML = store.zip;
     const tableShipRequestBody = document.querySelector(
       '#table-ship-request-body',
     );
@@ -153,9 +178,10 @@ viewShipRequestButtonElements.forEach(e =>
           <div class="pl-3">
             <div id="product-view-regular_price"
               class="shadow-sm h-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-              ${product.comment
-                ? product.comment
-                : `<span class="text-gray-400">No comment</span>`
+              ${
+                product.comment
+                  ? product.comment
+                  : `<span class="text-gray-400">No comment</span>`
               }
             </div>
           </div>

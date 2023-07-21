@@ -9,10 +9,9 @@ from app.database import db
 from app import schema as s
 from .utils import ModelMixin
 
-# NOTE: we need it when will be created store
-# from .store import Store
-from .supplier import Supplier
 from .cart import Cart
+from .warehouse import Warehouse
+from .store import Store
 
 
 class ShipRequest(db.Model, ModelMixin):
@@ -41,11 +40,10 @@ class ShipRequest(db.Model, ModelMixin):
         default=datetime.utcnow,
     )
 
-    supplier_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("suppliers.id"))
-    supplier: orm.Mapped[Supplier] = orm.relationship()
-    # NOTE: we need it when will be created store
-    # store_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("stores.id"))
-    # store: orm.Mapped[Store] = orm.relationship()
+    warehouse_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("warehouses.id"))
+    warehouse: orm.Mapped[Warehouse] = orm.relationship()
+    store_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("stores.id"))
+    store: orm.Mapped[Store] = orm.relationship()
 
     def __repr__(self):
         return f"<{self.id}: {self.order_numb}>"
@@ -68,4 +66,5 @@ class ShipRequest(db.Model, ModelMixin):
                 Cart.select().where(Cart.order_numb == mg_dict["order_numb"])
             ).scalars()
         ]
+        mg_dict["warehouse_name"] = self.warehouse.name
         return json.dumps(mg_dict)

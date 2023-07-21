@@ -11,14 +11,10 @@ from app import db
 
 
 class NewShipRequestForm(FlaskForm):
-    # NOTE: commented while store does not exist
-    # store = StringField("Store", [DataRequired()])
     store_category = StringField("Store", [DataRequired()])
     order_type = StringField("Order Type")
-    supplier = StringField("Supplier", [DataRequired()])
-    # NOTE: what field we need? delete unnecessary in the future
-    # retail_price = FloatField("Retail price", [DataRequired()])
-    # regular_price = FloatField("Regular price", [DataRequired()])
+    store = StringField("Store", [DataRequired()])
+    warehouse = StringField("Warehouse", [DataRequired()])
 
     submit = SubmitField("Save")
 

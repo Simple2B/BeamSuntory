@@ -42,6 +42,9 @@ def get_all():
 
     warehouses_rows = db.session.execute(sa.select(m.Warehouse)).all()
     warehouses = [row[0] for row in warehouses_rows]
+    
+    stores_rows = db.session.execute(sa.select(m.Store)).all()
+    stores = [row[0] for row in stores_rows]
 
     return render_template(
         "cart.html",
@@ -55,6 +58,7 @@ def get_all():
         form=form,
         delivery_agents=delivery_agents,
         warehouses=warehouses,
+        stores=stores,
     )
 
 
@@ -96,9 +100,9 @@ def save():
         c.comments = form.comments.data
         c.quantity = form.quantity.data
         c.save()
-        if form.next_url.data:
-            return redirect(form.next_url.data)
-        return redirect(url_for("group.get_all"))
+        # if form.next_url.data:
+        #     return redirect(form.next_url.data)
+        return redirect(url_for("cart.get_all"))
 
     else:
         log(log.ERROR, "Cart item save errors: [%s]", form.errors)

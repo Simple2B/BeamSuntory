@@ -49,8 +49,6 @@ def get_all():
         )
 
     pagination = create_pagination(total=db.session.scalar(count_query))
-    suppliers_rows = db.session.execute(sa.select(m.Supplier)).all()
-    suppliers = [row[0] for row in suppliers_rows]
 
     ship_requests = [i for i in db.session.execute(
         query.offset((pagination.page - 1) * pagination.per_page).limit(
@@ -73,7 +71,6 @@ def get_all():
         current_order_carts=current_order_carts,
         page=pagination,
         search_query=q,
-        suppliers=suppliers,
         form_create=form_create,
     )
 
@@ -90,10 +87,9 @@ def create():
             order_numb=f"BEAM-DO{int(datetime.datetime.now().timestamp())}",
             # NOTE: what status is default?
             status="pending",
-            supplier_id=form.supplier.data,
-            # NOTE: commented, until store is created
-            # store=form.store.data,
+            store_id=form.store.data,
             store_category=form.store_category.data,
+            warehouse_id=form.warehouse.data,
             # TODO: ask client about store_delivery
             order_type="store_delivery",
             user_id=current_user.id,
