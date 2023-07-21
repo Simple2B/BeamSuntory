@@ -32,19 +32,7 @@ def init(app: Flask):
         if db.session.execute(query).first():
             print(f"User with e-mail: [{app.config['ADMIN_EMAIL']}] already exists")
             return
-        master_group_name = "Country"
-        mg_query = m.MasterGroup.select().where(m.MasterGroup.name == master_group_name)
-        if not db.session.execute(mg_query).first():
-            m.MasterGroup(
-                name=master_group_name,
-            ).save()
-        group_name = "Canada"
-        g_query = m.Group.select().where(m.Group.name == group_name)
-        if not db.session.execute(g_query).first():
-            m.Group(
-                name=group_name,
-                master_group_id="1",
-            ).save()
+
         m.User(
             username=app.config["ADMIN_USERNAME"],
             email=app.config["ADMIN_EMAIL"],
@@ -60,3 +48,122 @@ def init(app: Flask):
             sales_rep=False,
         ).save()
         print("admin created")
+
+    @app.cli.command("fill-db")
+    def fill_db():
+        """Populate DB with basic data."""
+        master_groups = {
+            "Country": ["Canada", "US"],
+            "Brand": ["JB", "Bombay"],
+            "Language": ["English", "French"],
+        }
+
+        for mg in master_groups:
+            master_group = db.session.execute(
+                m.MasterGroup.select().where(m.MasterGroup.name == mg)
+            ).scalar()
+            if not master_group:
+                master_group = m.MasterGroup(
+                    name=mg,
+                )
+                master_group.save(False)
+
+            for g in master_groups[mg]:
+                group = db.session.execute(
+                    m.Group.select().where(m.Group.name == g)
+                ).scalar()
+                if not group:
+                    m.Group(
+                        name=g,
+                        master_group_id=master_group.id,
+                    ).save(False)
+
+        # yeah yeah, just code duplication
+        for mg in master_groups:
+            master_group = db.session.execute(
+                m.MasterGroupProduct.select().where(m.MasterGroupProduct.name == mg)
+            ).scalar()
+            if not master_group:
+                master_group = m.MasterGroupProduct(
+                    name=mg,
+                )
+                master_group.save(False)
+
+            for g in master_groups[mg]:
+                group = db.session.execute(
+                    m.GroupProduct.select().where(m.GroupProduct.name == g)
+                ).scalar()
+                if not group:
+                    m.GroupProduct(
+                        name=g,
+                        master_group_id=master_group.id,
+                    ).save(False)
+
+        wh_user = "warehouse manager 1"
+        m.User(
+            username=wh_user,
+            email="warehouseuser1@mail.com",
+            password="warehousemanagerpassword1",
+            role="WAREHOUSE_MANAGER",
+            activated=True,
+            approval_permission=True,
+            street_address="street",
+            phone_number="123456789",
+            country="UK",
+            region="Lv",
+            city="Dro",
+            zip_code="82100",
+            sales_rep=False,
+        ).save(False)
+
+        wh_manager: m.User = db.session.execute(
+            m.User.select().where(m.User.username == wh_user)
+        ).scalar()
+
+        m.Warehouse(
+            name="Maywood warehouse",
+            phone_number="380362470221",
+            city="Al",
+            zip="unzip",
+            address="sserdda",
+            manager_id=wh_manager.id,
+        ).save(False)
+
+        m.DeliveryAgent(
+            first_name="May",
+            last_name="Wood",
+            username="maywood",
+            email="maywood@test.com",
+            contact_number="380362470223",
+            street_address="sserdda",
+            active=True,
+        ).save(False)
+
+        m.Supplier(
+            name="supplier base 1",
+            email="supplier_base_1@email.com",
+            contact_number="380362470225",
+            country="Cat",
+            region="Albe",
+            city="Kam",
+            address="st.2",
+            zip="45773",
+            active=True,
+        ).save(False)
+
+        m.Store(
+            store_category="restaurant",
+            store_name="JB-restaurant",
+            contact_person="Johnny",
+            email="storejb@email.com",
+            phone_numb="380362470231",
+            country="Can",
+            region="Alba",
+            city="Kan",
+            address="st.1",
+            zip="45778",
+            active=True,
+        ).save(False)
+
+        db.session.commit()
+        print("database filled")
