@@ -9,6 +9,7 @@ class ShipRequest(BaseModel):
     order_type: str  # enum??? ask client
     store_id: int
     warehouse_id: int
+    comment: str | None
 
     created_at: datetime
 

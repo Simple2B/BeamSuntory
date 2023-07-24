@@ -12,6 +12,7 @@ interface IShipRequest {
   created_at: string;
   quantity: number;
   current_order_carts: IProduct[];
+  comment: string;
 }
 
 interface IProduct {
@@ -24,11 +25,26 @@ interface IProduct {
   comment: string;
 }
 
+interface IStore {
+  id: number;
+  store_name: string;
+  address: string;
+  phone_numb: string;
+  country: string;
+  region: string;
+  city: string;
+  zip: string;
+}
+
 const $modalViewElement: HTMLElement = document.querySelector(
   '#view-ship-request-modal',
 );
 
-const modalOptions: ModalOptions = {
+const $modalEditElement: HTMLElement = document.querySelector(
+  '#edit-ship-request-modal',
+);
+
+const modalViewOptions: ModalOptions = {
   placement: 'bottom-right',
   backdrop: 'dynamic',
   backdropClasses:
@@ -37,21 +53,47 @@ const modalOptions: ModalOptions = {
   onHide: () => {
     console.log('modal is hidden');
     const tableShipRequestBody = document.querySelector(
-      '#table-ship-request-body',
+      '#table-ship-request-body-view',
     );
     while (tableShipRequestBody.firstChild) {
       tableShipRequestBody.removeChild(tableShipRequestBody.firstChild);
     }
   },
-  onShow: () => {
-    console.log('user id: ');
-  },
+  onShow: () => {},
   onToggle: () => {
     console.log('modal has been toggled');
   },
 };
 
-const viewModal: ModalInterface = new Modal($modalViewElement, modalOptions);
+const modalEditOptions: ModalOptions = {
+  placement: 'bottom-right',
+  backdrop: 'dynamic',
+  backdropClasses:
+    'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
+  closable: true,
+  onHide: () => {
+    console.log('modal is hidden');
+    const tableShipRequestBody = document.querySelector(
+      '#table-ship-request-body-edit',
+    );
+    while (tableShipRequestBody.firstChild) {
+      tableShipRequestBody.removeChild(tableShipRequestBody.firstChild);
+    }
+  },
+  onShow: () => {},
+  onToggle: () => {
+    console.log('modal has been toggled');
+  },
+};
+
+const viewModal: ModalInterface = new Modal(
+  $modalViewElement,
+  modalViewOptions,
+);
+const editModal: ModalInterface = new Modal(
+  $modalEditElement,
+  modalEditOptions,
+);
 
 // search flow
 const searchInput: HTMLInputElement = document.querySelector(
@@ -106,6 +148,8 @@ viewShipRequestButtonElements.forEach(e =>
     div.innerHTML = shipRequest.order_type;
     div = document.querySelector('#ship-request-view-warehouse-name');
     div.innerHTML = shipRequest.warehouse_name;
+    div = document.querySelector('#ship-request-view-comment');
+    div.innerHTML = shipRequest.comment;
     div = document.querySelector('#ship-request-view-store');
     div.innerHTML = store.store_name;
     div = document.querySelector('#ship-request-view-store_address');
@@ -120,24 +164,89 @@ viewShipRequestButtonElements.forEach(e =>
     div.innerHTML = store.city;
     div = document.querySelector('#ship-request-view-store_zip_code');
     div.innerHTML = store.zip;
-    const tableShipRequestBody = document.querySelector(
-      '#table-ship-request-body',
-    );
-    const currentCartItems = shipRequest.current_order_carts;
-    console.log('currentCartItems', currentCartItems);
-    currentCartItems.forEach((product, index) => {
-      const tableShipRequestItem = document.createElement('tr');
 
-      tableShipRequestItem.classList.add(
-        'table-product-item-tr',
-        'bg-white',
-        'border-b',
-        'dark:bg-gray-800',
-        'dark:border-gray-700',
-        'hover:bg-gray-50',
-        'dark:hover:bg-gray-600',
-      );
-      tableShipRequestItem.innerHTML = `
+    createShipRequestItemTable(shipRequest, 'view');
+    viewModal.show();
+  }),
+);
+
+const $buttonEditElements = document.querySelectorAll(
+  '.ship-request-edit-button',
+);
+$buttonEditElements.forEach(e =>
+  e.addEventListener('click', () => {
+    editShipRequest(
+      JSON.parse(e.getAttribute('data-target')),
+      JSON.parse(e.getAttribute('data-target-store')),
+    );
+  }),
+);
+
+// -----user edit modal window----
+function editShipRequest(shipRequest: IShipRequest, store: IStore) {
+  console.log('shipRequest', shipRequest);
+  console.log('store', store);
+  let input: HTMLInputElement = document.querySelector(
+    '#ship-request-edit-status',
+  );
+  input.value = shipRequest.status;
+  input = document.querySelector('#ship-request-edit-store');
+  input.value = shipRequest.store_id.toString();
+  // input = document.querySelector('#ship-request-edit-warehouse-name');
+  // input.value = shipRequest.warehouse_id.toString();
+
+  let div: HTMLDivElement = document.querySelector(
+    '#ship-request-edit-order-number',
+  );
+  div.innerHTML = shipRequest.order_numb;
+  div = document.querySelector('#ship-request-edit-store');
+  div.innerHTML = store.store_name;
+  div = document.querySelector('#ship-request-edit-type');
+  div.innerHTML = shipRequest.order_type;
+  div = document.querySelector('#ship-request-edit-status');
+  div.innerHTML = shipRequest.status;
+  div = document.querySelector('#ship-request-edit-created-date');
+  div.innerHTML = shipRequest.created_at.slice(0, 10);
+  div = document.querySelector('#ship-request-edit-comment');
+  div.innerHTML = shipRequest.comment;
+  div = document.querySelector('#ship-request-edit-store');
+  div.innerHTML = store.store_name;
+  div = document.querySelector('#ship-request-edit-store_address');
+  div.innerHTML = store.address;
+  div = document.querySelector('#ship-request-edit-store_phone');
+  div.innerHTML = store.phone_numb;
+  div = document.querySelector('#ship-request-edit-store_country');
+  div.innerHTML = store.country;
+  div = document.querySelector('#ship-request-edit-store_province');
+  div.innerHTML = store.region;
+  div = document.querySelector('#ship-request-edit-store_city');
+  div.innerHTML = store.city;
+  div = document.querySelector('#ship-request-edit-store_zip_code');
+  div.innerHTML = store.zip;
+
+  createShipRequestItemTable(shipRequest, 'edit');
+
+  editModal.show();
+}
+
+function createShipRequestItemTable(shipRqst: IShipRequest, typeModal: string) {
+  const tableShipRequestBody = document.querySelector(
+    `#table-ship-request-body-${typeModal}`,
+  );
+  const currentCartItems = shipRqst.current_order_carts;
+  currentCartItems.forEach((product, index) => {
+    const tableShipRequestItem = document.createElement('tr');
+
+    tableShipRequestItem.classList.add(
+      'table-product-item-tr',
+      'bg-white',
+      'border-b',
+      'dark:bg-gray-800',
+      'dark:border-gray-700',
+      'hover:bg-gray-50',
+      'dark:hover:bg-gray-600',
+    );
+    tableShipRequestItem.innerHTML = `
         <td class="w-4 p-4">
           <div class="flex items-center">
             ${index + 1}
@@ -176,27 +285,52 @@ viewShipRequestButtonElements.forEach(e =>
         </td>
         <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div id="product-view-regular_price"
-              class="shadow-sm h-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-              ${
-                product.comment
-                  ? product.comment
-                  : `<span class="text-gray-400">No comment</span>`
-              }
-            </div>
-          </div>
-        </td>
-        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div id="product-view-regular_price"
+            <div
               class="shadow-sm h-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
               ${product.quantity}
             </div>
           </div>
         </td>
+        <td class="p-4 space-x-2 whitespace-nowrap">
+          <select type="text" name="store" id="ship-request-${typeModal}-warehouse-name"
+            class="ship-request-${typeModal}-warehouse-name shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            placeholder="Currency" required>
+          </select>
+        </td>
       `;
-      tableShipRequestBody.appendChild(tableShipRequestItem);
-    });
-    viewModal.show();
-  }),
-);
+    const selectWarehouse = tableShipRequestItem.querySelector(
+      `#ship-request-${typeModal}-warehouse-name`,
+    );
+    for (const warehouse of shipRqst.warehouses) {
+      const option = document.createElement('option');
+      option.value = warehouse.id.toString();
+      option.text = warehouse.name;
+      selectWarehouse.appendChild(option);
+     }
+    tableShipRequestBody.appendChild(tableShipRequestItem);
+  });
+}
+
+function setWarehouseAllItems(warehouseId: string, typeModal: string) {
+  const warehousesSelect = document.querySelectorAll(`.ship-request-${typeModal}-warehouse-name`);
+  warehousesSelect.forEach((e: HTMLInputElement) => {
+    e.value = warehouseId.toString();
+  });
+}
+
+const isWarehouseSetAll: HTMLInputElement = document.querySelector('#ship-request-edit-warehouse-set-all');
+
+isWarehouseSetAll.addEventListener('change', () => {
+  if (isWarehouseSetAll.checked) {
+    const warehouseInput = document.querySelector(
+      '#ship-request-edit-warehouse-name',
+    ) as HTMLInputElement;
+    const warehouseId = warehouseInput.value;
+    setWarehouseAllItems(warehouseId, 'edit');
+  }
+});
+
+const warehouseNameSelect = document.querySelector('#ship-request-edit-warehouse-name') as HTMLInputElement;
+warehouseNameSelect.addEventListener('change', () => {
+  isWarehouseSetAll.checked = false;
+});

@@ -34,6 +34,7 @@ class ShipRequest(db.Model, ModelMixin):
         nullable=False,
     )  # TODO enum??? ask client
     user_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("users.id"))
+    comment: orm.Mapped[str] = orm.mapped_column(sa.String(256), default="")
 
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
@@ -59,7 +60,6 @@ class ShipRequest(db.Model, ModelMixin):
                 "SKU": cart.product.SKU,
                 "price": cart.product.regular_price,
                 "quantity": cart.quantity,
-                "comment": cart.comments,
                 "image": cart.product.image,
             }
             for cart in db.session.execute(
@@ -67,4 +67,8 @@ class ShipRequest(db.Model, ModelMixin):
             ).scalars()
         ]
         mg_dict["warehouse_name"] = self.warehouse.name
+        mg_dict["warehouses"] = [{
+                "name": w.name,
+                "id": w.id,
+            } for w in db.session.execute(Warehouse.select()).scalars()]
         return json.dumps(mg_dict)

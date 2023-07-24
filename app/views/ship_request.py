@@ -22,6 +22,7 @@ ship_request_blueprint = Blueprint("ship_request", __name__, url_prefix="/ship_r
 @login_required
 def get_all():
     form_create: f.NewShipRequestForm = f.NewShipRequestForm()
+    form_edit: f.ShipRequestForm = f.ShipRequestForm()
 
     q = request.args.get("q", type=str, default=None)
     query = m.ShipRequest.select().order_by(m.ShipRequest.id)
@@ -50,11 +51,14 @@ def get_all():
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
-    ship_requests = [i for i in db.session.execute(
-        query.offset((pagination.page - 1) * pagination.per_page).limit(
-            pagination.per_page
-        )
-    ).scalars()]
+    ship_requests = [
+        i
+        for i in db.session.execute(
+            query.offset((pagination.page - 1) * pagination.per_page).limit(
+                pagination.per_page
+            )
+        ).scalars()
+    ]
     current_order_carts = {
         spr.order_numb: [
             cart
@@ -64,6 +68,8 @@ def get_all():
         ]
         for spr in ship_requests
     }
+    warehouses_rows = db.session.execute(sa.select(m.Warehouse)).scalars()
+    warehouses = [{"name": w.name, "id": w.id} for w in warehouses_rows]
 
     return render_template(
         "ship_request/ship_requests.html",
@@ -72,24 +78,27 @@ def get_all():
         page=pagination,
         search_query=q,
         form_create=form_create,
+        form_edit=form_edit,
+        warehouses=warehouses,
     )
 
 
 @ship_request_blueprint.route("/create", methods=["POST"])
 @login_required
 def create():
-    form: f.NewShipRequestForm = f.NewShipRequestForm()
-    if not form.validate_on_submit():
+    form_create: f.NewShipRequestForm = f.NewShipRequestForm()
+    if not form_create.validate_on_submit():
         flash("Validation failed", "danger")
         return redirect(url_for("ship_request.get_all"))
-    if form.validate_on_submit():
+    if form_create.validate_on_submit():
         ship_request = m.ShipRequest(
             order_numb=f"BEAM-DO{int(datetime.datetime.now().timestamp())}",
             # NOTE: what status is default?
             status="pending",
-            store_id=form.store.data,
-            store_category=form.store_category.data,
-            warehouse_id=form.warehouse.data,
+            store_id=form_create.store.data,
+            store_category=form_create.store_category.data,
+            warehouse_id=1,
+            comment=form_create.comment.data,
             # TODO: ask client about store_delivery
             order_type="store_delivery",
             user_id=current_user.id,
@@ -116,6 +125,35 @@ def create():
 
     flash("Something went wrong!", "danger")
     return redirect(url_for("ship_request.get_all"))
+
+
+@ship_request_blueprint.route("/edit", methods=["POST"])
+@login_required
+def save():
+    form_edit = f.ShipRequestForm()
+    if form_edit.validate_on_submit():
+        query = m.ShipRequest.select().where(
+            m.ShipRequest.id == int(form_edit.ship_request_id.data)
+        )
+        sr: m.ShipRequest | None = db.session.scalar(query)
+        if not sr:
+            log(
+                log.ERROR,
+                "Not found ship request item by id : [%s]",
+                form_edit.ship_request_id.data,
+            )
+            flash("Cannot save item data", "danger")
+        sr.comments = form_edit.comments.data
+        sr.quantity = form_edit.quantity.data
+        sr.save()
+        # if form.next_url.data:
+        #     return redirect(form.next_url.data)
+        return redirect(url_for("ship_request.get_all"))
+
+    else:
+        log(log.ERROR, "Cart item save errors: [%s]", form_edit.errors)
+        flash(f"{form_edit.errors}", "danger")
+        return redirect(url_for("cart.get_all"))
 
 
 @ship_request_blueprint.route("/delete/<int:id>", methods=["DELETE"])
