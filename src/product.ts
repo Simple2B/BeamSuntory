@@ -570,6 +570,11 @@ function requestShare(product: IProduct) {
   div.innerHTML = 'ADMIN';
   div = document.querySelector('#product-request-share-total-available-items');
   div.innerHTML = product.total_available_items.toString();
+  let input: HTMLInputElement = document.querySelector(
+    '#product-ship-desire-quantity',
+  );
+  input.max = product.available_quantity.toString();
+  input.min = '1';
   requestShareModal.show();
 }
 
@@ -593,6 +598,9 @@ function ship(product: IProduct) {
     '#product-ship-product-id',
   );
   input.value = product.id.toString();
+  input = document.querySelector('#product-ship-desire-quantity');
+  input.max = product.available_quantity.toString();
+  input.min = '1';
   shipModal.show();
 }
 

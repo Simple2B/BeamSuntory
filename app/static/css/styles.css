@@ -1235,6 +1235,18 @@ input:checked + .toggle-bg {
   grid-column: span 6 / span 6;
 }
 
+.col-span-4 {
+  grid-column: span 4 / span 4;
+}
+
+.col-span-2 {
+  grid-column: span 2 / span 2;
+}
+
+.row-span-2 {
+  grid-row: span 2 / span 2;
+}
+
 .float-right {
   float: right;
 }
@@ -1887,6 +1899,10 @@ input:checked + .toggle-bg {
 
 .shrink-0 {
   flex-shrink: 0;
+}
+
+.flex-grow {
+  flex-grow: 1;
 }
 
 .grow {
@@ -3974,6 +3990,11 @@ input:checked + .toggle-bg {
   border-color: rgb(59 113 202 / var(--tw-border-opacity));
 }
 
+.focus\:border-primary-500:focus {
+  --tw-border-opacity: 1;
+  border-color: rgb(101 144 213 / var(--tw-border-opacity));
+}
+
 .focus\:bg-\[\#00000014\]:focus {
   background-color: #00000014;
 }
@@ -4063,6 +4084,11 @@ input:checked + .toggle-bg {
 .focus\:ring-gray-300:focus {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(209 213 219 / var(--tw-ring-opacity));
+}
+
+.focus\:ring-primary-500:focus {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(101 144 213 / var(--tw-ring-opacity));
 }
 
 .focus\:ring-red-300:focus {
@@ -5030,6 +5056,11 @@ input:checked + .toggle-bg {
   border-color: rgb(63 131 248 / var(--tw-border-opacity));
 }
 
+:is(.dark .dark\:focus\:border-primary-500:focus) {
+  --tw-border-opacity: 1;
+  border-color: rgb(101 144 213 / var(--tw-border-opacity));
+}
+
 :is(.dark .dark\:focus\:bg-white\/10:focus) {
   background-color: rgb(255 255 255 / 0.1);
 }
@@ -5067,6 +5098,11 @@ input:checked + .toggle-bg {
 :is(.dark .dark\:focus\:ring-gray-700:focus) {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(55 65 81 / var(--tw-ring-opacity));
+}
+
+:is(.dark .dark\:focus\:ring-primary-500:focus) {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(101 144 213 / var(--tw-ring-opacity));
 }
 
 :is(.dark .dark\:focus\:ring-red-900:focus) {
@@ -5168,8 +5204,16 @@ input:checked + .toggle-bg {
     grid-column: span 6 / span 6;
   }
 
+  .sm\:col-span-1 {
+    grid-column: span 1 / span 1;
+  }
+
   .sm\:row-span-2 {
     grid-row: span 2 / span 2;
+  }
+
+  .sm\:row-span-3 {
+    grid-row: span 3 / span 3;
   }
 
   .sm\:ml-64 {
