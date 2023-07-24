@@ -146,8 +146,8 @@ def get_all():
         search_query=products_object["q"],
         main_master_groups=products_object["master_groups"],
         product_groups=products_object["product_groups"],
-        current_user_groups_ids=[
-            row[0].right_id for row in products_object["current_user_groups_rows"]
+        current_user_groups=[
+            row[0] for row in products_object["current_user_groups_rows"]
         ],
         master_groups_groups_available=products_object[
             "mastr_for_prods_groups_for_prods"
@@ -410,8 +410,8 @@ def sort():
             search_query=products_object["q"],
             main_master_groups=products_object["master_groups"],
             product_groups=products_object["product_groups"],
-            current_user_groups_ids=[
-                row[0].right_id for row in products_object["current_user_groups_rows"]
+            current_user_groups=[
+                row[0] for row in products_object["current_user_groups_rows"]
             ],
             master_groups_groups_available=products_object[
                 "mastr_for_prods_groups_for_prods"

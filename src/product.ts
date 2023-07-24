@@ -571,7 +571,7 @@ function requestShare(product: IProduct) {
   div = document.querySelector('#product-request-share-total-available-items');
   div.innerHTML = product.total_available_items.toString();
   let input: HTMLInputElement = document.querySelector(
-    '#product-ship-desire-quantity',
+    '#product-request-share-quantity',
   );
   input.max = product.available_quantity.toString();
   input.min = '1';
@@ -611,6 +611,11 @@ function assign(product: IProduct) {
   // NOTE It will be need when we create master group in assign modal
   // let input: HTMLInputElement = document.querySelector('#product-assign-master-group');
   // input.value = product.mstr_groups_groups;
+  let input: HTMLInputElement = document.querySelector(
+    '#product-assign-amount',
+  );
+  input.max = product.available_quantity.toString();
+  input.min = '1';
   assignModal.show();
 }
 
