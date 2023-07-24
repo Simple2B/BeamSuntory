@@ -25,6 +25,7 @@ class NewShipRequestForm(FlaskForm):
 
 
 class ShipRequestForm(FlaskForm):
+    next_url = StringField("next_url")
     store_category = StringField("Store", [DataRequired()])
     order_type = StringField("Order Type")
     store = StringField("Store", [DataRequired()])

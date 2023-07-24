@@ -67,11 +67,6 @@ def get_all():
 def create():
     form = f.NewCartForm()
     if form.validate_on_submit():
-        # query = m.Car.select().where(m.Group.name == form.name.data)
-        # gr: m.Group | None = db.session.scalar(query)
-        # if gr:
-        #     flash("This group name is already taken.", "danger")
-        #     return redirect(url_for("group.get_all"))
         item = m.Cart(
             product_id=int(form.product_id.data),
             quantity=int(form.quantity.data),
@@ -99,8 +94,6 @@ def save():
             flash("Cannot save item data", "danger")
         c.quantity = form.quantity.data
         c.save()
-        # if form.next_url.data:
-        #     return redirect(form.next_url.data)
         return redirect(url_for("cart.get_all"))
 
     else:

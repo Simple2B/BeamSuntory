@@ -146,8 +146,8 @@ def save():
         sr.comments = form_edit.comments.data
         sr.quantity = form_edit.quantity.data
         sr.save()
-        # if form.next_url.data:
-        #     return redirect(form.next_url.data)
+        if form_edit.next_url.data:
+            return redirect(form_edit.next_url.data)
         return redirect(url_for("ship_request.get_all"))
 
     else:
