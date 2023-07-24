@@ -62,7 +62,12 @@ const modalOptions: ModalOptions = {
     'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
   closable: true,
   onHide: () => {
-    console.log('modal is hidden');
+    const inboundOrderAddItems = document.querySelectorAll(
+      '.inbound-order-edit-add-item',
+    );
+    inboundOrderAddItems.forEach(item => {
+      item.remove();
+    });
   },
   onShow: () => {
     console.log('inbound-order id: ');
@@ -182,3 +187,90 @@ viewInboundOrderButtonElements.forEach(e =>
     div.innerHTML = inboundOrder.sup_da_wh_prod_objs.product;
   }),
 );
+
+// ----add inbound order item----
+function createInboundOrderItems() {
+  console.log('createInboundOrderItems');
+  const inboundOrderAddContainer = document.querySelector(
+    '#inbound-order-edit-add-container',
+  );
+  const lastChild = inboundOrderAddContainer.lastElementChild;
+  const buttonId = Number(lastChild.getAttribute('data-target-id-btn'));
+  console.log('buttonId: ', buttonId);
+  const inboundOrderAddItem = document.createElement('div');
+  inboundOrderAddItem.classList.add(
+    'p-6',
+    'space-y-6',
+    'border-t',
+    'inbound-order-edit-add-item',
+  );
+  inboundOrderAddItem.setAttribute('data-target-id-btn', String(buttonId + 1));
+  inboundOrderAddItem.innerHTML = `
+    <div class="grid grid-cols-12 gap-5">
+    <div class="col-span-6 sm:col-span-3">
+      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product</label>
+      <select type="text" name="add_product" id="inbound-order-edit-add-product"
+        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        placeholder="Product" required>
+      </select>
+    </div>
+    <div class="col-span-6 sm:col-span-3">
+      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label>
+      <select type="text" name="add_group" id="inbound-order-edit-add-group"
+        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        placeholder="Group" required>
+      </select>
+    </div>
+    <div class="col-span-6 sm:col-span-3">
+      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
+      <select type="text" name="add_quantity" id="inbound-order-add-quantity"
+        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        placeholder="Quantity" required>
+      </select>
+    </div>
+    <div class="col-span-6 sm:col-span-3">
+      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Action</label>
+      <button type="button" data-target=""
+        class="inbound-order-edit-delete-item-btn inline-flex items-center px-3 py-2 mr-3 text-sm font-medium text-center text-white rounded-lg bg-red-600 hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+          <path d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z"></path>
+        </svg>
+      </button>
+      <button type="button" data-target=""
+        class="inbound-order-edit-add-item-btn inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+          <path d="M64 80c-8.8 0-16 7.2-16 16V416c0 8.8 7.2 16 16 16H384c8.8 0 16-7.2 16-16V96c0-8.8-7.2-16-16-16H64zM0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96zM200 344V280H136c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H248v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+  `;
+  inboundOrderAddContainer.appendChild(inboundOrderAddItem);
+
+  const addButton = inboundOrderAddItem.querySelector(
+    '.inbound-order-edit-add-item-btn',
+  );
+  addButton.addEventListener('click', () => {
+    createInboundOrderItems();
+  });
+
+  const deleteButtons = document.querySelectorAll(
+    '.inbound-order-edit-delete-item-btn',
+  );
+  deleteButtons.forEach(button =>
+    button.addEventListener('click', () => {
+      const inboundOrderItem = button.closest('.inbound-order-edit-add-item');
+      if (inboundOrderItem) {
+        inboundOrderItem.remove();
+      }
+    }),
+  );
+}
+
+// this button need to add first item from template
+const addInboundOrderItemBtnById = document.querySelector(
+  '#inbound-order-edit-add-item-btn',
+);
+addInboundOrderItemBtnById.addEventListener('click', () => {
+  createInboundOrderItems();
+});

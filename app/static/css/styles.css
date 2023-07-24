@@ -1227,20 +1227,20 @@ input:checked + .toggle-bg {
   z-index: 999;
 }
 
-.col-span-3 {
-  grid-column: span 3 / span 3;
+.col-span-2 {
+  grid-column: span 2 / span 2;
 }
 
-.col-span-6 {
-  grid-column: span 6 / span 6;
+.col-span-3 {
+  grid-column: span 3 / span 3;
 }
 
 .col-span-4 {
   grid-column: span 4 / span 4;
 }
 
-.col-span-2 {
-  grid-column: span 2 / span 2;
+.col-span-6 {
+  grid-column: span 6 / span 6;
 }
 
 .row-span-2 {
@@ -2168,6 +2168,10 @@ input:checked + .toggle-bg {
 
 .grid-cols-7 {
   grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.grid-cols-12 {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
 }
 
 .\!flex-row {
@@ -5188,6 +5192,10 @@ input:checked + .toggle-bg {
 }
 
 @media (min-width: 640px) {
+  .sm\:col-span-1 {
+    grid-column: span 1 / span 1;
+  }
+
   .sm\:col-span-2 {
     grid-column: span 2 / span 2;
   }
@@ -5204,16 +5212,8 @@ input:checked + .toggle-bg {
     grid-column: span 6 / span 6;
   }
 
-  .sm\:col-span-1 {
-    grid-column: span 1 / span 1;
-  }
-
   .sm\:row-span-2 {
     grid-row: span 2 / span 2;
-  }
-
-  .sm\:row-span-3 {
-    grid-row: span 3 / span 3;
   }
 
   .sm\:ml-64 {
