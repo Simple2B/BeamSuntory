@@ -13,6 +13,7 @@ interface IShipRequest {
   quantity: number;
   current_order_carts: IProduct[];
   comment: string;
+  warehouses: IWarehouse[];
 }
 
 interface IProduct {
@@ -34,6 +35,11 @@ interface IStore {
   region: string;
   city: string;
   zip: string;
+}
+
+interface IWarehouse {
+  id: number;
+  name: string;
 }
 
 const $modalViewElement: HTMLElement = document.querySelector(
@@ -192,8 +198,6 @@ function editShipRequest(shipRequest: IShipRequest, store: IStore) {
   input.value = shipRequest.status;
   input = document.querySelector('#ship-request-edit-store');
   input.value = shipRequest.store_id.toString();
-  // input = document.querySelector('#ship-request-edit-warehouse-name');
-  // input.value = shipRequest.warehouse_id.toString();
 
   let div: HTMLDivElement = document.querySelector(
     '#ship-request-edit-order-number',
@@ -229,6 +233,7 @@ function editShipRequest(shipRequest: IShipRequest, store: IStore) {
   editModal.show();
 }
 
+// -----create ship request item table-----
 function createShipRequestItemTable(shipRqst: IShipRequest, typeModal: string) {
   const tableShipRequestBody = document.querySelector(
     `#table-ship-request-body-${typeModal}`,
@@ -291,34 +296,61 @@ function createShipRequestItemTable(shipRqst: IShipRequest, typeModal: string) {
             </div>
           </div>
         </td>
-        <td class="p-4 space-x-2 whitespace-nowrap">
-          <select type="text" name="store" id="ship-request-${typeModal}-warehouse-name"
-            class="ship-request-${typeModal}-warehouse-name shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            placeholder="Currency" required>
-          </select>
-        </td>
       `;
-    const selectWarehouse = tableShipRequestItem.querySelector(
-      `#ship-request-${typeModal}-warehouse-name`,
-    );
-    for (const warehouse of shipRqst.warehouses) {
-      const option = document.createElement('option');
-      option.value = warehouse.id.toString();
-      option.text = warehouse.name;
-      selectWarehouse.appendChild(option);
-     }
+
+    const warehouseEditElement = document.createElement('td');
+    warehouseEditElement.classList.add('p-4', 'space-x-2', 'whitespace-nowrap');
+    warehouseEditElement.innerHTML = `
+      <td class="p-4 space-x-2 whitespace-nowrap">
+            <select type="text" name="store" id="ship-request-${typeModal}-warehouse-name"
+              class="ship-request-${typeModal}-warehouse-name shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              required>
+            </select>
+      </td>
+    `;
+
+    const warehouseViewElement = document.createElement('td');
+    warehouseViewElement.classList.add('p-4', 'space-x-2', 'whitespace-nowrap');
+    warehouseViewElement.innerHTML = `
+      <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+        <div class="pl-3">
+          <div class="text-base text-gray-900 dark:text-white font-semibold">${shipRqst.warehouse_name}</div>
+        </div>
+      </td>
+    `;
+
+    if (typeModal === 'edit') {
+      tableShipRequestItem.appendChild(warehouseEditElement);
+      const selectWarehouse = tableShipRequestItem.querySelector(
+        `#ship-request-${typeModal}-warehouse-name`,
+      );
+      for (const warehouse of shipRqst.warehouses) {
+        const option = document.createElement('option');
+        option.value = warehouse.id.toString();
+        option.text = warehouse.name;
+        selectWarehouse.appendChild(option);
+      }
+    } else {
+      tableShipRequestItem.appendChild(warehouseViewElement);
+    }
+
     tableShipRequestBody.appendChild(tableShipRequestItem);
   });
 }
 
+// -----set one warehouse to all items-----
 function setWarehouseAllItems(warehouseId: string, typeModal: string) {
-  const warehousesSelect = document.querySelectorAll(`.ship-request-${typeModal}-warehouse-name`);
+  const warehousesSelect = document.querySelectorAll(
+    `.ship-request-${typeModal}-warehouse-name`,
+  );
   warehousesSelect.forEach((e: HTMLInputElement) => {
     e.value = warehouseId.toString();
   });
 }
 
-const isWarehouseSetAll: HTMLInputElement = document.querySelector('#ship-request-edit-warehouse-set-all');
+const isWarehouseSetAll: HTMLInputElement = document.querySelector(
+  '#ship-request-edit-warehouse-set-all',
+);
 
 isWarehouseSetAll.addEventListener('change', () => {
   if (isWarehouseSetAll.checked) {
@@ -330,7 +362,9 @@ isWarehouseSetAll.addEventListener('change', () => {
   }
 });
 
-const warehouseNameSelect = document.querySelector('#ship-request-edit-warehouse-name') as HTMLInputElement;
+const warehouseNameSelect = document.querySelector(
+  '#ship-request-edit-warehouse-name',
+) as HTMLInputElement;
 warehouseNameSelect.addEventListener('change', () => {
   isWarehouseSetAll.checked = false;
 });
