@@ -97,7 +97,6 @@ def save():
         if not c:
             log(log.ERROR, "Not found cart item by id : [%s]", form.cart_id.data)
             flash("Cannot save item data", "danger")
-        c.comments = form.comments.data
         c.quantity = form.quantity.data
         c.save()
         # if form.next_url.data:

@@ -16,7 +16,6 @@ class Cart(db.Model, ModelMixin):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
     product_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("products.id"))
     product: orm.Mapped[Product] = orm.relationship()
-    comments: orm.Mapped[str] = orm.mapped_column(sa.String(256), default="")
     quantity: orm.Mapped[int] = orm.mapped_column(sa.Integer)
     status: orm.Mapped[str] = orm.mapped_column(
         sa.String(64), default="pending"
