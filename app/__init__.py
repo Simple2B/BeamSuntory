@@ -30,6 +30,7 @@ def create_app(environment="development"):
         delivery_agent_blueprint,
         ship_request_blueprint,
         supplier_blueprint,
+        cart_blueprint,
         inbound_order_blueprint,
         store_blueprint,
     )
@@ -64,6 +65,7 @@ def create_app(environment="development"):
     app.register_blueprint(delivery_agent_blueprint)
     app.register_blueprint(ship_request_blueprint)
     app.register_blueprint(supplier_blueprint)
+    app.register_blueprint(cart_blueprint)
     app.register_blueprint(inbound_order_blueprint)
     app.register_blueprint(store_blueprint)
 

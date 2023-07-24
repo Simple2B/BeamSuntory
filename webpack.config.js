@@ -126,6 +126,16 @@ const supplierConfig = {
   },
 };
 
+const cartConfig = {
+  entry: {
+    main: './src/cart.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/cart.js', // <--- Will be compiled to this single file
+  },
+};
+
 const inboundOrderConfig = {
   entry: {
     main: './src/inbound_order.ts',
@@ -158,6 +168,7 @@ const configs = [
   deliveryAgentConfig,
   shipRequestConfig,
   supplierConfig,
+  cartConfig,
   inboundOrderConfig,
   storeConfig,
 ].map(conf => merge(defaultConfig, conf));

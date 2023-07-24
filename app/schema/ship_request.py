@@ -7,8 +7,9 @@ class ShipRequest(BaseModel):
     order_numb: str
     status: str  # enum??
     order_type: str  # enum??? ask client
-    supplier_id: int
-    quantity: int
+    store_id: int
+    warehouse_id: int
+    comment: str | None
 
     created_at: datetime
 

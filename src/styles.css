@@ -14,7 +14,7 @@
 }
 
 .dropdown-open {
-    max-height: 300px;
+    max-height: 800px;
     overflow: hidden;
     transition: max-height 0.5s ease-in;
 }

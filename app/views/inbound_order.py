@@ -60,18 +60,30 @@ def get_all():
         ).scalars(),
         page=pagination,
         search_query=q,
-        suppliers=db.session.execute(
-            m.Supplier.select().order_by(m.Supplier.id)
-        ).scalars(),
-        delivery_agents=db.session.execute(
-            m.DeliveryAgent.select().order_by(m.DeliveryAgent.id)
-        ).scalars(),
-        warehouses=db.session.execute(
-            m.Warehouse.select().order_by(m.Warehouse.id)
-        ).scalars(),
-        products=db.session.execute(
-            m.Product.select().order_by(m.Product.id)
-        ).scalars(),
+        suppliers=[
+            s
+            for s in db.session.execute(
+                m.Supplier.select().order_by(m.Supplier.id)
+            ).scalars()
+        ],
+        delivery_agents=[
+            da
+            for da in db.session.execute(
+                m.DeliveryAgent.select().order_by(m.DeliveryAgent.id)
+            ).scalars()
+        ],
+        warehouses=[
+            w
+            for w in db.session.execute(
+                m.Warehouse.select().order_by(m.Warehouse.id)
+            ).scalars()
+        ],
+        products=[
+            p
+            for p in db.session.execute(
+                m.Product.select().order_by(m.Product.id)
+            ).scalars()
+        ],
         form_create=form_create,
         form_edit=form_edit,
     )
@@ -107,6 +119,25 @@ def save():
         io.warehouse_id = form.warehouse_id.data
         io.product_id = form.product_id.data
         io.save()
+
+        # save delivered product quantity, so this product would be available in warehouse
+        if io.status == "Delivered":
+            warehouse_product: m.WarehouseProduct = db.session.execute(
+                m.WarehouseProduct.select().where(
+                    m.WarehouseProduct.product_id == io.product_id,
+                    m.WarehouseProduct.warehouse_id == io.warehouse_id,
+                )
+            ).scalar()
+            if warehouse_product:
+                warehouse_product.product_quantity += io.quantity
+                warehouse_product.save()
+            else:
+                warehouse_product = m.WarehouseProduct(
+                    product_id=io.product_id,
+                    warehouse_id=io.warehouse_id,
+                    product_quantity=io.quantity,
+                )
+                warehouse_product.save()
 
         if form.next_url.data:
             return redirect(form.next_url.data)
@@ -144,6 +175,25 @@ def create():
         log(log.INFO, "Form submitted. Inbound order: [%s]", inbound_order)
         flash("Inbound order added!", "success")
         inbound_order.save()
+
+        # save delivered product quantity, so this product would be available in warehouse
+        if inbound_order.status == "Delivered":
+            warehouse_product: m.WarehouseProduct = db.session.execute(
+                m.WarehouseProduct.select().where(
+                    m.WarehouseProduct.product_id == inbound_order.product_id,
+                    m.WarehouseProduct.warehouse_id == inbound_order.warehouse_id,
+                )
+            ).scalar()
+            if warehouse_product:
+                warehouse_product.product_quantity += inbound_order.quantity
+                warehouse_product.save()
+            else:
+                warehouse_product = m.WarehouseProduct(
+                    product_id=inbound_order.product_id,
+                    warehouse_id=inbound_order.warehouse_id,
+                    product_quantity=inbound_order.quantity,
+                )
+                warehouse_product.save()
 
         return redirect(url_for("inbound_order.get_all"))
 

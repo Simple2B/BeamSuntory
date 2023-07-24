@@ -3,7 +3,6 @@ from wtforms import (
     StringField,
     SubmitField,
     ValidationError,
-    IntegerField,
 )
 from wtforms.validators import DataRequired
 
@@ -12,15 +11,25 @@ from app import db
 
 
 class NewShipRequestForm(FlaskForm):
-    # NOTE: commented while store does not exist
-    # store = StringField("Store", [DataRequired()])
     store_category = StringField("Store", [DataRequired()])
-    order_type = StringField("Store", [DataRequired()])
-    supplier = StringField("Supplier", [DataRequired()])
-    quantity = IntegerField("Quantity", [DataRequired()])
-    # NOTE: what field we need? delete unnecessary in the future
-    # retail_price = FloatField("Retail price", [DataRequired()])
-    # regular_price = FloatField("Regular price", [DataRequired()])
+    order_type = StringField("Order Type")
+    store = StringField("Store", [DataRequired()])
+    comment = StringField("Comment")
+
+    submit = SubmitField("Save")
+
+    def validate_ship_request(self, field):
+        query = m.ShipRequest.select().where(m.ShipRequest.order_numb == field.data)
+        if db.session.scalar(query) is not None:
+            raise ValidationError("This request already exist.")
+
+
+class ShipRequestForm(FlaskForm):
+    next_url = StringField("next_url")
+    store_category = StringField("Store", [DataRequired()])
+    order_type = StringField("Order Type")
+    store = StringField("Store", [DataRequired()])
+    warehouse = StringField("Warehouse")
 
     submit = SubmitField("Save")
 
