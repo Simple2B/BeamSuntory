@@ -1,4 +1,5 @@
 import datetime
+import json
 
 from flask import (
     Blueprint,
@@ -84,6 +85,12 @@ def get_all():
                 m.Product.select().order_by(m.Product.id)
             ).scalars()
         ],
+        groups=[
+            g
+            for g in db.session.execute(
+                m.Group.select().order_by(m.Group.id)
+            ).scalars()
+        ],
         form_create=form_create,
         form_edit=form_edit,
     )
@@ -138,6 +145,28 @@ def save():
                     product_quantity=io.quantity,
                 )
                 warehouse_product.save()
+
+        products = json.loads(form.products.data)
+
+        for product in products:
+            product_quantity_group: m.ProductQuantityGroup = db.session.execute(
+                m.ProductQuantityGroup.select().where(
+                    m.ProductQuantityGroup.product_id == product["product_id"],
+                    m.ProductQuantityGroup.warehouse_id == io.warehouse_id,
+                )
+            ).scalar()
+            if product_quantity_group:
+                product_quantity_group.quantity += int(product["quantity"])
+                product_quantity_group.group_id = product["group_id"]
+                product_quantity_group.save()
+            else:
+                product_quantity_group = m.ProductQuantityGroup(
+                    product_id=product["product_id"],
+                    warehouse_id=io.warehouse_id,
+                    group_id=product["group_id"],
+                    quantity=int(product["quantity"]),
+                )
+                product_quantity_group.save()
 
         if form.next_url.data:
             return redirect(form.next_url.data)
