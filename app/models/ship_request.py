@@ -12,6 +12,7 @@ from .utils import ModelMixin
 from .cart import Cart
 from .warehouse import Warehouse
 from .store import Store
+from .warehouse_product import WarehouseProduct
 
 
 class ShipRequest(db.Model, ModelMixin):
@@ -56,6 +57,7 @@ class ShipRequest(db.Model, ModelMixin):
         mg_dict = json.loads(ujs)
         mg_dict["current_order_carts"] = [
             {
+                "id": cart.product.id,
                 "name": cart.product.name,
                 "SKU": cart.product.SKU,
                 "price": cart.product.regular_price,
@@ -67,8 +69,14 @@ class ShipRequest(db.Model, ModelMixin):
             ).scalars()
         ]
         mg_dict["warehouse_name"] = self.warehouse.name
-        mg_dict["warehouses"] = [{
-                "name": w.name,
-                "id": w.id,
-            } for w in db.session.execute(Warehouse.select()).scalars()]
+        mg_dict["warehouses"] = [
+            {"name": w.name, "id": w.id, "products_ids": []}
+            for w in db.session.execute(Warehouse.select()).scalars()
+        ]
+
+        for wh_prod in db.session.execute(WarehouseProduct.select()).scalars():
+            for warehouse in mg_dict["warehouses"]:
+                if warehouse["id"] == wh_prod.warehouse_id:
+                    warehouse["products_ids"].append(wh_prod.product_id)
+
         return json.dumps(mg_dict)
