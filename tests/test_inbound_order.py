@@ -74,6 +74,7 @@ def test_edit_inbound_order(mg_g_populate: FlaskClient):
             delivery_agent_id=1,
             warehouse_id=1,
             product_id=1,
+            products='[{"product_id": 1, "quantity": 5, "group_id": 1}]',
         ),
     )
     assert response.status_code == 302

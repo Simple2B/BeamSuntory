@@ -43,7 +43,6 @@ class NewInboundOrderForm(FlaskForm):
     delivery_agent_id = IntegerField("Delivery agent ID", [DataRequired()])
     warehouse_id = IntegerField("Warehouse ID", [DataRequired()])
     product_id = IntegerField("Product ID", [DataRequired()])
-    products = FieldList(StringField("Product ID", [DataRequired()]), min_entries=1)
 
     submit = SubmitField("Save")
 
