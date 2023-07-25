@@ -21,15 +21,6 @@ interface IInboundOrder {
   sup_da_wh_prod_objs: SupDAWhProd;
 }
 
-function convertDate(date: string) {
-  const inputDate = date.split('T')[0];
-  const dateParts = inputDate.split('-');
-  const year = dateParts[0];
-  const month = dateParts[1];
-  const day = dateParts[2];
-  return `${month}/${day}/${year}`;
-}
-
 // search flow
 const searchInput: HTMLInputElement = document.querySelector(
   '#table-search-incoming-stocks',

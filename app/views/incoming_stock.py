@@ -13,6 +13,7 @@ from app import forms as f
 from app.logger import log
 
 
+# NOTE incoming stock IS inbound order. Meaning goods going from supplier to warehouse
 incoming_stock_blueprint = Blueprint(
     "incoming_stock", __name__, url_prefix="/incoming_stock"
 )

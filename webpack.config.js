@@ -166,6 +166,16 @@ const incomingStockConfig = {
   },
 };
 
+const outgoingStockConfig = {
+  entry: {
+    main: './src/outgoing_stock.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/outgoing_stock.js', // <--- Will be compiled to this single file
+  },
+};
+
 const configs = [
   baseConfig,
   userConfig,
@@ -182,6 +192,7 @@ const configs = [
   inboundOrderConfig,
   storeConfig,
   incomingStockConfig,
+  outgoingStockConfig,
 ].map(conf => merge(defaultConfig, conf));
 
 module.exports = configs;

@@ -19,7 +19,6 @@ interface IInboundOrder {
     product_id: number;
     sup_da_wh_prod_objs: SupDAWhProd;
 }
-declare function convertDate(date: string): string;
 declare const searchInput: HTMLInputElement;
 declare const searchInputButton: Element;
 declare const acceptButtons: NodeListOf<Element>;
