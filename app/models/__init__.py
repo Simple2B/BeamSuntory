@@ -19,3 +19,4 @@ from .master_group_for_product import MasterGroupProduct
 from .cart import Cart
 from .warehouse_product import WarehouseProduct
 from .product_quantity_group import ProductQuantityGroup
+from .favorite_store_user import FavoriteStoreUser

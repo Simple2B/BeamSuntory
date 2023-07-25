@@ -139,3 +139,38 @@ def delete(id: int):
     log(log.INFO, "Store deleted. Store: [%s]", s)
     flash("Store deleted!", "success")
     return "ok", 200
+
+
+@store_blueprint.route("/add-favorite", methods=["POST"])
+@login_required
+def add_favorite():
+    store_user_ids = request.json
+    user: m.User = db.session.execute(
+        m.User.select().where(m.User.id == store_user_ids["user_id"])
+    ).scalar()
+    store: m.Store = db.session.execute(
+        m.Store.select().where(m.Store.id == store_user_ids["store_id"])
+    ).scalar()
+    if user and store:
+        favorite_user_store: m.FavoriteStoreUser = db.session.execute(
+            m.FavoriteStoreUser.select().where(
+                m.FavoriteStoreUser.user_id == store_user_ids["user_id"],
+                m.FavoriteStoreUser.store_id == store_user_ids["store_id"],
+            )
+        ).scalar()
+        if favorite_user_store:
+            delete_favorite_user_store = sa.delete(m.FavoriteStoreUser).where(
+                m.FavoriteStoreUser.id == favorite_user_store.id
+            )
+            db.session.execute(delete_favorite_user_store)
+            db.session.commit()
+            return "ok", 200
+        else:
+            favorite_store = m.FavoriteStoreUser(
+                user_id=store_user_ids["user_id"],
+                store_id=store_user_ids["store_id"],
+            )
+            favorite_store.save()
+            return "ok", 200
+    else:
+        return "no user or store", 400
