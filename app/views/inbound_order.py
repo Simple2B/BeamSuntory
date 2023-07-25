@@ -85,6 +85,12 @@ def get_all():
                 m.Product.select().order_by(m.Product.id)
             ).scalars()
         ],
+        groups=[
+            g
+            for g in db.session.execute(
+                m.Group.select().order_by(m.Group.id)
+            ).scalars()
+        ],
         form_create=form_create,
         form_edit=form_edit,
     )
@@ -150,7 +156,7 @@ def save():
                 )
             ).scalar()
             if product_quantity_group:
-                product_quantity_group.quantity += product["quantity"]
+                product_quantity_group.quantity += int(product["quantity"])
                 product_quantity_group.group_id = product["group_id"]
                 product_quantity_group.save()
             else:
@@ -160,7 +166,7 @@ def save():
                     group_id=product["group_id"],
                     quantity=int(product["quantity"]),
                 )
-                warehouse_product.save()
+                product_quantity_group.save()
 
         if form.next_url.data:
             return redirect(form.next_url.data)

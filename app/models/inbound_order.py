@@ -11,6 +11,7 @@ from .supplier import Supplier
 from .delivery_agent import DeliveryAgent
 from .warehouse import Warehouse
 from .product import Product
+from .group import Group
 
 
 class InboundOrder(db.Model, ModelMixin):
@@ -59,6 +60,20 @@ class InboundOrder(db.Model, ModelMixin):
         current_io: InboundOrder = db.session.execute(
             InboundOrder.select().where(InboundOrder.id == mg_dict["id"])
         ).scalar()
+        mg_dict["groups"] = [
+            {
+                "name": g.name,
+                "id": g.id,
+            }
+            for g in db.session.execute(Group.select()).scalars()
+        ]
+        mg_dict["products"] = [
+            {
+                "name": p.name,
+                "id": p.id,
+            }
+            for p in db.session.execute(Product.select()).scalars()
+        ]
 
         mg_dict["sup_da_wh_prod_objs"] = {
             "supplier": current_io.supplier.name,
