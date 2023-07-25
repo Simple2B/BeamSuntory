@@ -1,4 +1,5 @@
 import datetime
+import json
 
 from flask import (
     Blueprint,
@@ -136,6 +137,28 @@ def save():
                     product_id=io.product_id,
                     warehouse_id=io.warehouse_id,
                     product_quantity=io.quantity,
+                )
+                warehouse_product.save()
+
+        products = json.loads(form.products.data)
+
+        for product in products:
+            product_quantity_group: m.ProductQuantityGroup = db.session.execute(
+                m.ProductQuantityGroup.select().where(
+                    m.ProductQuantityGroup.product_id == product["product_id"],
+                    m.ProductQuantityGroup.warehouse_id == io.warehouse_id,
+                )
+            ).scalar()
+            if product_quantity_group:
+                product_quantity_group.quantity += product["quantity"]
+                product_quantity_group.group_id = product["group_id"]
+                product_quantity_group.save()
+            else:
+                product_quantity_group = m.ProductQuantityGroup(
+                    product_id=product["product_id"],
+                    warehouse_id=io.warehouse_id,
+                    group_id=product["group_id"],
+                    quantity=int(product["quantity"]),
                 )
                 warehouse_product.save()
 
