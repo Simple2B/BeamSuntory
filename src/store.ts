@@ -119,15 +119,14 @@ function editStore(store: IStore) {
 const addFavoriteCheckboxes = document.querySelectorAll(
   '.store-add-favorite-btn',
 );
-addFavoriteCheckboxes.forEach((checkbox, index) => {
+addFavoriteCheckboxes.forEach((checkbox: HTMLInputElement, index) => {
   checkbox.addEventListener('change', async () => {
     const favoriteContainer = checkbox.closest('.favorite-container');
     const imageStar = favoriteContainer.querySelector(
       '.store-add-favorite-star',
     );
     const storeId = checkbox.getAttribute('data-store-id');
-    console.log('store id: ', storeId);
-    const userId = '1';
+    const userId = checkbox.getAttribute('data-user-id');
     const favStore = {
       store_id: storeId,
       user_id: userId,
