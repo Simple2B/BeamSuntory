@@ -40,6 +40,7 @@ interface IStore {
 interface IWarehouse {
   id: number;
   name: string;
+  products_ids: number[];
 }
 
 const $modalViewElement: HTMLElement = document.querySelector(
@@ -190,8 +191,6 @@ $buttonEditElements.forEach(e =>
 
 // -----user edit modal window----
 function editShipRequest(shipRequest: IShipRequest, store: IStore) {
-  console.log('shipRequest', shipRequest);
-  console.log('store', store);
   let input: HTMLInputElement = document.querySelector(
     '#ship-request-edit-status',
   );
@@ -238,6 +237,7 @@ function createShipRequestItemTable(shipRqst: IShipRequest, typeModal: string) {
   const tableShipRequestBody = document.querySelector(
     `#table-ship-request-body-${typeModal}`,
   );
+
   const currentCartItems = shipRqst.current_order_carts;
   currentCartItems.forEach((product, index) => {
     const tableShipRequestItem = document.createElement('tr');
@@ -326,9 +326,12 @@ function createShipRequestItemTable(shipRqst: IShipRequest, typeModal: string) {
       );
       for (const warehouse of shipRqst.warehouses) {
         const option = document.createElement('option');
-        option.value = warehouse.id.toString();
-        option.text = warehouse.name;
-        selectWarehouse.appendChild(option);
+
+        if (warehouse.products_ids.includes(product.id)) {
+          option.value = warehouse.id.toString();
+          option.text = warehouse.name;
+          selectWarehouse.appendChild(option);
+        }
       }
     } else {
       tableShipRequestItem.appendChild(warehouseViewElement);

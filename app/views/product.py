@@ -258,7 +258,10 @@ def save():
         u.regular_price = form.regular_price.data
         u.retail_price = form.retail_price.data
 
-        u.image = image_string
+        if len(image_string) == 0:
+            image_string = u.image
+        else:
+            u.image = image_string
         u.description = form.description.data
         # General Info ->
         u.SKU = form.SKU.data
