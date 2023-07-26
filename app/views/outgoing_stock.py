@@ -95,7 +95,7 @@ def dispatch(id: int):
         flash("There is no such ship request", "danger")
         return "no ship request", 404
 
-    sr.status = "Assigned for pickup"
+    sr.status = "Assigned to pickup"
     sr.save()
 
     log(log.INFO, "Ship Request dispatched. Ship Request: [%s]", sr)

@@ -94,10 +94,9 @@ def create():
         ship_request = m.ShipRequest(
             order_numb=f"BEAM-DO{int(datetime.datetime.now().timestamp())}",
             # NOTE: what status is default?
-            status="pending",
+            status="Waiting for warehouse manager",
             store_id=form_create.store.data,
             store_category=form_create.store_category.data,
-            warehouse_id=1,
             comment=form_create.comment.data,
             # TODO: ask client about store_delivery
             order_type="store_delivery",
