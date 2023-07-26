@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 from pydantic import BaseModel
 
 
@@ -8,7 +9,7 @@ class ShipRequest(BaseModel):
     status: str  # enum??
     order_type: str  # enum??? ask client
     store_id: int
-    warehouse_id: int
+    warehouse_id: Optional[int]
     comment: str | None
 
     created_at: datetime

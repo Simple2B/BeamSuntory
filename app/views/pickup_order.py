@@ -99,3 +99,22 @@ def pickup(id: int):
     log(log.INFO, "Ship Request pickup done. Ship Request: [%s]", sr)
     flash("Ship Request pickup done!", "success")
     return "ok", 200
+
+
+@pickup_order_blueprint.route("/deliver/<int:id>", methods=["GET"])
+@login_required
+def deliver(id: int):
+    sr: m.ShipRequest = db.session.scalar(
+        m.ShipRequest.select().where(m.ShipRequest.id == id)
+    )
+    if not sr:
+        log(log.INFO, "There is no ship request with id: [%s]", id)
+        flash("There is no such ship request", "danger")
+        return "no ship request", 404
+
+    sr.status = "Delivered"
+    sr.save()
+
+    log(log.INFO, "Ship Request delivered. Ship Request: [%s]", sr)
+    flash("Ship Request delivered!", "success")
+    return "ok", 200

@@ -35,14 +35,18 @@ class ShipRequest(db.Model, ModelMixin):
         nullable=False,
     )  # TODO enum??? ask client
     user_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("users.id"))
-    comment: orm.Mapped[str] = orm.mapped_column(sa.String(256), default="")
+    comment: orm.Mapped[str] = orm.mapped_column(
+        sa.String(256), default="", nullable=True
+    )
 
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
         default=datetime.utcnow,
     )
 
-    warehouse_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("warehouses.id"))
+    warehouse_id: orm.Mapped[int] = orm.mapped_column(
+        sa.ForeignKey("warehouses.id"), nullable=True
+    )
     warehouse: orm.Mapped[Warehouse] = orm.relationship()
     store_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("stores.id"))
     store: orm.Mapped[Store] = orm.relationship()
@@ -68,7 +72,10 @@ class ShipRequest(db.Model, ModelMixin):
                 Cart.select().where(Cart.order_numb == mg_dict["order_numb"])
             ).scalars()
         ]
-        mg_dict["warehouse_name"] = self.warehouse.name
+        # TODO: check if "No warehouse" causes problems
+        mg_dict["warehouse_name"] = (
+            self.warehouse.name if self.warehouse else "No warehouse"
+        )
         mg_dict["warehouses"] = [
             {"name": w.name, "id": w.id, "products_ids": []}
             for w in db.session.execute(Warehouse.select()).scalars()

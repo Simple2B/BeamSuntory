@@ -41,7 +41,7 @@ pickupInboundButtons.forEach(e => {
   e.addEventListener('click', async () => {
     if (confirm('Are sure?')) {
       let id = e.getAttribute('data-pickup-inbound-id');
-      const response = await fetch(`/incoming_stock/pickup/${id}`, {
+      const response = await fetch(`/pickup_inbound/pickup/${id}`, {
         method: 'GET',
       });
       if (response.status == 200) {
