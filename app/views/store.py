@@ -6,7 +6,7 @@ from flask import (
     redirect,
     url_for,
 )
-from flask_login import login_required
+from flask_login import login_required, current_user
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
@@ -41,17 +41,34 @@ def get_all():
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
-    return render_template(
-        "store/stores.html",
-        stores=db.session.execute(
+    stores = [
+        store
+        for store in db.session.execute(
             query.offset((pagination.page - 1) * pagination.per_page).limit(
                 pagination.per_page
             )
-        ).scalars(),
+        ).scalars()
+    ]
+
+    for store in stores:
+        store.favorite = db.session.execute(
+            sa.select(m.FavoriteStoreUser)
+            .where(m.FavoriteStoreUser.user_id == current_user.id)
+            .where(m.FavoriteStoreUser.store_id == store.id)
+        ).scalar()
+        if store.favorite:
+            store.favorite = True
+        else:
+            store.favorite = False
+
+    return render_template(
+        "store/stores.html",
+        stores=stores,
         page=pagination,
         search_query=q,
         form_create=form_create,
         form_edit=form_edit,
+        current_user_id=current_user.id,
     )
 
 
@@ -139,3 +156,29 @@ def delete(id: int):
     log(log.INFO, "Store deleted. Store: [%s]", s)
     flash("Store deleted!", "success")
     return "ok", 200
+
+
+@store_blueprint.route("/add-favorite", methods=["POST"])
+@login_required
+def add_favorite():
+    store_user_ids = request.json
+    favorite_user_store: m.FavoriteStoreUser = db.session.execute(
+        m.FavoriteStoreUser.select().where(
+            m.FavoriteStoreUser.user_id == store_user_ids["user_id"],
+            m.FavoriteStoreUser.store_id == store_user_ids["store_id"],
+        )
+    ).scalar()
+    if favorite_user_store:
+        delete_favorite_user_store = sa.delete(m.FavoriteStoreUser).where(
+            m.FavoriteStoreUser.id == favorite_user_store.id
+        )
+        db.session.execute(delete_favorite_user_store)
+        db.session.commit()
+        return "ok", 200
+    else:
+        favorite_store = m.FavoriteStoreUser(
+            user_id=store_user_ids["user_id"],
+            store_id=store_user_ids["store_id"],
+        )
+        favorite_store.save()
+        return "ok", 200
