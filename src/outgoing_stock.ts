@@ -70,3 +70,19 @@ dispatchButtons.forEach(e => {
     }
   });
 });
+
+const cancelButtons = document.querySelectorAll('.cancel-outgoing-stock-btn');
+
+cancelButtons.forEach(e => {
+  e.addEventListener('click', async () => {
+    if (confirm('Are sure?')) {
+      let id = e.getAttribute('data-outgoing-stock-id');
+      const response = await fetch(`/outgoing_stock/cancel/${id}`, {
+        method: 'GET',
+      });
+      if (response.status == 200) {
+        location.reload();
+      }
+    }
+  });
+});

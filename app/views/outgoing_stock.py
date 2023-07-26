@@ -84,7 +84,7 @@ def get_all():
     )
 
 
-@outgoing_stock_blueprint.route("/dispatch/<int:id>", methods=["POST", "GET"])
+@outgoing_stock_blueprint.route("/dispatch/<int:id>", methods=["GET"])
 @login_required
 def dispatch(id: int):
     sr: m.ShipRequest = db.session.scalar(
@@ -100,4 +100,23 @@ def dispatch(id: int):
 
     log(log.INFO, "Ship Request dispatched. Ship Request: [%s]", sr)
     flash("Ship Request dispatched!", "success")
+    return "ok", 200
+
+
+@outgoing_stock_blueprint.route("/cancel/<int:id>", methods=["GET"])
+@login_required
+def cancel(id: int):
+    sr: m.ShipRequest = db.session.scalar(
+        m.ShipRequest.select().where(m.ShipRequest.id == id)
+    )
+    if not sr:
+        log(log.INFO, "There is no ship request with id: [%s]", id)
+        flash("There is no such ship request", "danger")
+        return "no ship request", 404
+
+    sr.status = "Canceled"
+    sr.save()
+
+    log(log.INFO, "Ship Request canceled. Ship Request: [%s]", sr)
+    flash("Ship Request canceled!", "success")
     return "ok", 200

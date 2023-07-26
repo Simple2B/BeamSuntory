@@ -22,3 +22,4 @@ interface IInboundOrder {
 declare const searchInput: HTMLInputElement;
 declare const searchInputButton: Element;
 declare const acceptButtons: NodeListOf<Element>;
+declare const cancelOrderButtons: NodeListOf<Element>;

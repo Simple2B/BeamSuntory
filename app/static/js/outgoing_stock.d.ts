@@ -38,3 +38,4 @@ interface IWarehouse {
 declare const searchOutgoingInput: HTMLInputElement;
 declare const searchOutgoingInputButton: Element;
 declare const dispatchButtons: NodeListOf<Element>;
+declare const cancelButtons: NodeListOf<Element>;

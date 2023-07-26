@@ -50,3 +50,21 @@ acceptButtons.forEach(e => {
     }
   });
 });
+
+const cancelOrderButtons = document.querySelectorAll(
+  '.cancel-incoming-stock-btn',
+);
+
+cancelOrderButtons.forEach(e => {
+  e.addEventListener('click', async () => {
+    if (confirm('Are sure?')) {
+      let id = e.getAttribute('data-cancel-incoming-stock-id');
+      const response = await fetch(`/incoming_stock/cancel/${id}`, {
+        method: 'GET',
+      });
+      if (response.status == 200) {
+        location.reload();
+      }
+    }
+  });
+});

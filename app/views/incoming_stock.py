@@ -102,3 +102,21 @@ def accept(id: int):
     log(log.INFO, "Inbound order accepted. Inbound order: [%s]", io)
     flash("Inbound order accepted!", "success")
     return "ok", 200
+
+
+@incoming_stock_blueprint.route("/cancel/<int:id>", methods=["GET"])
+@login_required
+def cancel(id: int):
+    io: m.InboundOrder = db.session.scalar(
+        m.InboundOrder.select().where(m.InboundOrder.id == id)
+    )
+    if not io:
+        log(log.INFO, "There is no inbound order with id: [%s]", id)
+        flash("There is no such inbound order", "danger")
+        return "no inbound order", 404
+    io.status = "Canceled"
+    io.save()
+
+    log(log.INFO, "Inbound order canceled. Inbound order: [%s]", io)
+    flash("Inbound order canceled!", "success")
+    return "ok", 200
