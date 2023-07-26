@@ -35,6 +35,8 @@ def create_app(environment="development"):
         store_blueprint,
         incoming_stock_blueprint,
         outgoing_stock_blueprint,
+        pickup_order_blueprint,
+        pickup_inbound_blueprint,
     )
     from app import models as m
 
@@ -72,6 +74,8 @@ def create_app(environment="development"):
     app.register_blueprint(store_blueprint)
     app.register_blueprint(incoming_stock_blueprint)
     app.register_blueprint(outgoing_stock_blueprint)
+    app.register_blueprint(pickup_order_blueprint)
+    app.register_blueprint(pickup_inbound_blueprint)
 
     # Set up flask login.
     @login_manager.user_loader

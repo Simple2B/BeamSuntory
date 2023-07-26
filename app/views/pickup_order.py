@@ -14,12 +14,10 @@ from app.logger import log
 
 
 # NOTE outgoing stock IS ship request. Meaning good going from warehouse to store
-outgoing_stock_blueprint = Blueprint(
-    "outgoing_stock", __name__, url_prefix="/outgoing_stock"
-)
+pickup_order_blueprint = Blueprint("pickup_order", __name__, url_prefix="/pickup_order")
 
 
-@outgoing_stock_blueprint.route("/", methods=["GET"])
+@pickup_order_blueprint.route("/", methods=["GET"])
 @login_required
 def get_all():
     form_create: f.NewShipRequestForm = f.NewShipRequestForm()
@@ -73,7 +71,7 @@ def get_all():
     warehouses = [{"name": w.name, "id": w.id} for w in warehouses_rows]
 
     return render_template(
-        "outgoing_stock/outgoing_stocks.html",
+        "pickup_order/pickup_orders.html",
         ship_requests=ship_requests,
         current_order_carts=current_order_carts,
         page=pagination,
@@ -84,9 +82,9 @@ def get_all():
     )
 
 
-@outgoing_stock_blueprint.route("/dispatch/<int:id>", methods=["POST", "GET"])
+@pickup_order_blueprint.route("/pickup/<int:id>", methods=["GET"])
 @login_required
-def dispatch(id: int):
+def pickup(id: int):
     sr: m.ShipRequest = db.session.scalar(
         m.ShipRequest.select().where(m.ShipRequest.id == id)
     )
@@ -95,9 +93,9 @@ def dispatch(id: int):
         flash("There is no such ship request", "danger")
         return "no ship request", 404
 
-    sr.status = "Assigned for pickup"
+    sr.status = "In transit"
     sr.save()
 
-    log(log.INFO, "Ship Request dispatched. Ship Request: [%s]", sr)
-    flash("Ship Request dispatched!", "success")
+    log(log.INFO, "Ship Request pickup done. Ship Request: [%s]", sr)
+    flash("Ship Request pickup done!", "success")
     return "ok", 200

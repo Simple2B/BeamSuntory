@@ -16,3 +16,5 @@ from .inbound_order import inbound_order_blueprint
 from .store import store_blueprint
 from .incoming_stock import incoming_stock_blueprint
 from .outgoing_stock import outgoing_stock_blueprint
+from .pickup_order import pickup_order_blueprint
+from .pickup_inbound import pickup_inbound_blueprint
