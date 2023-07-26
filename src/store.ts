@@ -116,6 +116,7 @@ function editStore(store: IStore) {
   modal.show();
 }
 
+// -----add/remove store to favorite and send data to route add-favorite------
 const addFavoriteCheckboxes = document.querySelectorAll(
   '.store-add-favorite-btn',
 );
@@ -159,3 +160,26 @@ addFavoriteCheckboxes.forEach((checkbox: HTMLInputElement, index) => {
     }
   });
 });
+
+
+//------show only favorite stores------
+const favoriteAllStoresBtn: HTMLInputElement = document.querySelector('#store-show-favorite-all-btn');
+favoriteAllStoresBtn.addEventListener('change', () => {
+  const favoriteCheckboxes = document.querySelectorAll('.store-add-favorite-btn');
+  if (favoriteAllStoresBtn.checked) {
+    favoriteCheckboxes.forEach((checkbox: HTMLInputElement) => {
+      const storeItem = checkbox.closest('.table-store-item-tr');
+      if (checkbox.checked) {
+        storeItem.classList.remove('hidden');
+      } else {
+        storeItem.classList.add('hidden');
+      }
+    });
+  }
+  if (!favoriteAllStoresBtn.checked) {
+    favoriteCheckboxes.forEach((checkbox: HTMLInputElement) => {
+      const storeItem = checkbox.closest('.table-store-item-tr');
+      storeItem.classList.remove('hidden');
+    });
+  }
+ });
