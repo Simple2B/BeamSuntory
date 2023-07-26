@@ -13,7 +13,7 @@ from app import forms as f
 from app.logger import log
 
 
-# NOTE incoming stock IS inbound order. Meaning goods going from supplier to warehouse
+# NOTE pickup inbound IS inbound order. Meaning goods going from supplier to warehouse
 pickup_inbound_blueprint = Blueprint(
     "pickup_inbound", __name__, url_prefix="/pickup_inbound"
 )

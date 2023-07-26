@@ -13,7 +13,7 @@ from app import forms as f
 from app.logger import log
 
 
-# NOTE outgoing stock IS ship request. Meaning good going from warehouse to store
+# NOTE pickup order IS ship request. Meaning good going from warehouse to store
 pickup_order_blueprint = Blueprint("pickup_order", __name__, url_prefix="/pickup_order")
 
 
