@@ -156,6 +156,46 @@ const storeConfig = {
   },
 };
 
+const incomingStockConfig = {
+  entry: {
+    main: './src/incoming_stock.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/incoming_stock.js', // <--- Will be compiled to this single file
+  },
+};
+
+const outgoingStockConfig = {
+  entry: {
+    main: './src/outgoing_stock.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/outgoing_stock.js', // <--- Will be compiled to this single file
+  },
+};
+
+const pickupOrderConfig = {
+  entry: {
+    main: './src/pickup_order.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/pickup_order.js', // <--- Will be compiled to this single file
+  },
+};
+
+const pickupInboundConfig = {
+  entry: {
+    main: './src/pickup_inbound.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/pickup_inbound.js', // <--- Will be compiled to this single file
+  },
+};
+
 const configs = [
   baseConfig,
   userConfig,
@@ -171,6 +211,10 @@ const configs = [
   cartConfig,
   inboundOrderConfig,
   storeConfig,
+  incomingStockConfig,
+  outgoingStockConfig,
+  pickupOrderConfig,
+  pickupInboundConfig,
 ].map(conf => merge(defaultConfig, conf));
 
 module.exports = configs;
