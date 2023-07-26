@@ -29,7 +29,6 @@ interface IInboundOrder {
   active_date: number;
   active_time: string;
   order_title: string;
-  quantity: number;
   delivery_date: string;
   status: string;
   supplier_id: number;
@@ -148,8 +147,6 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
   input.value = inboundOrder.active_time;
   input = document.querySelector('#inbound-order-edit-order_title');
   input.value = inboundOrder.order_title;
-  input = document.querySelector('#inbound-order-edit-quantity');
-  input.value = inboundOrder.quantity.toString();
   input = document.querySelector('#inbound-order-edit-delivery_date');
   input.value = convertDate(inboundOrder.delivery_date.toString());
   input = document.querySelector('#inbound-order-edit-status');
@@ -188,8 +185,6 @@ viewInboundOrderButtonElements.forEach(e =>
     div.innerHTML = inboundOrder.active_time;
     div = document.querySelector('#inbound-order-view-order_title');
     div.innerHTML = inboundOrder.order_title;
-    div = document.querySelector('#inbound-order-view-quantity');
-    div.innerHTML = inboundOrder.quantity.toString();
     div = document.querySelector('#inbound-order-view-delivery_date');
     div.innerHTML = convertDate(inboundOrder.delivery_date.toString());
     div = document.querySelector('#inbound-order-view-status');

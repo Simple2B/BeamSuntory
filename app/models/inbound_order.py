@@ -29,7 +29,6 @@ class InboundOrder(db.Model, ModelMixin):
         sa.String(64),
         nullable=False,
     )
-    quantity: orm.Mapped[int] = orm.mapped_column()
     delivery_date: orm.Mapped[datetime] = orm.mapped_column(sa.DateTime)
     status: orm.Mapped[str] = orm.mapped_column(sa.String(64))
 
@@ -41,11 +40,12 @@ class InboundOrder(db.Model, ModelMixin):
     supplier_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("suppliers.id"))
     supplier: orm.Mapped[Supplier] = orm.relationship()
     delivery_agent_id: orm.Mapped[int] = orm.mapped_column(
-        sa.ForeignKey("delivery_agents.id")
+        sa.ForeignKey("delivery_agents.id"), nullable=True
     )
     delivery_agent: orm.Mapped[DeliveryAgent] = orm.relationship()
     warehouse_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("warehouses.id"))
     warehouse: orm.Mapped[Warehouse] = orm.relationship()
+    # TODO delete product foreign key and use product_quantity_group instead
     product_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("products.id"))
     product: orm.Mapped[Product] = orm.relationship()
 

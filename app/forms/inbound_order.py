@@ -11,7 +11,6 @@ class InboundOrderForm(FlaskForm):
     active_date = StringField("Active date", [DataRequired()])  # datetime
     active_time = StringField("Active time", [DataRequired()])  # datetime
     order_title = StringField("Order title", [DataRequired()])
-    quantity = IntegerField("Quantity", [DataRequired()])
     delivery_date = StringField("Delivery date", [DataRequired()])  # datetime
     status = StringField("Status", [DataRequired()])
     supplier_id = IntegerField("Supplier ID", [DataRequired()])
@@ -36,11 +35,9 @@ class NewInboundOrderForm(FlaskForm):
     active_date = StringField("Active date", [DataRequired()])  # datetime
     active_time = StringField("Active time", [DataRequired()])  # datetime
     order_title = StringField("Order title", [DataRequired()])
-    quantity = IntegerField("Quantity", [DataRequired()])
     delivery_date = StringField("Delivery date", [DataRequired()])  # datetime
     status = StringField("Status", [DataRequired()])
     supplier_id = IntegerField("Supplier ID", [DataRequired()])
-    delivery_agent_id = IntegerField("Delivery agent ID", [DataRequired()])
     warehouse_id = IntegerField("Warehouse ID", [DataRequired()])
     product_id = IntegerField("Product ID", [DataRequired()])
 

@@ -301,8 +301,8 @@ interface IProduct {
   mstr_groups_groups: object;
   current_user_groups: object;
   groups_ids: object;
-  available_quantity: number;
-  total_available_items: number;
+  available_quantity: object;
+  total_available_items: object;
 }
 
 const $requestShareModalElement: HTMLElement = document.querySelector(
@@ -549,7 +549,7 @@ viewProductButtonElements.forEach(e =>
 );
 
 // function to request share
-function requestShare(product: IProduct) {
+function requestShare(product: IProduct, group: string) {
   const img: HTMLImageElement = document.querySelector(
     '#product-request-share-image',
   );
@@ -563,23 +563,24 @@ function requestShare(product: IProduct) {
   div = document.querySelector('#product-request-share-sku');
   div.innerHTML = product.SKU;
   div = document.querySelector('#product-request-share-available-quantity');
-  div.innerHTML = product.available_quantity.toString();
+  div.innerHTML = product.available_quantity[group].toString();
   div = document.querySelector('#product-request-share-owner');
+  // TODO change to something not hardcoded here and in rest funcs
   div.innerHTML = 'Mike';
   div = document.querySelector('#product-request-share-role');
   div.innerHTML = 'ADMIN';
   div = document.querySelector('#product-request-share-total-available-items');
-  div.innerHTML = product.total_available_items.toString();
+  div.innerHTML = product.total_available_items[group].toString();
   let input: HTMLInputElement = document.querySelector(
     '#product-request-share-quantity',
   );
-  input.max = product.available_quantity.toString();
+  input.max = product.available_quantity[group].toString();
   input.min = '1';
   requestShareModal.show();
 }
 
 // function to ship
-function ship(product: IProduct) {
+function ship(product: IProduct, group: string) {
   const img: HTMLImageElement = document.querySelector('#product-ship-image');
   product.image.length > 100
     ? (img.src = `data:image/png;base64, ${product.image}`)
@@ -588,24 +589,28 @@ function ship(product: IProduct) {
   div.innerHTML = product.name;
   div = document.querySelector('#product-ship-sku');
   div.innerHTML = product.SKU;
-  console.log('product.available_quantity', product.available_quantity);
+  console.log('product.available_quantity', product.available_quantity[group]);
+  console.log(
+    'product.total_available_items',
+    product.total_available_items[group],
+  );
 
   div = document.querySelector('#product-ship-available-quantity');
-  div.innerHTML = product.available_quantity.toString();
+  div.innerHTML = product.available_quantity[group].toString();
   div = document.querySelector('#product-ship-total-available-items');
-  div.innerHTML = product.total_available_items.toString();
+  div.innerHTML = product.total_available_items[group].toString();
   let input: HTMLInputElement = document.querySelector(
     '#product-ship-product-id',
   );
   input.value = product.id.toString();
   input = document.querySelector('#product-ship-desire-quantity');
-  input.max = product.available_quantity.toString();
+  input.max = product.available_quantity[group].toString();
   input.min = '1';
   shipModal.show();
 }
 
 // function to assign
-function assign(product: IProduct) {
+function assign(product: IProduct, group: string) {
   let div: HTMLDivElement = document.querySelector('#product-assign-name');
   div.innerHTML = product.name;
   // NOTE It will be need when we create master group in assign modal
@@ -614,7 +619,7 @@ function assign(product: IProduct) {
   let input: HTMLInputElement = document.querySelector(
     '#product-assign-amount',
   );
-  input.max = product.available_quantity.toString();
+  input.max = product.available_quantity[group].toString();
   input.min = '1';
   assignModal.show();
 }
@@ -657,11 +662,17 @@ function addShipAssignShareButton(
   );
   shipAssignContainer.innerHTML = `
     <label for="product_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Action</label >
-    <button type="button"  class="ship-product-button inline-flex items-center mr-2 px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
+    <button ship-group-data=${group.replace(
+      / /g,
+      '_',
+    )} type="button"  class="ship-product-button inline-flex items-center mr-2 px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
       <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
       Ship
     </button>
-    <button type="button" class="assign-product-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+    <button assign-group-data=${group.replace(
+      / /g,
+      '_',
+    )} type="button" class="assign-product-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
       <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
       Assign
     </button>
@@ -675,7 +686,10 @@ function addShipAssignShareButton(
   );
   shareContainer.innerHTML = `
     <label for="product_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Action</label >
-    <button type="button" class="request-share-product-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+    <button share-group-data=${group.replace(
+      / /g,
+      '_',
+    )} type="button" class="request-share-product-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
       <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
       Request Share
     </button>
@@ -698,8 +712,10 @@ function addShipAssignShareButton(
     e.addEventListener('click', () => {
       viewModal.hide();
       editModal.hide();
+      let shipGroup = e.getAttribute('ship-group-data');
+      console.log("getAttribute('ship-group-data')", shipGroup);
       const product = JSON.parse(sessionStorage.product);
-      ship(product);
+      ship(product, shipGroup);
     }),
   );
 
@@ -708,8 +724,10 @@ function addShipAssignShareButton(
     e.addEventListener('click', () => {
       viewModal.hide();
       editModal.hide();
+      let assignGroup = e.getAttribute('assign-group-data');
+      console.log("getAttribute('assign-group-data')", assignGroup);
       const product = JSON.parse(sessionStorage.product);
-      assign(product);
+      assign(product, assignGroup);
     }),
   );
 
@@ -720,8 +738,10 @@ function addShipAssignShareButton(
     e.addEventListener('click', () => {
       viewModal.hide();
       editModal.hide();
+      let shareGroup = e.getAttribute('share-group-data');
+      console.log("getAttribute('share-group-data')", shareGroup);
       const product = JSON.parse(sessionStorage.product);
-      requestShare(product);
+      requestShare(product, shareGroup);
     }),
   );
   const productViewTypeContainer = document.querySelector(
