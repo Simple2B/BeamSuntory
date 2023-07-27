@@ -6,12 +6,14 @@ from flask import (
     flash,
     redirect,
     url_for,
+    current_app as app,
 )
 from flask_login import login_required, current_user
+from flask_mail import Message
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
-from app import models as m, db
+from app import models as m, db, mail
 from app import forms as f
 from app.logger import log
 
@@ -87,10 +89,18 @@ def get_all():
 @login_required
 def create():
     form_create: f.NewShipRequestForm = f.NewShipRequestForm()
+    carts = [
+        c
+        for c in db.session.execute(
+            m.Cart.select().where(
+                m.Cart.user_id == current_user.id, m.Cart.status == "pending"
+            )
+        ).scalars()
+    ]
     if not form_create.validate_on_submit():
         flash("Validation failed", "danger")
         return redirect(url_for("ship_request.get_all"))
-    if form_create.validate_on_submit():
+    if form_create.validate_on_submit() and len(carts) > 0:
         ship_request = m.ShipRequest(
             order_numb=f"BEAM-DO{int(datetime.datetime.now().timestamp())}",
             # NOTE: what status is default?
@@ -106,19 +116,37 @@ def create():
         flash("Ship request added!", "success")
         ship_request.save()
 
-        query_cart = db.session.execute(
-            m.Cart.select().where(
-                m.Cart.user_id == current_user.id, m.Cart.status == "pending"
-            )
-        ).scalars()
-
-        carts = [c for c in query_cart]
         for cart in carts:
             cart.status = "completed"
             cart.order_numb = ship_request.order_numb
             cart.save()
 
         db.session.commit()
+
+        warehouse_manager = db.session.execute(
+            m.User.select().where(m.User.role == "WAREHOUSE_MANAGER")
+        ).scalar_one()
+        if warehouse_manager:
+            msg = Message(
+                subject="New ship request",
+                sender=app.config["MAIL_DEFAULT_SENDER"],
+                recipients=[warehouse_manager.email],
+            )
+            url = (
+                url_for(
+                    "ship_request.get_all",
+                    _external=True,
+                )
+                + f"?q={ship_request.order_numb}"
+            )
+
+            msg.html = render_template(
+                "email/ship_request.html",
+                user=warehouse_manager,
+                ship_request=ship_request,
+                url=url,
+            )
+            mail.send(msg)
 
         return redirect(url_for("ship_request.get_all"))
 
