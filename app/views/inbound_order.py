@@ -8,12 +8,14 @@ from flask import (
     flash,
     redirect,
     url_for,
+    current_app as app,
 )
 from flask_login import login_required
+from flask_mail import Message
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
-from app import models as m, db
+from app import models as m, db, mail
 from app import forms as f
 from app.logger import log
 
@@ -37,7 +39,7 @@ def get_all():
             m.InboundOrder.select()
             .where(
                 m.InboundOrder.order_title.like(f"{q}%")
-                | m.InboundOrder.quantity.like(f"{q}%")
+                | m.InboundOrder.order_id.like(f"{q}%")
             )
             .order_by(m.InboundOrder.id)
         )
@@ -45,7 +47,7 @@ def get_all():
             sa.select(sa.func.count())
             .where(
                 m.InboundOrder.order_title.like(f"{q}%")
-                | m.InboundOrder.quantity.like(f"{q}%")
+                | m.InboundOrder.order_id.like(f"{q}%")
             )
             .select_from(m.InboundOrder)
         )
@@ -87,9 +89,7 @@ def get_all():
         ],
         groups=[
             g
-            for g in db.session.execute(
-                m.Group.select().order_by(m.Group.id)
-            ).scalars()
+            for g in db.session.execute(m.Group.select().order_by(m.Group.id)).scalars()
         ],
         form_create=form_create,
         form_edit=form_edit,
@@ -223,6 +223,28 @@ def create():
                     product_quantity=inbound_order.quantity,
                 )
                 warehouse_product.save()
+
+        warehouse_manager = db.session.execute(
+            m.User.select().where(m.User.role == "WAREHOUSE_MANAGER")
+        ).scalar_one()
+        if warehouse_manager:
+            msg = Message(
+                subject="New inbound order",
+                sender=app.config["MAIL_DEFAULT_SENDER"],
+                recipients=[warehouse_manager.email],
+            )
+            url = url_for(
+                "inbound_order.get_all",
+                _external=True,
+            ) + f"?q={inbound_order.order_id}"
+
+            msg.html = render_template(
+                "email/inbound_order.html",
+                user=warehouse_manager,
+                inbound_order=inbound_order,
+                url=url,
+            )
+            mail.send(msg)
 
         return redirect(url_for("inbound_order.get_all"))
 
