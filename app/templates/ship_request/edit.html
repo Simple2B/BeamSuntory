@@ -5,7 +5,7 @@
   <div class="relative w-full max-w-6xl max-h-full">
     <!-- Modal content -->
     <!-- TODO change action for view form -->
-    <form action="#" method="get" class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+    <form action="{{url_for('ship_request.save')}}" method="post" class="relative bg-white rounded-lg shadow dark:bg-gray-700">
       <input type="hidden" name="ship_request_id" id="ship-request-edit-id" value="0" />
       <input type="hidden" name="next_url" id="ship-request-edit-next_url" value="" />
       <!-- Modal header -->
@@ -50,7 +50,7 @@
           <div class="col-span-4 sm:col-span-2">
             <label for="ship-request-edit-warehouse-name"
               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Warehouse</label>
-            <select type="text" name="warehouse_name" id="ship-request-edit-warehouse-name"
+            <select type="text" name="warehouse" id="ship-request-edit-warehouse-name"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                required>
               <option value="" disabled selected>Select another warehouse</option>

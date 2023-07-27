@@ -129,7 +129,7 @@ def create():
 @ship_request_blueprint.route("/edit", methods=["POST"])
 @login_required
 def save():
-    form_edit = f.ShipRequestForm()
+    form_edit: f.ShipRequestForm = f.ShipRequestForm()
     if form_edit.validate_on_submit():
         query = m.ShipRequest.select().where(
             m.ShipRequest.id == int(form_edit.ship_request_id.data)
@@ -142,8 +142,7 @@ def save():
                 form_edit.ship_request_id.data,
             )
             flash("Cannot save item data", "danger")
-        sr.comments = form_edit.comments.data
-        sr.quantity = form_edit.quantity.data
+        sr.status = form_edit.status.data
         sr.save()
         if form_edit.next_url.data:
             return redirect(form_edit.next_url.data)

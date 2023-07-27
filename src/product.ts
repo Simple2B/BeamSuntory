@@ -301,8 +301,12 @@ interface IProduct {
   mstr_groups_groups: object;
   current_user_groups: object;
   groups_ids: object;
-  available_quantity: object;
-  total_available_items: object;
+  available_quantity: {
+    [index: string]: number;
+  };
+  total_available_items: {
+    [index: string]: number;
+  };
 }
 
 const $requestShareModalElement: HTMLElement = document.querySelector(
@@ -589,12 +593,6 @@ function ship(product: IProduct, group: string) {
   div.innerHTML = product.name;
   div = document.querySelector('#product-ship-sku');
   div.innerHTML = product.SKU;
-  console.log('product.available_quantity', product.available_quantity[group]);
-  console.log(
-    'product.total_available_items',
-    product.total_available_items[group],
-  );
-
   div = document.querySelector('#product-ship-available-quantity');
   div.innerHTML = product.available_quantity[group].toString();
   div = document.querySelector('#product-ship-total-available-items');
@@ -655,29 +653,48 @@ function addShipAssignShareButton(
     `#product-view-product_type-container`,
   );
   const shipAssignContainer = document.createElement('div');
-  shipAssignContainer.classList.add('sm:col-span-3');
+  shipAssignContainer.classList.add('sm:col-span-3', 'flex', 'gap-4');
   shipAssignContainer.setAttribute(
     'id',
     `product-ship-assign-share-container-${masterGroup.replace(/ /g, '_')}`,
   );
   shipAssignContainer.innerHTML = `
-    <label for="product_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Action</label >
-    <button ship-group-data=${group.replace(
-      / /g,
-      '_',
-    )} type="button"  class="ship-product-button inline-flex items-center mr-2 px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
-      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
-      Ship
-    </button>
-    <button assign-group-data=${group.replace(
-      / /g,
-      '_',
-    )} type="button" class="assign-product-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
-      Assign
-    </button>
+    <div>
+      <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
+        <div id="ship-product-quantity"
+          class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+      ${productParam.available_quantity[group] || 0}</div>
+    </div>
+    <div>
+      <label for="product_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Action</label >
+      <button ship-group-data=${group.replace(
+        / /g,
+        '_',
+      )} type="button" id="ship-product-button-${group.replace(
+    / /g,
+    '_',
+  )}" class="ship-product-button inline-flex items-center mr-2 px-3 py-2.5 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
+        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
+        Ship
+      </button>
+      <button assign-group-data=${group.replace(
+        / /g,
+        '_',
+      )} type="button" class="assign-product-button inline-flex items-center px-3 py-2.5 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
+        Assign
+      </button>
+    </div>
   `;
-
+  const shipProductBtn = shipAssignContainer.querySelector(
+    `#ship-product-button-${group.replace(/ /g, '_')}`,
+  );
+  if (
+    productParam.available_quantity[group] === 0 ||
+    !productParam.available_quantity[group]
+  ) {
+    shipProductBtn.classList.add('invisible');
+  }
   const shareContainer = document.createElement('div');
   shareContainer.classList.add('sm:col-span-3');
   shareContainer.setAttribute(
@@ -689,7 +706,7 @@ function addShipAssignShareButton(
     <button share-group-data=${group.replace(
       / /g,
       '_',
-    )} type="button" class="request-share-product-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+    )} type="button" class="request-share-product-button inline-flex items-center px-3 py-2.5 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
       <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
       Request Share
     </button>
@@ -713,7 +730,6 @@ function addShipAssignShareButton(
       viewModal.hide();
       editModal.hide();
       let shipGroup = e.getAttribute('ship-group-data');
-      console.log("getAttribute('ship-group-data')", shipGroup);
       const product = JSON.parse(sessionStorage.product);
       ship(product, shipGroup);
     }),
@@ -725,7 +741,6 @@ function addShipAssignShareButton(
       viewModal.hide();
       editModal.hide();
       let assignGroup = e.getAttribute('assign-group-data');
-      console.log("getAttribute('assign-group-data')", assignGroup);
       const product = JSON.parse(sessionStorage.product);
       assign(product, assignGroup);
     }),
@@ -739,7 +754,6 @@ function addShipAssignShareButton(
       viewModal.hide();
       editModal.hide();
       let shareGroup = e.getAttribute('share-group-data');
-      console.log("getAttribute('share-group-data')", shareGroup);
       const product = JSON.parse(sessionStorage.product);
       requestShare(product, shareGroup);
     }),

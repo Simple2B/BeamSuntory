@@ -29,6 +29,7 @@ class ShipRequestForm(FlaskForm):
     store_category = StringField("Store", [DataRequired()])
     order_type = StringField("Order Type")
     store = StringField("Store", [DataRequired()])
+    status = StringField("Status")
     warehouse = StringField("Warehouse")
 
     submit = SubmitField("Save")
