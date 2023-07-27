@@ -18,11 +18,11 @@ def test_ship_request_pages(client):
     assert response.status_code == 405
 
 
-def test_create_ship_request(client):
+def test_create_ship_request(mg_g_populate: FlaskClient):
     register("samg", "samg@test.com")
-    login(client, "samg")
+    login(mg_g_populate, "samg")
 
-    response = client.post(
+    response = mg_g_populate.post(
         "/ship_request/create",
         data=dict(
             status="In Progress",
