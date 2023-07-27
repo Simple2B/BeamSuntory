@@ -215,7 +215,6 @@ def mg_g_populate(client: FlaskClient):
         active_date=datetime.datetime.strptime("07/20/2023", "%m/%d/%Y"),
         active_time="12:00 AM",
         order_title="Inbound Order test",
-        quantity=5,
         delivery_date=datetime.datetime.strptime("07/19/2023", "%m/%d/%Y"),
         status="Delivered",
         supplier_id=1,
