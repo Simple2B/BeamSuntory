@@ -597,6 +597,7 @@ function ship(product: IProduct, group: string) {
   div.innerHTML = product.available_quantity[group].toString();
   div = document.querySelector('#product-ship-total-available-items');
   div.innerHTML = product.total_available_items[group].toString();
+
   let input: HTMLInputElement = document.querySelector(
     '#product-ship-product-id',
   );
@@ -604,6 +605,9 @@ function ship(product: IProduct, group: string) {
   input = document.querySelector('#product-ship-desire-quantity');
   input.max = product.available_quantity[group].toString();
   input.min = '1';
+  console.log('SHIP GROUP', group);
+  input = document.querySelector('#product-ship-group');
+  input.value = group;
   shipModal.show();
 }
 

@@ -65,12 +65,13 @@ def get_all():
 @cart_blueprint.route("/create", methods=["POST"])
 @login_required
 def create():
-    form = f.NewCartForm()
+    form: f.NewCartForm = f.NewCartForm()
     if form.validate_on_submit():
         item = m.Cart(
             product_id=int(form.product_id.data),
             quantity=int(form.quantity.data),
             user_id=current_user.id,
+            group=form.group.data,
         )
         log(log.INFO, "Form submitted. Cart: [%s]", item)
         item.save()
