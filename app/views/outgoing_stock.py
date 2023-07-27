@@ -114,6 +114,25 @@ def cancel(id: int):
         flash("There is no such ship request", "danger")
         return "no ship request", 404
 
+    carts: list[m.Cart] = db.session.execute(
+        m.Cart.select().where(m.Cart.ship_request_id == sr.id)
+    ).scalars()
+    for cart in carts:
+        cart_user_group: m.Group = db.session.execute(
+            m.Group.select().where(m.Group.name == cart.group)
+        ).scalar()
+        # TODO consider to add warehouse id
+        warehouse_product: m.WarehouseProduct = db.session.execute(
+            m.WarehouseProduct.select().where(
+                m.WarehouseProduct.product_id == cart.product_id,
+                # m.WarehouseProduct.warehouse_id == sr.warehouse_id,
+                m.WarehouseProduct.group_id == cart_user_group.id,
+            )
+        ).scalar()
+        if warehouse_product:
+            warehouse_product.product_quantity += cart.quantity
+            warehouse_product.save()
+
     sr.status = "Canceled"
     sr.save()
 

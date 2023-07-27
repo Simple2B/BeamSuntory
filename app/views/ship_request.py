@@ -106,17 +106,30 @@ def create():
         flash("Ship request added!", "success")
         ship_request.save()
 
-        query_cart = db.session.execute(
+        carts: list[m.Cart] = db.session.execute(
             m.Cart.select().where(
                 m.Cart.user_id == current_user.id, m.Cart.status == "pending"
             )
         ).scalars()
 
-        carts = [c for c in query_cart]
         for cart in carts:
             cart.status = "completed"
             cart.order_numb = ship_request.order_numb
+            cart.ship_request_id = ship_request.id
             cart.save()
+            cart_user_group: m.Group = db.session.execute(
+                m.Group.select().where(m.Group.name == cart.group)
+            ).scalar()
+            warehouse_product: m.WarehouseProduct = db.session.execute(
+                m.WarehouseProduct.select().where(
+                    m.WarehouseProduct.product_id == cart.product_id,
+                    # m.WarehouseProduct.warehouse_id == cart.warehouse_id,
+                    m.WarehouseProduct.group_id == cart_user_group.id,
+                )
+            ).scalar()
+            if warehouse_product:
+                warehouse_product.product_quantity -= cart.quantity
+                warehouse_product.save()
 
         db.session.commit()
 
@@ -129,7 +142,7 @@ def create():
 @ship_request_blueprint.route("/edit", methods=["POST"])
 @login_required
 def save():
-    form_edit = f.ShipRequestForm()
+    form_edit: f.ShipRequestForm = f.ShipRequestForm()
     if form_edit.validate_on_submit():
         query = m.ShipRequest.select().where(
             m.ShipRequest.id == int(form_edit.ship_request_id.data)
@@ -142,8 +155,7 @@ def save():
                 form_edit.ship_request_id.data,
             )
             flash("Cannot save item data", "danger")
-        sr.comments = form_edit.comments.data
-        sr.quantity = form_edit.quantity.data
+        sr.status = form_edit.status.data
         sr.save()
         if form_edit.next_url.data:
             return redirect(form_edit.next_url.data)
@@ -152,7 +164,7 @@ def save():
     else:
         log(log.ERROR, "Cart item save errors: [%s]", form_edit.errors)
         flash(f"{form_edit.errors}", "danger")
-        return redirect(url_for("cart.get_all"))
+        return redirect(url_for("ship_request.get_all"))
 
 
 @ship_request_blueprint.route("/delete/<int:id>", methods=["DELETE"])

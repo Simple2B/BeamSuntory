@@ -9,10 +9,12 @@ from .utils import ModelMixin
 if TYPE_CHECKING:
     from .product import Product
     from .warehouse import Warehouse
+    from .group import Group
 
 else:
     Product = "Product"
     Warehouse = "Warehouse"
+    Group = "Group"
 
 
 class WarehouseProduct(db.Model, ModelMixin):
@@ -20,6 +22,8 @@ class WarehouseProduct(db.Model, ModelMixin):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
     product_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("products.id"))
     warehouse_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("warehouses.id"))
+    group_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("groups.id"))
+    group: orm.Mapped[Group] = orm.relationship()
     product: orm.Mapped[Product] = orm.relationship()
     warehouse: orm.Mapped[Warehouse] = orm.relationship()
     product_quantity: orm.Mapped[int] = orm.mapped_column(nullable=False)

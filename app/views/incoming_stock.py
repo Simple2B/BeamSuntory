@@ -99,6 +99,36 @@ def accept(id: int):
     io.status = "Delivered"
     io.save()
 
+    # save delivered product quantity, so this product would be available in warehouse
+    products_quantity_group: m.ProductQuantityGroup = db.session.execute(
+        m.ProductQuantityGroup.select().where(
+            m.ProductQuantityGroup.inbound_order_id == io.id,
+        )
+    ).scalars()
+    if not products_quantity_group:
+        flash("There is no such ProductQuantityGroup", "danger")
+        return "no product quantity group", 404
+
+    for product in products_quantity_group:
+        warehouse_product: m.WarehouseProduct = db.session.execute(
+            m.WarehouseProduct.select().where(
+                m.WarehouseProduct.product_id == product.product_id,
+                m.WarehouseProduct.warehouse_id == product.warehouse_id,
+                m.WarehouseProduct.group_id == product.group_id,
+            )
+        ).scalar()
+        if warehouse_product:
+            warehouse_product.product_quantity += product.quantity
+            warehouse_product.save()
+        else:
+            warehouse_product = m.WarehouseProduct(
+                product_id=product.product_id,
+                warehouse_id=product.warehouse_id,
+                product_quantity=product.quantity,
+                group_id=product.group_id,
+            )
+            warehouse_product.save()
+
     log(log.INFO, "Inbound order accepted. Inbound order: [%s]", io)
     flash("Inbound order accepted!", "success")
     return "ok", 200

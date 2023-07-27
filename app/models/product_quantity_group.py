@@ -9,10 +9,12 @@ from .utils import ModelMixin
 if TYPE_CHECKING:
     from .product import Product
     from .group import Group
+    from .inbound_order import InboundOrder
 
 else:
     Product = "Product"
     Group = "Group"
+    InboundOrder = "InboundOrder"
 
 
 class ProductQuantityGroup(db.Model, ModelMixin):
@@ -24,6 +26,10 @@ class ProductQuantityGroup(db.Model, ModelMixin):
     parent: orm.Mapped[Group] = orm.relationship()
     quantity: orm.Mapped[int] = orm.mapped_column()
     warehouse_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("warehouses.id"))
+    inbound_order_id: orm.Mapped[int] = orm.mapped_column(
+        ForeignKey("inbound_orders.id")
+    )
+    inbound_order: orm.Mapped[InboundOrder] = orm.relationship()
 
     @property
     def json(self):

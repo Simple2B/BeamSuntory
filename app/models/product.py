@@ -98,16 +98,16 @@ class Product(db.Model, ModelMixin):
             i[0].parent.name: i[0].parent.id
             for i in current_product_products_groups_rows
         }
-        warehouse_product: WarehouseProduct = db.session.execute(
+        warehouse_products = db.session.execute(
             WarehouseProduct.select().where(
                 WarehouseProduct.product_id == mg_dict["id"]
             )
-        ).scalar()
+        ).scalars()
         mg_dict["available_quantity"] = (
-            warehouse_product.product_quantity if warehouse_product else 0
+            {wp.group.name: wp.product_quantity for wp in warehouse_products}
+            if warehouse_products
+            else {}
         )
         # TODO looks like it is duplicate of available_quantity. Ask client
-        mg_dict["total_available_items"] = (
-            warehouse_product.product_quantity if warehouse_product else 0
-        )
+        mg_dict["total_available_items"] = mg_dict["available_quantity"]
         return json.dumps(mg_dict)

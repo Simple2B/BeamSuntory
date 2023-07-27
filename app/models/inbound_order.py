@@ -12,6 +12,7 @@ from .delivery_agent import DeliveryAgent
 from .warehouse import Warehouse
 from .product import Product
 from .group import Group
+from .product_quantity_group import ProductQuantityGroup
 
 
 class InboundOrder(db.Model, ModelMixin):
@@ -29,7 +30,6 @@ class InboundOrder(db.Model, ModelMixin):
         sa.String(64),
         nullable=False,
     )
-    quantity: orm.Mapped[int] = orm.mapped_column()
     delivery_date: orm.Mapped[datetime] = orm.mapped_column(sa.DateTime)
     status: orm.Mapped[str] = orm.mapped_column(sa.String(64))
 
@@ -41,11 +41,12 @@ class InboundOrder(db.Model, ModelMixin):
     supplier_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("suppliers.id"))
     supplier: orm.Mapped[Supplier] = orm.relationship()
     delivery_agent_id: orm.Mapped[int] = orm.mapped_column(
-        sa.ForeignKey("delivery_agents.id")
+        sa.ForeignKey("delivery_agents.id"), nullable=True
     )
     delivery_agent: orm.Mapped[DeliveryAgent] = orm.relationship()
     warehouse_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("warehouses.id"))
     warehouse: orm.Mapped[Warehouse] = orm.relationship()
+    # TODO delete product foreign key and use product_quantity_group instead
     product_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("products.id"))
     product: orm.Mapped[Product] = orm.relationship()
 
@@ -80,5 +81,22 @@ class InboundOrder(db.Model, ModelMixin):
             "delivery_agent": current_io.delivery_agent.username,
             "warehouse": current_io.warehouse.name,
             "product": current_io.product.name,
+        }
+
+        apqg: list[ProductQuantityGroup] = [
+            io for io in db.session.execute(ProductQuantityGroup.select()).scalars()
+        ]
+
+        mg_dict["inbound_order_prods"] = {
+            io.inbound_order.order_id: [
+                {
+                    "group": {"id": uio.group_id, "name": uio.parent.name},
+                    "product": {"id": uio.product_id, "name": uio.child.name},
+                    "quantity": uio.quantity,
+                }
+                for uio in apqg
+                if uio.inbound_order.order_id == io.inbound_order.order_id
+            ]
+            for io in apqg
         }
         return json.dumps(mg_dict)

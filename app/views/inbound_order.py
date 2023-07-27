@@ -87,9 +87,7 @@ def get_all():
         ],
         groups=[
             g
-            for g in db.session.execute(
-                m.Group.select().order_by(m.Group.id)
-            ).scalars()
+            for g in db.session.execute(m.Group.select().order_by(m.Group.id)).scalars()
         ],
         form_create=form_create,
         form_edit=form_edit,
@@ -116,7 +114,6 @@ def save():
         io.active_date = datetime.datetime.strptime(form.active_date.data, "%m/%d/%Y")
         io.active_time = form.active_time.data
         io.order_title = form.order_title.data
-        io.quantity = form.quantity.data
         io.delivery_date = datetime.datetime.strptime(
             form.delivery_date.data, "%m/%d/%Y"
         )
@@ -128,35 +125,19 @@ def save():
         io.save()
 
         # save delivered product quantity, so this product would be available in warehouse
-        if io.status == "Delivered":
-            warehouse_product: m.WarehouseProduct = db.session.execute(
-                m.WarehouseProduct.select().where(
-                    m.WarehouseProduct.product_id == io.product_id,
-                    m.WarehouseProduct.warehouse_id == io.warehouse_id,
-                )
-            ).scalar()
-            if warehouse_product:
-                warehouse_product.product_quantity += io.quantity
-                warehouse_product.save()
-            else:
-                warehouse_product = m.WarehouseProduct(
-                    product_id=io.product_id,
-                    warehouse_id=io.warehouse_id,
-                    product_quantity=io.quantity,
-                )
-                warehouse_product.save()
-
         products = json.loads(form.products.data)
 
         for product in products:
             product_quantity_group: m.ProductQuantityGroup = db.session.execute(
                 m.ProductQuantityGroup.select().where(
                     m.ProductQuantityGroup.product_id == product["product_id"],
+                    m.ProductQuantityGroup.group_id == product["group_id"],
                     m.ProductQuantityGroup.warehouse_id == io.warehouse_id,
+                    m.ProductQuantityGroup.inbound_order_id == io.id,
                 )
             ).scalar()
             if product_quantity_group:
-                product_quantity_group.quantity += int(product["quantity"])
+                product_quantity_group.quantity = int(product["quantity"])
                 product_quantity_group.group_id = product["group_id"]
                 product_quantity_group.save()
             else:
@@ -165,8 +146,29 @@ def save():
                     warehouse_id=io.warehouse_id,
                     group_id=product["group_id"],
                     quantity=int(product["quantity"]),
+                    inbound_order_id=io.id,
                 )
                 product_quantity_group.save()
+        # NOTE remove product quantity group if it is not in products
+        product_quantity_group_rm: list[m.ProductQuantityGroup] = db.session.execute(
+            m.ProductQuantityGroup.select().where(
+                m.ProductQuantityGroup.warehouse_id == io.warehouse_id,
+                m.ProductQuantityGroup.inbound_order_id == io.id,
+            )
+        ).scalars()
+        product_ids = [p["product_id"] for p in products]
+        group_ids = [p["group_id"] for p in products]
+
+        for product in product_quantity_group_rm:
+            if (
+                str(product.product_id) not in product_ids
+                and str(product.group_id) not in group_ids
+            ):
+                delete_p = sa.delete(m.ProductQuantityGroup).where(
+                    m.ProductQuantityGroup.id == product.id,
+                )
+                db.session.execute(delete_p)
+                db.session.commit()
 
         if form.next_url.data:
             return redirect(form.next_url.data)
@@ -191,38 +193,18 @@ def create():
             active_date=datetime.datetime.strptime(form.active_date.data, "%m/%d/%Y"),
             active_time=form.active_time.data,
             order_title=form.order_title.data,
-            quantity=form.quantity.data,
             delivery_date=datetime.datetime.strptime(
                 form.delivery_date.data, "%m/%d/%Y"
             ),
             status=form.status.data,
             supplier_id=form.supplier_id.data,
-            delivery_agent_id=form.delivery_agent_id.data,
             warehouse_id=form.warehouse_id.data,
             product_id=form.product_id.data,
+            delivery_agent_id=form.delivery_agent_id.data,
         )
         log(log.INFO, "Form submitted. Inbound order: [%s]", inbound_order)
         flash("Inbound order added!", "success")
         inbound_order.save()
-
-        # save delivered product quantity, so this product would be available in warehouse
-        if inbound_order.status == "Delivered":
-            warehouse_product: m.WarehouseProduct = db.session.execute(
-                m.WarehouseProduct.select().where(
-                    m.WarehouseProduct.product_id == inbound_order.product_id,
-                    m.WarehouseProduct.warehouse_id == inbound_order.warehouse_id,
-                )
-            ).scalar()
-            if warehouse_product:
-                warehouse_product.product_quantity += inbound_order.quantity
-                warehouse_product.save()
-            else:
-                warehouse_product = m.WarehouseProduct(
-                    product_id=inbound_order.product_id,
-                    warehouse_id=inbound_order.warehouse_id,
-                    product_quantity=inbound_order.quantity,
-                )
-                warehouse_product.save()
 
         return redirect(url_for("inbound_order.get_all"))
 
