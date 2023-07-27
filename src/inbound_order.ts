@@ -188,21 +188,25 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
         '.inbound-order-edit-add-quantity',
       );
 
-    for (let i = 0; i < currentInboundOrder.length; i++) {
-      if (i === 0) {
-        const inboundOrderProductInput = inboundOrderProductsInputs[i];
-        const inboundOrderGroupInput = inboundOrderGroupsInputs[i];
-        const inboundOrderQuantityInput = inboundOrderQuantityInputs[i];
-        inboundOrderProductInput.value = String(
-          currentInboundOrder[i].product.id,
-        );
-        inboundOrderGroupInput.value = String(currentInboundOrder[i].group.id);
-        inboundOrderQuantityInput.value = String(
-          currentInboundOrder[i].quantity,
-        );
-        continue;
+    if (currentInboundOrder) {
+      for (let i = 0; i < currentInboundOrder.length; i++) {
+        if (i === 0) {
+          const inboundOrderProductInput = inboundOrderProductsInputs[i];
+          const inboundOrderGroupInput = inboundOrderGroupsInputs[i];
+          const inboundOrderQuantityInput = inboundOrderQuantityInputs[i];
+          inboundOrderProductInput.value = String(
+            currentInboundOrder[i].product.id,
+          );
+          inboundOrderGroupInput.value = String(
+            currentInboundOrder[i].group.id,
+          );
+          inboundOrderQuantityInput.value = String(
+            currentInboundOrder[i].quantity,
+          );
+          continue;
+        }
+        createInboundOrderItems(inboundOrder, currentInboundOrder[i]);
       }
-      createInboundOrderItems(inboundOrder, currentInboundOrder[i]);
     }
   }
   modal.show();
