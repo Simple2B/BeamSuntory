@@ -68,3 +68,19 @@ pickupButtons.forEach(e => {
     }
   });
 });
+
+const deliverButtons = document.querySelectorAll('.deliver-order-btn');
+
+deliverButtons.forEach(e => {
+  e.addEventListener('click', async () => {
+    if (confirm('Are sure?')) {
+      let id = e.getAttribute('data-deliver-order-id');
+      const response = await fetch(`/pickup_order/deliver/${id}`, {
+        method: 'GET',
+      });
+      if (response.status == 200) {
+        location.reload();
+      }
+    }
+  });
+});
