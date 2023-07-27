@@ -12,6 +12,7 @@ from .delivery_agent import DeliveryAgent
 from .warehouse import Warehouse
 from .product import Product
 from .group import Group
+from .product_quantity_group import ProductQuantityGroup
 
 
 class InboundOrder(db.Model, ModelMixin):
@@ -80,5 +81,22 @@ class InboundOrder(db.Model, ModelMixin):
             "delivery_agent": current_io.delivery_agent.username,
             "warehouse": current_io.warehouse.name,
             "product": current_io.product.name,
+        }
+
+        apqg: list[ProductQuantityGroup] = [
+            io for io in db.session.execute(ProductQuantityGroup.select()).scalars()
+        ]
+
+        mg_dict["inbound_order_prods"] = {
+            io.inbound_order.order_id: [
+                {
+                    "group": {"id": uio.group_id, "name": uio.parent.name},
+                    "product": {"id": uio.product_id, "name": uio.child.name},
+                    "quantity": uio.quantity,
+                }
+                for uio in apqg
+                if uio.inbound_order.order_id == io.inbound_order.order_id
+            ]
+            for io in apqg
         }
         return json.dumps(mg_dict)

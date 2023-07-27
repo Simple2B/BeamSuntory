@@ -131,6 +131,7 @@ def save():
             product_quantity_group: m.ProductQuantityGroup = db.session.execute(
                 m.ProductQuantityGroup.select().where(
                     m.ProductQuantityGroup.product_id == product["product_id"],
+                    m.ProductQuantityGroup.group_id == product["group_id"],
                     m.ProductQuantityGroup.warehouse_id == io.warehouse_id,
                     m.ProductQuantityGroup.inbound_order_id == io.id,
                 )
@@ -148,6 +149,26 @@ def save():
                     inbound_order_id=io.id,
                 )
                 product_quantity_group.save()
+        # NOTE remove product quantity group if it is not in products
+        product_quantity_group_rm: list[m.ProductQuantityGroup] = db.session.execute(
+            m.ProductQuantityGroup.select().where(
+                m.ProductQuantityGroup.warehouse_id == io.warehouse_id,
+                m.ProductQuantityGroup.inbound_order_id == io.id,
+            )
+        ).scalars()
+        product_ids = [p["product_id"] for p in products]
+        group_ids = [p["group_id"] for p in products]
+
+        for product in product_quantity_group_rm:
+            if (
+                str(product.product_id) not in product_ids
+                and str(product.group_id) not in group_ids
+            ):
+                delete_p = sa.delete(m.ProductQuantityGroup).where(
+                    m.ProductQuantityGroup.id == product.id,
+                )
+                db.session.execute(delete_p)
+                db.session.commit()
 
         if form.next_url.data:
             return redirect(form.next_url.data)
@@ -179,6 +200,7 @@ def create():
             supplier_id=form.supplier_id.data,
             warehouse_id=form.warehouse_id.data,
             product_id=form.product_id.data,
+            delivery_agent_id=form.delivery_agent_id.data,
         )
         log(log.INFO, "Form submitted. Inbound order: [%s]", inbound_order)
         flash("Inbound order added!", "success")

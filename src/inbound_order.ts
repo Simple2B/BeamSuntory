@@ -38,6 +38,15 @@ interface IInboundOrder {
   sup_da_wh_prod_objs: SupDAWhProd;
   products: IProduct[];
   groups: IGroup[];
+  inbound_order_prods: {
+    [index: string]: IInboundOrderProd[];
+  };
+}
+
+interface IInboundOrderProd {
+  product: {id: number; name: string};
+  group: {id: number; name: string};
+  quantity: number;
 }
 
 interface IProduct {
@@ -137,6 +146,7 @@ deleteButtons.forEach(e => {
 });
 
 function editInboundOrder(inboundOrder: IInboundOrder) {
+  console.log('inboundOrder:', inboundOrder);
   let input: HTMLInputElement = document.querySelector(
     '#inbound-order-edit-id',
   );
@@ -161,6 +171,40 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
   input.value = inboundOrder.product_id.toString();
   input = document.querySelector('#inbound-order-edit-next_url');
   input.value = window.location.href;
+
+  if (Object.keys(inboundOrder.inbound_order_prods).length > 0) {
+    const currentInboundOrder =
+      inboundOrder.inbound_order_prods[inboundOrder.order_id];
+    const inboundOrderProductsInputs =
+      document.querySelectorAll<HTMLInputElement>(
+        '.inbound-order-edit-add-product',
+      );
+    const inboundOrderGroupsInputs =
+      document.querySelectorAll<HTMLInputElement>(
+        '.inbound-order-edit-add-group',
+      );
+    const inboundOrderQuantityInputs =
+      document.querySelectorAll<HTMLInputElement>(
+        '.inbound-order-edit-add-quantity',
+      );
+
+    for (let i = 0; i < currentInboundOrder.length; i++) {
+      if (i === 0) {
+        const inboundOrderProductInput = inboundOrderProductsInputs[i];
+        const inboundOrderGroupInput = inboundOrderGroupsInputs[i];
+        const inboundOrderQuantityInput = inboundOrderQuantityInputs[i];
+        inboundOrderProductInput.value = String(
+          currentInboundOrder[i].product.id,
+        );
+        inboundOrderGroupInput.value = String(currentInboundOrder[i].group.id);
+        inboundOrderQuantityInput.value = String(
+          currentInboundOrder[i].quantity,
+        );
+        continue;
+      }
+      createInboundOrderItems(inboundOrder, currentInboundOrder[i]);
+    }
+  }
   modal.show();
 }
 
@@ -201,10 +245,16 @@ viewInboundOrderButtonElements.forEach(e =>
 );
 
 // ----add inbound order item----
-function createInboundOrderItems() {
-  const inboundOrder: IInboundOrder = JSON.parse(
-    sessionStorage.getItem('inboundOrder'),
-  );
+function createInboundOrderItems(
+  inbOrder: IInboundOrder = null,
+  curInbOrder: IInboundOrderProd = null,
+) {
+  if (!inbOrder) {
+    const inboundOrder: IInboundOrder = JSON.parse(
+      sessionStorage.getItem('inboundOrder'),
+    );
+    inbOrder = inboundOrder;
+  }
   const inboundOrderAddContainer = document.querySelector(
     '#inbound-order-edit-add-container',
   );
@@ -222,6 +272,7 @@ function createInboundOrderItems() {
       <select type="text" name="add_product"
         class="inbound-order-edit-add-product shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
         placeholder="Product" required>
+        <option value="" disabled selected>Select product</option>
       </select>
     </div>
     <div class="col-span-6 sm:col-span-3">
@@ -229,6 +280,7 @@ function createInboundOrderItems() {
       <select type="text" name="add_group"
         class="inbound-order-edit-add-group shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
         placeholder="Group" required>
+        <option value="" disabled selected>Select group</option>
       </select>
     </div>
     <div class="col-span-6 sm:col-span-3">
@@ -255,24 +307,50 @@ function createInboundOrderItems() {
   </div>
   `;
 
-  const inboundOrderAddProductSelect = inboundOrderAddItem.querySelector(
-    '.inbound-order-edit-add-product',
-  );
-  const inboundOrderAddGroupSelect = inboundOrderAddItem.querySelector(
-    '.inbound-order-edit-add-group',
-  );
-  inboundOrder.products.forEach(product => {
+  const inboundOrderAddProductSelect: HTMLInputElement =
+    inboundOrderAddItem.querySelector('.inbound-order-edit-add-product');
+  const inboundOrderAddGroupSelect: HTMLInputElement =
+    inboundOrderAddItem.querySelector('.inbound-order-edit-add-group');
+  const inboundOrderAddQuantityInput: HTMLInputElement =
+    inboundOrderAddItem.querySelector('.inbound-order-edit-add-quantity');
+
+  inbOrder.products.forEach(product => {
     const option = document.createElement('option');
-    option.value = product.id.toString();
-    option.innerHTML = product.name;
+    curInbOrder;
+    if (curInbOrder) {
+      option.value = curInbOrder.product.id.toString();
+      option.innerHTML = curInbOrder.product.name;
+    } else {
+      option.value = product.id.toString();
+      option.innerHTML = product.name;
+    }
+    if (curInbOrder) {
+      inboundOrderAddProductSelect.value = option.value;
+      inboundOrderAddProductSelect.setAttribute('disabled', 'disabled');
+    }
     inboundOrderAddProductSelect.appendChild(option);
   });
-  inboundOrder.groups.forEach(group => {
+
+  inbOrder.groups.forEach(group => {
     const option = document.createElement('option');
-    option.value = group.id.toString();
-    option.innerHTML = group.name;
+    if (curInbOrder) {
+      option.value = curInbOrder.group.id.toString();
+      option.innerHTML = curInbOrder.group.name;
+    } else {
+      option.value = group.id.toString();
+      option.innerHTML = group.name;
+    }
     inboundOrderAddGroupSelect.appendChild(option);
+
+    if (curInbOrder) {
+      inboundOrderAddGroupSelect.value = option.value;
+      inboundOrderAddGroupSelect.setAttribute('disabled', 'disabled');
+    }
   });
+
+  if (curInbOrder) {
+    inboundOrderAddQuantityInput.value = String(curInbOrder.quantity);
+  }
 
   inboundOrderAddContainer.appendChild(inboundOrderAddItem);
 
