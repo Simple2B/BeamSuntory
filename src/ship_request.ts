@@ -195,8 +195,12 @@ function editShipRequest(shipRequest: IShipRequest, store: IStore) {
     '#ship-request-edit-status',
   );
   input.value = shipRequest.status;
+  input = document.querySelector('#ship-request-edit-id');
+  input.value = shipRequest.id.toString();
   input = document.querySelector('#ship-request-edit-store');
   input.value = shipRequest.store_id.toString();
+  input = document.querySelector('#ship-request-edit-status');
+  input.value = shipRequest.status;
 
   let div: HTMLDivElement = document.querySelector(
     '#ship-request-edit-order-number',
@@ -206,8 +210,6 @@ function editShipRequest(shipRequest: IShipRequest, store: IStore) {
   div.innerHTML = store.store_name;
   div = document.querySelector('#ship-request-edit-type');
   div.innerHTML = shipRequest.order_type;
-  div = document.querySelector('#ship-request-edit-status');
-  div.innerHTML = shipRequest.status;
   div = document.querySelector('#ship-request-edit-created-date');
   div.innerHTML = shipRequest.created_at.slice(0, 10);
   div = document.querySelector('#ship-request-edit-comment');

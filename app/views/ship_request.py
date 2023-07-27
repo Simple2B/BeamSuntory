@@ -164,7 +164,7 @@ def save():
     else:
         log(log.ERROR, "Cart item save errors: [%s]", form_edit.errors)
         flash(f"{form_edit.errors}", "danger")
-        return redirect(url_for("cart.get_all"))
+        return redirect(url_for("ship_request.get_all"))
 
 
 @ship_request_blueprint.route("/delete/<int:id>", methods=["DELETE"])

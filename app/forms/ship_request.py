@@ -12,6 +12,7 @@ from app import db
 
 class NewShipRequestForm(FlaskForm):
     store_category = StringField("Store", [DataRequired()])
+    ship_request_id = StringField("ship_request_id", [DataRequired()])
     order_type = StringField("Order Type")
     store = StringField("Store", [DataRequired()])
     comment = StringField("Comment")
@@ -26,7 +27,9 @@ class NewShipRequestForm(FlaskForm):
 
 class ShipRequestForm(FlaskForm):
     next_url = StringField("next_url")
-    store_category = StringField("Store", [DataRequired()])
+    ship_request_id = StringField("ship_request_id", [DataRequired()])
+    # NOTE: Disable DataRequired for store_category while this field is missing in modal edit ship_request
+    store_category = StringField("Store")
     order_type = StringField("Order Type")
     store = StringField("Store", [DataRequired()])
     status = StringField("Status")
