@@ -89,6 +89,7 @@ def create():
     form_create: f.NewShipRequestForm = f.NewShipRequestForm()
     if not form_create.validate_on_submit():
         flash("Validation failed", "danger")
+        log(log.ERROR, "Validation failed: [%s]", form_create.errors)
         return redirect(url_for("ship_request.get_all"))
     if form_create.validate_on_submit():
         ship_request = m.ShipRequest(

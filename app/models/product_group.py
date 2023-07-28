@@ -20,7 +20,8 @@ class ProductGroup(db.Model, ModelMixin):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
     product_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("products.id"))
     group_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("groups_for_product.id"))
-    child: orm.Mapped[Product] = orm.relationship()
+    child: orm.Mapped[Product] = orm.relationship(overlaps="child")
+    # TODO is overlaps="user_obj" correct decision? remove it to see the warning
     parent: orm.Mapped[GroupProduct] = orm.relationship()
 
     @property

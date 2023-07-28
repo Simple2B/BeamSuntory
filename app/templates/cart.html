@@ -190,6 +190,7 @@
       class="space-y-6"
       action="{{ url_for('ship_request.create') }}"
       method="post">
+      {{ form.hidden_tag() }}
       <input type="text" hidden value="" />
       <h5 class="text-xl font-medium text-gray-900 dark:text-white">
         Create Store Request

@@ -14,7 +14,7 @@ class BaseConfig(BaseSettings):
     APP_NAME: str = "Beam Suntory"
     SECRET_KEY: str
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
-    WTF_CSRF_ENABLED: bool = False
+    WTF_CSRF_ENABLED: bool = True
 
     # Mail config
     MAIL_SERVER: str = os.environ.get("MAIL_SERVER")
