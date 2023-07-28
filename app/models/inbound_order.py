@@ -46,9 +46,6 @@ class InboundOrder(db.Model, ModelMixin):
     delivery_agent: orm.Mapped[DeliveryAgent] = orm.relationship()
     warehouse_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("warehouses.id"))
     warehouse: orm.Mapped[Warehouse] = orm.relationship()
-    # TODO delete product foreign key and use product_quantity_group instead
-    product_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("products.id"))
-    product: orm.Mapped[Product] = orm.relationship()
 
     def __repr__(self):
         return f"<{self.id}: {self.order_id}>"
@@ -80,7 +77,6 @@ class InboundOrder(db.Model, ModelMixin):
             "supplier": current_io.supplier.name,
             "delivery_agent": current_io.delivery_agent.username,
             "warehouse": current_io.warehouse.name,
-            "product": current_io.product.name,
         }
 
         apqg: list[ProductQuantityGroup] = [

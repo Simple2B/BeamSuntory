@@ -14,7 +14,6 @@ class InboundOrder(BaseModel):
     supplier_id: int
     delivery_agent_id: Optional[int]
     warehouse_id: int
-    product_id: int
     created_at: datetime
 
     class Config:
