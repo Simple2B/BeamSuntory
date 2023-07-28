@@ -5,7 +5,9 @@
   <div class="relative w-full max-w-6xl max-h-full">
     <!-- Modal content -->
     <!-- TODO change action for view form -->
-    <form action="{{url_for('ship_request.save')}}" method="post" class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+    <form action="{{url_for('ship_request.save')}}" method="post"
+      class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+      {{ form_edit.hidden_tag() }}
       <input type="hidden" name="ship_request_id" id="ship-request-edit-id" value="0" />
       <input type="hidden" name="next_url" id="ship-request-edit-next_url" value="" />
       <!-- Modal header -->
@@ -23,7 +25,8 @@
             </div>
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="ship-request-edit-status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status</label>
+            <label for="ship-request-edit-status"
+              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status</label>
             <select type="text" name="status" id="ship-request-edit-status"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Status" required>
@@ -42,13 +45,15 @@
             </div>
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="ship-request-edit-type" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Type</label>
+            <label for="ship-request-edit-type"
+              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Type</label>
             <div id="ship-request-edit-type"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="ship-request-edit-store" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store</label>
+            <label for="ship-request-edit-store"
+              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store</label>
             <div id="ship-request-edit-store"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
@@ -57,16 +62,16 @@
             <label for="ship-request-edit-warehouse-name"
               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Warehouse</label>
             <select type="text" name="warehouse" id="ship-request-edit-warehouse-name"
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-               required>
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
               <option value="" disabled selected>Select another warehouse</option>
               {% for warehouse in warehouses %}
-                <option value="{{ warehouse.id }}">{{ warehouse.name }}</option>
+              <option value="{{ warehouse.id }}">{{ warehouse.name }}</option>
               {% endfor %}
             </select>
           </div>
           <div class="col-span-2 sm:col-span-1">
-            <label for="ship-request-edit-warehouse-set-all" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Change for all products</label>
+            <label for="ship-request-edit-warehouse-set-all"
+              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Change for all products</label>
             <input type="checkbox" name="activated" id="ship-request-edit-warehouse-set-all"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block  p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
           </div>
@@ -87,14 +92,14 @@
           <div class="col-span-6 sm:col-span-3">
             <label for="store_country" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store
               Country</label>
-              <div id="ship-request-edit-store_country"
+            <div id="ship-request-edit-store_country"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="store_province" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store
               Province</label>
-              <div id="ship-request-edit-store_province"
+            <div id="ship-request-edit-store_province"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
           </div>
