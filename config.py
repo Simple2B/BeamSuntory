@@ -14,7 +14,7 @@ class BaseConfig(BaseSettings):
     APP_NAME: str = "Beam Suntory"
     SECRET_KEY: str
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
-    WTF_CSRF_ENABLED: bool = False
+    WTF_CSRF_ENABLED: bool = True
 
     # Mail config
     MAIL_SERVER: str = os.environ.get("MAIL_SERVER")
@@ -66,6 +66,7 @@ class DevelopmentConfig(BaseConfig):
 class TestingConfig(BaseConfig):
     """Testing configuration."""
 
+    WTF_CSRF_ENABLED: bool = False
     TESTING: bool = True
     PRESERVE_CONTEXT_ON_EXCEPTION: bool = False
     ALCHEMICAL_DATABASE_URL: str = "sqlite:///" + os.path.join(
