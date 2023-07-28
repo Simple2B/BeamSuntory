@@ -12,7 +12,6 @@ from app import db
 
 class NewShipRequestForm(FlaskForm):
     store_category = StringField("Store", [DataRequired()])
-    ship_request_id = StringField("ship_request_id", [DataRequired()])
     order_type = StringField("Order Type")
     store = StringField("Store", [DataRequired()])
     comment = StringField("Comment")
