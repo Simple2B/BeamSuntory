@@ -13,6 +13,7 @@ from .warehouse import Warehouse
 from .product import Product
 from .group import Group
 from .product_quantity_group import ProductQuantityGroup
+from .package_info import PackageInfo
 
 
 class InboundOrder(db.Model, ModelMixin):
@@ -87,7 +88,12 @@ class InboundOrder(db.Model, ModelMixin):
             io.inbound_order.order_id: [
                 {
                     "group": {"id": uio.group_id, "name": uio.parent.name},
-                    "product": {"id": uio.product_id, "name": uio.child.name},
+                    "product": {
+                        "id": uio.product_id,
+                        "name": uio.child.name,
+                        "SKU": uio.child.SKU,
+                        "image": uio.child.image,
+                    },
                     "quantity": uio.quantity,
                 }
                 for uio in apqg
@@ -95,4 +101,14 @@ class InboundOrder(db.Model, ModelMixin):
             ]
             for io in apqg
         }
+
+        package: PackageInfo = db.session.execute(
+            PackageInfo.select().where(PackageInfo.inbound_order_id == mg_dict["id"])
+        ).scalar()
+        if package:
+            mg_dict["package_info"] = {
+                "quantity_per_wrap": package.quantity_per_wrap,
+                "quantity_wrap_carton": package.quantity_wrap_carton,
+                "quantity_carton_master": package.quantity_carton_master,
+            }
         return json.dumps(mg_dict)

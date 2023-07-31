@@ -17,3 +17,4 @@ from .product_group import ProductGroup
 from .delivery_agent import DeliveryAgent
 from .cart import Cart
 from .warehouse_product import WarehouseProduct
+from .package_info import PackageInfo

@@ -121,7 +121,6 @@ def save():
         io.supplier_id = form.supplier_id.data
         io.delivery_agent_id = form.delivery_agent_id.data
         io.warehouse_id = form.warehouse_id.data
-        io.product_id = form.product_id.data
         io.save()
 
         # save delivered product quantity, so this product would be available in warehouse

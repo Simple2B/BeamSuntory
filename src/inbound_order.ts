@@ -43,7 +43,7 @@ interface IInboundOrder {
 }
 
 interface IInboundOrderProd {
-  product: {id: number; name: string};
+  product: {id: number; name: string; SKU: string; image: string};
   group: {id: number; name: string};
   quantity: number;
 }
