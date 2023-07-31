@@ -184,7 +184,8 @@ def save():
 def create():
     form: f.NewInboundOrderForm = f.NewInboundOrderForm()
     if not form.validate_on_submit():
-        flash("This order id is already taken.", "danger")
+        flash(f"Inbound order validation failed: {form.errors}", "danger")
+        log(log.INFO, "Inbound order validation failed: [%s]", form.errors)
         return redirect(url_for("inbound_order.get_all"))
     if form.validate_on_submit():
         inbound_order = m.InboundOrder(
