@@ -3,7 +3,7 @@
 <div id="assign-product-modal" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
   <div class="relative w-full max-w-2xl max-h-full">
     <!-- Modal content -->
-    <form action="#" method="post" class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+    <form action="{{ url_for('product.assign')}}" method="post" class="relative bg-white rounded-lg shadow dark:bg-gray-700">
       {{ form_edit.hidden_tag() }}
       <!-- Modal header -->
       <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
@@ -13,25 +13,24 @@
       <div class="p-6 space-y-6">
         <div class="grid grid-cols-6 gap-5">
           <div class="col-span-6 sm:col-span-3">
-            <label for="product-assign-name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Product Name</label >
-           <div id="product-assign-name"  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>  
+            <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Product Name</label >
+           <input type="text" id="product-assign-name" name="name" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> 
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="product-assign-master-group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Master Group</label >
-            <select type="text" name="product-assign-master-group" id="product-assign-master-group" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Brand" required >
+            <label for="master_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Master Group</label >
+            <select type="text" name="master_group" id="product-assign-master-group" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Brand" required >
               {% for g in current_user_groups %}
-                <option value="{{ g.parent.id }}">{{ g.parent.name }}</option>
+                <option value="{{ g.parent.master_groups.id }}">{{ g.parent.master_groups.name }}</option>
               {% endfor %}
             </select>
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="product-assign-amount" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Quantity</label >
-            <!-- <div id="product-assign-amount"  class="mb-2 shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>   -->
-            <input type="number" name="product-assign-amount" id="product-assign-amount" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Quantity" required />
+            <label for="quantity" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Quantity</label >
+            <input type="number" name="quantity" id="product-assign-amount" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Quantity" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="product-assign-group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Group</label >
-            <select type="text" name="product-assign-group" id="product-assign-group" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Brand" required >
+            <label for="group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Group</label >
+            <select type="text" name="group" id="product-assign-group" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Brand" required >
               {% for g in current_user_groups %}
                 <option value="{{ g.parent.id }}">{{ g.parent.name }}</option>
               {% endfor %}

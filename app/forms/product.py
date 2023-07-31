@@ -89,3 +89,12 @@ class NewProductForm(FlaskForm):
 class SortByGroupProductForm(FlaskForm):
     sort_by = JSONField("Sort by", [DataRequired()])
     submit = SubmitField("Submit")
+
+
+class AssignProductForm(FlaskForm):
+    name = StringField("Name", [DataRequired()])
+    master_group = IntegerField("Master group", [DataRequired()])
+    group = IntegerField("Group", [DataRequired()])
+    quantity = IntegerField("Quantity", [DataRequired()])
+
+    submit = SubmitField("Add product")

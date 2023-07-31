@@ -451,3 +451,49 @@ def sort():
     log(log.INFO, "Wrong sort")
     flash("Wrong sort", "danger")
     return redirect(url_for("product.get_all"))
+
+
+@product_blueprint.route("/assign", methods=["POST"])
+@login_required
+def assign():
+    form: f.AssignProductForm = f.AssignProductForm()
+    if form.validate_on_submit():
+        query = m.Product.select().where(m.Product.name == form.name.data)
+        p: m.Product | None = db.session.scalar(query)
+        if not p:
+            log(log.ERROR, "Not found product by name : [%s]", form.name.data)
+            flash("Cannot save product data", "danger")
+
+        # TODO sort also by group_id and warehouse_id
+        product_warehouse: m.WarehouseProduct = db.session.execute(
+            m.WarehouseProduct.select().where(m.WarehouseProduct.product_id == p.id)
+        ).scalar()
+        product_warehouse.product_quantity -= form.quantity.data
+        product_warehouse.save()
+
+        new_product_warehouse: m.WarehouseProduct = db.session.execute(
+            m.WarehouseProduct.select().where(
+                m.WarehouseProduct.product_id == p.id,
+                m.WarehouseProduct.group_id == int(form.group.data),
+            )
+        ).scalar()
+        if new_product_warehouse:
+            new_product_warehouse.product_quantity += form.quantity.data
+            new_product_warehouse.save()
+        else:
+            # TODO get warehouse_id
+            warehouse: m.Warehouse = db.session.execute(m.Warehouse.select()).scalar()
+            new_product_warehouse = m.WarehouseProduct(
+                product_id=p.id,
+                group_id=int(form.group.data),
+                product_quantity=form.quantity.data,
+                warehouse_id=warehouse.id,
+            )
+            new_product_warehouse.save()
+
+        return redirect(url_for("product.get_all"))
+
+    else:
+        log(log.ERROR, "product assign errors: [%s]", form.errors)
+        flash(f"{form.errors}", "danger")
+        return redirect(url_for("product.get_all"))

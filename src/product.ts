@@ -613,14 +613,12 @@ function ship(product: IProduct, group: string) {
 
 // function to assign
 function assign(product: IProduct, group: string) {
-  let div: HTMLDivElement = document.querySelector('#product-assign-name');
-  div.innerHTML = product.name;
+  let input: HTMLInputElement = document.querySelector('#product-assign-name');
+  input.value = product.name;
   // NOTE It will be need when we create master group in assign modal
   // let input: HTMLInputElement = document.querySelector('#product-assign-master-group');
   // input.value = product.mstr_groups_groups;
-  let input: HTMLInputElement = document.querySelector(
-    '#product-assign-amount',
-  );
+  input = document.querySelector('#product-assign-amount');
   input.max = product.available_quantity[group].toString();
   input.min = '1';
   assignModal.show();
