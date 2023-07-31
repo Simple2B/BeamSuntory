@@ -2,7 +2,12 @@
 from .auth import LoginForm, RegistrationForm, ForgotForm, ChangePasswordForm
 from .user import UserForm, NewUserForm
 from .group import GroupForm, NewGroupForm, MasterGroupForm, NewMasterGroupForm
-from .product import ProductForm, NewProductForm, SortByGroupProductForm
+from .product import (
+    ProductForm,
+    NewProductForm,
+    SortByGroupProductForm,
+    AssignProductForm,
+)
 from .group_for_product import (
     GroupProductForm,
     NewGroupProductForm,
@@ -16,3 +21,4 @@ from .supplier import SupplierForm, NewSupplierForm
 from .cart import CartForm, NewCartForm
 from .inbound_order import InboundOrderForm, NewInboundOrderForm
 from .store import StoreForm, NewStoreForm
+from .package_info import PackageInfoForm

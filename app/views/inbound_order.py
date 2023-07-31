@@ -121,7 +121,6 @@ def save():
         io.supplier_id = form.supplier_id.data
         io.delivery_agent_id = form.delivery_agent_id.data
         io.warehouse_id = form.warehouse_id.data
-        io.product_id = form.product_id.data
         io.save()
 
         # save delivered product quantity, so this product would be available in warehouse
@@ -185,7 +184,8 @@ def save():
 def create():
     form: f.NewInboundOrderForm = f.NewInboundOrderForm()
     if not form.validate_on_submit():
-        flash("This order id is already taken.", "danger")
+        flash(f"Inbound order validation failed: {form.errors}", "danger")
+        log(log.INFO, "Inbound order validation failed: [%s]", form.errors)
         return redirect(url_for("inbound_order.get_all"))
     if form.validate_on_submit():
         inbound_order = m.InboundOrder(
@@ -199,7 +199,6 @@ def create():
             status=form.status.data,
             supplier_id=form.supplier_id.data,
             warehouse_id=form.warehouse_id.data,
-            product_id=form.product_id.data,
             delivery_agent_id=form.delivery_agent_id.data,
         )
         log(log.INFO, "Form submitted. Inbound order: [%s]", inbound_order)

@@ -20,3 +20,4 @@ from .cart import Cart
 from .warehouse_product import WarehouseProduct
 from .product_quantity_group import ProductQuantityGroup
 from .favorite_store_user import FavoriteStoreUser
+from .package_info import PackageInfo

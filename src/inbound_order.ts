@@ -34,7 +34,6 @@ interface IInboundOrder {
   supplier_id: number;
   delivery_agent_id: number;
   warehouse_id: number;
-  product_id: number;
   sup_da_wh_prod_objs: SupDAWhProd;
   products: IProduct[];
   groups: IGroup[];
@@ -44,7 +43,7 @@ interface IInboundOrder {
 }
 
 interface IInboundOrderProd {
-  product: {id: number; name: string};
+  product: {id: number; name: string; SKU: string; image: string};
   group: {id: number; name: string};
   quantity: number;
 }
@@ -167,8 +166,6 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
   input.value = inboundOrder.delivery_agent_id.toString();
   input = document.querySelector('#inbound-order-edit-warehouse_id');
   input.value = inboundOrder.warehouse_id.toString();
-  input = document.querySelector('#inbound-order-edit-product_id');
-  input.value = inboundOrder.product_id.toString();
   input = document.querySelector('#inbound-order-edit-next_url');
   input.value = window.location.href;
 
@@ -243,8 +240,6 @@ viewInboundOrderButtonElements.forEach(e =>
     div.innerHTML = inboundOrder.sup_da_wh_prod_objs.delivery_agent;
     div = document.querySelector('#inbound-order-view-warehouse_id');
     div.innerHTML = inboundOrder.sup_da_wh_prod_objs.warehouse;
-    div = document.querySelector('#inbound-order-view-product_id');
-    div.innerHTML = inboundOrder.sup_da_wh_prod_objs.product;
   }),
 );
 

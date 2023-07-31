@@ -13,6 +13,7 @@ from .warehouse import Warehouse
 from .product import Product
 from .group import Group
 from .product_quantity_group import ProductQuantityGroup
+from .package_info import PackageInfo
 
 
 class InboundOrder(db.Model, ModelMixin):
@@ -46,9 +47,6 @@ class InboundOrder(db.Model, ModelMixin):
     delivery_agent: orm.Mapped[DeliveryAgent] = orm.relationship()
     warehouse_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("warehouses.id"))
     warehouse: orm.Mapped[Warehouse] = orm.relationship()
-    # TODO delete product foreign key and use product_quantity_group instead
-    product_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("products.id"))
-    product: orm.Mapped[Product] = orm.relationship()
 
     def __repr__(self):
         return f"<{self.id}: {self.order_id}>"
@@ -80,7 +78,6 @@ class InboundOrder(db.Model, ModelMixin):
             "supplier": current_io.supplier.name,
             "delivery_agent": current_io.delivery_agent.username,
             "warehouse": current_io.warehouse.name,
-            "product": current_io.product.name,
         }
 
         apqg: list[ProductQuantityGroup] = [
@@ -91,12 +88,30 @@ class InboundOrder(db.Model, ModelMixin):
             io.inbound_order.order_id: [
                 {
                     "group": {"id": uio.group_id, "name": uio.parent.name},
-                    "product": {"id": uio.product_id, "name": uio.child.name},
+                    "product": {
+                        "id": uio.product_id,
+                        "name": uio.child.name,
+                        "SKU": uio.child.SKU,
+                        "image": uio.child.image,
+                    },
                     "quantity": uio.quantity,
                 }
                 for uio in apqg
                 if uio.inbound_order.order_id == io.inbound_order.order_id
             ]
             for io in apqg
+        }
+
+        package: PackageInfo = db.session.execute(
+            PackageInfo.select().where(PackageInfo.inbound_order_id == mg_dict["id"])
+        ).scalar()
+        mg_dict["package_info"] = {
+            "quantity_per_wrap": package.quantity_per_wrap,
+            "quantity_wrap_carton": package.quantity_wrap_carton,
+            "quantity_carton_master": package.quantity_carton_master,
+        } if package else {
+            "quantity_per_wrap": 0,
+            "quantity_wrap_carton": 0,
+            "quantity_carton_master": 0,
         }
         return json.dumps(mg_dict)
