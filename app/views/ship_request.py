@@ -171,13 +171,23 @@ def save():
 @ship_request_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
 def delete(id: int):
-    sr = db.session.scalar(m.ShipRequest.select().where(m.ShipRequest.id == id))
+    sr: m.ShipRequest = db.session.scalar(
+        m.ShipRequest.select().where(m.ShipRequest.id == id)
+    )
     if not sr:
         log(log.INFO, "There is no ship request with id: [%s]", id)
         flash("There is no such ship request", "danger")
         return "no ship request", 404
 
     delete_sr = sa.delete(m.ShipRequest).where(m.ShipRequest.id == id)
+
+    ship_requests = db.session.execute(
+        m.Cart.select().where(m.Cart.ship_request_id == sr.id)
+    ).scalars()
+
+    for sr in ship_requests:
+        db.session.delete(sr)
+
     db.session.execute(delete_sr)
     db.session.commit()
     log(log.INFO, "Ship Request deleted. Ship Request: [%s]", sr)
