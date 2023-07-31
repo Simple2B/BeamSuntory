@@ -198,7 +198,6 @@ def create():
             status=form.status.data,
             supplier_id=form.supplier_id.data,
             warehouse_id=form.warehouse_id.data,
-            product_id=form.product_id.data,
             delivery_agent_id=form.delivery_agent_id.data,
         )
         log(log.INFO, "Form submitted. Inbound order: [%s]", inbound_order)

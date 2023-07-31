@@ -220,7 +220,6 @@ def mg_g_populate(client: FlaskClient):
         supplier_id=1,
         delivery_agent_id=1,
         warehouse_id=1,
-        product_id=1,
     ).save(False)
 
     m.ShipRequest(
