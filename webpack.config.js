@@ -196,6 +196,16 @@ const pickupInboundConfig = {
   },
 };
 
+const divisionConfig = {
+  entry: {
+    main: './src/division.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/division.js', // <--- Will be compiled to this single file
+  },
+};
+
 const configs = [
   baseConfig,
   userConfig,
@@ -215,6 +225,7 @@ const configs = [
   outgoingStockConfig,
   pickupOrderConfig,
   pickupInboundConfig,
+  divisionConfig,
 ].map(conf => merge(defaultConfig, conf));
 
 module.exports = configs;
