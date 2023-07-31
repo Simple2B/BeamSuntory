@@ -29,7 +29,6 @@ class Product(db.Model, ModelMixin):
     supplier_id: orm.Mapped[str] = orm.mapped_column(
         sa.ForeignKey("suppliers.id")
     )  # NOTE vendor = supplier
-    # supplier: orm.Mapped[Supplier] = orm.relationship(foreign_keys=[supplier_id])
     currency: orm.Mapped[s.Currency]
     regular_price: orm.Mapped[float] = orm.mapped_column(
         sa.Float(),
@@ -60,8 +59,9 @@ class Product(db.Model, ModelMixin):
     width: orm.Mapped[float] = orm.mapped_column(sa.Float())
     height: orm.Mapped[float] = orm.mapped_column(sa.Float())
 
+    # TODO is overlaps="user_obj" correct decision? remove it to see the warning
     product_groups: orm.Mapped[ProductGroup] = orm.relationship(
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan", overlaps="child"
     )
 
     def __repr__(self):

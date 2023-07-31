@@ -323,15 +323,35 @@ def save():
 @product_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
 def delete(id: int):
-    u = db.session.scalar(m.Product.select().where(m.Product.id == id))
-    if not u:
+    prod: m.Product = db.session.scalar(m.Product.select().where(m.Product.id == id))
+    if not prod:
         log(log.INFO, "There is no product with id: [%s]", id)
         flash("There is no such product", "danger")
         return "no product", 404
 
-    db.session.delete(u)
+    # NOTE should we allow to delete product if it is in product_group, warehouse_product, carts, product_quantity_group
+    product_warehouses = db.session.execute(
+        m.WarehouseProduct.select().where(m.WarehouseProduct.product_id == prod.id)
+    ).scalars()
+    product_carts = db.session.execute(
+        m.Cart.select().where(m.Cart.product_id == prod.id)
+    ).scalars()
+    product_groups = db.session.execute(
+        m.ProductGroup.select().where(m.ProductGroup.product_id == prod.id)
+    ).scalars()
+    product_io = db.session.execute(
+        m.ProductQuantityGroup.select().where(
+            m.ProductQuantityGroup.product_id == prod.id
+        )
+    ).scalars()
+
+    for prod_conn in [product_warehouses, product_carts, product_groups, product_io]:
+        for pw in prod_conn:
+            db.session.delete(pw)
+
+    db.session.delete(prod)
     db.session.commit()
-    log(log.INFO, "Product deleted. Product: [%s]", u)
+    log(log.INFO, "Product deleted. Product: [%s]", prod)
     flash("Product deleted!", "success")
     return "ok", 200
 
