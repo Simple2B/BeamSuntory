@@ -48,12 +48,12 @@ def test_delete_inbound_order(mg_g_populate: FlaskClient):
     login(mg_g_populate)
 
     inbound_orders_rows_objs = db.session.execute(m.InboundOrder.select()).all()
-    assert len(inbound_orders_rows_objs) == 1
+    assert len(inbound_orders_rows_objs) == 3
     response = mg_g_populate.delete("/inbound_order/delete/1")
     assert response.status_code == 200
     assert "ok" in response.text
     inbound_orders_rows_objs = db.session.execute(m.InboundOrder.select()).all()
-    assert len(inbound_orders_rows_objs) == 0
+    assert len(inbound_orders_rows_objs) == 2
 
 
 def test_edit_inbound_order(mg_g_populate: FlaskClient):

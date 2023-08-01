@@ -130,7 +130,7 @@ def mg_g_populate(client: FlaskClient):
             master_group_id=groups[g],
         ).save(False)
 
-    m.Product(
+    populate_test_product = m.Product(
         name="populate_test_product",
         product_type="SIMPLE_PRODUCT",
         supplier_id=1,
@@ -152,7 +152,8 @@ def mg_g_populate(client: FlaskClient):
         length=11.0,
         width=11.0,
         height=11.0,
-    ).save(False)
+    )
+    populate_test_product.save(False)
     m.Product(
         name="populate_test_prod2",
         product_type="SIMPLE_PRODUCT",
@@ -179,14 +180,15 @@ def mg_g_populate(client: FlaskClient):
     m.ProductGroup(product_id=1, group_id=1).save(False)
     m.ProductGroup(product_id=2, group_id=2).save(False)
 
-    m.Warehouse(
+    jw = m.Warehouse(
         name="Junewood warehouse",
         phone_number="380362470221",
         city="Bagmom",
         zip="unzip",
         address="sserdda",
         manager_id=1,
-    ).save(False)
+    )
+    jw.save(False)
 
     m.DeliveryAgent(
         first_name="May",
@@ -246,6 +248,95 @@ def mg_g_populate(client: FlaskClient):
         active=True,
     ).save(False)
 
+    m.Cart(
+        product_id=1,
+        quantity=11,
+        user_id=1,
+        group="JB",
+    ).save(False)
+
+    sr_atp = m.ShipRequest(
+        order_numb="Order-12345-Assigned-to-pickup",
+        status="Assigned to pickup",
+        store_category="Drinks",
+        order_type="Regular",
+        store_id=1,
+        warehouse_id=1,
+        user_id=1,
+    )
+    sr_atp.save(False)
+
+    m.ShipRequest(
+        order_numb="Order-12345-In-transit",
+        status="In transit",
+        store_category="Drinks",
+        order_type="Regular",
+        store_id=1,
+        warehouse_id=1,
+        user_id=1,
+    ).save(False)
+
+    m.ShipRequest(
+        order_numb="Order-12345-Waiting-for-warehouse-manager",
+        status="Waiting for warehouse manager",
+        store_category="Drinks",
+        order_type="Regular",
+        store_id=1,
+        warehouse_id=1,
+        user_id=1,
+    ).save(False)
+
+    m.InboundOrder(
+        order_id="IO-BEAM-A-t-p",
+        active_date=datetime.datetime.strptime("07/20/2023", "%m/%d/%Y"),
+        active_time="12:00 AM",
+        order_title="Inbound Order Assigned to pickup",
+        delivery_date=datetime.datetime.strptime("07/19/2023", "%m/%d/%Y"),
+        status="Assigned to pickup",
+        supplier_id=1,
+        delivery_agent_id=1,
+        warehouse_id=1,
+    ).save(False)
+
+    io_it = m.InboundOrder(
+        order_id="IO-BEAM-I-t",
+        active_date=datetime.datetime.strptime("07/20/2023", "%m/%d/%Y"),
+        active_time="12:00 AM",
+        order_title="Inbound Order In transit",
+        delivery_date=datetime.datetime.strptime("07/19/2023", "%m/%d/%Y"),
+        status="In transit",
+        supplier_id=1,
+        delivery_agent_id=1,
+        warehouse_id=1,
+    )
+    io_it.save(False)
+
+    # NOTE actually save everything above
+    db.session.commit()
+
+    m.WarehouseProduct(
+        product_id=populate_test_product.id,
+        group_id=1,
+        product_quantity=100,
+        warehouse_id=jw.id,
+    ).save()
+
+    m.ProductQuantityGroup(
+        product_id=populate_test_product.id,
+        warehouse_id=jw.id,
+        group_id=1,
+        quantity=100,
+        inbound_order_id=io_it.id,
+    ).save()
+
+    m.Cart(
+        product_id=populate_test_product.id,
+        quantity=11,
+        user_id=1,
+        group="Canada",
+        ship_request_id=sr_atp.id,
+    ).save()
+
     m.Division(
         role_name="Manager",
         type="Master",
@@ -253,5 +344,4 @@ def mg_g_populate(client: FlaskClient):
         activated=True,
     ).save(False)
 
-    db.session.commit()
     yield client
