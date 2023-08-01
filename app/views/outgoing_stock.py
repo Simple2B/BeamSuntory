@@ -133,9 +133,9 @@ def cancel(id: int):
             warehouse_product.product_quantity += cart.quantity
             warehouse_product.save()
 
-    sr.status = "Canceled"
+    sr.status = "Cancelled"
     sr.save()
 
-    log(log.INFO, "Ship Request canceled. Ship Request: [%s]", sr)
-    flash("Ship Request canceled!", "success")
+    log(log.INFO, "Ship Request cancelled. Ship Request: [%s]", sr)
+    flash("Ship Request cancelled!", "success")
     return "ok", 200
