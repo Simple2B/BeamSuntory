@@ -1,4 +1,3 @@
-import json
 from flask import (
     Blueprint,
     render_template,
@@ -124,8 +123,6 @@ def pickup(id: int):
 @login_required
 def package_info():
     form_edit: f.PackageInfoForm = f.PackageInfoForm()
-    if not form_edit.validate_on_submit():
-        return redirect(url_for("pickup_inbound.get_all"))
     if form_edit.validate_on_submit():
         package_info: m.PackageInfo = db.session.execute(
             m.PackageInfo.select()
@@ -145,10 +142,8 @@ def package_info():
                 quantity_wrap_carton=form_edit.quantity_wrap_carton.data,
             )
             package_info.save()
-        # NOTE: json list of dicts with product_id and quantity.
-        recieved_products = json.loads(form_edit.recieved_products.data)
-        type(recieved_products)
+        flash("Package info updated!", "success")
         return redirect(url_for("pickup_inbound.get_all"))
 
     flash("Something went wrong!", "danger")
-    return redirect(url_for("inbound_order.get_all"))
+    return redirect(url_for("pickup_inbound.get_all"))

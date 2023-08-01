@@ -100,7 +100,7 @@ def accept(id: int):
     io.save()
 
     # save delivered product quantity, so this product would be available in warehouse
-    products_quantity_group: m.ProductQuantityGroup = db.session.execute(
+    products_quantity_group: list[m.ProductQuantityGroup] = db.session.execute(
         m.ProductQuantityGroup.select().where(
             m.ProductQuantityGroup.inbound_order_id == io.id,
         )
@@ -144,7 +144,7 @@ def cancel(id: int):
         log(log.INFO, "There is no inbound order with id: [%s]", id)
         flash("There is no such inbound order", "danger")
         return "no inbound order", 404
-    io.status = "Canceled"
+    io.status = "Cancelled"
     io.save()
 
     log(log.INFO, "Inbound order canceled. Inbound order: [%s]", io)

@@ -86,7 +86,7 @@ def create():
 @cart_blueprint.route("/edit", methods=["POST"])
 @login_required
 def save():
-    form = f.CartForm()
+    form: f.CartForm = f.CartForm()
     if form.validate_on_submit():
         query = m.Cart.select().where(m.Cart.id == int(form.cart_id.data))
         c: m.Cart | None = db.session.scalar(query)
