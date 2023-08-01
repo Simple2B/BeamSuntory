@@ -214,11 +214,27 @@ def create():
 @inbound_order_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
 def delete(id: int):
-    io = db.session.scalar(m.InboundOrder.select().where(m.InboundOrder.id == id))
+    io: m.InboundOrder = db.session.scalar(
+        m.InboundOrder.select().where(m.InboundOrder.id == id)
+    )
     if not io:
         log(log.INFO, "There is no inbound order with id: [%s]", id)
         flash("There is no such inbound order", "danger")
         return "no inbound order", 404
+
+    product_package = db.session.execute(
+        m.PackageInfo.select().where(m.PackageInfo.inbound_order_id == io.id)
+    ).scalars()
+
+    product_q_g = db.session.execute(
+        m.ProductQuantityGroup.select().where(
+            m.ProductQuantityGroup.inbound_order_id == io.id
+        )
+    ).scalars()
+
+    for prod_conn in [product_package, product_q_g]:
+        for pw in prod_conn:
+            db.session.delete(pw)
 
     delete_io = sa.delete(m.InboundOrder).where(m.InboundOrder.id == id)
     db.session.execute(delete_io)
