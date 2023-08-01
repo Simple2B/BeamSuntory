@@ -123,18 +123,6 @@ def create():
             parent_role=form.parent_role.data,
             activated=form.activated.data,
         )
-        if form.role_name.data.lower() == form.parent_role.data.lower():
-            log(
-                log.INFO,
-                "Cannot create role with name: [%s]",
-                division.role_name,
-                division.parent_role,
-            )
-            flash(
-                f"Role {form.role_name.data} can not belong to parent role {form.parent_role.data}",
-                "danger",
-            )
-            return redirect(url_for("division.get_all"))
         query = m.Division.select().where(m.Division.role_name == division.role_name)
 
         if db.session.scalar(query) is not None:

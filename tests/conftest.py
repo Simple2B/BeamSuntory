@@ -246,5 +246,12 @@ def mg_g_populate(client: FlaskClient):
         active=True,
     ).save(False)
 
+    m.Division(
+        role_name="Manager",
+        type="Master",
+        parent_role="Admin",
+        activated=True,
+    ).save(False)
+
     db.session.commit()
     yield client
