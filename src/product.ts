@@ -554,6 +554,7 @@ viewProductButtonElements.forEach(e =>
 
 // function to request share
 function requestShare(product: IProduct, group: string) {
+  console.log('product in request share modal', product);
   const img: HTMLImageElement = document.querySelector(
     '#product-request-share-image',
   );
@@ -580,6 +581,18 @@ function requestShare(product: IProduct, group: string) {
   );
   input.max = product.available_quantity[group].toString();
   input.min = '1';
+  input = document.querySelector('#product-request-share-name-hidden-input');
+  input.value = product.name;
+  input = document.querySelector('#product-request-share-SKU-hidden-input');
+  input.value = product.SKU;
+  input = document.querySelector(
+    '#product-request-share-group-id-hidden-input',
+  );
+  input.value = product.groups_ids[group].toString();
+  input = document.querySelector(
+    '#product-request-share-available-quantity-hidden-input',
+  );
+  input.value = product.available_quantity[group].toString();
   requestShareModal.show();
 }
 

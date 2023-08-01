@@ -8,12 +8,14 @@ from flask import (
     flash,
     redirect,
     url_for,
+    current_app as app,
 )
 from flask_login import login_required, current_user
+from flask_mail import Message
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
-from app import models as m, db
+from app import models as m, db, mail
 from app import forms as f
 from app.logger import log
 
@@ -490,6 +492,72 @@ def assign():
                 warehouse_id=warehouse.id,
             )
             new_product_warehouse.save()
+
+        return redirect(url_for("product.get_all"))
+
+    else:
+        log(log.ERROR, "product assign errors: [%s]", form.errors)
+        flash(f"{form.errors}", "danger")
+        return redirect(url_for("product.get_all"))
+
+
+@product_blueprint.route("/request_share", methods=["POST"])
+@login_required
+def request_share():
+    form: f.RequestShareProductForm = f.RequestShareProductForm()
+    if form.validate_on_submit():
+        query = m.Product.select().where(m.Product.name == form.name.data)
+        p: m.Product | None = db.session.scalar(query)
+        if not p:
+            log(log.ERROR, "Not found product by name : [%s]", form.name.data)
+            flash("Cannot save product data", "danger")
+
+        product_group = (
+            db.session.execute(
+                m.ProductGroup.select()
+                .where(m.ProductGroup.product_id == p.id)
+                .where(m.ProductGroup.group_id == form.group_id.data)
+            )
+            .scalar()
+            .parent
+        )
+        group_id = (
+            db.session.execute(
+                m.Group.select().where(m.Group.name == product_group.name)
+            )
+            .scalar()
+            .id
+        )
+        users = [
+            u
+            for u in db.session.execute(
+                m.UserGroup.select().where(m.UserGroup.right_id == group_id)
+            ).scalars()
+        ]
+
+        if len(users) != 0:
+            for u in users:
+                user = db.session.execute(
+                    m.User.select().where(m.User.id == u.left_id)
+                ).scalar()
+                msg = Message(
+                    subject="New request share",
+                    sender=app.config["MAIL_DEFAULT_SENDER"],
+                    recipients=[user.email],
+                )
+                url = url_for(
+                    "product.gett_all",
+                    _external=True,
+                )
+
+                msg.html = render_template(
+                    "email/set.html",
+                    user=user,
+                    desire_quantity=form.quantity.data,
+                    available_quantity=p.quantity,
+                    url=url,
+                )
+                # mail.send(msg)
 
         return redirect(url_for("product.get_all"))
 

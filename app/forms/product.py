@@ -98,3 +98,14 @@ class AssignProductForm(FlaskForm):
     quantity = IntegerField("Quantity", [DataRequired()])
 
     submit = SubmitField("Add product")
+
+
+class RequestShareProductForm(FlaskForm):
+    name = StringField("Name", [DataRequired()])
+    group_id = IntegerField("Group", [DataRequired()])
+    SKU = StringField("Name", [DataRequired()])
+    available_quantity = IntegerField("Available Quantity", [DataRequired()])
+    desire_quantity = IntegerField("Desire Quantity", [DataRequired()])
+    brand = StringField("Brand", [DataRequired()])
+
+    submit = SubmitField("Add product")

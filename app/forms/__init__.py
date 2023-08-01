@@ -7,6 +7,7 @@ from .product import (
     NewProductForm,
     SortByGroupProductForm,
     AssignProductForm,
+    RequestShareProductForm,
 )
 from .group_for_product import (
     GroupProductForm,

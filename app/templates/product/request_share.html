@@ -5,7 +5,13 @@
   <div class="relative w-full max-w-2xl max-h-full">
     <!-- Modal content -->
     <!-- TODO : Change the action url -->
-    <form action="#" method="post" class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+    <form action="{{url_for('product.request_share')}}" method="post"
+      class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+      <input type="hidden" name="name" id="product-request-share-name-hidden-input" value="" />
+      <input type="hidden" name="SKU" id="product-request-share-SKU-hidden-input" value="" />
+      <input type="hidden" name="available_quantity" id="product-request-share-available-quantity-hidden-input"
+        value="" />
+      <input type="hidden" name="group_id" id="product-request-share-group-id-hidden-input" value="1" />
       {{ form_edit.hidden_tag() }}
       <!-- Modal header -->
       <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
@@ -54,7 +60,7 @@
           <div class="col-span-6 sm:col-span-6">
             <label for="product-request-share-batch-no"
               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Desire Quantity</label>
-            <input type="number" name="product-request-share-quantity" id="product-request-share-quantity"
+            <input type="number" name="desire_quantity" id="product-request-share-quantity"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Quantity" required />
           </div>
@@ -62,12 +68,12 @@
             <label for="product-request-share-define-brand"
               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Define Your Brand the Item will
               Appear in if Accepted</label>
-            <select type="text" name="product-request-share-define-brand" id="product-request-share-define-brand"
+            <select type="text" name="brand" id="product-request-share-define-brand"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Brand" required>
-              <option value="1">ADL</option>
-              <option value="2">Brugal</option>
-              <option value="3">Sauza</option>
+              {% for g in current_user_groups %}
+              <option value="{{ g.parent.id }}">{{ g.parent.name }}</option>
+              {% endfor %}
             </select>
           </div>
           <div class="col-span-6 sm:col-span-6">
