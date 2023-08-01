@@ -19,7 +19,7 @@ class Division(db.Model, ModelMixin):
     )
     type: orm.Mapped[str] = orm.mapped_column(sa.String(64))
     parent_role: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=True)
-    status: orm.Mapped[str] = orm.mapped_column(sa.String(64))
+    activated: orm.Mapped[bool] = orm.mapped_column(sa.Boolean, default=False)
 
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,

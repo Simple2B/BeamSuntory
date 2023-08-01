@@ -80,24 +80,23 @@ def save():
         if not d:
             log(log.ERROR, "Not found role by id : [%s]", form.division_id.data)
             flash("Cannot save role", "danger")
-        if (
-            form.role_name.data.lower() == "admin"
-            and form.parent_role.data is not None
-            and form.parent_role.data.lower() != "admin"
-        ):
+        if form.role_name.data.lower() == form.parent_role.data.lower():
             log(
                 log.INFO,
                 "Cannot edit role with name: [%s]",
                 d.role_name,
                 d.parent_role,
             )
-            flash("Role Admin belong only to parent role Admin", "danger")
+            flash(
+                f"Role {form.role_name.data} can not belong to parent role {form.parent_role.data}",
+                "danger",
+            )
             return redirect(url_for("division.get_all"))
 
         d.role_name = form.role_name.data
         d.type = form.type.data
         d.parent_role = form.parent_role.data
-        d.status = form.status.data
+        d.activated = form.activated.data
         d.save()
 
         if form.next_url.data:
@@ -122,20 +121,19 @@ def create():
             role_name=form.role_name.data,
             type=form.type.data,
             parent_role=form.parent_role.data,
-            status=form.status.data,
+            activated=form.activated.data,
         )
-        if (
-            division.role_name.lower() == "admin"
-            and division.parent_role is not None
-            and division.parent_role.lower() != "admin"
-        ):
+        if form.role_name.data.lower() == form.parent_role.data.lower():
             log(
                 log.INFO,
                 "Cannot create role with name: [%s]",
                 division.role_name,
                 division.parent_role,
             )
-            flash("Role Admin belong only to parent role Admin", "danger")
+            flash(
+                f"Role {form.role_name.data} can not belong to parent role {form.parent_role.data}",
+                "danger",
+            )
             return redirect(url_for("division.get_all"))
         query = m.Division.select().where(m.Division.role_name == division.role_name)
 

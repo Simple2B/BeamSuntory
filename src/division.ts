@@ -12,8 +12,8 @@ interface IDivision {
   role_name: string;
   id: number;
   type: string;
-  status: string;
   parent_role: string;
+  activated: boolean;
 }
 
 const $modalElement: HTMLElement = document.querySelector('#editDivisionModal');
@@ -87,7 +87,7 @@ function editDivision(division: IDivision) {
   input.value = division.type;
   input = document.querySelector('#division-edit-parent-role');
   input.value = division.parent_role;
-  input = document.querySelector('#division-edit-status');
-  input.value = division.status;
+  input = document.querySelector('#division-edit-activated');
+  input.checked = division.activated;
   modal.show();
 }

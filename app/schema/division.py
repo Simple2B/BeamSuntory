@@ -7,7 +7,7 @@ class Division(BaseModel):
     role_name: str
     type: str
     parent_role: Optional[str]
-    status: str
+    activated: bool
 
     class Config:
         orm_mode = True

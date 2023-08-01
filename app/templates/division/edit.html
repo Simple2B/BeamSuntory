@@ -17,27 +17,30 @@
       <div class="p-6 space-y-6">
         <div class="grid grid-cols-6 gap-6">
           <div class="col-span-6 sm:col-span-6">
-            <label for="role_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Role Name</label>
+            <label for="role_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Role
+              Name</label>
             <input type="text" name="role_name" id="division-edit-role-name"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Role Name" required />
           </div>
           <div class="col-span-6 sm:col-span-6">
-            <label for="parent_role" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Parent Role</label>
+            <label for="parent_role" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Parent
+              Role</label>
             <select type="text" name="parent_role" id="division-edit-parent-role"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Supplier" required>
+              placeholder="Parent Role">
               <option selected="selected" value="" disabled>Select Parent Role</option>
               {% for role in parent_roles %}
-                <option value="{{ role }}">{{ role }}</option>
+              <option value="{{ role }}">{{ role }}</option>
               {% endfor %}
             </select>
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="type" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Type (Role/Division)</label>
+            <label for="type" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Type
+              (Role/Division)</label>
             <select type="text" name="type" id="division-edit-type"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Some Group" required>
+              placeholder="Select Type" required>
               <option value="" disabled selected="selected">Select Type</option>
               <option value="Master">Master</option>
               <option value="Master">Division</option>
@@ -45,14 +48,10 @@
             </select>
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status</label>
-            <select type="text" name="status" id="division-edit-status"
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Status" required>
-              <option selected="selected" value="" disabled>Choose Status</option>
-              <option value="Active">Active</option>
-              <option value="Offline">Offline</option>
-            </select>
+            <label for="activated"
+              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Activated</label>
+            <input type="checkbox" name="activated" id="division-edit-activated"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block  p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
           </div>
         </div>
       </div>
