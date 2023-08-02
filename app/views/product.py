@@ -491,6 +491,12 @@ def assign():
             )
             new_product_warehouse.save()
 
+        m.Assign(
+            product_id=p.id,
+            group_id=int(form.group.data),
+            quantity=form.quantity.data,
+        ).save()
+
         return redirect(url_for("product.get_all"))
 
     else:

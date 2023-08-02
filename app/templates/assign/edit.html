@@ -1,0 +1,52 @@
+<!-- Edit warehouse modal -->
+<!-- prettier-ignore-->
+<div id="editWarehouseModal" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
+  <div class="relative w-full max-w-2xl max-h-full">
+    <!-- Modal content -->
+    <form action="{{url_for('warehouse.save')}}" method="post" class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+      {{ form_edit.hidden_tag() }}
+      <input type="hidden" name="warehouse_id" id="warehouse-edit-id" value="0" />
+      <input type="hidden" name="next_url" id="warehouse-edit-next_url" value="" />
+      <!-- Modal header -->
+      <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Edit warehouse </h3>
+      </div>
+      <!-- Modal body -->
+      <div class="p-6 space-y-6">
+        <div class="grid grid-cols-6 gap-6">
+          <div class="col-span-6 sm:col-span-3">
+            <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Name</label >
+            <input type="text" name="name" id="warehouse-edit-name" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Name" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="phone_number" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Phone number</label >
+            <input type="text" name="phone_number" id="warehouse-edit-phone_number" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Phone number" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="city" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >City</label >
+            <input type="text" name="city" id="warehouse-edit-city" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="City" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="zip" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >ZIP</label >
+            <input type="text" name="zip" id="warehouse-edit-zip" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="ZIP" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Address</label >
+            <input type="text" name="address" id="warehouse-edit-address" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Address" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="manager_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Manager</label >
+            <select type="text" name="manager_id" id="warehouse-edit-manager_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Manager" required >
+              {% for manager in managers %}
+              <option value="{{ manager.id }}">{{ manager.username }}</option>
+              {% endfor %}
+            </select></div>
+        </div>
+      </div>
+      <!-- Modal footer -->
+      <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+        <button name="submit" type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"> Save all </button>
+      </div>
+    </form>
+  </div>
+</div>
