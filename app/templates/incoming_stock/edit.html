@@ -1,21 +1,21 @@
-<!-- Edit pickup inbound modal -->
+<!-- Edit incoming stock modal -->
 <!-- prettier-ignore-->
-<div id="editPickupInboundModal" tabindex="-1" aria-hidden="true"
+<div id="editIncomingStockModal" tabindex="-1" aria-hidden="true"
   class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
   <div class="relative w-full max-w-2xl max-h-full">
     <!-- Modal content -->
-    <form action="{{url_for('pickup_inbound.package_info')}}" id="pickup-inbound-edit-form" method="post"
+    <form action="{{ url_for('incoming_stock.package_info') }}" id="incoming-stock-edit-form" method="post"
       class="relative bg-white rounded-lg shadow dark:bg-gray-700">
       {{ form_edit.hidden_tag() }}
-      <input type="hidden" name="inbound_order_id" id="pickup-inbound-edit-id" value="0" />
-      <input type="hidden" name="recieved_products" id="pickup-inbound-edit-recieved-products" value="" />
+      <input type="hidden" name="inbound_order_id" id="incoming-stock-edit-id" value="0" />
+      <input type="hidden" name="recieved_products" id="incoming-stock-edit-recieved-products" value="" />
       <input type="hidden" name="next_url" id="inbound-order-edit-next_url" value="" />
       <!-- Modal header -->
       <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
-        <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Edit pickup inbound </h3>
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Edit incoming stock </h3>
       </div>
       <!-- Modal body -->
-      <div id="pickup-inbound-edit-add-container">
+      <div id="incoming-stock-edit-add-container">
       </div>
       <div class="p-6 space-y-6 border-t">
         <div class="grid grid-cols-6 gap-6">
@@ -23,29 +23,29 @@
             <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity Per
               Wrap</label>
             <input type="text" name="quantity_per_wrap"
-              class="pickup-inbound-edit-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              class="incoming-stock-edit-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Quantity" required>
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity Of Wraps
               Per Carton</label>
             <input type="text" name="quantity_wrap_carton"
-              class="pickup-inbound-edit-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              class="incoming-stock-edit-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Quantity" required>
           </div>
           <div class="col-span-6 sm:col-span-6">
             <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity Of Cartons
               Per Master Carton (Optional)</label>
             <input type="text" name="quantity_carton_master"
-              class="pickup-inbound-edit-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              class="incoming-stock-edit-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Quantity">
           </div>
         </div>
       </div>
       <!-- Modal footer -->
       <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
-        <button id="pickup-inbound-submit-btn" name="submit" type="submit" class="hidden"></button>
-        <button id="pickup-inbound-save-products-btn" name="save-products" type="button"
+        <button id="incoming-stock-submit-btn" name="submit" type="submit" class="hidden"></button>
+        <button id="incoming-stock-save-products-btn" name="save-products" type="button"
           class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
           Save all </button>
       </div>

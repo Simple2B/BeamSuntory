@@ -176,6 +176,20 @@ if (searchPickupInboundInputButton && searchPickupInboundInput) {
 }
 const pickupInboundButtons = document.querySelectorAll('.pickup-inbound-btn');
 
+pickupInboundButtons.forEach(e => {
+  e.addEventListener('click', async () => {
+    if (confirm('Are sure?')) {
+      let id = e.getAttribute('data-pickup-inbound-id');
+      const response = await fetch(`/pickup_inbound/pickup/${id}`, {
+        method: 'GET',
+      });
+      if (response.status == 200) {
+        location.reload();
+      }
+    }
+  });
+});
+
 function setProducts() {
   const pickupInboundProducts = document.querySelectorAll(
     '.pickup-inbound-product-item',
@@ -215,7 +229,7 @@ const inboundOrderSaveProductsButton = document.querySelector(
 );
 
 inboundOrderSaveProductsButton.addEventListener('click', async () => {
-  setProducts();
+  await setProducts();
   if (confirm('Are sure?')) {
     const inboundOrder: IInboundOrder = JSON.parse(
       sessionStorage.getItem('inboundOrder'),

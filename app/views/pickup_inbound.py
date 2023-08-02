@@ -3,8 +3,6 @@ from flask import (
     render_template,
     request,
     flash,
-    redirect,
-    url_for,
 )
 from flask_login import login_required
 import sqlalchemy as sa
@@ -117,33 +115,3 @@ def pickup(id: int):
     log(log.INFO, "Inbound order pickup done. Inbound order: [%s]", io)
     flash("Inbound order pickup done!", "success")
     return "ok", 200
-
-
-@pickup_inbound_blueprint.route("/package_info", methods=["POST"])
-@login_required
-def package_info():
-    form_edit: f.PackageInfoForm = f.PackageInfoForm()
-    if form_edit.validate_on_submit():
-        package_info: m.PackageInfo = db.session.execute(
-            m.PackageInfo.select()
-            .order_by(m.PackageInfo.id)
-            .where(m.PackageInfo.inbound_order_id == form_edit.inbound_order_id.data)
-        ).scalar()
-        if package_info:
-            package_info.quantity_carton_master = form_edit.quantity_carton_master.data
-            package_info.quantity_per_wrap = form_edit.quantity_per_wrap.data
-            package_info.quantity_wrap_carton = form_edit.quantity_wrap_carton.data
-            package_info.save()
-        else:
-            package_info = m.PackageInfo(
-                inbound_order_id=int(form_edit.inbound_order_id.data),
-                quantity_carton_master=form_edit.quantity_carton_master.data,
-                quantity_per_wrap=form_edit.quantity_per_wrap.data,
-                quantity_wrap_carton=form_edit.quantity_wrap_carton.data,
-            )
-            package_info.save()
-        flash("Package info updated!", "success")
-        return redirect(url_for("pickup_inbound.get_all"))
-
-    flash("Something went wrong!", "danger")
-    return redirect(url_for("pickup_inbound.get_all"))
