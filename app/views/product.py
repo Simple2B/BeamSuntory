@@ -546,18 +546,25 @@ def request_share():
                     recipients=[user.email],
                 )
                 url = url_for(
-                    "product.gett_all",
+                    "product.get_all",
                     _external=True,
                 )
 
                 msg.html = render_template(
                     "email/set.html",
                     user=user,
-                    desire_quantity=form.quantity.data,
-                    available_quantity=p.quantity,
+                    desire_quantity=form.desire_quantity.data,
                     url=url,
                 )
                 # mail.send(msg)
+
+            rs: m.RequestShare = m.RequestShare(
+                product_id=p.id,
+                group_id=form.group_id.data,
+                desire_quantity=form.desire_quantity.data,
+            )
+            log(log.INFO, "Form submitted. Share Request: [%s]", rs)
+            rs.save()
 
         return redirect(url_for("product.get_all"))
 

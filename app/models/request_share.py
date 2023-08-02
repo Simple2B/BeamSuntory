@@ -13,6 +13,7 @@ class RequestShare(db.Model, ModelMixin):
     product_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("products.id"))
     group_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("groups.id"))
     desire_quantity: orm.Mapped[int] = orm.mapped_column()
+    status: orm.Mapped[str] = orm.mapped_column()
     product: orm.Mapped[Product] = orm.relationship()
     group: orm.Mapped[Group] = orm.relationship()
 
