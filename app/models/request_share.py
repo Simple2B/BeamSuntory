@@ -1,3 +1,6 @@
+from datetime import datetime
+
+import sqlalchemy as sa
 from sqlalchemy import ForeignKey, orm
 
 from app import db
@@ -16,8 +19,7 @@ class RequestShare(db.Model, ModelMixin):
     status: orm.Mapped[str] = orm.mapped_column()
     product: orm.Mapped[Product] = orm.relationship()
     group: orm.Mapped[Group] = orm.relationship()
-
-    # @property
-    # def json(self):
-    #     mg = s.ProductGroup.from_orm(self)
-    #     return mg.json()
+    created_at: orm.Mapped[datetime] = orm.mapped_column(
+        sa.DateTime,
+        default=datetime.utcnow,
+    )

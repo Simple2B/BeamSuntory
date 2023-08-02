@@ -15,7 +15,7 @@ from flask_mail import Message
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
-from app import models as m, db, mail
+from app import models as m, db
 from app import forms as f
 from app.logger import log
 
@@ -512,6 +512,15 @@ def request_share():
             log(log.ERROR, "Not found product by name : [%s]", form.name.data)
             flash("Cannot save product data", "danger")
 
+        rs: m.RequestShare = m.RequestShare(
+            product_id=p.id,
+            group_id=form.group_id.data,
+            desire_quantity=form.desire_quantity.data,
+            status="unread",
+        )
+        log(log.INFO, "Form submitted. Share Request: [%s]", rs)
+        rs.save()
+
         product_group = (
             db.session.execute(
                 m.ProductGroup.select()
@@ -556,15 +565,12 @@ def request_share():
                     desire_quantity=form.desire_quantity.data,
                     url=url,
                 )
+                sru = m.RequestShareUser(
+                    user_id=user.id,
+                    request_share_id=rs.id,
+                )
+                sru.save()
                 # mail.send(msg)
-
-            rs: m.RequestShare = m.RequestShare(
-                product_id=p.id,
-                group_id=form.group_id.data,
-                desire_quantity=form.desire_quantity.data,
-            )
-            log(log.INFO, "Form submitted. Share Request: [%s]", rs)
-            rs.save()
 
         return redirect(url_for("product.get_all"))
 

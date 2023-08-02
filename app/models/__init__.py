@@ -22,3 +22,4 @@ from .product_quantity_group import ProductQuantityGroup
 from .favorite_store_user import FavoriteStoreUser
 from .package_info import PackageInfo
 from .request_share import RequestShare
+from .request_share_user import RequestShareUser
