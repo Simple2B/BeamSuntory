@@ -83,7 +83,7 @@ def save():
         if form.role_name.data.lower() == form.parent_role.data.lower():
             log(
                 log.INFO,
-                "Cannot edit role with name: [%s]",
+                "Cannot edit role with name: [%s] [%s]",
                 d.role_name,
                 d.parent_role,
             )
@@ -91,7 +91,7 @@ def save():
                 f"Role {form.role_name.data} can not belong to parent role {form.parent_role.data}",
                 "danger",
             )
-            return redirect(url_for("division.get_all"))
+            return redirect(url_for("division.get_all"), code=304)
 
         d.role_name = form.role_name.data
         d.type = form.type.data

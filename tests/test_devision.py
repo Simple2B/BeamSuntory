@@ -69,16 +69,16 @@ def test_edit_division(mg_g_populate: FlaskClient):
     ).all()
     assert len(divisions_rows_objs) > 0
 
-    # response = mg_g_populate.post(
-    #     "/division/save",
-    #     data=dict(
-    #         division_id=1,
-    #         role_name="Warehouse_Manager",
-    #         type="Master",
-    #         parent_role="Warehouse_Manager",
-    #         activated=False,
-    #     ),
-    #     follow_redirects=True,
-    # )
-    # assert response.status_code == 304
-    # assert "Role Sales_Rep can not belong to parent role Sales_Rep" in response.text
+    role_repeated_name = "Sales_Rep"
+
+    response = mg_g_populate.post(
+        "/division/save",
+        data=dict(
+            division_id=1,
+            role_name=role_repeated_name,
+            type="Master",
+            parent_role=role_repeated_name,
+            activated=False,
+        ),
+    )
+    assert response.status_code == 304
