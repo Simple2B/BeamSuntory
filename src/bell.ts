@@ -2,10 +2,10 @@ const defaultBrandImage =
   'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png';
 
 async function getNotification() {
-  const response = await fetch(`user/notification`, {
+  const baseURL = window.location.origin;
+  const response = await fetch(`${baseURL}/user/notification`, {
     method: 'GET',
   });
-  console.log('response', response);
   if (response.status == 200) {
     const userRequests = await response.json();
     const bellContainer = document.getElementById(
