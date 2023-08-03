@@ -512,11 +512,22 @@ def request_share():
             log(log.ERROR, "Not found product by name : [%s]", form.name.data)
             flash("Cannot save product data", "danger")
 
+        from_group_id = (
+            db.session.execute(
+                m.GroupProduct.select().where(
+                    m.GroupProduct.name == form.from_group.data,
+                )
+            )
+            .scalar()
+            .id
+        )
+
         rs: m.RequestShare = m.RequestShare(
             product_id=p.id,
             group_id=form.group_id.data,
             desire_quantity=form.desire_quantity.data,
-            status="unread",
+            status="pending",
+            from_group_id=from_group_id,
         )
         log(log.INFO, "Form submitted. Share Request: [%s]", rs)
         rs.save()
