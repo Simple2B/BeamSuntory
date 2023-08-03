@@ -66,8 +66,6 @@ async function getNotification() {
         bellContainer.appendChild(notificationItem);
       }
     });
-
-    console.log('finished');
   }
 }
 

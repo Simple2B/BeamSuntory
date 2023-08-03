@@ -3,14 +3,52 @@ import type {ModalOptions, ModalInterface} from 'flowbite';
 
 // TODO: clean console.log after milestone
 
+interface IProduct {
+  id: number;
+  name: string;
+  product_type: string;
+  supplier_id: number;
+  currency: string;
+  regular_price: number;
+  retail_price: number;
+  image: string;
+  description: string;
+  // General Info ->
+  SKU: string;
+  low_stock_level: number;
+  shelf_life_start: number;
+  shelf_life_end: number;
+  program_year: number;
+  package_qty: number;
+  numb_of_items_per_case: number;
+  numb_of_cases_per_outer_case: number;
+  comments: string;
+  // shipping
+  weight: number;
+  length: number;
+  width: number;
+  height: number;
+  mstr_groups_groups: object;
+  current_user_groups: object;
+  groups_ids: {
+    [index: string]: number;
+  };
+  available_quantity: {
+    [index: string]: number;
+  };
+  total_available_items: {
+    [index: string]: number;
+  };
+}
+interface FilterJsonData {
+  [key: string]: string;
+}
+
 // variable to set default image to brand dynamically in modal window. Can we get link from the internet?
 const defaultBrandImage =
   'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png';
 
 // check if product has filter and display it
-interface FilterJsonData {
-  [key: string]: string;
-}
 let filterJsonData: FilterJsonData = {};
 const filterJsonObject = sessionStorage.getItem('filterJsonData');
 const filterData = JSON.parse(filterJsonObject);
@@ -266,49 +304,6 @@ checkboxFilterProductMasterGroups.forEach(checkbox => {
   });
 });
 
-// /*
-//  * $editProductModal: required
-//  * options: optional
-//  */
-
-// // For your js code
-
-interface IProduct {
-  id: number;
-  name: string;
-  product_type: string;
-  supplier_id: number;
-  currency: string;
-  regular_price: number;
-  retail_price: number;
-  image: string;
-  description: string;
-  // General Info ->
-  SKU: string;
-  low_stock_level: number;
-  shelf_life_start: number;
-  shelf_life_end: number;
-  program_year: number;
-  package_qty: number;
-  numb_of_items_per_case: number;
-  numb_of_cases_per_outer_case: number;
-  comments: string;
-  // shipping
-  weight: number;
-  length: number;
-  width: number;
-  height: number;
-  mstr_groups_groups: object;
-  current_user_groups: object;
-  groups_ids: object;
-  available_quantity: {
-    [index: string]: number;
-  };
-  total_available_items: {
-    [index: string]: number;
-  };
-}
-
 const $requestShareModalElement: HTMLElement = document.querySelector(
   '#request-share-product-modal',
 );
@@ -361,10 +356,6 @@ const modalShipAssignOptions: ModalOptions = {
   },
 };
 
-const addModal: ModalInterface = new Modal(
-  $addProductModalElement,
-  modalOptions,
-);
 const viewModal: ModalInterface = new Modal(
   $viewProductModalElement,
   modalOptions,
@@ -447,8 +438,6 @@ function editProduct(product: IProduct) {
   input = document.querySelector('#product-edit-product_type');
   input.value = product.product_type.toUpperCase().split(' ').join('_');
   // a loop that adds additional fields
-  // input = document.querySelector('#product-edit-supplier');
-  // input.value = product.supplier_id.toString();
   input = document.querySelector('#product-edit-currency');
   input.value = product.currency;
   input = document.querySelector('#product-edit-regular_price');
@@ -628,9 +617,6 @@ function ship(product: IProduct, group: string) {
 function assign(product: IProduct, group: string) {
   let input: HTMLInputElement = document.querySelector('#product-assign-name');
   input.value = product.name;
-  // NOTE It will be need when we create master group in assign modal
-  // let input: HTMLInputElement = document.querySelector('#product-assign-master-group');
-  // input.value = product.mstr_groups_groups;
   input = document.querySelector('#product-assign-amount');
   input.max = product.available_quantity[group].toString();
   input.min = '1';
@@ -663,7 +649,7 @@ function addShipAssignShareButton(
   group: string,
   productParam: IProduct,
 ) {
-  const groupProductIds = productParam.groups_ids as {[index: string]: string};
+  const groupProductIds = productParam.groups_ids;
   const productTypeContainer = document.querySelector(
     `#product-view-product_type-container`,
   );
@@ -825,7 +811,6 @@ function addShipAssignShareButton(
 }
 
 // function to filter products by group
-
 const productFilterInputs = document.querySelectorAll('.product-filter-input');
 const filterProductButton = document.querySelector('#product-filter-button');
 const filterRadioButtons = document.querySelectorAll(
