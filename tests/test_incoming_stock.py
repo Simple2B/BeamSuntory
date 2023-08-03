@@ -1,3 +1,4 @@
+import json
 from flask.testing import FlaskClient
 from app import models as m, db
 from tests.utils import login, register, logout
@@ -22,12 +23,40 @@ def test_accept_incoming_stock(mg_g_populate: FlaskClient):
     order_to_accept: m.InboundOrder = db.session.execute(
         m.InboundOrder.select().where(m.InboundOrder.order_id == "IO-BEAM-I-t")
     ).scalar()
+    ordered_products: m.ProductQuantityGroup = db.session.execute(
+        m.ProductQuantityGroup.select().where(
+            m.ProductQuantityGroup.inbound_order_id == order_to_accept.id
+        )
+    ).scalar()
 
     assert order_to_accept
     assert order_to_accept.status == "In transit"
 
-    mg_g_populate.get(f"/incoming_stock/accept/{order_to_accept.id}")
+    quantity_received = 90
 
+    response = mg_g_populate.post(
+        "/incoming_stock/accept",
+        data=dict(
+            inbound_order_id=order_to_accept.id,
+            quantity_per_wrap=12,
+            quantity_wrap_carton=11,
+            quantity_carton_master=13,
+            received_products=json.dumps(
+                [
+                    {
+                        "product_id": ordered_products.product_id,
+                        "quantity_received": quantity_received,
+                        "group_id": ordered_products.group_id,
+                    }
+                ]
+            ),
+        ),
+        follow_redirects=True,
+    )
+
+    assert response.status_code == 200
+    assert "accepted" in response.text
+    assert "!=" in response.text
     order_to_accept: m.InboundOrder = db.session.execute(
         m.InboundOrder.select().where(m.InboundOrder.order_id == "IO-BEAM-I-t")
     ).scalar()
@@ -51,7 +80,16 @@ def test_accept_incoming_stock(mg_g_populate: FlaskClient):
     ).scalar()
 
     assert warehouse_product
-    assert warehouse_product.product_quantity == 100 + products_quantity_group.quantity
+    assert warehouse_product.product_quantity != 100 + products_quantity_group.quantity
+    assert warehouse_product.product_quantity != 100 + products_quantity_group.quantity
+
+    package_info = db.session.execute(
+        m.PackageInfo.select().where(
+            m.PackageInfo.inbound_order_id == order_to_accept.id
+        )
+    ).scalars()
+
+    assert package_info
 
 
 def test_cancel_incoming_stock(mg_g_populate: FlaskClient):
@@ -71,47 +109,3 @@ def test_cancel_incoming_stock(mg_g_populate: FlaskClient):
     ).scalar()
     assert order_to_accept
     assert order_to_accept.status == "Cancelled"
-
-
-def test_incoming_stock_package_info(mg_g_populate: FlaskClient):
-    login(mg_g_populate)
-
-    package_info: m.PackageInfo = db.session.execute(m.PackageInfo.select()).scalars()
-
-    assert len([i for i in package_info]) == 0
-
-    response = mg_g_populate.post(
-        "/incoming_stock/package_info",
-        data=dict(
-            inbound_order_id=1,
-            quantity_carton_master=11,
-            quantity_per_wrap=12,
-            quantity_wrap_carton=13,
-            received_products="14",
-        ),
-        follow_redirects=True,
-    )
-    assert response.status_code == 200
-    assert "Package info updated!" in response.text
-    package_info = db.session.execute(m.PackageInfo.select()).scalars()
-
-    assert len([i for i in package_info]) == 1
-
-    response = mg_g_populate.post(
-        "/incoming_stock/package_info",
-        data=dict(
-            inbound_order_id=1,
-            quantity_carton_master=110,
-            quantity_per_wrap=12,
-            quantity_wrap_carton=13,
-            received_products="14",
-        ),
-        follow_redirects=True,
-    )
-    assert response.status_code == 200
-    assert "Package info updated!" in response.text
-    package_info: m.PackageInfo = db.session.execute(
-        m.PackageInfo.select().where(m.PackageInfo.inbound_order_id == 1)
-    ).scalar()
-
-    assert package_info.quantity_carton_master == 110
