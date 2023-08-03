@@ -9,6 +9,6 @@ class PackageInfoForm(FlaskForm):
     quantity_per_wrap = IntegerField("quantity_per_wrap", [DataRequired()])
     quantity_wrap_carton = IntegerField("quantity_wrap_carton", [DataRequired()])
     quantity_carton_master = IntegerField("quantity_carton_master", [DataRequired()])
-    recieved_products = IntegerField("Products", [DataRequired()])
+    received_products = StringField("Products", [DataRequired()])
 
     submit = SubmitField("Save")
