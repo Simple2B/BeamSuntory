@@ -1,8 +1,11 @@
+import json
 from flask import (
     Blueprint,
     render_template,
     request,
     flash,
+    redirect,
+    url_for,
 )
 from flask_login import login_required
 import sqlalchemy as sa
@@ -86,11 +89,42 @@ def get_all():
     )
 
 
-@incoming_stock_blueprint.route("/accept/<int:id>", methods=["POST", "GET"])
+@incoming_stock_blueprint.route("/accept", methods=["POST"])
 @login_required
-def accept(id: int):
+def accept():
+    form_edit: f.PackageInfoForm = f.PackageInfoForm()
+    if form_edit.validate_on_submit():
+        package_info: m.PackageInfo = db.session.execute(
+            m.PackageInfo.select()
+            .order_by(m.PackageInfo.id)
+            .where(m.PackageInfo.inbound_order_id == form_edit.inbound_order_id.data)
+        ).scalar()
+        if package_info:
+            package_info.quantity_carton_master = form_edit.quantity_carton_master.data
+            package_info.quantity_per_wrap = form_edit.quantity_per_wrap.data
+            package_info.quantity_wrap_carton = form_edit.quantity_wrap_carton.data
+            package_info.save()
+        else:
+            package_info = m.PackageInfo(
+                inbound_order_id=int(form_edit.inbound_order_id.data),
+                quantity_carton_master=form_edit.quantity_carton_master.data,
+                quantity_per_wrap=form_edit.quantity_per_wrap.data,
+                quantity_wrap_carton=form_edit.quantity_wrap_carton.data,
+            )
+            package_info.save()
+
+    products_info_json = json.loads(form_edit.received_products.data)
+
+    # NOTE transform json, so it would be easier to compare with db data
+    products_received_quantity = {
+        f'{i["product_id"]}_{i["group_id"]}': i["quantity_received"]
+        for i in products_info_json
+    }
+
     io: m.InboundOrder = db.session.scalar(
-        m.InboundOrder.select().where(m.InboundOrder.id == id)
+        m.InboundOrder.select().where(
+            m.InboundOrder.id == int(form_edit.inbound_order_id.data)
+        )
     )
     if not io:
         log(log.INFO, "There is no inbound order with id: [%s]", id)
@@ -117,21 +151,37 @@ def accept(id: int):
                 m.WarehouseProduct.group_id == product.group_id,
             )
         ).scalar()
+        real_quantity = products_received_quantity[
+            f"{product.product_id}_{product.group_id}"
+        ]
+        if real_quantity != product.quantity:
+            log(
+                log.INFO,
+                "Inbound order accepted! Ordered quantity: [%s], != received quantity: [%s]",
+                product.quantity,
+                real_quantity,
+            )
+            flash(
+                f"Inbound order accepted! Ordered quantity: {product.quantity}, != received quantity: {real_quantity}",
+                "warning",
+            )
+
         if warehouse_product:
-            warehouse_product.product_quantity += product.quantity
+            warehouse_product.product_quantity += real_quantity
             warehouse_product.save()
         else:
             warehouse_product = m.WarehouseProduct(
                 product_id=product.product_id,
                 warehouse_id=product.warehouse_id,
-                product_quantity=product.quantity,
+                product_quantity=real_quantity,
                 group_id=product.group_id,
             )
             warehouse_product.save()
 
     log(log.INFO, "Inbound order accepted. Inbound order: [%s]", io)
-    flash("Inbound order accepted!", "success")
-    return "ok", 200
+    if not real_quantity != product.quantity:
+        flash("Inbound order accepted!", "success")
+    return redirect(url_for("incoming_stock.get_all"))
 
 
 @incoming_stock_blueprint.route("/cancel/<int:id>", methods=["GET"])
