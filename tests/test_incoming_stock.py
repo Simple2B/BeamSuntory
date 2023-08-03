@@ -87,7 +87,7 @@ def test_incoming_stock_package_info(mg_g_populate: FlaskClient):
             quantity_carton_master=11,
             quantity_per_wrap=12,
             quantity_wrap_carton=13,
-            recieved_products="14",
+            received_products="14",
         ),
         follow_redirects=True,
     )
@@ -104,7 +104,7 @@ def test_incoming_stock_package_info(mg_g_populate: FlaskClient):
             quantity_carton_master=110,
             quantity_per_wrap=12,
             quantity_wrap_carton=13,
-            recieved_products="14",
+            received_products="14",
         ),
         follow_redirects=True,
     )

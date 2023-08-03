@@ -143,9 +143,9 @@ function createInboundOrderItems(curInbOrder: IInboundOrderProd) {
         </div>
       </div>
       <div class="col-span-6 sm:col-span-6">
-        <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Qty. Recieved</label>
-        <input type="text" name="recieved_quantity"
-          class="incoming-stock-edit-recieved-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Qty. received</label>
+        <input type="text" name="received_quantity"
+          class="incoming-stock-edit-received-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           placeholder="Quantity" required>
       </div>
     </div>
@@ -203,7 +203,7 @@ function setProducts() {
     '.incoming-stock-product-item',
   );
   const incomingStockProductsQuantity = document.querySelectorAll(
-    '.incoming-stock-edit-recieved-quantity',
+    '.incoming-stock-edit-received-quantity',
   );
   const products = [];
 
@@ -218,17 +218,17 @@ function setProducts() {
 
     const product = {
       product_id: productId,
-      quantity_recieved: incomingStockQuantity.value,
+      quantity_received: incomingStockQuantity.value,
       group_id: productGroupQuantity[`group_id-${i}`],
     };
     products.push(product);
   }
 
-  const inputRecievedProducts: HTMLInputElement = document.querySelector(
-    '#incoming-stock-edit-recieved-products',
+  const inputReceivedProducts: HTMLInputElement = document.querySelector(
+    '#incoming-stock-edit-received-products',
   );
 
-  inputRecievedProducts.value = JSON.stringify(products);
+  inputReceivedProducts.value = JSON.stringify(products);
 }
 
 // ----submit form through hidden submit button----

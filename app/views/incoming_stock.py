@@ -113,11 +113,18 @@ def accept():
             )
             package_info.save()
 
-    products_info_json = json.loads(form_edit.recieved_products.data)
-    type(products_info_json)
+    products_info_json = json.loads(form_edit.received_products.data)
+
+    # NOTE transform json, so it would be easier to compare with db data
+    products_received_quantity = {
+        f'{i["product_id"]}_{i["group_id"]}': i["quantity_received"]
+        for i in products_info_json
+    }
 
     io: m.InboundOrder = db.session.scalar(
-        m.InboundOrder.select().where(m.InboundOrder.id == id)
+        m.InboundOrder.select().where(
+            m.InboundOrder.id == int(form_edit.inbound_order_id.data)
+        )
     )
     if not io:
         log(log.INFO, "There is no inbound order with id: [%s]", id)
@@ -144,20 +151,36 @@ def accept():
                 m.WarehouseProduct.group_id == product.group_id,
             )
         ).scalar()
+        real_quantity = products_received_quantity[
+            f"{product.product_id}_{product.group_id}"
+        ]
+        if real_quantity != product.quantity:
+            log(
+                log.INFO,
+                "Inbound order accepted! Ordered quantity: [%s], != received quantity: [%s]",
+                product.quantity,
+                real_quantity,
+            )
+            flash(
+                f"Inbound order accepted! Ordered quantity: {product.quantity}, != received quantity: {real_quantity}",
+                "warning",
+            )
+
         if warehouse_product:
-            warehouse_product.product_quantity += product.quantity
+            warehouse_product.product_quantity += real_quantity
             warehouse_product.save()
         else:
             warehouse_product = m.WarehouseProduct(
                 product_id=product.product_id,
                 warehouse_id=product.warehouse_id,
-                product_quantity=product.quantity,
+                product_quantity=real_quantity,
                 group_id=product.group_id,
             )
             warehouse_product.save()
 
     log(log.INFO, "Inbound order accepted. Inbound order: [%s]", io)
-    flash("Inbound order accepted!", "success")
+    if not real_quantity != product.quantity:
+        flash("Inbound order accepted!", "success")
     return redirect(url_for("incoming_stock.get_all"))
 
 
