@@ -19,3 +19,4 @@ from .outgoing_stock import outgoing_stock_blueprint
 from .pickup_order import pickup_order_blueprint
 from .pickup_inbound import pickup_inbound_blueprint
 from .assign import assign_blueprint
+from .request_share import request_share_blueprint
