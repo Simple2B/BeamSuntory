@@ -162,7 +162,7 @@ def accept():
                 real_quantity,
             )
             flash(
-                f"Inbound order accepted! Ordered quantity: {product.quantity}, != received quantity: {real_quantity}",
+                f"Inbound order accepted! Ordered qty: {product.quantity}, != received qty: {real_quantity}",
                 "warning",
             )
 

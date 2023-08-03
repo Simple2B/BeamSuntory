@@ -7,7 +7,7 @@ from app.database import db
 from .utils import ModelMixin
 from app import schema as s
 from .product import Product
-from .group import Group
+from .group_for_product import GroupProduct
 
 
 class Assign(db.Model, ModelMixin):
@@ -18,16 +18,15 @@ class Assign(db.Model, ModelMixin):
     quantity: orm.Mapped[int] = orm.mapped_column(sa.Integer)
     product_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("products.id"))
     product: orm.Mapped[Product] = orm.relationship()
-    group_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("groups.id"))
-    group: orm.Mapped[Group] = orm.relationship()
+    group_id: orm.Mapped[int] = orm.mapped_column(
+        sa.ForeignKey("groups_for_product.id")
+    )
+    group: orm.Mapped[GroupProduct] = orm.relationship()
 
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
         default=datetime.utcnow,
     )
-
-    def __repr__(self):
-        return f"<{self.id}: {self.name}>"
 
     @property
     def json(self):

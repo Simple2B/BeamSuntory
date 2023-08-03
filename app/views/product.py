@@ -123,6 +123,12 @@ def get_all_products(request, query=None, count_query=None):
         "product_mg_g": json.dumps(product_mg_g),
         "master_product_groups_name": master_group_product_name,
         "suppliers": suppliers,
+        "all_product_groups": {
+            i.name: i for i in db.session.execute(m.GroupProduct.select()).scalars()
+        },
+        "current_user_groups_names": [
+            i[0].parent.name for i in current_user_groups_rows
+        ],
     }
 
 
@@ -148,9 +154,11 @@ def get_all():
         search_query=products_object["q"],
         main_master_groups=products_object["master_groups"],
         product_groups=products_object["product_groups"],
+        all_product_groups=products_object["all_product_groups"],
         current_user_groups=[
             row[0] for row in products_object["current_user_groups_rows"]
         ],
+        current_user_groups_names=products_object["current_user_groups_names"],
         master_groups_groups_available=products_object[
             "mastr_for_prods_groups_for_prods"
         ],
@@ -435,9 +443,11 @@ def sort():
             search_query=products_object["q"],
             main_master_groups=products_object["master_groups"],
             product_groups=products_object["product_groups"],
+            all_product_groups=products_object["all_product_groups"],
             current_user_groups=[
                 row[0] for row in products_object["current_user_groups_rows"]
             ],
+            current_user_groups_names=products_object["current_user_groups_names"],
             master_groups_groups_available=products_object[
                 "mastr_for_prods_groups_for_prods"
             ],
@@ -466,9 +476,18 @@ def assign():
             log(log.ERROR, "Not found product by name : [%s]", form.name.data)
             flash("Cannot save product data", "danger")
 
+        product_from_group: m.GroupProduct = db.session.execute(
+            m.GroupProduct.select().where(
+                m.GroupProduct.name == form.from_group.data,
+            )
+        ).scalar()
+
         # TODO sort also by group_id and warehouse_id
         product_warehouse: m.WarehouseProduct = db.session.execute(
-            m.WarehouseProduct.select().where(m.WarehouseProduct.product_id == p.id)
+            m.WarehouseProduct.select().where(
+                m.WarehouseProduct.product_id == p.id,
+                m.WarehouseProduct.group_id == product_from_group.id,
+            )
         ).scalar()
         product_warehouse.product_quantity -= form.quantity.data
         product_warehouse.save()
@@ -483,15 +502,12 @@ def assign():
             new_product_warehouse.product_quantity += form.quantity.data
             new_product_warehouse.save()
         else:
-            # TODO get warehouse_id
-            warehouse: m.Warehouse = db.session.execute(m.Warehouse.select()).scalar()
-            new_product_warehouse = m.WarehouseProduct(
+            m.WarehouseProduct(
                 product_id=p.id,
                 group_id=int(form.group.data),
                 product_quantity=form.quantity.data,
-                warehouse_id=warehouse.id,
-            )
-            new_product_warehouse.save()
+                warehouse_id=product_warehouse.warehouse_id,
+            ).save()
 
         m.Assign(
             product_id=p.id,
