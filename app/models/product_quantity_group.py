@@ -25,6 +25,8 @@ class ProductQuantityGroup(db.Model, ModelMixin):
     child: orm.Mapped[Product] = orm.relationship()
     parent: orm.Mapped[Group] = orm.relationship()
     quantity: orm.Mapped[int] = orm.mapped_column()
+    # NOTE: quantity after incoming stock is recieved
+    # quantity_recieved: orm.Mapped[int] = orm.mapped_column(nullable=True)
     warehouse_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("warehouses.id"))
     inbound_order_id: orm.Mapped[int] = orm.mapped_column(
         ForeignKey("inbound_orders.id")

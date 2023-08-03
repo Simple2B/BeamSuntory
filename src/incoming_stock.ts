@@ -40,6 +40,9 @@ interface IInboundOrderProd {
   quantity: number;
 }
 
+let productGroupQuantity = {} as {[index: string]: number};
+let i = 0;
+
 const $modalElement: HTMLElement = document.querySelector(
   '#editIncomingStockModal',
 );
@@ -83,7 +86,6 @@ $buttonElements.forEach(e =>
 );
 
 function editIncomingStock(inboundOrder: IInboundOrder) {
-  console.log('inboundOrder: ', inboundOrder);
   let input: HTMLInputElement = document.querySelector(
     '#incoming-stock-edit-id',
   );
@@ -157,6 +159,10 @@ function createInboundOrderItems(curInbOrder: IInboundOrderProd) {
     productImage.src = defaultBrandImage;
   }
 
+  // NOTE: this counter needs to identify group id
+  productGroupQuantity[`group_id-${i}`] = curInbOrder.group.id;
+  i++;
+
   incomingStockAddContainer.appendChild(incomingStockAddItem);
 }
 
@@ -209,9 +215,11 @@ function setProducts() {
     const productId = incomingStockProduct.getAttribute(
       'data-target-product-id',
     );
+
     const product = {
       product_id: productId,
-      quantity: incomingStockQuantity.value,
+      quantity_recieved: incomingStockQuantity.value,
+      group_id: productGroupQuantity[`group_id-${i}`],
     };
     products.push(product);
   }
