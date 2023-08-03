@@ -32,12 +32,12 @@ def get_all():
     if q:
         query = (
             m.RequestShare.select()
-            .where(m.RequestShare.name.like(f"{q}%"))
+            .where(m.RequestShare.id.like(f"{q}%"))
             .order_by(m.RequestShare.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(m.RequestShare.name.like(f"{q}%"))
+            .where(m.RequestShare.id.like(f"{q}%"))
             .select_from(m.RequestShare)
         )
 

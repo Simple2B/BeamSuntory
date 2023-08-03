@@ -548,7 +548,7 @@ def request_share():
             .scalar()
             .id
         )
-        users = [
+        users: list[m.UserGroup] = [
             u
             for u in db.session.execute(
                 m.UserGroup.select().where(m.UserGroup.right_id == group_id)
@@ -557,13 +557,12 @@ def request_share():
 
         if len(users) != 0:
             for u in users:
-                user = db.session.execute(
-                    m.User.select().where(m.User.id == u.left_id)
-                ).scalar()
+                if not u.child.approval_permission:
+                    continue
                 msg = Message(
                     subject="New request share",
                     sender=app.config["MAIL_DEFAULT_SENDER"],
-                    recipients=[user.email],
+                    recipients=[u.child.email],
                 )
                 url = url_for(
                     "product.get_all",
@@ -572,15 +571,16 @@ def request_share():
 
                 msg.html = render_template(
                     "email/set.html",
-                    user=user,
+                    user=u.child,
                     desire_quantity=form.desire_quantity.data,
                     url=url,
                 )
                 sru = m.RequestShareUser(
-                    user_id=user.id,
+                    user_id=u.child.id,
                     request_share_id=rs.id,
                 )
                 sru.save()
+                # TODO uncomment when ready to notify
                 # mail.send(msg)
         flash("Share request created!", "success")
         return redirect(url_for("product.get_all"))
