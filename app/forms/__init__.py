@@ -7,6 +7,7 @@ from .product import (
     NewProductForm,
     SortByGroupProductForm,
     AssignProductForm,
+    RequestShareProductForm,
 )
 from .group_for_product import (
     GroupProductForm,
@@ -22,3 +23,4 @@ from .cart import CartForm, NewCartForm
 from .inbound_order import InboundOrderForm, NewInboundOrderForm
 from .store import StoreForm, NewStoreForm
 from .package_info import PackageInfoForm
+from .request_share import RequestShareForm

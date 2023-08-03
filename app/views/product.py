@@ -8,8 +8,10 @@ from flask import (
     flash,
     redirect,
     url_for,
+    current_app as app,
 )
 from flask_login import login_required, current_user
+from flask_mail import Message
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
@@ -491,6 +493,96 @@ def assign():
             )
             new_product_warehouse.save()
 
+        return redirect(url_for("product.get_all"))
+
+    else:
+        log(log.ERROR, "product assign errors: [%s]", form.errors)
+        flash(f"{form.errors}", "danger")
+        return redirect(url_for("product.get_all"))
+
+
+@product_blueprint.route("/request_share", methods=["POST"])
+@login_required
+def request_share():
+    form: f.RequestShareProductForm = f.RequestShareProductForm()
+    if form.validate_on_submit():
+        query = m.Product.select().where(m.Product.name == form.name.data)
+        p: m.Product | None = db.session.scalar(query)
+        if not p:
+            log(log.ERROR, "Not found product by name : [%s]", form.name.data)
+            flash("Cannot save product data", "danger")
+
+        from_group_id = (
+            db.session.execute(
+                m.GroupProduct.select().where(
+                    m.GroupProduct.name == form.from_group.data,
+                )
+            )
+            .scalar()
+            .id
+        )
+
+        rs: m.RequestShare = m.RequestShare(
+            product_id=p.id,
+            group_id=form.group_id.data,
+            desire_quantity=form.desire_quantity.data,
+            status="pending",
+            from_group_id=from_group_id,
+        )
+        log(log.INFO, "Form submitted. Share Request: [%s]", rs)
+        rs.save()
+
+        product_group = (
+            db.session.execute(
+                m.ProductGroup.select()
+                .where(m.ProductGroup.product_id == p.id)
+                .where(m.ProductGroup.group_id == form.group_id.data)
+            )
+            .scalar()
+            .parent
+        )
+        group_id = (
+            db.session.execute(
+                m.Group.select().where(m.Group.name == product_group.name)
+            )
+            .scalar()
+            .id
+        )
+        users: list[m.UserGroup] = [
+            u
+            for u in db.session.execute(
+                m.UserGroup.select().where(m.UserGroup.right_id == group_id)
+            ).scalars()
+        ]
+
+        if len(users) != 0:
+            for u in users:
+                if not u.child.approval_permission:
+                    continue
+                msg = Message(
+                    subject="New request share",
+                    sender=app.config["MAIL_DEFAULT_SENDER"],
+                    recipients=[u.child.email],
+                )
+                url = url_for(
+                    "product.get_all",
+                    _external=True,
+                )
+
+                msg.html = render_template(
+                    "email/set.html",
+                    user=u.child,
+                    desire_quantity=form.desire_quantity.data,
+                    url=url,
+                )
+                sru = m.RequestShareUser(
+                    user_id=u.child.id,
+                    request_share_id=rs.id,
+                )
+                sru.save()
+                # TODO uncomment when ready to notify
+                # mail.send(msg)
+        flash("Share request created!", "success")
         return redirect(url_for("product.get_all"))
 
     else:
