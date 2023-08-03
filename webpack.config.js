@@ -206,6 +206,16 @@ const bellConfig = {
   },
 };
 
+const requestShareConfig = {
+  entry: {
+    main: './src/request_share.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/request_share.js', // <--- Will be compiled to this single file
+  },
+};
+
 const configs = [
   baseConfig,
   userConfig,
@@ -226,6 +236,7 @@ const configs = [
   pickupOrderConfig,
   pickupInboundConfig,
   bellConfig,
+  requestShareConfig,
 ].map(conf => merge(defaultConfig, conf));
 
 module.exports = configs;

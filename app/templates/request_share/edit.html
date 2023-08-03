@@ -1,54 +1,40 @@
-<!-- Edit supplier modal -->
+<!-- Edit requestShare modal -->
 <!-- prettier-ignore-->
-<div id="editSupplierModal" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
+<div id="editRequestShareModal" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
   <div class="relative w-full max-w-2xl max-h-full">
     <!-- Modal content -->
-    <form action="{{url_for('supplier.save')}}" method="post" class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+    <form action="{{url_for('request_share.save')}}" method="post" class="relative bg-white rounded-lg shadow dark:bg-gray-700">
       {{ form_edit.hidden_tag() }}
-      <input type="hidden" name="supplier_id" id="supplier-edit-id" value="0" />
-      <input type="hidden" name="next_url" id="supplier-edit-next_url" value="" />
+      <input type="hidden" name="request_share_id" id="request-share-edit-id" value="0" />
+      <input type="hidden" name="next_url" id="request-share-edit-next_url" value="" />
       <!-- Modal header -->
       <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
-        <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Edit supplier </h3>
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Edit request share </h3>
       </div>
       <!-- Modal body -->
       <div class="p-6 space-y-6">
         <div class="grid grid-cols-6 gap-6">
           <div class="col-span-6 sm:col-span-3">
-            <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Name</label >
-            <input type="text" name="name" id="supplier-edit-name" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Name" required />
+            <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Product</label >
+            <div id="request-share-edit-product"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Email</label >
-            <input type="email" name="email" id="supplier-edit-email" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="example@company.com" required />
+            <label for="desire_quantity" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Quantity</label >
+              <input type="text" name="desire_quantity" id="request-share-edit-quantity" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Quantity" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="contact_number" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Contact number</label >
-            <input type="contact_number" name="contact_number" id="supplier-edit-contact_number" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="contact_number" required />
+            <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Group</label >
+            <div id="request-share-edit-group"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="country" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Country</label >
-            <input type="country" name="country" id="supplier-edit-country" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="country" required />
-          </div>
-          <div class="col-span-6 sm:col-span-3">
-            <label for="region" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Region</label >
-            <input type="region" name="region" id="supplier-edit-region" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="region" required />
-          </div>
-          <div class="col-span-6 sm:col-span-3">
-            <label for="city" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >City</label >
-            <input type="city" name="city" id="supplier-edit-city" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="city" required />
-          </div>
-          <div class="col-span-6 sm:col-span-3">
-            <label for="address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Address</label >
-            <input type="address" name="address" id="supplier-edit-address" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="address" required />
-          </div>
-          <div class="col-span-6 sm:col-span-3">
-            <label for="zip" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >ZIP</label >
-            <input type="zip" name="zip" id="supplier-edit-zip" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="zip" required />
-          </div>
-          <div class="col-span-6 sm:col-span-3">
-            <label for="active" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Active</label >
-            <input type="checkbox" name="active" id="supplier-edit-active" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block  p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+            <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Status</label >
+            <div id="request-share-edit-status"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
           </div>
         </div>
       </div>

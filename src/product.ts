@@ -582,6 +582,8 @@ function requestShare(product: IProduct, group: string) {
     '#product-request-share-available-quantity-hidden-input',
   );
   input.value = product.available_quantity[group].toString();
+  input = document.querySelector('#product-request-share-from-group');
+  input.value = group;
   requestShareModal.show();
 }
 

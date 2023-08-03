@@ -11,7 +11,7 @@ from .supplier import Supplier
 from .delivery_agent import DeliveryAgent
 from .warehouse import Warehouse
 from .product import Product
-from .group import Group
+from .group_for_product import GroupProduct
 from .product_quantity_group import ProductQuantityGroup
 from .package_info import PackageInfo
 
@@ -64,7 +64,7 @@ class InboundOrder(db.Model, ModelMixin):
                 "name": g.name,
                 "id": g.id,
             }
-            for g in db.session.execute(Group.select()).scalars()
+            for g in db.session.execute(GroupProduct.select()).scalars()
         ]
         mg_dict["products"] = [
             {
@@ -105,13 +105,17 @@ class InboundOrder(db.Model, ModelMixin):
         package: PackageInfo = db.session.execute(
             PackageInfo.select().where(PackageInfo.inbound_order_id == mg_dict["id"])
         ).scalar()
-        mg_dict["package_info"] = {
-            "quantity_per_wrap": package.quantity_per_wrap,
-            "quantity_wrap_carton": package.quantity_wrap_carton,
-            "quantity_carton_master": package.quantity_carton_master,
-        } if package else {
-            "quantity_per_wrap": 0,
-            "quantity_wrap_carton": 0,
-            "quantity_carton_master": 0,
-        }
+        mg_dict["package_info"] = (
+            {
+                "quantity_per_wrap": package.quantity_per_wrap,
+                "quantity_wrap_carton": package.quantity_wrap_carton,
+                "quantity_carton_master": package.quantity_carton_master,
+            }
+            if package
+            else {
+                "quantity_per_wrap": 0,
+                "quantity_wrap_carton": 0,
+                "quantity_carton_master": 0,
+            }
+        )
         return json.dumps(mg_dict)
