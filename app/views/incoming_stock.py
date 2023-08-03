@@ -133,7 +133,7 @@ def accept(id: int):
 
     log(log.INFO, "Inbound order accepted. Inbound order: [%s]", io)
     flash("Inbound order accepted!", "success")
-    return "ok", 200
+    return redirect(url_for("incoming_stock.get_all"))
 
 
 @incoming_stock_blueprint.route("/cancel/<int:id>", methods=["GET"])
@@ -178,7 +178,12 @@ def package_info():
             )
             package_info.save()
         flash("Package info updated!", "success")
-        return redirect(url_for("incoming_stock.get_all"))
+        return redirect(
+            url_for(
+                "incoming_stock.accept",
+                id=form_edit.inbound_order_id.data,
+            )
+        )
 
     flash("Something went wrong!", "danger")
     return redirect(url_for("incoming_stock.get_all"))

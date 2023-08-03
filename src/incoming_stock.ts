@@ -83,7 +83,6 @@ $buttonElements.forEach(e =>
 );
 
 function editIncomingStock(inboundOrder: IInboundOrder) {
-  console.log('inboundOrder:', inboundOrder);
   let input: HTMLInputElement = document.querySelector(
     '#incoming-stock-edit-id',
   );
@@ -174,22 +173,6 @@ if (searchInputButton && searchInput) {
     window.location.href = `${url.href}`;
   });
 }
-// const acceptButtons = document.querySelectorAll('.accept-incoming-stock-btn');
-
-// acceptButtons.forEach(e => {
-//   e.addEventListener('click', async () => {
-//     if (confirm('Are sure?')) {
-//       let id = e.getAttribute('data-incoming-stock-id');
-//       const response = await fetch(`/incoming_stock/accept/${id}`, {
-//         method: 'GET',
-//       });
-//       if (response.status == 200) {
-//         location.reload();
-//       }
-//     }
-//   });
-// });
-
 const cancelOrderButtons = document.querySelectorAll(
   '.cancel-incoming-stock-btn',
 );
@@ -208,7 +191,7 @@ cancelOrderButtons.forEach(e => {
   });
 });
 
-async function setProducts() {
+function setProducts() {
   const incomingStockProducts = document.querySelectorAll(
     '.incoming-stock-product-item',
   );
@@ -235,8 +218,6 @@ async function setProducts() {
   const inputRecievedProducts: HTMLInputElement = document.querySelector(
     '#incoming-stock-edit-recieved-products',
   );
-  console.log('inputRecievedProducts in ', inputRecievedProducts);
-  console.log('products', products);
 
   inputRecievedProducts.value = JSON.stringify(products);
 }
@@ -249,19 +230,9 @@ const inboundOrderSaveProductsButton = document.querySelector(
   '#incoming-stock-save-products-btn',
 );
 
-inboundOrderSaveProductsButton.addEventListener('click', async () => {
-  await setProducts();
-  if (confirm('Are sure?')) {
-    const inboundOrder: IInboundOrder = JSON.parse(
-      sessionStorage.getItem('inboundOrder'),
-    );
-    const response = await fetch(`/incoming_stock/accept/${inboundOrder.id}`, {
-      method: 'GET',
-    });
-    if (response.status == 200) {
-      inboundOrderSubmitButton.click();
-    }
-  }
+inboundOrderSaveProductsButton.addEventListener('click', () => {
+  setProducts();
+  inboundOrderSubmitButton.click();
 });
 
 // ----view modal----
