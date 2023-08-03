@@ -71,3 +71,47 @@ def test_cancel_incoming_stock(mg_g_populate: FlaskClient):
     ).scalar()
     assert order_to_accept
     assert order_to_accept.status == "Cancelled"
+
+
+def test_incoming_stock_package_info(mg_g_populate: FlaskClient):
+    login(mg_g_populate)
+
+    package_info: m.PackageInfo = db.session.execute(m.PackageInfo.select()).scalars()
+
+    assert len([i for i in package_info]) == 0
+
+    response = mg_g_populate.post(
+        "/incoming_stock/package_info",
+        data=dict(
+            inbound_order_id=1,
+            quantity_carton_master=11,
+            quantity_per_wrap=12,
+            quantity_wrap_carton=13,
+            recieved_products="14",
+        ),
+        follow_redirects=True,
+    )
+    assert response.status_code == 200
+    assert "Package info updated!" in response.text
+    package_info = db.session.execute(m.PackageInfo.select()).scalars()
+
+    assert len([i for i in package_info]) == 1
+
+    response = mg_g_populate.post(
+        "/incoming_stock/package_info",
+        data=dict(
+            inbound_order_id=1,
+            quantity_carton_master=110,
+            quantity_per_wrap=12,
+            quantity_wrap_carton=13,
+            recieved_products="14",
+        ),
+        follow_redirects=True,
+    )
+    assert response.status_code == 200
+    assert "Package info updated!" in response.text
+    package_info: m.PackageInfo = db.session.execute(
+        m.PackageInfo.select().where(m.PackageInfo.inbound_order_id == 1)
+    ).scalar()
+
+    assert package_info.quantity_carton_master == 110
