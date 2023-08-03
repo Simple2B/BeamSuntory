@@ -177,7 +177,6 @@ def package_info():
                 quantity_wrap_carton=form_edit.quantity_wrap_carton.data,
             )
             package_info.save()
-        flash("Package info updated!", "success")
         return redirect(
             url_for(
                 "incoming_stock.accept",

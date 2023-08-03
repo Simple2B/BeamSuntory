@@ -83,6 +83,7 @@ $buttonElements.forEach(e =>
 );
 
 function editIncomingStock(inboundOrder: IInboundOrder) {
+  console.log('inboundOrder: ', inboundOrder);
   let input: HTMLInputElement = document.querySelector(
     '#incoming-stock-edit-id',
   );
@@ -113,40 +114,40 @@ function createInboundOrderItems(curInbOrder: IInboundOrderProd) {
     'incoming-stock-edit-add-item',
   );
   incomingStockAddItem.innerHTML = `
-  <div class="incoming-stock-product-item grid grid-cols-12 gap-4" data-target-product-id="${curInbOrder.product.id}" >
-    <div class="col-span-6 sm:col-span-4 sm:row-span-2 max-height-image-container">
-      <img src="data:image/png;base64, ${curInbOrder.product.image}" class="incoming-stock-edit-product-image w-full h-full object-cover">
-    </div>
-    <div class="col-span-6 sm:col-span-8">
-      <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Name</label>
-      <div
-        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-      ${curInbOrder.product.name}
+    <div class="incoming-stock-product-item grid grid-cols-12 gap-4" data-target-product-id="${curInbOrder.product.id}" >
+      <div class="col-span-6 sm:col-span-4 sm:row-span-2 max-height-image-container">
+        <img src="data:image/png;base64, ${curInbOrder.product.image}" class="incoming-stock-edit-product-image w-full h-full object-cover">
+      </div>
+      <div class="col-span-6 sm:col-span-8">
+        <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Name</label>
+        <div
+          class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+        ${curInbOrder.product.name}
+        </div>
+      </div>
+      <div class="col-span-6 sm:col-span-8">
+        <label for="SKU" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">SKU</label>
+        <div
+          class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+        ${curInbOrder.product.SKU}
+        </div>
+      </div>
+      <div class="col-span-6 sm:col-span-6">
+        <label for="package_qty" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+          Qty. Ordered</label>
+        <div
+          class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+        ${curInbOrder.quantity}
+        </div>
+      </div>
+      <div class="col-span-6 sm:col-span-6">
+        <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Qty. Recieved</label>
+        <input type="text" name="recieved_quantity"
+          class="incoming-stock-edit-recieved-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          placeholder="Quantity" required>
       </div>
     </div>
-    <div class="col-span-6 sm:col-span-8">
-      <label for="SKU" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">SKU</label>
-      <div
-        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-      ${curInbOrder.product.SKU}
-      </div>
-    </div>
-    <div class="col-span-6 sm:col-span-6">
-      <label for="package_qty" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-        Qty. Ordered</label>
-      <div
-        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-      ${curInbOrder.quantity}
-      </div>
-    </div>
-    <div class="col-span-6 sm:col-span-6">
-      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Qty. Recieved</label>
-      <input type="text" name="recieved_quantity"
-        class="incoming-stock-edit-recieved-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-        placeholder="Quantity" required>
-    </div>
-  </div>
-`;
+  `;
   const productImage: HTMLImageElement = incomingStockAddItem.querySelector(
     '.incoming-stock-edit-product-image',
   );
