@@ -30,12 +30,12 @@ def get_all():
     if q:
         query = (
             m.Store.select()
-            .where(m.Store.name.like(f"{q}%") | m.Store.email.like(f"{q}%"))
+            .where(m.Store.store_name.like(f"{q}%") | m.Store.email.like(f"{q}%"))
             .order_by(m.Store.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(m.Store.name.like(f"{q}%") | m.Store.email.like(f"{q}%"))
+            .where(m.Store.store_name.like(f"{q}%") | m.Store.email.like(f"{q}%"))
             .select_from(m.Store)
         )
 
@@ -61,6 +61,8 @@ def get_all():
         else:
             store.favorite = False
 
+    store_categories = db.session.execute(m.StoreCategory.select()).scalars().all()
+
     return render_template(
         "store/stores.html",
         stores=stores,
@@ -69,6 +71,7 @@ def get_all():
         form_create=form_create,
         form_edit=form_edit,
         current_user_id=current_user.id,
+        store_categories=store_categories,
     )
 
 
@@ -87,7 +90,7 @@ def save():
             )
             flash("Cannot save store data", "danger")
 
-        s.store_category = form.store_category.data
+        s.store_category_id = int(form.store_category.data)
         s.store_name = form.store_name.data
         s.contact_person = form.contact_person.data
         s.email = form.email.data
@@ -114,12 +117,9 @@ def save():
 @login_required
 def create():
     form: f.NewStoreForm = f.NewStoreForm()
-    if not form.validate_on_submit():
-        flash("This username or email is already taken.", "danger")
-        return redirect(url_for("store.get_all"))
     if form.validate_on_submit():
         store = m.Store(
-            store_category=form.store_category.data,
+            store_category_id=int(form.store_category.data),
             store_name=form.store_name.data,
             contact_person=form.contact_person.data,
             email=form.email.data,

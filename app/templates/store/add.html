@@ -14,8 +14,11 @@
         <div class="grid grid-cols-6 gap-6">
           <div class="col-span-6 sm:col-span-3">
             <label for="store_category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Store category</label >
-            <input type="text" name="store_category" id="store-add-store_category" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Store category" required />
-          </div>
+              <select type="text" name="store_category" id="store-add-store_category" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Store category" required>
+                {% for store_category in store_categories %}
+                  <option value="{{store_category.id}}">{{store_category.name}}</option>
+                {% endfor %}
+              </select>           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="store_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Name</label >
             <input type="text" name="store_name" id="store-add-store_name" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Name" required />

@@ -1,10 +1,11 @@
 from datetime import datetime
+from typing import Optional
 from pydantic import BaseModel
 
 
 class Store(BaseModel):
     id: int
-    store_category: str
+    store_category_id: Optional[int]
     store_name: str
     contact_person: str
     email: str
