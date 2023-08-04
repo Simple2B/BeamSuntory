@@ -39,7 +39,7 @@ class Product(db.Model, ModelMixin):
         nullable=False,
     )
 
-    image: orm.Mapped[str] = orm.mapped_column(sa.Text())  # link or png base64 str??
+    image: orm.Mapped[str] = orm.mapped_column(sa.Text())  # png base64 str
     description: orm.Mapped[str] = orm.mapped_column(sa.String(256))
     # General Info ->
     SKU: orm.Mapped[str] = orm.mapped_column(sa.String(64))

@@ -6,17 +6,17 @@ from sqlalchemy import orm
 from app.database import db
 from app import schema as s
 from .utils import ModelMixin
+from .store_category import StoreCategory
 
 
 class Store(db.Model, ModelMixin):
     __tablename__ = "stores"
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
-    store_category: orm.Mapped[str] = orm.mapped_column(
-        sa.String(64),
-        unique=True,
-        nullable=False,
-    )  # TODO enum???
+    store_category_id: orm.Mapped[int] = orm.mapped_column(
+        sa.ForeignKey("store_categories.id")
+    )
+    store_category: orm.Mapped[StoreCategory] = orm.relationship()
     store_name: orm.Mapped[str] = orm.mapped_column(
         sa.String(64),
         unique=True,

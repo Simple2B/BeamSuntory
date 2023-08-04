@@ -24,7 +24,7 @@ def test_create_store(client):
     response = client.post(
         "/store/create",
         data=dict(
-            store_category="bar",
+            store_category="1",
             store_name="JBbar",
             contact_person="John",
             email="store@email.com",
@@ -70,7 +70,7 @@ def test_edit_store(mg_g_populate: FlaskClient):
         "/store/save",
         data=dict(
             store_id=1,
-            store_category="bar",
+            store_category="1",
             store_name="JBbar",
             contact_person="John",
             email="store@email.com",
