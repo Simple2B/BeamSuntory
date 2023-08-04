@@ -139,11 +139,15 @@ def test_sort_product(mg_g_populate: FlaskClient):
 
 def test_assign_product(mg_g_populate: FlaskClient):
     login(mg_g_populate)
+
+    group_name = "Canada"
+
     data = dict(
         name="populate_test_product",
         master_group=2,
         group=2,
         quantity=10,
+        from_group=group_name,
     )
 
     response = mg_g_populate.post(
@@ -154,7 +158,8 @@ def test_assign_product(mg_g_populate: FlaskClient):
     assert "product" in response.text
     products_at_warehouse: m.WarehouseProduct = db.session.execute(
         m.WarehouseProduct.select().where(
-            m.WarehouseProduct.group_id == 1, m.WarehouseProduct.product_quantity == 90
+            m.WarehouseProduct.group_id == 1,
+            m.WarehouseProduct.product_quantity == 90,
         )
     ).scalar()
     assert products_at_warehouse.product_quantity

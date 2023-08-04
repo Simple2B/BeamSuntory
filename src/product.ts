@@ -622,6 +622,8 @@ function assign(product: IProduct, group: string) {
   input = document.querySelector('#product-assign-amount');
   input.max = product.available_quantity[group].toString();
   input.min = '1';
+  input = document.querySelector('#product-assign-from-group');
+  input.value = group;
   assignModal.show();
 }
 
