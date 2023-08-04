@@ -12,7 +12,7 @@ class StoreCategoryForm(FlaskForm):
     name = StringField("Name", [DataRequired()])
     parent_category = StringField("Parent category")
     active = BooleanField("Status", [DataRequired()])
-    image = StringField("Image", [DataRequired()])
+    image = StringField("Image")
 
     submit = SubmitField("Save")
 
