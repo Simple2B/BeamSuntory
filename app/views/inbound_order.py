@@ -51,6 +51,14 @@ def get_all():
         )
 
     pagination = create_pagination(total=db.session.scalar(count_query))
+    inbound_orders_json = json.dumps(
+        [
+            json.loads(io.json)
+            for io in db.session.execute(
+                m.InboundOrder.select().order_by(m.InboundOrder.id)
+            ).scalars()
+        ]
+    )
 
     return render_template(
         "inbound_order/inbound_orders.html",
@@ -59,6 +67,7 @@ def get_all():
                 pagination.per_page
             )
         ).scalars(),
+        inbound_orders_json=inbound_orders_json,
         page=pagination,
         search_query=q,
         suppliers=[
@@ -191,7 +200,7 @@ def create():
         return redirect(url_for("inbound_order.get_all"))
     if form.validate_on_submit():
         inbound_order = m.InboundOrder(
-            order_id=f"IO-BEAM-{int(datetime.datetime.now().timestamp())}",
+            order_id=form.inbound_order_id.data,
             active_date=datetime.datetime.strptime(form.active_date.data, "%m/%d/%Y"),
             active_time=form.active_time.data,
             order_title=form.order_title.data,
@@ -204,6 +213,7 @@ def create():
             delivery_agent_id=form.delivery_agent_id.data,
         )
         log(log.INFO, "Form submitted. Inbound order: [%s]", inbound_order)
+        # NOTE: don't rename message, it is used in frontend to connect create and edit
         flash("Inbound order added!", "success")
         inbound_order.save()
 
