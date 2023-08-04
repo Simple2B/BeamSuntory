@@ -97,10 +97,27 @@ const modalOptions: ModalOptions = {
   },
 };
 
+const addModalOptions: ModalOptions = {
+  placement: 'bottom-right',
+  backdrop: 'dynamic',
+  backdropClasses:
+    'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
+  closable: true,
+  onHide: () => {
+    console.log('inbound-order id: ');
+  },
+  onShow: () => {
+    console.log('inbound-order id: ');
+  },
+  onToggle: () => {
+    console.log('modal has been toggled');
+  },
+};
+
 const modal: ModalInterface = new Modal($modalElement, modalOptions);
 const addModal: ModalInterface = new Modal(
   $addInboundOrderModalElement,
-  modalOptions,
+  addModalOptions,
 );
 
 const $buttonElements = document.querySelectorAll('.inbound-order-edit-button');
@@ -113,6 +130,20 @@ $buttonElements.forEach(e =>
     sessionStorage.setItem('inboundOrder', JSON.stringify(inboundOrder));
   }),
 );
+
+const addModalButton = document.querySelector(
+  '#inbound-order-add-modal-button',
+);
+
+addModalButton.addEventListener('click', () => {
+  const createdInboundOrderId = `IO-BEAM-${Math.floor(Date.now() / 1000)}`;
+  const inboundOrderIdInput: HTMLInputElement = document.querySelector(
+    '#inbound-order-add-id',
+  );
+  inboundOrderIdInput.value = createdInboundOrderId;
+  sessionStorage.setItem('inboundOrderId', createdInboundOrderId);
+  addModal.show();
+});
 
 // search flow
 const searchInput: HTMLInputElement = document.querySelector(
@@ -142,6 +173,26 @@ deleteButtons.forEach(e => {
       }
     }
   });
+});
+
+// # NOTE: depends on flash from create route on inbound_order_blueprint
+document.addEventListener('DOMContentLoaded', () => {
+  const successFlash = document.querySelector('#toast-success');
+  if (successFlash) {
+    const successMessage = successFlash.children[1] as HTMLDivElement;
+    if (successMessage.innerText === 'Inbound order added!') {
+      const inboundOrders = JSON.parse(sessionStorage.getItem('inboundOrders'));
+      const inboundOrderId = sessionStorage.getItem('inboundOrderId');
+      for (const inboundOrder of inboundOrders) {
+        if (inboundOrder.order_id === inboundOrderId) {
+          editInboundOrder(inboundOrder);
+          break;
+        }
+      }
+    }
+    sessionStorage.removeItem('inboundOrders');
+    sessionStorage.removeItem('inboundOrderId');
+  }
 });
 
 function editInboundOrder(inboundOrder: IInboundOrder) {
