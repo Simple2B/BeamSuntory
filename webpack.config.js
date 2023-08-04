@@ -216,6 +216,16 @@ const requestShareConfig = {
   },
 };
 
+const storeCategoryConfig = {
+  entry: {
+    main: './src/store_category.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/store_category.js', // <--- Will be compiled to this single file
+  },
+};
+
 const configs = [
   baseConfig,
   userConfig,
@@ -237,6 +247,7 @@ const configs = [
   pickupInboundConfig,
   bellConfig,
   requestShareConfig,
+  storeCategoryConfig,
 ].map(conf => merge(defaultConfig, conf));
 
 module.exports = configs;
