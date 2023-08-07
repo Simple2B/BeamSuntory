@@ -8,6 +8,7 @@ from .product import (
     SortByGroupProductForm,
     AssignProductForm,
     RequestShareProductForm,
+    DepleteProductForm,
 )
 from .group_for_product import (
     GroupProductForm,
