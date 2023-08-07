@@ -46,6 +46,17 @@ def get_all():
     stores_rows = db.session.execute(sa.select(m.Store)).all()
     stores = [row[0] for row in stores_rows]
 
+    for store in stores:
+        store.favorite = db.session.execute(
+            sa.select(m.FavoriteStoreUser)
+            .where(m.FavoriteStoreUser.user_id == current_user.id)
+            .where(m.FavoriteStoreUser.store_id == store.id)
+        ).scalar()
+        if store.favorite:
+            store.favorite = True
+        else:
+            store.favorite = False
+
     return render_template(
         "cart.html",
         cart_items=db.session.execute(
