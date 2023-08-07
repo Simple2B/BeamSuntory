@@ -46,19 +46,15 @@ def get_all_products(request, query=None, count_query=None):
     master_groups_rows_obj = db.session.execute(m.MasterGroup.select()).all()
 
     groups_for_products_obj = db.session.execute(m.GroupProduct.select()).all()
+    groups_obj = db.session.execute(m.Group.select()).all()
     mastr_for_prods_groups_for_prods = {}
-    for group in groups_for_products_obj:
-        if (
-            group[0].master_groups_for_product.name
-            not in mastr_for_prods_groups_for_prods
-        ):
-            mastr_for_prods_groups_for_prods[
-                group[0].master_groups_for_product.name
-            ] = [group[0]]
+    for group in groups_obj:
+        if group[0].master_groups.name not in mastr_for_prods_groups_for_prods:
+            mastr_for_prods_groups_for_prods[group[0].master_groups.name] = [group[0]]
         else:
-            mastr_for_prods_groups_for_prods[
-                group[0].master_groups_for_product.name
-            ].append(group[0])
+            mastr_for_prods_groups_for_prods[group[0].master_groups.name].append(
+                group[0]
+            )
 
     # get all product_groups to list and compare in view.html
     product_groups_obj = db.session.execute(m.ProductGroup.select()).all()
@@ -83,22 +79,25 @@ def get_all_products(request, query=None, count_query=None):
 
     # NOTE: Create json object for "show-all-groups" button in products.html
     product_groups = [row[0] for row in product_groups_obj]
-    product_mg_g = {
-        p.child.name: {
-            mg.parent.master_groups_for_product.name: "".join(
-                [
-                    g.parent.name
-                    for g in product_groups
-                    if p.child.name == g.child.name
-                    and mg.parent.master_groups_for_product.name
-                    == g.parent.master_groups_for_product.name
-                ]
-            )
-            for mg in product_groups
-            if p.child.name == mg.child.name
+    product_mg_g = (
+        {
+            p.child.name: {
+                mg.parent.master_groups.name: "".join(
+                    [
+                        g.parent.name
+                        for g in product_groups
+                        if p.child.name == g.child.name
+                        and mg.parent.master_groups.name == g.parent.master_groups.name
+                    ]
+                )
+                for mg in product_groups
+                if p.child.name == mg.child.name
+            }
+            for p in product_groups
         }
-        for p in product_groups
-    }
+        if len(product_groups) > 0
+        else {}
+    )
 
     for prod in product_mg_g:
         for mg in mastr_for_prods_groups_for_prods:
@@ -321,6 +320,7 @@ def save():
                 )
                 product_group.save()
 
+        flash("Product edited successfully", "success")
         if form.next_url.data:
             return redirect(form.next_url.data)
         return redirect(url_for("product.get_all"))
