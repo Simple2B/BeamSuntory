@@ -3,6 +3,7 @@ import datetime
 import json
 from flask import (
     Blueprint,
+    jsonify,
     render_template,
     request,
     flash,
@@ -611,3 +612,72 @@ def request_share():
         log(log.ERROR, "product assign errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("product.get_all"))
+
+
+@product_blueprint.route("/deplete/", methods=["POST"])
+@login_required
+def deplete():
+    form: f.DepleteProductForm = f.DepleteProductForm()
+    product_desire_quantity = int(form.quantity.data)
+
+    if form.validate_on_submit():
+        warehouse_product: m.WarehouseProduct = db.session.execute(
+            m.WarehouseProduct.select().where(
+                m.WarehouseProduct.warehouse_id == form.warehouse_id.data,
+                m.WarehouseProduct.product_id == form.product_id.data,
+                m.WarehouseProduct.group_id == form.group_id.data,
+            )
+        ).scalar()
+
+    if not warehouse_product:
+        log(
+            log.INFO,
+            "These product is not in warehouse. Product id: [%s]",
+            form.product_id.data,
+        )
+        flash("These product was depleted", "danger")
+        return redirect(url_for("product.get_all"))
+
+    product_name = (
+        db.session.execute(
+            m.Product.select().where(m.Product.id == form.product_id.data)
+        )
+        .scalar()
+        .name
+    )
+    warehouse_name = (
+        db.session.execute(
+            m.Warehouse.select().where(m.Warehouse.id == form.warehouse_id.data)
+        )
+        .scalar()
+        .name
+    )
+
+    if warehouse_product.product_quantity < product_desire_quantity:
+        log(
+            log.INFO,
+            "Not enough products in warehouse. Product id: [%s]",
+            form.product_id.data,
+        )
+        return (
+            jsonify(
+                message=f"Not enough product {product_name} in warehouse {warehouse_name}",
+            ),
+            200,
+        )
+
+    warehouse_product.product_quantity = product_desire_quantity
+    warehouse_product.save()
+
+    log(
+        log.INFO,
+        "Deplete product: [%s][%s",
+        form.product_id.data,
+        form.warehouse_id.data,
+    )
+    return (
+        jsonify(
+            message=f"Product {product_name} in warehouse {warehouse_name} was depleted",
+        ),
+        201,
+    )

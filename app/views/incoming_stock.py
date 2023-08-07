@@ -151,9 +151,10 @@ def accept():
                 m.WarehouseProduct.group_id == product.group_id,
             )
         ).scalar()
-        real_quantity = products_received_quantity[
-            f"{product.product_id}_{product.group_id}"
-        ]
+        # TODO: validate real quantity
+        real_quantity = int(
+            products_received_quantity[f"{product.product_id}_{product.group_id}"]
+        )
         if real_quantity != product.quantity:
             log(
                 log.INFO,

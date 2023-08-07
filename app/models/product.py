@@ -14,6 +14,7 @@ from .utils import ModelMixin
 from .product_group import ProductGroup
 from .user_group import UserGroup
 from .warehouse_product import WarehouseProduct
+from .warehouse import Warehouse
 
 
 class Product(db.Model, ModelMixin):
@@ -108,6 +109,13 @@ class Product(db.Model, ModelMixin):
             if warehouse_products
             else {}
         )
+        mg_dict["all_warehouses"] = [
+            {
+                "id": w.id,
+                "name": w.name,
+            }
+            for w in db.session.execute(Warehouse.select()).scalars()
+        ]
         # TODO looks like it is duplicate of available_quantity. Ask client
         mg_dict["total_available_items"] = mg_dict["available_quantity"]
         return json.dumps(mg_dict)
