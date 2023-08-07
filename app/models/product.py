@@ -1,4 +1,3 @@
-from datetime import datetime
 import json
 
 import sqlalchemy as sa
@@ -10,7 +9,6 @@ from app.database import db
 from app import schema as s
 from .utils import ModelMixin
 
-# from .supplier import Supplier
 from .product_group import ProductGroup
 from .user_group import UserGroup
 from .warehouse_product import WarehouseProduct
@@ -44,10 +42,7 @@ class Product(db.Model, ModelMixin):
     # General Info ->
     SKU: orm.Mapped[str] = orm.mapped_column(sa.String(64))
     low_stock_level: orm.Mapped[int] = orm.mapped_column(sa.Integer())
-    shelf_life_start: orm.Mapped[datetime] = orm.mapped_column(
-        sa.DateTime()
-    )  # calendar
-    shelf_life_end: orm.Mapped[datetime] = orm.mapped_column(sa.DateTime())  # calendar
+
     program_year: orm.Mapped[int] = orm.mapped_column(sa.Integer())
     package_qty: orm.Mapped[int] = orm.mapped_column(sa.Integer())
     numb_of_items_per_case: orm.Mapped[int] = orm.mapped_column(sa.Integer())

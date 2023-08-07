@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Optional, Any
 from enum import Enum
 from pydantic import BaseModel
@@ -40,8 +39,6 @@ class Product(CustomBase):
     # General Info ->
     SKU: str
     low_stock_level: int
-    shelf_life_start: datetime
-    shelf_life_end: datetime
     program_year: int
     package_qty: int
     numb_of_items_per_case: int

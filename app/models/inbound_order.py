@@ -95,6 +95,8 @@ class InboundOrder(db.Model, ModelMixin):
                         "image": uio.child.image,
                     },
                     "quantity": uio.quantity,
+                    "shelf_life_start": uio.shelf_life_start.strftime("%m/%d/%Y"),
+                    "shelf_life_end": uio.shelf_life_end.strftime("%m/%d/%Y"),
                 }
                 for uio in apqg
                 if uio.inbound_order.order_id == io.inbound_order.order_id
@@ -118,4 +120,5 @@ class InboundOrder(db.Model, ModelMixin):
                 "quantity_carton_master": 0,
             }
         )
+
         return json.dumps(mg_dict)
