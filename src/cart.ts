@@ -59,9 +59,7 @@ favoriteCheckbox.addEventListener('change', () => {
   const showFavoriteStore = favoriteCheckbox.checked;
 
   for (let i = 0; i < optionsStore.length; i++) {
-    console.log('optionsStore[i]: ', optionsStore[i]);
     const isFavorite = optionsStore[i].getAttribute('data-target-favorite');
-    console.log('isFavorite: ', isFavorite);
 
     if (showFavoriteStore && isFavorite !== 'True') {
       (optionsStore[i] as HTMLOptionElement).style.display = 'none';
