@@ -647,10 +647,6 @@ function requestShare(product: IProduct, group: string) {
   input = document.querySelector('#product-request-share-SKU-hidden-input');
   input.value = product.SKU;
   input = document.querySelector(
-    '#product-request-share-group-id-hidden-input',
-  );
-  input.value = product.groups_ids[group].toString();
-  input = document.querySelector(
     '#product-request-share-available-quantity-hidden-input',
   );
   input.value = product.available_quantity[group].toString();

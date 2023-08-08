@@ -124,7 +124,7 @@ def get_all_products(request, query=None, count_query=None):
         "master_product_groups_name": master_group_product_name,
         "suppliers": suppliers,
         "all_product_groups": {
-            i.name: i for i in db.session.execute(m.GroupProduct.select()).scalars()
+            i.name: i for i in db.session.execute(m.Group.select()).scalars()
         },
         "current_user_groups_names": [
             i[0].parent.name for i in current_user_groups_rows
@@ -477,9 +477,9 @@ def assign():
             log(log.ERROR, "Not found product by name : [%s]", form.name.data)
             flash("Cannot save product data", "danger")
 
-        product_from_group: m.GroupProduct = db.session.execute(
-            m.GroupProduct.select().where(
-                m.GroupProduct.name == form.from_group.data,
+        product_from_group: m.Group = db.session.execute(
+            m.Group.select().where(
+                m.Group.name == form.from_group.data,
             )
         ).scalar()
 
@@ -537,8 +537,8 @@ def request_share():
 
         from_group_id = (
             db.session.execute(
-                m.GroupProduct.select().where(
-                    m.GroupProduct.name == form.from_group.data,
+                m.Group.select().where(
+                    m.Group.name == form.from_group.data,
                 )
             )
             .scalar()
@@ -555,26 +555,14 @@ def request_share():
         log(log.INFO, "Form submitted. Share Request: [%s]", rs)
         rs.save()
 
-        product_group = (
-            db.session.execute(
-                m.ProductGroup.select()
-                .where(m.ProductGroup.product_id == p.id)
-                .where(m.ProductGroup.group_id == form.group_id.data)
-            )
-            .scalar()
-            .parent
-        )
-        group_id = (
-            db.session.execute(
-                m.Group.select().where(m.Group.name == product_group.name)
-            )
-            .scalar()
-            .id
-        )
+        product_group: m.Group = db.session.execute(
+            m.Group.select().where(m.Group.id == form.group_id.data)
+        ).scalar()
+
         users: list[m.UserGroup] = [
             u
             for u in db.session.execute(
-                m.UserGroup.select().where(m.UserGroup.right_id == group_id)
+                m.UserGroup.select().where(m.UserGroup.right_id == product_group.id)
             ).scalars()
         ]
 
