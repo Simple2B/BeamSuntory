@@ -380,7 +380,7 @@ def sort():
         groups = [
             grp[0].id
             for grp in db.session.execute(
-                m.GroupProduct.select().where(m.GroupProduct.name.in_(group_names))
+                m.Group.select().where(m.Group.name.in_(group_names))
             ).all()
         ]
 
