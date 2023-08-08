@@ -127,9 +127,13 @@ def accept():
         )
     )
     if not io:
-        log(log.INFO, "There is no inbound order with id: [%s]", id)
+        log(
+            log.INFO,
+            "There is no inbound order with id: [%s]",
+            int(form_edit.inbound_order_id.data),
+        )
         flash("There is no such inbound order", "danger")
-        return "no inbound order", 404
+        return redirect(url_for("incoming_stock.get_all"))
     io.status = "Delivered"
     io.save()
 
@@ -140,8 +144,13 @@ def accept():
         )
     ).scalars()
     if not products_quantity_group:
+        log(
+            log.INFO,
+            "There is no ProductQuantityGroup for inbound order with id: [%s]",
+            int(form_edit.inbound_order_id.data),
+        )
         flash("There is no such ProductQuantityGroup", "danger")
-        return "no product quantity group", 404
+        return redirect(url_for("incoming_stock.get_all"))
 
     for product in products_quantity_group:
         warehouse_product: m.WarehouseProduct = db.session.execute(
@@ -151,37 +160,46 @@ def accept():
                 m.WarehouseProduct.group_id == product.group_id,
             )
         ).scalar()
+
         # TODO: validate real quantity
-        real_quantity = int(
+        quantity_received = int(
             products_received_quantity[f"{product.product_id}_{product.group_id}"]
         )
-        if real_quantity != product.quantity:
+        product.quantity_received = quantity_received
+        product.save()
+
+        if quantity_received != product.quantity:
             log(
                 log.INFO,
                 "Inbound order accepted! Ordered quantity: [%s], != received quantity: [%s]",
                 product.quantity,
-                real_quantity,
+                quantity_received,
             )
             flash(
-                f"Inbound order accepted! Ordered qty: {product.quantity}, != received qty: {real_quantity}",
+                f"Inbound order accepted! Ordered qty: {product.quantity}, != received qty: {quantity_received}",
                 "warning",
             )
 
         if warehouse_product:
-            warehouse_product.product_quantity += real_quantity
+            warehouse_product.product_quantity += quantity_received
             warehouse_product.save()
         else:
             warehouse_product = m.WarehouseProduct(
                 product_id=product.product_id,
                 warehouse_id=product.warehouse_id,
-                product_quantity=real_quantity,
+                product_quantity=quantity_received,
                 group_id=product.group_id,
             )
             warehouse_product.save()
 
     log(log.INFO, "Inbound order accepted. Inbound order: [%s]", io)
-    if not real_quantity != product.quantity:
+    if not quantity_received != product.quantity:
         flash("Inbound order accepted!", "success")
+    else:
+        flash(
+            "Inbound order accepted! But received quantity is different from ordered",
+            "warning",
+        )
     return redirect(url_for("incoming_stock.get_all"))
 
 

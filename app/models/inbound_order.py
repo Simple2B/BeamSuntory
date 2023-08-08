@@ -11,7 +11,7 @@ from .supplier import Supplier
 from .delivery_agent import DeliveryAgent
 from .warehouse import Warehouse
 from .product import Product
-from .group_for_product import GroupProduct
+from .group import Group
 from .product_quantity_group import ProductQuantityGroup
 from .package_info import PackageInfo
 
@@ -64,7 +64,7 @@ class InboundOrder(db.Model, ModelMixin):
                 "name": g.name,
                 "id": g.id,
             }
-            for g in db.session.execute(GroupProduct.select()).scalars()
+            for g in db.session.execute(Group.select()).scalars()
         ]
         mg_dict["products"] = [
             {

@@ -107,7 +107,6 @@ class RequestShareProductForm(FlaskForm):
     SKU = StringField("Name", [DataRequired()])
     available_quantity = IntegerField("Available Quantity", [DataRequired()])
     desire_quantity = IntegerField("Desire Quantity", [DataRequired()])
-    brand = StringField("Brand", [DataRequired()])
     from_group = StringField("From Group", [DataRequired()])
 
     submit = SubmitField("Add product")
