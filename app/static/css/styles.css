@@ -1693,10 +1693,6 @@ input:checked + .toggle-bg {
   width: 0.75rem;
 }
 
-.w-3\/4 {
-  width: 75%;
-}
-
 .w-4 {
   width: 1rem;
 }
@@ -1899,6 +1895,10 @@ input:checked + .toggle-bg {
 
 .flex-grow {
   flex-grow: 1;
+}
+
+.flex-grow-0 {
+  flex-grow: 0;
 }
 
 .grow {
@@ -2224,10 +2224,6 @@ input:checked + .toggle-bg {
 
 .justify-evenly {
   justify-content: space-evenly;
-}
-
-.gap-4 {
-  gap: 1rem;
 }
 
 .gap-5 {
