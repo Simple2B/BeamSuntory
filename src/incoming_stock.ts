@@ -1,3 +1,4 @@
+import {log} from 'console';
 import {Modal} from 'flowbite';
 import type {ModalOptions, ModalInterface} from 'flowbite';
 
@@ -265,3 +266,57 @@ viewIncomingStockButtons.forEach(e =>
     div.innerHTML = packageInfo.quantity_carton_master.toString();
   }),
 );
+
+// function to filter products by status
+const orderFilterInputs = document.querySelectorAll(
+  '.incoming-stock-filter-input',
+);
+const orderFilterButton = document.querySelector(
+  '#incoming-stock-filter-button',
+);
+const orderFilterRadioButtons = document.querySelectorAll(
+  '.incoming-stock-filter-radio-button',
+);
+const radioButton = document.querySelector(
+  '#dropdownRadioButton-incoming-stock-status',
+);
+// radioButton.addEventListener('click', () => {
+
+// orderFilterRadioButtons.forEach(btn => {
+//   const filterButtonId = btn.getAttribute('id');
+//   const filterJsonDataStorage = sessionStorage.getItem('filterJsonData');
+//   const filterJsonDataObject = JSON.parse(filterJsonDataStorage);
+
+//   for (const key in filterJsonDataObject) {
+//     if (filterButtonId.includes(key)) {
+//       btn.innerHTML = `
+//         ${filterJsonDataObject[key]}
+//         <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+//           viewBox="0 0 10 6">
+//           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+//             d="m1 1 4 4 4-4" />
+//         </svg>`;
+//     }
+//   }
+// });
+
+orderFilterInputs.forEach(input => {
+  const hiddenInput = document.querySelector('#sort_by') as HTMLInputElement;
+  input.addEventListener('change', () => {
+    console.log('input changed', input.checked);
+    if (input.checked) {
+      hiddenInput.value = input.value;
+    }
+  });
+});
+
+// orderFilterButton.addEventListener('click', e => {
+//   const hiddenInput = document.querySelector('#sort_by') as HTMLInputElement;
+//   const filterJsonDataStorage = sessionStorage.getItem('filterJsonData');
+//   const filterDataObject = JSON.parse(filterJsonDataStorage);
+//   filterJsonData = filterDataObject;
+//   hiddenInput.value = JSON.stringify(filterJsonData);
+//   sessionStorage.setItem('filterJsonData', JSON.stringify(filterJsonData));
+//   const isVisibleFilter = true;
+//   sessionStorage.setItem('isVisibleFilter', JSON.stringify(isVisibleFilter));
+// });

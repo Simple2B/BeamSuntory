@@ -47,3 +47,8 @@ class NewInboundOrderForm(FlaskForm):
         query = m.InboundOrder.select().where(m.InboundOrder.order_id == field.data)
         if db.session.scalar(query) is not None:
             raise ValidationError("This order_id is taken.")
+
+
+class SortByStatusInboundOrderForm(FlaskForm):
+    sort_by = StringField("Sort by", [DataRequired()])
+    submit = SubmitField("Submit")
