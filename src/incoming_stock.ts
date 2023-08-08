@@ -267,56 +267,36 @@ viewIncomingStockButtons.forEach(e =>
   }),
 );
 
-// function to filter products by status
+// function to filter order by status
 const orderFilterInputs = document.querySelectorAll(
   '.incoming-stock-filter-input',
 );
-const orderFilterButton = document.querySelector(
-  '#incoming-stock-filter-button',
+const sortByNameIncomingStockStorage = JSON.parse(
+  sessionStorage.getItem('sortByNameIncomingStock'),
 );
-const orderFilterRadioButtons = document.querySelectorAll(
-  '.incoming-stock-filter-radio-button',
-);
-const radioButton = document.querySelector(
-  '#dropdownRadioButton-incoming-stock-status',
-);
-// radioButton.addEventListener('click', () => {
 
-// orderFilterRadioButtons.forEach(btn => {
-//   const filterButtonId = btn.getAttribute('id');
-//   const filterJsonDataStorage = sessionStorage.getItem('filterJsonData');
-//   const filterJsonDataObject = JSON.parse(filterJsonDataStorage);
+if (sortByNameIncomingStockStorage) {
+  const filterDropdownContainer = document.querySelector(
+    '#dropdownRadioButton-incoming-stock-status',
+  );
+  filterDropdownContainer.innerHTML = `${sortByNameIncomingStockStorage}
+          <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+          viewBox="0 0 10 6">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="m1 1 4 4 4-4" />
+        </svg>`;
+}
 
-//   for (const key in filterJsonDataObject) {
-//     if (filterButtonId.includes(key)) {
-//       btn.innerHTML = `
-//         ${filterJsonDataObject[key]}
-//         <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-//           viewBox="0 0 10 6">
-//           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-//             d="m1 1 4 4 4-4" />
-//         </svg>`;
-//     }
-//   }
-// });
-
-orderFilterInputs.forEach(input => {
+orderFilterInputs.forEach((input: HTMLInputElement) => {
   const hiddenInput = document.querySelector('#sort_by') as HTMLInputElement;
   input.addEventListener('change', () => {
     console.log('input changed', input.checked);
     if (input.checked) {
       hiddenInput.value = input.value;
+      sessionStorage.setItem(
+        'sortByNameIncomingStock',
+        JSON.stringify(input.value),
+      );
     }
   });
 });
-
-// orderFilterButton.addEventListener('click', e => {
-//   const hiddenInput = document.querySelector('#sort_by') as HTMLInputElement;
-//   const filterJsonDataStorage = sessionStorage.getItem('filterJsonData');
-//   const filterDataObject = JSON.parse(filterJsonDataStorage);
-//   filterJsonData = filterDataObject;
-//   hiddenInput.value = JSON.stringify(filterJsonData);
-//   sessionStorage.setItem('filterJsonData', JSON.stringify(filterJsonData));
-//   const isVisibleFilter = true;
-//   sessionStorage.setItem('isVisibleFilter', JSON.stringify(isVisibleFilter));
-// });

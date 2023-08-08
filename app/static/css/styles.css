@@ -1801,10 +1801,6 @@ input:checked + .toggle-bg {
   width: 100vw;
 }
 
-.w-2\/4 {
-  width: 50%;
-}
-
 .min-w-0 {
   min-width: 0px;
 }
@@ -2232,10 +2228,6 @@ input:checked + .toggle-bg {
 
 .gap-6 {
   gap: 1.5rem;
-}
-
-.gap-4 {
-  gap: 1rem;
 }
 
 .-space-x-px > :not([hidden]) ~ :not([hidden]) {

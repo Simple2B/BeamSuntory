@@ -221,8 +221,8 @@ def sort():
     form_create: f.NewInboundOrderForm = f.NewInboundOrderForm()
     form_edit: f.InboundOrderForm = f.InboundOrderForm()
     if not form_sort.validate_on_submit() and request.method == "POST":
-        log(log.INFO, "Wrong sort")
-        flash("Wrong sort", "danger")
+        # log(log.INFO, "Wrong sort")
+        # flash("Wrong sort", "danger")
         return redirect(url_for("incoming_stock.get_all"))
 
     filtered = True
