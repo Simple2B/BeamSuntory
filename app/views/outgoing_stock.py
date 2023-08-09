@@ -86,7 +86,7 @@ def get_all():
         form_edit=form_edit,
         form_sort=form_sort,
         warehouses=warehouses,
-        ship_requests_status=BaseConfig.SHIP_REQUEST_STATUS,
+        ship_requests_status=BaseConfig.Config.SHIP_REQUEST_STATUS,
     )
 
 
@@ -235,5 +235,5 @@ def sort():
         form_sort=form_sort,
         warehouses=warehouses,
         filtered=filtered,
-        ship_requests_status=BaseConfig.SHIP_REQUEST_STATUS,
+        ship_requests_status=BaseConfig.Config.SHIP_REQUEST_STATUS,
     )

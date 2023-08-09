@@ -101,7 +101,7 @@ def get_all():
         form_create=form_create,
         form_edit=form_edit,
         form_sort=form_sort,
-        inbound_orders_status=BaseConfig.INBOUND_ORDER_STATUS,
+        inbound_orders_status=BaseConfig.Config.INBOUND_ORDER_STATUS,
     )
 
 
@@ -227,5 +227,5 @@ def sort():
         form_edit=form_edit,
         form_sort=form_sort,
         filtered=filtered,
-        inbound_orders_status=BaseConfig.INBOUND_ORDER_STATUS,
+        inbound_orders_status=BaseConfig.Config.INBOUND_ORDER_STATUS,
     )
