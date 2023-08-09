@@ -14,6 +14,7 @@ from app.controllers import create_pagination
 from app import models as m, db
 from app import forms as f
 from app.logger import log
+from config import BaseConfig
 
 
 # NOTE incoming stock IS inbound order. Meaning goods going from supplier to warehouse
@@ -29,7 +30,6 @@ def get_all():
     form_create: f.NewInboundOrderForm = f.NewInboundOrderForm()
     form_edit: f.InboundOrderForm = f.InboundOrderForm()
     filtered = False
-    inbound_orders_status = 1
 
     q = request.args.get("q", type=str, default=None)
     query = m.InboundOrder.select().order_by(m.InboundOrder.id)
@@ -91,7 +91,7 @@ def get_all():
         form_edit=form_edit,
         form_sort=form_sort,
         filtered=filtered,
-        inbound_orders_status=inbound_orders_status,
+        inbound_orders_status=BaseConfig.INBOUND_ORDER_STATUS,
     )
 
 
@@ -300,4 +300,5 @@ def sort():
         form_edit=form_edit,
         form_sort=form_sort,
         filtered=filtered,
+        inbound_orders_status=BaseConfig.INBOUND_ORDER_STATUS,
     )

@@ -38,7 +38,7 @@ class BaseConfig(BaseSettings):
     PAGE_LINKS_NUMBER: int
 
     # Inbound order status
-    inbound_order_status: list[str] = [
+    INBOUND_ORDER_STATUS: list[str] = [
         "Draft",
         "Assigned to pickup",
         "Delivered",
@@ -46,7 +46,7 @@ class BaseConfig(BaseSettings):
     ]
 
     # Ship request status
-    ship_request_status: list[str] = [
+    SHIP_REQUEST_STATUS: list[str] = [
         "Waiting for warehouse manager",
         "Assigned to pickup",
         "Delivered",
