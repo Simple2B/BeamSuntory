@@ -140,8 +140,7 @@ def sort():
     form_create: f.NewShipRequestForm = f.NewShipRequestForm()
     form_edit: f.ShipRequestForm = f.ShipRequestForm()
     if not form_sort.validate_on_submit() and request.method == "POST":
-        # log(log.INFO, "Wrong sort")
-        # flash("Wrong sort", "danger")
+        # NOTE: this is drop filters action
         return redirect(url_for("pickup_order.get_all"))
 
     filtered = True
