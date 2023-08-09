@@ -154,7 +154,7 @@ def share(id: int):
         m.WarehouseProduct(
             product_id=rs.product_id,
             group_id=rs.group_id,
-            quantity=rs.desire_quantity,
+            product_quantity=rs.desire_quantity,
             warehouse_id=warehouse_from_prod.warehouse_id,
         ).save()
     else:

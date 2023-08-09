@@ -39,6 +39,11 @@ interface IProduct {
   total_available_items: {
     [index: string]: number;
   };
+  all_warehouses: [
+    {
+      [index: string]: number | string;
+    },
+  ];
 }
 interface FilterJsonData {
   [key: string]: string;
@@ -318,6 +323,9 @@ const $addProductModalElement: HTMLElement =
 const $viewProductModalElement: HTMLElement = document.querySelector(
   '#view-product-modal',
 );
+const $depleteProductModalElement: HTMLElement = document.querySelector(
+  '#deplete-product-modal',
+);
 const $editProductModalElement: HTMLElement =
   document.querySelector('#editProductModal');
 
@@ -333,6 +341,26 @@ const modalOptions: ModalOptions = {
 
     mstrGroupsEntries.forEach(([key, value]: [string, string]) => {
       deleteShipAssignButton(key.replace(/\s/g, '_'), value);
+    });
+  },
+  onShow: () => {},
+  onToggle: () => {
+    console.log('modal has been toggled');
+  },
+};
+
+const depleteModalOptions: ModalOptions = {
+  placement: 'bottom-right',
+  backdrop: 'dynamic',
+  backdropClasses:
+    'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
+  closable: true,
+  onHide: () => {
+    const product = JSON.parse(sessionStorage.product);
+    const mstrGroupsEntries = Object.entries(product.mstr_groups_groups);
+
+    mstrGroupsEntries.forEach(([key, value]: [string, string]) => {
+      deleteDepleteContainer(key.replace(/\s/g, '_'), value);
     });
   },
   onShow: () => {},
@@ -359,6 +387,10 @@ const modalShipAssignOptions: ModalOptions = {
 const viewModal: ModalInterface = new Modal(
   $viewProductModalElement,
   modalOptions,
+);
+const depleteModal: ModalInterface = new Modal(
+  $depleteProductModalElement,
+  depleteModalOptions,
 );
 const editModal: ModalInterface = new Modal(
   $editProductModalElement,
@@ -424,7 +456,6 @@ function convertDate(date: string) {
 }
 
 function editProduct(product: IProduct) {
-  console.log('product in edit modal', product);
   const img: HTMLImageElement = document.querySelector(
     '#product-edit-show-image',
   );
@@ -485,7 +516,6 @@ const viewProductButtonElements = document.querySelectorAll(
 viewProductButtonElements.forEach(e =>
   e.addEventListener('click', () => {
     const product = JSON.parse(e.getAttribute('data-target'));
-    console.log('product', product);
     sessionStorage.setItem('product', JSON.stringify(product));
     const mstrGroups = Object.keys(product.mstr_groups_groups);
 
@@ -541,9 +571,51 @@ viewProductButtonElements.forEach(e =>
   }),
 );
 
+const depleteProductButtonElements = document.querySelectorAll(
+  '.product-deplete-button',
+);
+depleteProductButtonElements.forEach(e =>
+  e.addEventListener('click', () => {
+    const product = JSON.parse(e.getAttribute('data-target'));
+    sessionStorage.setItem('product', JSON.stringify(product));
+    const mstrGroups = Object.keys(product.mstr_groups_groups);
+    mstrGroups.forEach(groupName => {
+      let isEqual = false;
+      if (product.current_user_groups.hasOwnProperty(groupName)) {
+        const currentUserValue = product.current_user_groups[groupName];
+        const mstrGroupsValue = product.mstr_groups_groups[groupName];
+        if (currentUserValue.includes(mstrGroupsValue)) {
+          isEqual = true;
+        }
+      }
+      createDepleteAction(
+        isEqual,
+        groupName,
+        product.mstr_groups_groups[groupName],
+        product,
+      );
+    });
+
+    let div: HTMLDivElement = document.querySelector('#product-deplete-name');
+    div.innerHTML = product.name;
+    div = document.querySelector('#product-deplete-id');
+    div.innerHTML = product.id.toString();
+    const img: HTMLImageElement = document.querySelector(
+      '#product-deplete-image',
+    );
+    product.image.length > 100
+      ? (img.src = `data:image/png;base64, ${product.image}`)
+      : (img.src = defaultBrandImage);
+    div = document.querySelector('#product-deplete-product_type');
+    div.innerHTML = product.product_type.toUpperCase().split(' ').join('_');
+    div = document.querySelector('#product-deplete-next_url');
+    div.innerHTML = window.location.href;
+    depleteModal.show();
+  }),
+);
+
 // function to request share
 function requestShare(product: IProduct, group: string) {
-  console.log('product in request share modal', product);
   const img: HTMLImageElement = document.querySelector(
     '#product-request-share-image',
   );
@@ -575,10 +647,6 @@ function requestShare(product: IProduct, group: string) {
   input = document.querySelector('#product-request-share-SKU-hidden-input');
   input.value = product.SKU;
   input = document.querySelector(
-    '#product-request-share-group-id-hidden-input',
-  );
-  input.value = product.groups_ids[group].toString();
-  input = document.querySelector(
     '#product-request-share-available-quantity-hidden-input',
   );
   input.value = product.available_quantity[group].toString();
@@ -609,7 +677,6 @@ function ship(product: IProduct, group: string) {
   input = document.querySelector('#product-ship-desire-quantity');
   input.max = product.available_quantity[group].toString();
   input.min = '1';
-  console.log('SHIP GROUP', group);
   input = document.querySelector('#product-ship-group');
   input.value = group;
   shipModal.show();
@@ -918,5 +985,201 @@ function getSessionStorageObject(
       break;
     default:
       break;
+  }
+}
+
+function createDepleteAction(
+  isEqual: boolean,
+  masterGroup: string,
+  group: string,
+  productParam: IProduct,
+) {
+  const groupProductIds = productParam.groups_ids;
+  const productTypeContainer = document.querySelector(
+    `#product-deplete-product_type-container`,
+  );
+  const depleteContainer = document.createElement('div');
+  depleteContainer.classList.add('sm:col-span-2', 'flex', 'gap-4');
+  depleteContainer.setAttribute(
+    'id',
+    `product-deplete-container-${group.replace(/ /g, '_')}`,
+  );
+  depleteContainer.innerHTML = `
+    <div>
+      <label for="deplete-product-quantity-${group.replace(
+        / /g,
+        '_',
+      )}" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
+        <input id="deplete-product-quantity-${group.replace(/ /g, '_')}"
+          class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+    </div>
+    <div>
+      <label for="product_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Action</label >
+      <button deplete-group-data=${group.replace(
+        / /g,
+        '_',
+      )} type="button" id="deplete-product-button-${group.replace(
+    / /g,
+    '_',
+  )}" class="deplete-product-button inline-flex items-center mr-2 px-3 py-2.5 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
+        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
+        Deplete
+      </button>
+    </div>
+  `;
+  const depleteProductBtn = depleteContainer.querySelector(
+    `#deplete-product-button-${group.replace(/ /g, '_')}`,
+  );
+
+  productTypeContainer.parentNode.insertBefore(
+    depleteContainer,
+    productTypeContainer.nextSibling,
+  );
+
+  const productViewTypeContainer = document.querySelector(
+    '#product-deplete-product_type-container',
+  );
+  const masterGroupWarehouseContainer = document.createElement('div');
+  masterGroupWarehouseContainer.classList.add('sm:col-span-4');
+  masterGroupWarehouseContainer.setAttribute(
+    'id',
+    `product-deplete-product_group-container-${group.replace(/ /g, '_')}`,
+  );
+
+  masterGroupWarehouseContainer.innerHTML = `
+  <div class="flex gap-4">
+  <div class="w-2/4">
+    <label for="for-group-${group}"
+      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">${masterGroup}</label>
+    <select type="text" name="group-${group}" id="master-group-deplete-${group}"
+      class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+      placeholder="Some Group" required
+    >
+      <option value="${groupProductIds[group]}">${group}</option>
+    </select>
+  </div>
+  <div class="w-2/4">
+    <label for="for-warehouse-${group}"
+      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Warehouse</label>
+    <select type="text" name="group-${group}" id="warehouse-deplete-${group}"
+      class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+      placeholder="Some Group" required
+    >
+    </select>
+  </div>
+  </div>
+    `;
+
+  const selectWarehouse: HTMLInputElement =
+    masterGroupWarehouseContainer.querySelector(`#warehouse-deplete-${group}`);
+  const productQuantity: HTMLInputElement = depleteContainer.querySelector(
+    `#deplete-product-quantity-${group.replace(/ /g, '_')}`,
+  );
+
+  const productQuantityValue = productParam.available_quantity[group] || 0;
+  productQuantity.value = String(productQuantityValue);
+
+  for (const warehouse of productParam.all_warehouses) {
+    const option = document.createElement('option');
+
+    option.value = warehouse.id.toString();
+    option.text = warehouse.name.toString();
+    selectWarehouse.appendChild(option);
+  }
+
+  productViewTypeContainer.parentNode.insertBefore(
+    masterGroupWarehouseContainer,
+    productViewTypeContainer.nextSibling,
+  );
+
+  const depleteButton = document.querySelector(
+    `#deplete-product-button-${group.replace(/ /g, '_')}`,
+  );
+  depleteButton.addEventListener('click', () => {
+    const csrfTokenInput =
+      document.querySelector<HTMLInputElement>('#csrf_token');
+    const csrfToken = csrfTokenInput ? csrfTokenInput.value : '';
+    const groupId = groupProductIds[group];
+    const productId = productParam.id;
+    const warehouseId = selectWarehouse.value;
+    const currentQuantity = Number(productQuantity.value);
+    depleteProduct(
+      warehouseId,
+      productId,
+      currentQuantity,
+      groupId,
+      group,
+      csrfToken,
+    );
+  });
+}
+
+async function depleteProduct(
+  warehouseId: string,
+  productId: number,
+  quantity: number,
+  groupId: number,
+  group: string,
+  csrfToken: string,
+) {
+  const data = {
+    warehouse_id: warehouseId,
+    product_id: productId,
+    quantity: String(quantity),
+    group_id: groupId,
+    csrf_token: csrfToken,
+  };
+
+  const response = await fetch('/product/deplete', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  const message = await response.json();
+  const groupContainer = document.querySelector(
+    `#product-deplete-product_group-container-${group.replace(/ /g, '_')}`,
+  );
+
+  if (response.status === 201) {
+    const productQuantity: HTMLInputElement = document.querySelector(
+      `#deplete-product-quantity-${group.replace(/ /g, '_')}`,
+    );
+    productQuantity.value = quantity.toString();
+    const successMessage = document.createElement('div');
+    successMessage.classList.add('text-green-500', 'text-sm');
+    successMessage.innerText = message.message;
+    groupContainer.appendChild(successMessage);
+    setTimeout(() => {
+      successMessage.remove();
+    }, 10000);
+  } else {
+    const errorMessage = document.createElement('div');
+    errorMessage.classList.add('text-red-500', 'text-sm');
+    errorMessage.innerText = message.message;
+    groupContainer.appendChild(errorMessage);
+    setTimeout(() => {
+      errorMessage.remove();
+    }, 20000);
+  }
+}
+
+function deleteDepleteContainer(nameGroup: string, nameGroupValue: string) {
+  const depleteContainer = document.querySelector(
+    `#product-deplete-container-${nameGroupValue.replace(/ /g, '_')}`,
+  );
+  const masterGroupWarehouseContainer = document.querySelector(
+    `#product-deplete-product_group-container-${nameGroupValue.replace(
+      / /g,
+      '_',
+    )}`,
+  );
+  if (depleteContainer) {
+    depleteContainer.remove();
+  }
+  if (masterGroupWarehouseContainer) {
+    masterGroupWarehouseContainer.remove();
   }
 }
