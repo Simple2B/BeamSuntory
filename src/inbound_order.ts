@@ -294,7 +294,7 @@ viewInboundOrderButtonElements.forEach(e =>
   }),
 );
 
-// ----add inbound order item----
+// ----add inbound order item for edit modal----
 function createInboundOrderItems(
   inbOrder: IInboundOrder = null,
   curInbOrder: IInboundOrderProd = null,
@@ -432,16 +432,111 @@ addInboundOrderItemBtnById.addEventListener('click', () => {
   createInboundOrderItems();
 });
 
-// ----set product to JSON hidden input in inbound-order-edit-form----
-function setProducts() {
-  const inboundOrderAddProductSelects = document.querySelectorAll(
-    '.inbound-order-edit-add-product',
+// ----add inbound order item for add modal----
+function createInboundOrderAddItems(
+  inbOrder: IInboundOrder = null,
+  curInbOrder: IInboundOrderProd = null,
+) {
+  if (!inbOrder) {
+    const inboundOrder: IInboundOrder = JSON.parse(
+      sessionStorage.getItem('inboundOrder'),
+    );
+    inbOrder = inboundOrder;
+  }
+  const inboundOrderAddContainer = document.querySelector(
+    '#inbound-order-add-add-container',
   );
-  const inboundOrderAddGroupSelects = document.querySelectorAll(
-    '.inbound-order-edit-add-group',
+  const inboundOrderAddItem = document.createElement('div');
+  inboundOrderAddItem.classList.add(
+    'p-6',
+    'space-y-6',
+    'border-t',
+    'inbound-order-add-add-item',
+  );
+  inboundOrderAddItem.innerHTML = `
+    <div class="grid grid-cols-12 gap-5">
+    <div class="col-span-6 sm:col-span-3">
+      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product</label>
+      <select type="text" name="add_product"
+        class="inbound-order-add-add-product shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        placeholder="Product" required>
+        <option value="" disabled selected>Select product</option>
+      </select>
+    </div>
+    <div class="col-span-6 sm:col-span-3">
+      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
+      <input type="text" name="add_quantity"
+        class="inbound-order-add-add-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        placeholder="Quantity" required>
+    </div>
+    <div class="col-span-6 sm:col-span-3">
+      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Action</label>
+      <button type="button" data-target=""
+        class="inbound-order-add-delete-item-btn inline-flex items-center px-3 py-2 mr-3 text-sm font-medium text-center text-white rounded-lg bg-red-600 hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+          <path d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z"></path>
+        </svg>
+      </button>
+      <button type="button" data-target="" id="inbound-order-add-add-item-btn"
+        class="inbound-order-add-add-item-btn inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+          <path d="M64 80c-8.8 0-16 7.2-16 16V416c0 8.8 7.2 16 16 16H384c8.8 0 16-7.2 16-16V96c0-8.8-7.2-16-16-16H64zM0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96zM200 344V280H136c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H248v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+  `;
+
+  const inboundOrderAddProductSelect: HTMLInputElement =
+    inboundOrderAddItem.querySelector('.inbound-order-add-add-product');
+  const inboundOrderAddFirstSelect: HTMLSelectElement = document.querySelector(
+    '#inbound-order-add-add-product-select',
+  );
+
+  inboundOrderAddProductSelect.innerHTML = inboundOrderAddFirstSelect.innerHTML;
+  inboundOrderAddContainer.appendChild(inboundOrderAddItem);
+
+  const addButton = inboundOrderAddItem.querySelector(
+    '.inbound-order-add-add-item-btn',
+  );
+  addButton.addEventListener('click', () => {
+    createInboundOrderAddItems();
+  });
+
+  const deleteButtons = document.querySelectorAll(
+    '.inbound-order-add-delete-item-btn',
+  );
+  deleteButtons.forEach(button =>
+    button.addEventListener('click', () => {
+      const inboundOrderItem = button.closest('.inbound-order-add-add-item');
+      if (inboundOrderItem) {
+        inboundOrderItem.remove();
+      }
+    }),
+  );
+}
+
+// this button need to add first item from template
+const createAddInboundOrderItemBtnById = document.querySelector(
+  '#inbound-order-add-add-item-btn',
+);
+createAddInboundOrderItemBtnById.addEventListener('click', () => {
+  createInboundOrderAddItems();
+});
+
+// ----set product to JSON hidden input in inbound-order-edit-form----
+function setProducts(actionType: string) {
+  let inboundOrderAddGroupSelects: any;
+  if (actionType === 'edit') {
+    inboundOrderAddGroupSelects = document.querySelectorAll(
+      '.inbound-order-edit-add-group',
+    );
+  }
+  const inboundOrderAddProductSelects = document.querySelectorAll(
+    `.inbound-order-${actionType}-add-product`,
   );
   const inboundOrderAddQuantityInputs = document.querySelectorAll(
-    '.inbound-order-edit-add-quantity',
+    `.inbound-order-${actionType}-add-quantity`,
   );
   const products = [];
 
@@ -449,27 +544,29 @@ function setProducts() {
     const inboundOrderAddProductSelect = inboundOrderAddProductSelects[
       i
     ] as HTMLSelectElement;
-    const inboundOrderAddGroupSelect = inboundOrderAddGroupSelects[
-      i
-    ] as HTMLSelectElement;
     const inboundOrderAddQuantityInput = inboundOrderAddQuantityInputs[
       i
     ] as HTMLSelectElement;
     const product = {
       product_id: inboundOrderAddProductSelect.value,
-      group_id: inboundOrderAddGroupSelect.value,
       quantity: inboundOrderAddQuantityInput.value,
     };
+    if (actionType === 'edit') {
+      const inboundOrderAddGroupSelect = inboundOrderAddGroupSelects[
+        i
+      ] as HTMLSelectElement;
+      Object.assign(product, {group_id: inboundOrderAddGroupSelect.value});
+    }
     products.push(product);
   }
 
   const inputProducts: HTMLInputElement = document.querySelector(
-    '#inbound-order-edit-products',
+    `#inbound-order-${actionType}-products`,
   );
   inputProducts.value = JSON.stringify(products);
 }
 
-// ----submit form through hidden submit button----
+// ----submit edit form through hidden submit button----
 const inboundOrderSubmitButton: HTMLButtonElement = document.querySelector(
   '#inbound-order-submit-btn',
 );
@@ -478,6 +575,19 @@ const inboundOrderSaveProductsButton = document.querySelector(
 );
 
 inboundOrderSaveProductsButton.addEventListener('click', () => {
-  setProducts();
+  setProducts('edit');
   inboundOrderSubmitButton.click();
+});
+
+// ----submit add through hidden submit button----
+const inboundOrderSubmitAddButton: HTMLButtonElement = document.querySelector(
+  '#inbound-order-add-submit-btn',
+);
+const inboundOrderSaveProductsAddButton = document.querySelector(
+  '#inbound-order-save-add-products-btn',
+);
+
+inboundOrderSaveProductsAddButton.addEventListener('click', () => {
+  setProducts('add');
+  inboundOrderSubmitAddButton.click();
 });

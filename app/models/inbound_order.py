@@ -14,6 +14,7 @@ from .product import Product
 from .group import Group
 from .product_quantity_group import ProductQuantityGroup
 from .package_info import PackageInfo
+from .io_allocate_product import IOAllocateProduct
 
 
 class InboundOrder(db.Model, ModelMixin):
@@ -47,6 +48,9 @@ class InboundOrder(db.Model, ModelMixin):
     delivery_agent: orm.Mapped[DeliveryAgent] = orm.relationship()
     warehouse_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("warehouses.id"))
     warehouse: orm.Mapped[Warehouse] = orm.relationship()
+    io_allocate_products: orm.Mapped[IOAllocateProduct] = orm.relationship(
+        "IOAllocateProduct", backref="inbound_order", cascade="all, delete-orphan"
+    )
 
     def __repr__(self):
         return f"<{self.id}: {self.order_id}>"
