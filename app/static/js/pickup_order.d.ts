@@ -39,3 +39,5 @@ declare const searchPickupInput: HTMLInputElement;
 declare const searchPickupInputButton: Element;
 declare const pickupButtons: NodeListOf<Element>;
 declare const deliverButtons: NodeListOf<Element>;
+declare const orderFilterInputs: NodeListOf<Element>;
+declare const sortByNamePickupOrderStorage: any;

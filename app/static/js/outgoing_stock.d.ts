@@ -39,3 +39,5 @@ declare const searchOutgoingInput: HTMLInputElement;
 declare const searchOutgoingInputButton: Element;
 declare const dispatchButtons: NodeListOf<Element>;
 declare const cancelButtons: NodeListOf<Element>;
+declare const orderFilterInputs: NodeListOf<Element>;
+declare const sortByNameOutgoingStockStorage: any;

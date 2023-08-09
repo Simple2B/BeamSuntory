@@ -59,3 +59,37 @@ pickupInboundButtons.forEach(e => {
     }
   });
 });
+
+// function to filter order by status
+const orderFilterInputs = document.querySelectorAll(
+  '.pickup_inbound-filter-input',
+);
+const sortByNamePickupInboundStorage = JSON.parse(
+  sessionStorage.getItem('sortByNamePickupInbound'),
+);
+
+if (sortByNamePickupInboundStorage) {
+  const filterDropdownContainer = document.querySelector(
+    '#dropdownRadioButton-pickup_inbound-status',
+  );
+  filterDropdownContainer.innerHTML = `${sortByNamePickupInboundStorage}
+          <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+          viewBox="0 0 10 6">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="m1 1 4 4 4-4" />
+        </svg>`;
+}
+
+orderFilterInputs.forEach((input: HTMLInputElement) => {
+  const hiddenInput = document.querySelector('#sort_by') as HTMLInputElement;
+  input.addEventListener('change', () => {
+    console.log('input changed', input.checked);
+    if (input.checked) {
+      hiddenInput.value = input.value;
+      sessionStorage.setItem(
+        'sortByNamePickupInbound',
+        JSON.stringify(input.value),
+      );
+    }
+  });
+});

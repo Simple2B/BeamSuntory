@@ -38,3 +38,5 @@ interface IInboundOrderProd {
 declare const searchPickupInboundInput: HTMLInputElement;
 declare const searchPickupInboundInputButton: Element;
 declare const pickupInboundButtons: NodeListOf<Element>;
+declare const orderFilterInputs: NodeListOf<Element>;
+declare const sortByNamePickupInboundStorage: any;
