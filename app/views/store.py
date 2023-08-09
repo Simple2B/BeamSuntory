@@ -135,6 +135,12 @@ def create():
         flash("Store added!", "success")
         store.save()
 
+        favorite_store: m.FavoriteStoreUser = m.FavoriteStoreUser(
+            user_id=current_user.id,
+            store_id=store.id,
+        )
+        favorite_store.save()
+
         return redirect(url_for("store.get_all"))
 
     flash("Something went wrong!", "danger")

@@ -48,3 +48,23 @@ deleteButtons.forEach(e => {
     }
   });
 });
+
+// --show/hide favorite store in dropdown--
+const favoriteCheckbox: HTMLInputElement = document.querySelector(
+  '#cart-favorite-store-checkbox',
+);
+const selectStore = document.querySelector('#cart-store-select');
+const optionsStore = document.querySelectorAll('.cart-store-option');
+favoriteCheckbox.addEventListener('change', () => {
+  const showFavoriteStore = favoriteCheckbox.checked;
+
+  for (let i = 0; i < optionsStore.length; i++) {
+    const isFavorite = optionsStore[i].getAttribute('data-target-favorite');
+
+    if (showFavoriteStore && isFavorite !== 'True') {
+      (optionsStore[i] as HTMLOptionElement).style.display = 'none';
+    } else {
+      (optionsStore[i] as HTMLOptionElement).style.display = 'block';
+    }
+  }
+});
