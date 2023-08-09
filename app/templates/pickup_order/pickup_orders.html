@@ -41,61 +41,17 @@
                 </label>
               </div>
             </li>
+            {% for status in ship_requests_status %}
             <li>
               <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
-                <input id="pickup-order-filter-input-draft"
-                  data-target="{{group_search_no_space, master_group_search_no_space }}" type="radio" value="Draft"
-                  name="filter-radio"
+                <input id="pickup-order-filter-input-{{ status }}" name="filter-radio"
                   class="pickup-order-filter-input w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
-                <label for="pickup-order-filter-input-draft"
+                <label for="pickup-order-filter-input-{{ status }}"
                   class="w-full ml-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300 cursor-pointer">
-                  Draft</label>
+                  {{ status }}</label>
               </div>
             </li>
-            <li>
-              <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
-                <input id="pickup-order-filter-input-assigned-to-pickup"
-                  data-target="{{group_search_no_space, master_group_search_no_space }}" type="radio"
-                  value="Assigned to pickup" name="filter-radio"
-                  class="pickup-order-filter-input w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
-                <label for="pickup-order-filter-input-assigned-to-pickup"
-                  class="w-full ml-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300 cursor-pointer">
-                  Assigned to pickup</label>
-              </div>
-            </li>
-            <li>
-              <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
-                <input id="pickup-order-filter-input-delivered"
-                  data-target="{{group_search_no_space, master_group_search_no_space }}" type="radio" value="Delivered"
-                  name="filter-radio"
-                  class="pickup-order-filter-input w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
-                <label for="pickup-order-filter-input-delivered"
-                  class="w-full ml-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300 cursor-pointer">
-                  Delivered</label>
-              </div>
-            </li>
-            <li>
-              <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
-                <input id="pickup-order-filter-input-in-transit"
-                  data-target="{{group_search_no_space, master_group_search_no_space }}" type="radio" value="In transit"
-                  name="filter-radio"
-                  class="pickup-order-filter-input w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
-                <label for="pickup-order-filter-input-in-transit"
-                  class="w-full ml-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300 cursor-pointer">
-                  In transit</label>
-              </div>
-            </li>
-            <li>
-              <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
-                <input id="pickup-order-filter-input-canceled"
-                  data-target="{{group_search_no_space, master_group_search_no_space }}" type="radio" value="Canceled"
-                  name="filter-radio"
-                  class="pickup-order-filter-input w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
-                <label for="pickup-order-filter-input-canceled"
-                  class="w-full ml-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300 cursor-pointer">
-                  Canceled</label>
-              </div>
-            </li>
+            {% endfor %}
           </ul>
         </div>
       </div>

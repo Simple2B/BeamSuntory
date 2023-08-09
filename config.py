@@ -37,6 +37,22 @@ class BaseConfig(BaseSettings):
     DEFAULT_PAGE_SIZE: int
     PAGE_LINKS_NUMBER: int
 
+    # Inbound order status
+    inbound_order_status: list[str] = [
+        "Draft",
+        "Assigned to pickup",
+        "Delivered",
+        "In transit",
+    ]
+
+    # Ship request status
+    ship_request_status: list[str] = [
+        "Waiting for warehouse manager",
+        "Assigned to pickup",
+        "Delivered",
+        "In transit",
+    ]
+
     @staticmethod
     def configure(app: Flask):
         # Implement this method to do further configuration on your app.

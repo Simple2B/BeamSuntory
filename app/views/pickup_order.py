@@ -26,6 +26,7 @@ def get_all():
     form_edit: f.ShipRequestForm = f.ShipRequestForm()
     form_sort: f.SortByStatusShipRequestForm = f.SortByStatusShipRequestForm()
 
+    ship_requests_status = m.BaseConfig.ship_request_status
     q = request.args.get("q", type=str, default=None)
     query = m.ShipRequest.select().order_by(m.ShipRequest.id)
     count_query = sa.select(sa.func.count()).select_from(m.ShipRequest)
@@ -83,6 +84,7 @@ def get_all():
         form_edit=form_edit,
         form_sort=form_sort,
         warehouses=warehouses,
+        ship_requests_status=ship_requests_status,
     )
 
 

@@ -29,6 +29,7 @@ def get_all():
     form_create: f.NewInboundOrderForm = f.NewInboundOrderForm()
     form_edit: f.InboundOrderForm = f.InboundOrderForm()
     filtered = False
+    inbound_orders_status = 1
 
     q = request.args.get("q", type=str, default=None)
     query = m.InboundOrder.select().order_by(m.InboundOrder.id)
@@ -90,6 +91,7 @@ def get_all():
         form_edit=form_edit,
         form_sort=form_sort,
         filtered=filtered,
+        inbound_orders_status=inbound_orders_status,
     )
 
 

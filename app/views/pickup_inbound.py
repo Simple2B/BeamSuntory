@@ -28,6 +28,8 @@ def get_all():
     form_edit: f.InboundOrderForm = f.InboundOrderForm()
     form_sort: f.SortByStatusInboundOrderForm = f.SortByStatusInboundOrderForm()
 
+    inbound_orders_status = os.environ.get("INBOUND_ORDER_STATUS")
+
     q = request.args.get("q", type=str, default=None)
     query = m.InboundOrder.select().order_by(m.InboundOrder.id)
     count_query = sa.select(sa.func.count()).select_from(m.InboundOrder)
@@ -100,6 +102,7 @@ def get_all():
         form_create=form_create,
         form_edit=form_edit,
         form_sort=form_sort,
+        inbound_orders_status=inbound_orders_status,
     )
 
 

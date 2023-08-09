@@ -86,8 +86,8 @@ deliverButtons.forEach(e => {
 });
 
 // function to filter order by status
-const orderFilterInputs = document.querySelectorAll(
-  '.pickup_order-filter-input',
+const orderFilterPickupOrderInputs = document.querySelectorAll(
+  '.pickup-order-filter-input',
 );
 const sortByNamePickupOrderStorage = JSON.parse(
   sessionStorage.getItem('sortByNamePickupOrder'),
@@ -95,7 +95,7 @@ const sortByNamePickupOrderStorage = JSON.parse(
 
 if (sortByNamePickupOrderStorage) {
   const filterDropdownContainer = document.querySelector(
-    '#dropdownRadioButton-pickup_order-status',
+    '#dropdownRadioButton-pickup-order-status',
   );
   filterDropdownContainer.innerHTML = `${sortByNamePickupOrderStorage}
           <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -105,7 +105,7 @@ if (sortByNamePickupOrderStorage) {
         </svg>`;
 }
 
-orderFilterInputs.forEach((input: HTMLInputElement) => {
+orderFilterPickupOrderInputs.forEach((input: HTMLInputElement) => {
   const hiddenInput = document.querySelector('#sort_by') as HTMLInputElement;
   input.addEventListener('change', () => {
     console.log('input changed', input.checked);
