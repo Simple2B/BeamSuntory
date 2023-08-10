@@ -1,8 +1,6 @@
 import {Modal} from 'flowbite';
 import type {ModalOptions, ModalInterface} from 'flowbite';
 
-// TODO: clean console.log after milestone
-
 interface IProduct {
   id: number;
   name: string;

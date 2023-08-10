@@ -60,3 +60,40 @@ def test_cancel_outgoing_stock(mg_g_populate: FlaskClient):
     ).scalar()
     assert order_to_cancel
     assert order_to_cancel.status == "Cancelled"
+
+
+def test_sort_outgoing_stock(mg_g_populate: FlaskClient):
+    login(mg_g_populate)
+
+    response = mg_g_populate.post(
+        "/outgoing_stock/sort",
+        data=dict(sort_by="In transit"),
+    )
+    assert ("Order-12345-In-transit" in response.text) is True
+    assert ("Order-12345-Waiting-for-warehouse-manager" in response.text) is False
+    assert response.status_code == 200
+
+    response = mg_g_populate.post(
+        "/outgoing_stock/sort",
+        data=dict(sort_by="Waiting for warehouse manager"),
+    )
+    assert ("Order-12345-Waiting-for-warehouse-manager" in response.text) is True
+    assert ("Order-12345-In-transit" in response.text) is False
+    assert response.status_code == 200
+
+    response = mg_g_populate.post(
+        "/outgoing_stock/sort",
+        data=dict(sort_by=""),
+        follow_redirects=True,
+    )
+    assert ("Order-12345-Waiting-for-warehouse-manager" in response.text) is True
+    assert ("Order-12345-In-transit" in response.text) is True
+    assert response.status_code == 200
+
+    response = mg_g_populate.get(
+        "/outgoing_stock/sort",
+        follow_redirects=True,
+    )
+    assert ("Order-12345-Waiting-for-warehouse-manager" in response.text) is True
+    assert ("Order-12345-In-transit" in response.text) is True
+    assert response.status_code == 200

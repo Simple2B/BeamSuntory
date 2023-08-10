@@ -18,10 +18,18 @@ from .group_for_product import (
 )
 from .warehouse import WarehouseForm, NewWarehouseForm
 from .delivery_agent import DeliveryAgentForm, NewDeliveryAgentForm
-from .ship_request import NewShipRequestForm, ShipRequestForm
+from .ship_request import (
+    NewShipRequestForm,
+    ShipRequestForm,
+    SortByStatusShipRequestForm,
+)
 from .supplier import SupplierForm, NewSupplierForm
 from .cart import CartForm, NewCartForm
-from .inbound_order import InboundOrderForm, NewInboundOrderForm
+from .inbound_order import (
+    InboundOrderForm,
+    NewInboundOrderForm,
+    SortByStatusInboundOrderForm,
+)
 from .store import StoreForm, NewStoreForm
 from .package_info import PackageInfoForm
 from .request_share import RequestShareForm
