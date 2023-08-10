@@ -232,21 +232,21 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
     const currentInboundOrder =
       inboundOrder.inbound_order_prods[inboundOrder.order_id];
     const inboundOrderProductsInputs =
-      document.querySelectorAll<HTMLInputElement>(
+      document.querySelectorAll<HTMLSelectElement>(
         '.inbound-order-edit-add-product',
       );
     const inboundOrderGroupsInputs =
-      document.querySelectorAll<HTMLInputElement>(
+      document.querySelectorAll<HTMLSelectElement>(
         '.inbound-order-edit-add-group',
       );
     const inboundOrderQuantityInputs =
       document.querySelectorAll<HTMLInputElement>(
         '.inbound-order-edit-add-quantity',
       );
-    const inboundOrderQuantityInputsLabels =
-      document.querySelectorAll<HTMLLabelElement>(
-        '#inbound-order-edit-add-quantity-label',
-      );
+    // const inboundOrderQuantityInputsLabels =
+    //   document.querySelectorAll<HTMLLabelElement>(
+    //     '#inbound-order-edit-add-quantity-label',
+    //   );
 
     if (currentInboundOrder) {
       for (let i = 0; i < currentInboundOrder.length; i++) {
@@ -254,8 +254,8 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
           const inboundOrderProductInput = inboundOrderProductsInputs[i];
           const inboundOrderGroupInput = inboundOrderGroupsInputs[i];
           const inboundOrderQuantityInput = inboundOrderQuantityInputs[i];
-          const inboundOrderQuantityInputLabel =
-            inboundOrderQuantityInputsLabels[i];
+          // const inboundOrderQuantityInputLabel =
+          //   inboundOrderQuantityInputsLabels[i];
           inboundOrderProductInput.value = String(
             currentInboundOrder[i].product.id,
           );
@@ -274,17 +274,66 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
           // inboundOrderQuantityInputLabel.textContent = `Quantity (1 - ${
           //   inboundOrder.io_allocate_product[currentInboundOrder[i].product.id]
           // })`;
+          // NOTE adds event listener to first input
+          // inboundOrderQuantityInput.addEventListener('change', () => {
+          //   console.log(
+          //     '1st changed',
+          //     inboundOrderProductInput.options[
+          //       inboundOrderProductInput.selectedIndex
+          //     ].text,
+          //     inboundOrderQuantityInput.value,
+          //   );
+          // });
           continue;
         }
         createInboundOrderItems(inboundOrder, currentInboundOrder[i]);
       }
     }
-  }
 
-  console.log(
-    'Object.keys(inboundOrder.io_allocate_product).length',
-    Object.keys(inboundOrder.io_allocate_product).length,
-  );
+    const selectedProduct =
+      inboundOrderProductsInputs[0].options[
+        inboundOrderProductsInputs[0].selectedIndex
+      ].text;
+
+    const selectedProductQtyId = `io-product-input-qty-${selectedProduct}`;
+
+    const selectedProductAllocateId = `#inbound-order-edit-check-quantity-${selectedProduct}`;
+
+    // const hiddenAllocateQtyInput: HTMLDivElement = document.querySelector(
+    //   `${selectedProductAllocateId}-hidden`,
+    // );
+    // console.log(`${selectedProductAllocateId}-hidden`, hiddenAllocateQtyInput);
+
+    // hiddenAllocateQtyInput.innerHTML = String(currentInboundOrder[0].quantity);
+
+    inboundOrderQuantityInputs[0].addEventListener('change', () => {
+      const allocateQtyInput: HTMLDivElement = document.querySelector(
+        selectedProductAllocateId,
+      );
+
+      allocateQtyInput.innerHTML = String(currentInboundOrder[0].quantity);
+
+      const changedQuantityInputs = document.querySelectorAll<HTMLInputElement>(
+        `#${selectedProductQtyId}`,
+      );
+
+      let totalProductChangedQty = 0;
+
+      changedQuantityInputs.forEach((input: HTMLInputElement) => {
+        totalProductChangedQty += Number(input.value);
+
+        allocateQtyInput.innerHTML = (
+          currentInboundOrder[0].quantity - totalProductChangedQty
+        ).toString();
+      });
+    });
+
+    inboundOrderQuantityInputs[0].setAttribute('id', selectedProductQtyId);
+
+    inboundOrderProductsInputs[0].addEventListener('change', () => {
+      inboundOrderQuantityInputs[0].setAttribute('id', selectedProductQtyId);
+    });
+  }
 
   if (Object.keys(inboundOrder.io_allocate_product).length > 0) {
     const currentInboundOrderCheck =
@@ -297,6 +346,10 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
       document.querySelectorAll<HTMLInputElement>(
         '.inbound-order-edit-check-quantity',
       );
+    const inboundOrderQuantityCheckInputsHidden =
+      document.querySelectorAll<HTMLInputElement>(
+        '.inbound-order-edit-check-quantity-hidden',
+      );
 
     if (currentInboundOrderCheck) {
       for (let i = 0; i < currentInboundOrderCheck.length; i++) {
@@ -305,15 +358,26 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
             inboundOrderProductsCheckInputs[i];
           const inboundOrderQuantityCheckInput =
             inboundOrderQuantityCheckInputs[i];
+          const inboundOrderQuantityCheckInputHidden =
+            inboundOrderQuantityCheckInputsHidden[i];
+
           inboundOrderProductCheckInput.innerHTML = String(
             currentInboundOrderCheck[i].product.name,
           );
           inboundOrderQuantityCheckInput.innerHTML = String(
             currentInboundOrderCheck[i].quantity,
           );
+          inboundOrderQuantityCheckInputHidden.innerHTML = String(
+            currentInboundOrderCheck[i].quantity,
+          );
+
           inboundOrderQuantityCheckInput.setAttribute(
             'id',
             `inbound-order-edit-check-quantity-${currentInboundOrderCheck[i].product.name}`,
+          );
+          inboundOrderQuantityCheckInputHidden.setAttribute(
+            'id',
+            `inbound-order-edit-check-quantity-${currentInboundOrderCheck[i].product.name}-hidden`,
           );
 
           continue;
@@ -386,6 +450,9 @@ function createInboundOrderCheckItems(
       <div class="col-span-6 sm:col-span-3">
         <div type="text" name="check_quantity" id="inbound-order-edit-check-quantity-${String(
           curInbOrder.product.name,
+        )}-hidden" class="inbound-order-edit-check-quantity-hidden" hidden></div>
+        <div type="text" name="check_quantity_display" id="inbound-order-edit-check-quantity-${String(
+          curInbOrder.product.name,
         )}"
           class="inbound-order-edit-check-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           placeholder="Quantity">
@@ -397,10 +464,18 @@ function createInboundOrderCheckItems(
     inboundOrderCheckItem.querySelector('.inbound-order-edit-check-product');
   const inboundOrderCheckQuantityInput: HTMLDivElement =
     inboundOrderCheckItem.querySelector('.inbound-order-edit-check-quantity');
+  const inboundOrderCheckQuantityInputHidden: HTMLDivElement =
+    inboundOrderCheckItem.querySelector(
+      '.inbound-order-edit-check-quantity-hidden',
+    );
+  console.log('inboundOrderCheckItem', inboundOrderCheckItem);
 
   if (curInbOrder) {
     inboundOrderCheckProductInput.innerHTML = String(curInbOrder.product.name);
     inboundOrderCheckQuantityInput.innerHTML = String(curInbOrder.quantity);
+    inboundOrderCheckQuantityInputHidden.innerHTML = String(
+      curInbOrder.quantity,
+    );
   }
 
   inboundOrderCheckContainer.appendChild(inboundOrderCheckItem);
@@ -470,9 +545,9 @@ function createInboundOrderItems(
   </div>
   `;
 
-  const inboundOrderAddProductSelect: HTMLInputElement =
+  const inboundOrderAddProductSelect: HTMLSelectElement =
     inboundOrderAddItem.querySelector('.inbound-order-edit-add-product');
-  const inboundOrderAddGroupSelect: HTMLInputElement =
+  const inboundOrderAddGroupSelect: HTMLSelectElement =
     inboundOrderAddItem.querySelector('.inbound-order-edit-add-group');
   const inboundOrderAddQuantityInput: HTMLInputElement =
     inboundOrderAddItem.querySelector('.inbound-order-edit-add-quantity');
@@ -513,9 +588,62 @@ function createInboundOrderItems(
 
   if (curInbOrder) {
     inboundOrderAddQuantityInput.value = String(curInbOrder.quantity);
+    inboundOrderAddQuantityInput.setAttribute(
+      'id',
+      `io-product-input-qty-${
+        inboundOrderAddProductSelect.options[
+          inboundOrderAddProductSelect.selectedIndex
+        ].text
+      }`,
+    );
   }
 
   inboundOrderAddContainer.appendChild(inboundOrderAddItem);
+
+  inboundOrderAddQuantityInput.addEventListener('change', () => {
+    const inboundOrderAddQuantityInputsAll = document.querySelectorAll(
+      `#io-product-input-qty-${
+        inboundOrderAddProductSelect.options[
+          inboundOrderAddProductSelect.selectedIndex
+        ].text
+      }`,
+    );
+    const inboundOrderCheckQuantityInput: HTMLDivElement =
+      document.querySelector(
+        `#inbound-order-edit-check-quantity-${
+          inboundOrderAddProductSelect.options[
+            inboundOrderAddProductSelect.selectedIndex
+          ].text
+        }`,
+      );
+    const inboundOrderCheckQuantityInputHidden: HTMLDivElement =
+      document.querySelector(
+        `#inbound-order-edit-check-quantity-${
+          inboundOrderAddProductSelect.options[
+            inboundOrderAddProductSelect.selectedIndex
+          ].text
+        }-hidden`,
+      );
+    inboundOrderCheckQuantityInput.innerHTML =
+      inboundOrderCheckQuantityInputHidden.innerHTML;
+
+    inboundOrderAddQuantityInputsAll.forEach((input: HTMLInputElement) => {
+      inboundOrderCheckQuantityInput.innerHTML = (
+        Number(inboundOrderCheckQuantityInput.innerHTML) - Number(input.value)
+      ).toString();
+    });
+  });
+
+  inboundOrderAddProductSelect.addEventListener('change', () => {
+    inboundOrderAddQuantityInput.setAttribute(
+      'id',
+      `io-product-input-qty-${
+        inboundOrderAddProductSelect.options[
+          inboundOrderAddProductSelect.selectedIndex
+        ].text
+      }`,
+    );
+  });
 
   const addButton = inboundOrderAddItem.querySelector(
     '.inbound-order-edit-add-item-btn',
@@ -629,24 +757,6 @@ function createInboundOrderAddItems(
   );
 }
 
-// TODO check if product is changed in select
-// const selectInboundOrderProduct = document.querySelector(
-//   '.inbound-order-add-edit-product',
-// );
-
-// selectInboundOrderProduct.addEventListener('change', () => {
-//   let inbOrder: IInboundOrder = null;
-//   if (!inbOrder) {
-//     const inboundOrder: IInboundOrder = JSON.parse(
-//       sessionStorage.getItem('inboundOrder'),
-//     );
-//     inbOrder = inboundOrder;
-//   }
-//   const selectInboundOrderProductQuantity = document.querySelector(
-//     '.inbound-order-add-edit-quantity',
-//   );
-// });
-
 // this button need to add first item from template
 const createAddInboundOrderItemBtnById = document.querySelector(
   '#inbound-order-add-add-item-btn',
@@ -692,17 +802,12 @@ function setProducts(actionType: string) {
       // NOTE sum qty of the same product and check if it is not more or less than available qty
       const prodId = inboundOrderAddProductSelect.value.toString();
 
-      if (
-        !Object.prototype.hasOwnProperty.call(
-          productsQuantities,
-          inboundOrderAddProductSelect.value,
-        )
-      ) {
-        productsQuantities[prodId] = Number(inboundOrderAddQuantityInput.value);
-      } else {
+      if (inboundOrderAddProductSelect.value in productsQuantities) {
         productsQuantities[prodId] += Number(
           inboundOrderAddQuantityInput.value,
         );
+      } else {
+        productsQuantities[prodId] = Number(inboundOrderAddQuantityInput.value);
       }
 
       const ProductQuantityCheck = document.querySelector(
@@ -710,32 +815,69 @@ function setProducts(actionType: string) {
           inboundOrderAddProductSelect.options[
             inboundOrderAddProductSelect.selectedIndex
           ].text
-        }`,
-      ).innerHTML;
+        }-hidden`,
+      );
 
-      if (productsQuantities[prodId] > Number(ProductQuantityCheck)) {
+      if (!ProductQuantityCheck) {
         alert(
-          `Quantity of product ${
+          `Product ${
             inboundOrderAddProductSelect.options[
               inboundOrderAddProductSelect.selectedIndex
             ].text
-          } in orders can not be more than ${Number(ProductQuantityCheck)}`,
-        );
-        return false;
-      } else if (productsQuantities[prodId] < Number(ProductQuantityCheck)) {
-        alert(
-          `Quantity of product ${
-            inboundOrderAddProductSelect.options[
-              inboundOrderAddProductSelect.selectedIndex
-            ].text
-          } in orders can not be less than ${Number(
-            ProductQuantityCheck,
-          )}. Please, allocate all products`,
+          } can't be allocated for this order. Please, choose another product`,
         );
         return false;
       }
     }
     products.push(product);
+  }
+
+  for (let i = 0; i < inboundOrderAddProductSelects.length; i++) {
+    const inboundOrderAddProductSelect = inboundOrderAddProductSelects[
+      i
+    ] as HTMLSelectElement;
+    const prodId = inboundOrderAddProductSelect.value.toString();
+
+    const ProductQuantityCheck = document.querySelector(
+      `#inbound-order-edit-check-quantity-${
+        inboundOrderAddProductSelect.options[
+          inboundOrderAddProductSelect.selectedIndex
+        ].text
+      }-hidden`,
+    );
+
+    console.log(
+      'ProductQuantityCheck',
+      ProductQuantityCheck.innerHTML,
+      prodId,
+      productsQuantities[prodId],
+    );
+
+    if (productsQuantities[prodId] > Number(ProductQuantityCheck.innerHTML)) {
+      alert(
+        `Quantity of product ${
+          inboundOrderAddProductSelect.options[
+            inboundOrderAddProductSelect.selectedIndex
+          ].text
+        } in orders can not be more than ${Number(
+          ProductQuantityCheck.innerHTML,
+        )}`,
+      );
+      return false;
+    } else if (
+      productsQuantities[prodId] < Number(ProductQuantityCheck.innerHTML)
+    ) {
+      alert(
+        `Quantity of product ${
+          inboundOrderAddProductSelect.options[
+            inboundOrderAddProductSelect.selectedIndex
+          ].text
+        } in orders can not be less than ${Number(
+          ProductQuantityCheck.innerHTML,
+        )}. Please, allocate all products`,
+      );
+      return false;
+    }
   }
 
   console.log('productsQuantities', productsQuantities);
