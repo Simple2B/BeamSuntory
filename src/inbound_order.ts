@@ -205,8 +205,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function editInboundOrder(inboundOrder: IInboundOrder) {
-  console.log('inboundOrder', inboundOrder);
-
   let input: HTMLInputElement = document.querySelector(
     '#inbound-order-edit-id',
   );
@@ -300,8 +298,6 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
         '.inbound-order-edit-check-quantity',
       );
 
-    console.log('currentInboundOrderCheck', currentInboundOrderCheck);
-
     if (currentInboundOrderCheck) {
       for (let i = 0; i < currentInboundOrderCheck.length; i++) {
         if (i === 0) {
@@ -318,10 +314,6 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
           inboundOrderQuantityCheckInput.setAttribute(
             'id',
             `inbound-order-edit-check-quantity-${currentInboundOrderCheck[i].product.name}`,
-          );
-          console.log(
-            'inboundOrderProductCheckInput',
-            currentInboundOrderCheck[i].product.name,
           );
 
           continue;
@@ -378,7 +370,6 @@ function createInboundOrderCheckItems(
     );
     inbOrder = inboundOrder;
   }
-  console.log(inbOrder);
 
   const inboundOrderCheckContainer = document.querySelector(
     '#inbound-order-edit-check-container',
@@ -426,7 +417,6 @@ function createInboundOrderItems(
     );
     inbOrder = inboundOrder;
   }
-  console.log(inbOrder);
 
   const inboundOrderAddContainer = document.querySelector(
     '#inbound-order-edit-add-container',
@@ -699,7 +689,7 @@ function setProducts(actionType: string) {
       ] as HTMLSelectElement;
       Object.assign(product, {group_id: inboundOrderAddGroupSelect.value});
 
-      // NOTE sum qty of the same product and check if it is not more than max
+      // NOTE sum qty of the same product and check if it is not more or less than available qty
       const prodId = inboundOrderAddProductSelect.value.toString();
 
       if (
@@ -710,22 +700,11 @@ function setProducts(actionType: string) {
       ) {
         productsQuantities[prodId] = Number(inboundOrderAddQuantityInput.value);
       } else {
-        // console.log('productsQuantities[prodId]', productsQuantities[prodId]);
         productsQuantities[prodId] += Number(
           inboundOrderAddQuantityInput.value,
         );
       }
 
-      // console.log(
-      //   'compare',
-      //   productsQuantities[prodId],
-      //   Number(inboundOrderAddQuantityInput.max),
-      // );
-      console.log(
-        'io val',
-        inboundOrderAddProductSelect.options,
-        inboundOrderAddProductSelect.selectedIndex,
-      );
       const ProductQuantityCheck = document.querySelector(
         `#inbound-order-edit-check-quantity-${
           inboundOrderAddProductSelect.options[
@@ -733,7 +712,6 @@ function setProducts(actionType: string) {
           ].text
         }`,
       ).innerHTML;
-      console.log('ProductQuantityCheck', ProductQuantityCheck);
 
       if (productsQuantities[prodId] > Number(ProductQuantityCheck)) {
         alert(
@@ -742,6 +720,17 @@ function setProducts(actionType: string) {
               inboundOrderAddProductSelect.selectedIndex
             ].text
           } in orders can not be more than ${Number(ProductQuantityCheck)}`,
+        );
+        return false;
+      } else if (productsQuantities[prodId] < Number(ProductQuantityCheck)) {
+        alert(
+          `Quantity of product ${
+            inboundOrderAddProductSelect.options[
+              inboundOrderAddProductSelect.selectedIndex
+            ].text
+          } in orders can not be less than ${Number(
+            ProductQuantityCheck,
+          )}. Please, allocate all products`,
         );
         return false;
       }
