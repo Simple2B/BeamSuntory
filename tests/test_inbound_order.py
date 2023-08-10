@@ -34,6 +34,7 @@ def test_create_inbound_order(mg_g_populate: FlaskClient):
             supplier_id=1,
             delivery_agent_id=1,
             warehouse_id=1,
+            products='[{"product_id": "1", "quantity": "100"}]',
         ),
         follow_redirects=True,
     )
