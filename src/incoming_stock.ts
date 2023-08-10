@@ -130,14 +130,14 @@ function editIncomingStock(inboundOrder: IInboundOrder) {
 
     if (currentInboundOrder) {
       for (let i = 0; i < currentInboundOrder.length; i++) {
-        createEditInboundOrderItems(currentInboundOrder[i]);
+        createIncomingStockOrderItems(currentInboundOrder[i]);
       }
     }
   }
   editModal.show();
 }
 
-function createEditInboundOrderItems(curInbOrder: IInboundOrderProd) {
+function createIncomingStockOrderItems(curInbOrder: IInboundOrderProd) {
   const incomingStockAddContainer = document.querySelector(
     '#incoming-stock-edit-add-container',
   );
@@ -286,11 +286,11 @@ viewIncomingStockButtons.forEach(e =>
     const inboundOrder: IInboundOrder = JSON.parse(
       e.getAttribute('data-target'),
     );
-    viewInboundOrder(inboundOrder);
+    viewIncomingStock(inboundOrder);
   }),
 );
 
-function viewInboundOrder(inboundOrder: IInboundOrder) {
+function viewIncomingStock(inboundOrder: IInboundOrder) {
   const packageInfo: IPackageInfo = inboundOrder.package_info;
 
   let div: HTMLDivElement = document.querySelector(
@@ -327,7 +327,7 @@ function viewInboundOrder(inboundOrder: IInboundOrder) {
 
     if (currentInboundOrder) {
       for (let i = 0; i < currentInboundOrder.length; i++) {
-        createViewInboundOrderItems(inboundOrder, currentInboundOrder[i]);
+        createViewIncomingStockItems(inboundOrder, currentInboundOrder[i]);
       }
     }
   }
@@ -345,7 +345,7 @@ function convertDate(date: string) {
 }
 
 // ----add inbound order item----
-function createViewInboundOrderItems(
+function createViewIncomingStockItems(
   inbOrder: IInboundOrder = null,
   curInbOrder: IInboundOrderProd = null,
 ) {

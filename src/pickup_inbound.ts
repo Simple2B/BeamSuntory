@@ -103,19 +103,19 @@ const viewModal: ModalInterface = new Modal(
   viewModalOptions,
 );
 
-const viewIncomingStockButtons = document.querySelectorAll(
+const viewPickupInboundButtons = document.querySelectorAll(
   '.pickup-inbound-view-button',
 );
-viewIncomingStockButtons.forEach(e =>
+viewPickupInboundButtons.forEach(e =>
   e.addEventListener('click', () => {
     const inboundOrder: IInboundOrder = JSON.parse(
       e.getAttribute('data-target'),
     );
-    viewInboundOrder(inboundOrder);
+    viewPickupInbound(inboundOrder);
   }),
 );
 
-function viewInboundOrder(inboundOrder: IInboundOrder) {
+function viewPickupInbound(inboundOrder: IInboundOrder) {
   const packageInfo: IPackageInfo = inboundOrder.package_info;
 
   let div: HTMLDivElement = document.querySelector(
@@ -152,7 +152,7 @@ function viewInboundOrder(inboundOrder: IInboundOrder) {
 
     if (currentInboundOrder) {
       for (let i = 0; i < currentInboundOrder.length; i++) {
-        createViewInboundOrderItems(inboundOrder, currentInboundOrder[i]);
+        createViewPickupInboundOrderItems(inboundOrder, currentInboundOrder[i]);
       }
     }
   }
@@ -170,7 +170,7 @@ function convertDate(date: string) {
 }
 
 // ----add inbound order item----
-function createViewInboundOrderItems(
+function createViewPickupInboundOrderItems(
   inbOrder: IInboundOrder = null,
   curInbOrder: IInboundOrderProd = null,
 ) {
