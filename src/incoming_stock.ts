@@ -1,4 +1,3 @@
-import {log} from 'console';
 import {Modal} from 'flowbite';
 import type {ModalOptions, ModalInterface} from 'flowbite';
 
@@ -44,11 +43,14 @@ interface IInboundOrderProd {
 let productGroupQuantity = {} as {[index: string]: number};
 let i = 0;
 
-const $modalElement: HTMLElement = document.querySelector(
+const $editModalElement: HTMLElement = document.querySelector(
   '#editIncomingStockModal',
 );
+const $viewModalElement: HTMLElement = document.querySelector(
+  '#viewIncomingStockModal',
+);
 
-const modalOptions: ModalOptions = {
+const editModalOptions: ModalOptions = {
   placement: 'bottom-right',
   backdrop: 'dynamic',
   backdropClasses:
@@ -64,14 +66,44 @@ const modalOptions: ModalOptions = {
     sessionStorage.removeItem('inboundOrder');
   },
   onShow: () => {
-    console.log('inbound-order id: ');
+    console.log('incoming-stock id: ');
   },
   onToggle: () => {
     console.log('modal has been toggled');
   },
 };
 
-const modal: ModalInterface = new Modal($modalElement, modalOptions);
+const viewModalOptions: ModalOptions = {
+  placement: 'bottom-right',
+  backdrop: 'dynamic',
+  backdropClasses:
+    'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
+  closable: true,
+  onHide: () => {
+    const incomingStockItems = document.querySelectorAll(
+      '.incoming-stock-view-add-item',
+    );
+    incomingStockItems.forEach(item => {
+      item.remove();
+    });
+    sessionStorage.removeItem('inboundOrder');
+  },
+  onShow: () => {
+    console.log('incoming-stock id: ');
+  },
+  onToggle: () => {
+    console.log('modal has been toggled');
+  },
+};
+
+const editModal: ModalInterface = new Modal(
+  $editModalElement,
+  editModalOptions,
+);
+const viewModal: ModalInterface = new Modal(
+  $viewModalElement,
+  viewModalOptions,
+);
 
 const $buttonElements = document.querySelectorAll(
   '.accept-incoming-stock-edit-button',
@@ -98,14 +130,14 @@ function editIncomingStock(inboundOrder: IInboundOrder) {
 
     if (currentInboundOrder) {
       for (let i = 0; i < currentInboundOrder.length; i++) {
-        createInboundOrderItems(currentInboundOrder[i]);
+        createEditInboundOrderItems(currentInboundOrder[i]);
       }
     }
   }
-  modal.show();
+  editModal.show();
 }
 
-function createInboundOrderItems(curInbOrder: IInboundOrderProd) {
+function createEditInboundOrderItems(curInbOrder: IInboundOrderProd) {
   const incomingStockAddContainer = document.querySelector(
     '#incoming-stock-edit-add-container',
   );
@@ -254,18 +286,121 @@ viewIncomingStockButtons.forEach(e =>
     const inboundOrder: IInboundOrder = JSON.parse(
       e.getAttribute('data-target'),
     );
-    const packageInfo: IPackageInfo = inboundOrder.package_info;
-
-    let div: HTMLDivElement = document.querySelector(
-      '#incoming-stock-view-quantity-wrap',
-    );
-    div.innerHTML = packageInfo.quantity_per_wrap.toString();
-    div = document.querySelector('#incoming-stock-view-quantity-wrap-carton');
-    div.innerHTML = packageInfo.quantity_wrap_carton.toString();
-    div = document.querySelector('#incoming-stock-view-quantity-carton-master');
-    div.innerHTML = packageInfo.quantity_carton_master.toString();
+    viewInboundOrder(inboundOrder);
   }),
 );
+
+function viewInboundOrder(inboundOrder: IInboundOrder) {
+  const packageInfo: IPackageInfo = inboundOrder.package_info;
+
+  let div: HTMLDivElement = document.querySelector(
+    '#incoming-stock-view-order-id',
+  );
+  div.innerHTML = inboundOrder.order_id;
+  div = document.querySelector('#incoming-stock-view-order-title');
+  div.innerHTML = inboundOrder.order_title;
+  div = document.querySelector('#incoming-stock-view-active-date');
+  div.innerHTML = convertDate(inboundOrder.active_date.toString());
+  div = document.querySelector('#incoming-stock-view-active-time');
+  div.innerHTML = inboundOrder.active_time;
+  div = document.querySelector('#incoming-stock-view-delivery-date');
+  div.innerHTML = convertDate(inboundOrder.delivery_date.toString());
+  div = document.querySelector('#incoming-stock-view-status');
+  div.innerHTML = inboundOrder.status;
+  div = document.querySelector('#incoming-stock-view-supplier-id');
+  div.innerHTML = inboundOrder.sup_da_wh_prod_objs.supplier;
+  div = document.querySelector('#incoming-stock-view-delivery-agent-id');
+  div.innerHTML = inboundOrder.sup_da_wh_prod_objs.delivery_agent;
+  div = document.querySelector('#incoming-stock-view-warehouse-id');
+  div.innerHTML = inboundOrder.sup_da_wh_prod_objs.warehouse;
+
+  div = document.querySelector('#incoming-stock-view-quantity-wrap');
+  div.innerHTML = packageInfo.quantity_per_wrap.toString();
+  div = document.querySelector('#incoming-stock-view-quantity-wrap-carton');
+  div.innerHTML = packageInfo.quantity_wrap_carton.toString();
+  div = document.querySelector('#incoming-stock-view-quantity-carton-master');
+  div.innerHTML = packageInfo.quantity_carton_master.toString();
+
+  if (Object.keys(inboundOrder.inbound_order_prods).length > 0) {
+    const currentInboundOrder =
+      inboundOrder.inbound_order_prods[inboundOrder.order_id];
+
+    if (currentInboundOrder) {
+      for (let i = 0; i < currentInboundOrder.length; i++) {
+        createViewInboundOrderItems(inboundOrder, currentInboundOrder[i]);
+      }
+    }
+  }
+
+  viewModal.show();
+}
+
+function convertDate(date: string) {
+  const inputDate = date.split('T')[0];
+  const dateParts = inputDate.split('-');
+  const year = dateParts[0];
+  const month = dateParts[1];
+  const day = dateParts[2];
+  return `${month}/${day}/${year}`;
+}
+
+// ----add inbound order item----
+function createViewInboundOrderItems(
+  inbOrder: IInboundOrder = null,
+  curInbOrder: IInboundOrderProd = null,
+) {
+  if (!inbOrder) {
+    const inboundOrder: IInboundOrder = JSON.parse(
+      sessionStorage.getItem('inboundOrder'),
+    );
+    inbOrder = inboundOrder;
+  }
+  const inboundOrderAddContainer = document.querySelector(
+    '#incoming-stock-view-add-container',
+  );
+  const inboundOrderAddItem = document.createElement('div');
+  inboundOrderAddItem.classList.add(
+    'p-6',
+    'space-y-6',
+    'border-t',
+    'incoming-stock-view-add-item',
+  );
+  inboundOrderAddItem.innerHTML = `
+    <div class="grid grid-cols-12 gap-5">
+    <div class="col-span-6 sm:col-span-4">
+      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product</label>
+      <div
+        class="incoming-stock-view-add-product shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+      </div>
+    </div>
+    <div class="col-span-6 sm:col-span-4">
+      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label>
+      <div
+        class="incoming-stock-view-add-group shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+      </div>
+    </div>
+    <div class="col-span-6 sm:col-span-4">
+      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
+      <div
+        class="incoming-stock-view-add-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+      </div>
+    </div>
+  </div>
+  `;
+
+  const inboundOrderAddProduct: HTMLInputElement =
+    inboundOrderAddItem.querySelector('.incoming-stock-view-add-product');
+  const inboundOrderAddGroup: HTMLInputElement =
+    inboundOrderAddItem.querySelector('.incoming-stock-view-add-group');
+  const inboundOrderAddQuantity: HTMLInputElement =
+    inboundOrderAddItem.querySelector('.incoming-stock-view-add-quantity');
+
+  inboundOrderAddProduct.innerHTML = curInbOrder.product.name;
+  inboundOrderAddGroup.innerHTML = curInbOrder.group.name;
+  inboundOrderAddQuantity.innerHTML = curInbOrder.quantity.toString();
+
+  inboundOrderAddContainer.appendChild(inboundOrderAddItem);
+}
 
 // function to filter order by status
 const orderFilterInputs = document.querySelectorAll(
@@ -290,7 +425,6 @@ if (sortByNameIncomingStockStorage) {
 orderFilterInputs.forEach((input: HTMLInputElement) => {
   const hiddenInput = document.querySelector('#sort_by') as HTMLInputElement;
   input.addEventListener('change', () => {
-    console.log('input changed', input.checked);
     if (input.checked) {
       hiddenInput.value = input.value;
       sessionStorage.setItem(
