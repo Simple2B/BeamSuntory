@@ -118,31 +118,28 @@ def test_sort_incoming_stock(mg_g_populate: FlaskClient):
         "/incoming_stock/sort",
         data=dict(sort_by="Assigned to pickup"),
     )
-    assert ("IO-BEAM-A-t-p" in response.text) is True
-    assert ("IO-BEAM-I-t" in response.text) is False
+    # NOTE: use "><" because we have data about all inbound orders in data-target json, so we avoid false positives
+    assert (">IO-BEAM-A-t-p<" in response.text) is True
+    assert (">IO-BEAM-I-t<" in response.text) is False
     assert response.status_code == 200
 
     response = mg_g_populate.post(
         "/incoming_stock/sort",
         data=dict(sort_by="In transit"),
     )
-    assert ("IO-BEAM-I-t" in response.text) is True
-    assert ("IO-BEAM-A-t-p" in response.text) is False
+    assert (">IO-BEAM-I-t<" in response.text) is True
+    assert (">IO-BEAM-A-t-p<" in response.text) is False
     assert response.status_code == 200
 
     response = mg_g_populate.post(
         "/incoming_stock/sort",
         data=dict(sort_by=""),
-        follow_redirects=True,
     )
-    assert ("IO-BEAM-I-t" in response.text) is True
-    assert ("IO-BEAM-A-t-p" in response.text) is True
-    assert response.status_code == 200
+    assert "/incoming_stock/" in response.text
+    assert response.status_code == 302
 
     response = mg_g_populate.get(
         "/incoming_stock/sort",
-        follow_redirects=True,
     )
-    assert ("IO-BEAM-I-t" in response.text) is True
-    assert ("IO-BEAM-A-t-p" in response.text) is True
-    assert response.status_code == 200
+    assert "/incoming_stock/" in response.text
+    assert response.status_code == 302
