@@ -4,6 +4,7 @@ const quantityElements = document.querySelectorAll('.cart-item-quantity');
 const totalPriceElement = document.querySelector('#cart-total-price');
 const totalQuantityElement = document.querySelector('#cart-total-quantity');
 const tableCartItems = document.querySelectorAll('.table-cart-item');
+
 let totalPrice = 0;
 let totalQuantity = 0;
 
@@ -12,11 +13,16 @@ tableCartItems.forEach(item => {
   const quantityElement: HTMLInputElement = item.querySelector(
     '.cart-item-quantity',
   );
+  const availableProductQuantity = quantityElement.getAttribute(
+    'data-target-available-quantity',
+  );
+
   const price = parseFloat(priceElement.textContent);
   const quantity = parseInt(quantityElement.value);
   const totalPriceOneElement = price * quantity;
   totalPrice += totalPriceOneElement;
   totalQuantity += quantity;
+  quantityElement.max = availableProductQuantity;
 });
 
 totalPriceElement.textContent = `${totalPrice.toFixed(2)}$`;
