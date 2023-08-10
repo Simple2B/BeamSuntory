@@ -33,3 +33,40 @@ def test_pickup_pickup_inbound(mg_g_populate: FlaskClient):
     ).scalar()
     assert order_to_pickup
     assert order_to_pickup.status == "In transit"
+
+
+def test_sort_pickup_inbound(mg_g_populate: FlaskClient):
+    login(mg_g_populate)
+
+    response = mg_g_populate.post(
+        "/pickup_inbound/sort",
+        data=dict(sort_by="Assigned to pickup"),
+    )
+    assert ("IO-BEAM-A-t-p" in response.text) is True
+    assert ("IO-BEAM-I-t" in response.text) is False
+    assert response.status_code == 200
+
+    response = mg_g_populate.post(
+        "/pickup_inbound/sort",
+        data=dict(sort_by="In transit"),
+    )
+    assert ("IO-BEAM-I-t" in response.text) is True
+    assert ("IO-BEAM-A-t-p" in response.text) is False
+    assert response.status_code == 200
+
+    response = mg_g_populate.post(
+        "/pickup_inbound/sort",
+        data=dict(sort_by=""),
+        follow_redirects=True,
+    )
+    assert ("IO-BEAM-I-t" in response.text) is True
+    assert ("IO-BEAM-A-t-p" in response.text) is True
+    assert response.status_code == 200
+
+    response = mg_g_populate.get(
+        "/pickup_inbound/sort",
+        follow_redirects=True,
+    )
+    assert ("IO-BEAM-I-t" in response.text) is True
+    assert ("IO-BEAM-A-t-p" in response.text) is True
+    assert response.status_code == 200

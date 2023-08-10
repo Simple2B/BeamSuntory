@@ -162,7 +162,7 @@
             Dispatch goods
           </button>
           {% endif %}
-          {% if ship_request.status.lower() != 'canceled' and ship_request.status.lower() != 'delivered' %}
+          {% if ship_request.status.lower() != 'cancelled' and ship_request.status.lower() != 'delivered' %}
           <button data-outgoing-stock-id={{ ship_request.id }} type="button"
             class="cancel-outgoing-stock-btn inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">

@@ -167,7 +167,7 @@
             Accept goods
           </button>
           {% endif %}
-          {% if inbound_order.status.lower() != 'canceled' and inbound_order.status.lower() != 'delivered' %}
+          {% if inbound_order.status.lower() != 'cancelled' and inbound_order.status.lower() != 'delivered' %}
           <button data-cancel-incoming-stock-id={{ inbound_order.id }} type="button"
             class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900 cancel-incoming-stock-btn">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">

@@ -109,3 +109,40 @@ def test_cancel_incoming_stock(mg_g_populate: FlaskClient):
     ).scalar()
     assert order_to_accept
     assert order_to_accept.status == "Cancelled"
+
+
+def test_sort_incoming_stock(mg_g_populate: FlaskClient):
+    login(mg_g_populate)
+
+    response = mg_g_populate.post(
+        "/incoming_stock/sort",
+        data=dict(sort_by="Assigned to pickup"),
+    )
+    assert ("IO-BEAM-A-t-p" in response.text) is True
+    assert ("IO-BEAM-I-t" in response.text) is False
+    assert response.status_code == 200
+
+    response = mg_g_populate.post(
+        "/incoming_stock/sort",
+        data=dict(sort_by="In transit"),
+    )
+    assert ("IO-BEAM-I-t" in response.text) is True
+    assert ("IO-BEAM-A-t-p" in response.text) is False
+    assert response.status_code == 200
+
+    response = mg_g_populate.post(
+        "/incoming_stock/sort",
+        data=dict(sort_by=""),
+        follow_redirects=True,
+    )
+    assert ("IO-BEAM-I-t" in response.text) is True
+    assert ("IO-BEAM-A-t-p" in response.text) is True
+    assert response.status_code == 200
+
+    response = mg_g_populate.get(
+        "/incoming_stock/sort",
+        follow_redirects=True,
+    )
+    assert ("IO-BEAM-I-t" in response.text) is True
+    assert ("IO-BEAM-A-t-p" in response.text) is True
+    assert response.status_code == 200
