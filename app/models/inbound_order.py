@@ -122,4 +122,23 @@ class InboundOrder(db.Model, ModelMixin):
                 "quantity_carton_master": 0,
             }
         )
+        io_allocate_product: list[IOAllocateProduct] = db.session.execute(
+            IOAllocateProduct.select().where(
+                IOAllocateProduct.inbound_order_id == mg_dict["id"],
+            )
+        ).scalars()
+
+        mg_dict["io_allocate_product"] = {
+            mg_dict["id"]: [
+                {
+                    "product": {
+                        "id": io.product_id,
+                        "name": io.product.name,
+                    },
+                    "quantity": io.quantity,
+                }
+                for io in io_allocate_product
+            ]
+        }
+
         return json.dumps(mg_dict)

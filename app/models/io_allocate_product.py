@@ -10,6 +10,7 @@ class IOAllocateProduct(db.Model, ModelMixin):
     product_id: orm.Mapped[int] = orm.mapped_column(
         ForeignKey("products.id", ondelete="CASCADE")
     )
+    product = orm.relationship("Product")
     quantity: orm.Mapped[int] = orm.mapped_column()
     inbound_order_id: orm.Mapped[int] = orm.mapped_column(
         ForeignKey("inbound_orders.id", ondelete="CASCADE")

@@ -40,6 +40,9 @@ interface IInboundOrder {
   inbound_order_prods: {
     [index: string]: IInboundOrderProd[];
   };
+  io_allocate_product: {
+    [index: string]: IOAllocateProduct[];
+  };
 }
 
 interface IInboundOrderProd {
@@ -56,6 +59,11 @@ interface IProduct {
 interface IGroup {
   id: number;
   name: string;
+}
+
+interface IOAllocateProduct {
+  product: {id: number; name: string};
+  quantity: number;
 }
 
 function convertDate(date: string) {
@@ -197,6 +205,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function editInboundOrder(inboundOrder: IInboundOrder) {
+  console.log('inboundOrder', inboundOrder);
+
   let input: HTMLInputElement = document.querySelector(
     '#inbound-order-edit-id',
   );
@@ -235,6 +245,10 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
       document.querySelectorAll<HTMLInputElement>(
         '.inbound-order-edit-add-quantity',
       );
+    const inboundOrderQuantityInputsLabels =
+      document.querySelectorAll<HTMLLabelElement>(
+        '#inbound-order-edit-add-quantity-label',
+      );
 
     if (currentInboundOrder) {
       for (let i = 0; i < currentInboundOrder.length; i++) {
@@ -242,6 +256,8 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
           const inboundOrderProductInput = inboundOrderProductsInputs[i];
           const inboundOrderGroupInput = inboundOrderGroupsInputs[i];
           const inboundOrderQuantityInput = inboundOrderQuantityInputs[i];
+          const inboundOrderQuantityInputLabel =
+            inboundOrderQuantityInputsLabels[i];
           inboundOrderProductInput.value = String(
             currentInboundOrder[i].product.id,
           );
@@ -251,9 +267,66 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
           inboundOrderQuantityInput.value = String(
             currentInboundOrder[i].quantity,
           );
+          // NOTE adds min - max qty to input. Doesn't work, because we use hidden submit button
+          // inboundOrderQuantityInput.min = '1';
+          // inboundOrderQuantityInput.max = String(
+          //   inboundOrder.io_allocate_product[currentInboundOrder[i].product.id],
+          // );
+          // NOTE adds min - max qty to label
+          // inboundOrderQuantityInputLabel.textContent = `Quantity (1 - ${
+          //   inboundOrder.io_allocate_product[currentInboundOrder[i].product.id]
+          // })`;
           continue;
         }
         createInboundOrderItems(inboundOrder, currentInboundOrder[i]);
+      }
+    }
+  }
+
+  console.log(
+    'Object.keys(inboundOrder.io_allocate_product).length',
+    Object.keys(inboundOrder.io_allocate_product).length,
+  );
+
+  if (Object.keys(inboundOrder.io_allocate_product).length > 0) {
+    const currentInboundOrderCheck =
+      inboundOrder.io_allocate_product[inboundOrder.id];
+    const inboundOrderProductsCheckInputs =
+      document.querySelectorAll<HTMLInputElement>(
+        '.inbound-order-edit-check-product',
+      );
+    const inboundOrderQuantityCheckInputs =
+      document.querySelectorAll<HTMLInputElement>(
+        '.inbound-order-edit-check-quantity',
+      );
+
+    console.log('currentInboundOrderCheck', currentInboundOrderCheck);
+
+    if (currentInboundOrderCheck) {
+      for (let i = 0; i < currentInboundOrderCheck.length; i++) {
+        if (i === 0) {
+          const inboundOrderProductCheckInput =
+            inboundOrderProductsCheckInputs[i];
+          const inboundOrderQuantityCheckInput =
+            inboundOrderQuantityCheckInputs[i];
+          inboundOrderProductCheckInput.innerHTML = String(
+            currentInboundOrderCheck[i].product.name,
+          );
+          inboundOrderQuantityCheckInput.innerHTML = String(
+            currentInboundOrderCheck[i].quantity,
+          );
+          inboundOrderQuantityCheckInput.setAttribute(
+            'id',
+            `inbound-order-edit-check-quantity-${currentInboundOrderCheck[i].product.name}`,
+          );
+          console.log(
+            'inboundOrderProductCheckInput',
+            currentInboundOrderCheck[i].product.name,
+          );
+
+          continue;
+        }
+        createInboundOrderCheckItems(inboundOrder, currentInboundOrderCheck[i]);
       }
     }
   }
@@ -294,6 +367,54 @@ viewInboundOrderButtonElements.forEach(e =>
   }),
 );
 
+// ----add inbound order check item for edit modal----
+function createInboundOrderCheckItems(
+  inbOrder: IInboundOrder = null,
+  curInbOrder: IOAllocateProduct = null,
+) {
+  if (!inbOrder) {
+    const inboundOrder: IInboundOrder = JSON.parse(
+      sessionStorage.getItem('inboundOrder'),
+    );
+    inbOrder = inboundOrder;
+  }
+  console.log(inbOrder);
+
+  const inboundOrderCheckContainer = document.querySelector(
+    '#inbound-order-edit-check-container',
+  );
+  const inboundOrderCheckItem = document.createElement('div');
+  inboundOrderCheckItem.classList.add('grid', 'grid-cols-12', 'gap-5');
+  inboundOrderCheckItem.innerHTML = `
+      <div class="col-span-6 sm:col-span-3">
+        <div type="text" name="check_product"
+          class="inbound-order-edit-check-product shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          placeholder="Product">
+        </div>
+      </div>
+      <div class="col-span-6 sm:col-span-3">
+        <div type="text" name="check_quantity" id="inbound-order-edit-check-quantity-${String(
+          curInbOrder.product.name,
+        )}"
+          class="inbound-order-edit-check-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          placeholder="Quantity">
+        </div>
+      </div>
+  `;
+
+  const inboundOrderCheckProductInput: HTMLDivElement =
+    inboundOrderCheckItem.querySelector('.inbound-order-edit-check-product');
+  const inboundOrderCheckQuantityInput: HTMLDivElement =
+    inboundOrderCheckItem.querySelector('.inbound-order-edit-check-quantity');
+
+  if (curInbOrder) {
+    inboundOrderCheckProductInput.innerHTML = String(curInbOrder.product.name);
+    inboundOrderCheckQuantityInput.innerHTML = String(curInbOrder.quantity);
+  }
+
+  inboundOrderCheckContainer.appendChild(inboundOrderCheckItem);
+}
+
 // ----add inbound order item for edit modal----
 function createInboundOrderItems(
   inbOrder: IInboundOrder = null,
@@ -305,6 +426,8 @@ function createInboundOrderItems(
     );
     inbOrder = inboundOrder;
   }
+  console.log(inbOrder);
+
   const inboundOrderAddContainer = document.querySelector(
     '#inbound-order-edit-add-container',
   );
@@ -337,7 +460,7 @@ function createInboundOrderItems(
       <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
       <input type="text" name="add_quantity"
         class="inbound-order-edit-add-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-        placeholder="Quantity" required>
+        placeholder="Quantity" min="1" required>
     </div>
     <div class="col-span-6 sm:col-span-3">
       <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Action</label>
@@ -467,7 +590,7 @@ function createInboundOrderAddItems(
       <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
       <input type="text" name="add_quantity"
         class="inbound-order-add-add-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-        placeholder="Quantity" required>
+        placeholder="Quantity" min="1" required>
     </div>
     <div class="col-span-6 sm:col-span-3">
       <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Action</label>
@@ -516,6 +639,24 @@ function createInboundOrderAddItems(
   );
 }
 
+// TODO check if product is changed in select
+// const selectInboundOrderProduct = document.querySelector(
+//   '.inbound-order-add-edit-product',
+// );
+
+// selectInboundOrderProduct.addEventListener('change', () => {
+//   let inbOrder: IInboundOrder = null;
+//   if (!inbOrder) {
+//     const inboundOrder: IInboundOrder = JSON.parse(
+//       sessionStorage.getItem('inboundOrder'),
+//     );
+//     inbOrder = inboundOrder;
+//   }
+//   const selectInboundOrderProductQuantity = document.querySelector(
+//     '.inbound-order-add-edit-quantity',
+//   );
+// });
+
 // this button need to add first item from template
 const createAddInboundOrderItemBtnById = document.querySelector(
   '#inbound-order-add-add-item-btn',
@@ -539,6 +680,7 @@ function setProducts(actionType: string) {
     `.inbound-order-${actionType}-add-quantity`,
   );
   const products = [];
+  const productsQuantities: {[index: string]: number} = {};
 
   for (let i = 0; i < inboundOrderAddProductSelects.length; i++) {
     const inboundOrderAddProductSelect = inboundOrderAddProductSelects[
@@ -546,7 +688,7 @@ function setProducts(actionType: string) {
     ] as HTMLSelectElement;
     const inboundOrderAddQuantityInput = inboundOrderAddQuantityInputs[
       i
-    ] as HTMLSelectElement;
+    ] as HTMLInputElement;
     const product = {
       product_id: inboundOrderAddProductSelect.value,
       quantity: inboundOrderAddQuantityInput.value,
@@ -556,14 +698,64 @@ function setProducts(actionType: string) {
         i
       ] as HTMLSelectElement;
       Object.assign(product, {group_id: inboundOrderAddGroupSelect.value});
+
+      // NOTE sum qty of the same product and check if it is not more than max
+      const prodId = inboundOrderAddProductSelect.value.toString();
+
+      if (
+        !Object.prototype.hasOwnProperty.call(
+          productsQuantities,
+          inboundOrderAddProductSelect.value,
+        )
+      ) {
+        productsQuantities[prodId] = Number(inboundOrderAddQuantityInput.value);
+      } else {
+        // console.log('productsQuantities[prodId]', productsQuantities[prodId]);
+        productsQuantities[prodId] += Number(
+          inboundOrderAddQuantityInput.value,
+        );
+      }
+
+      // console.log(
+      //   'compare',
+      //   productsQuantities[prodId],
+      //   Number(inboundOrderAddQuantityInput.max),
+      // );
+      console.log(
+        'io val',
+        inboundOrderAddProductSelect.options,
+        inboundOrderAddProductSelect.selectedIndex,
+      );
+      const ProductQuantityCheck = document.querySelector(
+        `#inbound-order-edit-check-quantity-${
+          inboundOrderAddProductSelect.options[
+            inboundOrderAddProductSelect.selectedIndex
+          ].text
+        }`,
+      ).innerHTML;
+      console.log('ProductQuantityCheck', ProductQuantityCheck);
+
+      if (productsQuantities[prodId] > Number(ProductQuantityCheck)) {
+        alert(
+          `Quantity of product ${
+            inboundOrderAddProductSelect.options[
+              inboundOrderAddProductSelect.selectedIndex
+            ].text
+          } in orders can not be more than ${Number(ProductQuantityCheck)}`,
+        );
+        return false;
+      }
     }
     products.push(product);
   }
+
+  console.log('productsQuantities', productsQuantities);
 
   const inputProducts: HTMLInputElement = document.querySelector(
     `#inbound-order-${actionType}-products`,
   );
   inputProducts.value = JSON.stringify(products);
+  return true;
 }
 
 // ----submit edit form through hidden submit button----
@@ -575,8 +767,10 @@ const inboundOrderSaveProductsButton = document.querySelector(
 );
 
 inboundOrderSaveProductsButton.addEventListener('click', () => {
-  setProducts('edit');
-  inboundOrderSubmitButton.click();
+  const result = setProducts('edit');
+  if (result) {
+    inboundOrderSubmitButton.click();
+  }
 });
 
 // ----submit add through hidden submit button----

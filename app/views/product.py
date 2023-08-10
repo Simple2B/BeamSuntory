@@ -122,7 +122,7 @@ def get_all_products(request, query=None, count_query=None):
         "master_groups_search": master_groups_search,
         "product_mg_g": json.dumps(product_mg_g),
         "master_product_groups_name": master_group_product_name,
-        "suppliers": suppliers,
+        "suppliers": [s for s in suppliers],
         "all_product_groups": {
             i.name: i for i in db.session.execute(m.Group.select()).scalars()
         },
