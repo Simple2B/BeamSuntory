@@ -6,7 +6,6 @@ class Cart(BaseModel):
     id: int
     product_id: int
     status: str
-    comments: str
     quantity: int
     user_id: int
 
