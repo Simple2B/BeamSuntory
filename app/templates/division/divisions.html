@@ -74,7 +74,8 @@
         </td>
         <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ division.parent_role if division.parent_role is not none else '' }}</div>
+            <div class="text-base font-semibold">{{ division.parent_role if division.parent_role is not none else '' }}
+            </div>
           </div>
         </td>
         <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
@@ -201,6 +202,7 @@
 {% endblock %}
 <!-- prettier-ignore -->
 {% block scripts %}
+<!-- NOTE: This is a solution to pass the product_mg_g variable to the division.ts file. -->
 <script>
   const productMgG = '{{ product_mg_g | safe }}';
   sessionStorage.setItem('productMgG', productMgG);
