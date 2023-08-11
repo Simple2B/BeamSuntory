@@ -870,51 +870,53 @@ function setProducts(actionType: string) {
     products.push(product);
   }
 
-  for (let i = 0; i < inboundOrderAddProductSelects.length; i++) {
-    const inboundOrderAddProductSelect = inboundOrderAddProductSelects[
-      i
-    ] as HTMLSelectElement;
-    const prodId = inboundOrderAddProductSelect.value.toString();
+  if (actionType === 'edit') {
+    for (let i = 0; i < inboundOrderAddProductSelects.length; i++) {
+      const inboundOrderAddProductSelect = inboundOrderAddProductSelects[
+        i
+      ] as HTMLSelectElement;
+      const prodId = inboundOrderAddProductSelect.value.toString();
 
-    const ProductQuantityCheck = document.querySelector(
-      `#inbound-order-edit-check-quantity-${
-        inboundOrderAddProductSelect.options[
-          inboundOrderAddProductSelect.selectedIndex
-        ].text
-      }-hidden`,
-    );
-
-    console.log(
-      'ProductQuantityCheck',
-      ProductQuantityCheck.innerHTML,
-      prodId,
-      productsQuantities[prodId],
-    );
-
-    if (productsQuantities[prodId] > Number(ProductQuantityCheck.innerHTML)) {
-      alert(
-        `Quantity of product ${
+      const ProductQuantityCheck = document.querySelector(
+        `#inbound-order-edit-check-quantity-${
           inboundOrderAddProductSelect.options[
             inboundOrderAddProductSelect.selectedIndex
           ].text
-        } in orders can not be more than ${Number(
-          ProductQuantityCheck.innerHTML,
-        )}`,
+        }-hidden`,
       );
-      return false;
-    } else if (
-      productsQuantities[prodId] < Number(ProductQuantityCheck.innerHTML)
-    ) {
-      alert(
-        `Quantity of product ${
-          inboundOrderAddProductSelect.options[
-            inboundOrderAddProductSelect.selectedIndex
-          ].text
-        } in orders can not be less than ${Number(
-          ProductQuantityCheck.innerHTML,
-        )}. Please, allocate all products`,
+
+      console.log(
+        'ProductQuantityCheck',
+        ProductQuantityCheck.innerHTML,
+        prodId,
+        productsQuantities[prodId],
       );
-      return false;
+
+      if (productsQuantities[prodId] > Number(ProductQuantityCheck.innerHTML)) {
+        alert(
+          `Quantity of product ${
+            inboundOrderAddProductSelect.options[
+              inboundOrderAddProductSelect.selectedIndex
+            ].text
+          } in orders can not be more than ${Number(
+            ProductQuantityCheck.innerHTML,
+          )}`,
+        );
+        return false;
+      } else if (
+        productsQuantities[prodId] < Number(ProductQuantityCheck.innerHTML)
+      ) {
+        alert(
+          `Quantity of product ${
+            inboundOrderAddProductSelect.options[
+              inboundOrderAddProductSelect.selectedIndex
+            ].text
+          } in orders can not be less than ${Number(
+            ProductQuantityCheck.innerHTML,
+          )}. Please, allocate all products`,
+        );
+        return false;
+      }
     }
   }
 
