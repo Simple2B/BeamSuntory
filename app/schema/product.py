@@ -32,8 +32,7 @@ class Product(CustomBase):
     supplier: Optional[Any]  # = Field(exclude=True)
     supplier_id: int | None
     currency: Currency
-    regular_price: float
-    retail_price: float
+    price: float
     image: str
     description: str
     # General Info ->

@@ -29,11 +29,7 @@ class Product(db.Model, ModelMixin):
         sa.ForeignKey("suppliers.id")
     )  # NOTE vendor = supplier
     currency: orm.Mapped[s.Currency]
-    regular_price: orm.Mapped[float] = orm.mapped_column(
-        sa.Float(),
-        nullable=False,
-    )
-    retail_price: orm.Mapped[float] = orm.mapped_column(
+    price: orm.Mapped[float] = orm.mapped_column(
         sa.Float(),
         nullable=False,
     )

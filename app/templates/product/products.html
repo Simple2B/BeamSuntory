@@ -156,8 +156,7 @@
         <th scope="col" class="px-6 py-3">Name</th>
         <th id="product-table-th-product-type" scope="col" class="px-6 py-3">Description</th>
         <th scope="col" class="px-6 py-3">Currency</th>
-        <th scope="col" class="px-6 py-3">Regular Price</th>
-        <th scope="col" class="px-6 py-3">Retail Price</th>
+        <th scope="col" class="px-6 py-3">Price</th>
         <th scope="col" class="px-6 py-3">Actions</th>
       </tr>
     </thead>
@@ -197,12 +196,7 @@
         </td>
         <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ product.regular_price }}</div>
-          </div>
-        </td>
-        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="text-base font-semibold">{{ product.retail_price }}</div>
+            <div class="text-base font-semibold">{{ product.price }}</div>
           </div>
         </td>
         <td class="p-4 space-x-2 whitespace-nowrap">
