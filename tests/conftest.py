@@ -342,4 +342,11 @@ def mg_g_populate(client: FlaskClient):
         ship_request_id=sr_atp.id,
     ).save()
 
+    m.Division(
+        role_name="Manager",
+        type="Master",
+        parent_role="Admin",
+        activated=True,
+    ).save(False)
+
     yield client
