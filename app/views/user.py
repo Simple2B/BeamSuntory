@@ -1,4 +1,5 @@
 from typing import List
+import json
 from flask import (
     Blueprint,
     render_template,
@@ -8,7 +9,7 @@ from flask import (
     url_for,
     current_app as app,
 )
-from flask_login import login_required
+from flask_login import login_required, current_user
 from flask_mail import Message
 import sqlalchemy as sa
 from app.controllers import create_pagination
@@ -210,3 +211,37 @@ def delete(id: int):
     log(log.INFO, "User deleted. User: [%s]", u)
     flash("User deleted!", "success")
     return "ok", 200
+
+
+@bp.route("/notification", methods=["GET"])
+@login_required
+def notification():
+    user_requests = []
+    user_requests_ids = [
+        r.request_share_id
+        for r in db.session.execute(
+            m.RequestShareUser.select().where(
+                m.RequestShareUser.user_id == current_user.id
+            )
+        ).scalars()
+    ]
+    for rs_id in user_requests_ids:
+        request_share = db.session.scalar(
+            m.RequestShare.select().where(m.RequestShare.id == rs_id)
+        )
+        data = {
+            "product_name": request_share.product.name,
+            "product_image": request_share.product.image,
+            "SKU": request_share.product.SKU,
+            "desire_quantity": request_share.desire_quantity,
+            "target_group": request_share.group.name,
+            "created_at": request_share.created_at.isoformat(),
+            "request_share_id": request_share.id,
+        }
+        user_requests.append(data)
+
+    response = app.response_class(
+        response=json.dumps(user_requests), status=200, mimetype="application/json"
+    )
+
+    return response

@@ -35,45 +35,35 @@ def test_pickup_pickup_inbound(mg_g_populate: FlaskClient):
     assert order_to_pickup.status == "In transit"
 
 
-def test_pickup_inbound_package_info(client):
-    login(client, "bob")
+def test_sort_pickup_inbound(mg_g_populate: FlaskClient):
+    login(mg_g_populate)
 
-    package_info: m.PackageInfo = db.session.execute(m.PackageInfo.select()).scalars()
-
-    assert len([i for i in package_info]) == 0
-
-    response = client.post(
-        "/pickup_inbound/package_info",
-        data=dict(
-            inbound_order_id=1,
-            quantity_carton_master=11,
-            quantity_per_wrap=12,
-            quantity_wrap_carton=13,
-            recieved_products=14,
-        ),
-        follow_redirects=True,
+    response = mg_g_populate.post(
+        "/pickup_inbound/sort",
+        data=dict(sort_by="Assigned to pickup"),
     )
+    # NOTE: use "><" because we have data about all inbound orders in data-target json, so we avoid false positives
+    assert (">IO-BEAM-A-t-p<" in response.text) is True
+    assert (">IO-BEAM-I-t<" in response.text) is False
     assert response.status_code == 200
-    assert "Package info updated!" in response.text
-    package_info = db.session.execute(m.PackageInfo.select()).scalars()
 
-    assert len([i for i in package_info]) == 1
-
-    response = client.post(
-        "/pickup_inbound/package_info",
-        data=dict(
-            inbound_order_id=1,
-            quantity_carton_master=110,
-            quantity_per_wrap=12,
-            quantity_wrap_carton=13,
-            recieved_products=14,
-        ),
-        follow_redirects=True,
+    response = mg_g_populate.post(
+        "/pickup_inbound/sort",
+        data=dict(sort_by="In transit"),
     )
+    assert (">IO-BEAM-I-t<" in response.text) is True
+    assert (">IO-BEAM-A-t-p<" in response.text) is False
     assert response.status_code == 200
-    assert "Package info updated!" in response.text
-    package_info: m.PackageInfo = db.session.execute(
-        m.PackageInfo.select().where(m.PackageInfo.inbound_order_id == 1)
-    ).scalar()
 
-    assert package_info.quantity_carton_master == 110
+    response = mg_g_populate.post(
+        "/pickup_inbound/sort",
+        data=dict(sort_by=""),
+    )
+    assert "/pickup_inbound/" in response.text
+    assert response.status_code == 302
+
+    response = mg_g_populate.get(
+        "/pickup_inbound/sort",
+    )
+    assert "/pickup_inbound/" in response.text
+    assert response.status_code == 302

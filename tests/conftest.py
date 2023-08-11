@@ -234,8 +234,15 @@ def mg_g_populate(client: FlaskClient):
         user_id=1,
     ).save(False)
 
+    m.StoreCategory(
+        name="Bar",
+        parent_category=None,
+        active=True,
+        image="",
+    ).save(False)
+
     m.Store(
-        store_category="restaurant",
+        store_category_id=1,
         store_name="JB-restaurant",
         contact_person="Johnny",
         email="storejb@email.com",

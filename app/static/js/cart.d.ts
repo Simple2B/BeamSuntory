@@ -8,3 +8,6 @@ declare let totalQuantity: number;
 declare const deliverToStoreBtn: Element;
 declare const createStoreRequestContainer: HTMLDivElement;
 declare const deleteButtons: NodeListOf<Element>;
+declare const favoriteCheckbox: HTMLInputElement;
+declare const selectStore: Element;
+declare const optionsStore: NodeListOf<Element>;

@@ -206,6 +206,36 @@ const divisionConfig = {
   },
 };
 
+const bellConfig = {
+  entry: {
+    main: './src/bell.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/bell.js', // <--- Will be compiled to this single file
+  },
+};
+
+const requestShareConfig = {
+  entry: {
+    main: './src/request_share.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/request_share.js', // <--- Will be compiled to this single file
+  },
+};
+
+const storeCategoryConfig = {
+  entry: {
+    main: './src/store_category.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/store_category.js', // <--- Will be compiled to this single file
+  },
+};
+
 const configs = [
   baseConfig,
   userConfig,
@@ -226,6 +256,9 @@ const configs = [
   pickupOrderConfig,
   pickupInboundConfig,
   divisionConfig,
+  bellConfig,
+  requestShareConfig,
+  storeCategoryConfig,
 ].map(conf => merge(defaultConfig, conf));
 
 module.exports = configs;

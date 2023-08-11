@@ -18,12 +18,13 @@ def test_inbound_orders_pages(client):
     assert response.status_code == 405
 
 
-def test_create_inbound_order(client):
-    login(client, "bob")
+def test_create_inbound_order(mg_g_populate: FlaskClient):
+    login(mg_g_populate, "bob")
 
-    response = client.post(
+    response = mg_g_populate.post(
         "/inbound_order/create",
         data=dict(
+            inbound_order_id="IO-0001",
             active_date="07/19/2023",
             active_time="12:00 AM",
             order_title="Inbound Order 1",

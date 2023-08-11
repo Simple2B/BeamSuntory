@@ -3,13 +3,16 @@ import datetime
 import json
 from flask import (
     Blueprint,
+    jsonify,
     render_template,
     request,
     flash,
     redirect,
     url_for,
+    current_app as app,
 )
 from flask_login import login_required, current_user
+from flask_mail import Message
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
@@ -43,19 +46,15 @@ def get_all_products(request, query=None, count_query=None):
     master_groups_rows_obj = db.session.execute(m.MasterGroup.select()).all()
 
     groups_for_products_obj = db.session.execute(m.GroupProduct.select()).all()
+    groups_obj = db.session.execute(m.Group.select()).all()
     mastr_for_prods_groups_for_prods = {}
-    for group in groups_for_products_obj:
-        if (
-            group[0].master_groups_for_product.name
-            not in mastr_for_prods_groups_for_prods
-        ):
-            mastr_for_prods_groups_for_prods[
-                group[0].master_groups_for_product.name
-            ] = [group[0]]
+    for group in groups_obj:
+        if group[0].master_groups.name not in mastr_for_prods_groups_for_prods:
+            mastr_for_prods_groups_for_prods[group[0].master_groups.name] = [group[0]]
         else:
-            mastr_for_prods_groups_for_prods[
-                group[0].master_groups_for_product.name
-            ].append(group[0])
+            mastr_for_prods_groups_for_prods[group[0].master_groups.name].append(
+                group[0]
+            )
 
     # get all product_groups to list and compare in view.html
     product_groups_obj = db.session.execute(m.ProductGroup.select()).all()
@@ -80,22 +79,25 @@ def get_all_products(request, query=None, count_query=None):
 
     # NOTE: Create json object for "show-all-groups" button in products.html
     product_groups = [row[0] for row in product_groups_obj]
-    product_mg_g = {
-        p.child.name: {
-            mg.parent.master_groups_for_product.name: "".join(
-                [
-                    g.parent.name
-                    for g in product_groups
-                    if p.child.name == g.child.name
-                    and mg.parent.master_groups_for_product.name
-                    == g.parent.master_groups_for_product.name
-                ]
-            )
-            for mg in product_groups
-            if p.child.name == mg.child.name
+    product_mg_g = (
+        {
+            p.child.name: {
+                mg.parent.master_groups.name: "".join(
+                    [
+                        g.parent.name
+                        for g in product_groups
+                        if p.child.name == g.child.name
+                        and mg.parent.master_groups.name == g.parent.master_groups.name
+                    ]
+                )
+                for mg in product_groups
+                if p.child.name == mg.child.name
+            }
+            for p in product_groups
         }
-        for p in product_groups
-    }
+        if len(product_groups) > 0
+        else {}
+    )
 
     for prod in product_mg_g:
         for mg in mastr_for_prods_groups_for_prods:
@@ -121,6 +123,12 @@ def get_all_products(request, query=None, count_query=None):
         "product_mg_g": json.dumps(product_mg_g),
         "master_product_groups_name": master_group_product_name,
         "suppliers": suppliers,
+        "all_product_groups": {
+            i.name: i for i in db.session.execute(m.Group.select()).scalars()
+        },
+        "current_user_groups_names": [
+            i[0].parent.name for i in current_user_groups_rows
+        ],
     }
 
 
@@ -146,9 +154,11 @@ def get_all():
         search_query=products_object["q"],
         main_master_groups=products_object["master_groups"],
         product_groups=products_object["product_groups"],
+        all_product_groups=products_object["all_product_groups"],
         current_user_groups=[
             row[0] for row in products_object["current_user_groups_rows"]
         ],
+        current_user_groups_names=products_object["current_user_groups_names"],
         master_groups_groups_available=products_object[
             "mastr_for_prods_groups_for_prods"
         ],
@@ -310,6 +320,7 @@ def save():
                 )
                 product_group.save()
 
+        flash("Product edited successfully", "success")
         if form.next_url.data:
             return redirect(form.next_url.data)
         return redirect(url_for("product.get_all"))
@@ -369,7 +380,7 @@ def sort():
         groups = [
             grp[0].id
             for grp in db.session.execute(
-                m.GroupProduct.select().where(m.GroupProduct.name.in_(group_names))
+                m.Group.select().where(m.Group.name.in_(group_names))
             ).all()
         ]
 
@@ -433,9 +444,11 @@ def sort():
             search_query=products_object["q"],
             main_master_groups=products_object["master_groups"],
             product_groups=products_object["product_groups"],
+            all_product_groups=products_object["all_product_groups"],
             current_user_groups=[
                 row[0] for row in products_object["current_user_groups_rows"]
             ],
+            current_user_groups_names=products_object["current_user_groups_names"],
             master_groups_groups_available=products_object[
                 "mastr_for_prods_groups_for_prods"
             ],
@@ -464,9 +477,18 @@ def assign():
             log(log.ERROR, "Not found product by name : [%s]", form.name.data)
             flash("Cannot save product data", "danger")
 
+        product_from_group: m.Group = db.session.execute(
+            m.Group.select().where(
+                m.Group.name == form.from_group.data,
+            )
+        ).scalar()
+
         # TODO sort also by group_id and warehouse_id
         product_warehouse: m.WarehouseProduct = db.session.execute(
-            m.WarehouseProduct.select().where(m.WarehouseProduct.product_id == p.id)
+            m.WarehouseProduct.select().where(
+                m.WarehouseProduct.product_id == p.id,
+                m.WarehouseProduct.group_id == product_from_group.id,
+            )
         ).scalar()
         product_warehouse.product_quantity -= form.quantity.data
         product_warehouse.save()
@@ -481,15 +503,18 @@ def assign():
             new_product_warehouse.product_quantity += form.quantity.data
             new_product_warehouse.save()
         else:
-            # TODO get warehouse_id
-            warehouse: m.Warehouse = db.session.execute(m.Warehouse.select()).scalar()
-            new_product_warehouse = m.WarehouseProduct(
+            m.WarehouseProduct(
                 product_id=p.id,
                 group_id=int(form.group.data),
                 product_quantity=form.quantity.data,
-                warehouse_id=warehouse.id,
-            )
-            new_product_warehouse.save()
+                warehouse_id=product_warehouse.warehouse_id,
+            ).save()
+
+        m.Assign(
+            product_id=p.id,
+            group_id=int(form.group.data),
+            quantity=form.quantity.data,
+        ).save()
 
         return redirect(url_for("product.get_all"))
 
@@ -497,3 +522,150 @@ def assign():
         log(log.ERROR, "product assign errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("product.get_all"))
+
+
+@product_blueprint.route("/request_share", methods=["POST"])
+@login_required
+def request_share():
+    form: f.RequestShareProductForm = f.RequestShareProductForm()
+    if form.validate_on_submit():
+        query = m.Product.select().where(m.Product.name == form.name.data)
+        p: m.Product | None = db.session.scalar(query)
+        if not p:
+            log(log.ERROR, "Not found product by name : [%s]", form.name.data)
+            flash("Cannot save product data", "danger")
+
+        from_group_id = (
+            db.session.execute(
+                m.Group.select().where(
+                    m.Group.name == form.from_group.data,
+                )
+            )
+            .scalar()
+            .id
+        )
+
+        rs: m.RequestShare = m.RequestShare(
+            product_id=p.id,
+            group_id=form.group_id.data,
+            desire_quantity=form.desire_quantity.data,
+            status="pending",
+            from_group_id=from_group_id,
+        )
+        log(log.INFO, "Form submitted. Share Request: [%s]", rs)
+        rs.save()
+
+        product_group: m.Group = db.session.execute(
+            m.Group.select().where(m.Group.id == form.group_id.data)
+        ).scalar()
+
+        users: list[m.UserGroup] = [
+            u
+            for u in db.session.execute(
+                m.UserGroup.select().where(m.UserGroup.right_id == product_group.id)
+            ).scalars()
+        ]
+
+        if len(users) != 0:
+            for u in users:
+                if not u.child.approval_permission:
+                    continue
+                msg = Message(
+                    subject="New request share",
+                    sender=app.config["MAIL_DEFAULT_SENDER"],
+                    recipients=[u.child.email],
+                )
+                url = url_for(
+                    "product.get_all",
+                    _external=True,
+                )
+
+                msg.html = render_template(
+                    "email/set.html",
+                    user=u.child,
+                    desire_quantity=form.desire_quantity.data,
+                    url=url,
+                )
+                sru = m.RequestShareUser(
+                    user_id=u.child.id,
+                    request_share_id=rs.id,
+                )
+                sru.save()
+                # TODO uncomment when ready to notify
+                # mail.send(msg)
+        flash("Share request created!", "success")
+        return redirect(url_for("product.get_all"))
+
+    else:
+        log(log.ERROR, "product assign errors: [%s]", form.errors)
+        flash(f"{form.errors}", "danger")
+        return redirect(url_for("product.get_all"))
+
+
+@product_blueprint.route("/deplete/", methods=["POST"])
+@login_required
+def deplete():
+    form: f.DepleteProductForm = f.DepleteProductForm()
+    product_desire_quantity = int(form.quantity.data)
+
+    if form.validate_on_submit():
+        warehouse_product: m.WarehouseProduct = db.session.execute(
+            m.WarehouseProduct.select().where(
+                m.WarehouseProduct.warehouse_id == form.warehouse_id.data,
+                m.WarehouseProduct.product_id == form.product_id.data,
+                m.WarehouseProduct.group_id == form.group_id.data,
+            )
+        ).scalar()
+
+    if not warehouse_product:
+        log(
+            log.INFO,
+            "These product is not in warehouse. Product id: [%s]",
+            form.product_id.data,
+        )
+        flash("These product was depleted", "danger")
+        return redirect(url_for("product.get_all"))
+
+    product_name = (
+        db.session.execute(
+            m.Product.select().where(m.Product.id == form.product_id.data)
+        )
+        .scalar()
+        .name
+    )
+    warehouse_name = (
+        db.session.execute(
+            m.Warehouse.select().where(m.Warehouse.id == form.warehouse_id.data)
+        )
+        .scalar()
+        .name
+    )
+
+    if warehouse_product.product_quantity < product_desire_quantity:
+        log(
+            log.INFO,
+            "Not enough products in warehouse. Product id: [%s]",
+            form.product_id.data,
+        )
+        return (
+            jsonify(
+                message=f"Not enough product {product_name} in warehouse {warehouse_name}",
+            ),
+            200,
+        )
+
+    warehouse_product.product_quantity = product_desire_quantity
+    warehouse_product.save()
+
+    log(
+        log.INFO,
+        "Deplete product: [%s][%s",
+        form.product_id.data,
+        form.warehouse_id.data,
+    )
+    return (
+        jsonify(
+            message=f"Product {product_name} in warehouse {warehouse_name} was depleted",
+        ),
+        201,
+    )

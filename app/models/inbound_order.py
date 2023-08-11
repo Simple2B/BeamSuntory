@@ -105,13 +105,17 @@ class InboundOrder(db.Model, ModelMixin):
         package: PackageInfo = db.session.execute(
             PackageInfo.select().where(PackageInfo.inbound_order_id == mg_dict["id"])
         ).scalar()
-        mg_dict["package_info"] = {
-            "quantity_per_wrap": package.quantity_per_wrap,
-            "quantity_wrap_carton": package.quantity_wrap_carton,
-            "quantity_carton_master": package.quantity_carton_master,
-        } if package else {
-            "quantity_per_wrap": 0,
-            "quantity_wrap_carton": 0,
-            "quantity_carton_master": 0,
-        }
+        mg_dict["package_info"] = (
+            {
+                "quantity_per_wrap": package.quantity_per_wrap,
+                "quantity_wrap_carton": package.quantity_wrap_carton,
+                "quantity_carton_master": package.quantity_carton_master,
+            }
+            if package
+            else {
+                "quantity_per_wrap": 0,
+                "quantity_wrap_carton": 0,
+                "quantity_carton_master": 0,
+            }
+        )
         return json.dumps(mg_dict)

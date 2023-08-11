@@ -31,6 +31,7 @@ class InboundOrderForm(FlaskForm):
 
 
 class NewInboundOrderForm(FlaskForm):
+    inbound_order_id = StringField("inbound_order_id", [DataRequired()])
     active_date = StringField("Active date", [DataRequired()])  # datetime
     active_time = StringField("Active time", [DataRequired()])  # datetime
     order_title = StringField("Order title", [DataRequired()])
@@ -46,3 +47,8 @@ class NewInboundOrderForm(FlaskForm):
         query = m.InboundOrder.select().where(m.InboundOrder.order_id == field.data)
         if db.session.scalar(query) is not None:
             raise ValidationError("This order_id is taken.")
+
+
+class SortByStatusInboundOrderForm(FlaskForm):
+    sort_by = StringField("Sort by", [DataRequired()])
+    submit = SubmitField("Submit")
