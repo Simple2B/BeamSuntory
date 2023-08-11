@@ -109,7 +109,7 @@ def get_all_products(request, query=None, count_query=None):
     ]
     product_mg_g["master_group_product_name"] = master_group_product_name
 
-    suppliers = db.session.execute(m.Supplier.select()).scalars()
+    suppliers = [i for i in db.session.execute(m.Supplier.select()).scalars()]
 
     return {
         "query": query,
@@ -202,8 +202,7 @@ def create():
             product_type=form.product_type.data,
             supplier_id=form.supplier.data,
             currency=form.currency.data,
-            regular_price=form.regular_price.data,
-            retail_price=form.retail_price.data,
+            price=form.price.data,
             image=image_string,
             description=form.description.data,
             # General Info ->
@@ -265,8 +264,7 @@ def save():
         u.product_type = form.product_type.data
         u.supplier_id = form.supplier.data
         u.currency = form.currency.data
-        u.regular_price = form.regular_price.data
-        u.retail_price = form.retail_price.data
+        u.price = form.price.data
 
         if len(image_string) == 0:
             image_string = u.image

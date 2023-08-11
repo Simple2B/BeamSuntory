@@ -7,8 +7,7 @@ interface IProduct {
   product_type: string;
   supplier_id: number;
   currency: string;
-  regular_price: number;
-  retail_price: number;
+  price: number;
   image: string;
   description: string;
   // General Info ->
@@ -469,10 +468,8 @@ function editProduct(product: IProduct) {
   // a loop that adds additional fields
   input = document.querySelector('#product-edit-currency');
   input.value = product.currency;
-  input = document.querySelector('#product-edit-regular_price');
-  input.value = product.regular_price.toString();
-  input = document.querySelector('#product-edit-retail_price');
-  input.value = product.retail_price.toString();
+  input = document.querySelector('#product-edit-price');
+  input.value = product.price.toString();
   input = document.querySelector('#product-edit-description');
   input.value = product.description;
   // General Info ->
@@ -544,10 +541,8 @@ viewProductButtonElements.forEach(e =>
       : (img.src = defaultBrandImage);
     div = document.querySelector('#product-view-product_type');
     div.innerHTML = product.product_type.toUpperCase().split(' ').join('_');
-    div = document.querySelector('#product-view-regular_price');
-    div.innerHTML = product.regular_price.toString();
-    div = document.querySelector('#product-view-retail_price');
-    div.innerHTML = product.retail_price.toString();
+    div = document.querySelector('#product-view-price');
+    div.innerHTML = product.price.toString();
     // General Info ->
     div = document.querySelector('#product-view-SKU');
     div.innerHTML = product.SKU;

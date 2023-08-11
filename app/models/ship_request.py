@@ -64,7 +64,7 @@ class ShipRequest(db.Model, ModelMixin):
                 "id": cart.product.id,
                 "name": cart.product.name,
                 "SKU": cart.product.SKU,
-                "price": cart.product.regular_price,
+                "price": cart.product.price,
                 "quantity": cart.quantity,
                 "image": cart.product.image,
             }

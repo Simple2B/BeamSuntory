@@ -21,8 +21,7 @@ class ProductForm(FlaskForm):
     product_type = StringField("Product type", [DataRequired()])
     supplier = IntegerField("Supplier ID", [DataRequired()])
     currency = StringField("Currency", [DataRequired()])
-    regular_price = FloatField("Regular price", [DataRequired()])
-    retail_price = FloatField("Retail price", [DataRequired()])
+    price = FloatField("Price", [DataRequired()])
     image = FileField("Image")
     description = StringField("Description", [DataRequired()])
     # General Info ->
@@ -56,8 +55,7 @@ class NewProductForm(FlaskForm):
     product_type = StringField("Product type", [DataRequired()])
     supplier = IntegerField("Supplier ID", [DataRequired()])
     currency = StringField("Currency", [DataRequired()])
-    regular_price = FloatField("Regular price", [DataRequired()])
-    retail_price = FloatField("Retail price", [DataRequired()])
+    price = FloatField("Price", [DataRequired()])
     image = FileField("Image")
     description = StringField("Description", [DataRequired()])
     # General Info ->
