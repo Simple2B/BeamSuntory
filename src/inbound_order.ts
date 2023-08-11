@@ -246,10 +246,6 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
       document.querySelectorAll<HTMLInputElement>(
         '.inbound-order-edit-add-quantity',
       );
-    // const inboundOrderQuantityInputsLabels =
-    //   document.querySelectorAll<HTMLLabelElement>(
-    //     '#inbound-order-edit-add-quantity-label',
-    //   );
 
     const shelfLifeStartInputs = document.querySelectorAll<HTMLInputElement>(
       '.inbound-order-edit-add-shelf_life_start',
@@ -293,13 +289,6 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
     const selectedProductQtyId = `io-product-input-qty-${selectedProduct}`;
 
     const selectedProductAllocateId = `#inbound-order-edit-check-quantity-${selectedProduct}`;
-
-    // const hiddenAllocateQtyInput: HTMLDivElement = document.querySelector(
-    //   `${selectedProductAllocateId}-hidden`,
-    // );
-    // console.log(`${selectedProductAllocateId}-hidden`, hiddenAllocateQtyInput);
-
-    // hiddenAllocateQtyInput.innerHTML = String(currentInboundOrder[0].quantity);
 
     inboundOrderQuantityInputs[0].addEventListener('change', () => {
       const allocateQtyInput: HTMLDivElement = document.querySelector(

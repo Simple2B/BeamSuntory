@@ -246,8 +246,6 @@ def create():
                     inbound_order_id=inbound_order.id,
                 ).save()
 
-        # product: quntity
-
         return redirect(url_for("inbound_order.get_all"))
 
     flash("Something went wrong!", "danger")
