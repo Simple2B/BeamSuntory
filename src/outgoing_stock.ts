@@ -40,6 +40,7 @@ interface IStore {
 interface IWarehouse {
   id: number;
   name: string;
+  products_ids: number[];
 }
 
 // search flow
@@ -171,6 +172,7 @@ function createOutgoingStockItemTable(
   const tableShipRequestBody = document.querySelector(
     `#table-outgoing-stock-body-${typeModal}`,
   );
+  console.log('shipRqst: ', shipRqst);
 
   const currentCartItems = shipRqst.current_order_carts;
   currentCartItems.forEach((product, index) => {
