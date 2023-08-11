@@ -26,3 +26,4 @@ from .assign import Assign
 from .request_share import RequestShare
 from .request_share_user import RequestShareUser
 from .store_category import StoreCategory
+from .io_allocate_product import IOAllocateProduct

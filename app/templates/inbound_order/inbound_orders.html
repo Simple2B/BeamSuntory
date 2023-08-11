@@ -157,11 +157,13 @@
         {% if p == page.page %}
         <!-- prettier-ignore -->
         <a href="{{ url_for('inbound_order.get_all') }}?page={{p}}&q={{page.query}}" aria-current="page"
-          class="z-10 px-3 py-2 leading-tight text-blue-600 border border-blue-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">{{p}}</a>
+          class="z-10 px-3 py-2 leading-tight text-blue-600 border border-blue-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">{{
+          p }}</a>
         {% else %}
         <!-- prettier-ignore -->
         <a href="{{ url_for('inbound_order.get_all') }}?page={{p}}&q={{page.query}}"
-          class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">{{p}}</a>
+          class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">{{
+          p }}</a>
         {% endif %}
       </li>
       {% endfor %}
@@ -204,14 +206,16 @@
 {% include 'inbound_order/edit.html' %}
 {% include 'inbound_order/add.html' %}
 {% include 'inbound_order/view.html' %}
-<!-- prettier-ignore -->
+<!--prettier - ignore-->
 {% endblock %}
-<!-- prettier-ignore -->
+<!--prettier - ignore-->
 {% block scripts %}
-<!-- NOTE: write inbound_orders_json to session storage to avoid typescript error -->
+<!--NOTE: write inbound_orders_json to session storage to avoid typescript error-->
 <script>
-  const inboundOrders = '{{ inbound_orders_json | safe }}';
+  const inboundOrders = '{{ inbound_orders_json | safe}}';
   sessionStorage.setItem('inboundOrders', inboundOrders);
 </script>
 <script src="{{ url_for('static', filename='js/inbound_order.js') }}" type="text/javascript" defer></script>
+
+
 {% endblock %}

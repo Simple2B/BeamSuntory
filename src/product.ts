@@ -13,8 +13,6 @@ interface IProduct {
   // General Info ->
   SKU: string;
   low_stock_level: number;
-  shelf_life_start: number;
-  shelf_life_end: number;
   program_year: number;
   package_qty: number;
   numb_of_items_per_case: number;
@@ -477,10 +475,7 @@ function editProduct(product: IProduct) {
   input.value = product.SKU;
   input = document.querySelector('#product-edit-low_stock_level');
   input.value = product.low_stock_level.toString();
-  input = document.querySelector('#product-edit-shelf_life_start');
-  input.value = convertDate(product.shelf_life_start.toString());
-  input = document.querySelector('#product-edit-shelf_life_end');
-  input.value = convertDate(product.shelf_life_end.toString());
+
   input = document.querySelector('#product-edit-program_year');
   input.value = product.program_year.toString();
   input = document.querySelector('#product-edit-package_qty');
@@ -546,10 +541,6 @@ viewProductButtonElements.forEach(e =>
     // General Info ->
     div = document.querySelector('#product-view-SKU');
     div.innerHTML = product.SKU;
-    div = document.querySelector('#product-view-shelf_life_start');
-    div.innerHTML = convertDate(product.shelf_life_start.toString());
-    div = document.querySelector('#product-view-shelf_life_end');
-    div.innerHTML = convertDate(product.shelf_life_end.toString());
     div = document.querySelector('#product-view-package_qty');
     div.innerHTML = product.package_qty.toString();
     div = document.querySelector('#product-view-numb_of_items_per_case');

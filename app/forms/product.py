@@ -27,8 +27,6 @@ class ProductForm(FlaskForm):
     # General Info ->
     SKU = StringField("SKU", [DataRequired()])
     low_stock_level = IntegerField("Low stock level", [DataRequired()])
-    shelf_life_start = StringField("Shelf life start", [DataRequired()])
-    shelf_life_end = StringField("Shelf life end", [DataRequired()])
     program_year = IntegerField("Program year", [DataRequired()])
     package_qty = IntegerField("Package qty", [DataRequired()])
     numb_of_items_per_case = IntegerField("Number of items per case", [DataRequired()])
@@ -61,8 +59,6 @@ class NewProductForm(FlaskForm):
     # General Info ->
     SKU = StringField("SKU", [DataRequired()])
     low_stock_level = IntegerField("Low stock level", [DataRequired()])
-    shelf_life_start = StringField("Shelf life start", [DataRequired()])
-    shelf_life_end = StringField("Shelf life end", [DataRequired()])
     program_year = IntegerField("Program year", [DataRequired()])
     package_qty = IntegerField("Package qty", [DataRequired()])
     numb_of_items_per_case = IntegerField("Number of items per case", [DataRequired()])

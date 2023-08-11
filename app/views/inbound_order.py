@@ -136,6 +136,14 @@ def save():
         products = json.loads(form.products.data)
 
         for product in products:
+            shelf_life_str_start = product["shelf_life_start"]
+            shelf_life_str_end = product["shelf_life_end"]
+            shelf_life_stamp_start = datetime.datetime.strptime(
+                shelf_life_str_start, "%m/%d/%Y"
+            )
+            shelf_life_stamp_end = datetime.datetime.strptime(
+                shelf_life_str_end, "%m/%d/%Y"
+            )
             product_quantity_group: m.ProductQuantityGroup = db.session.execute(
                 m.ProductQuantityGroup.select().where(
                     m.ProductQuantityGroup.product_id == product["product_id"],
@@ -147,6 +155,8 @@ def save():
             if product_quantity_group:
                 product_quantity_group.quantity = int(product["quantity"])
                 product_quantity_group.group_id = product["group_id"]
+                product_quantity_group.shelf_life_start = shelf_life_stamp_start
+                product_quantity_group.shelf_life_end = shelf_life_stamp_end
                 product_quantity_group.save()
             else:
                 product_quantity_group = m.ProductQuantityGroup(
@@ -155,6 +165,8 @@ def save():
                     group_id=product["group_id"],
                     quantity=int(product["quantity"]),
                     inbound_order_id=io.id,
+                    shelf_life_start=shelf_life_stamp_start,
+                    shelf_life_end=shelf_life_stamp_end,
                 )
                 product_quantity_group.save()
         # NOTE remove product quantity group if it is not in products
@@ -210,10 +222,29 @@ def create():
             warehouse_id=form.warehouse_id.data,
             delivery_agent_id=form.delivery_agent_id.data,
         )
+        inbound_order.save()
         log(log.INFO, "Form submitted. Inbound order: [%s]", inbound_order)
         # NOTE: don't rename message, it is used in frontend to connect create and edit
         flash("Inbound order added!", "success")
-        inbound_order.save()
+
+        # save delivered product quantity, so this product would be available in warehouse
+        products = json.loads(form.products.data)
+        for product in products:
+            io_allocate_product: m.IOAllocateProduct = db.session.execute(
+                m.IOAllocateProduct.select().where(
+                    m.IOAllocateProduct.product_id == int(product["product_id"]),
+                    m.IOAllocateProduct.inbound_order_id == int(inbound_order.id),
+                )
+            ).scalar()
+            if io_allocate_product:
+                io_allocate_product.quantity = int(product["quantity"])
+                io_allocate_product.save()
+            else:
+                m.IOAllocateProduct(
+                    product_id=int(product["product_id"]),
+                    quantity=int(product["quantity"]),
+                    inbound_order_id=inbound_order.id,
+                ).save()
 
         return redirect(url_for("inbound_order.get_all"))
 

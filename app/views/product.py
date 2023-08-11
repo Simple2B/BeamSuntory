@@ -1,5 +1,4 @@
 import base64
-import datetime
 import json
 from flask import (
     Blueprint,
@@ -122,7 +121,7 @@ def get_all_products(request, query=None, count_query=None):
         "master_groups_search": master_groups_search,
         "product_mg_g": json.dumps(product_mg_g),
         "master_product_groups_name": master_group_product_name,
-        "suppliers": suppliers,
+        "suppliers": [s for s in suppliers],
         "all_product_groups": {
             i.name: i for i in db.session.execute(m.Group.select()).scalars()
         },
@@ -182,19 +181,7 @@ def create():
         if gr:
             flash("This product name is already taken.", "danger")
             return redirect(url_for("product.get_all"))
-        shelf_life_str_start = form.shelf_life_start.data
-        shelf_life_str_end = form.shelf_life_end.data
-        shelf_life_stamp_start = datetime.datetime.strptime(
-            shelf_life_str_start, "%m/%d/%Y"
-        )
-        shelf_life_stamp_end = datetime.datetime.strptime(
-            shelf_life_str_end, "%m/%d/%Y"
-        )
 
-        # NOTE return timestamp Float
-        # shelf_life_stamp_end = time.mktime(
-        #     datetime.datetime.strptime(shelf_life_str_end, "%m/%d/%Y").timetuple()
-        # )
         image = request.files["image"]
         image_string = base64.b64encode(image.read()).decode()
         product: m.Product = m.Product(
@@ -208,8 +195,6 @@ def create():
             # General Info ->
             SKU=form.SKU.data,
             low_stock_level=form.low_stock_level.data,
-            shelf_life_start=shelf_life_stamp_start,
-            shelf_life_end=shelf_life_stamp_end,
             program_year=form.program_year.data,
             package_qty=form.package_qty.data,
             numb_of_items_per_case=form.numb_of_items_per_case.data,
@@ -250,14 +235,7 @@ def save():
         if not u:
             log(log.ERROR, "Not found product by id : [%s]", form.product_id.data)
             flash("Cannot save product data", "danger")
-        shelf_life_str_start = form.shelf_life_start.data
-        shelf_life_str_end = form.shelf_life_end.data
-        shelf_life_stamp_start = datetime.datetime.strptime(
-            shelf_life_str_start, "%m/%d/%Y"
-        )
-        shelf_life_stamp_end = datetime.datetime.strptime(
-            shelf_life_str_end, "%m/%d/%Y"
-        )
+
         image = request.files["image"]
         image_string = base64.b64encode(image.read()).decode()
         u.name = str(form.name.data).strip(" ")
@@ -274,8 +252,6 @@ def save():
         # General Info ->
         u.SKU = form.SKU.data
         u.low_stock_level = form.low_stock_level.data
-        u.shelf_life_start = shelf_life_stamp_start
-        u.shelf_life_end = shelf_life_stamp_end
         u.program_year = form.program_year.data
         u.package_qty = form.package_qty.data
         u.numb_of_items_per_case = form.numb_of_items_per_case.data

@@ -140,8 +140,6 @@ def mg_g_populate(client: FlaskClient):
         description="desc",
         SKU="322ewd3333rf",
         low_stock_level=11,
-        shelf_life_start=datetime.datetime.now(),
-        shelf_life_end=datetime.datetime.now(),
         program_year=2023,
         package_qty=12,
         numb_of_items_per_case=22,
@@ -163,8 +161,6 @@ def mg_g_populate(client: FlaskClient):
         description="desc",
         SKU="322ewd3333rf",
         low_stock_level=11,
-        shelf_life_start=datetime.datetime.now(),
-        shelf_life_end=datetime.datetime.now(),
         program_year=2023,
         package_qty=12,
         numb_of_items_per_case=22,
@@ -332,6 +328,8 @@ def mg_g_populate(client: FlaskClient):
         group_id=1,
         quantity=100,
         inbound_order_id=io_it.id,
+        shelf_life_start=datetime.datetime.now(),
+        shelf_life_end=datetime.datetime.now(),
     ).save()
 
     m.Cart(
