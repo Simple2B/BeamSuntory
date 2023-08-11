@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
-from sqlalchemy import ForeignKey, orm
+from datetime import datetime
+from sqlalchemy import ForeignKey, orm, DateTime
 
 from app import db
 from .utils import ModelMixin
@@ -32,3 +33,5 @@ class ProductQuantityGroup(db.Model, ModelMixin):
         ForeignKey("inbound_orders.id")
     )
     inbound_order: orm.Mapped[InboundOrder] = orm.relationship()
+    shelf_life_start: orm.Mapped[datetime] = orm.mapped_column(DateTime())  # calendar
+    shelf_life_end: orm.Mapped[datetime] = orm.mapped_column(DateTime())  # calendar

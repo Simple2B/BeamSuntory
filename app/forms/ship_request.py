@@ -40,3 +40,8 @@ class ShipRequestForm(FlaskForm):
         query = m.ShipRequest.select().where(m.ShipRequest.order_numb == field.data)
         if db.session.scalar(query) is not None:
             raise ValidationError("This request already exist.")
+
+
+class SortByStatusShipRequestForm(FlaskForm):
+    sort_by = StringField("Sort by", [DataRequired()])
+    submit = SubmitField("Submit")

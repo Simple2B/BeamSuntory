@@ -1,6 +1,7 @@
 import {Modal} from 'flowbite';
 import type {ModalOptions, ModalInterface} from 'flowbite';
 import {Input, Timepicker, initTE} from 'tw-elements';
+import Datepicker from 'flowbite-datepicker/Datepicker';
 
 initTE({Input, Timepicker});
 
@@ -49,6 +50,8 @@ interface IInboundOrderProd {
   product: {id: number; name: string; SKU: string; image: string};
   group: {id: number; name: string};
   quantity: number;
+  shelf_life_start: number;
+  shelf_life_end: number;
 }
 
 interface IProduct {
@@ -248,14 +251,21 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
     //     '#inbound-order-edit-add-quantity-label',
     //   );
 
+    const shelfLifeStartInputs = document.querySelectorAll<HTMLInputElement>(
+      '.inbound-order-edit-add-shelf_life_start',
+    );
+    const shelfLifeEndInputs = document.querySelectorAll<HTMLInputElement>(
+      '.inbound-order-edit-add-shelf_life_end',
+    );
+
     if (currentInboundOrder) {
       for (let i = 0; i < currentInboundOrder.length; i++) {
         if (i === 0) {
           const inboundOrderProductInput = inboundOrderProductsInputs[i];
           const inboundOrderGroupInput = inboundOrderGroupsInputs[i];
           const inboundOrderQuantityInput = inboundOrderQuantityInputs[i];
-          // const inboundOrderQuantityInputLabel =
-          //   inboundOrderQuantityInputsLabels[i];
+          const shelfLifeStartInput = shelfLifeStartInputs[i];
+          const shelfLifeEndInput = shelfLifeEndInputs[i];
           inboundOrderProductInput.value = String(
             currentInboundOrder[i].product.id,
           );
@@ -265,25 +275,10 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
           inboundOrderQuantityInput.value = String(
             currentInboundOrder[i].quantity,
           );
-          // NOTE adds min - max qty to input. Doesn't work, because we use hidden submit button
-          // inboundOrderQuantityInput.min = '1';
-          // inboundOrderQuantityInput.max = String(
-          //   inboundOrder.io_allocate_product[currentInboundOrder[i].product.id],
-          // );
-          // NOTE adds min - max qty to label
-          // inboundOrderQuantityInputLabel.textContent = `Quantity (1 - ${
-          //   inboundOrder.io_allocate_product[currentInboundOrder[i].product.id]
-          // })`;
-          // NOTE adds event listener to first input
-          // inboundOrderQuantityInput.addEventListener('change', () => {
-          //   console.log(
-          //     '1st changed',
-          //     inboundOrderProductInput.options[
-          //       inboundOrderProductInput.selectedIndex
-          //     ].text,
-          //     inboundOrderQuantityInput.value,
-          //   );
-          // });
+          shelfLifeStartInput.value =
+            currentInboundOrder[i].shelf_life_start.toString();
+          shelfLifeEndInput.value =
+            currentInboundOrder[i].shelf_life_end.toString();
           continue;
         }
         createInboundOrderItems(inboundOrder, currentInboundOrder[i]);
@@ -496,7 +491,15 @@ function createInboundOrderItems(
   const inboundOrderAddContainer = document.querySelector(
     '#inbound-order-edit-add-container',
   );
+  const inboundOrderAddItemOriginal = document.querySelector(
+    '#inbound-order-edit-item',
+  );
+  const allInboundOrderItems = document.querySelectorAll(
+    '.inbound-order-edit-add-item',
+  );
+  const index = allInboundOrderItems.length + 1;
   const inboundOrderAddItem = document.createElement('div');
+
   inboundOrderAddItem.classList.add(
     'p-6',
     'space-y-6',
@@ -542,6 +545,24 @@ function createInboundOrderItems(
         </svg>
       </button>
     </div>
+    <div class="col-span-6 sm:col-span-6">
+      <label for="shelf_life_start" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Shelf life</label >
+      <div   class="flex items-center">
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
+          </div>
+          <input id="datepickerEl-start-${index}" datepicker name="shelf_life_start" type="text" class="inbound-order-edit-add-shelf_life_start bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date start">
+        </div>
+        <span class="mx-4 text-gray-500">to</span>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
+          </div>
+          <input name="shelf_life_end" id="datepickerEl-end-${index}" datepicker type="text" class="inbound-order-edit-add-shelf_life_end bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date end">
+        </div>
+      </div>
+    </div>
   </div>
   `;
 
@@ -551,6 +572,13 @@ function createInboundOrderItems(
     inboundOrderAddItem.querySelector('.inbound-order-edit-add-group');
   const inboundOrderAddQuantityInput: HTMLInputElement =
     inboundOrderAddItem.querySelector('.inbound-order-edit-add-quantity');
+  const shelfLifeStartInput: HTMLInputElement =
+    inboundOrderAddItem.querySelector(
+      '.inbound-order-edit-add-shelf_life_start',
+    );
+  const shelfLifeEndInput: HTMLInputElement = inboundOrderAddItem.querySelector(
+    '.inbound-order-edit-add-shelf_life_end',
+  );
 
   inbOrder.products.forEach(product => {
     const option = document.createElement('option');
@@ -596,6 +624,8 @@ function createInboundOrderItems(
         ].text
       }`,
     );
+    shelfLifeStartInput.value = curInbOrder.shelf_life_start.toString();
+    shelfLifeEndInput.value = curInbOrder.shelf_life_end.toString();
   }
 
   inboundOrderAddContainer.appendChild(inboundOrderAddItem);
@@ -650,6 +680,8 @@ function createInboundOrderItems(
   );
   addButton.addEventListener('click', () => {
     createInboundOrderItems();
+    new Datepicker(document.querySelector(`#datepickerEl-start-${index + 1}`));
+    new Datepicker(document.querySelector(`#datepickerEl-end-${index + 1}`));
   });
 
   const deleteButtons = document.querySelectorAll(
@@ -671,6 +703,12 @@ const addInboundOrderItemBtnById = document.querySelector(
 );
 addInboundOrderItemBtnById.addEventListener('click', () => {
   createInboundOrderItems();
+  const allInboundOrderItems = document.querySelectorAll(
+    '.inbound-order-edit-add-item',
+  );
+  const index = allInboundOrderItems.length;
+  new Datepicker(document.querySelector(`#datepickerEl-start-${index}`));
+  new Datepicker(document.querySelector(`#datepickerEl-end-${index}`));
 });
 
 // ----add inbound order item for add modal----
@@ -779,6 +817,13 @@ function setProducts(actionType: string) {
   const inboundOrderAddQuantityInputs = document.querySelectorAll(
     `.inbound-order-${actionType}-add-quantity`,
   );
+  const shelfLifeStartInputs = document.querySelectorAll(
+    '.inbound-order-edit-add-shelf_life_start',
+  );
+  const shelfLifeEndInputs = document.querySelectorAll(
+    '.inbound-order-edit-add-shelf_life_end',
+  );
+
   const products = [];
   const productsQuantities: {[index: string]: number} = {};
 
@@ -788,10 +833,14 @@ function setProducts(actionType: string) {
     ] as HTMLSelectElement;
     const inboundOrderAddQuantityInput = inboundOrderAddQuantityInputs[
       i
-    ] as HTMLInputElement;
+    ] as HTMLSelectElement;
+    const shelfLifeStartInput = shelfLifeStartInputs[i] as HTMLSelectElement;
+    const shelfLifeEndInput = shelfLifeEndInputs[i] as HTMLSelectElement;
     const product = {
       product_id: inboundOrderAddProductSelect.value,
       quantity: inboundOrderAddQuantityInput.value,
+      shelf_life_start: shelfLifeStartInput.value.toString(),
+      shelf_life_end: shelfLifeEndInput.value.toString(),
     };
     if (actionType === 'edit') {
       const inboundOrderAddGroupSelect = inboundOrderAddGroupSelects[
