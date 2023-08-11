@@ -11,7 +11,6 @@
       <input type="hidden" name="SKU" id="product-request-share-SKU-hidden-input" value="" />
       <input type="hidden" name="available_quantity" id="product-request-share-available-quantity-hidden-input"
         value="" />
-      <input type="hidden" name="group_id" id="product-request-share-group-id-hidden-input" value="1" />
       {{ form_edit.hidden_tag() }}
       <!-- Modal header -->
       <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
@@ -75,12 +74,12 @@
             <label for="product-request-share-define-brand"
               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Define Your Group the Item will
               Appear in if Accepted</label>
-            <select type="text" name="brand" id="product-request-share-define-brand"
+            <select type="text" name="group_id" id="product-request-share-define-brand"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Brand" required>
+              placeholder="Group" required>
               {% for g in all_product_groups  %}
                 {% if g in current_user_groups_names%}
-                  <option value="{{ g.id }}">{{ g.name }}</option>
+                  <option value="{{ all_product_groups[g].id }}">{{ all_product_groups[g].name }}</option>
                 {% endif %}
               {% endfor %}
             </select>

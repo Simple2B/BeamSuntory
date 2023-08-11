@@ -46,6 +46,31 @@ def get_all():
     stores_rows = db.session.execute(sa.select(m.Store)).all()
     stores = [row[0] for row in stores_rows]
 
+    for store in stores:
+        store.favorite = db.session.execute(
+            sa.select(m.FavoriteStoreUser)
+            .where(m.FavoriteStoreUser.user_id == current_user.id)
+            .where(m.FavoriteStoreUser.store_id == store.id)
+        ).scalar()
+        if store.favorite:
+            store.favorite = True
+        else:
+            store.favorite = False
+
+    warehouse_products = db.session.execute(
+        m.WarehouseProduct.select().where(
+            m.WarehouseProduct.product_id.in_(
+                [wp.product_id for wp in db.session.execute(query).scalars()]
+            )
+        )
+    ).scalars()
+
+    available_products = (
+        {wp.group.name: wp.product_quantity for wp in warehouse_products}
+        if warehouse_products
+        else {}
+    )
+
     return render_template(
         "cart.html",
         cart_items=db.session.execute(
@@ -59,6 +84,7 @@ def get_all():
         delivery_agents=delivery_agents,
         warehouses=warehouses,
         stores=stores,
+        available_products=available_products,
     )
 
 

@@ -1,0 +1,64 @@
+<!-- Edit division modal -->
+<!-- prettier-ignore-->
+<div id="editDivisionModal" tabindex="-1" aria-hidden="true"
+  class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
+  <div class="relative w-full max-w-lg max-h-full">
+    <!-- Modal content -->
+    <form action="{{url_for('division.save')}}" method="post" enctype="multipart/form-data"
+      class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+      {{ form_edit.hidden_tag() }}
+      <input type="hidden" name="division_id" id="division-edit-id" value="0" />
+      <input type="hidden" name="next_url" id="division-edit-next_url" value="" />
+      <!-- Modal header -->
+      <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Edit Role </h3>
+      </div>
+      <!-- Modal body -->
+      <div class="p-6 space-y-6">
+        <div class="grid grid-cols-6 gap-6">
+          <div class="col-span-6 sm:col-span-6">
+            <label for="role_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Role
+              Name</label>
+            <input type="text" name="role_name" id="division-edit-role-name"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="Role Name" required />
+          </div>
+          <div class="col-span-6 sm:col-span-6">
+            <label for="parent_role" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Parent
+              Role</label>
+            <select type="text" name="parent_role" id="division-edit-parent-role"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="Parent Role">
+              <option selected="selected" value="" disabled>Select Parent Role</option>
+
+            </select>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="type" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Type
+              (Role/Division)</label>
+            <select type="text" name="type" id="division-edit-type"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="Select Type" required>
+              <option value="" disabled selected="selected">Select Type</option>
+              <option value="Master">Master</option>
+              <option value="Division">Division</option>
+              <option value="User">User</option>
+            </select>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="activated"
+              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Activated</label>
+            <input type="checkbox" name="activated" id="division-edit-activated"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block  p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+          </div>
+        </div>
+      </div>
+      <!-- Modal footer -->
+      <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+        <button name="submit" type="submit"
+          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+          Save all </button>
+      </div>
+    </form>
+  </div>
+</div>

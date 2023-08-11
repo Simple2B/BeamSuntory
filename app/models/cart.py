@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 
 import sqlalchemy as sa
 from sqlalchemy import orm
@@ -8,6 +9,7 @@ from app import schema as s
 from .utils import ModelMixin
 
 from .product import Product
+from .warehouse_product import WarehouseProduct
 
 # from .ship_request import ShipRequest
 
@@ -39,5 +41,18 @@ class Cart(db.Model, ModelMixin):
 
     @property
     def json(self):
-        c = s.Cart.from_orm(self)
-        return c.json()
+        mg = s.Cart.from_orm(self)
+        ujs = mg.json()
+        mg_dict = json.loads(ujs)
+        warehouse_products = db.session.execute(
+            WarehouseProduct.select().where(
+                WarehouseProduct.product_id == self.product_id
+            )
+        ).scalars()
+
+        mg_dict["available_quantity"] = (
+            {wp.group.name: wp.product_quantity for wp in warehouse_products}
+            if warehouse_products
+            else {}
+        )
+        return json.dumps(mg_dict)

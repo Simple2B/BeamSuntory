@@ -1,7 +1,76 @@
 <!-- prettier-ignore -->
 {% extends 'base.html' %}
 {% block content %}
-<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+{% if filtered %}
+{% set base_url = url_for('incoming_stock.sort') %}
+{% else %}
+{% set base_url = url_for('incoming_stock.get_all') %}
+{% endif %}
+<div class="relative overflow-visible shadow-md sm:rounded-lg">
+  <form id="incoming-stock-filter-form" action="{{url_for('incoming_stock.sort')}}" method="post"
+    class="flex flex-wrap py-4 gap-5 bg-white dark:bg-gray-800">
+    {{ form_sort.hidden_tag() }}
+    <input id="sort_by" hidden type="text" value="" name="sort_by"
+      class="incoming-stock-filter-input w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+    <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800">
+      <div>
+        <button id="dropdownRadioButton-incoming-stock-status"
+          data-dropdown-toggle="dropdownRadio-incoming-stock-status"
+          class="incoming-stock-filter-radio-button inline-flex items-center w-48 text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+          type="button">
+          Status
+          <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 10 6">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="m1 1 4 4 4-4" />
+          </svg>
+        </button>
+        <!-- Dropdown menu -->
+        <div id="dropdownRadio-incoming-stock-status"
+          class="z-10 hidden w-48 bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600"
+          data-popper-reference-hidden="" data-popper-escaped="" data-popper-placement="top"
+          style="position: absolute; inset: auto auto 0px 0px; margin: 0px; transform: translate3d(522.5px, 3847.5px, 0px);">
+          <ul class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownRadioButton">
+            <li>
+              <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
+                <input id="incoming-stock-filter-input-default-value-status" type="radio" value=""
+                  data-target="{{master_group_search_no_space, master_group_search_no_space }}" name="filter-radio"
+                  class="incoming-stock-filter-input w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
+                <label for="incoming-stock-filter-input-default-value-status"
+                  class="w-full ml-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300 cursor-pointer">
+                  Default Value
+                </label>
+              </div>
+            </li>
+            {% for status in inbound_orders_status %}
+            <li>
+              <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
+                <input id="incoming-stock-filter-input-{{ status }}" type="radio" value="{{ status }}"
+                  class="incoming-stock-filter-input w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
+                <label for="incoming-stock-filter-input-{{ status }}"
+                  class="w-full ml-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300 cursor-pointer">
+                  {{ status }}
+                </label>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2 sm:space-x-3">
+      <button type="submit" id="incoming-stock-filter-button" name="submit"
+        class="inline-flex items-center justify-center w-1/2 px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-blue-300 sm:w-auto dark:bg-yellow-400 dark:hover:bg-yellow-500 dark:focus:ring-blue-800">
+        <svg class="w-3 h-3 mr-2 -ml-1" fill="currentColor" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd"
+            d="M137.4 41.4c12.5-12.5 32.8-12.5 45.3 0l128 128c9.2 9.2 11.9 22.9 6.9 34.9s-16.6 19.8-29.6 19.8H32c-12.9 0-24.6-7.8-29.6-19.8s-2.2-25.7 6.9-34.9l128-128zm0 429.3l-128-128c-9.2-9.2-11.9-22.9-6.9-34.9s16.6-19.8 29.6-19.8H288c12.9 0 24.6 7.8 29.6 19.8s2.2 25.7-6.9 34.9l-128 128c-12.5 12.5-32.8 12.5-45.3 0z"
+            clip-rule="evenodd">
+          </path>
+        </svg>
+        Filter
+      </button>
+    </div>
+  </form>
   <div class="flex items-center justify-center py-4 bg-white dark:bg-gray-800">
     <label for="table-search" class="sr-only">Search</label>
     <div class="relative">
@@ -75,21 +144,18 @@
           </div>
         </td>
         <td class="p-4 space-x-2 whitespace-nowrap">
-          {% if inbound_order.status.lower() == 'delivered' %}
-          <button data-modal-toggle="viewIncomingStockModal" data-pickup-inbound-id={{ inbound_order.id }}
-            data-target="{{inbound_order.json}}" type="button"
+          <button data-pickup-inbound-id={{ inbound_order.id }} data-target="{{inbound_order.json}}" type="button"
             class="incoming-stock-view-button  inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
               <path fill-rule="evenodd"
                 d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
                 clip-rule="evenodd"></path>
             </svg>
-            View Package Info
+            View
           </button>
-          {% endif %}
           {% if inbound_order.status.lower() == 'in transit' %}
           <button data-incoming-stock-id={{ inbound_order.id }} data-target="{{inbound_order.json}}" type="button"
-            class="accept-incoming-stock-edit-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900 accept-incoming-stock-btn">
+            class="accept-incoming-stock-edit-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900 accept-incoming-stock-btn">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
               <path fill-rule="evenodd"
                 d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
@@ -98,7 +164,7 @@
             Accept goods
           </button>
           {% endif %}
-          {% if inbound_order.status.lower() != 'canceled' and inbound_order.status.lower() != 'delivered' %}
+          {% if inbound_order.status.lower() != 'cancelled' and inbound_order.status.lower() != 'delivered' %}
           <button data-cancel-incoming-stock-id={{ inbound_order.id }} type="button"
             class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900 cancel-incoming-stock-btn">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -122,7 +188,7 @@
     <ul class="inline-flex items-center -space-x-px">
       <li>
         <!-- prettier-ignore -->
-        <a href="{{ url_for('incoming_stock.get_all') }}?page=1&q={{page.query}}"
+        <a href="{{ base_url }}?page=1&q={{page.query}}"
           class="block px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
           <span class="sr-only">First</span>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
@@ -131,10 +197,11 @@
               clip-rule="evenodd" />
           </svg>
         </a>
+
       </li>
       <li>
         <!-- prettier-ignore -->
-        <a href="{{ url_for('incoming_stock.get_all') }}?page={{page.page-1 if page.page > 1 else 1}}&q={{page.query}}"
+        <a href="{{ base_url }}?page={{page.page-1 if page.page > 1 else 1}}&q={{page.query}}"
           class="block px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
           <span class="sr-only">Previous</span>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
@@ -151,11 +218,11 @@
         <!-- prettier-ignore -->
         {% if p == page.page %}
         <!-- prettier-ignore -->
-        <a href="{{ url_for('incoming_stock.get_all') }}?page={{p}}&q={{page.query}}" aria-current="page"
+        <a href="{{ base_url }}?page={{p}}&q={{page.query}}" aria-current="page"
           class="z-10 px-3 py-2 leading-tight text-blue-600 border border-blue-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">{{p}}</a>
         {% else %}
         <!-- prettier-ignore -->
-        <a href="{{ url_for('incoming_stock.get_all') }}?page={{p}}&q={{page.query}}"
+        <a href="{{ base_url }}?page={{p}}&q={{page.query}}"
           class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">{{p}}</a>
         {% endif %}
       </li>
@@ -163,7 +230,7 @@
 
       <li>
         <!-- prettier-ignore -->
-        <a href="{{ url_for('incoming_stock.get_all') }}?page={{page.page+1 if page.page < page.pages else page.pages}}&q={{page.query}}"
+        <a href="{{ base_url }}?page={{page.page+1 if page.page < page.pages else page.pages}}&q={{page.query}}"
           class="block px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
           <!-- prettier-ignore -->
           <span class="sr-only">Next</span>
@@ -176,7 +243,7 @@
       </li>
       <li>
         <!-- prettier-ignore -->
-        <a href="{{ url_for('incoming_stock.get_all') }}?page={{page.pages}}&q={{page.query}}"
+        <a href="{{ base_url }}?page={{page.pages}}&q={{page.query}}"
           class="block px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
           <!-- prettier-ignore -->
           <span class="sr-only">Last</span>

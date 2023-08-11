@@ -188,6 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const inboundOrderId = sessionStorage.getItem('inboundOrderId');
       for (const inboundOrder of inboundOrders) {
         if (inboundOrder.order_id === inboundOrderId) {
+          sessionStorage.setItem('inboundOrder', JSON.stringify(inboundOrder));
           editInboundOrder(inboundOrder);
           break;
         }

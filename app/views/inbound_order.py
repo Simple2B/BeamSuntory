@@ -96,9 +96,7 @@ def get_all():
         ],
         groups=[
             g
-            for g in db.session.execute(
-                m.GroupProduct.select().order_by(m.GroupProduct.id)
-            ).scalars()
+            for g in db.session.execute(m.Group.select().order_by(m.Group.id)).scalars()
         ],
         form_create=form_create,
         form_edit=form_edit,
