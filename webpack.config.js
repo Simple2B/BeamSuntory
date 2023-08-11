@@ -196,6 +196,16 @@ const pickupInboundConfig = {
   },
 };
 
+const divisionConfig = {
+  entry: {
+    main: './src/division.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/division.js', // <--- Will be compiled to this single file
+  },
+};
+
 const bellConfig = {
   entry: {
     main: './src/bell.ts',
@@ -245,6 +255,7 @@ const configs = [
   outgoingStockConfig,
   pickupOrderConfig,
   pickupInboundConfig,
+  divisionConfig,
   bellConfig,
   requestShareConfig,
   storeCategoryConfig,

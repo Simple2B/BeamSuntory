@@ -32,5 +32,6 @@ from .inbound_order import (
 )
 from .store import StoreForm, NewStoreForm
 from .package_info import PackageInfoForm
+from .division import DivisionForm, NewDivisionForm
 from .request_share import RequestShareForm
 from .store_category import StoreCategoryForm, NewStoreCategoryForm

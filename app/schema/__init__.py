@@ -18,6 +18,7 @@ from .delivery_agent import DeliveryAgent
 from .cart import Cart
 from .warehouse_product import WarehouseProduct
 from .package_info import PackageInfo
+from .division import Division
 from .assign import Assign
 from .request_share import RequestShare
 from .store_category import StoreCategory

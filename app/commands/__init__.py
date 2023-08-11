@@ -151,8 +151,13 @@ def init(app: Flask):
             active=True,
         ).save(False)
 
+        sc = m.StoreCategory(
+            name="BAR",
+            active=True,
+        ).save(False)
+
         m.Store(
-            store_category="restaurant",
+            store_category_id=sc.id,
             store_name="JB-restaurant",
             contact_person="Johnny",
             email="storejb@email.com",

@@ -37,6 +37,7 @@ def create_app(environment="development"):
         outgoing_stock_blueprint,
         pickup_order_blueprint,
         pickup_inbound_blueprint,
+        division_blueprint,
         assign_blueprint,
         request_share_blueprint,
         store_category_blueprint,
@@ -79,6 +80,7 @@ def create_app(environment="development"):
     app.register_blueprint(outgoing_stock_blueprint)
     app.register_blueprint(pickup_order_blueprint)
     app.register_blueprint(pickup_inbound_blueprint)
+    app.register_blueprint(division_blueprint)
     app.register_blueprint(assign_blueprint)
     app.register_blueprint(request_share_blueprint)
     app.register_blueprint(store_category_blueprint)
