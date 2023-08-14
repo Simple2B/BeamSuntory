@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 from sqlalchemy import ForeignKey, orm
 
-from app import db, schema as s
+from app import db
 from .utils import ModelMixin
 
 
@@ -23,8 +23,3 @@ class FavoriteStoreUser(db.Model, ModelMixin):
     store_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("stores.id"))
     child: orm.Mapped[User] = orm.relationship()
     parent: orm.Mapped[Store] = orm.relationship()
-
-    @property
-    def json(self):
-        mg = s.ProductGroup.from_orm(self)
-        return mg.json()

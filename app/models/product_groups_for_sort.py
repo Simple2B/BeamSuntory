@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 from sqlalchemy import ForeignKey, orm
 
-from app import db, schema as s
+from app import db
 from .utils import ModelMixin
 
 
@@ -15,15 +15,10 @@ else:
     GroupProduct = "GroupProduct"
 
 
-class ProductGroup(db.Model, ModelMixin):
-    __tablename__ = "product_group"
+class ProductGroupForSort(db.Model, ModelMixin):
+    __tablename__ = "product_groups_for_sort"
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
     product_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("products.id"))
     group_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("groups_for_product.id"))
-    child: orm.Mapped[Product] = orm.relationship()
-    parent: orm.Mapped[GroupProduct] = orm.relationship()
-
-    @property
-    def json(self):
-        mg = s.ProductGroup.from_orm(self)
-        return mg.json()
+    product: orm.Mapped[Product] = orm.relationship()
+    group_for_product: orm.Mapped[GroupProduct] = orm.relationship()
