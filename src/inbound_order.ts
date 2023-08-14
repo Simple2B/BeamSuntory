@@ -102,7 +102,7 @@ const modalOptions: ModalOptions = {
     sessionStorage.removeItem('inboundOrder');
   },
   onShow: () => {
-    console.log('inbound-order id: ');
+    console.log('inbound-order modal Show ');
   },
   onToggle: () => {
     console.log('modal has been toggled');
@@ -237,10 +237,13 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
   if (Object.keys(inboundOrder.inbound_order_prods).length > 0) {
     const currentInboundOrder =
       inboundOrder.inbound_order_prods[inboundOrder.order_id];
+    // console.log('currentInboundOrder', currentInboundOrder);
     const inboundOrderProductsInputs =
       document.querySelectorAll<HTMLSelectElement>(
         '.inbound-order-edit-add-product',
       );
+    // TODO inboundOrderProductsInputs BECOMES EMPTY AFTER FIRST ITERATION. Can't open edit modal again
+    // console.log('inboundOrderProductsInputs', inboundOrderProductsInputs);
     const inboundOrderGroupsInputs =
       document.querySelectorAll<HTMLSelectElement>(
         '.inbound-order-edit-add-group',
@@ -298,7 +301,10 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
         selectedProductAllocateId,
       );
 
-      allocateQtyInput.innerHTML = String(currentInboundOrder[0].quantity);
+      const inboundOrderCheckQuantityInputHidden: HTMLDivElement =
+        document.querySelector(
+          `#inbound-order-edit-check-quantity-${selectedProduct}-hidden`,
+        );
 
       const changedQuantityInputs = document.querySelectorAll<HTMLInputElement>(
         `#${selectedProductQtyId}`,
@@ -308,9 +314,9 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
 
       changedQuantityInputs.forEach((input: HTMLInputElement) => {
         totalProductChangedQty += Number(input.value);
-
         allocateQtyInput.innerHTML = (
-          currentInboundOrder[0].quantity - totalProductChangedQty
+          Number(inboundOrderCheckQuantityInputHidden.innerHTML) -
+          totalProductChangedQty
         ).toString();
       });
     });
@@ -337,6 +343,7 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
       document.querySelectorAll<HTMLInputElement>(
         '.inbound-order-edit-check-quantity-hidden',
       );
+    // console.log('currentInboundOrderCheck', currentInboundOrderCheck);
 
     if (currentInboundOrderCheck) {
       for (let i = 0; i < currentInboundOrderCheck.length; i++) {
@@ -348,12 +355,33 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
           const inboundOrderQuantityCheckInputHidden =
             inboundOrderQuantityCheckInputsHidden[i];
 
+          const ioProdQtyCheckInput =
+            document.querySelectorAll<HTMLInputElement>(
+              `io-product-input-qty-${currentInboundOrderCheck[i].product.name}`,
+            );
+          // console.log(
+          //   'ioProdQtyCheckInput',
+          //   `io-product-input-qty-${currentInboundOrderCheck[i].product.name}`,
+          //   ioProdQtyCheckInput,
+          // );
+          // TODO ioProdQtyCheckInput is empty on modal open. Can't calculate total qty - selected products
+
           inboundOrderProductCheckInput.innerHTML = String(
             currentInboundOrderCheck[i].product.name,
           );
-          inboundOrderQuantityCheckInput.innerHTML = String(
-            currentInboundOrderCheck[i].quantity,
-          );
+          if (ioProdQtyCheckInput) {
+            let preselectedQty = 0;
+            ioProdQtyCheckInput.forEach((input: HTMLInputElement) => {
+              preselectedQty += Number(input.value);
+            });
+            inboundOrderQuantityCheckInput.innerHTML = String(
+              Number(currentInboundOrderCheck[i].quantity) - preselectedQty,
+            );
+          } else {
+            inboundOrderQuantityCheckInput.innerHTML = String(
+              currentInboundOrderCheck[i].quantity,
+            );
+          }
           inboundOrderQuantityCheckInputHidden.innerHTML = String(
             currentInboundOrderCheck[i].quantity,
           );
@@ -453,7 +481,6 @@ function createInboundOrderCheckItems(
     inboundOrderCheckItem.querySelector(
       '.inbound-order-edit-check-quantity-hidden',
     );
-  console.log('inboundOrderCheckItem', inboundOrderCheckItem);
 
   if (curInbOrder) {
     inboundOrderCheckProductInput.innerHTML = String(curInbOrder.product.name);
@@ -644,6 +671,7 @@ function createInboundOrderItems(
           ].text
         }-hidden`,
       );
+
     inboundOrderCheckQuantityInput.innerHTML =
       inboundOrderCheckQuantityInputHidden.innerHTML;
 
