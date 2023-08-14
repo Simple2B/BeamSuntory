@@ -15,7 +15,7 @@ else:
     GroupProduct = "GroupProduct"
 
 
-class ProductGroup(db.Model, ModelMixin):
+class ProductGroupForSort(db.Model, ModelMixin):
     __tablename__ = "product_groups_for_sort"
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
     product_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("products.id"))

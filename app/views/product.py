@@ -60,7 +60,9 @@ def get_all_products(request, query=None, count_query=None):
             ].append(group[0])
 
     # get all product_groups to list and compare in view.html
-    product_groups_obj = db.session.execute(m.ProductGroup.select()).all()
+    product_groups: list[m.ProductGroup] = [
+        row for row in db.session.execute(m.ProductGroup.select()).scalars()
+    ]
 
     # TODO: consider using a join instead of two queries <- Copilot
     # get all groups ids for current user to compare with product groups ids in view.html
@@ -81,16 +83,16 @@ def get_all_products(request, query=None, count_query=None):
             )
 
     # NOTE: Create json object for "show-all-groups" button in products.html
-    product_groups = [row[0] for row in product_groups_obj]
     product_mg_g = (
         {
             p.child.name: {
-                mg.parent.master_groups.name: "".join(
+                mg.parent.master_groups_for_product.name: "".join(
                     [
                         g.parent.name
                         for g in product_groups
                         if p.child.name == g.child.name
-                        and mg.parent.master_groups.name == g.parent.master_groups.name
+                        and mg.parent.master_groups_for_product.name
+                        == g.parent.master_groups_for_product.name
                     ]
                 )
                 for mg in product_groups

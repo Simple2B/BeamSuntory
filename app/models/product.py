@@ -64,19 +64,19 @@ class Product(db.Model, ModelMixin):
         mg = s.Product.from_orm(self)
         ujs = mg.json()
         mg_dict = json.loads(ujs)
-        current_product_products_groups_rows = db.session.execute(
-            ProductGroup.select().where(ProductGroup.product_id == mg_dict["id"])
-        ).all()
         current_user_groups_rows = db.session.execute(
             UserGroup.select().where(UserGroup.left_id == current_user.id)
         ).all()
         # here we get dict of current product group_name:master_group_name
         # example: {'Brand': 'Martini', 'Fr': 'Language', 'Country': 'US'}
-        whp = db.session.execute(
-            WarehouseProduct.select().where(
-                WarehouseProduct.product_id == mg_dict["id"]
-            )
-        ).scalars()
+        whp = [
+            i
+            for i in db.session.execute(
+                WarehouseProduct.select().where(
+                    WarehouseProduct.product_id == mg_dict["id"]
+                )
+            ).scalars()
+        ]
         mg_dict["mstr_groups_groups"] = {
             i.group.name: i.group.master_groups.name for i in whp
         }
@@ -89,10 +89,7 @@ class Product(db.Model, ModelMixin):
             ]
             for grps in current_user_groups_rows
         }
-        mg_dict["groups_ids"] = {
-            i[0].parent.name: i[0].parent.id
-            for i in current_product_products_groups_rows
-        }
+        mg_dict["groups_ids"] = {i.group.name: i.group.id for i in whp}
         warehouse_products = db.session.execute(
             WarehouseProduct.select().where(
                 WarehouseProduct.product_id == mg_dict["id"]
