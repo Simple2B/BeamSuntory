@@ -42,10 +42,14 @@ def get_all():
     pagination = create_pagination(total=db.session.scalar(count_query))
     master_groups_rows = db.session.execute(sa.select(m.MasterGroup)).all()
 
+    wh_role = db.session.execute(
+        sa.select(m.Division).where(m.Division.role_name == "Warehouse Manager")
+    ).scalar()
+
     managers = [
         man[0]
         for man in db.session.execute(
-            sa.select(m.User).where(m.User.role == "Warehouse Manager")
+            sa.select(m.User).where(m.User.role == wh_role.id)
         ).all()
     ]
     manager_id_manager_name = {man.id: man.username for man in managers}

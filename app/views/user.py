@@ -14,7 +14,7 @@ from flask_mail import Message
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
-from app import models as m, schema as s, db, mail
+from app import models as m, db, mail
 from app import forms as f
 from app.logger import log
 
@@ -32,13 +32,13 @@ def get_all():
     query = m.User.select().order_by(m.User.id)
     count_query = sa.select(sa.func.count()).select_from(m.User)
     if q:
-        # TODO: change search by roles
+        all_roles: list[m.Division] = db.session.execute(m.Division.select()).scalars()
         query = (
             m.User.select()
             .where(
                 m.User.username.like(f"{q}%")
                 | m.User.email.like(f"{q}%")
-                | m.User.role.in_([r for r in s.UserRole if q in r.name])
+                | m.User.role.in_([r.id for r in all_roles])
             )
             .order_by(m.User.id)
         )
@@ -47,7 +47,7 @@ def get_all():
             .where(
                 m.User.username.like(f"{q}%")
                 | m.User.email.like(f"{q}%")
-                | m.User.role.in_([r for r in s.UserRole if q in r.name])
+                | m.User.role.in_([r.id for r in all_roles])
             )
             .select_from(m.User)
         )
