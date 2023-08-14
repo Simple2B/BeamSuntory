@@ -15,6 +15,7 @@ interface IUser {
   activated: boolean;
   approval_permission: boolean;
   role: string;
+  role_name: string;
   country: string;
   region: string;
   city: string;
@@ -209,7 +210,7 @@ function editUser(user: IUser) {
   input = document.querySelector('#user-edit-group');
   input.value = user.group_name;
   input = document.querySelector('#user-edit-role');
-  input.value = user.role.toUpperCase();
+  input.value = user.role;
   input = document.querySelector('#user-edit-password');
   input.value = '*******';
   input = document.querySelector('#user-edit-password_confirmation');
@@ -252,6 +253,7 @@ viewUserButtonElements.forEach(e =>
     const lockerAddressContainer = document.querySelector(
       '#user-view-locker-address-container',
     );
+    console.log(user);
 
     if (user.role !== 'sales_rep') {
       lockerAddressContainer.classList.add('hidden');
@@ -267,7 +269,7 @@ viewUserButtonElements.forEach(e =>
     div = document.querySelector('#user-view-email');
     div.innerHTML = user.email;
     div = document.querySelector('#user-view-role');
-    div.innerHTML = user.role.toUpperCase();
+    div.innerHTML = user.role_name;
     div = document.querySelector('#user-view-status');
 
     user.activated ? (div.innerHTML = 'Active') : (div.innerHTML = 'Offline');

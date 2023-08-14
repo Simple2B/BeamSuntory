@@ -32,12 +32,16 @@ def init(app: Flask):
         if db.session.execute(query).first():
             print(f"User with e-mail: [{app.config['ADMIN_EMAIL']}] already exists")
             return
-
+        for role in ["Admin", "Sales rep", "Warehouse Manager"]:
+            m.Division(role_name=role, activated=True).save()
+        role = db.session.execute(
+            m.Division.select().where(m.Division.role_name == "Admin")
+        ).scalar()
         m.User(
             username=app.config["ADMIN_USERNAME"],
             email=app.config["ADMIN_EMAIL"],
             password=app.config["ADMIN_PASSWORD"],
-            role="ADMIN",
+            role=role.id,
             country="Ukraine",
             region="Kyiv",
             city="Kyiv",
@@ -99,35 +103,39 @@ def init(app: Flask):
                         master_group_id=master_group.id,
                     ).save(False)
 
-        wh_user = "warehouse manager 1"
-        m.User(
-            username=wh_user,
-            email="warehouseuser1@mail.com",
-            password="warehousemanagerpassword1",
-            role="WAREHOUSE_MANAGER",
-            activated=True,
-            approval_permission=True,
-            street_address="street",
-            phone_number="123456789",
-            country="UK",
-            region="Lv",
-            city="Dro",
-            zip_code="82100",
-            sales_rep=False,
-        ).save(False)
-
-        wh_manager: m.User = db.session.execute(
-            m.User.select().where(m.User.username == wh_user)
+        role = db.session.execute(
+            m.Division.select().where(m.Division.role_name == "Warehouse Manager")
         ).scalar()
+        if role:
+            wh_user = "warehouse manager 1"
+            m.User(
+                username=wh_user,
+                email="warehouseuser1@mail.com",
+                password="warehousemanagerpassword1",
+                role=role.id,
+                activated=True,
+                approval_permission=True,
+                street_address="street",
+                phone_number="123456789",
+                country="UK",
+                region="Lv",
+                city="Dro",
+                zip_code="82100",
+                sales_rep=False,
+            ).save(False)
 
-        m.Warehouse(
-            name="Maywood warehouse",
-            phone_number="380362470221",
-            city="Al",
-            zip="unzip",
-            address="sserdda",
-            manager_id=wh_manager.id,
-        ).save(False)
+            wh_manager: m.User = db.session.execute(
+                m.User.select().where(m.User.username == wh_user)
+            ).scalar()
+
+            m.Warehouse(
+                name="Maywood warehouse",
+                phone_number="380362470221",
+                city="Al",
+                zip="unzip",
+                address="sserdda",
+                manager_id=wh_manager.id,
+            ).save(False)
 
         m.DeliveryAgent(
             first_name="May",
@@ -154,7 +162,7 @@ def init(app: Flask):
         sc = m.StoreCategory(
             name="BAR",
             active=True,
-        ).save(False)
+        ).save()
 
         m.Store(
             store_category_id=sc.id,

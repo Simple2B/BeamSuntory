@@ -14,8 +14,6 @@ class DivisionForm(FlaskForm):
     next_url = StringField("next_url")
     division_id = StringField("division_id", [DataRequired()])
     role_name = StringField("Role Name")
-    type = StringField("Role type")
-    parent_role = StringField("Parent Role")
     activated = BooleanField("activated")
 
     submit = SubmitField("Save")
@@ -33,8 +31,6 @@ class DivisionForm(FlaskForm):
 class NewDivisionForm(FlaskForm):
     next_url = StringField("next_url")
     role_name = StringField("Role Name", [DataRequired()])
-    type = StringField("Role type", [DataRequired()])
-    parent_role = StringField("Parent Role")
     activated = BooleanField("activated")
 
     submit = SubmitField("Save")

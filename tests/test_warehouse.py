@@ -18,11 +18,11 @@ def test_warehouses_pages(client):
     assert response.status_code == 405
 
 
-def test_create_warehouse(client):
+def test_create_warehouse(mg_g_populate: FlaskClient):
     register("samg", "samg@test.com")
-    login(client, "samg")
+    login(mg_g_populate, "samg")
 
-    response = client.post(
+    response = mg_g_populate.post(
         "/warehouse/create",
         data=dict(
             name="Maywood warehouse",
@@ -38,12 +38,12 @@ def test_create_warehouse(client):
     assert "Warehouse added!" in response.text
     warehouses_rows_objs = db.session.execute(m.Warehouse.select()).all()
     assert len(warehouses_rows_objs) > 0
-    logout(client)
+    logout(mg_g_populate)
 
-    register("samm", "samm@test.com", role="MANAGER")
-    login(client, "samm")
+    register("samm", "samm@test.com", role=4)
+    login(mg_g_populate, "samm")
 
-    response = client.post(
+    response = mg_g_populate.post(
         "/warehouse/create",
         data=dict(
             name="Manager warehouse",
@@ -51,7 +51,7 @@ def test_create_warehouse(client):
             city="Bagmam",
             zip="unzip",
             address="sserdda",
-            manager_id=3,
+            manager_id=4,
         ),
         follow_redirects=True,
     )
@@ -70,7 +70,13 @@ def test_delete_warehouse(mg_g_populate: FlaskClient):
 
 def test_edit_warehouse(mg_g_populate: FlaskClient):
     login(mg_g_populate)
-
+    role_sales = db.session.execute(
+        m.Division.select().where(m.Division.role_name == "Sales rep")
+    ).scalar()
+    register("samm", "samm@test.com", role=role_sales.id)
+    cur_user = db.session.execute(
+        m.User.select().where(m.User.role == role_sales.id)
+    ).scalar()
     response = mg_g_populate.post(
         "/warehouse/edit",
         data=dict(
@@ -80,7 +86,7 @@ def test_edit_warehouse(mg_g_populate: FlaskClient):
             city="Baggranddad",
             zip="unzip",
             address="sserdda",
-            manager_id=2,
+            manager_id=cur_user.id,
         ),
         follow_redirects=True,
     )
@@ -101,7 +107,7 @@ def test_edit_warehouse(mg_g_populate: FlaskClient):
             city="Baggranddad",
             zip="unzip",
             address="sserdda",
-            manager_id=1,
+            manager_id=2,
         ),
         follow_redirects=True,
     )

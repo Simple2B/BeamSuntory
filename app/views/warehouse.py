@@ -12,7 +12,6 @@ from app.controllers import create_pagination
 
 from app import models as m, db
 from app import forms as f
-from app.schema import UserRole
 from app.logger import log
 
 
@@ -46,7 +45,7 @@ def get_all():
     managers = [
         man[0]
         for man in db.session.execute(
-            sa.select(m.User).where(m.User.role.in_([UserRole.WAREHOUSE_MANAGER]))
+            sa.select(m.User).where(m.User.role == "Warehouse Manager")
         ).all()
     ]
     manager_id_manager_name = {man.id: man.username for man in managers}
@@ -87,8 +86,11 @@ def create():
                 )
             )
         )
+        manager_role: m.Division = db.session.execute(
+            m.Division.select().where(m.Division.role_name == "Warehouse Manager")
+        ).scalar()
 
-        if manager.role != UserRole.WAREHOUSE_MANAGER:
+        if int(manager.role) != manager_role.id:
             flash("This user is not a warehouse manager.", "danger")
             return redirect(url_for("warehouse.get_all"))
 
@@ -136,8 +138,11 @@ def save():
                 )
             )
         )
+        manager_role: m.Division = db.session.execute(
+            m.Division.select().where(m.Division.role_name == "Warehouse Manager")
+        ).scalar()
 
-        if manager.role != UserRole.WAREHOUSE_MANAGER:
+        if int(manager.role) != manager_role.id:
             flash("This user is not a warehouse manager.", "danger")
             return redirect(url_for("warehouse.get_all"))
 

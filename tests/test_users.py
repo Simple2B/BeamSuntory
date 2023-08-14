@@ -103,7 +103,7 @@ def test_edit_user(populate_one_user: FlaskClient):
             username=user.username,
             email=user.email,
             password=user.password,
-            role=user.role.name,
+            role=user.role,
             activated=user.activated,
             approval_permission=user.approval_permission,
             street_address=new_street_address,

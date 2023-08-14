@@ -30,20 +30,12 @@ def get_all():
     if q:
         query = (
             m.Division.select()
-            .where(
-                m.Division.role_name.like(f"{q}%")
-                | m.Division.parent_role.like(f"{q}%")
-                | m.Division.status.like(f"{q}%")
-            )
+            .where(m.Division.role_name.like(f"{q}%"))
             .order_by(m.Division.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(
-                m.Division.role_name.like(f"{q}%")
-                | m.Division.parent_role.like(f"{q}%")
-                | m.Division.status.like(f"{q}%")
-            )
+            .where(m.Division.role_name.like(f"{q}%"))
             .select_from(m.Division)
         )
 
@@ -81,9 +73,16 @@ def save():
             log(log.ERROR, "Not found role by id : [%s]", form.division_id.data)
             flash("Cannot save role", "danger")
 
+        if (
+            d.role_name == "Admin"
+            or d.role_name == "Sales rep"
+            or d.role_name == "Warehouse Manager"
+        ):
+            log(log.ERROR, "Cannot edit role: [%s]", d.role_name)
+            flash("Cannot edit this role", "danger")
+            return redirect(url_for("division.get_all"))
+
         d.role_name = form.role_name.data
-        d.type = form.type.data
-        d.parent_role = form.parent_role.data
         d.activated = form.activated.data
         d.save()
 
@@ -107,8 +106,6 @@ def create():
     if form.validate_on_submit():
         division = m.Division(
             role_name=form.role_name.data,
-            type=form.type.data,
-            parent_role=form.parent_role.data,
             activated=form.activated.data,
         )
         query = m.Division.select().where(m.Division.role_name == division.role_name)

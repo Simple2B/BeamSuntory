@@ -32,6 +32,7 @@ def get_all():
     query = m.User.select().order_by(m.User.id)
     count_query = sa.select(sa.func.count()).select_from(m.User)
     if q:
+        # TODO: change search by roles
         query = (
             m.User.select()
             .where(
@@ -55,6 +56,7 @@ def get_all():
 
     groups_rows = db.session.execute(sa.select(m.Group)).all()
     master_groups_rows = db.session.execute(sa.select(m.MasterGroup)).all()
+    divisions = db.session.execute(m.Division.select()).scalars()
 
     return render_template(
         "user/users.html",
@@ -69,6 +71,7 @@ def get_all():
         main_master_groups=[i[0] for i in master_groups_rows],
         form_create=form_create,
         form_edit=form_edit,
+        divisions=divisions,
     )
 
 
