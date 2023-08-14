@@ -852,19 +852,24 @@ function setProducts(actionType: string) {
     const inboundOrderAddQuantityInput = inboundOrderAddQuantityInputs[
       i
     ] as HTMLSelectElement;
-    const shelfLifeStartInput = shelfLifeStartInputs[i] as HTMLSelectElement;
-    const shelfLifeEndInput = shelfLifeEndInputs[i] as HTMLSelectElement;
+
     const product = {
       product_id: inboundOrderAddProductSelect.value,
       quantity: inboundOrderAddQuantityInput.value,
-      shelf_life_start: shelfLifeStartInput.value.toString(),
-      shelf_life_end: shelfLifeEndInput.value.toString(),
     };
     if (actionType === 'edit') {
       const inboundOrderAddGroupSelect = inboundOrderAddGroupSelects[
         i
       ] as HTMLSelectElement;
+      const shelfLifeStartInput = shelfLifeStartInputs[i] as HTMLSelectElement;
+      const shelfLifeEndInput = shelfLifeEndInputs[i] as HTMLSelectElement;
       Object.assign(product, {group_id: inboundOrderAddGroupSelect.value});
+      Object.assign(product, {
+        shelf_life_start: shelfLifeStartInput.value.toString(),
+      });
+      Object.assign(product, {
+        shelf_life_end: shelfLifeEndInput.value.toString(),
+      });
 
       // NOTE sum qty of the same product and check if it is not more or less than available qty
       const prodId = inboundOrderAddProductSelect.value.toString();
