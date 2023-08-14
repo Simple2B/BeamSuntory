@@ -335,7 +335,7 @@ const modalOptions: ModalOptions = {
     const mstrGroupsEntries = Object.entries(product.mstr_groups_groups);
 
     mstrGroupsEntries.forEach(([key, value]: [string, string]) => {
-      deleteShipAssignButton(key.replace(/\s/g, '_'), value);
+      deleteShipAssignButton(value.replace(/\s/g, '_'), key);
     });
   },
   onShow: () => {},
@@ -355,7 +355,7 @@ const adjustModalOptions: ModalOptions = {
     const mstrGroupsEntries = Object.entries(product.mstr_groups_groups);
 
     mstrGroupsEntries.forEach(([key, value]: [string, string]) => {
-      deleteAdjustContainer(key.replace(/\s/g, '_'), value);
+      deleteAdjustContainer(value.replace(/\s/g, '_'), key);
     });
   },
   onShow: () => {},
@@ -507,23 +507,20 @@ viewProductButtonElements.forEach(e =>
   e.addEventListener('click', () => {
     const product = JSON.parse(e.getAttribute('data-target'));
     sessionStorage.setItem('product', JSON.stringify(product));
-    const mstrGroups = Object.keys(product.mstr_groups_groups);
+    const prodGroups = Object.keys(product.mstr_groups_groups);
 
-    mstrGroups.forEach(groupName => {
+    prodGroups.forEach(groupName => {
       let isEqual = false;
-      if (product.current_user_groups.hasOwnProperty(groupName)) {
-        const currentUserValue = product.current_user_groups[groupName];
-        const mstrGroupsValue = product.mstr_groups_groups[groupName];
-        if (currentUserValue.includes(mstrGroupsValue)) {
+
+      const mstrGroupName = product.mstr_groups_groups[groupName];
+      console.log('mstrGroupName', mstrGroupName);
+      if (product.current_user_groups.hasOwnProperty(mstrGroupName)) {
+        const currentUserValue = product.current_user_groups[mstrGroupName];
+        if (currentUserValue.includes(groupName)) {
           isEqual = true;
         }
       }
-      addShipAssignShareButton(
-        isEqual,
-        groupName,
-        product.mstr_groups_groups[groupName],
-        product,
-      );
+      addShipAssignShareButton(isEqual, mstrGroupName, groupName, product);
     });
 
     let div: HTMLDivElement = document.querySelector('#product-view-name');
@@ -562,22 +559,20 @@ adjustProductButtonElements.forEach(e =>
   e.addEventListener('click', () => {
     const product = JSON.parse(e.getAttribute('data-target'));
     sessionStorage.setItem('product', JSON.stringify(product));
-    const mstrGroups = Object.keys(product.mstr_groups_groups);
-    mstrGroups.forEach(groupName => {
+    const prodGroups = Object.keys(product.mstr_groups_groups);
+
+    prodGroups.forEach(groupName => {
       let isEqual = false;
-      if (product.current_user_groups.hasOwnProperty(groupName)) {
-        const currentUserValue = product.current_user_groups[groupName];
-        const mstrGroupsValue = product.mstr_groups_groups[groupName];
-        if (currentUserValue.includes(mstrGroupsValue)) {
+
+      const mstrGroupName = product.mstr_groups_groups[groupName];
+      console.log('mstrGroupName', mstrGroupName);
+      if (product.current_user_groups.hasOwnProperty(mstrGroupName)) {
+        const currentUserValue = product.current_user_groups[mstrGroupName];
+        if (currentUserValue.includes(groupName)) {
           isEqual = true;
         }
       }
-      createAdjustAction(
-        isEqual,
-        groupName,
-        product.mstr_groups_groups[groupName],
-        product,
-      );
+      createAdjustAction(isEqual, mstrGroupName, groupName, product);
     });
 
     let div: HTMLDivElement = document.querySelector('#product-adjust-name');
@@ -851,7 +846,7 @@ function addShipAssignShareButton(
 
   productMasterGroupContainer.innerHTML = `
     <label for="for-group-${group}"
-      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">${group}</label>
+      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">${masterGroup}</label>
     <select type="text" name="group-${group}" id="product-view-${group}"
       class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
       placeholder="Some Group" required

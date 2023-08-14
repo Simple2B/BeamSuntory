@@ -71,13 +71,16 @@ class Product(db.Model, ModelMixin):
             UserGroup.select().where(UserGroup.left_id == current_user.id)
         ).all()
         # here we get dict of current product group_name:master_group_name
-        # example: {'Martini': 'Brand', 'Fr': 'Language', 'US': 'Country'}
-        mstr_groups_groups = {
-            i[0].parent.master_groups.name: i[0].parent.name
-            for i in current_product_products_groups_rows
+        # example: {'Brand': 'Martini', 'Fr': 'Language', 'Country': 'US'}
+        whp = db.session.execute(
+            WarehouseProduct.select().where(
+                WarehouseProduct.product_id == mg_dict["id"]
+            )
+        ).scalars()
+        mg_dict["mstr_groups_groups"] = {
+            i.group.name: i.group.master_groups.name for i in whp
         }
 
-        mg_dict["mstr_groups_groups"] = mstr_groups_groups
         mg_dict["current_user_groups"] = {
             grps[0].parent.master_groups.name: [
                 g[0].parent.name
