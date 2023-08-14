@@ -576,9 +576,9 @@ def request_share():
         return redirect(url_for("product.get_all"))
 
 
-@product_blueprint.route("/deplete/", methods=["POST"])
+@product_blueprint.route("/adjust/", methods=["POST"])
 @login_required
-def deplete():
+def adjust():
     form: f.DepleteProductForm = f.DepleteProductForm()
     product_desire_quantity = int(form.quantity.data)
 
@@ -590,15 +590,6 @@ def deplete():
                 m.WarehouseProduct.group_id == form.group_id.data,
             )
         ).scalar()
-
-    if not warehouse_product:
-        log(
-            log.INFO,
-            "These product is not in warehouse. Product id: [%s]",
-            form.product_id.data,
-        )
-        flash("These product was depleted", "danger")
-        return redirect(url_for("product.get_all"))
 
     product_name = (
         db.session.execute(
@@ -615,15 +606,29 @@ def deplete():
         .name
     )
 
-    if warehouse_product.product_quantity < product_desire_quantity:
+    if not warehouse_product:
         log(
             log.INFO,
-            "Not enough products in warehouse. Product id: [%s]",
+            "These product is not in warehouse. Product id: [%s]",
             form.product_id.data,
         )
         return (
             jsonify(
-                message=f"Not enough product {product_name} in warehouse {warehouse_name}",
+                message=f"""Product "{product_name}" is out of warehouse "{warehouse_name}".""",
+            ),
+            200,
+        )
+
+    if warehouse_product.product_quantity == product_desire_quantity:
+        log(
+            log.INFO,
+            "Quantity of product is the same. Product id: [%s]",
+            form.product_id.data,
+        )
+        return (
+            jsonify(
+                message=f"""Quantity of product "{product_name}" in warehouse "{warehouse_name}"
+                    is the same as you want to change.""",
             ),
             200,
         )
@@ -633,13 +638,14 @@ def deplete():
 
     log(
         log.INFO,
-        "Deplete product: [%s][%s",
+        "Adjust product: [%s][%s",
         form.product_id.data,
         form.warehouse_id.data,
     )
     return (
         jsonify(
-            message=f"Product {product_name} in warehouse {warehouse_name} was depleted",
+            message=f"""Quantity of Product "{product_name}" in warehouse "{warehouse_name}"
+                was changed to {product_desire_quantity}""",
         ),
         201,
     )
