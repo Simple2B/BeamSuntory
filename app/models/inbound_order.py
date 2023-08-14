@@ -8,7 +8,6 @@ from app.database import db
 from .utils import ModelMixin
 from app import schema as s
 from .supplier import Supplier
-from .delivery_agent import DeliveryAgent
 from .warehouse import Warehouse
 from .product import Product
 from .group import Group
@@ -42,10 +41,6 @@ class InboundOrder(db.Model, ModelMixin):
 
     supplier_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("suppliers.id"))
     supplier: orm.Mapped[Supplier] = orm.relationship()
-    delivery_agent_id: orm.Mapped[int] = orm.mapped_column(
-        sa.ForeignKey("delivery_agents.id"), nullable=True
-    )
-    delivery_agent: orm.Mapped[DeliveryAgent] = orm.relationship()
     warehouse_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("warehouses.id"))
     warehouse: orm.Mapped[Warehouse] = orm.relationship()
     io_allocate_products: orm.Mapped[IOAllocateProduct] = orm.relationship(
@@ -80,7 +75,6 @@ class InboundOrder(db.Model, ModelMixin):
 
         mg_dict["sup_da_wh_prod_objs"] = {
             "supplier": current_io.supplier.name,
-            "delivery_agent": current_io.delivery_agent.username,
             "warehouse": current_io.warehouse.name,
         }
 
