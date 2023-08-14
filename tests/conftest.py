@@ -214,7 +214,6 @@ def mg_g_populate(client: FlaskClient):
         delivery_date=datetime.datetime.strptime("07/19/2023", "%m/%d/%Y"),
         status="Delivered",
         supplier_id=1,
-        delivery_agent_id=1,
         warehouse_id=1,
     ).save(False)
 
@@ -295,7 +294,6 @@ def mg_g_populate(client: FlaskClient):
         delivery_date=datetime.datetime.strptime("07/19/2023", "%m/%d/%Y"),
         status="Assigned to pickup",
         supplier_id=1,
-        delivery_agent_id=1,
         warehouse_id=1,
     ).save(False)
 
@@ -307,7 +305,6 @@ def mg_g_populate(client: FlaskClient):
         delivery_date=datetime.datetime.strptime("07/19/2023", "%m/%d/%Y"),
         status="In transit",
         supplier_id=1,
-        delivery_agent_id=1,
         warehouse_id=1,
     )
     io_it.save(False)
