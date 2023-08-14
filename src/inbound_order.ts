@@ -19,7 +19,6 @@ const timepickerMaxMin = new Timepicker(pickerInline, {
 
 interface SupDAWhProd {
   supplier: string;
-  delivery_agent: string;
   warehouse: string;
   product: string;
 }
@@ -33,7 +32,6 @@ interface IInboundOrder {
   delivery_date: string;
   status: string;
   supplier_id: number;
-  delivery_agent_id: number;
   warehouse_id: number;
   sup_da_wh_prod_objs: SupDAWhProd;
   products: IProduct[];
@@ -84,6 +82,9 @@ const $modalElement: HTMLElement = document.querySelector(
 const $addInboundOrderModalElement: HTMLElement = document.querySelector(
   '#add-inbound-order-modal',
 );
+const $viewInboundOrderModalElement: HTMLElement = document.querySelector(
+  '#view-inbound-order-modal',
+);
 
 const modalOptions: ModalOptions = {
   placement: 'bottom-right',
@@ -101,7 +102,7 @@ const modalOptions: ModalOptions = {
     sessionStorage.removeItem('inboundOrder');
   },
   onShow: () => {
-    console.log('inbound-order id: ');
+    console.log('inbound-order modal Show ');
   },
   onToggle: () => {
     console.log('modal has been toggled');
@@ -129,6 +130,10 @@ const modal: ModalInterface = new Modal($modalElement, modalOptions);
 const addModal: ModalInterface = new Modal(
   $addInboundOrderModalElement,
   addModalOptions,
+);
+const viewModal: ModalInterface = new Modal(
+  $viewInboundOrderModalElement,
+  modalOptions,
 );
 
 const $buttonElements = document.querySelectorAll('.inbound-order-edit-button');
@@ -224,8 +229,6 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
   input.value = inboundOrder.status;
   input = document.querySelector('#inbound-order-edit-supplier_id');
   input.value = inboundOrder.supplier_id.toString();
-  input = document.querySelector('#inbound-order-edit-delivery_agent_id');
-  input.value = inboundOrder.delivery_agent_id.toString();
   input = document.querySelector('#inbound-order-edit-warehouse_id');
   input.value = inboundOrder.warehouse_id.toString();
   input = document.querySelector('#inbound-order-edit-next_url');
@@ -234,10 +237,13 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
   if (Object.keys(inboundOrder.inbound_order_prods).length > 0) {
     const currentInboundOrder =
       inboundOrder.inbound_order_prods[inboundOrder.order_id];
+    // console.log('currentInboundOrder', currentInboundOrder);
     const inboundOrderProductsInputs =
       document.querySelectorAll<HTMLSelectElement>(
         '.inbound-order-edit-add-product',
       );
+    // TODO inboundOrderProductsInputs BECOMES EMPTY AFTER FIRST ITERATION. Can't open edit modal again
+    // console.log('inboundOrderProductsInputs', inboundOrderProductsInputs);
     const inboundOrderGroupsInputs =
       document.querySelectorAll<HTMLSelectElement>(
         '.inbound-order-edit-add-group',
@@ -295,7 +301,10 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
         selectedProductAllocateId,
       );
 
-      allocateQtyInput.innerHTML = String(currentInboundOrder[0].quantity);
+      const inboundOrderCheckQuantityInputHidden: HTMLDivElement =
+        document.querySelector(
+          `#inbound-order-edit-check-quantity-${selectedProduct}-hidden`,
+        );
 
       const changedQuantityInputs = document.querySelectorAll<HTMLInputElement>(
         `#${selectedProductQtyId}`,
@@ -305,9 +314,9 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
 
       changedQuantityInputs.forEach((input: HTMLInputElement) => {
         totalProductChangedQty += Number(input.value);
-
         allocateQtyInput.innerHTML = (
-          currentInboundOrder[0].quantity - totalProductChangedQty
+          Number(inboundOrderCheckQuantityInputHidden.innerHTML) -
+          totalProductChangedQty
         ).toString();
       });
     });
@@ -334,6 +343,7 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
       document.querySelectorAll<HTMLInputElement>(
         '.inbound-order-edit-check-quantity-hidden',
       );
+    // console.log('currentInboundOrderCheck', currentInboundOrderCheck);
 
     if (currentInboundOrderCheck) {
       for (let i = 0; i < currentInboundOrderCheck.length; i++) {
@@ -345,12 +355,33 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
           const inboundOrderQuantityCheckInputHidden =
             inboundOrderQuantityCheckInputsHidden[i];
 
+          const ioProdQtyCheckInput =
+            document.querySelectorAll<HTMLInputElement>(
+              `io-product-input-qty-${currentInboundOrderCheck[i].product.name}`,
+            );
+          // console.log(
+          //   'ioProdQtyCheckInput',
+          //   `io-product-input-qty-${currentInboundOrderCheck[i].product.name}`,
+          //   ioProdQtyCheckInput,
+          // );
+          // TODO ioProdQtyCheckInput is empty on modal open. Can't calculate total qty - selected products
+
           inboundOrderProductCheckInput.innerHTML = String(
             currentInboundOrderCheck[i].product.name,
           );
-          inboundOrderQuantityCheckInput.innerHTML = String(
-            currentInboundOrderCheck[i].quantity,
-          );
+          if (ioProdQtyCheckInput) {
+            let preselectedQty = 0;
+            ioProdQtyCheckInput.forEach((input: HTMLInputElement) => {
+              preselectedQty += Number(input.value);
+            });
+            inboundOrderQuantityCheckInput.innerHTML = String(
+              Number(currentInboundOrderCheck[i].quantity) - preselectedQty,
+            );
+          } else {
+            inboundOrderQuantityCheckInput.innerHTML = String(
+              currentInboundOrderCheck[i].quantity,
+            );
+          }
           inboundOrderQuantityCheckInputHidden.innerHTML = String(
             currentInboundOrderCheck[i].quantity,
           );
@@ -400,8 +431,6 @@ viewInboundOrderButtonElements.forEach(e =>
     div.innerHTML = inboundOrder.status;
     div = document.querySelector('#inbound-order-view-supplier_id');
     div.innerHTML = inboundOrder.sup_da_wh_prod_objs.supplier;
-    div = document.querySelector('#inbound-order-view-delivery_agent_id');
-    div.innerHTML = inboundOrder.sup_da_wh_prod_objs.delivery_agent;
     div = document.querySelector('#inbound-order-view-warehouse_id');
     div.innerHTML = inboundOrder.sup_da_wh_prod_objs.warehouse;
   }),
@@ -452,7 +481,6 @@ function createInboundOrderCheckItems(
     inboundOrderCheckItem.querySelector(
       '.inbound-order-edit-check-quantity-hidden',
     );
-  console.log('inboundOrderCheckItem', inboundOrderCheckItem);
 
   if (curInbOrder) {
     inboundOrderCheckProductInput.innerHTML = String(curInbOrder.product.name);
@@ -643,6 +671,7 @@ function createInboundOrderItems(
           ].text
         }-hidden`,
       );
+
     inboundOrderCheckQuantityInput.innerHTML =
       inboundOrderCheckQuantityInputHidden.innerHTML;
 
@@ -823,19 +852,24 @@ function setProducts(actionType: string) {
     const inboundOrderAddQuantityInput = inboundOrderAddQuantityInputs[
       i
     ] as HTMLSelectElement;
-    const shelfLifeStartInput = shelfLifeStartInputs[i] as HTMLSelectElement;
-    const shelfLifeEndInput = shelfLifeEndInputs[i] as HTMLSelectElement;
+
     const product = {
       product_id: inboundOrderAddProductSelect.value,
       quantity: inboundOrderAddQuantityInput.value,
-      shelf_life_start: shelfLifeStartInput.value.toString(),
-      shelf_life_end: shelfLifeEndInput.value.toString(),
     };
     if (actionType === 'edit') {
       const inboundOrderAddGroupSelect = inboundOrderAddGroupSelects[
         i
       ] as HTMLSelectElement;
+      const shelfLifeStartInput = shelfLifeStartInputs[i] as HTMLSelectElement;
+      const shelfLifeEndInput = shelfLifeEndInputs[i] as HTMLSelectElement;
       Object.assign(product, {group_id: inboundOrderAddGroupSelect.value});
+      Object.assign(product, {
+        shelf_life_start: shelfLifeStartInput.value.toString(),
+      });
+      Object.assign(product, {
+        shelf_life_end: shelfLifeEndInput.value.toString(),
+      });
 
       // NOTE sum qty of the same product and check if it is not more or less than available qty
       const prodId = inboundOrderAddProductSelect.value.toString();
