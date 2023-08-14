@@ -25,8 +25,6 @@ def test_create_division(client):
         "/division/create",
         data=dict(
             role_name="Sales_Rep",
-            type="User",
-            parent_role="Manager",
             activated=True,
         ),
         follow_redirects=True,
@@ -42,11 +40,13 @@ def test_create_division(client):
 def test_delete_division(mg_g_populate: FlaskClient):
     login(mg_g_populate)
 
+    divisions_rows_objs = db.session.execute(m.Division.select()).all()
+    assert len(divisions_rows_objs) == 4
     response = mg_g_populate.delete("/division/delete/1")
     assert response.status_code == 200
     assert "ok" in response.text
     divisions_rows_objs = db.session.execute(m.Division.select()).all()
-    assert len(divisions_rows_objs) == 0
+    assert len(divisions_rows_objs) == 3
 
 
 def test_edit_division(mg_g_populate: FlaskClient):
@@ -56,15 +56,13 @@ def test_edit_division(mg_g_populate: FlaskClient):
         "/division/save",
         data=dict(
             division_id=1,
-            role_name="Warehouse_Manager",
-            parent_role="Manager",
+            role_name="Warehouse Manager",
             activated=False,
-            type="Master",
         ),
     )
     assert response.status_code == 302
     assert "division" in response.text
     divisions_rows_objs = db.session.execute(
-        m.Division.select().where(m.Division.role_name == "Warehouse_Manager")
+        m.Division.select().where(m.Division.role_name == "Warehouse Manager")
     ).all()
     assert len(divisions_rows_objs) > 0

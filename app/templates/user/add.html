@@ -32,10 +32,9 @@
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Street Address" required>
               <option selected="selected" value="" disabled>Choose Role</option>
-              <option value="ADMIN">Admin</option>
-              <option value="MANAGER">Manager</option>
-              <option value="SALES_REP">Sales Rep</option>
-              <option value="WAREHOUSE_MANAGER">Warehouse Manager</option>
+              {% for division in divisions %}
+              <option value="{{ division.id }}">{{ division.role_name }}</option>
+              {% endfor %}
             </select>
           </div>
           <div class="col-span-6 sm:col-span-3">

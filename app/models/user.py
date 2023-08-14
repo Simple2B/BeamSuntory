@@ -10,6 +10,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app.database import db
+from app.models.division import Division
 from .utils import ModelMixin
 from .group import Group
 from .user_group import UserGroup
@@ -61,7 +62,9 @@ class User(db.Model, UserMixin, ModelMixin):
     image: orm.Mapped[str] = orm.mapped_column(
         sa.String(255), nullable=True, default="png"
     )
-    role: orm.Mapped[s.UserRole]
+    role: orm.Mapped[int] = orm.mapped_column(
+        sa.ForeignKey("divisions.id"), nullable=False
+    )
     country: orm.Mapped[str] = orm.mapped_column(
         sa.String(255),
         nullable=False,
@@ -85,7 +88,6 @@ class User(db.Model, UserMixin, ModelMixin):
     approval_permission: orm.Mapped[bool] = orm.mapped_column(sa.Boolean, default=False)
     sales_rep: orm.Mapped[bool] = orm.mapped_column(sa.Boolean, default=False)
     phone_number: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=True)
-    division: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("divisions.id"), nullable=True)
 
     @hybrid_property
     def password(self):
@@ -139,6 +141,13 @@ class User(db.Model, UserMixin, ModelMixin):
             u_dict["group_name"] = ", ".join([g.name for g in groups_obj])
         else:
             u_dict["group_name"] = "Without group"
+
+        u_dict["role_name"] = (
+            db.session.execute(Division.select().where(Division.id == u_dict["role"]))
+            .scalars()
+            .first()
+            .role_name
+        )
         return json.dumps(u_dict)
 
 

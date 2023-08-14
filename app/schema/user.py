@@ -4,7 +4,6 @@ from pydantic import BaseModel
 
 class UserRole(Enum):
     ADMIN = "admin"
-    MANAGER = "manager"
     SALES_REP = "sales_rep"
     WAREHOUSE_MANAGER = "warehouse_manager"
 
@@ -14,7 +13,7 @@ class User(BaseModel):
     username: str
     email: str
     image: str
-    role: UserRole
+    role: int
     activated: bool
     approval_permission: bool
     street_address: str

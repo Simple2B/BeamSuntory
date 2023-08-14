@@ -7,7 +7,7 @@ from wtforms import (
     ValidationError,
     BooleanField,
 )
-from wtforms.validators import DataRequired, Email, Length, EqualTo
+from wtforms.validators import DataRequired, Email, EqualTo
 
 from app import models as m
 from app import db
@@ -74,7 +74,7 @@ class NewUserForm(FlaskForm):
         "Confirm Password",
         default=DEFAULT_USER_PASSWORD,
     )
-    role = StringField("Role", validators=[DataRequired(), Length(2, 30)])
+    role = StringField("Role", validators=[DataRequired()])
     country = StringField("Country", [DataRequired()])
     region = StringField("Region", [DataRequired()])
     city = StringField("City", [DataRequired()])

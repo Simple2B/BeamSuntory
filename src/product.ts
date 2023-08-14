@@ -318,8 +318,8 @@ const $addProductModalElement: HTMLElement =
 const $viewProductModalElement: HTMLElement = document.querySelector(
   '#view-product-modal',
 );
-const $depleteProductModalElement: HTMLElement = document.querySelector(
-  '#deplete-product-modal',
+const $adjustProductModalElement: HTMLElement = document.querySelector(
+  '#adjust-product-modal',
 );
 const $editProductModalElement: HTMLElement =
   document.querySelector('#editProductModal');
@@ -344,7 +344,7 @@ const modalOptions: ModalOptions = {
   },
 };
 
-const depleteModalOptions: ModalOptions = {
+const adjustModalOptions: ModalOptions = {
   placement: 'bottom-right',
   backdrop: 'dynamic',
   backdropClasses:
@@ -355,7 +355,7 @@ const depleteModalOptions: ModalOptions = {
     const mstrGroupsEntries = Object.entries(product.mstr_groups_groups);
 
     mstrGroupsEntries.forEach(([key, value]: [string, string]) => {
-      deleteDepleteContainer(key.replace(/\s/g, '_'), value);
+      deleteAdjustContainer(key.replace(/\s/g, '_'), value);
     });
   },
   onShow: () => {},
@@ -383,9 +383,9 @@ const viewModal: ModalInterface = new Modal(
   $viewProductModalElement,
   modalOptions,
 );
-const depleteModal: ModalInterface = new Modal(
-  $depleteProductModalElement,
-  depleteModalOptions,
+const adjustModal: ModalInterface = new Modal(
+  $adjustProductModalElement,
+  adjustModalOptions,
 );
 const editModal: ModalInterface = new Modal(
   $editProductModalElement,
@@ -555,10 +555,10 @@ viewProductButtonElements.forEach(e =>
   }),
 );
 
-const depleteProductButtonElements = document.querySelectorAll(
-  '.product-deplete-button',
+const adjustProductButtonElements = document.querySelectorAll(
+  '.product-adjust-button',
 );
-depleteProductButtonElements.forEach(e =>
+adjustProductButtonElements.forEach(e =>
   e.addEventListener('click', () => {
     const product = JSON.parse(e.getAttribute('data-target'));
     sessionStorage.setItem('product', JSON.stringify(product));
@@ -572,7 +572,7 @@ depleteProductButtonElements.forEach(e =>
           isEqual = true;
         }
       }
-      createDepleteAction(
+      createAdjustAction(
         isEqual,
         groupName,
         product.mstr_groups_groups[groupName],
@@ -580,21 +580,21 @@ depleteProductButtonElements.forEach(e =>
       );
     });
 
-    let div: HTMLDivElement = document.querySelector('#product-deplete-name');
+    let div: HTMLDivElement = document.querySelector('#product-adjust-name');
     div.innerHTML = product.name;
-    div = document.querySelector('#product-deplete-id');
+    div = document.querySelector('#product-adjust-id');
     div.innerHTML = product.id.toString();
     const img: HTMLImageElement = document.querySelector(
-      '#product-deplete-image',
+      '#product-adjust-image',
     );
     product.image.length > 100
       ? (img.src = `data:image/png;base64, ${product.image}`)
       : (img.src = defaultBrandImage);
-    div = document.querySelector('#product-deplete-product_type');
+    div = document.querySelector('#product-adjust-product_type');
     div.innerHTML = product.product_type.toUpperCase().split(' ').join('_');
-    div = document.querySelector('#product-deplete-next_url');
+    div = document.querySelector('#product-adjust-next_url');
     div.innerHTML = window.location.href;
-    depleteModal.show();
+    adjustModal.show();
   }),
 );
 
@@ -972,7 +972,7 @@ function getSessionStorageObject(
   }
 }
 
-function createDepleteAction(
+function createAdjustAction(
   isEqual: boolean,
   masterGroup: string,
   group: string,
@@ -980,54 +980,54 @@ function createDepleteAction(
 ) {
   const groupProductIds = productParam.groups_ids;
   const productTypeContainer = document.querySelector(
-    `#product-deplete-product_type-container`,
+    `#product-adjust-product_type-container`,
   );
-  const depleteContainer = document.createElement('div');
-  depleteContainer.classList.add('sm:col-span-2', 'flex', 'gap-4');
-  depleteContainer.setAttribute(
+  const adjustContainer = document.createElement('div');
+  adjustContainer.classList.add('sm:col-span-2', 'flex', 'gap-4');
+  adjustContainer.setAttribute(
     'id',
-    `product-deplete-container-${group.replace(/ /g, '_')}`,
+    `product-adjust-container-${group.replace(/ /g, '_')}`,
   );
-  depleteContainer.innerHTML = `
+  adjustContainer.innerHTML = `
     <div>
-      <label for="deplete-product-quantity-${group.replace(
+      <label for="adjust-product-quantity-${group.replace(
         / /g,
         '_',
       )}" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
-        <input id="deplete-product-quantity-${group.replace(/ /g, '_')}"
+        <input id="adjust-product-quantity-${group.replace(/ /g, '_')}"
           class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
     </div>
     <div>
       <label for="product_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Action</label >
-      <button deplete-group-data=${group.replace(
+      <button adjust-group-data=${group.replace(
         / /g,
         '_',
-      )} type="button" id="deplete-product-button-${group.replace(
+      )} type="button" id="adjust-product-button-${group.replace(
     / /g,
     '_',
-  )}" class="deplete-product-button inline-flex items-center mr-2 px-3 py-2.5 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
+  )}" class="adjust-product-button inline-flex items-center mr-2 px-3 py-2.5 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
         <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
-        Deplete
+        Adjust
       </button>
     </div>
   `;
-  const depleteProductBtn = depleteContainer.querySelector(
-    `#deplete-product-button-${group.replace(/ /g, '_')}`,
+  const adjustProductBtn = adjustContainer.querySelector(
+    `#adjust-product-button-${group.replace(/ /g, '_')}`,
   );
 
   productTypeContainer.parentNode.insertBefore(
-    depleteContainer,
+    adjustContainer,
     productTypeContainer.nextSibling,
   );
 
   const productViewTypeContainer = document.querySelector(
-    '#product-deplete-product_type-container',
+    '#product-adjust-product_type-container',
   );
   const masterGroupWarehouseContainer = document.createElement('div');
   masterGroupWarehouseContainer.classList.add('sm:col-span-4');
   masterGroupWarehouseContainer.setAttribute(
     'id',
-    `product-deplete-product_group-container-${group.replace(/ /g, '_')}`,
+    `product-adjust-product_group-container-${group.replace(/ /g, '_')}`,
   );
 
   masterGroupWarehouseContainer.innerHTML = `
@@ -1035,7 +1035,7 @@ function createDepleteAction(
   <div class="w-2/4">
     <label for="for-group-${group}"
       class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">${masterGroup}</label>
-    <select type="text" name="group-${group}" id="master-group-deplete-${group}"
+    <select type="text" name="group-${group}" id="master-group-adjust-${group}"
       class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
       placeholder="Some Group" required
     >
@@ -1045,7 +1045,7 @@ function createDepleteAction(
   <div class="w-2/4">
     <label for="for-warehouse-${group}"
       class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Warehouse</label>
-    <select type="text" name="group-${group}" id="warehouse-deplete-${group}"
+    <select type="text" name="group-${group}" id="warehouse-adjust-${group}"
       class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
       placeholder="Some Group" required
     >
@@ -1055,9 +1055,9 @@ function createDepleteAction(
     `;
 
   const selectWarehouse: HTMLInputElement =
-    masterGroupWarehouseContainer.querySelector(`#warehouse-deplete-${group}`);
-  const productQuantity: HTMLInputElement = depleteContainer.querySelector(
-    `#deplete-product-quantity-${group.replace(/ /g, '_')}`,
+    masterGroupWarehouseContainer.querySelector(`#warehouse-adjust-${group}`);
+  const productQuantity: HTMLInputElement = adjustContainer.querySelector(
+    `#adjust-product-quantity-${group.replace(/ /g, '_')}`,
   );
 
   const productQuantityValue = productParam.available_quantity[group] || 0;
@@ -1076,10 +1076,10 @@ function createDepleteAction(
     productViewTypeContainer.nextSibling,
   );
 
-  const depleteButton = document.querySelector(
-    `#deplete-product-button-${group.replace(/ /g, '_')}`,
+  const adjustButton = document.querySelector(
+    `#adjust-product-button-${group.replace(/ /g, '_')}`,
   );
-  depleteButton.addEventListener('click', () => {
+  adjustButton.addEventListener('click', () => {
     const csrfTokenInput =
       document.querySelector<HTMLInputElement>('#csrf_token');
     const csrfToken = csrfTokenInput ? csrfTokenInput.value : '';
@@ -1087,7 +1087,7 @@ function createDepleteAction(
     const productId = productParam.id;
     const warehouseId = selectWarehouse.value;
     const currentQuantity = Number(productQuantity.value);
-    depleteProduct(
+    adjustProduct(
       warehouseId,
       productId,
       currentQuantity,
@@ -1098,7 +1098,7 @@ function createDepleteAction(
   });
 }
 
-async function depleteProduct(
+async function adjustProduct(
   warehouseId: string,
   productId: number,
   quantity: number,
@@ -1114,7 +1114,7 @@ async function depleteProduct(
     csrf_token: csrfToken,
   };
 
-  const response = await fetch('/product/deplete', {
+  const response = await fetch('/product/adjust', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -1124,12 +1124,12 @@ async function depleteProduct(
 
   const message = await response.json();
   const groupContainer = document.querySelector(
-    `#product-deplete-product_group-container-${group.replace(/ /g, '_')}`,
+    `#product-adjust-product_group-container-${group.replace(/ /g, '_')}`,
   );
 
   if (response.status === 201) {
     const productQuantity: HTMLInputElement = document.querySelector(
-      `#deplete-product-quantity-${group.replace(/ /g, '_')}`,
+      `#adjust-product-quantity-${group.replace(/ /g, '_')}`,
     );
     productQuantity.value = quantity.toString();
     const successMessage = document.createElement('div');
@@ -1150,18 +1150,18 @@ async function depleteProduct(
   }
 }
 
-function deleteDepleteContainer(nameGroup: string, nameGroupValue: string) {
-  const depleteContainer = document.querySelector(
-    `#product-deplete-container-${nameGroupValue.replace(/ /g, '_')}`,
+function deleteAdjustContainer(nameGroup: string, nameGroupValue: string) {
+  const adjustContainer = document.querySelector(
+    `#product-adjust-container-${nameGroupValue.replace(/ /g, '_')}`,
   );
   const masterGroupWarehouseContainer = document.querySelector(
-    `#product-deplete-product_group-container-${nameGroupValue.replace(
+    `#product-adjust-product_group-container-${nameGroupValue.replace(
       / /g,
       '_',
     )}`,
   );
-  if (depleteContainer) {
-    depleteContainer.remove();
+  if (adjustContainer) {
+    adjustContainer.remove();
   }
   if (masterGroupWarehouseContainer) {
     masterGroupWarehouseContainer.remove();

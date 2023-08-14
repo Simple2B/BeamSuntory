@@ -4,7 +4,7 @@ TEST_ADMIN_NAME = "bob"
 TEST_ADMIN_EMAIL = "bob@test.com"
 TEST_ADMIN_PASSWORD = "password"
 TEST_ADMIN_FULL_NAME = "bob suntory"
-TEST_ADMIN_ROLE = "WAREHOUSE_MANAGER"
+TEST_ADMIN_ROLE = 3
 
 
 def register(

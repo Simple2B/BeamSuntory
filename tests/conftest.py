@@ -49,12 +49,17 @@ def runner(app, client):
 @pytest.fixture
 def populate(client: FlaskClient):
     NUM_TEST_USERS = 16
+    for role in ["Admin", "Sales rep", "Warehouse Manager", "Manager"]:
+        m.Division(role_name=role, activated=True).save()
+    role = db.session.execute(
+        m.Division.select().where(m.Division.role_name == "Manager")
+    ).scalar()
     for i in range(NUM_TEST_USERS):
         m.User(
             username=f"user{i+1}",
             email=f"user{i+1}@mail.com",
             password="password",
-            role="MANAGER",
+            role=role.id,
             activated=True,
             approval_permission=True,
             street_address="street",
@@ -71,11 +76,16 @@ def populate(client: FlaskClient):
 
 @pytest.fixture
 def populate_one_user(client: FlaskClient):
+    for role in ["Admin", "Sales rep", "Warehouse Manager"]:
+        m.Division(role_name=role, activated=True).save()
+    role = db.session.execute(
+        m.Division.select().where(m.Division.role_name == "Warehouse Manager")
+    ).scalar()
     m.User(
         username="user",
         email="user@mail.com",
         password="password",
-        role="MANAGER",
+        role=role.id,
         activated=True,
         approval_permission=True,
         street_address="street",
@@ -94,12 +104,16 @@ def populate_one_user(client: FlaskClient):
 def mg_g_populate(client: FlaskClient):
     master_groups = ["Country", "Brand"]
     groups = {"Canada": "1", "JB": "2", "Bombay": "2"}
-
+    for role in ["Admin", "Sales rep", "Warehouse Manager"]:
+        m.Division(role_name=role, activated=True).save()
+    role = db.session.execute(
+        m.Division.select().where(m.Division.role_name == "Warehouse Manager")
+    ).scalar()
     m.User(
         username="user1",
         email="user1@mail.com",
         password="password",
-        role="MANAGER",
+        role=role.id,
         activated=True,
         approval_permission=True,
         street_address="street",
@@ -229,7 +243,6 @@ def mg_g_populate(client: FlaskClient):
 
     m.StoreCategory(
         name="Bar",
-        parent_category=None,
         active=True,
         image="",
     ).save(False)
@@ -339,8 +352,6 @@ def mg_g_populate(client: FlaskClient):
 
     m.Division(
         role_name="Manager",
-        type="Master",
-        parent_role="Admin",
         activated=True,
     ).save(False)
 

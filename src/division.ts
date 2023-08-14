@@ -84,19 +84,7 @@ function editDivision(division: IDivision) {
   input.value = division.role_name;
   input = document.querySelector('#division-edit-id');
   input.value = division.id.toString();
-  input = document.querySelector('#division-edit-type');
-  input.value = division.type;
 
-  document.getElementById('division-edit-parent-role').innerHTML = '';
-  let select: HTMLSelectElement = document.querySelector(
-    '#division-edit-parent-role',
-  );
-  division.possible_parent_roles.forEach(optionValue => {
-    select.add(new Option(optionValue, optionValue));
-  });
-
-  input = document.querySelector('#division-edit-parent-role');
-  input.value = division.parent_role;
   input = document.querySelector('#division-edit-activated');
   input.checked = division.activated;
 
