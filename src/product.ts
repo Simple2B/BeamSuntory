@@ -1108,8 +1108,11 @@ async function adjustProduct(
     group_id: groupId,
     csrf_token: csrfToken,
   };
+  const base_url = window.location.origin;
+  // TODO: delete log
+  console.log('base_url', base_url);
 
-  const response = await fetch('/product/adjust', {
+  const response = await fetch(`${base_url}/product/adjust`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
