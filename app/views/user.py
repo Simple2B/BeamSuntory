@@ -56,7 +56,7 @@ def get_all():
 
     groups_rows = db.session.execute(sa.select(m.Group)).all()
     master_groups_rows = db.session.execute(sa.select(m.MasterGroup)).all()
-    divisions = db.session.execute(m.Division.select()).scalars()
+    divisions = [i for i in db.session.execute(m.Division.select()).scalars()]
 
     return render_template(
         "user/users.html",
