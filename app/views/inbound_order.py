@@ -76,12 +76,6 @@ def get_all():
                 m.Supplier.select().order_by(m.Supplier.id)
             ).scalars()
         ],
-        delivery_agents=[
-            da
-            for da in db.session.execute(
-                m.DeliveryAgent.select().order_by(m.DeliveryAgent.id)
-            ).scalars()
-        ],
         warehouses=[
             w
             for w in db.session.execute(
@@ -128,7 +122,6 @@ def save():
         )
         io.status = form.status.data
         io.supplier_id = form.supplier_id.data
-        io.delivery_agent_id = form.delivery_agent_id.data
         io.warehouse_id = form.warehouse_id.data
         io.save()
 
@@ -220,7 +213,6 @@ def create():
             status=form.status.data,
             supplier_id=form.supplier_id.data,
             warehouse_id=form.warehouse_id.data,
-            delivery_agent_id=form.delivery_agent_id.data,
         )
         inbound_order.save()
         log(log.INFO, "Form submitted. Inbound order: [%s]", inbound_order)

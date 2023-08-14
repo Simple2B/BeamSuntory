@@ -14,7 +14,6 @@ class InboundOrderForm(FlaskForm):
     delivery_date = StringField("Delivery date", [DataRequired()])  # datetime
     status = StringField("Status", [DataRequired()])
     supplier_id = IntegerField("Supplier ID", [DataRequired()])
-    delivery_agent_id = IntegerField("Delivery agent ID", [DataRequired()])
     warehouse_id = IntegerField("Warehouse ID", [DataRequired()])
     products = StringField("Products", [DataRequired()])
 
@@ -39,7 +38,6 @@ class NewInboundOrderForm(FlaskForm):
     status = StringField("Status", [DataRequired()])
     supplier_id = IntegerField("Supplier ID", [DataRequired()])
     warehouse_id = IntegerField("Warehouse ID", [DataRequired()])
-    delivery_agent_id = IntegerField("Delivery agent ID", [DataRequired()])
     products = StringField("Products", [DataRequired()])
 
     submit = SubmitField("Save")

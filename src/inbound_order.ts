@@ -19,7 +19,6 @@ const timepickerMaxMin = new Timepicker(pickerInline, {
 
 interface SupDAWhProd {
   supplier: string;
-  delivery_agent: string;
   warehouse: string;
   product: string;
 }
@@ -33,7 +32,6 @@ interface IInboundOrder {
   delivery_date: string;
   status: string;
   supplier_id: number;
-  delivery_agent_id: number;
   warehouse_id: number;
   sup_da_wh_prod_objs: SupDAWhProd;
   products: IProduct[];
@@ -84,6 +82,9 @@ const $modalElement: HTMLElement = document.querySelector(
 const $addInboundOrderModalElement: HTMLElement = document.querySelector(
   '#add-inbound-order-modal',
 );
+const $viewInboundOrderModalElement: HTMLElement = document.querySelector(
+  '#view-inbound-order-modal',
+);
 
 const modalOptions: ModalOptions = {
   placement: 'bottom-right',
@@ -129,6 +130,10 @@ const modal: ModalInterface = new Modal($modalElement, modalOptions);
 const addModal: ModalInterface = new Modal(
   $addInboundOrderModalElement,
   addModalOptions,
+);
+const viewModal: ModalInterface = new Modal(
+  $viewInboundOrderModalElement,
+  modalOptions,
 );
 
 const $buttonElements = document.querySelectorAll('.inbound-order-edit-button');
@@ -224,8 +229,6 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
   input.value = inboundOrder.status;
   input = document.querySelector('#inbound-order-edit-supplier_id');
   input.value = inboundOrder.supplier_id.toString();
-  input = document.querySelector('#inbound-order-edit-delivery_agent_id');
-  input.value = inboundOrder.delivery_agent_id.toString();
   input = document.querySelector('#inbound-order-edit-warehouse_id');
   input.value = inboundOrder.warehouse_id.toString();
   input = document.querySelector('#inbound-order-edit-next_url');
@@ -400,8 +403,6 @@ viewInboundOrderButtonElements.forEach(e =>
     div.innerHTML = inboundOrder.status;
     div = document.querySelector('#inbound-order-view-supplier_id');
     div.innerHTML = inboundOrder.sup_da_wh_prod_objs.supplier;
-    div = document.querySelector('#inbound-order-view-delivery_agent_id');
-    div.innerHTML = inboundOrder.sup_da_wh_prod_objs.delivery_agent;
     div = document.querySelector('#inbound-order-view-warehouse_id');
     div.innerHTML = inboundOrder.sup_da_wh_prod_objs.warehouse;
   }),
