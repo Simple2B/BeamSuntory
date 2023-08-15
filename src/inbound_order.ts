@@ -86,10 +86,8 @@ const modalOptions: ModalOptions = {
     backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
     closable: true,
     onHide: () => {
-        const inboundOrderAddItems = document.querySelectorAll('.inbound-order-edit-add-item')
-        inboundOrderAddItems.forEach((item) => {
-            item.remove()
-        })
+        const inboundOrder = JSON.parse(sessionStorage.inboundOrder)
+        deleteProductFields(inboundOrder.id)
         sessionStorage.removeItem('inboundOrder')
     },
     onShow: () => {
@@ -208,12 +206,9 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
 
     if (Object.keys(inboundOrder.inbound_order_prods).length > 0) {
         const currentInboundOrder = inboundOrder.inbound_order_prods[inboundOrder.order_id]
-        // console.log('currentInboundOrder', currentInboundOrder);
         const inboundOrderProductsInputs = document.querySelectorAll<HTMLSelectElement>(
             '.inbound-order-edit-add-product'
         )
-        // TODO inboundOrderProductsInputs BECOMES EMPTY AFTER FIRST ITERATION. Can't open edit modal again
-        // console.log('inboundOrderProductsInputs', inboundOrderProductsInputs);
         const inboundOrderGroupsInputs = document.querySelectorAll<HTMLSelectElement>('.inbound-order-edit-add-group')
         const inboundOrderQuantityInputs = document.querySelectorAll<HTMLInputElement>(
             '.inbound-order-edit-add-quantity'
@@ -304,12 +299,6 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
                     const ioProdQtyCheckInput = document.querySelectorAll<HTMLInputElement>(
                         `io-product-input-qty-${prodName}`
                     )
-                    // console.log(
-                    //   'ioProdQtyCheckInput',
-                    //   `io-product-input-qty-${prodName}`,
-                    //   ioProdQtyCheckInput,
-                    // );
-                    // TODO ioProdQtyCheckInput is empty on modal open. Can't calculate total qty - selected products
 
                     inboundOrderProductCheckInput.innerHTML = String(prodName)
                     if (ioProdQtyCheckInput) {
@@ -379,7 +368,7 @@ function createInboundOrderCheckItems(inbOrder: IInboundOrder = null, curInbOrde
 
     const inboundOrderCheckContainer = document.querySelector('#inbound-order-edit-check-container')
     const inboundOrderCheckItem = document.createElement('div')
-    inboundOrderCheckItem.classList.add('grid', 'grid-cols-12', 'gap-5')
+    inboundOrderCheckItem.classList.add('grid', 'grid-cols-12', 'gap-5', `delete-id-check-${inbOrder.id}`)
     inboundOrderCheckItem.innerHTML = `
       <div class="col-span-6 sm:col-span-3">
         <div type="text" name="check_product"
@@ -461,7 +450,13 @@ function createInboundOrderItems(inbOrder: IInboundOrder = null, curInbOrder: II
     const index = allInboundOrderItems.length + 1
     const inboundOrderAddItem = document.createElement('div')
 
-    inboundOrderAddItem.classList.add('p-6', 'space-y-6', 'border-t', 'inbound-order-add-add-item')
+    inboundOrderAddItem.classList.add(
+        'p-6',
+        'space-y-6',
+        'border-t',
+        'inbound-order-add-add-item',
+        `delete-id-${inbOrder.id}`
+    )
     inboundOrderAddItem.innerHTML = `
     <div class="grid grid-cols-12 gap-5">
     <div class="col-span-6 sm:col-span-3">
@@ -672,14 +667,14 @@ function createInboundOrderAddItems(inbOrder: IInboundOrder = null, curInbOrder:
           <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
               <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
           </div>
-          <input id="datepickerEl-start-${index}" datepicker name="shelf_life_start" type="text" class="inbound-order-add-add-shelf_life_start bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date start">
+          <input id="datepickerEl-start-add-${index}" datepicker name="shelf_life_start" type="text" class="inbound-order-add-add-shelf_life_start bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date start">
         </div>
         <span class="mx-4 text-gray-500">to</span>
         <div class="relative">
           <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
               <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
           </div>
-          <input name="shelf_life_end" id="datepickerEl-end-${index}" datepicker type="text" class="inbound-order-add-add-shelf_life_end bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date end">
+          <input name="shelf_life_end" id="datepickerEl-end-add-${index}" datepicker type="text" class="inbound-order-add-add-shelf_life_end bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date end">
         </div>
       </div>
     </div>
@@ -699,8 +694,8 @@ function createInboundOrderAddItems(inbOrder: IInboundOrder = null, curInbOrder:
     const addButton = inboundOrderAddItem.querySelector('.inbound-order-add-add-item-btn')
     addButton.addEventListener('click', () => {
         createInboundOrderAddItems()
-        new Datepicker(document.querySelector(`#datepickerEl-start-${index + 1}`))
-        new Datepicker(document.querySelector(`#datepickerEl-end-${index + 1}`))
+        new Datepicker(document.querySelector(`#datepickerEl-start-add-${index + 1}`))
+        new Datepicker(document.querySelector(`#datepickerEl-end-add-${index + 1}`))
     })
 
     const deleteButtons = document.querySelectorAll('.inbound-order-add-delete-item-btn')
@@ -720,8 +715,8 @@ createAddInboundOrderItemBtnById.addEventListener('click', () => {
     createInboundOrderAddItems()
     const allInboundOrderItems = document.querySelectorAll('.inbound-order-add-add-item')
     const index = allInboundOrderItems.length
-    new Datepicker(document.querySelector(`#datepickerEl-start-${index}`))
-    new Datepicker(document.querySelector(`#datepickerEl-end-${index}`))
+    new Datepicker(document.querySelector(`#datepickerEl-start-add-${index}`))
+    new Datepicker(document.querySelector(`#datepickerEl-end-add-${index}`))
 })
 
 // ----set product to JSON hidden input in inbound-order-edit-form----
@@ -739,9 +734,6 @@ function setProducts(actionType: string) {
     }
     const inboundOrderAddProductSelects = document.querySelectorAll(`.inbound-order-${actionType}-add-product`)
     const inboundOrderAddQuantityInputs = document.querySelectorAll(`.inbound-order-${actionType}-add-quantity`)
-    // const shelfLifeStartInputs = document.querySelectorAll('.inbound-order-edit-add-shelf_life_start')
-    // const shelfLifeEndInputs = document.querySelectorAll('.inbound-order-edit-add-shelf_life_end')
-    console.log('shelfLifeStartInputs', shelfLifeStartInputs)
 
     const products = []
     const productsQuantities: { [index: string]: number } = {}
@@ -754,12 +746,10 @@ function setProducts(actionType: string) {
         if (actionType === 'add') {
             shelfLifeStartInput = shelfLifeStartInputs[i] as HTMLSelectElement
             shelfLifeEndInput = shelfLifeEndInputs[i] as HTMLSelectElement
-            console.log('io add', shelfLifeStartInputs[i].value, shelfLifeEndInputs[i].value)
         } else {
             const prodName = inboundOrderAddProductSelect.options[inboundOrderAddProductSelect.selectedIndex].text
             shelfLifeStartInput = document.querySelector(`#datepickerEl-start-${prodName}`)
             shelfLifeEndInput = document.querySelector(`#datepickerEl-end-${prodName}`)
-            console.log('io edit', prodName, shelfLifeStartInput, shelfLifeEndInput)
         }
 
         const product = {
@@ -817,8 +807,6 @@ function setProducts(actionType: string) {
                 }-hidden`
             )
 
-            // console.log('ProductQuantityCheck', ProductQuantityCheck.innerHTML, prodId, productsQuantities[prodId])
-
             if (productsQuantities[prodId] > Number(ProductQuantityCheck.innerHTML)) {
                 alert(
                     `Quantity of product ${
@@ -838,8 +826,6 @@ function setProducts(actionType: string) {
             }
         }
     }
-
-    // console.log('productsQuantities', productsQuantities)
 
     const inputProducts: HTMLInputElement = document.querySelector(`#inbound-order-${actionType}-products`)
     inputProducts.value = JSON.stringify(products)
@@ -865,3 +851,19 @@ inboundOrderSaveProductsAddButton.addEventListener('click', () => {
     setProducts('add')
     inboundOrderSubmitAddButton.click()
 })
+
+// function to delete product fields
+function deleteProductFields(ioId: string) {
+    const editProductFields = document.querySelectorAll(`.delete-id-${ioId}`)
+    const checkProductFields = document.querySelectorAll(`.delete-id-check-${ioId}`)
+    if (editProductFields) {
+        editProductFields.forEach((el) => {
+            el.remove()
+        })
+    }
+    if (checkProductFields) {
+        checkProductFields.forEach((el) => {
+            el.remove()
+        })
+    }
+}
