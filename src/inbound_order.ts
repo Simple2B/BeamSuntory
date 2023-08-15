@@ -242,10 +242,13 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
 
         const selectedProductQtyId = `io-product-input-qty-${selectedProduct}`
 
-        const selectedProductAllocateId = `#inbound-order-edit-check-quantity-${selectedProduct}`
-
         inboundOrderQuantityInputs[0].addEventListener('change', () => {
-            const allocateQtyInput: HTMLDivElement = document.querySelector(selectedProductAllocateId)
+            const selectedProduct =
+                inboundOrderProductsInputs[0].options[inboundOrderProductsInputs[0].selectedIndex].text
+            const selectedProductQtyId = `io-product-input-qty-${selectedProduct}`
+            const allocateQtyInput: HTMLDivElement = document.querySelector(
+                `#inbound-order-edit-check-quantity-${selectedProduct}`
+            )
 
             const inboundOrderCheckQuantityInputHidden: HTMLDivElement = document.querySelector(
                 `#inbound-order-edit-check-quantity-${selectedProduct}-hidden`
@@ -265,8 +268,17 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
 
         inboundOrderQuantityInputs[0].setAttribute('id', selectedProductQtyId)
 
+        console.log('inboundOrderProductsInputs[0]', inboundOrderProductsInputs[0])
+
         inboundOrderProductsInputs[0].addEventListener('change', () => {
-            inboundOrderQuantityInputs[0].setAttribute('id', selectedProductQtyId)
+            console.log('inboundOrderProductsInputs[0]', inboundOrderProductsInputs[0])
+
+            inboundOrderQuantityInputs[0].setAttribute(
+                'id',
+                `io-product-input-qty-${
+                    inboundOrderProductsInputs[0].options[inboundOrderProductsInputs[0].selectedIndex].text
+                }`
+            )
         })
     }
 
@@ -508,12 +520,6 @@ function createInboundOrderItems(inbOrder: IInboundOrder = null, curInbOrder: II
     const inboundOrderAddQuantityInput: HTMLInputElement = inboundOrderAddItem.querySelector(
         '.inbound-order-edit-add-quantity'
     )
-    // const shelfLifeStartInput: HTMLInputElement = inboundOrderAddItem.querySelector(
-    //     '.inbound-order-edit-add-shelf_life_start'
-    // )
-    // const shelfLifeEndInput: HTMLInputElement = inboundOrderAddItem.querySelector(
-    //     '.inbound-order-edit-add-shelf_life_end'
-    // )
 
     inbOrder.products.forEach((product) => {
         const option = document.createElement('option')
@@ -557,8 +563,6 @@ function createInboundOrderItems(inbOrder: IInboundOrder = null, curInbOrder: II
                 inboundOrderAddProductSelect.options[inboundOrderAddProductSelect.selectedIndex].text
             }`
         )
-        // shelfLifeStartInput.value = curInbOrder.shelf_life_start.toString()
-        // shelfLifeEndInput.value = curInbOrder.shelf_life_end.toString()
     }
 
     inboundOrderAddContainer.appendChild(inboundOrderAddItem)
