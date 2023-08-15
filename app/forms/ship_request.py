@@ -30,9 +30,9 @@ class ShipRequestForm(FlaskForm):
     # NOTE: Disable DataRequired for store_category while this field is missing in modal edit ship_request
     store_category = StringField("Store")
     order_type = StringField("Order Type")
-    store = StringField("Store", [DataRequired()])
+    store = StringField("Store")
     status = StringField("Status")
-    warehouse = StringField("Warehouse")
+    products = StringField("Products", [DataRequired()])
 
     submit = SubmitField("Save")
 

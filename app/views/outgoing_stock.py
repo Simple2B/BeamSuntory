@@ -1,3 +1,4 @@
+import json
 from flask import (
     Blueprint,
     render_template,
@@ -88,6 +89,50 @@ def get_all():
         warehouses=warehouses,
         ship_requests_status=BaseConfig.Config.SHIP_REQUEST_STATUS,
     )
+
+
+@outgoing_stock_blueprint.route("/edit", methods=["POST"])
+@login_required
+def save():
+    form_edit: f.ShipRequestForm = f.ShipRequestForm()
+    if form_edit.validate_on_submit():
+        query = m.ShipRequest.select().where(
+            m.ShipRequest.id == int(form_edit.ship_request_id.data)
+        )
+        sr: m.ShipRequest | None = db.session.scalar(query)
+        if not sr:
+            log(
+                log.ERROR,
+                "Not found ship request item by id : [%s]",
+                form_edit.ship_request_id.data,
+            )
+            flash("Cannot save item data", "danger")
+        sr.status = form_edit.status.data
+        sr.save()
+
+        products = json.loads(form_edit.products.data)
+
+        for product in products:
+            cart: m.Cart = db.session.execute(
+                m.Cart.select().where(
+                    m.Cart.product_id == product["product_id"],
+                    m.Cart.group == product["group_name"],
+                    m.Cart.ship_request_id == sr.id,
+                    m.Cart.quantity == product["quantity"],
+                )
+            ).scalar()
+            if cart:
+                cart.warehouse_id = product["warehouse_id"]
+                cart.save()
+
+        if form_edit.next_url.data:
+            return redirect(form_edit.next_url.data)
+        return redirect(url_for("outgoing_stock.get_all"))
+
+    else:
+        log(log.ERROR, "Cart item save errors: [%s]", form_edit.errors)
+        flash(f"{form_edit.errors}", "danger")
+        return redirect(url_for("outgoing_stock.get_all"))
 
 
 @outgoing_stock_blueprint.route("/dispatch/<int:id>", methods=["GET"])

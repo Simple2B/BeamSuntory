@@ -1,3 +1,4 @@
+import os
 import click
 from flask import Flask
 import sqlalchemy as sa
@@ -159,7 +160,11 @@ def init(app: Flask):
             active=True,
         ).save(False)
 
-        sc = m.StoreCategory(name="BAR", active=True, image="default_image").save()
+        sc = m.StoreCategory(
+            name="BAR",
+            active=True,
+            image=os.environ.get("DEFAULT_IMAGE", "default"),
+        ).save()
 
         m.Store(
             store_category_id=sc.id,

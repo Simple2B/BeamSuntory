@@ -11,7 +11,7 @@ class StoreCategoryForm(FlaskForm):
     store_category_id = StringField("store_category_id", [DataRequired()])
     name = StringField("Name", [DataRequired()])
     parent_category = StringField("Parent category")
-    active = BooleanField("Status", [DataRequired()])
+    active = BooleanField("Status")
     image = StringField("Image")
 
     submit = SubmitField("Save")
@@ -25,8 +25,8 @@ class StoreCategoryForm(FlaskForm):
 class NewStoreCategoryForm(FlaskForm):
     name = StringField("Name", [DataRequired()])
     parent_category = StringField("Parent category")
-    active = BooleanField("Status", [DataRequired()])
-    image = StringField("Image", [DataRequired()])
+    active = BooleanField("Status")
+    image = StringField("Image")
 
     submit = SubmitField("Add product")
 

@@ -140,34 +140,6 @@ def create():
     return redirect(url_for("ship_request.get_all"))
 
 
-@ship_request_blueprint.route("/edit", methods=["POST"])
-@login_required
-def save():
-    form_edit: f.ShipRequestForm = f.ShipRequestForm()
-    if form_edit.validate_on_submit():
-        query = m.ShipRequest.select().where(
-            m.ShipRequest.id == int(form_edit.ship_request_id.data)
-        )
-        sr: m.ShipRequest | None = db.session.scalar(query)
-        if not sr:
-            log(
-                log.ERROR,
-                "Not found ship request item by id : [%s]",
-                form_edit.ship_request_id.data,
-            )
-            flash("Cannot save item data", "danger")
-        sr.status = form_edit.status.data
-        sr.save()
-        if form_edit.next_url.data:
-            return redirect(form_edit.next_url.data)
-        return redirect(url_for("ship_request.get_all"))
-
-    else:
-        log(log.ERROR, "Cart item save errors: [%s]", form_edit.errors)
-        flash(f"{form_edit.errors}", "danger")
-        return redirect(url_for("ship_request.get_all"))
-
-
 @ship_request_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
 def delete(id: int):
