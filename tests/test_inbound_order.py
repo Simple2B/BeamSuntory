@@ -33,7 +33,9 @@ def test_create_inbound_order(mg_g_populate: FlaskClient):
             status="Draft",
             supplier_id=1,
             warehouse_id=1,
-            products='[{"product_id": "1", "quantity": "100"}]',
+            products="""[{"product_id": 1, "quantity": 5, "group_id": 1,
+                "shelf_life_start": "07/22/2023",
+                "shelf_life_end": "07/24/2023"}]""",
         ),
         follow_redirects=True,
     )

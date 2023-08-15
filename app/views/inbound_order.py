@@ -222,6 +222,14 @@ def create():
         # save delivered product quantity, so this product would be available in warehouse
         products = json.loads(form.products.data)
         for product in products:
+            shelf_life_str_start = product["shelf_life_start"]
+            shelf_life_str_end = product["shelf_life_end"]
+            shelf_life_stamp_start = datetime.datetime.strptime(
+                shelf_life_str_start, "%m/%d/%Y"
+            )
+            shelf_life_stamp_end = datetime.datetime.strptime(
+                shelf_life_str_end, "%m/%d/%Y"
+            )
             io_allocate_product: m.IOAllocateProduct = db.session.execute(
                 m.IOAllocateProduct.select().where(
                     m.IOAllocateProduct.product_id == int(product["product_id"]),
@@ -230,12 +238,16 @@ def create():
             ).scalar()
             if io_allocate_product:
                 io_allocate_product.quantity = int(product["quantity"])
+                io_allocate_product.shelf_life_start = shelf_life_stamp_start
+                io_allocate_product.shelf_life_end = shelf_life_stamp_end
                 io_allocate_product.save()
             else:
                 m.IOAllocateProduct(
                     product_id=int(product["product_id"]),
                     quantity=int(product["quantity"]),
                     inbound_order_id=inbound_order.id,
+                    shelf_life_start=shelf_life_stamp_start,  # calendar
+                    shelf_life_end=shelf_life_stamp_end,  # calendar
                 ).save()
 
         return redirect(url_for("inbound_order.get_all"))
