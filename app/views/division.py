@@ -73,15 +73,6 @@ def save():
             log(log.ERROR, "Not found role by id : [%s]", form.division_id.data)
             flash("Cannot save role", "danger")
 
-        if (
-            d.role_name == "Admin"
-            or d.role_name == "Sales rep"
-            or d.role_name == "Warehouse Manager"
-        ):
-            log(log.ERROR, "Cannot edit role: [%s]", d.role_name)
-            flash("Cannot edit this role", "danger")
-            return redirect(url_for("division.get_all"))
-
         d.role_name = form.role_name.data
         d.activated = form.activated.data
         d.save()
