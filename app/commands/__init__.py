@@ -159,10 +159,7 @@ def init(app: Flask):
             active=True,
         ).save(False)
 
-        sc = m.StoreCategory(
-            name="BAR",
-            active=True,
-        ).save()
+        sc = m.StoreCategory(name="BAR", active=True, image="default_image").save()
 
         m.Store(
             store_category_id=sc.id,
