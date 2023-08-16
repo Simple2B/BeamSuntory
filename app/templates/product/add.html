@@ -6,6 +6,7 @@
     <!-- Modal content -->
     <form action="{{url_for('product.create')}}" method="post" enctype="multipart/form-data"
       class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+      <input type="hidden" name="product_groups" id="product-add-product-groups" value="1" />
       {{ form_create.hidden_tag() }}
       <!-- Modal header -->
       <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
@@ -199,9 +200,10 @@
       </div>
       <!-- Modal footer -->
       <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
-        <button name="submit" type="submit"
+        <button id="product-add-submit-btn" name="submit" type="submit" class="hidden"></button>
+        <button id="product-add-save-products-btn" name="save-products" type="button"
           class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-          Save new product </button>
+          Save all </button>
       </div>
     </form>
   </div>

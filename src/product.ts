@@ -39,10 +39,14 @@ interface IProduct {
             [index: string]: number | string
         }
     ]
-    mstr_prod_grps_prod_grps_names: object
+    mstr_prod_grps_prod_grps_names: { [index: string]: { group_name: string; group_id: number }[] }
 }
 interface FilterJsonData {
     [key: string]: string
+}
+
+interface IProductMasterGroupGroup {
+    [index: string]: { group_name: string; group_id: number }[]
 }
 
 // variable to set default image to brand dynamically in modal window. Can we get link from the internet?
@@ -325,7 +329,9 @@ $buttonElements.forEach((e) =>
 const $addButtonElements = document.querySelectorAll('.product-add-button')
 $addButtonElements.forEach((e) =>
     e.addEventListener('click', () => {
-        addProduct()
+        const groups = JSON.parse(e.getAttribute('data-target-groups'))
+        sessionStorage.setItem('groups', JSON.stringify(groups))
+        addProduct(groups)
     })
 )
 
@@ -364,20 +370,23 @@ function convertDate(date: string) {
     return `${month}/${day}/${year}`
 }
 
-function addProduct() {
+function addProduct(groups: IProductMasterGroupGroup) {
+    console.log('groups', groups)
+
     addModal.show()
-    productMasterGroupEditSelect.addEventListener('change', () => {
+    const productMasterGroupAddSelect: HTMLSelectElement = document.querySelector(
+        '#product-master-group-add-add-product-1'
+    )
+    const options = productMasterGroupAddSelect.querySelectorAll('option')
+
+    productMasterGroupAddSelect.addEventListener('change', () => {
         options.forEach((e) => {
-            if (
-                e.textContent === productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
-            ) {
-                console.log(productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text)
+            if (e.textContent === productMasterGroupAddSelect.options[productMasterGroupAddSelect.selectedIndex].text) {
+                console.log(productMasterGroupAddSelect.options[productMasterGroupAddSelect.selectedIndex].text)
 
                 const groupSelect = document.querySelector('#product-group-add-item-1')
                 const optionCategory =
-                    product.mstr_prod_grps_prod_grps_names[
-                        productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
-                    ]
+                    groups[productMasterGroupAddSelect.options[productMasterGroupAddSelect.selectedIndex].text]
                 console.log('optionCategory', optionCategory)
 
                 groupSelect.innerHTML = ''
@@ -440,6 +449,10 @@ function editProduct(product: IProduct) {
     input.value = window.location.href
 
     editModal.show()
+    const productMasterGroupEditSelect: HTMLSelectElement = document.querySelector(
+        '#product-master-group-edit-add-product-1'
+    )
+    const options = productMasterGroupEditSelect.querySelectorAll('option')
 
     productMasterGroupEditSelect.addEventListener('change', () => {
         options.forEach((e) => {
@@ -1012,11 +1025,6 @@ function deleteAdjustContainer(nameGroup: string, nameGroupValue: string) {
     }
 }
 
-const productMasterGroupEditSelect: HTMLSelectElement = document.querySelector(
-    '#product-master-group-edit-add-product-1'
-)
-const options = productMasterGroupEditSelect.querySelectorAll('option')
-
 // ----add inbound order item for edit modal----
 function createProductGroupEditItem(productParam: IProduct = null) {
     if (!productParam) {
@@ -1079,45 +1087,45 @@ function createProductGroupEditItem(productParam: IProduct = null) {
   </div>
   `
 
-    const productMasterGroupEditSelect: HTMLSelectElement = productGroupEditItem.querySelector(
-        '.product-master-group-edit-item'
-    )
-    console.log('productMasterGroupEditSelect', productMasterGroupEditSelect)
-
     const productGroupEditSelect: HTMLSelectElement = productGroupEditItem.querySelector('.product-group-edit-item')
     const availableMasterGroups = Object.keys(productParam.mstr_prod_grps_prod_grps_names)
+    const productMasterGroupEditSelect: HTMLSelectElement = productGroupEditItem.querySelector(
+        `#product-master-group-edit-item-${index}`
+    )
+    console.log('productMasterGroupEditSelect', productMasterGroupEditSelect)
 
     availableMasterGroups.forEach((masterGroup) => {
         const option = document.createElement('option')
         option.setAttribute('value', masterGroup)
         option.innerHTML = masterGroup
         productMasterGroupEditSelect.appendChild(option)
+    })
+    const options = productMasterGroupEditSelect.querySelectorAll('option')
+    productMasterGroupEditSelect.addEventListener('change', () => {
+        console.log('clock')
 
-        productMasterGroupEditSelect.addEventListener('change', () => {
-            options.forEach((e) => {
-                if (
-                    e.textContent ===
-                    productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
-                ) {
-                    console.log(productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text)
+        options.forEach((e) => {
+            if (
+                e.textContent === productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
+            ) {
+                console.log(productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text)
 
-                    const optionCategory =
-                        productParam.mstr_prod_grps_prod_grps_names[
-                            productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
-                        ]
-                    console.log('optionCategory', optionCategory)
+                const optionCategory =
+                    productParam.mstr_prod_grps_prod_grps_names[
+                        productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
+                    ]
+                console.log('optionCategory', optionCategory)
 
-                    document.getElementById(`product-group-edit-item-${index}`).innerHTML = ''
-                    if (optionCategory) {
-                        optionCategory.forEach((group: { group_name: string; group_id: number }) => {
-                            const storeSelectOption = document.createElement('option')
-                            storeSelectOption.setAttribute('value', group.group_id.toString())
-                            storeSelectOption.textContent = group.group_name
-                            productGroupEditSelect.appendChild(storeSelectOption)
-                        })
-                    }
+                document.getElementById(`product-group-edit-item-${index}`).innerHTML = ''
+                if (optionCategory) {
+                    optionCategory.forEach((group: { group_name: string; group_id: number }) => {
+                        const storeSelectOption = document.createElement('option')
+                        storeSelectOption.setAttribute('value', group.group_id.toString())
+                        storeSelectOption.textContent = group.group_name
+                        productGroupEditSelect.appendChild(storeSelectOption)
+                    })
                 }
-            })
+            }
         })
     })
 
@@ -1140,28 +1148,31 @@ function createProductGroupEditItem(productParam: IProduct = null) {
 }
 
 // this button need to add first item from template
-const addInboundOrderItemBtnById = document.querySelector('#product-group-edit-add-item-btn')
-addInboundOrderItemBtnById.addEventListener('click', () => {
+const productGroupEditBtnById = document.querySelector('#product-group-edit-add-item-btn')
+productGroupEditBtnById.addEventListener('click', () => {
     createProductGroupEditItem()
 })
 
 // ----set product to JSON hidden input in inbound-order-edit-form----
-function setProducts() {
-    const productGroupEditItems = document.querySelectorAll('.product-group-edit-add-item')
-    const productGroupItems = document.querySelectorAll('.product-group-edit-item')
+function setProducts(typeModal: string) {
+    const productGroupItems = document.querySelectorAll(`.product-group-${typeModal}-add-item`)
 
     const products = []
 
-    for (let i = 0; i < productGroupEditItems.length; i++) {
-        const productMasterGroupItems = productGroupEditItems[i].querySelector('.product-master-group-edit-item')
-        const productGroupItems = productGroupEditItems[i].querySelector('.product-group-edit-item')
+    for (let i = 0; i < productGroupItems.length; i++) {
+        const productGroupItem: HTMLSelectElement = productGroupItems[i].querySelector(
+            `.product-group-${typeModal}-item`
+        )
 
-        const product = Number(productGroupItems.value)
+        const product = Number(productGroupItem.value)
         products.push(product)
     }
 
-    const inputProducts: HTMLInputElement = document.querySelector('#product-edit-product-groups')
+    const inputProducts: HTMLInputElement = document.querySelector(`#product-${typeModal}-product-groups`)
     inputProducts.value = JSON.stringify(products)
+    console.log('inputProducts', inputProducts)
+    console.log('products', products)
+
     return true
 }
 
@@ -1170,8 +1181,138 @@ const productEditSubmitButton: HTMLButtonElement = document.querySelector('#prod
 const productEditSaveButton = document.querySelector('#product-edit-save-products-btn')
 
 productEditSaveButton.addEventListener('click', () => {
-    const result = setProducts()
+    const result = setProducts('edit')
     if (result) {
         productEditSubmitButton.click()
+    }
+})
+
+// ----add product group item for edit modal----
+function createProductGroupAddItem(groups: IProductMasterGroupGroup = null) {
+    if (!groups) {
+        groups = JSON.parse(sessionStorage.getItem('groups'))
+    }
+    const productGroupAddContainer = document.querySelector('#product-group-add-add-container')
+    const productGroupEditOriginal = document.querySelector('#product-group-add-item')
+    const productGroupAddAllItems = document.querySelectorAll('.product-group-add-add-item')
+    const index = productGroupAddAllItems.length + 1
+    const productGroupAddItem = document.createElement('div')
+
+    productGroupAddItem.classList.add(
+        'p-6',
+        'space-y-6',
+        'border-t',
+        'product-group-add-add-item',
+        `delete-id-${index}`
+    )
+    productGroupAddItem.innerHTML = `
+  <div class="grid grid-cols-12 gap-5">
+    <div class="col-span-6 sm:col-span-4">
+      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Master
+        Group</label>
+      <select type="text" name="add_product" id="product-master-group-add-item-${index}"
+        class="product-master-group-add-item shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        placeholder="Master
+        Group" required>
+        <option value="" disabled selected>Select master group</option>
+      </select>
+    </div>
+    <div class="col-span-6 sm:col-span-4">
+      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label>
+      <select type="text" name="add_group" id="product-group-add-item-${index}"
+        class="product-group-add-item shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        placeholder="Group" required>
+        <option value="" disabled selected>Select group</option>
+      </select>
+    </div>
+    <div class="col-span-6 sm:col-span-4">
+      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Action</label>
+      <button type="button" data-target=""
+        class="product-group-add-delete-item-btn inline-flex items-center px-3 py-2 mr-3 text-sm font-medium text-center text-white rounded-lg bg-red-600 hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z">
+          </path>
+        </svg>
+      </button>
+      <button type="button" id="product-group-add-add-item-btn-${index}"
+        class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M64 80c-8.8 0-16 7.2-16 16V416c0 8.8 7.2 16 16 16H384c8.8 0 16-7.2 16-16V96c0-8.8-7.2-16-16-16H64zM0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96zM200 344V280H136c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H248v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z">
+          </path>
+        </svg>
+      </button>
+    </div>
+  </div>
+  `
+
+    const productMasterGroupAddSelect: HTMLSelectElement = productGroupAddItem.querySelector(
+        `#product-master-group-add-item-${index}`
+    )
+    const productGroupAddSelect: HTMLSelectElement = productGroupAddItem.querySelector('.product-group-add-item')
+    const availableMasterGroups = Object.keys(groups)
+
+    availableMasterGroups.forEach((masterGroup) => {
+        const option = document.createElement('option')
+        option.setAttribute('value', masterGroup)
+        option.innerHTML = masterGroup
+        productMasterGroupAddSelect.appendChild(option)
+    })
+    const options = productMasterGroupAddSelect.querySelectorAll('option')
+
+    productMasterGroupAddSelect.addEventListener('change', () => {
+        options.forEach((e) => {
+            if (e.textContent === productMasterGroupAddSelect.options[productMasterGroupAddSelect.selectedIndex].text) {
+                console.log(productMasterGroupAddSelect.options[productMasterGroupAddSelect.selectedIndex].text)
+
+                const optionCategory =
+                    groups[productMasterGroupAddSelect.options[productMasterGroupAddSelect.selectedIndex].text]
+                console.log('optionCategory', optionCategory)
+
+                document.getElementById(`product-group-add-item-${index}`).innerHTML = ''
+                if (optionCategory) {
+                    optionCategory.forEach((group: { group_name: string; group_id: number }) => {
+                        const storeSelectOption = document.createElement('option')
+                        storeSelectOption.setAttribute('value', group.group_id.toString())
+                        storeSelectOption.textContent = group.group_name
+                        productGroupAddSelect.appendChild(storeSelectOption)
+                    })
+                }
+            }
+        })
+    })
+
+    productGroupAddContainer.appendChild(productGroupAddItem)
+
+    const addButton = productGroupAddItem.querySelector(`#product-group-add-add-item-btn-${index}`)
+
+    addButton.addEventListener('click', () => {
+        createProductGroupAddItem()
+    })
+
+    const deleteButton = productGroupAddItem.querySelector('.product-group-add-delete-item-btn')
+    deleteButton.addEventListener('click', () => {
+        const inboundOrderItem = document.querySelector(`.delete-id-${index}`)
+        if (inboundOrderItem) {
+            inboundOrderItem.remove()
+        }
+    })
+}
+
+// this button need to add first item from template
+const productGroupAddBtnById = document.querySelector('#product-group-add-add-item-btn')
+productGroupAddBtnById.addEventListener('click', () => {
+    createProductGroupAddItem()
+})
+
+// ----submit add form through hidden submit button----
+const productAddSubmitButton: HTMLButtonElement = document.querySelector('#product-add-submit-btn')
+const productAddSaveButton = document.querySelector('#product-add-save-products-btn')
+
+productAddSaveButton.addEventListener('click', () => {
+    const result = setProducts('add')
+    if (result) {
+        productAddSubmitButton.click()
     }
 })

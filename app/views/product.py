@@ -56,7 +56,7 @@ def get_all_products(request, query=None, count_query=None):
                 group[0].master_groups_for_product.name
             ] = [group[0]]
             mstr_prod_grps_prod_grps_names[group[0].master_groups_for_product.name] = [
-                group[0].name
+                {"group_name": group[0].name, "group_id": group[0].id}
             ]
         else:
             mastr_for_prods_groups_for_prods[
@@ -64,7 +64,7 @@ def get_all_products(request, query=None, count_query=None):
             ].append(group[0])
             mstr_prod_grps_prod_grps_names[
                 group[0].master_groups_for_product.name
-            ].append(group[0].name)
+            ].append({"group_name": group[0].name, "group_id": group[0].id})
 
     # get all product_groups to list and compare in view.html
     product_groups: list[m.ProductGroup] = [
@@ -141,7 +141,7 @@ def get_all_products(request, query=None, count_query=None):
         "current_user_groups_names": [
             i[0].parent.name for i in current_user_groups_rows
         ],
-        "mstr_prod_grps_prod_grps_names": mstr_prod_grps_prod_grps_names,
+        "mstr_prod_grps_prod_grps_names": json.dumps(mstr_prod_grps_prod_grps_names),
     }
 
 
