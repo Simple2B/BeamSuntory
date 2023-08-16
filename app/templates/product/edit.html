@@ -30,7 +30,7 @@
               Type</label>
             <select type="text" name="product_type" id="product-edit-product_type"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Product type" required>
+              placeholder="Product type">
               <option value="SIMPLE_PRODUCT">Simple Product</option>
               <option value="VARIABLE_PRODUCT">Variable Product</option>
             </select>
@@ -41,7 +41,7 @@
               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{ master_group }}</label>
             <select type="text" name="group-{{ master_group }}" id="product-edit-{{ master_group }}"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Some Group" required>
+              placeholder="Some Group">
               {% for group in master_groups_groups_available[master_group] %}
               <option value="{{ group.id }}">{{ group.name }}</option>
               {% endfor %}
@@ -52,7 +52,7 @@
             <label for="supplier" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Supplier</label>
             <select type="text" name="supplier" id="product-edit-supplier"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Supplier" required>
+              placeholder="Supplier">
               {% for supplier in suppliers %}
               <option value="{{ supplier.id }}">{{ supplier.name }}</option>
               {% endfor %}
@@ -62,7 +62,7 @@
             <label for="currency" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Currency</label>
             <select type="text" name="currency" id="product-edit-currency"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Currency" required>
+              placeholder="Currency">
               <option value="CAD">CAD</option>
               <option value="USD">USD</option>
             </select>
@@ -71,7 +71,7 @@
             <label for="price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Price</label>
             <input type="text" name="price" id="product-edit-price"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Price" required />
+              placeholder="Price" />
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="image" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Image</label>
@@ -97,69 +97,69 @@
               Level</label>
             <input type="text" name="low_stock_level" id="product-edit-low_stock_level"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Low Stock Level" required />
+              placeholder="Low Stock Level" />
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="program_year" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Program
               Year</label>
             <input type="text" name="program_year" id="product-edit-program_year"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Program Year" required />
+              placeholder="Program Year" />
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="package_qty" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Package
               Qty.</label>
             <input type="text" name="package_qty" id="product-edit-package_qty"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Package Qty." required />
+              placeholder="Package Qty." />
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="numb_of_items_per_case" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">No.
               Of Items Per Case</label>
             <input type="text" name="numb_of_items_per_case" id="product-edit-numb_of_items_per_case"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="No. Of Items Per Case" required />
+              placeholder="No. Of Items Per Case" />
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="numb_of_cases_per_outer_case"
               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">No. Of Cases Per Outer Case</label>
             <input type="text" name="numb_of_cases_per_outer_case" id="product-edit-numb_of_cases_per_outer_case"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="No. Of Cases Per Outer Case" required />
+              placeholder="No. Of Cases Per Outer Case" />
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="comments" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Comments</label>
             <input type="text" name="comments" id="product-edit-comments"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Comments" required />
+              placeholder="Comments" />
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="weight" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Weight (in
               gm)</label>
             <input type="text" name="weight" id="product-edit-weight"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Weight" required />
+              placeholder="Weight" />
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="length" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Length (in
               cm)</label>
             <input type="text" name="length" id="product-edit-length"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Length" required />
+              placeholder="Length" />
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="width" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Width (in
               cm)</label>
             <input type="text" name="width" id="product-edit-width"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Width" required />
+              placeholder="Width" />
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="height" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Height (in
               cm)</label>
             <input type="text" name="height" id="product-edit-height"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Height" required />
+              placeholder="Height" />
           </div>
         </div>
       </div>
