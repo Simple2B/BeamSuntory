@@ -130,6 +130,8 @@ class InboundOrder(db.Model, ModelMixin):
                     "product": {
                         "id": io.product_id,
                         "name": io.product.name,
+                        "shelf_life_start": io.shelf_life_start.strftime("%m/%d/%Y"),
+                        "shelf_life_end": io.shelf_life_end.strftime("%m/%d/%Y"),
                     },
                     "quantity": io.quantity,
                 }

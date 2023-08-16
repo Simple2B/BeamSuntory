@@ -1,4 +1,5 @@
-from sqlalchemy import ForeignKey, orm
+from datetime import datetime
+from sqlalchemy import ForeignKey, orm, DateTime
 
 from app import db
 from .utils import ModelMixin
@@ -15,3 +16,5 @@ class IOAllocateProduct(db.Model, ModelMixin):
     inbound_order_id: orm.Mapped[int] = orm.mapped_column(
         ForeignKey("inbound_orders.id", ondelete="CASCADE")
     )
+    shelf_life_start: orm.Mapped[datetime] = orm.mapped_column(DateTime())  # calendar
+    shelf_life_end: orm.Mapped[datetime] = orm.mapped_column(DateTime())  # calendar
