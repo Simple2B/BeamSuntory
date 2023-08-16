@@ -127,4 +127,23 @@ class Product(db.Model, ModelMixin):
                     group[0].master_groups_for_product.name
                 ].append({"group_name": group[0].name, "group_id": group[0].id})
         mg_dict["mstr_prod_grps_prod_grps_names"] = mstr_prod_grps_prod_grps_names
+        mstr_grps_grps_names_in_prod = {}
+        groups_in_products_obj = db.session.execute(
+            GroupProduct.select().where(
+                GroupProduct.id.in_([i.group_id for i in self.product_groups])
+            )
+        ).all()
+        for group in groups_in_products_obj:
+            if (
+                group[0].master_groups_for_product.name
+                not in mstr_grps_grps_names_in_prod
+            ):
+                mstr_grps_grps_names_in_prod[
+                    group[0].master_groups_for_product.name
+                ] = [{"group_name": group[0].name, "group_id": group[0].id}]
+            else:
+                mstr_grps_grps_names_in_prod[
+                    group[0].master_groups_for_product.name
+                ].append({"group_name": group[0].name, "group_id": group[0].id})
+        mg_dict["mstr_grps_grps_names_in_prod"] = mstr_grps_grps_names_in_prod
         return json.dumps(mg_dict)

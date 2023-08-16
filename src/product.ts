@@ -448,11 +448,67 @@ function editProduct(product: IProduct) {
     input = document.querySelector('#product-edit-next_url')
     input.value = window.location.href
 
+    const productMasterGroups = Object.keys(product.mstr_grps_grps_names_in_prod)
+
+    if (productMasterGroups.length > 0) {
+        // const currentInboundOrder = inboundOrder.inbound_order_prods[inboundOrder.order_id]
+        const productGroupsEditSelects = document.querySelectorAll<HTMLSelectElement>('.product-group-edit-item')
+
+        for (let i = 0; i < productMasterGroups.length; i++) {
+            if (i !== 0) {
+                createProductGroupEditItem()
+            }
+        }
+
+        for (let i = 0; i < productMasterGroups.length; i++) {
+            const productMasterGroupEditSelect: HTMLSelectElement = document.querySelector(
+                `#product-master-group-edit-item-${i + 1}`
+            )
+            console.log(i)
+
+            const options = productMasterGroupEditSelect.querySelectorAll('option')
+            const productGroupsEditSelect = productGroupsEditSelects[i]
+            productMasterGroupEditSelect.value = productMasterGroups[i]
+            console.log('productGroupsEditSelect', `#product-master-group-edit-item-${i + 1}`)
+
+            product.mstr_grps_grps_names_in_prod[productMasterGroups[i]].forEach(
+                (group: { group_name: string; group_id: number }) => {
+                    const storeSelectOption = document.createElement('option')
+                    storeSelectOption.setAttribute('value', group.group_id.toString())
+                    storeSelectOption.textContent = group.group_name
+                    productGroupsEditSelect.appendChild(storeSelectOption)
+                }
+            )
+            // TODO: always select first option
+            productGroupsEditSelect.value =
+                product.mstr_grps_grps_names_in_prod[productMasterGroups[i]][0].group_id.toString()
+            productMasterGroupEditSelect.addEventListener('change', () => {
+                options.forEach((e) => {
+                    if (
+                        e.textContent ===
+                        productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
+                    ) {
+                        const groupSelect = document.querySelector(`#product-group-edit-item-${i + 1}`)
+                        const optionCategory =
+                            product.mstr_prod_grps_prod_grps_names[
+                                productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
+                            ]
+                        groupSelect.innerHTML = ''
+                        if (optionCategory) {
+                            optionCategory.forEach((group: { group_name: string; group_id: number }) => {
+                                const storeSelectOption = document.createElement('option')
+                                storeSelectOption.setAttribute('value', group.group_id.toString())
+                                storeSelectOption.textContent = group.group_name
+                                groupSelect.appendChild(storeSelectOption)
+                            })
+                        }
+                    }
+                })
+            })
+        }
+    }
+
     editModal.show()
-    const productMasterGroupEditSelect: HTMLSelectElement = document.querySelector(
-        '#product-master-group-edit-add-product-1'
-    )
-    const options = productMasterGroupEditSelect.querySelectorAll('option')
 
     productMasterGroupEditSelect.addEventListener('change', () => {
         options.forEach((e) => {
