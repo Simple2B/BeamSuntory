@@ -14,11 +14,6 @@ class CustomBase(BaseModel):
         return super().json(include=include, exclude=exclude, **kwargs)
 
 
-class ProductType(Enum):
-    SIMPLE_PRODUCT = "Simple Product"
-    VARIABLE_PRODUCT = "Variable Product"
-
-
 class Currency(Enum):
     USD = "USD"
     CAD = "CAD"
@@ -27,27 +22,26 @@ class Currency(Enum):
 class Product(CustomBase):
     id: int
     name: str
-    product_type: ProductType
 
     supplier: Optional[Any]  # = Field(exclude=True)
-    supplier_id: int | None
-    currency: Currency
-    price: float
-    image: str
+    supplier_id: Optional[int]
+    currency: Optional[Currency]
+    price: Optional[float]
+    image: Optional[str]
     description: str
     # General Info ->
     SKU: str
-    low_stock_level: int
-    program_year: int
-    package_qty: int
-    numb_of_items_per_case: int
-    numb_of_cases_per_outer_case: int
-    comments: str
+    low_stock_level: Optional[int]
+    program_year: Optional[int]
+    package_qty: Optional[int]
+    numb_of_items_per_case: Optional[int]
+    numb_of_cases_per_outer_case: Optional[int]
+    comments: Optional[str]
     # shipping
-    weight: float
-    length: float
-    width: float
-    height: float
+    weight: Optional[float]
+    length: Optional[float]
+    width: Optional[float]
+    height: Optional[float]
     mstr_groups_groups: Optional[dict]
     current_user_groups: Optional[dict]
 

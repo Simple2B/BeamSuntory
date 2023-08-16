@@ -46,6 +46,7 @@ def get_all_products(request, query=None, count_query=None):
 
     groups_for_products_obj = db.session.execute(m.GroupProduct.select()).all()
     mastr_for_prods_groups_for_prods = {}
+    mstr_prod_grps_prod_grps_names = {}
     for group in groups_for_products_obj:
         if (
             group[0].master_groups_for_product.name
@@ -54,10 +55,16 @@ def get_all_products(request, query=None, count_query=None):
             mastr_for_prods_groups_for_prods[
                 group[0].master_groups_for_product.name
             ] = [group[0]]
+            mstr_prod_grps_prod_grps_names[group[0].master_groups_for_product.name] = [
+                group[0].name
+            ]
         else:
             mastr_for_prods_groups_for_prods[
                 group[0].master_groups_for_product.name
             ].append(group[0])
+            mstr_prod_grps_prod_grps_names[
+                group[0].master_groups_for_product.name
+            ].append(group[0].name)
 
     # get all product_groups to list and compare in view.html
     product_groups: list[m.ProductGroup] = [
@@ -134,6 +141,7 @@ def get_all_products(request, query=None, count_query=None):
         "current_user_groups_names": [
             i[0].parent.name for i in current_user_groups_rows
         ],
+        "mstr_prod_grps_prod_grps_names": mstr_prod_grps_prod_grps_names,
     }
 
 
@@ -171,6 +179,9 @@ def get_all():
         product_mg_g=products_object["product_mg_g"],
         master_group_product_name=products_object["master_product_groups_name"],
         suppliers=products_object["suppliers"],
+        mstr_prod_grps_prod_grps_names=products_object[
+            "mstr_prod_grps_prod_grps_names"
+        ],
         form_sort=form_sort,
         form_create=form_create,
         form_edit=form_edit,
@@ -436,6 +447,9 @@ def sort():
             product_mg_g=products_object["product_mg_g"],
             master_group_product_name=products_object["master_product_groups_name"],
             suppliers=products_object["suppliers"],
+            mstr_prod_grps_prod_grps_names=products_object[
+                "mstr_prod_grps_prod_grps_names"
+            ],
             form_sort=form,
             form_create=form_create,
             form_edit=form_edit,

@@ -18,27 +18,24 @@ class ProductForm(FlaskForm):
     next_url = StringField("next_url")
     product_id = StringField("product_id", [DataRequired()])
     name = StringField("Name", [DataRequired()])
-    product_type = StringField("Product type", [DataRequired()])
-    supplier = IntegerField("Supplier ID", [DataRequired()])
-    currency = StringField("Currency", [DataRequired()])
-    price = FloatField("Price", [DataRequired()])
+    supplier = IntegerField("Supplier ID")
+    currency = StringField("Currency")
+    price = FloatField("Price")
     image = FileField("Image")
     description = StringField("Description", [DataRequired()])
     # General Info ->
     SKU = StringField("SKU", [DataRequired()])
-    low_stock_level = IntegerField("Low stock level", [DataRequired()])
-    program_year = IntegerField("Program year", [DataRequired()])
-    package_qty = IntegerField("Package qty", [DataRequired()])
-    numb_of_items_per_case = IntegerField("Number of items per case", [DataRequired()])
-    numb_of_cases_per_outer_case = IntegerField(
-        "Number of cases per outer case", [DataRequired()]
-    )
-    comments = StringField("Comments", [DataRequired()])
+    low_stock_level = IntegerField("Low stock level")
+    program_year = IntegerField("Program year")
+    package_qty = IntegerField("Package qty")
+    numb_of_items_per_case = IntegerField("Number of items per case")
+    numb_of_cases_per_outer_case = IntegerField("Number of cases per outer case")
+    comments = StringField("Comments")
     # shipping
-    weight = FloatField("Weight", [DataRequired()])
-    length = FloatField("Length", [DataRequired()])
-    width = FloatField("Width", [DataRequired()])
-    height = FloatField("Height", [DataRequired()])
+    weight = FloatField("Weight")
+    length = FloatField("Length")
+    width = FloatField("Width")
+    height = FloatField("Height")
 
     submit = SubmitField("Save")
 
@@ -50,27 +47,24 @@ class ProductForm(FlaskForm):
 
 class NewProductForm(FlaskForm):
     name = StringField("Name", [DataRequired()])
-    product_type = StringField("Product type", [DataRequired()])
-    supplier = IntegerField("Supplier ID", [DataRequired()])
-    currency = StringField("Currency", [DataRequired()])
-    price = FloatField("Price", [DataRequired()])
+    supplier = IntegerField("Supplier ID")
+    currency = StringField("Currency")
+    price = FloatField("Price")
     image = FileField("Image")
     description = StringField("Description", [DataRequired()])
     # General Info ->
     SKU = StringField("SKU", [DataRequired()])
-    low_stock_level = IntegerField("Low stock level", [DataRequired()])
-    program_year = IntegerField("Program year", [DataRequired()])
-    package_qty = IntegerField("Package qty", [DataRequired()])
-    numb_of_items_per_case = IntegerField("Number of items per case", [DataRequired()])
-    numb_of_cases_per_outer_case = IntegerField(
-        "Number of cases per outer case", [DataRequired()]
-    )
-    comments = StringField("Comments", [DataRequired()])
+    low_stock_level = IntegerField("Low stock level")
+    program_year = IntegerField("Program year")
+    package_qty = IntegerField("Package qty")
+    numb_of_items_per_case = IntegerField("Number of items per case")
+    numb_of_cases_per_outer_case = IntegerField("Number of cases per outer case")
+    comments = StringField("Comments")
     # shipping
-    weight = FloatField("Weight", [DataRequired()])
-    length = FloatField("Length", [DataRequired()])
-    width = FloatField("Width", [DataRequired()])
-    height = FloatField("Height", [DataRequired()])
+    weight = FloatField("Weight")
+    length = FloatField("Length")
+    width = FloatField("Width")
+    height = FloatField("Height")
 
     submit = SubmitField("Add product")
 

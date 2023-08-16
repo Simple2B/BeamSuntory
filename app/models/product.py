@@ -23,33 +23,35 @@ class Product(db.Model, ModelMixin):
         sa.String(64),
         nullable=False,
     )
-    product_type: orm.Mapped[s.ProductType]
 
     supplier_id: orm.Mapped[str] = orm.mapped_column(
-        sa.ForeignKey("suppliers.id")
+        sa.ForeignKey("suppliers.id"), nullable=True
     )  # NOTE vendor = supplier
-    currency: orm.Mapped[s.Currency]
-    price: orm.Mapped[float] = orm.mapped_column(
-        sa.Float(),
-        nullable=False,
+    currency: orm.Mapped[s.Currency] = orm.mapped_column(
+        sa.Enum(s.Currency), nullable=True
     )
+    price: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
 
     image: orm.Mapped[str] = orm.mapped_column(sa.Text())  # png base64 str
-    description: orm.Mapped[str] = orm.mapped_column(sa.String(256))
+    description: orm.Mapped[str] = orm.mapped_column(sa.String(256), nullable=False)
     # General Info ->
-    SKU: orm.Mapped[str] = orm.mapped_column(sa.String(64))
-    low_stock_level: orm.Mapped[int] = orm.mapped_column(sa.Integer())
+    SKU: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=False)
+    low_stock_level: orm.Mapped[int] = orm.mapped_column(sa.Integer(), nullable=True)
 
-    program_year: orm.Mapped[int] = orm.mapped_column(sa.Integer())
-    package_qty: orm.Mapped[int] = orm.mapped_column(sa.Integer())
-    numb_of_items_per_case: orm.Mapped[int] = orm.mapped_column(sa.Integer())
-    numb_of_cases_per_outer_case: orm.Mapped[int] = orm.mapped_column(sa.Integer())
-    comments: orm.Mapped[str] = orm.mapped_column(sa.String(128))
+    program_year: orm.Mapped[int] = orm.mapped_column(sa.Integer(), nullable=True)
+    package_qty: orm.Mapped[int] = orm.mapped_column(sa.Integer(), nullable=True)
+    numb_of_items_per_case: orm.Mapped[int] = orm.mapped_column(
+        sa.Integer(), nullable=True
+    )
+    numb_of_cases_per_outer_case: orm.Mapped[int] = orm.mapped_column(
+        sa.Integer(), nullable=True
+    )
+    comments: orm.Mapped[str] = orm.mapped_column(sa.String(128), nullable=True)
     # shipping
-    weight: orm.Mapped[float] = orm.mapped_column(sa.Float())
-    length: orm.Mapped[float] = orm.mapped_column(sa.Float())
-    width: orm.Mapped[float] = orm.mapped_column(sa.Float())
-    height: orm.Mapped[float] = orm.mapped_column(sa.Float())
+    weight: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
+    length: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
+    width: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
+    height: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
 
     # TODO is overlaps="user_obj" correct decision? remove it to see the warning
     product_groups: orm.Mapped[ProductGroup] = orm.relationship(
