@@ -7,6 +7,7 @@ from flask_login import current_user
 
 from app.database import db
 from app import schema as s
+from app.models.group_for_product import GroupProduct
 from .utils import ModelMixin
 
 from .product_group import ProductGroup
@@ -111,4 +112,19 @@ class Product(db.Model, ModelMixin):
         ]
         # TODO looks like it is duplicate of available_quantity. Ask client
         mg_dict["total_available_items"] = mg_dict["available_quantity"]
+        groups_for_products_obj = db.session.execute(GroupProduct.select()).all()
+        mstr_prod_grps_prod_grps_names = {}
+        for group in groups_for_products_obj:
+            if (
+                group[0].master_groups_for_product.name
+                not in mstr_prod_grps_prod_grps_names
+            ):
+                mstr_prod_grps_prod_grps_names[
+                    group[0].master_groups_for_product.name
+                ] = [{"group_name": group[0].name, "group_id": group[0].id}]
+            else:
+                mstr_prod_grps_prod_grps_names[
+                    group[0].master_groups_for_product.name
+                ].append({"group_name": group[0].name, "group_id": group[0].id})
+        mg_dict["mstr_prod_grps_prod_grps_names"] = mstr_prod_grps_prod_grps_names
         return json.dumps(mg_dict)
