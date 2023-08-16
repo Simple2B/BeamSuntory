@@ -74,10 +74,6 @@ class ShipRequest(db.Model, ModelMixin):
                 Cart.select().where(Cart.order_numb == mg_dict["order_numb"])
             ).scalars()
         ]
-        # TODO: check if "No warehouse" causes problems
-        # mg_dict["warehouse_name"] = (
-        #     self.warehouse.name if self.warehouse else "No warehouse"
-        # )
         mg_dict["warehouses"] = [
             {"name": w.name, "id": w.id, "products_ids": []}
             for w in db.session.execute(Warehouse.select()).scalars()
