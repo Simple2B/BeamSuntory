@@ -5,7 +5,7 @@ from tests.utils import login, register, logout
 
 def test_groups_pages(client):
     logout(client)
-    response = client.get("/group/")
+    response = client.get("/stock_target_group/")
     assert response.status_code == 302
     response = client.get("/master_group/")
     assert response.status_code == 302
@@ -14,11 +14,11 @@ def test_groups_pages(client):
     response = login(client, "samg")
     assert b"Login successful." in response.data
 
-    response = client.get("/group/")
+    response = client.get("/stock_target_group/")
     assert response.status_code == 200
     response = client.get("/master_group/")
     assert response.status_code == 200
-    response = client.get("/group/create")
+    response = client.get("/stock_target_group/create")
     assert response.status_code == 405
     response = client.get("/master_group/create")
     assert response.status_code == 405
@@ -34,7 +34,9 @@ def test_create_group(client):
     master_groups_rows_objs = db.session.execute(m.MasterGroup.select()).all()
     assert len(master_groups_rows_objs) > 0
 
-    response = client.post("/group/create", data=dict(name="Maywood", master_group="1"))
+    response = client.post(
+        "/stock_target_group/create", data=dict(name="Maywood", master_group="1")
+    )
     assert response.status_code == 302
     assert "group" in response.text
     groups_rows_objs = db.session.execute(m.Group.select()).all()
@@ -55,7 +57,7 @@ def test_delete_group(mg_g_populate: FlaskClient):
 
     before_delete_groups_rows_objs = db.session.execute(m.Group.select()).all()
 
-    response = mg_g_populate.delete("/group/delete/1")
+    response = mg_g_populate.delete("/stock_target_group/delete/1")
     assert response.status_code == 200
     assert "ok" in response.text
     groups_rows_objs = db.session.execute(m.Group.select()).all()
@@ -85,7 +87,7 @@ def test_edit_group(mg_g_populate: FlaskClient):
     assert master_groups_rows_objs[0][0].name == "Premise"
 
     response = mg_g_populate.post(
-        "/group/edit", data=dict(group_id=1, name="BJ", master_group="1")
+        "/stock_target_group/edit", data=dict(group_id=1, name="BJ", master_group="1")
     )
     assert response.status_code == 302
     assert "group" in response.text

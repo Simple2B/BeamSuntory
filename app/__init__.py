@@ -21,7 +21,7 @@ def create_app(environment="development"):
         main_blueprint,
         auth_blueprint,
         user_blueprint,
-        group_blueprint,
+        stock_target_group_blueprint,
         master_group_blueprint,
         product_blueprint,
         group_for_product_blueprint,
@@ -65,7 +65,7 @@ def create_app(environment="development"):
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(main_blueprint)
     app.register_blueprint(user_blueprint)
-    app.register_blueprint(group_blueprint)
+    app.register_blueprint(stock_target_group_blueprint)
     app.register_blueprint(master_group_blueprint)
     app.register_blueprint(product_blueprint)
     app.register_blueprint(group_for_product_blueprint)
