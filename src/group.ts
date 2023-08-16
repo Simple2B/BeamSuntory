@@ -63,7 +63,7 @@ deleteButtons.forEach(e => {
   e.addEventListener('click', async () => {
     if (confirm('Are sure?')) {
       let id = e.getAttribute('data-group-id');
-      const response = await fetch(`/group/delete/${id}`, {
+      const response = await fetch(`/stock_target_group/delete/${id}`, {
         method: 'DELETE',
       });
       if (response.status == 200) {

@@ -24,7 +24,6 @@ def test_create_product(client):
     login(client, "samg")
     data = dict(
         name="test_product",
-        product_type="SIMPLE_PRODUCT",
         supplier=1,
         currency="CAD",
         price=11,
@@ -41,6 +40,7 @@ def test_create_product(client):
         length=11.0,
         width=11.0,
         height=11.0,
+        product_groups="[1,2,3]",
     )
     data["image"] = (io.BytesIO(b"abcdef"), "test.png")
     response = client.post(
@@ -70,7 +70,6 @@ def test_edit_product(mg_g_populate: FlaskClient):
     data = dict(
         product_id=1,
         name="test_product_edited",
-        product_type="SIMPLE_PRODUCT",
         supplier=1,
         currency="USD",
         price=12,
@@ -87,6 +86,7 @@ def test_edit_product(mg_g_populate: FlaskClient):
         length=11.0,
         width=11.0,
         height=11.0,
+        product_groups="[1,2,3]",
     )
     data["image"] = (io.BytesIO(b"abcdef"), "test.png")
 

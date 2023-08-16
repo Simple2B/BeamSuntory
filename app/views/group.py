@@ -15,10 +15,12 @@ from app import forms as f
 from app.logger import log
 
 
-group_blueprint = Blueprint("group", __name__, url_prefix="/group")
+stock_target_group_blueprint = Blueprint(
+    "stock_target_group", __name__, url_prefix="/stock_target_group"
+)
 
 
-@group_blueprint.route("/", methods=["GET"])
+@stock_target_group_blueprint.route("/", methods=["GET"])
 @login_required
 def get_all():
     form_create = f.NewGroupForm()
@@ -54,7 +56,7 @@ def get_all():
     master_groups = [row[0] for row in master_groups_rows_objs]
 
     return render_template(
-        "group/groups.html",
+        "stock_target_group/stock_target_groups.html",
         groups=db.session.execute(
             query.offset((pagination.page - 1) * pagination.per_page).limit(
                 pagination.per_page
@@ -69,7 +71,7 @@ def get_all():
     )
 
 
-@group_blueprint.route("/create", methods=["POST"])
+@stock_target_group_blueprint.route("/create", methods=["POST"])
 @login_required
 def create():
     form = f.NewGroupForm()
@@ -78,7 +80,7 @@ def create():
         gr: m.Group | None = db.session.scalar(query)
         if gr:
             flash("This group name is already taken.", "danger")
-            return redirect(url_for("group.get_all"))
+            return redirect(url_for("stock_target_group.get_all"))
         group = m.Group(
             name=form.name.data,
             master_group_id=form.master_group.data,
@@ -86,14 +88,14 @@ def create():
         log(log.INFO, "Form submitted. Group: [%s]", group)
         group.save()
         flash("Group added!", "success")
-        return redirect(url_for("group.get_all"))
+        return redirect(url_for("stock_target_group.get_all"))
     else:
         log(log.ERROR, "Group creation errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
-        return redirect(url_for("group.get_all"))
+        return redirect(url_for("stock_target_group.get_all"))
 
 
-@group_blueprint.route("/edit", methods=["POST"])
+@stock_target_group_blueprint.route("/edit", methods=["POST"])
 @login_required
 def save():
     form = f.GroupForm()
@@ -108,15 +110,15 @@ def save():
         u.save()
         if form.next_url.data:
             return redirect(form.next_url.data)
-        return redirect(url_for("group.get_all"))
+        return redirect(url_for("stock_target_group.get_all"))
 
     else:
         log(log.ERROR, "group save errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
-        return redirect(url_for("group.get_all"))
+        return redirect(url_for("stock_target_group.get_all"))
 
 
-@group_blueprint.route("/delete/<int:id>", methods=["DELETE"])
+@stock_target_group_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
 def delete(id: int):
     u = db.session.scalar(m.Group.select().where(m.Group.id == id))

@@ -46,6 +46,7 @@ def get_all_products(request, query=None, count_query=None):
 
     groups_for_products_obj = db.session.execute(m.GroupProduct.select()).all()
     mastr_for_prods_groups_for_prods = {}
+    mstr_prod_grps_prod_grps_names = {}
     for group in groups_for_products_obj:
         if (
             group[0].master_groups_for_product.name
@@ -54,10 +55,16 @@ def get_all_products(request, query=None, count_query=None):
             mastr_for_prods_groups_for_prods[
                 group[0].master_groups_for_product.name
             ] = [group[0]]
+            mstr_prod_grps_prod_grps_names[group[0].master_groups_for_product.name] = [
+                {"group_name": group[0].name, "group_id": group[0].id}
+            ]
         else:
             mastr_for_prods_groups_for_prods[
                 group[0].master_groups_for_product.name
             ].append(group[0])
+            mstr_prod_grps_prod_grps_names[
+                group[0].master_groups_for_product.name
+            ].append({"group_name": group[0].name, "group_id": group[0].id})
 
     # get all product_groups to list and compare in view.html
     product_groups: list[m.ProductGroup] = [
@@ -134,6 +141,7 @@ def get_all_products(request, query=None, count_query=None):
         "current_user_groups_names": [
             i[0].parent.name for i in current_user_groups_rows
         ],
+        "mstr_prod_grps_prod_grps_names": json.dumps(mstr_prod_grps_prod_grps_names),
     }
 
 
@@ -171,6 +179,9 @@ def get_all():
         product_mg_g=products_object["product_mg_g"],
         master_group_product_name=products_object["master_product_groups_name"],
         suppliers=products_object["suppliers"],
+        mstr_prod_grps_prod_grps_names=products_object[
+            "mstr_prod_grps_prod_grps_names"
+        ],
         form_sort=form_sort,
         form_create=form_create,
         form_edit=form_edit,
@@ -188,36 +199,41 @@ def create():
             flash("This product name is already taken.", "danger")
             return redirect(url_for("product.get_all"))
 
+        supplier: m.Supplier = db.session.scalar(m.Supplier.select())
+
         image = request.files["image"]
         image_string = base64.b64encode(image.read()).decode()
         product: m.Product = m.Product(
             name=str(form.name.data).strip(" "),
-            product_type=form.product_type.data,
-            supplier_id=form.supplier.data,
-            currency=form.currency.data,
-            price=form.price.data,
+            supplier_id=form.supplier.data if form.supplier.data else supplier.id,
+            currency=form.currency.data if form.currency.data else "CAD",
+            price=form.price.data if form.price.data else 0,
             image=image_string,
             description=form.description.data,
             # General Info ->
             SKU=form.SKU.data,
-            low_stock_level=form.low_stock_level.data,
-            program_year=form.program_year.data,
-            package_qty=form.package_qty.data,
-            numb_of_items_per_case=form.numb_of_items_per_case.data,
-            numb_of_cases_per_outer_case=form.numb_of_cases_per_outer_case.data,
-            comments=form.comments.data,
+            low_stock_level=form.low_stock_level.data
+            if form.low_stock_level.data
+            else 0,
+            program_year=form.program_year.data if form.program_year.data else 2023,
+            package_qty=form.package_qty.data if form.package_qty.data else 0,
+            numb_of_items_per_case=form.numb_of_items_per_case.data
+            if form.numb_of_items_per_case.data
+            else 0,
+            numb_of_cases_per_outer_case=form.numb_of_cases_per_outer_case.data
+            if form.numb_of_cases_per_outer_case.data
+            else 0,
+            comments=form.comments.data if form.comments.data else "no comment",
             # shipping
-            weight=form.weight.data,
-            length=form.length.data,
-            width=form.width.data,
-            height=form.height.data,
+            weight=form.weight.data if form.weight.data else 0,
+            length=form.length.data if form.length.data else 0,
+            width=form.width.data if form.width.data else 0,
+            height=form.height.data if form.height.data else 0,
         )
         log(log.INFO, "Form submitted. Product: [%s]", product)
         product.save()
 
-        product_master_groups_ids = [
-            int(request.form[i]) for i in request.form if "group" in i
-        ]
+        product_master_groups_ids = json.loads(form.product_groups.data)
 
         for group_id in product_master_groups_ids:
             product_group = m.ProductGroup(product_id=product.id, group_id=group_id)
@@ -237,18 +253,19 @@ def save():
     form: f.ProductForm = f.ProductForm()
     if form.validate_on_submit():
         query = m.Product.select().where(m.Product.id == int(form.product_id.data))
-        u: m.Product | None = db.session.scalar(query)
+        u: m.Product = db.session.scalar(query)
         if not u:
             log(log.ERROR, "Not found product by id : [%s]", form.product_id.data)
             flash("Cannot save product data", "danger")
 
+        supplier: m.Supplier = db.session.scalar(m.Supplier.select())
+
         image = request.files["image"]
         image_string = base64.b64encode(image.read()).decode()
         u.name = str(form.name.data).strip(" ")
-        u.product_type = form.product_type.data
-        u.supplier_id = form.supplier.data
-        u.currency = form.currency.data
-        u.price = form.price.data
+        u.supplier_id = form.supplier.data if form.supplier.data else supplier.id
+        u.currency = form.currency.data if form.currency.data else "CAD"
+        u.price = form.price.data if form.price.data else 0
 
         if len(image_string) == 0:
             image_string = u.image
@@ -257,22 +274,28 @@ def save():
         u.description = form.description.data
         # General Info ->
         u.SKU = form.SKU.data
-        u.low_stock_level = form.low_stock_level.data
-        u.program_year = form.program_year.data
-        u.package_qty = form.package_qty.data
-        u.numb_of_items_per_case = form.numb_of_items_per_case.data
-        u.numb_of_cases_per_outer_case = form.numb_of_cases_per_outer_case.data
-        u.comments = form.comments.data
+        u.low_stock_level = (
+            form.low_stock_level.data if form.low_stock_level.data else 0
+        )
+        u.program_year = form.program_year.data if form.program_year.data else 2023
+        u.package_qty = form.package_qty.data if form.package_qty.data else 0
+        u.numb_of_items_per_case = (
+            form.numb_of_items_per_case.data if form.numb_of_items_per_case.data else 0
+        )
+        u.numb_of_cases_per_outer_case = (
+            form.numb_of_cases_per_outer_case.data
+            if form.numb_of_cases_per_outer_case.data
+            else 0
+        )
+        u.comments = form.comments.data if form.comments.data else "no comment"
         # shipping
-        u.weight = form.weight.data
-        u.length = form.length.data
-        u.width = form.width.data
-        u.height = form.height.data
+        u.weight = form.weight.data if form.weight.data else 0
+        u.length = form.length.data if form.length.data else 0
+        u.width = form.width.data if form.width.data else 0
+        u.height = form.height.data if form.height.data else 0
         u.save()
 
-        product_master_groups_ids = [
-            int(request.form[i]) for i in request.form if "group" in i
-        ]
+        product_master_groups_ids = json.loads(form.product_groups.data)
 
         product_groups_obj = db.session.execute(
             m.ProductGroup.select().where(
@@ -436,6 +459,9 @@ def sort():
             product_mg_g=products_object["product_mg_g"],
             master_group_product_name=products_object["master_product_groups_name"],
             suppliers=products_object["suppliers"],
+            mstr_prod_grps_prod_grps_names=products_object[
+                "mstr_prod_grps_prod_grps_names"
+            ],
             form_sort=form,
             form_create=form_create,
             form_edit=form_edit,

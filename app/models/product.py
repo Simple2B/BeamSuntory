@@ -7,6 +7,7 @@ from flask_login import current_user
 
 from app.database import db
 from app import schema as s
+from app.models.group_for_product import GroupProduct
 from .utils import ModelMixin
 
 from .product_group import ProductGroup
@@ -23,33 +24,35 @@ class Product(db.Model, ModelMixin):
         sa.String(64),
         nullable=False,
     )
-    product_type: orm.Mapped[s.ProductType]
 
     supplier_id: orm.Mapped[str] = orm.mapped_column(
-        sa.ForeignKey("suppliers.id")
+        sa.ForeignKey("suppliers.id"), nullable=True
     )  # NOTE vendor = supplier
-    currency: orm.Mapped[s.Currency]
-    price: orm.Mapped[float] = orm.mapped_column(
-        sa.Float(),
-        nullable=False,
+    currency: orm.Mapped[s.Currency] = orm.mapped_column(
+        sa.Enum(s.Currency), nullable=True
     )
+    price: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
 
     image: orm.Mapped[str] = orm.mapped_column(sa.Text())  # png base64 str
-    description: orm.Mapped[str] = orm.mapped_column(sa.String(256))
+    description: orm.Mapped[str] = orm.mapped_column(sa.String(256), nullable=False)
     # General Info ->
-    SKU: orm.Mapped[str] = orm.mapped_column(sa.String(64))
-    low_stock_level: orm.Mapped[int] = orm.mapped_column(sa.Integer())
+    SKU: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=False)
+    low_stock_level: orm.Mapped[int] = orm.mapped_column(sa.Integer(), nullable=True)
 
-    program_year: orm.Mapped[int] = orm.mapped_column(sa.Integer())
-    package_qty: orm.Mapped[int] = orm.mapped_column(sa.Integer())
-    numb_of_items_per_case: orm.Mapped[int] = orm.mapped_column(sa.Integer())
-    numb_of_cases_per_outer_case: orm.Mapped[int] = orm.mapped_column(sa.Integer())
-    comments: orm.Mapped[str] = orm.mapped_column(sa.String(128))
+    program_year: orm.Mapped[int] = orm.mapped_column(sa.Integer(), nullable=True)
+    package_qty: orm.Mapped[int] = orm.mapped_column(sa.Integer(), nullable=True)
+    numb_of_items_per_case: orm.Mapped[int] = orm.mapped_column(
+        sa.Integer(), nullable=True
+    )
+    numb_of_cases_per_outer_case: orm.Mapped[int] = orm.mapped_column(
+        sa.Integer(), nullable=True
+    )
+    comments: orm.Mapped[str] = orm.mapped_column(sa.String(128), nullable=True)
     # shipping
-    weight: orm.Mapped[float] = orm.mapped_column(sa.Float())
-    length: orm.Mapped[float] = orm.mapped_column(sa.Float())
-    width: orm.Mapped[float] = orm.mapped_column(sa.Float())
-    height: orm.Mapped[float] = orm.mapped_column(sa.Float())
+    weight: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
+    length: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
+    width: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
+    height: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
 
     # TODO is overlaps="user_obj" correct decision? remove it to see the warning
     product_groups: orm.Mapped[ProductGroup] = orm.relationship(
@@ -109,4 +112,38 @@ class Product(db.Model, ModelMixin):
         ]
         # TODO looks like it is duplicate of available_quantity. Ask client
         mg_dict["total_available_items"] = mg_dict["available_quantity"]
+        groups_for_products_obj = db.session.execute(GroupProduct.select()).all()
+        mstr_prod_grps_prod_grps_names = {}
+        for group in groups_for_products_obj:
+            if (
+                group[0].master_groups_for_product.name
+                not in mstr_prod_grps_prod_grps_names
+            ):
+                mstr_prod_grps_prod_grps_names[
+                    group[0].master_groups_for_product.name
+                ] = [{"group_name": group[0].name, "group_id": group[0].id}]
+            else:
+                mstr_prod_grps_prod_grps_names[
+                    group[0].master_groups_for_product.name
+                ].append({"group_name": group[0].name, "group_id": group[0].id})
+        mg_dict["mstr_prod_grps_prod_grps_names"] = mstr_prod_grps_prod_grps_names
+        mstr_grps_grps_names_in_prod = {}
+        groups_in_products_obj = db.session.execute(
+            GroupProduct.select().where(
+                GroupProduct.id.in_([i.group_id for i in self.product_groups])
+            )
+        ).all()
+        for group in groups_in_products_obj:
+            if (
+                group[0].master_groups_for_product.name
+                not in mstr_grps_grps_names_in_prod
+            ):
+                mstr_grps_grps_names_in_prod[
+                    group[0].master_groups_for_product.name
+                ] = [{"group_name": group[0].name, "group_id": group[0].id}]
+            else:
+                mstr_grps_grps_names_in_prod[
+                    group[0].master_groups_for_product.name
+                ].append({"group_name": group[0].name, "group_id": group[0].id})
+        mg_dict["mstr_grps_grps_names_in_prod"] = mstr_grps_grps_names_in_prod
         return json.dumps(mg_dict)

@@ -57,13 +57,21 @@ def init(app: Flask):
     @app.cli.command("fill-db")
     def fill_db():
         """Populate DB with basic data."""
-        master_groups = {
-            "Country": ["Canada", "US"],
-            "Brand": ["JB", "Bombay"],
+        stock_master_groups = {
+            "Marketing": ["Brugal", "Banff Ice", "Alberta Springs"],
+            "Field Marketing": ["Ontario", "Alberta", "Manitoba", "Ontario FMM"],
+            "Mixit": ["Mixit"],
+            "Key Accounts": ["Key Accounts"],
+            "Sales Manager": ["Sales Manager"],
+        }
+        product_master_groups = {
+            "Brand": ["Brugal", "Banff Ice", "Alberta Springs"],
             "Language": ["English", "French"],
+            "Premises": ["On Premises", "Off Premises"],
+            "Category": ["NLVA", "GWP", "Kit", "Bareware", "Signage"],
         }
 
-        for mg in master_groups:
+        for mg in stock_master_groups:
             master_group = db.session.execute(
                 m.MasterGroup.select().where(m.MasterGroup.name == mg)
             ).scalar()
@@ -73,7 +81,7 @@ def init(app: Flask):
                 )
                 master_group.save(False)
 
-            for g in master_groups[mg]:
+            for g in stock_master_groups[mg]:
                 group = db.session.execute(
                     m.Group.select().where(m.Group.name == g)
                 ).scalar()
@@ -84,7 +92,7 @@ def init(app: Flask):
                     ).save(False)
 
         # yeah yeah, just code duplication
-        for mg in master_groups:
+        for mg in product_master_groups:
             master_group = db.session.execute(
                 m.MasterGroupProduct.select().where(m.MasterGroupProduct.name == mg)
             ).scalar()
@@ -94,7 +102,7 @@ def init(app: Flask):
                 )
                 master_group.save(False)
 
-            for g in master_groups[mg]:
+            for g in product_master_groups[mg]:
                 group = db.session.execute(
                     m.GroupProduct.select().where(m.GroupProduct.name == g)
                 ).scalar()

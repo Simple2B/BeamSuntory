@@ -7,7 +7,7 @@ from wtforms import (
     FloatField,
     FileField,
 )
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Optional
 
 from app import models as m
 from app import db
@@ -18,27 +18,30 @@ class ProductForm(FlaskForm):
     next_url = StringField("next_url")
     product_id = StringField("product_id", [DataRequired()])
     name = StringField("Name", [DataRequired()])
-    product_type = StringField("Product type", [DataRequired()])
-    supplier = IntegerField("Supplier ID", [DataRequired()])
-    currency = StringField("Currency", [DataRequired()])
-    price = FloatField("Price", [DataRequired()])
-    image = FileField("Image")
+    supplier = IntegerField("Supplier ID", validators=[Optional()])
+    currency = StringField("Currency", validators=[Optional()])
+    price = FloatField("Price", validators=[Optional()])
+    image = FileField("Image", validators=[Optional()])
     description = StringField("Description", [DataRequired()])
     # General Info ->
     SKU = StringField("SKU", [DataRequired()])
-    low_stock_level = IntegerField("Low stock level", [DataRequired()])
-    program_year = IntegerField("Program year", [DataRequired()])
-    package_qty = IntegerField("Package qty", [DataRequired()])
-    numb_of_items_per_case = IntegerField("Number of items per case", [DataRequired()])
-    numb_of_cases_per_outer_case = IntegerField(
-        "Number of cases per outer case", [DataRequired()]
+    low_stock_level = IntegerField("Low stock level", validators=[Optional()])
+    program_year = IntegerField("Program year", validators=[Optional()])
+    package_qty = IntegerField("Package qty", validators=[Optional()])
+    numb_of_items_per_case = IntegerField(
+        "Number of items per case", validators=[Optional()]
     )
-    comments = StringField("Comments", [DataRequired()])
+    numb_of_cases_per_outer_case = IntegerField(
+        "Number of cases per outer case", validators=[Optional()]
+    )
+    comments = StringField("Comments", validators=[Optional()])
     # shipping
-    weight = FloatField("Weight", [DataRequired()])
-    length = FloatField("Length", [DataRequired()])
-    width = FloatField("Width", [DataRequired()])
-    height = FloatField("Height", [DataRequired()])
+    weight = FloatField("Weight", validators=[Optional()])
+    length = FloatField("Length", validators=[Optional()])
+    width = FloatField("Width", validators=[Optional()])
+    height = FloatField("Height", validators=[Optional()])
+    # json groups
+    product_groups = StringField("Groups", [DataRequired()])
 
     submit = SubmitField("Save")
 
@@ -50,27 +53,30 @@ class ProductForm(FlaskForm):
 
 class NewProductForm(FlaskForm):
     name = StringField("Name", [DataRequired()])
-    product_type = StringField("Product type", [DataRequired()])
-    supplier = IntegerField("Supplier ID", [DataRequired()])
-    currency = StringField("Currency", [DataRequired()])
-    price = FloatField("Price", [DataRequired()])
-    image = FileField("Image")
+    supplier = IntegerField("Supplier ID", validators=[Optional()])
+    currency = StringField("Currency", validators=[Optional()])
+    price = FloatField("Price", validators=[Optional()])
+    image = FileField("Image", validators=[Optional()])
     description = StringField("Description", [DataRequired()])
     # General Info ->
     SKU = StringField("SKU", [DataRequired()])
-    low_stock_level = IntegerField("Low stock level", [DataRequired()])
-    program_year = IntegerField("Program year", [DataRequired()])
-    package_qty = IntegerField("Package qty", [DataRequired()])
-    numb_of_items_per_case = IntegerField("Number of items per case", [DataRequired()])
-    numb_of_cases_per_outer_case = IntegerField(
-        "Number of cases per outer case", [DataRequired()]
+    low_stock_level = IntegerField("Low stock level", validators=[Optional()])
+    program_year = IntegerField("Program year", validators=[Optional()])
+    package_qty = IntegerField("Package qty", validators=[Optional()])
+    numb_of_items_per_case = IntegerField(
+        "Number of items per case", validators=[Optional()]
     )
-    comments = StringField("Comments", [DataRequired()])
+    numb_of_cases_per_outer_case = IntegerField(
+        "Number of cases per outer case", validators=[Optional()]
+    )
+    comments = StringField("Comments", validators=[Optional()])
     # shipping
-    weight = FloatField("Weight", [DataRequired()])
-    length = FloatField("Length", [DataRequired()])
-    width = FloatField("Width", [DataRequired()])
-    height = FloatField("Height", [DataRequired()])
+    weight = FloatField("Weight", validators=[Optional()])
+    length = FloatField("Length", validators=[Optional()])
+    width = FloatField("Width", validators=[Optional()])
+    height = FloatField("Height", validators=[Optional()])
+    # json groups
+    product_groups = StringField("Groups", [DataRequired()])
 
     submit = SubmitField("Add product")
 
