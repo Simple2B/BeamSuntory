@@ -24,6 +24,8 @@ interface IProduct {
   image: string;
   SKU: string;
   comment: string;
+  group: string;
+  warehouse: {id: number; name: string};
 }
 
 interface IStore {
@@ -47,10 +49,6 @@ const $modalViewElement: HTMLElement = document.querySelector(
   '#view-ship-request-modal',
 );
 
-const $modalEditElement: HTMLElement = document.querySelector(
-  '#edit-ship-request-modal',
-);
-
 const modalViewOptions: ModalOptions = {
   placement: 'bottom-right',
   backdrop: 'dynamic',
@@ -72,34 +70,9 @@ const modalViewOptions: ModalOptions = {
   },
 };
 
-const modalEditOptions: ModalOptions = {
-  placement: 'bottom-right',
-  backdrop: 'dynamic',
-  backdropClasses:
-    'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
-  closable: true,
-  onHide: () => {
-    console.log('modal is hidden');
-    const tableShipRequestBody = document.querySelector(
-      '#table-ship-request-body-edit',
-    );
-    while (tableShipRequestBody.firstChild) {
-      tableShipRequestBody.removeChild(tableShipRequestBody.firstChild);
-    }
-  },
-  onShow: () => {},
-  onToggle: () => {
-    console.log('modal has been toggled');
-  },
-};
-
 const viewModal: ModalInterface = new Modal(
   $modalViewElement,
   modalViewOptions,
-);
-const editModal: ModalInterface = new Modal(
-  $modalEditElement,
-  modalEditOptions,
 );
 
 // search flow
@@ -177,63 +150,6 @@ viewShipRequestButtonElements.forEach(e =>
   }),
 );
 
-const $buttonEditElements = document.querySelectorAll(
-  '.ship-request-edit-button',
-);
-$buttonEditElements.forEach(e =>
-  e.addEventListener('click', () => {
-    editShipRequest(
-      JSON.parse(e.getAttribute('data-target')),
-      JSON.parse(e.getAttribute('data-target-store')),
-    );
-  }),
-);
-
-// -----user edit modal window----
-function editShipRequest(shipRequest: IShipRequest, store: IStore) {
-  let input: HTMLInputElement = document.querySelector(
-    '#ship-request-edit-status',
-  );
-  input.value = shipRequest.status;
-  input = document.querySelector('#ship-request-edit-id');
-  input.value = shipRequest.id.toString();
-  input = document.querySelector('#ship-request-edit-store');
-  input.value = shipRequest.store_id.toString();
-  input = document.querySelector('#ship-request-edit-status');
-  input.value = shipRequest.status;
-
-  let div: HTMLDivElement = document.querySelector(
-    '#ship-request-edit-order-number',
-  );
-  div.innerHTML = shipRequest.order_numb;
-  div = document.querySelector('#ship-request-edit-store');
-  div.innerHTML = store.store_name;
-  div = document.querySelector('#ship-request-edit-type');
-  div.innerHTML = shipRequest.order_type;
-  div = document.querySelector('#ship-request-edit-created-date');
-  div.innerHTML = shipRequest.created_at.slice(0, 10);
-  div = document.querySelector('#ship-request-edit-comment');
-  div.innerHTML = shipRequest.comment;
-  div = document.querySelector('#ship-request-edit-store');
-  div.innerHTML = store.store_name;
-  div = document.querySelector('#ship-request-edit-store_address');
-  div.innerHTML = store.address;
-  div = document.querySelector('#ship-request-edit-store_phone');
-  div.innerHTML = store.phone_numb;
-  div = document.querySelector('#ship-request-edit-store_country');
-  div.innerHTML = store.country;
-  div = document.querySelector('#ship-request-edit-store_province');
-  div.innerHTML = store.region;
-  div = document.querySelector('#ship-request-edit-store_city');
-  div.innerHTML = store.city;
-  div = document.querySelector('#ship-request-edit-store_zip_code');
-  div.innerHTML = store.zip;
-
-  createShipRequestItemTable(shipRequest, 'edit');
-
-  editModal.show();
-}
-
 // -----create ship request item table-----
 function createShipRequestItemTable(shipRqst: IShipRequest, typeModal: string) {
   const tableShipRequestBody = document.querySelector(
@@ -292,10 +208,9 @@ function createShipRequestItemTable(shipRqst: IShipRequest, typeModal: string) {
         </td>
         <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div
-              class="shadow-sm h-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-              ${product.quantity}
-            </div>
+            <div class="cart-item-retail-price text-base font-semibold">${
+              product.quantity
+            }</div>
           </div>
         </td>
       `;
@@ -310,13 +225,15 @@ function createShipRequestItemTable(shipRqst: IShipRequest, typeModal: string) {
             </select>
       </td>
     `;
-
+    const warehouseName = product.warehouse
+      ? product.warehouse.name
+      : 'No Warehouse';
     const warehouseViewElement = document.createElement('td');
     warehouseViewElement.classList.add('p-4', 'space-x-2', 'whitespace-nowrap');
     warehouseViewElement.innerHTML = `
       <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
         <div class="pl-3">
-          <div class="text-base text-gray-900 dark:text-white font-semibold">${shipRqst.warehouse_name}</div>
+          <div class="text-base text-gray-900 dark:text-white font-semibold">${warehouseName}</div>
         </div>
       </td>
     `;
@@ -342,34 +259,3 @@ function createShipRequestItemTable(shipRqst: IShipRequest, typeModal: string) {
     tableShipRequestBody.appendChild(tableShipRequestItem);
   });
 }
-
-// -----set one warehouse to all items-----
-function setWarehouseAllItems(warehouseId: string, typeModal: string) {
-  const warehousesSelect = document.querySelectorAll(
-    `.ship-request-${typeModal}-warehouse-name`,
-  );
-  warehousesSelect.forEach((e: HTMLInputElement) => {
-    e.value = warehouseId.toString();
-  });
-}
-
-const isWarehouseSetAll: HTMLInputElement = document.querySelector(
-  '#ship-request-edit-warehouse-set-all',
-);
-
-isWarehouseSetAll.addEventListener('change', () => {
-  if (isWarehouseSetAll.checked) {
-    const warehouseInput = document.querySelector(
-      '#ship-request-edit-warehouse-name',
-    ) as HTMLInputElement;
-    const warehouseId = warehouseInput.value;
-    setWarehouseAllItems(warehouseId, 'edit');
-  }
-});
-
-const warehouseNameSelect = document.querySelector(
-  '#ship-request-edit-warehouse-name',
-) as HTMLInputElement;
-warehouseNameSelect.addEventListener('change', () => {
-  isWarehouseSetAll.checked = false;
-});

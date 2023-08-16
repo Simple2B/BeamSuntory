@@ -6,7 +6,6 @@ from sqlalchemy import orm
 from app.database import db
 from app import schema as s
 from .utils import ModelMixin
-from .store_category import StoreCategory
 
 
 class Store(db.Model, ModelMixin):
@@ -16,7 +15,7 @@ class Store(db.Model, ModelMixin):
     store_category_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("store_categories.id")
     )
-    store_category: orm.Mapped[StoreCategory] = orm.relationship()
+    store_category = orm.relationship("StoreCategory")
     store_name: orm.Mapped[str] = orm.mapped_column(
         sa.String(64),
         unique=True,

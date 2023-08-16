@@ -234,10 +234,9 @@ def mg_g_populate(client: FlaskClient):
     m.ShipRequest(
         order_numb=f"Order{datetime.datetime.now().timestamp()}",
         status="In Progress",
-        store_category="Drinks",
+        store_category_id=1,
         order_type="Regular",
         store_id=1,
-        warehouse_id=1,
         user_id=1,
     ).save(False)
 
@@ -271,10 +270,9 @@ def mg_g_populate(client: FlaskClient):
     sr_atp = m.ShipRequest(
         order_numb="Order-12345-Assigned-to-pickup",
         status="Assigned to pickup",
-        store_category="Drinks",
+        store_category_id=1,
         order_type="Regular",
         store_id=1,
-        warehouse_id=1,
         user_id=1,
     )
     sr_atp.save(False)
@@ -282,20 +280,18 @@ def mg_g_populate(client: FlaskClient):
     m.ShipRequest(
         order_numb="Order-12345-In-transit",
         status="In transit",
-        store_category="Drinks",
+        store_category_id=1,
         order_type="Regular",
         store_id=1,
-        warehouse_id=1,
         user_id=1,
     ).save(False)
 
     m.ShipRequest(
         order_numb="Order-12345-Waiting-for-warehouse-manager",
         status="Waiting for warehouse manager",
-        store_category="Drinks",
+        store_category_id=1,
         order_type="Regular",
         store_id=1,
-        warehouse_id=1,
         user_id=1,
     ).save(False)
 

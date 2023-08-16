@@ -22,8 +22,7 @@
     </div>
   </div>
   <table class="w-full mb-1 text-sm text-left text-gray-500 dark:text-gray-400">
-    <thead
-      class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
       <tr>
         <th scope="col" class="px-6 py-3">#</th>
         <th scope="col" class="px-6 py-3">Image</th>
@@ -39,106 +38,70 @@
       {% set cart_ids = [] %} {% for item in cart_items %}
       <form method="post" action="{{ url_for('cart.save') }}">
         {{ form.hidden_tag() }}
-        <input
-          type="hidden"
-          name="cart_id"
-          id="cart-edit-id"
-          value="{{ item.id }}" />
-        <tr
-          id="cart-item-{{ item.id }}"
+        <input type="hidden" name="cart_id" id="cart-edit-id" value="{{ item.id }}" />
+        <tr id="cart-item-{{ item.id }}"
           class="table-cart-item bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
           <td class="w-4 p-4">
             <div class="flex items-center">{{ loop.index + page.skip }}</div>
           </td>
-          <td
-            scope="row"
-            class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
             <div class="pl-3">
               {% if item.product.image|length > 100 %}
-              <img
-                src="data:image/png;base64, {{ item.product.image }}"
-                alt="{{ item.product.name }}"
+              <img src="data:image/png;base64, {{ item.product.image }}" alt="{{ item.product.name }}"
                 class="w-14 h-14" />
               {% else %}
-              <img
-                src="{{ url_for('static', filename='img/default_image_brand.png') }}"
-                alt="{{ item.product.name }}"
+              <img src="{{ url_for('static', filename='img/default_image_brand.png') }}" alt="{{ item.product.name }}"
                 class="w-14 h-14" />
               {% endif %}
             </div>
           </td>
-          <td
-            scope="row"
-            class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
             <div class="pl-3">
               <div class="text-base font-semibold">{{ item.product.name }}</div>
             </div>
           </td>
-          <td
-            scope="row"
-            class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
             <div class="pl-3">
               <div class="text-base font-semibold">{{ item.group }}</div>
             </div>
           </td>
-          <td
-            class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
             <div class="pl-3">
               <div class="text-base font-semibold">
                 {{ available_products[item.group] }}
               </div>
             </div>
           </td>
-          <td
-            class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
             <div class="pl-3">
               <div class="cart-item-price text-base font-semibold">
                 {{ item.product.price }}
               </div>
             </div>
           </td>
-          <td
-            class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
             <div class="pl-3">
-              <input
-                type="number"
-                name="quantity"
-                id="cart-item-quantity-{{ item.id }}"
-                value="{{ item.quantity }}"
+              <input type="number" name="quantity" id="cart-item-quantity-{{ item.id }}" value="{{ item.quantity }}"
                 data-target-available-quantity="{{ available_products[item.group] }}"
                 class="cart-item-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 placeholder="{{ item.quantity }}" />
             </div>
           </td>
           <td class="p-4 space-x-2 whitespace-nowrap">
-            <button
-              type="submit"
+            <button type="submit"
               class="cart-item-edit-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-              <svg
-                class="w-4 h-4 mr-2"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg">
-                <path
-                  d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path>
-                <path
-                  fill-rule="evenodd"
+              <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path>
+                <path fill-rule="evenodd"
                   d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
                   clip-rule="evenodd"></path>
               </svg>
               Update quantity
             </button>
-            <button
-              data-cart-item-id="{{ item.id }}"
-              type="button"
+            <button data-cart-item-id="{{ item.id }}" type="button"
               class="delete-cart-item-btn inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
-              <svg
-                class="w-4 h-4 mr-2"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg">
-                <path
-                  fill-rule="evenodd"
+              <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd"
                   d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
                   clip-rule="evenodd"></path>
               </svg>
@@ -158,28 +121,19 @@
       </h5>
       <div class="flex gap-5">
         <div class="w-full">
-          <label
-            for="email"
-            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >Total</label
-          >
-          <div
-            id="cart-total-price"
-            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>
+          <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Total</label>
+          <div id="cart-total-price"
+            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+          </div>
         </div>
         <div class="w-full">
-          <label
-            for="password"
-            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >Items</label
-          >
-          <div
-            id="cart-total-quantity"
-            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>
+          <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Items</label>
+          <div id="cart-total-quantity"
+            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+          </div>
         </div>
       </div>
-      <button
-        type="button"
+      <button type="button"
         class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
         id="cart-deliver-to-store-btn">
         Deliver to store
@@ -189,89 +143,58 @@
   <div
     class="hidden w-full mx-auto my-0 max-w-3xl p-4 bg-white border border-gray-200 rounded-lg shadow sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700"
     id="cart-create-store-request-container">
-    <form
-      class="space-y-6"
-      action="{{ url_for('ship_request.create') }}"
-      method="post">
+    <form class="space-y-6" action="{{ url_for('ship_request.create') }}" method="post">
       {{ form.hidden_tag() }}
       <input type="text" hidden value="" />
       <h5 class="text-xl font-medium text-gray-900 dark:text-white">
         Create Store Request
       </h5>
       <div class="w-1/2">
-        <label
-          for="cart-store-request-category"
-          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-          >Select Category</label
-        >
-        <select
-          type="text"
-          name="store_category"
-          id="cart-store-request-category"
+        <label for="cart-store-request-category"
+          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select Category</label>
+        <select type="text" name="store_category" id="cart-store-request-category"
           class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          placeholder="Currency"
-          required>
-          <option value="1">Bar</option>
-          <option value="2">Agency</option>
+          placeholder="Currency" required>
+          <option value="" disabled selected>Select store category</option>
+          {% for store_category in store_categories %}
+          <option data-target-store-category-store="{{ store_category.json }}" value="{{ store_category.id }}">{{
+            store_category.name }}</option>
+          {% endfor %}
         </select>
       </div>
       <div class="w-full flex gap-5">
         <div class="w-1/2">
-          <label
-            for="cart-store-select"
-            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >Select Store</label
-          >
-          <select
-            type="text"
-            name="store"
-            id="cart-store-select"
+          <label for="cart-store-select" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select
+            Store</label>
+          <select type="text" name="store" id="cart-store-select"
             class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            placeholder="Currency"
-            required>
+            placeholder="Currency" required>
             <option value="" disabled selected>Select store</option>
             {% for store in stores %}
-            <option
-              class="cart-store-option"
-              data-target-favorite="{{ store.favorite }}"
-              value="{{ store.id }}">
+            <option class="cart-store-option" data-target-favorite="{{ store.favorite }}" value="{{ store.id }}">
               {{ store.store_name }}
             </option>
             {% endfor %}
           </select>
         </div>
         <div>
-          <label
-            class="top-1/2 ml-7 flex-grow-0 relative inline-flex items-center cursor-pointer">
-            <input
-              id="cart-favorite-store-checkbox"
-              type="checkbox"
-              value=""
-              class="sr-only peer" />
+          <label class="top-1/2 ml-7 flex-grow-0 relative inline-flex items-center cursor-pointer">
+            <input id="cart-favorite-store-checkbox" type="checkbox" value="" class="sr-only peer" />
             <div
-              class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-400"></div>
-            <span
-              class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300"
-              >Show Favorite Stores</span
-            >
+              class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-400">
+            </div>
+            <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Show Favorite Stores</span>
           </label>
         </div>
       </div>
       <div class="w-full">
-        <label
-          for="cart-store-request-comment"
-          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-          >Comment</label
-        >
-        <textarea
-          id="cart-store-request-comment"
-          rows="4"
-          name="comment"
+        <label for="cart-store-request-comment"
+          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Comment</label>
+        <textarea id="cart-store-request-comment" rows="4" name="comment"
           class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
           placeholder="Write your comment"></textarea>
       </div>
-      <button
-        type="submit"
+      <button type="submit"
         class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
         Ship to store
       </button>
@@ -283,8 +206,5 @@
 {% endblock %}
 <!-- prettier-ignore -->
 {% block scripts %}
-<script
-  src="{{ url_for('static', filename='js/cart.js') }}"
-  type="text/javascript"
-  defer></script>
+<script src="{{ url_for('static', filename='js/cart.js') }}" type="text/javascript" defer></script>
 {% endblock %}

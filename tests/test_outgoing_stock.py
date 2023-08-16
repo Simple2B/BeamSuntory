@@ -97,3 +97,27 @@ def test_sort_outgoing_stock(mg_g_populate: FlaskClient):
     assert ("Order-12345-Waiting-for-warehouse-manager" in response.text) is True
     assert ("Order-12345-In-transit" in response.text) is True
     assert response.status_code == 200
+
+
+def test_edit_outgoing_stock(mg_g_populate: FlaskClient):
+    register("samg", "samg@test.com")
+    login(mg_g_populate, "samg")
+
+    response = mg_g_populate.post(
+        "/outgoing_stock/edit",
+        data=dict(
+            ship_request_id=1,
+            status="Edited",
+            store_category=1,
+            order_type="test type",
+            store=1,
+            quantity=1,
+            products='[{"product_id": "1", "group_name": "test group", "quantity": "1", "warehouse_id": "1"}]',
+        ),
+    )
+    assert response.status_code == 302
+    assert "outgoing_stock" in response.text
+    ship_request: m.ShipRequest = db.session.execute(
+        m.ShipRequest.select().where(m.ShipRequest.status == "Edited")
+    ).scalar()
+    assert ship_request
