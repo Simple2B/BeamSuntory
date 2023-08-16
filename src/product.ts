@@ -272,11 +272,7 @@ const modalOptions: ModalOptions = {
         mstrGroupsEntries.forEach(([key, value]: [string, string]) => {
             deleteShipAssignButton(value.replace(/\s/g, '_'), key)
         })
-        const productGroupEditContainer = document.querySelector('#product-group-edit-add-container')
-        const productGroupEditItems = document.querySelectorAll('.product-group-edit-add-item')
-        for (let i = 1; i < productGroupEditItems.length; i++) {
-            productGroupEditContainer.removeChild(productGroupEditItems[i])
-        }
+        clearProductGroupContainer()
     },
     onShow: () => {},
     onToggle: () => {
@@ -464,7 +460,7 @@ function editProduct(product: IProduct) {
 
                 productMasterGroupEditSelect.value = productMasterGroups[i]
 
-                product.mstr_grps_grps_names_in_prod[productMasterGroups[i]].forEach(
+                product.mstr_prod_grps_prod_grps_names[productMasterGroups[i]].forEach(
                     (group: { group_name: string; group_id: number }) => {
                         const storeSelectOption = document.createElement('option')
                         storeSelectOption.setAttribute('value', group.group_id.toString())
@@ -1147,7 +1143,7 @@ function createProductGroupEditItem(productParam: IProduct = null, masterGroup: 
     })
     if (masterGroup) {
         productMasterGroupEditSelect.value = masterGroup
-        productParam.mstr_grps_grps_names_in_prod[masterGroup].forEach(
+        productParam.mstr_prod_grps_prod_grps_names[masterGroup].forEach(
             (group: { group_name: string; group_id: number }) => {
                 const productGroupSelectOption = document.createElement('option')
                 productGroupSelectOption.setAttribute('value', group.group_id.toString())
@@ -1363,3 +1359,12 @@ productAddSaveButton.addEventListener('click', () => {
         productAddSubmitButton.click()
     }
 })
+
+function clearProductGroupContainer() {
+    const productGroupEditContainer = document.querySelector('#product-group-edit-add-container')
+    const productGroupEditItems = document.querySelectorAll('.product-group-edit-add-item')
+    for (let i = 1; i < productGroupEditItems.length; i++) {
+        productGroupEditContainer.removeChild(productGroupEditItems[i])
+    }
+    const productGroupEditSelects = document.querySelectorAll('.product-group-edit-add-item')
+}
