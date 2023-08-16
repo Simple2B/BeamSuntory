@@ -979,7 +979,7 @@ const productMasterGroupEditSelect: HTMLSelectElement = document.querySelector(
 const options = productMasterGroupEditSelect.querySelectorAll('option')
 
 // ----add inbound order item for edit modal----
-function createInboundOrderItems(productParam: IProduct = null) {
+function createProductGroupEditItem(productParam: IProduct = null) {
     if (!productParam) {
         const product: IProduct = JSON.parse(sessionStorage.getItem('product'))
         productParam = product
@@ -995,8 +995,8 @@ function createInboundOrderItems(productParam: IProduct = null) {
         'p-6',
         'space-y-6',
         'border-t',
-        'product-group-add-add-item',
-        `delete-id-${productParam.id}`
+        'product-group-edit-add-item',
+        `delete-id-${index}`
     )
     productGroupEditItem.innerHTML = `
   <div class="grid grid-cols-12 gap-5">
@@ -1021,7 +1021,7 @@ function createInboundOrderItems(productParam: IProduct = null) {
     <div class="col-span-6 sm:col-span-4">
       <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Action</label>
       <button type="button" data-target=""
-        class="invisible inline-flex items-center px-3 py-2 mr-3 text-sm font-medium text-center text-white rounded-lg bg-red-600 hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
+        class="product-group-edit-delete-item-btn inline-flex items-center px-3 py-2 mr-3 text-sm font-medium text-center text-white rounded-lg bg-red-600 hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
         <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
           <path
             d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z">
@@ -1068,7 +1068,7 @@ function createInboundOrderItems(productParam: IProduct = null) {
                         ]
                     console.log('optionCategory', optionCategory)
 
-                    document.getElementById('product-group-edit-add-product-1').innerHTML = ''
+                    document.getElementById(`product-group-edit-item-${index}`).innerHTML = ''
                     if (optionCategory) {
                         optionCategory.forEach((group: { group_name: string; group_id: number }) => {
                             const storeSelectOption = document.createElement('option')
@@ -1088,22 +1088,54 @@ function createInboundOrderItems(productParam: IProduct = null) {
     console.log(`product-group-edit-add-item-btn-${index}`)
 
     addButton.addEventListener('click', () => {
-        createInboundOrderItems()
+        createProductGroupEditItem()
     })
 
-    const deleteButtons = document.querySelectorAll('.product-group-edit-delete-item-btn')
-    deleteButtons.forEach((button) =>
-        button.addEventListener('click', () => {
-            const inboundOrderItem = button.closest('.product-group-edit-add-item')
-            if (inboundOrderItem) {
-                inboundOrderItem.remove()
-            }
-        })
-    )
+    const deleteButton = productGroupEditItem.querySelector('.product-group-edit-delete-item-btn')
+    deleteButton.addEventListener('click', () => {
+        const inboundOrderItem = document.querySelector(`.delete-id-${index}`)
+        if (inboundOrderItem) {
+            inboundOrderItem.remove()
+        }
+    })
 }
 
 // this button need to add first item from template
 const addInboundOrderItemBtnById = document.querySelector('#product-group-edit-add-item-btn')
 addInboundOrderItemBtnById.addEventListener('click', () => {
-    createInboundOrderItems()
+    createProductGroupEditItem()
+})
+
+// ----set product to JSON hidden input in inbound-order-edit-form----
+function setProducts() {
+    const productGroupEditItems = document.querySelectorAll('.product-group-edit-add-item')
+    const productGroupItems = document.querySelectorAll('.product-group-edit-item')
+
+    const products = []
+
+    for (let i = 0; i < productGroupEditItems.length; i++) {
+        const productMasterGroupItems = productGroupEditItems[i].querySelector('.product-master-group-edit-item')
+        const productGroupItems = productGroupEditItems[i].querySelector('.product-group-edit-item')
+
+        const product = {
+            group_id: Number(productGroupItems.value),
+            master_group_id: Number(productMasterGroupItems.value),
+        }
+        products.push(product)
+    }
+
+    const inputProducts: HTMLInputElement = document.querySelector('#product-edit-product-groups')
+    inputProducts.value = JSON.stringify(products)
+    return true
+}
+
+// ----submit edit form through hidden submit button----
+const productEditSubmitButton: HTMLButtonElement = document.querySelector('#product-edit-submit-btn')
+const productEditSaveButton = document.querySelector('#product-edit-save-products-btn')
+
+productEditSaveButton.addEventListener('click', () => {
+    const result = setProducts()
+    if (result) {
+        productEditSubmitButton.click()
+    }
 })

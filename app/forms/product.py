@@ -36,6 +36,8 @@ class ProductForm(FlaskForm):
     length = FloatField("Length")
     width = FloatField("Width")
     height = FloatField("Height")
+    # json groups
+    product_groups = StringField("Groups", [DataRequired()])
 
     submit = SubmitField("Save")
 
@@ -65,6 +67,8 @@ class NewProductForm(FlaskForm):
     length = FloatField("Length")
     width = FloatField("Width")
     height = FloatField("Height")
+    # json groups
+    product_groups = StringField("Groups", [DataRequired()])
 
     submit = SubmitField("Add product")
 
