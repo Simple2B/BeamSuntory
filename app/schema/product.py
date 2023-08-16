@@ -24,26 +24,26 @@ class Product(CustomBase):
     name: str
 
     supplier: Optional[Any]  # = Field(exclude=True)
-    supplier_id: Optional[int]
-    currency: Optional[Currency]
-    price: Optional[float]
-    image: Optional[str]
+    supplier_id: int | None
+    currency: Currency | None
+    price: float | None
+    image: str | None
     description: str
     # General Info ->
     SKU: str
-    low_stock_level: Optional[int]
-    program_year: Optional[int]
-    package_qty: Optional[int]
-    numb_of_items_per_case: Optional[int]
-    numb_of_cases_per_outer_case: Optional[int]
-    comments: Optional[str]
+    low_stock_level: int | None
+    program_year: int | None
+    package_qty: int | None
+    numb_of_items_per_case: int | None
+    numb_of_cases_per_outer_case: int | None
+    comments: str | None
     # shipping
-    weight: Optional[float]
-    length: Optional[float]
-    width: Optional[float]
-    height: Optional[float]
-    mstr_groups_groups: Optional[dict]
-    current_user_groups: Optional[dict]
+    weight: float | None
+    length: float | None
+    width: float | None
+    height: float | None
+    mstr_groups_groups: dict | None
+    current_user_groups: dict | None
 
     class Config:
         orm_mode = True

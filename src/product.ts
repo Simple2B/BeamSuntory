@@ -497,7 +497,14 @@ function editProduct(product: IProduct) {
                 })
                 continue
             }
-            createProductGroupEditItem(null, productMasterGroups[i])
+
+            if (product.mstr_grps_grps_names_in_prod[productMasterGroups[i]].length > 0) {
+                for (let j = 0; j < product.mstr_grps_grps_names_in_prod[productMasterGroups[i]].length; j++) {
+                    createProductGroupEditItem(null, productMasterGroups[i], j)
+                }
+            } else {
+                createProductGroupEditItem(null, productMasterGroups[i])
+            }
         }
     }
 
@@ -897,13 +904,19 @@ function getSessionStorageObject(
             const newDataObject = { ...dataObject, ...localObject }
             const newJsonData = JSON.stringify(newDataObject)
             sessionStorage.setItem(sessionObject, newJsonData)
+            console.log('add')
+
             break
         case 'remove':
             delete dataObject[objectKey]
             const newJsonDataObject = JSON.stringify(dataObject)
             sessionStorage.setItem(sessionObject, newJsonDataObject)
+            console.log('remove')
+
             break
         default:
+            console.log('def')
+
             break
     }
 }
@@ -1070,7 +1083,11 @@ function deleteAdjustContainer(nameGroup: string, nameGroupValue: string) {
 }
 
 // ----add inbound order item for edit modal----
-function createProductGroupEditItem(productParam: IProduct = null, masterGroup: string = null) {
+function createProductGroupEditItem(
+    productParam: IProduct = null,
+    masterGroup: string = null,
+    itemIndex: number = null
+) {
     if (!productParam) {
         const product: IProduct = JSON.parse(sessionStorage.getItem('product'))
         productParam = product
@@ -1152,7 +1169,11 @@ function createProductGroupEditItem(productParam: IProduct = null, masterGroup: 
             }
         )
         // TODO: always select first option
-        productGroupEditSelect.value = productParam.mstr_grps_grps_names_in_prod[masterGroup][0].group_id.toString()
+        if (!itemIndex) {
+            itemIndex = 0
+        }
+        productGroupEditSelect.value =
+            productParam.mstr_grps_grps_names_in_prod[masterGroup][itemIndex].group_id.toString()
     }
 
     const options = productMasterGroupEditSelect.querySelectorAll('option')
