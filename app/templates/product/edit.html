@@ -26,19 +26,6 @@
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Name" required />
           </div>
-          {% for master_group in master_groups_groups_available %}
-          <div class="col-span-6 sm:col-span-3" id="product-edit-product_group-container-{{ master_group }}">
-            <label for="for-group-{{ master_group }}"
-              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{ master_group }}</label>
-            <select type="text" name="group-{{ master_group }}" id="product-edit-{{ master_group }}"
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Some Group">
-              {% for group in master_groups_groups_available[master_group] %}
-              <option value="{{ group.id }}">{{ group.name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          {% endfor %}
           <div class="col-span-6 sm:col-span-3">
             <label for="supplier" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Supplier</label>
             <select type="text" name="supplier" id="product-edit-supplier"

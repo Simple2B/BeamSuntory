@@ -1156,10 +1156,7 @@ function setProducts() {
         const productMasterGroupItems = productGroupEditItems[i].querySelector('.product-master-group-edit-item')
         const productGroupItems = productGroupEditItems[i].querySelector('.product-group-edit-item')
 
-        const product = {
-            group_id: Number(productGroupItems.value),
-            master_group_id: Number(productMasterGroupItems.value),
-        }
+        const product = Number(productGroupItems.value)
         products.push(product)
     }
 
