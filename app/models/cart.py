@@ -10,6 +10,7 @@ from .utils import ModelMixin
 
 from .product import Product
 from .warehouse_product import WarehouseProduct
+from .warehouse import Warehouse
 
 # from .ship_request import ShipRequest
 
@@ -25,6 +26,10 @@ class Cart(db.Model, ModelMixin):
         sa.String(64), default="pending"
     )  # in progress, completed, removed
     user_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("users.id"))
+    warehouse_id: orm.Mapped[int] = orm.mapped_column(
+        sa.ForeignKey("warehouses.id"), nullable=True
+    )
+    warehouse: orm.Mapped[Warehouse] = orm.relationship()
     order_numb: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=True)
     group: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=True)
     created_at: orm.Mapped[datetime] = orm.mapped_column(

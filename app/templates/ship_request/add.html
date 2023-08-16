@@ -23,9 +23,10 @@
           <div class="col-span-6 sm:col-span-3">
             <label for="store_category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store
               Category</label>
-            <input type="text" name="store_category" id="ship-request-add-store-category"
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Store" required />
+            <option value="" disabled selected>Select store category</option>
+            {% for store_category in store_categories %}
+            <option value="{{ store_category.id }}">{{ store_category.name }}</option>
+            {% endfor %}
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="order_type" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Type</label>

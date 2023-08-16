@@ -13,6 +13,7 @@ from .cart import Cart
 from .warehouse import Warehouse
 from .store import Store
 from .warehouse_product import WarehouseProduct
+from .store_category import StoreCategory
 
 
 class ShipRequest(db.Model, ModelMixin):
@@ -27,9 +28,10 @@ class ShipRequest(db.Model, ModelMixin):
     status: orm.Mapped[str] = orm.mapped_column(
         sa.String(64),
     )
-    store_category: orm.Mapped[str] = orm.mapped_column(
-        sa.String(64),
+    store_category_id: orm.Mapped[int] = orm.mapped_column(
+        sa.ForeignKey("store_categories.id")
     )
+    store_category: orm.Mapped[StoreCategory] = orm.relationship()
     order_type: orm.Mapped[str] = orm.mapped_column(
         sa.String(128),
         nullable=False,
@@ -44,10 +46,6 @@ class ShipRequest(db.Model, ModelMixin):
         default=datetime.utcnow,
     )
 
-    warehouse_id: orm.Mapped[int] = orm.mapped_column(
-        sa.ForeignKey("warehouses.id"), nullable=True
-    )
-    warehouse: orm.Mapped[Warehouse] = orm.relationship()
     store_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("stores.id"))
     store: orm.Mapped[Store] = orm.relationship()
 
@@ -67,15 +65,15 @@ class ShipRequest(db.Model, ModelMixin):
                 "price": cart.product.price,
                 "quantity": cart.quantity,
                 "image": cart.product.image,
+                "group": cart.group,
+                "warehouse": {"id": cart.warehouse_id, "name": cart.warehouse.name}
+                if cart.warehouse_id
+                else None,
             }
             for cart in db.session.execute(
                 Cart.select().where(Cart.order_numb == mg_dict["order_numb"])
             ).scalars()
         ]
-        # TODO: check if "No warehouse" causes problems
-        mg_dict["warehouse_name"] = (
-            self.warehouse.name if self.warehouse else "No warehouse"
-        )
         mg_dict["warehouses"] = [
             {"name": w.name, "id": w.id, "products_ids": []}
             for w in db.session.execute(Warehouse.select()).scalars()

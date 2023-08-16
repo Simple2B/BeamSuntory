@@ -70,6 +70,9 @@ def get_all():
         if warehouse_products
         else {}
     )
+    store_categories = [
+        sc for sc in db.session.execute(m.StoreCategory.select()).scalars()
+    ]
 
     return render_template(
         "cart.html",
@@ -85,6 +88,7 @@ def get_all():
         warehouses=warehouses,
         stores=stores,
         available_products=available_products,
+        store_categories=store_categories,
     )
 
 

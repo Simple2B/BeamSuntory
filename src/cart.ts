@@ -74,3 +74,47 @@ favoriteCheckbox.addEventListener('change', () => {
     }
   }
 });
+
+const storeCategorySelect: HTMLSelectElement = document.querySelector(
+  '#cart-store-request-category',
+);
+const options = storeCategorySelect.querySelectorAll('option');
+console.log('options', options);
+
+storeCategorySelect.addEventListener('change', () => {
+  console.log(
+    'click',
+    storeCategorySelect.options[storeCategorySelect.selectedIndex].text,
+  );
+
+  options.forEach(e => {
+    if (
+      e.textContent ===
+      storeCategorySelect.options[storeCategorySelect.selectedIndex].text
+    ) {
+      const storeSelect = document.querySelector('#cart-store-select');
+      const optionCategory = JSON.parse(
+        e.getAttribute('data-target-store-category-store'),
+      );
+      console.log('before', document.getElementById('cart-store-select'));
+
+      document.getElementById('cart-store-select').innerHTML = '';
+      console.log('after', document.getElementById('cart-store-select'));
+
+      console.log('optionCategory', optionCategory);
+      if (optionCategory) {
+        optionCategory.store_category_store.forEach(
+          (e: {store_id: number; store_name: string}) => {
+            const storeSelectOption = document.createElement('option');
+            console.log('e.id', e.store_id);
+            console.log('storeSelect', storeSelect);
+
+            storeSelectOption.setAttribute('value', e.store_id.toString());
+            storeSelectOption.textContent = e.store_name;
+            storeSelect.appendChild(storeSelectOption);
+          },
+        );
+      }
+    }
+  });
+});

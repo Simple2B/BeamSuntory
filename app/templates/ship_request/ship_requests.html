@@ -63,7 +63,7 @@
         </td>
         <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ ship_request.store_category }}</div>
+            <div class="text-base font-semibold">{{ ship_request.store_category.name }}</div>
           </div>
         </td>
         <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
@@ -83,7 +83,8 @@
           </div>
         </td>
         <td class="p-4 space-x-2 whitespace-nowrap">
-          <button type="button" data-target="{{ ship_request.json }}" data-target-store="{{ ship_request.store.json }}" data-target-cart-items="{{ current_order_carts }}" data-target-current-order="{{ ship_request.order_numb }}" 
+          <button type="button" data-target="{{ ship_request.json }}" data-target-store="{{ ship_request.store.json }}"
+            data-target-cart-items="{{ current_order_carts }}" data-target-current-order="{{ ship_request.order_numb }}"
             class="ship-request-view-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
               <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path>
@@ -92,24 +93,6 @@
                 clip-rule="evenodd"></path>
             </svg>
             View
-          </button>
-          <button type="button" data-target="{{ ship_request.json }}" data-target-store="{{ ship_request.store.json }}"
-            class="ship-request-edit-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-              <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path>
-              <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
-                clip-rule="evenodd"></path>
-            </svg>
-            Edit
-          </button>
-          <button data-ship-request-id={{ ship_request.id }} type="button"
-            class="delete-ship-request-btn inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
-            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-              <path fill-rule="evenodd"
-                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                clip-rule="evenodd"></path>
-            </svg>
-            Delete ship request
           </button>
         </td>
       </tr>
@@ -200,7 +183,6 @@
 </div>
 {% include 'ship_request/add.html' %}
 {% include 'ship_request/view.html' %}
-{% include 'ship_request/edit.html' %}
 <!-- prettier-ignore -->
 {% endblock %}
 <!-- prettier-ignore -->

@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 
 import sqlalchemy as sa
 from sqlalchemy import orm
@@ -6,6 +7,7 @@ from sqlalchemy import orm
 from app.database import db
 from app import schema as s
 from .utils import ModelMixin
+from .store import Store
 
 
 class StoreCategory(db.Model, ModelMixin):
@@ -41,4 +43,13 @@ class StoreCategory(db.Model, ModelMixin):
     @property
     def json(self):
         mg = s.StoreCategory.from_orm(self)
-        return mg.json()
+        mg_dict = json.loads(mg.json())
+        stores = db.session.execute(
+            Store.select().where(Store.store_category_id == mg_dict["id"])
+        ).scalars()
+
+        mg_dict["store_category_store"] = [
+            {"store_name": store.store_name, "store_id": store.id} for store in stores
+        ]
+
+        return json.dumps(mg_dict)

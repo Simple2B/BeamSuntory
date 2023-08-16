@@ -70,6 +70,9 @@ def get_all():
     }
     warehouses_rows = db.session.execute(sa.select(m.Warehouse)).scalars()
     warehouses = [{"name": w.name, "id": w.id} for w in warehouses_rows]
+    store_categories = [
+        sc for sc in db.session.execute(m.StoreCategory.select()).scalars()
+    ]
 
     return render_template(
         "ship_request/ship_requests.html",
@@ -80,6 +83,7 @@ def get_all():
         form_create=form_create,
         form_edit=form_edit,
         warehouses=warehouses,
+        store_categories=store_categories,
     )
 
 
@@ -97,7 +101,7 @@ def create():
             # NOTE: what status is default?
             status="Waiting for warehouse manager",
             store_id=form_create.store.data,
-            store_category=form_create.store_category.data,
+            store_category_id=int(form_create.store_category.data),
             comment=form_create.comment.data,
             # TODO: ask client about store_delivery
             order_type="store_delivery",
@@ -138,34 +142,6 @@ def create():
 
     flash("Something went wrong!", "danger")
     return redirect(url_for("ship_request.get_all"))
-
-
-@ship_request_blueprint.route("/edit", methods=["POST"])
-@login_required
-def save():
-    form_edit: f.ShipRequestForm = f.ShipRequestForm()
-    if form_edit.validate_on_submit():
-        query = m.ShipRequest.select().where(
-            m.ShipRequest.id == int(form_edit.ship_request_id.data)
-        )
-        sr: m.ShipRequest | None = db.session.scalar(query)
-        if not sr:
-            log(
-                log.ERROR,
-                "Not found ship request item by id : [%s]",
-                form_edit.ship_request_id.data,
-            )
-            flash("Cannot save item data", "danger")
-        sr.status = form_edit.status.data
-        sr.save()
-        if form_edit.next_url.data:
-            return redirect(form_edit.next_url.data)
-        return redirect(url_for("ship_request.get_all"))
-
-    else:
-        log(log.ERROR, "Cart item save errors: [%s]", form_edit.errors)
-        flash(f"{form_edit.errors}", "danger")
-        return redirect(url_for("ship_request.get_all"))
 
 
 @ship_request_blueprint.route("/delete/<int:id>", methods=["DELETE"])
