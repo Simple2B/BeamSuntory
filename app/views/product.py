@@ -203,7 +203,6 @@ def create():
         image_string = base64.b64encode(image.read()).decode()
         product: m.Product = m.Product(
             name=str(form.name.data).strip(" "),
-            product_type=form.product_type.data,
             supplier_id=form.supplier.data,
             currency=form.currency.data,
             price=form.price.data,
@@ -256,7 +255,6 @@ def save():
         image = request.files["image"]
         image_string = base64.b64encode(image.read()).decode()
         u.name = str(form.name.data).strip(" ")
-        u.product_type = form.product_type.data
         u.supplier_id = form.supplier.data
         u.currency = form.currency.data
         u.price = form.price.data

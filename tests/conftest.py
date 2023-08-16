@@ -146,7 +146,6 @@ def mg_g_populate(client: FlaskClient):
 
     populate_test_product = m.Product(
         name="populate_test_product",
-        product_type="SIMPLE_PRODUCT",
         supplier_id=1,
         currency="CAD",
         price=11,
@@ -167,7 +166,6 @@ def mg_g_populate(client: FlaskClient):
     populate_test_product.save(False)
     m.Product(
         name="populate_test_prod2",
-        product_type="SIMPLE_PRODUCT",
         supplier_id=1,
         currency="USD",
         price=11,

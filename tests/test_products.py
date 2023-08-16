@@ -24,7 +24,6 @@ def test_create_product(client):
     login(client, "samg")
     data = dict(
         name="test_product",
-        product_type="SIMPLE_PRODUCT",
         supplier=1,
         currency="CAD",
         price=11,
@@ -70,7 +69,6 @@ def test_edit_product(mg_g_populate: FlaskClient):
     data = dict(
         product_id=1,
         name="test_product_edited",
-        product_type="SIMPLE_PRODUCT",
         supplier=1,
         currency="USD",
         price=12,
