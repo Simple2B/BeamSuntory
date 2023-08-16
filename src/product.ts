@@ -307,6 +307,7 @@ const modalShipAssignOptions: ModalOptions = {
     },
 }
 
+const addModal: ModalInterface = new Modal($addProductModalElement, modalOptions)
 const viewModal: ModalInterface = new Modal($viewProductModalElement, modalOptions)
 const adjustModal: ModalInterface = new Modal($adjustProductModalElement, adjustModalOptions)
 const editModal: ModalInterface = new Modal($editProductModalElement, modalOptions)
@@ -318,6 +319,13 @@ const $buttonElements = document.querySelectorAll('.product-edit-button')
 $buttonElements.forEach((e) =>
     e.addEventListener('click', () => {
         editProduct(JSON.parse(e.getAttribute('data-target')))
+    })
+)
+
+const $addButtonElements = document.querySelectorAll('.product-add-button')
+$addButtonElements.forEach((e) =>
+    e.addEventListener('click', () => {
+        addProduct()
     })
 )
 
@@ -356,8 +364,39 @@ function convertDate(date: string) {
     return `${month}/${day}/${year}`
 }
 
+function addProduct() {
+    addModal.show()
+    productMasterGroupEditSelect.addEventListener('change', () => {
+        options.forEach((e) => {
+            if (
+                e.textContent === productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
+            ) {
+                console.log(productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text)
+
+                const groupSelect = document.querySelector('#product-group-add-item-1')
+                const optionCategory =
+                    product.mstr_prod_grps_prod_grps_names[
+                        productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
+                    ]
+                console.log('optionCategory', optionCategory)
+
+                groupSelect.innerHTML = ''
+                if (optionCategory) {
+                    optionCategory.forEach((group: { group_name: string; group_id: number }) => {
+                        const storeSelectOption = document.createElement('option')
+                        storeSelectOption.setAttribute('value', group.group_id.toString())
+                        storeSelectOption.textContent = group.group_name
+                        groupSelect.appendChild(storeSelectOption)
+                    })
+                }
+            }
+        })
+    })
+}
+
 function editProduct(product: IProduct) {
     console.log(' product', product)
+    sessionStorage.setItem('product', JSON.stringify(product))
 
     const img: HTMLImageElement = document.querySelector('#product-edit-show-image')
     product.image.length > 100 ? (img.src = `data:image/png;base64, ${product.image}`) : (img.src = defaultBrandImage)
