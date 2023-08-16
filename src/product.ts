@@ -40,6 +40,7 @@ interface IProduct {
         }
     ]
     mstr_prod_grps_prod_grps_names: { [index: string]: { group_name: string; group_id: number }[] }
+    mstr_grps_grps_names_in_prod: { [index: string]: { group_name: string; group_id: number }[] }
 }
 interface FilterJsonData {
     [key: string]: string
@@ -271,6 +272,11 @@ const modalOptions: ModalOptions = {
         mstrGroupsEntries.forEach(([key, value]: [string, string]) => {
             deleteShipAssignButton(value.replace(/\s/g, '_'), key)
         })
+        const productGroupEditContainer = document.querySelector('#product-group-edit-add-container')
+        const productGroupEditItems = document.querySelectorAll('.product-group-edit-add-item')
+        for (let i = 1; i < productGroupEditItems.length; i++) {
+            productGroupEditContainer.removeChild(productGroupEditItems[i])
+        }
     },
     onShow: () => {},
     onToggle: () => {
@@ -371,8 +377,6 @@ function convertDate(date: string) {
 }
 
 function addProduct(groups: IProductMasterGroupGroup) {
-    console.log('groups', groups)
-
     addModal.show()
     const productMasterGroupAddSelect: HTMLSelectElement = document.querySelector(
         '#product-master-group-add-add-product-1'
@@ -382,12 +386,9 @@ function addProduct(groups: IProductMasterGroupGroup) {
     productMasterGroupAddSelect.addEventListener('change', () => {
         options.forEach((e) => {
             if (e.textContent === productMasterGroupAddSelect.options[productMasterGroupAddSelect.selectedIndex].text) {
-                console.log(productMasterGroupAddSelect.options[productMasterGroupAddSelect.selectedIndex].text)
-
                 const groupSelect = document.querySelector('#product-group-add-item-1')
                 const optionCategory =
                     groups[productMasterGroupAddSelect.options[productMasterGroupAddSelect.selectedIndex].text]
-                console.log('optionCategory', optionCategory)
 
                 groupSelect.innerHTML = ''
                 if (optionCategory) {
@@ -448,63 +449,59 @@ function editProduct(product: IProduct) {
     input = document.querySelector('#product-edit-next_url')
     input.value = window.location.href
 
+    const productMasterGroupEditSelect: HTMLSelectElement = document.querySelector(
+        '#product-master-group-edit-add-product-1'
+    )
+    const options = productMasterGroupEditSelect.querySelectorAll('option')
     const productMasterGroups = Object.keys(product.mstr_grps_grps_names_in_prod)
 
     if (productMasterGroups.length > 0) {
-        // const currentInboundOrder = inboundOrder.inbound_order_prods[inboundOrder.order_id]
         const productGroupsEditSelects = document.querySelectorAll<HTMLSelectElement>('.product-group-edit-item')
 
         for (let i = 0; i < productMasterGroups.length; i++) {
-            if (i !== 0) {
-                createProductGroupEditItem()
-            }
-        }
+            if (i === 0) {
+                const productGroupsEditSelect = productGroupsEditSelects[i]
 
-        for (let i = 0; i < productMasterGroups.length; i++) {
-            const productMasterGroupEditSelect: HTMLSelectElement = document.querySelector(
-                `#product-master-group-edit-item-${i + 1}`
-            )
-            console.log(i)
+                productMasterGroupEditSelect.value = productMasterGroups[i]
 
-            const options = productMasterGroupEditSelect.querySelectorAll('option')
-            const productGroupsEditSelect = productGroupsEditSelects[i]
-            productMasterGroupEditSelect.value = productMasterGroups[i]
-            console.log('productGroupsEditSelect', `#product-master-group-edit-item-${i + 1}`)
-
-            product.mstr_grps_grps_names_in_prod[productMasterGroups[i]].forEach(
-                (group: { group_name: string; group_id: number }) => {
-                    const storeSelectOption = document.createElement('option')
-                    storeSelectOption.setAttribute('value', group.group_id.toString())
-                    storeSelectOption.textContent = group.group_name
-                    productGroupsEditSelect.appendChild(storeSelectOption)
-                }
-            )
-            // TODO: always select first option
-            productGroupsEditSelect.value =
-                product.mstr_grps_grps_names_in_prod[productMasterGroups[i]][0].group_id.toString()
-            productMasterGroupEditSelect.addEventListener('change', () => {
-                options.forEach((e) => {
-                    if (
-                        e.textContent ===
-                        productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
-                    ) {
-                        const groupSelect = document.querySelector(`#product-group-edit-item-${i + 1}`)
-                        const optionCategory =
-                            product.mstr_prod_grps_prod_grps_names[
-                                productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
-                            ]
-                        groupSelect.innerHTML = ''
-                        if (optionCategory) {
-                            optionCategory.forEach((group: { group_name: string; group_id: number }) => {
-                                const storeSelectOption = document.createElement('option')
-                                storeSelectOption.setAttribute('value', group.group_id.toString())
-                                storeSelectOption.textContent = group.group_name
-                                groupSelect.appendChild(storeSelectOption)
-                            })
-                        }
+                product.mstr_grps_grps_names_in_prod[productMasterGroups[i]].forEach(
+                    (group: { group_name: string; group_id: number }) => {
+                        const storeSelectOption = document.createElement('option')
+                        storeSelectOption.setAttribute('value', group.group_id.toString())
+                        storeSelectOption.textContent = group.group_name
+                        productGroupsEditSelect.appendChild(storeSelectOption)
                     }
+                )
+                // TODO: always select first option
+                productGroupsEditSelect.value =
+                    product.mstr_grps_grps_names_in_prod[productMasterGroups[i]][0].group_id.toString()
+                productMasterGroupEditSelect.addEventListener('change', () => {
+                    options.forEach((e) => {
+                        if (
+                            e.textContent ===
+                            productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
+                        ) {
+                            const groupSelect = document.querySelector('#product-group-edit-item-1')
+                            const optionCategory =
+                                product.mstr_prod_grps_prod_grps_names[
+                                    productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex]
+                                        .text
+                                ]
+                            groupSelect.innerHTML = ''
+                            if (optionCategory) {
+                                optionCategory.forEach((group: { group_name: string; group_id: number }) => {
+                                    const storeSelectOption = document.createElement('option')
+                                    storeSelectOption.setAttribute('value', group.group_id.toString())
+                                    storeSelectOption.textContent = group.group_name
+                                    groupSelect.appendChild(storeSelectOption)
+                                })
+                            }
+                        }
+                    })
                 })
-            })
+                continue
+            }
+            createProductGroupEditItem(null, productMasterGroups[i])
         }
     }
 
@@ -515,14 +512,11 @@ function editProduct(product: IProduct) {
             if (
                 e.textContent === productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
             ) {
-                console.log(productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text)
-
                 const groupSelect = document.querySelector('#product-group-edit-item-1')
                 const optionCategory =
                     product.mstr_prod_grps_prod_grps_names[
                         productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
                     ]
-                console.log('optionCategory', optionCategory)
 
                 groupSelect.innerHTML = ''
                 if (optionCategory) {
@@ -549,7 +543,6 @@ viewProductButtonElements.forEach((e) =>
             let isEqual = false
 
             const mstrGroupName = product.mstr_groups_groups[groupName]
-            console.log('mstrGroupName', mstrGroupName)
             if (product.current_user_groups.hasOwnProperty(mstrGroupName)) {
                 const currentUserValue = product.current_user_groups[mstrGroupName]
                 if (currentUserValue.includes(groupName)) {
@@ -597,7 +590,6 @@ adjustProductButtonElements.forEach((e) =>
             let isEqual = false
 
             const mstrGroupName = product.mstr_groups_groups[groupName]
-            console.log('mstrGroupName', mstrGroupName)
             if (product.current_user_groups.hasOwnProperty(mstrGroupName)) {
                 const currentUserValue = product.current_user_groups[mstrGroupName]
                 if (currentUserValue.includes(groupName)) {
@@ -1082,14 +1074,13 @@ function deleteAdjustContainer(nameGroup: string, nameGroupValue: string) {
 }
 
 // ----add inbound order item for edit modal----
-function createProductGroupEditItem(productParam: IProduct = null) {
+function createProductGroupEditItem(productParam: IProduct = null, masterGroup: string = null) {
     if (!productParam) {
         const product: IProduct = JSON.parse(sessionStorage.getItem('product'))
         productParam = product
     }
 
     const productGroupEditContainer = document.querySelector('#product-group-edit-add-container')
-    const productGroupEditOriginal = document.querySelector('#product-group-edit-item')
     const productGroupEditAllItems = document.querySelectorAll('.product-group-edit-add-item')
     const index = productGroupEditAllItems.length + 1
     const productGroupEditItem = document.createElement('div')
@@ -1148,29 +1139,36 @@ function createProductGroupEditItem(productParam: IProduct = null) {
     const productMasterGroupEditSelect: HTMLSelectElement = productGroupEditItem.querySelector(
         `#product-master-group-edit-item-${index}`
     )
-    console.log('productMasterGroupEditSelect', productMasterGroupEditSelect)
-
     availableMasterGroups.forEach((masterGroup) => {
         const option = document.createElement('option')
         option.setAttribute('value', masterGroup)
         option.innerHTML = masterGroup
         productMasterGroupEditSelect.appendChild(option)
     })
+    if (masterGroup) {
+        productMasterGroupEditSelect.value = masterGroup
+        productParam.mstr_grps_grps_names_in_prod[masterGroup].forEach(
+            (group: { group_name: string; group_id: number }) => {
+                const productGroupSelectOption = document.createElement('option')
+                productGroupSelectOption.setAttribute('value', group.group_id.toString())
+                productGroupSelectOption.textContent = group.group_name
+                productGroupEditSelect.appendChild(productGroupSelectOption)
+            }
+        )
+        // TODO: always select first option
+        productGroupEditSelect.value = productParam.mstr_grps_grps_names_in_prod[masterGroup][0].group_id.toString()
+    }
+
     const options = productMasterGroupEditSelect.querySelectorAll('option')
     productMasterGroupEditSelect.addEventListener('change', () => {
-        console.log('clock')
-
         options.forEach((e) => {
             if (
                 e.textContent === productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
             ) {
-                console.log(productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text)
-
                 const optionCategory =
                     productParam.mstr_prod_grps_prod_grps_names[
                         productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
                     ]
-                console.log('optionCategory', optionCategory)
 
                 document.getElementById(`product-group-edit-item-${index}`).innerHTML = ''
                 if (optionCategory) {
@@ -1184,11 +1182,9 @@ function createProductGroupEditItem(productParam: IProduct = null) {
             }
         })
     })
-
     productGroupEditContainer.appendChild(productGroupEditItem)
 
     const addButton = productGroupEditItem.querySelector(`#product-group-edit-add-item-btn-${index}`)
-    console.log(`product-group-edit-add-item-btn-${index}`)
 
     addButton.addEventListener('click', () => {
         createProductGroupEditItem()
@@ -1226,8 +1222,6 @@ function setProducts(typeModal: string) {
 
     const inputProducts: HTMLInputElement = document.querySelector(`#product-${typeModal}-product-groups`)
     inputProducts.value = JSON.stringify(products)
-    console.log('inputProducts', inputProducts)
-    console.log('products', products)
 
     return true
 }
@@ -1320,11 +1314,8 @@ function createProductGroupAddItem(groups: IProductMasterGroupGroup = null) {
     productMasterGroupAddSelect.addEventListener('change', () => {
         options.forEach((e) => {
             if (e.textContent === productMasterGroupAddSelect.options[productMasterGroupAddSelect.selectedIndex].text) {
-                console.log(productMasterGroupAddSelect.options[productMasterGroupAddSelect.selectedIndex].text)
-
                 const optionCategory =
                     groups[productMasterGroupAddSelect.options[productMasterGroupAddSelect.selectedIndex].text]
-                console.log('optionCategory', optionCategory)
 
                 document.getElementById(`product-group-add-item-${index}`).innerHTML = ''
                 if (optionCategory) {
