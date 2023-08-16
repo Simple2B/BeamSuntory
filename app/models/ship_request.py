@@ -13,6 +13,7 @@ from .cart import Cart
 from .warehouse import Warehouse
 from .store import Store
 from .warehouse_product import WarehouseProduct
+from .store_category import StoreCategory
 
 
 class ShipRequest(db.Model, ModelMixin):
@@ -27,9 +28,10 @@ class ShipRequest(db.Model, ModelMixin):
     status: orm.Mapped[str] = orm.mapped_column(
         sa.String(64),
     )
-    store_category: orm.Mapped[str] = orm.mapped_column(
-        sa.String(64),
+    store_category_id: orm.Mapped[int] = orm.mapped_column(
+        sa.ForeignKey("store_categories.id")
     )
+    store_category: orm.Mapped[StoreCategory] = orm.relationship()
     order_type: orm.Mapped[str] = orm.mapped_column(
         sa.String(128),
         nullable=False,

@@ -11,3 +11,5 @@ declare const deleteButtons: NodeListOf<Element>;
 declare const favoriteCheckbox: HTMLInputElement;
 declare const selectStore: Element;
 declare const optionsStore: NodeListOf<Element>;
+declare const storeCategorySelect: HTMLSelectElement;
+declare const options: NodeListOf<HTMLOptionElement>;

@@ -177,12 +177,9 @@ def delete(id: int):
         return "no warehouse", 404
 
     delete_w = sa.delete(m.Warehouse).where(m.Warehouse.id == id)
-
+    # TODO: replace with cascade
     product_warehouses = db.session.execute(
         m.WarehouseProduct.select().where(m.WarehouseProduct.warehouse_id == w.id)
-    ).scalars()
-    ship_requests = db.session.execute(
-        m.ShipRequest.select().where(m.ShipRequest.warehouse_id == w.id)
     ).scalars()
     inbound_orders = db.session.execute(
         m.InboundOrder.select().where(m.InboundOrder.warehouse_id == w.id)
@@ -193,7 +190,7 @@ def delete(id: int):
         )
     ).scalars()
 
-    for prod_conn in [product_warehouses, ship_requests, inbound_orders, product_io]:
+    for prod_conn in [product_warehouses, inbound_orders, product_io]:
         for pw in prod_conn:
             db.session.delete(pw)
 

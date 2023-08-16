@@ -70,6 +70,9 @@ def get_all():
     }
     warehouses_rows = db.session.execute(sa.select(m.Warehouse)).scalars()
     warehouses = [{"name": w.name, "id": w.id} for w in warehouses_rows]
+    store_categories = [
+        sc for sc in db.session.execute(m.StoreCategory.select()).scalars()
+    ]
 
     return render_template(
         "ship_request/ship_requests.html",
@@ -80,6 +83,7 @@ def get_all():
         form_create=form_create,
         form_edit=form_edit,
         warehouses=warehouses,
+        store_categories=store_categories,
     )
 
 
@@ -97,7 +101,7 @@ def create():
             # NOTE: what status is default?
             status="Waiting for warehouse manager",
             store_id=form_create.store.data,
-            store_category=form_create.store_category.data,
+            store_category_id=int(form_create.store_category.data),
             comment=form_create.comment.data,
             # TODO: ask client about store_delivery
             order_type="store_delivery",

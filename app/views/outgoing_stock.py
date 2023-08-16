@@ -115,10 +115,10 @@ def save():
         for product in products:
             cart: m.Cart = db.session.execute(
                 m.Cart.select().where(
-                    m.Cart.product_id == product["product_id"],
+                    m.Cart.product_id == int(product["product_id"]),
                     m.Cart.group == product["group_name"],
                     m.Cart.ship_request_id == sr.id,
-                    m.Cart.quantity == product["quantity"],
+                    m.Cart.quantity == int(product["quantity"]),
                 )
             ).scalar()
             if cart:
