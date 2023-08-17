@@ -1383,12 +1383,12 @@ function clearProductGroupContainer() {
     const productGroupEditSelects = document.querySelectorAll('.product-group-edit-add-item')
 }
 
-// ----product show stocks own by me btn----
+// ----product show stocks own by me----
 const showProductByUserGroupCheckbox: HTMLInputElement = document.querySelector('#product-show-stocks-own-by-me-btn')
 showProductByUserGroupCheckbox.addEventListener('change', async () => {
     if (showProductByUserGroupCheckbox.checked) {
         try {
-            const response = await fetch(`/product/show_stocks_by_me`, {
+            const response = await fetch(`/product/stocks_owned_by_me`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
