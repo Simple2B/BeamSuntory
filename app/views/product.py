@@ -23,7 +23,7 @@ from app.logger import log
 product_blueprint = Blueprint("product", __name__, url_prefix="/product")
 
 
-def get_all_products(request, query=None, count_query=None):
+def get_all_products(request, query=None, count_query=None, my_stocks=False):
     q = request.args.get("q", type=str, default=None)
     if query is None or count_query is None:
         query = m.Product.select().order_by(m.Product.id)
@@ -123,27 +123,37 @@ def get_all_products(request, query=None, count_query=None):
 
     suppliers = [i for i in db.session.execute(m.Supplier.select()).scalars()]
 
-    query_result_list: list[m.WarehouseProduct] = [
+    warehouse_product_query: list[m.WarehouseProduct] = [
         i
         for i in db.session.execute(
-            m.WarehouseProduct.select().order_by(m.WarehouseProduct.id)
+            m.WarehouseProduct.select()
+            # .where(
+            #     m.WarehouseProduct.product_id.in_(
+            #         [prod.id for prod in db.session.execute(query).scalars()]
+            #     )
+            # )
+            .order_by(m.WarehouseProduct.id)
         ).scalars()
     ]
 
     warehouse_product_qty = dict()
 
-    warehouse_products = {wpq.product_id for wpq in query_result_list}
+    warehouse_products = {wpq.product_id for wpq in warehouse_product_query}
 
     for ware_prod in warehouse_products:
-        for wpq in query_result_list:
-            if wpq.product_id == ware_prod:
-                if wpq.product.name in warehouse_product_qty:
-                    warehouse_product_qty[wpq.product.name] = str(
-                        int(warehouse_product_qty[wpq.product.name])
-                        + int(wpq.product_quantity)
-                    )
-                else:
-                    warehouse_product_qty[wpq.product.name] = str(wpq.product_quantity)
+        for wpq in warehouse_product_query:
+            if wpq.product_id != ware_prod:
+                continue
+            if my_stocks:
+                if wpq.group_id not in my_stocks:
+                    continue
+            if wpq.product.name in warehouse_product_qty:
+                warehouse_product_qty[wpq.product.name] = str(
+                    int(warehouse_product_qty[wpq.product.name])
+                    + int(wpq.product_quantity)
+                )
+            else:
+                warehouse_product_qty[wpq.product.name] = str(wpq.product_quantity)
 
     return {
         "query": query,
@@ -753,7 +763,9 @@ def stocks_owned_by_me():
             .select_from(m.Product)
         )
 
-    products_object = get_all_products(request, query, count_query)
+    products_object = get_all_products(
+        request, query, count_query, my_stocks=curr_user_groups_ids
+    )
     form_sort: f.SortByGroupProductForm = f.SortByGroupProductForm()
     form_create: f.NewProductForm = f.NewProductForm()
     form_edit: f.ProductForm = f.ProductForm()
