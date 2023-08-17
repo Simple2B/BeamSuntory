@@ -1383,6 +1383,36 @@ function clearProductGroupContainer() {
     const productGroupEditSelects = document.querySelectorAll('.product-group-edit-add-item')
 }
 
-// ----show product by user group----
-// const showProductByUserGroupCheckbox = document.querySelector('#product-show-product-by-user-group-btn')
-// showProductByUserGroupCheckbox.addEventListener('change', () => {
+// ----product show stocks own by me btn----
+const showProductByUserGroupCheckbox: HTMLInputElement = document.querySelector('#product-show-stocks-own-by-me-btn')
+showProductByUserGroupCheckbox.addEventListener('change', async () => {
+    if (showProductByUserGroupCheckbox.checked) {
+        try {
+            const response = await fetch(`/product/show_stocks_by_me`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            if (response.status === 200) {
+                window.location.href = response.url
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    } else {
+        try {
+            const response = await fetch(`/product`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            if (response.status === 200) {
+                window.location.href = response.url
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+})
