@@ -692,7 +692,7 @@ def upload():
     form: f.UploadProductForm = f.UploadProductForm()
     if form.validate_on_submit():
         csv_file = request.files["upload_csv"]
-        type(csv_file)
+        type(csv_file.read())
 
         flash("Product added!", "success")
         return redirect(url_for("product.get_all"))
