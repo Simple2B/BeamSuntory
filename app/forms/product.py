@@ -120,3 +120,9 @@ class DepleteProductForm(FlaskForm):
     quantity = StringField("Quantity", [DataRequired()])
 
     submit = SubmitField("Submit")
+
+
+class UploadProductForm(FlaskForm):
+    upload_csv = FileField("CSV", [DataRequired()])
+
+    submit = SubmitField("Submit")

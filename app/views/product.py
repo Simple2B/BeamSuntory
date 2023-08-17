@@ -684,3 +684,19 @@ def adjust():
         ),
         201,
     )
+
+
+@product_blueprint.route("/upload", methods=["POST"])
+@login_required
+def upload():
+    form: f.UploadProductForm = f.UploadProductForm()
+    if form.validate_on_submit():
+        csv_file = request.files["upload_csv"]
+        type(csv_file)
+
+        flash("Product added!", "success")
+        return redirect(url_for("product.get_all"))
+    else:
+        log(log.ERROR, "Product creation errors: [%s]", form.errors)
+        flash(f"{form.errors}", "danger")
+        return redirect(url_for("product.get_all"))
