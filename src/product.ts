@@ -495,7 +495,16 @@ function editProduct(product: IProduct) {
                         }
                     })
                 })
-                continue
+
+                if (product.mstr_grps_grps_names_in_prod[productMasterGroups[i]].length > 1) {
+                    for (let j = 1; j < product.mstr_grps_grps_names_in_prod[productMasterGroups[i]].length; j++) {
+                        console.log('if product')
+                        createProductGroupEditItem(null, productMasterGroups[i], j)
+                    }
+                    continue
+                } else {
+                    continue
+                }
             }
 
             if (product.mstr_grps_grps_names_in_prod[productMasterGroups[i]].length > 0) {
