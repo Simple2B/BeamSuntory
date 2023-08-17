@@ -611,7 +611,7 @@ def request_share():
         return redirect(url_for("product.get_all"))
 
 
-@product_blueprint.route("/adjust/", methods=["POST"])
+@product_blueprint.route("/adjust", methods=["POST"])
 @login_required
 def adjust():
     form: f.DepleteProductForm = f.DepleteProductForm()

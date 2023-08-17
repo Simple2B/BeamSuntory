@@ -1029,7 +1029,7 @@ async function adjustProduct(
     // TODO: delete log
     console.log('base_url', base_url)
 
-    const response = await fetch(`${base_url}/product/adjust`, {
+    const response = await fetch(`/product/adjust`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
