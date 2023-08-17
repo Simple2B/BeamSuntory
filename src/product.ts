@@ -1385,10 +1385,15 @@ function clearProductGroupContainer() {
 
 // ----product show stocks own by me----
 const showProductByUserGroupCheckbox: HTMLInputElement = document.querySelector('#product-show-stocks-own-by-me-btn')
+if (window.location.pathname + window.location.hash === '/product/stocks_owned_by_me') {
+    window.onload = (event) => {
+        showProductByUserGroupCheckbox.setAttribute('checked', 'checked')
+    }
+}
 showProductByUserGroupCheckbox.addEventListener('change', async () => {
     if (showProductByUserGroupCheckbox.checked) {
         try {
-            const response = await fetch(`/product/stocks_owned_by_me`, {
+            const response = await fetch('/product/stocks_owned_by_me', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

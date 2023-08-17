@@ -78,15 +78,15 @@
         </svg>
         Filter
       </button>
+      <label class="ml-7 relative inline-flex items-center cursor-pointer">
+        <input id="product-show-stocks-own-by-me-btn" type="checkbox" value="" class="sr-only peer">
+        <div
+          class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-400">
+        </div>
+        <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Stocks Own By Me</span>
+      </label>
     </div>
   </form>
-  <label class="ml-7 relative inline-flex items-center cursor-pointer">
-    <input id="product-show-stocks-own-by-me-btn" type="checkbox" value="" class="sr-only peer">
-    <div
-      class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-400">
-    </div>
-    <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Stocks Own By Me</span>
-  </label>
   <div class="flex items-center justify-center py-4 bg-white dark:bg-gray-800">
     <label for="table-search" class="sr-only">Search</label>
     <div class="relative">
@@ -164,6 +164,7 @@
         <th id="product-table-th-product-type" scope="col" class="px-6 py-3">Description</th>
         <th scope="col" class="px-6 py-3">Currency</th>
         <th scope="col" class="px-6 py-3">Price</th>
+        <th scope="col" class="px-6 py-3">Available Qty</th>
         <th scope="col" class="px-6 py-3">Actions</th>
       </tr>
     </thead>
@@ -206,6 +207,11 @@
             <div class="text-base font-semibold">{{ product.price }}</div>
           </div>
         </td>
+        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ warehouse_product_qty[product.name] if product.name in warehouse_product_qty else 0 }}</div>
+          </div>
+        </td>
         <td class="p-4 space-x-2 whitespace-nowrap">
           <button type="button" data-target="{{product.json}}"
             class="product-adjust-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-blue-300 sm:w-auto dark:bg-yellow-400 dark:hover:bg-yellow-500 dark:focus:ring-blue-800">
@@ -235,7 +241,7 @@
                 d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
                 clip-rule="evenodd"></path>
             </svg>
-            Edit product
+            Edit
           </button>
           <button data-product-id={{ product.id }} type="button"
             class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900 delete-product-btn">
@@ -244,7 +250,7 @@
                 d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
                 clip-rule="evenodd"></path>
             </svg>
-            Delete product
+            Delete
           </button>
           <!-- NOTE: Implement this dropdown actions if space required -->
           <!-- <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown"

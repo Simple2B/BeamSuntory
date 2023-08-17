@@ -123,6 +123,28 @@ def get_all_products(request, query=None, count_query=None):
 
     suppliers = [i for i in db.session.execute(m.Supplier.select()).scalars()]
 
+    query_result_list: list[m.WarehouseProduct] = [
+        i
+        for i in db.session.execute(
+            m.WarehouseProduct.select().order_by(m.WarehouseProduct.id)
+        ).scalars()
+    ]
+
+    warehouse_product_qty = dict()
+
+    warehouse_products = {wpq.product_id for wpq in query_result_list}
+
+    for ware_prod in warehouse_products:
+        for wpq in query_result_list:
+            if wpq.product_id == ware_prod:
+                if wpq.product.name in warehouse_product_qty:
+                    warehouse_product_qty[wpq.product.name] = str(
+                        int(warehouse_product_qty[wpq.product.name])
+                        + int(wpq.product_quantity)
+                    )
+                else:
+                    warehouse_product_qty[wpq.product.name] = str(wpq.product_quantity)
+
     return {
         "query": query,
         "pagination": pagination,
@@ -142,6 +164,7 @@ def get_all_products(request, query=None, count_query=None):
             i[0].parent.name for i in current_user_groups_rows
         ],
         "mstr_prod_grps_prod_grps_names": json.dumps(mstr_prod_grps_prod_grps_names),
+        "warehouse_product_qty": warehouse_product_qty,
     }
 
 
@@ -182,6 +205,7 @@ def get_all():
         mstr_prod_grps_prod_grps_names=products_object[
             "mstr_prod_grps_prod_grps_names"
         ],
+        warehouse_product_qty=products_object["warehouse_product_qty"],
         form_sort=form_sort,
         form_create=form_create,
         form_edit=form_edit,
@@ -465,6 +489,7 @@ def sort():
             mstr_prod_grps_prod_grps_names=products_object[
                 "mstr_prod_grps_prod_grps_names"
             ],
+            warehouse_product_qty=products_object["warehouse_product_qty"],
             form_sort=form,
             form_create=form_create,
             form_edit=form_edit,
@@ -683,4 +708,87 @@ def adjust():
                 was changed to {product_desire_quantity}""",
         ),
         201,
+    )
+
+
+@product_blueprint.route("/stocks_owned_by_me", methods=["GET"])
+@login_required
+def stocks_owned_by_me():
+    curr_user_groups_ids = [
+        i.right_id
+        for i in db.session.execute(
+            m.UserGroup.select().where(
+                m.UserGroup.left_id == current_user.id,
+            )
+        ).scalars()
+    ]
+    curr_user_products_ids = [
+        i.product_id
+        for i in db.session.execute(
+            m.WarehouseProduct.select().where(
+                m.WarehouseProduct.group_id.in_(curr_user_groups_ids),
+            )
+        ).scalars()
+    ]
+    q = request.args.get("q", type=str, default=None)
+    query = (
+        m.Product.select()
+        .where(m.Product.id.in_(curr_user_products_ids))
+        .order_by(m.Product.id)
+    )
+    count_query = sa.select(sa.func.count()).select_from(m.Product)
+    if q:
+        query = (
+            m.Product.select()
+            .where(
+                m.Product.name.like(f"{q}%"), m.Product.id.in_(curr_user_products_ids)
+            )
+            .order_by(m.Product.id)
+        )
+        count_query = (
+            sa.select(sa.func.count())
+            .where(
+                m.Product.name.like(f"{q}%"), m.Product.id.in_(curr_user_products_ids)
+            )
+            .select_from(m.Product)
+        )
+
+    products_object = get_all_products(request, query, count_query)
+    form_sort: f.SortByGroupProductForm = f.SortByGroupProductForm()
+    form_create: f.NewProductForm = f.NewProductForm()
+    form_edit: f.ProductForm = f.ProductForm()
+
+    return render_template(
+        "product/products.html",
+        products=db.session.execute(
+            products_object["query"]
+            .offset(
+                (products_object["pagination"].page - 1)
+                * products_object["pagination"].per_page
+            )
+            .limit(products_object["pagination"].per_page)
+        ).scalars(),
+        page=products_object["pagination"],
+        search_query=products_object["q"],
+        main_master_groups=products_object["master_groups"],
+        product_groups=products_object["product_groups"],
+        all_product_groups=products_object["all_product_groups"],
+        current_user_groups=[
+            row[0] for row in products_object["current_user_groups_rows"]
+        ],
+        current_user_groups_names=products_object["current_user_groups_names"],
+        master_groups_groups_available=products_object[
+            "mastr_for_prods_groups_for_prods"
+        ],
+        master_groups_search=products_object["master_groups_search"],
+        product_mg_g=products_object["product_mg_g"],
+        master_group_product_name=products_object["master_product_groups_name"],
+        suppliers=products_object["suppliers"],
+        mstr_prod_grps_prod_grps_names=products_object[
+            "mstr_prod_grps_prod_grps_names"
+        ],
+        warehouse_product_qty=products_object["warehouse_product_qty"],
+        form_sort=form_sort,
+        form_create=form_create,
+        form_edit=form_edit,
     )
