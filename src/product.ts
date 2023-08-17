@@ -619,8 +619,6 @@ adjustProductButtonElements.forEach((e) =>
         product.image.length > 100
             ? (img.src = `data:image/png;base64, ${product.image}`)
             : (img.src = defaultBrandImage)
-        div = document.querySelector('#product-adjust-product_type')
-        div.innerHTML = product.product_type.toUpperCase().split(' ').join('_')
         div = document.querySelector('#product-adjust-next_url')
         div.innerHTML = window.location.href
         adjustModal.show()
@@ -711,6 +709,7 @@ function deleteShipAssignButton(nameGroup: string, nameGroupValue: string) {
 
 // function to add ship, assign, button to view product modal
 function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: string, productParam: IProduct) {
+    const groupUnderScore = group.replace(/ /g, '_')
     const groupProductIds = productParam.groups_ids
     const productTypeContainer = document.querySelector(`#product-view-product_type-container`)
     const shipAssignContainer = document.createElement('div')
@@ -725,25 +724,19 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
     </div>
     <div>
       <label for="product_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Action</label >
-      <button ship-group-data=${group.replace(/ /g, '_')} type="button" id="ship-product-button-${group.replace(
-        / /g,
-        '_'
-    )}" class="ship-product-button inline-flex items-center mr-2 px-3 py-2.5 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
+      <button ship-group-data=${groupUnderScore} type="button" id="ship-product-button-${groupUnderScore}" class="ship-product-button inline-flex items-center mr-2 px-3 py-2.5 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
         <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
         Ship
       </button>
-      <button assign-group-data=${group.replace(/ /g, '_')} type="button" id="assign-product-button-${group.replace(
-        / /g,
-        '_'
-    )}" class="assign-product-button inline-flex items-center px-3 py-2.5 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+      <button assign-group-data=${groupUnderScore} type="button" id="assign-product-button-${groupUnderScore}" class="assign-product-button inline-flex items-center px-3 py-2.5 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
         <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
         Assign
       </button>
     </div>
   `
     const shareContainer = document.createElement('div')
-    const shipProductBtn = shipAssignContainer.querySelector(`#ship-product-button-${group.replace(/ /g, '_')}`)
-    const assignProductBtn = shipAssignContainer.querySelector(`#assign-product-button-${group.replace(/ /g, '_')}`)
+    const shipProductBtn = shipAssignContainer.querySelector(`#ship-product-button-${groupUnderScore}`)
+    const assignProductBtn = shipAssignContainer.querySelector(`#assign-product-button-${groupUnderScore}`)
 
     shareContainer.classList.add('sm:col-span-3', 'flex', 'gap-4')
     shareContainer.setAttribute('id', `product-ship-assign-share-container-${masterGroup.replace(/ /g, '_')}`)
@@ -756,17 +749,14 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
     </div>
     <div>
       <label for="product_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Action</label >
-      <button share-group-data=${group.replace(/ /g, '_')} type="button" id="share-product-button-${group.replace(
-        / /g,
-        '_'
-    )}" class="request-share-product-button inline-flex items-center px-3 py-2.5 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+      <button share-group-data=${groupUnderScore} type="button" id="share-product-button-${groupUnderScore}" class="request-share-product-button inline-flex items-center px-3 py-2.5 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
         <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
         Request Share
       </button>
     </div>
   `
 
-    const shareProductBtn = shareContainer.querySelector(`#share-product-button-${group.replace(/ /g, '_')}`)
+    const shareProductBtn = shareContainer.querySelector(`#share-product-button-${groupUnderScore}`)
 
     if (productParam.available_quantity[group] === 0 || !productParam.available_quantity[group]) {
         shipProductBtn.classList.add('invisible')
@@ -815,12 +805,12 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
     const productViewTypeContainer = document.querySelector('#product-view-product_type-container')
     const productMasterGroupContainer = document.createElement('div')
     productMasterGroupContainer.classList.add('sm:col-span-3')
-    productMasterGroupContainer.setAttribute('id', `product-view-product_group-container-${group.replace(/ /g, '_')}`)
+    productMasterGroupContainer.setAttribute('id', `product-view-product_group-container-${groupUnderScore}`)
 
     productMasterGroupContainer.innerHTML = `
-    <label for="for-group-${group}"
+    <label for="for-group-${groupUnderScore}"
       class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">${masterGroup}</label>
-    <select type="text" name="group-${group}" id="product-view-${group}"
+    <select type="text" name="group-${groupUnderScore}" id="product-view-${groupUnderScore}"
       class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
       placeholder="Some Group" required
     >
@@ -931,49 +921,41 @@ function getSessionStorageObject(
 }
 
 function createAdjustAction(isEqual: boolean, masterGroup: string, group: string, productParam: IProduct) {
+    const groupUnderScore = group.replace(/ /g, '_')
     const groupProductIds = productParam.groups_ids
     const productTypeContainer = document.querySelector(`#product-adjust-product_type-container`)
     const adjustContainer = document.createElement('div')
     adjustContainer.classList.add('sm:col-span-2', 'flex', 'gap-4')
-    adjustContainer.setAttribute('id', `product-adjust-container-${group.replace(/ /g, '_')}`)
+    adjustContainer.setAttribute('id', `product-adjust-container-${groupUnderScore}`)
     adjustContainer.innerHTML = `
     <div>
-      <label for="adjust-product-quantity-${group.replace(
-          / /g,
-          '_'
-      )}" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
-        <input id="adjust-product-quantity-${group.replace(/ /g, '_')}"
+      <label for="adjust-product-quantity-${groupUnderScore}" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
+        <input id="adjust-product-quantity-${groupUnderScore}"
           class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
     </div>
     <div>
       <label for="product_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Action</label >
-      <button adjust-group-data=${group.replace(/ /g, '_')} type="button" id="adjust-product-button-${group.replace(
-        / /g,
-        '_'
-    )}" class="adjust-product-button inline-flex items-center mr-2 px-3 py-2.5 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
+      <button adjust-group-data=${groupUnderScore} type="button" id="adjust-product-button-${groupUnderScore}" class="adjust-product-button inline-flex items-center mr-2 px-3 py-2.5 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
         <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
         Adjust
       </button>
     </div>
   `
-    const adjustProductBtn = adjustContainer.querySelector(`#adjust-product-button-${group.replace(/ /g, '_')}`)
+    const adjustProductBtn = adjustContainer.querySelector(`#adjust-product-button-${groupUnderScore}`)
 
     productTypeContainer.parentNode.insertBefore(adjustContainer, productTypeContainer.nextSibling)
 
     const productViewTypeContainer = document.querySelector('#product-adjust-product_type-container')
     const masterGroupWarehouseContainer = document.createElement('div')
     masterGroupWarehouseContainer.classList.add('sm:col-span-4')
-    masterGroupWarehouseContainer.setAttribute(
-        'id',
-        `product-adjust-product_group-container-${group.replace(/ /g, '_')}`
-    )
+    masterGroupWarehouseContainer.setAttribute('id', `product-adjust-product_group-container-${groupUnderScore}`)
 
     masterGroupWarehouseContainer.innerHTML = `
   <div class="flex gap-4">
   <div class="w-2/4">
-    <label for="for-group-${group}"
+    <label for="for-group-${groupUnderScore}"
       class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">${masterGroup}</label>
-    <select type="text" name="group-${group}" id="master-group-adjust-${group}"
+    <select type="text" name="group-${groupUnderScore}" id="master-group-adjust-${groupUnderScore}"
       class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
       placeholder="Some Group" required
     >
@@ -981,9 +963,9 @@ function createAdjustAction(isEqual: boolean, masterGroup: string, group: string
     </select>
   </div>
   <div class="w-2/4">
-    <label for="for-warehouse-${group}"
+    <label for="for-warehouse-${groupUnderScore}"
       class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Warehouse</label>
-    <select type="text" name="group-${group}" id="warehouse-adjust-${group}"
+    <select type="text" name="group-${groupUnderScore}" id="warehouse-adjust-${groupUnderScore}"
       class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
       placeholder="Some Group" required
     >
@@ -992,9 +974,11 @@ function createAdjustAction(isEqual: boolean, masterGroup: string, group: string
   </div>
     `
 
-    const selectWarehouse: HTMLInputElement = masterGroupWarehouseContainer.querySelector(`#warehouse-adjust-${group}`)
+    const selectWarehouse: HTMLInputElement = masterGroupWarehouseContainer.querySelector(
+        `#warehouse-adjust-${groupUnderScore}`
+    )
     const productQuantity: HTMLInputElement = adjustContainer.querySelector(
-        `#adjust-product-quantity-${group.replace(/ /g, '_')}`
+        `#adjust-product-quantity-${groupUnderScore}`
     )
 
     const productQuantityValue = productParam.available_quantity[group] || 0
@@ -1013,7 +997,7 @@ function createAdjustAction(isEqual: boolean, masterGroup: string, group: string
         productViewTypeContainer.nextSibling
     )
 
-    const adjustButton = document.querySelector(`#adjust-product-button-${group.replace(/ /g, '_')}`)
+    const adjustButton = document.querySelector(`#adjust-product-button-${groupUnderScore}`)
     adjustButton.addEventListener('click', () => {
         const csrfTokenInput = document.querySelector<HTMLInputElement>('#csrf_token')
         const csrfToken = csrfTokenInput ? csrfTokenInput.value : ''
@@ -1040,6 +1024,7 @@ async function adjustProduct(
         group_id: groupId,
         csrf_token: csrfToken,
     }
+    const groupUnderScore = group.replace(/ /g, '_')
     const base_url = window.location.origin
     // TODO: delete log
     console.log('base_url', base_url)
@@ -1053,12 +1038,10 @@ async function adjustProduct(
     })
 
     const message = await response.json()
-    const groupContainer = document.querySelector(`#product-adjust-product_group-container-${group.replace(/ /g, '_')}`)
+    const groupContainer = document.querySelector(`#product-adjust-product_group-container-${groupUnderScore}`)
 
     if (response.status === 201) {
-        const productQuantity: HTMLInputElement = document.querySelector(
-            `#adjust-product-quantity-${group.replace(/ /g, '_')}`
-        )
+        const productQuantity: HTMLInputElement = document.querySelector(`#adjust-product-quantity-${groupUnderScore}`)
         productQuantity.value = quantity.toString()
         const successMessage = document.createElement('div')
         successMessage.classList.add('text-green-500', 'text-sm')
@@ -1390,6 +1373,7 @@ productAddSaveButton.addEventListener('click', () => {
     }
 })
 
+// ----clear product group container----
 function clearProductGroupContainer() {
     const productGroupEditContainer = document.querySelector('#product-group-edit-add-container')
     const productGroupEditItems = document.querySelectorAll('.product-group-edit-add-item')
@@ -1398,3 +1382,7 @@ function clearProductGroupContainer() {
     }
     const productGroupEditSelects = document.querySelectorAll('.product-group-edit-add-item')
 }
+
+// ----show product by user group----
+// const showProductByUserGroupCheckbox = document.querySelector('#product-show-product-by-user-group-btn')
+// showProductByUserGroupCheckbox.addEventListener('change', () => {
