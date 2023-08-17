@@ -308,11 +308,14 @@ def save():
             if group_row[0].group_id in product_master_groups_ids:
                 continue
             else:
-                delete_gp = sa.delete(m.ProductGroup).where(
-                    m.ProductGroup.product_id == int(form.product_id.data),
-                    m.ProductGroup.group_id == group_row[0].group_id,
-                )
-                db.session.execute(delete_gp)
+                delete_gp = db.session.execute(
+                    m.ProductGroup.select().where(
+                        m.ProductGroup.product_id == int(form.product_id.data),
+                        m.ProductGroup.group_id == group_row[0].group_id,
+                    )
+                ).scalar()
+                db.session.delete(delete_gp)
+                db.session.commit()
 
         for group_id in product_master_groups_ids:
             if group_id in product_groups_ids:
