@@ -126,13 +126,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     warehouse_product_query: list[m.WarehouseProduct] = [
         i
         for i in db.session.execute(
-            m.WarehouseProduct.select()
-            # .where(
-            #     m.WarehouseProduct.product_id.in_(
-            #         [prod.id for prod in db.session.execute(query).scalars()]
-            #     )
-            # )
-            .order_by(m.WarehouseProduct.id)
+            m.WarehouseProduct.select().order_by(m.WarehouseProduct.id)
         ).scalars()
     ]
 
