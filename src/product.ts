@@ -853,9 +853,13 @@ filterRadioButtons.forEach((btn) => {
     }
 })
 
-productFilterInputs.forEach((input) => {
+productFilterInputs.forEach((input: HTMLInputElement) => {
     input.addEventListener('change', () => {
         const filterInputDataTarget = input.getAttribute('data-target')
+        const masterGroup = filterInputDataTarget
+            .split(',')[1]
+            .replace(/[^a-zA-Z0-9\s\_]/g, '')
+            .trim()
         const filterInputId = filterInputDataTarget.split(',')[0].replace(/[^a-zA-Z0-9\s\_]/g, '')
         const filterInputIdString = `#product-filter-input-${filterInputId}`
         const filterButtonId = filterInputDataTarget
@@ -864,7 +868,8 @@ productFilterInputs.forEach((input) => {
             .replace(/[^a-zA-Z0-9\s\_]/g, '')
         const filterInput = document.querySelector(filterInputIdString) as HTMLInputElement
         const filterRadioBtn = document.querySelector(`#dropdownRadioButton-${filterButtonId}`)
-        if (filterInputIdString.includes(filterButtonId)) {
+
+        if (filterInputIdString.includes(filterButtonId) && input.value === masterGroup) {
             filterRadioBtn.innerHTML = `
         ${filterButtonId.split('_').join(' ')}
         <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -876,6 +881,7 @@ productFilterInputs.forEach((input) => {
             getSessionStorageObject(filterJsonData, 'filterJsonData', 'remove', filterButtonId)
             return
         }
+
         filterRadioBtn.innerHTML = `
       ${filterInput.value.split('_').join(' ')}
       <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -913,19 +919,13 @@ function getSessionStorageObject(
             const newDataObject = { ...dataObject, ...localObject }
             const newJsonData = JSON.stringify(newDataObject)
             sessionStorage.setItem(sessionObject, newJsonData)
-            console.log('add')
-
             break
         case 'remove':
             delete dataObject[objectKey]
             const newJsonDataObject = JSON.stringify(dataObject)
             sessionStorage.setItem(sessionObject, newJsonDataObject)
-            console.log('remove')
-
             break
         default:
-            console.log('def')
-
             break
     }
 }
