@@ -1,5 +1,8 @@
 import base64
 import json
+from datetime import datetime
+from io import BytesIO
+import pandas
 from flask import (
     Blueprint,
     jsonify,
@@ -12,6 +15,7 @@ from flask import (
 )
 from flask_login import login_required, current_user
 from flask_mail import Message
+from sqlalchemy.dialects.postgresql import insert
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
@@ -692,7 +696,57 @@ def upload():
     form: f.UploadProductForm = f.UploadProductForm()
     if form.validate_on_submit():
         csv_file = request.files["upload_csv"]
-        type(csv_file.read())
+        file_io = BytesIO(csv_file.read())
+
+        # conn = sa.create_engine(BaseConfig.server_url)
+        conn = db.get_engine()
+
+        for table_name in ["Language", "Categories", "Brand"]:
+            master_group_obj = db.session.execute(
+                m.MasterGroup.select().where(m.MasterGroup.name == table_name)
+            ).scalar()
+
+            if not master_group_obj:
+                m.MasterGroup(name=table_name).save()
+
+            df = pandas.read_csv(file_io, usecols=[table_name])
+            df = df.drop_duplicates().dropna()
+            df["master_group_id"] = master_group_obj.id
+            df["created_at"] = datetime.now()
+
+            df.rename(
+                columns=dict(zip(df.columns, ["name", "master_group_id", "created_at"]))
+            ).to_sql(
+                "groups",
+                con=conn,
+                if_exists="append",
+                index=False,
+                # method="multi",
+                method=insert_do_nothing_on_conflicts,
+            )
+
+        pandas_df = pandas.read_csv(
+            file_io,
+            usecols=[
+                "Name",
+                "Description",
+                "Language",
+                "SKU",
+                "Brand",
+                "Categories",
+                "Regular Price",
+                "Retail Price",
+                "Available Quantity",
+            ],
+        )
+        pandas_df.head()
+        # group_by_df.to_sql(
+        #     "dimensional_tables",
+        #     con=con,
+        #     if_exists="append",
+        #     index=False,
+        #     method="multi",
+        # )
 
         flash("Product added!", "success")
         return redirect(url_for("product.get_all"))
@@ -700,3 +754,33 @@ def upload():
         log(log.ERROR, "Product creation errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("product.get_all"))
+
+
+def insert_do_nothing_on_conflicts(sqltable, conn, keys, data_iter):
+    """
+    Execute SQL statement inserting data
+
+    Parameters
+    ----------
+    sqltable : pandas.io.sql.SQLTable
+    conn : sqlalchemy.engine.Engine or sqlalchemy.engine.Connection
+    keys : list of str
+        Column names
+    data_iter : Iterable that iterates the values to be inserted
+    """
+    columns = []
+    for c in keys:
+        columns.append(sa.column(c))
+
+    if sqltable.schema:
+        table_name = "{}.{}".format(sqltable.schema, sqltable.name)
+    else:
+        table_name = sqltable.name
+
+    mytable = sa.table(table_name, *columns)
+
+    insert_stmt = insert(mytable).values(list(data_iter))
+    # do_nothing_stmt = insert_stmt.on_conflict_do_nothing(index_elements=["unique_code"])
+    do_nothing_stmt = insert_stmt.on_conflict_do_nothing(index_elements=["name"])
+
+    conn.execute(do_nothing_stmt)
