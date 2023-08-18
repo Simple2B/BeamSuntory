@@ -140,8 +140,6 @@ def accept():
         )
         flash("There is no such inbound order", "danger")
         return redirect(url_for("incoming_stock.get_all"))
-    io.status = "Delivered"
-    io.save()
 
     # save delivered product quantity, so this product would be available in warehouse
     products_quantity_group: list[m.ProductQuantityGroup] = db.session.execute(
@@ -198,6 +196,8 @@ def accept():
             )
             warehouse_product.save()
 
+    io.status = "Delivered"
+    io.save()
     log(log.INFO, "Inbound order accepted. Inbound order: [%s]", io)
     if not quantity_received != product.quantity:
         flash("Inbound order accepted!", "success")
