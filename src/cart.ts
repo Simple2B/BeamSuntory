@@ -51,7 +51,7 @@ deleteButtons.forEach((e) => {
 
 // --show/hide favorite store in dropdown--
 const favoriteCheckbox: HTMLInputElement = document.querySelector('#cart-favorite-store-checkbox')
-const selectStore = document.querySelector('#cart-store-select')
+const storeSelect: HTMLSelectElement = document.querySelector('#cart-store-select')
 const optionsStore = document.querySelectorAll('.cart-store-option')
 favoriteCheckbox.addEventListener('change', () => {
     const showFavoriteStore = favoriteCheckbox.checked
@@ -67,9 +67,8 @@ favoriteCheckbox.addEventListener('change', () => {
     }
 })
 
-const storeCategorySelect: HTMLSelectElement = document.querySelector('#cart-store-request-category')
+const storeCategorySelect: HTMLSelectElement = document.querySelector('#cart-store-request-category-select')
 const options = storeCategorySelect.querySelectorAll('option')
-console.log('options', options)
 
 storeCategorySelect.addEventListener('change', () => {
     options.forEach((e) => {
@@ -91,4 +90,40 @@ storeCategorySelect.addEventListener('change', () => {
             }
         }
     })
+})
+
+// --display only sales rep locker--
+const salesRepLockerCheckbox: HTMLInputElement = document.querySelector('#cart-sales-rep-locker-checkbox')
+
+salesRepLockerCheckbox.addEventListener('change', () => {
+    const favoriteStoreContainer = document.querySelector('#cart-store-container')
+    const lockerStoreCategoryIds = JSON.parse(
+        salesRepLockerCheckbox.getAttribute('data-target-locker-store-category-ids')
+    )
+
+    const oldStoreCategoryOptions = storeCategorySelect.querySelectorAll('option')
+    const oldStoreOptions = storeSelect.querySelectorAll('option')
+
+    if (salesRepLockerCheckbox.checked) {
+        const newStoreCategoryOption = new Option('Locker', lockerStoreCategoryIds[1], true, true)
+        const newStoreOption = new Option(' Locker Store', lockerStoreCategoryIds[0], true, true)
+        favoriteStoreContainer.classList.add('invisible')
+        oldStoreCategoryOptions.forEach((e) => {
+            e.disabled = true
+        })
+        storeSelect.appendChild(newStoreOption)
+        storeSelect.value = lockerStoreCategoryIds[0].toString()
+        storeCategorySelect.appendChild(newStoreCategoryOption)
+    } else {
+        favoriteStoreContainer.classList.remove('invisible')
+        storeSelect.removeChild(oldStoreOptions[oldStoreOptions.length - 1])
+        storeCategorySelect.removeChild(oldStoreCategoryOptions[oldStoreCategoryOptions.length - 1])
+        oldStoreCategoryOptions.forEach((e, i) => {
+            if (i !== 0) {
+                e.disabled = false
+            }
+        })
+        storeSelect.selectedIndex = 0
+        storeCategorySelect.selectedIndex = 0
+    }
 })

@@ -1,3 +1,4 @@
+import json
 from flask import (
     Blueprint,
     render_template,
@@ -13,6 +14,7 @@ from app.controllers import create_pagination
 from app import models as m, db
 from app import forms as f
 from app.logger import log
+from config import BaseConfig
 
 
 cart_blueprint = Blueprint("cart", __name__, url_prefix="/cart")
@@ -43,7 +45,19 @@ def get_all():
     warehouses_rows = db.session.execute(sa.select(m.Warehouse)).all()
     warehouses = [row[0] for row in warehouses_rows]
 
-    stores_rows = db.session.execute(sa.select(m.Store)).all()
+    locker_id = (
+        db.session.execute(
+            m.StoreCategory.select().where(
+                m.StoreCategory.name == BaseConfig.Config.SALES_REP_LOCKER_NAME
+            )
+        )
+        .scalar()
+        .id
+    )
+
+    stores_rows = db.session.execute(
+        m.Store.select().where(m.Store.store_category_id != locker_id)
+    ).all()
     stores = [row[0] for row in stores_rows]
 
     for store in stores:
@@ -71,8 +85,35 @@ def get_all():
         else {}
     )
     store_categories = [
-        sc for sc in db.session.execute(m.StoreCategory.select()).scalars()
+        sc
+        for sc in db.session.execute(
+            m.StoreCategory.select().where(m.StoreCategory.id != locker_id)
+        ).scalars()
     ]
+    sales_rep_role_id = (
+        db.session.execute(
+            m.Division.select().where(
+                m.Division.role_name == BaseConfig.Config.SALES_REP
+            )
+        )
+        .scalar()
+        .id
+    )
+    if current_user.role == sales_rep_role_id:
+        sales_rep_locker = db.session.execute(
+            m.Store.select().where(m.Store.user_id == current_user.id)
+        ).scalar()
+        locker_store_category_ids = [
+            sales_rep_locker.id,
+            sales_rep_locker.store_category_id,
+        ]
+    current_user_role_name = (
+        db.session.execute(
+            m.Division.select().where(m.Division.id == current_user.role)
+        )
+        .scalar()
+        .role_name
+    )
 
     return render_template(
         "cart.html",
@@ -89,6 +130,11 @@ def get_all():
         stores=stores,
         available_products=available_products,
         store_categories=store_categories,
+        current_user_role_name=current_user_role_name,
+        sales_rep_role=BaseConfig.Config.SALES_REP,
+        locker_store_category_ids=json.dumps(locker_store_category_ids)
+        if locker_store_category_ids
+        else None,
     )
 
 

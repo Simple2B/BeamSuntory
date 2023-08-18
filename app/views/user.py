@@ -17,6 +17,7 @@ from app.controllers import create_pagination
 from app import models as m, db, mail
 from app import forms as f
 from app.logger import log
+from config import BaseConfig
 
 
 bp = Blueprint("user", __name__, url_prefix="/user")
@@ -161,8 +162,31 @@ def create():
             sales_rep=form.sales_rep.data,
             phone_number=form.phone_number.data,
         )
+
+        store_category: m.StoreCategory = db.session.execute(
+            m.StoreCategory.select().where(
+                m.StoreCategory.name == BaseConfig.Config.SALES_REP_LOCKER_NAME
+            )
+        ).scalar()
+        store = m.Store(
+            store_category_id=store_category.id,
+            store_name=f"{user.username}_{BaseConfig.Config.SALES_REP_LOCKER_NAME}",
+            contact_person=user.username,
+            email=user.email,
+            phone_numb=user.phone_number,
+            country=user.country if not user.sales_rep else form.locker_country.data,
+            region=user.region if not user.sales_rep else form.locker_region.data,
+            city=user.city if not user.sales_rep else form.locker_city.data,
+            address=user.street_address
+            if not user.sales_rep
+            else form.locker_street_address.data,
+            zip=user.zip_code if not user.sales_rep else form.locker_zip_code.data,
+            active=True,
+            user_id=user.id,
+        )
         log(log.INFO, "Form submitted. User: [%s]", user)
         flash("User added!", "success")
+        store.save()
         user.save()
 
         g_query = m.Group.select().where(

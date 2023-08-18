@@ -64,6 +64,14 @@ class BaseConfig(BaseSettings):
             "Cancelled",
         ]
 
+        # Locker name for sales rep
+        SALES_REP_LOCKER_NAME: str = "Locker"
+
+        # Main User Role
+        ADMIN: str = "Admin"
+        SALES_REP: str = "Sales Rep"
+        WAREHOUSE_MANAGER: str = "Warehouse Manager"
+
 
 class DevelopmentConfig(BaseConfig):
     """Development configuration."""

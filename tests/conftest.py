@@ -7,6 +7,13 @@ from flask.testing import FlaskClient
 from app import create_app, db
 from app import models as m
 from tests.utils import register
+from config import BaseConfig
+
+roles = [
+    BaseConfig.Config.ADMIN,
+    BaseConfig.Config.SALES_REP,
+    BaseConfig.Config.WAREHOUSE_MANAGER,
+]
 
 
 @pytest.fixture()
@@ -49,7 +56,7 @@ def runner(app, client):
 @pytest.fixture
 def populate(client: FlaskClient):
     NUM_TEST_USERS = 16
-    for role in ["Admin", "Sales rep", "Warehouse Manager", "Manager"]:
+    for role in roles:
         m.Division(role_name=role, activated=True).save()
     role = db.session.execute(
         m.Division.select().where(m.Division.role_name == "Manager")
@@ -76,10 +83,12 @@ def populate(client: FlaskClient):
 
 @pytest.fixture
 def populate_one_user(client: FlaskClient):
-    for role in ["Admin", "Sales rep", "Warehouse Manager"]:
+    for role in roles:
         m.Division(role_name=role, activated=True).save()
     role = db.session.execute(
-        m.Division.select().where(m.Division.role_name == "Warehouse Manager")
+        m.Division.select().where(
+            m.Division.role_name == BaseConfig.Config.WAREHOUSE_MANAGER
+        )
     ).scalar()
     m.User(
         username="user",
@@ -104,10 +113,12 @@ def populate_one_user(client: FlaskClient):
 def mg_g_populate(client: FlaskClient):
     master_groups = ["Country", "Brand"]
     groups = {"Canada": "1", "JB": "2", "Bombay": "2"}
-    for role in ["Admin", "Sales rep", "Warehouse Manager"]:
+    for role in roles:
         m.Division(role_name=role, activated=True).save()
     role = db.session.execute(
-        m.Division.select().where(m.Division.role_name == "Warehouse Manager")
+        m.Division.select().where(
+            m.Division.role_name == BaseConfig.Config.WAREHOUSE_MANAGER
+        )
     ).scalar()
     m.User(
         username="user1",
