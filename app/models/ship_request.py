@@ -36,7 +36,9 @@ class ShipRequest(db.Model, ModelMixin):
         sa.String(128),
         nullable=False,
     )  # TODO enum??? ask client
-    user_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("users.id"))
+    user_id: orm.Mapped[int] = orm.mapped_column(
+        sa.ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
     comment: orm.Mapped[str] = orm.mapped_column(
         sa.String(256), default="", nullable=True
     )
@@ -46,7 +48,9 @@ class ShipRequest(db.Model, ModelMixin):
         default=datetime.utcnow,
     )
 
-    store_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("stores.id"))
+    store_id: orm.Mapped[int] = orm.mapped_column(
+        sa.ForeignKey("stores.id", ondelete="SET NULL"), nullable=True
+    )
     store: orm.Mapped[Store] = orm.relationship()
 
     def __repr__(self):

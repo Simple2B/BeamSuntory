@@ -1,4 +1,5 @@
 import datetime
+import os
 
 import pytest
 from flask import Flask
@@ -6,7 +7,8 @@ from flask.testing import FlaskClient
 
 from app import create_app, db
 from app import models as m
-from tests.utils import register
+from tests.utils import register, create_default_divisions
+from config import BaseConfig
 
 
 @pytest.fixture()
@@ -49,8 +51,8 @@ def runner(app, client):
 @pytest.fixture
 def populate(client: FlaskClient):
     NUM_TEST_USERS = 16
-    for role in ["Admin", "Sales rep", "Warehouse Manager", "Manager"]:
-        m.Division(role_name=role, activated=True).save()
+
+    create_default_divisions()
     role = db.session.execute(
         m.Division.select().where(m.Division.role_name == "Manager")
     ).scalar()
@@ -76,10 +78,12 @@ def populate(client: FlaskClient):
 
 @pytest.fixture
 def populate_one_user(client: FlaskClient):
-    for role in ["Admin", "Sales rep", "Warehouse Manager"]:
-        m.Division(role_name=role, activated=True).save()
+    create_default_divisions()
+
     role = db.session.execute(
-        m.Division.select().where(m.Division.role_name == "Warehouse Manager")
+        m.Division.select().where(
+            m.Division.role_name == BaseConfig.Config.WAREHOUSE_MANAGER
+        )
     ).scalar()
     m.User(
         username="user",
@@ -104,10 +108,11 @@ def populate_one_user(client: FlaskClient):
 def mg_g_populate(client: FlaskClient):
     master_groups = ["Country", "Brand"]
     groups = {"Canada": "1", "JB": "2", "Bombay": "2"}
-    for role in ["Admin", "Sales rep", "Warehouse Manager"]:
-        m.Division(role_name=role, activated=True).save()
+    create_default_divisions()
     role = db.session.execute(
-        m.Division.select().where(m.Division.role_name == "Warehouse Manager")
+        m.Division.select().where(
+            m.Division.role_name == BaseConfig.Config.WAREHOUSE_MANAGER
+        )
     ).scalar()
     m.User(
         username="user1",
@@ -244,6 +249,12 @@ def mg_g_populate(client: FlaskClient):
         image="",
     ).save(False)
 
+    m.StoreCategory(
+        name=BaseConfig.Config.SALES_REP_LOCKER_NAME,
+        active=True,
+        image=os.environ.get("DEFAULT_IMAGE", "default"),
+    ).save()
+
     m.Store(
         store_category_id=1,
         store_name="JB-restaurant",
@@ -343,10 +354,5 @@ def mg_g_populate(client: FlaskClient):
         group="Canada",
         ship_request_id=sr_atp.id,
     ).save()
-
-    m.Division(
-        role_name="Manager",
-        activated=True,
-    ).save(False)
 
     yield client

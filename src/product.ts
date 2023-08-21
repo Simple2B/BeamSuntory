@@ -4,7 +4,6 @@ import type { ModalOptions, ModalInterface } from 'flowbite'
 interface IProduct {
     id: number
     name: string
-    product_type: string
     supplier_id: number
     currency: string
     price: number
@@ -48,6 +47,11 @@ interface FilterJsonData {
 
 interface IProductMasterGroupGroup {
     [index: string]: { group_name: string; group_id: number }[]
+}
+
+interface IMasterGroup {
+    name: string
+    master_groups_list_groups: { [index: string]: { group_name: string; group_id: number }[] }
 }
 
 // variable to set default image to brand dynamically in modal window. Can we get link from the internet?
@@ -634,25 +638,25 @@ function requestShare(product: IProduct, group: string) {
     div = document.querySelector('#product-request-share-sku')
     div.innerHTML = product.SKU
     div = document.querySelector('#product-request-share-available-quantity')
-    div.innerHTML = product.available_quantity[group].toString()
+    div.innerHTML = product.available_quantity[group.replace('_', ' ')].toString()
     div = document.querySelector('#product-request-share-owner')
     // TODO change to something not hardcoded here and in rest funcs
     div.innerHTML = 'Mike'
     div = document.querySelector('#product-request-share-role')
     div.innerHTML = 'ADMIN'
     div = document.querySelector('#product-request-share-total-available-items')
-    div.innerHTML = product.total_available_items[group].toString()
+    div.innerHTML = product.total_available_items[group.replace('_', ' ')].toString()
     let input: HTMLInputElement = document.querySelector('#product-request-share-quantity')
-    input.max = product.available_quantity[group].toString()
+    input.max = product.available_quantity[group.replace('_', ' ')].toString()
     input.min = '1'
     input = document.querySelector('#product-request-share-name-hidden-input')
     input.value = product.name
     input = document.querySelector('#product-request-share-SKU-hidden-input')
     input.value = product.SKU
     input = document.querySelector('#product-request-share-available-quantity-hidden-input')
-    input.value = product.available_quantity[group].toString()
+    input.value = product.available_quantity[group.replace('_', ' ')].toString()
     input = document.querySelector('#product-request-share-from-group')
-    input.value = group
+    input.value = group.replace('_', ' ')
     requestShareModal.show()
 }
 
@@ -665,17 +669,17 @@ function ship(product: IProduct, group: string) {
     div = document.querySelector('#product-ship-sku')
     div.innerHTML = product.SKU
     div = document.querySelector('#product-ship-available-quantity')
-    div.innerHTML = product.available_quantity[group].toString()
+    div.innerHTML = product.available_quantity[group.replace('_', ' ')].toString()
     div = document.querySelector('#product-ship-total-available-items')
-    div.innerHTML = product.total_available_items[group].toString()
+    div.innerHTML = product.total_available_items[group.replace('_', ' ')].toString()
 
     let input: HTMLInputElement = document.querySelector('#product-ship-product-id')
     input.value = product.id.toString()
     input = document.querySelector('#product-ship-desire-quantity')
-    input.max = product.available_quantity[group].toString()
+    input.max = product.available_quantity[group.replace('_', ' ')].toString()
     input.min = '1'
     input = document.querySelector('#product-ship-group')
-    input.value = group
+    input.value = group.replace('_', ' ')
     shipModal.show()
 }
 
@@ -684,10 +688,10 @@ function assign(product: IProduct, group: string) {
     let input: HTMLInputElement = document.querySelector('#product-assign-name')
     input.value = product.name
     input = document.querySelector('#product-assign-amount')
-    input.max = product.available_quantity[group].toString()
+    input.max = product.available_quantity[group.replace('_', ' ')].toString()
     input.min = '1'
     input = document.querySelector('#product-assign-from-group')
-    input.value = group
+    input.value = group.replace('_', ' ')
     assignModal.show()
 }
 
@@ -1407,7 +1411,7 @@ showProductByUserGroupCheckbox.addEventListener('change', async () => {
         }
     } else {
         try {
-            const response = await fetch(`/product`, {
+            const response = await fetch(`/product/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1420,4 +1424,30 @@ showProductByUserGroupCheckbox.addEventListener('change', async () => {
             console.log(error)
         }
     }
+})
+
+document.querySelector('#product-assign-master-group').addEventListener('change', () => {
+    const productAssignMasterGroupSelect: HTMLSelectElement = document.querySelector('#product-assign-master-group')
+    const productAssignGroupSelect: HTMLSelectElement = document.querySelector('#product-assign-group')
+    const groups: IMasterGroup = JSON.parse(
+        productAssignMasterGroupSelect[productAssignMasterGroupSelect.selectedIndex].getAttribute('data-target')
+    )
+    const availableMasterGroups = Object.keys(groups.master_groups_list_groups)
+
+    productAssignGroupSelect.innerHTML = ''
+
+    availableMasterGroups.forEach((masterGroup) => {
+        if (masterGroup === productAssignMasterGroupSelect.options[productAssignMasterGroupSelect.selectedIndex].text) {
+            const optionCategory = groups.master_groups_list_groups[masterGroup]
+
+            if (optionCategory) {
+                optionCategory.forEach((group: { group_name: string; group_id: number }) => {
+                    const storeSelectOption = document.createElement('option')
+                    storeSelectOption.setAttribute('value', group.group_id.toString())
+                    storeSelectOption.textContent = group.group_name
+                    productAssignGroupSelect.appendChild(storeSelectOption)
+                })
+            }
+        }
+    })
 })
