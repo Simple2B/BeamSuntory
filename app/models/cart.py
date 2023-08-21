@@ -25,7 +25,9 @@ class Cart(db.Model, ModelMixin):
     status: orm.Mapped[str] = orm.mapped_column(
         sa.String(64), default="pending"
     )  # in progress, completed, removed
-    user_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("users.id"))
+    user_id: orm.Mapped[int] = orm.mapped_column(
+        sa.ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
     warehouse_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("warehouses.id"), nullable=True
     )

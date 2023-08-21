@@ -1,6 +1,7 @@
 from flask.testing import FlaskClient
 from app import models as m, db
 from tests.utils import login, register, logout
+from config import BaseConfig
 
 
 def test_divisions_pages(client):
@@ -56,13 +57,15 @@ def test_edit_division(mg_g_populate: FlaskClient):
         "/division/save",
         data=dict(
             division_id=1,
-            role_name="Warehouse Manager",
+            role_name=BaseConfig.Config.WAREHOUSE_MANAGER,
             activated=False,
         ),
     )
     assert response.status_code == 302
     assert "division" in response.text
     divisions_rows_objs = db.session.execute(
-        m.Division.select().where(m.Division.role_name == "Warehouse Manager")
+        m.Division.select().where(
+            m.Division.role_name == BaseConfig.Config.WAREHOUSE_MANAGER
+        )
     ).all()
     assert len(divisions_rows_objs) > 0

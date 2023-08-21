@@ -17,6 +17,7 @@ from app.controllers import create_pagination
 from app import models as m, db, mail
 from app import forms as f
 from app.logger import log
+from config import BaseConfig
 
 
 bp = Blueprint("user", __name__, url_prefix="/user")
@@ -161,9 +162,42 @@ def create():
             sales_rep=form.sales_rep.data,
             phone_number=form.phone_number.data,
         )
+
+        user.save()
+        sales_rep_role_id = (
+            db.session.execute(
+                m.Division.select().where(
+                    m.Division.role_name == BaseConfig.Config.SALES_REP
+                )
+            )
+            .scalar()
+            .id
+        )
+        if user.role == sales_rep_role_id:
+            store_category: m.StoreCategory = db.session.execute(
+                m.StoreCategory.select().where(
+                    m.StoreCategory.name == BaseConfig.Config.SALES_REP_LOCKER_NAME
+                )
+            ).scalar()
+            store = m.Store(
+                store_category_id=store_category.id,
+                store_name=f"{user.username}_{BaseConfig.Config.SALES_REP_LOCKER_NAME}",
+                contact_person=user.username,
+                email=user.email,
+                phone_numb=user.phone_number,
+                country=user.country if user.sales_rep else form.locker_country.data,
+                region=user.region if user.sales_rep else form.locker_region.data,
+                city=user.city if user.sales_rep else form.locker_city.data,
+                address=user.street_address
+                if user.sales_rep
+                else form.locker_street_address.data,
+                zip=user.zip_code if user.sales_rep else form.locker_zip_code.data,
+                active=True,
+                user_id=user.id,
+            )
+            store.save()
         log(log.INFO, "Form submitted. User: [%s]", user)
         flash("User added!", "success")
-        user.save()
 
         g_query = m.Group.select().where(
             m.Group.name.in_(str(form.group.data).split(", "))
@@ -200,11 +234,24 @@ def create():
 @bp.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
 def delete(id: int):
-    u = db.session.scalar(m.User.select().where(m.User.id == id))
+    u: m.User = db.session.scalar(m.User.select().where(m.User.id == id))
     if not u:
         log(log.INFO, "There is no user with id: [%s]", id)
         flash("There is no such user", "danger")
         return "no user", 404
+    sales_rep_role_id = (
+        db.session.execute(
+            m.Division.select().where(
+                m.Division.role_name == BaseConfig.Config.SALES_REP
+            )
+        )
+        .scalar()
+        .id
+    )
+    if u.role == sales_rep_role_id:
+        store = db.session.scalar(m.Store.select().where(m.Store.user_id == u.id))
+        if store:
+            db.session.delete(store)
 
     delete_u = sa.delete(m.UserGroup).where(m.UserGroup.left_id == u.id)
     db.session.execute(delete_u)
