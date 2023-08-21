@@ -61,6 +61,7 @@ def get_all():
                 pagination.per_page
             )
         ).scalars(),
+        warehouse_product_qty=warehouse_product_qty,
         page=pagination,
         search_query=q,
     )
