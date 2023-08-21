@@ -287,24 +287,44 @@ const salesRepAddUserContainer = document.querySelector('#user-add-sales_rep-con
 const salesAddRepContainer = document.querySelector('#user-add-locker-address-container')
 const userRoleSelect: HTMLSelectElement = document.querySelector('#user-add-role')
 
+function setRequiredLockerAddress() {
+    document.querySelector('#user-add-locker-country').setAttribute('required', '')
+    document.querySelector('#user-add-locker-region').setAttribute('required', '')
+    document.querySelector('#user-add-locker-city').setAttribute('required', '')
+    document.querySelector('#user-add-locker-zip_code').setAttribute('required', '')
+    document.querySelector('#user-add-locker-street_address').setAttribute('required', '')
+}
+
+function removeRequiredLockerAddress() {
+    document.querySelector('#user-add-locker-country').removeAttribute('required')
+    document.querySelector('#user-add-locker-region').removeAttribute('required')
+    document.querySelector('#user-add-locker-city').removeAttribute('required')
+    document.querySelector('#user-add-locker-zip_code').removeAttribute('required')
+    document.querySelector('#user-add-locker-street_address').removeAttribute('required')
+}
+
 salesRepAddUserCheckbox.addEventListener('change', () => {
     if (salesRepAddUserCheckbox.checked) {
         salesAddRepContainer.classList.add('hidden')
+        removeRequiredLockerAddress()
     } else {
         salesAddRepContainer.classList.remove('hidden')
+        setRequiredLockerAddress()
     }
 })
 
 userRoleSelect.addEventListener('change', () => {
+    salesRepAddUserCheckbox.checked = false
     const selectedRole = userRoleSelect.options[userRoleSelect.selectedIndex].text
-    console.log(selectedRole)
 
     if (selectedRole !== UserRole.SalesRep) {
         salesAddRepContainer.classList.add('hidden')
         salesRepAddUserContainer.classList.add('hidden')
+        removeRequiredLockerAddress()
     } else {
         salesAddRepContainer.classList.remove('hidden')
         salesRepAddUserContainer.classList.remove('hidden')
+        setRequiredLockerAddress()
     }
 })
 
