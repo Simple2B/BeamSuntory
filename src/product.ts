@@ -4,7 +4,6 @@ import type { ModalOptions, ModalInterface } from 'flowbite'
 interface IProduct {
     id: number
     name: string
-    product_type: string
     supplier_id: number
     currency: string
     price: number
@@ -686,6 +685,9 @@ function ship(product: IProduct, group: string) {
 
 // function to assign
 function assign(product: IProduct, group: string) {
+    console.log('assign group', group)
+    console.log('group available_quantity', product.available_quantity)
+
     let input: HTMLInputElement = document.querySelector('#product-assign-name')
     input.value = product.name
     input = document.querySelector('#product-assign-amount')
@@ -1412,7 +1414,7 @@ showProductByUserGroupCheckbox.addEventListener('change', async () => {
         }
     } else {
         try {
-            const response = await fetch(`/product`, {
+            const response = await fetch(`/product/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

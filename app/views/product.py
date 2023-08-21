@@ -42,7 +42,9 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
-    master_groups = [row for row in db.session.execute(m.MasterGroup.select()).scalars()]
+    master_groups = [
+        row for row in db.session.execute(m.MasterGroup.select()).scalars()
+    ]
 
     groups_for_products_obj = db.session.execute(m.GroupProduct.select()).all()
     mastr_for_prods_groups_for_prods = {}
@@ -520,7 +522,7 @@ def assign():
             )
         ).scalar()
 
-        # TODO sort also by group_id and warehouse_id
+        # TODO sort also by warehouse_id
         product_warehouse: m.WarehouseProduct = db.session.execute(
             m.WarehouseProduct.select().where(
                 m.WarehouseProduct.product_id == p.id,
