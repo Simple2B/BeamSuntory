@@ -50,6 +50,11 @@ interface IProductMasterGroupGroup {
     [index: string]: { group_name: string; group_id: number }[]
 }
 
+interface IMasterGroup {
+    name: string
+    master_groups_list_groups: { [index: string]: { group_name: string; group_id: number }[] }
+}
+
 // variable to set default image to brand dynamically in modal window. Can we get link from the internet?
 const defaultBrandImage =
     'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png'
@@ -1420,4 +1425,30 @@ showProductByUserGroupCheckbox.addEventListener('change', async () => {
             console.log(error)
         }
     }
+})
+
+document.querySelector('#product-assign-master-group').addEventListener('change', () => {
+    const productAssignMasterGroupSelect: HTMLSelectElement = document.querySelector('#product-assign-master-group')
+    const productAssignGroupSelect: HTMLSelectElement = document.querySelector('#product-assign-group')
+    const groups: IMasterGroup = JSON.parse(
+        productAssignMasterGroupSelect[productAssignMasterGroupSelect.selectedIndex].getAttribute('data-target')
+    )
+    const availableMasterGroups = Object.keys(groups.master_groups_list_groups)
+
+    productAssignGroupSelect.innerHTML = ''
+
+    availableMasterGroups.forEach((masterGroup) => {
+        if (masterGroup === productAssignMasterGroupSelect.options[productAssignMasterGroupSelect.selectedIndex].text) {
+            const optionCategory = groups.master_groups_list_groups[masterGroup]
+
+            if (optionCategory) {
+                optionCategory.forEach((group: { group_name: string; group_id: number }) => {
+                    const storeSelectOption = document.createElement('option')
+                    storeSelectOption.setAttribute('value', group.group_id.toString())
+                    storeSelectOption.textContent = group.group_name
+                    productAssignGroupSelect.appendChild(storeSelectOption)
+                })
+            }
+        }
+    })
 })

@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 from typing import List
 
 import sqlalchemy as sa
@@ -32,4 +33,20 @@ class MasterGroup(db.Model, ModelMixin):
     @property
     def json(self):
         mg = s.MasterGroup.from_orm(self)
-        return mg.json()
+        ujs = mg.json()
+        mg_dict = json.loads(ujs)
+
+        master_groups_list_groups = {}
+        groups: list[m.Group] = db.session.execute(m.Group.select()).scalars()
+
+        for group in groups:
+            if group.master_groups.name not in master_groups_list_groups:
+                master_groups_list_groups[group.master_groups.name] = [
+                    {"group_name": group.name, "group_id": group.id}
+                ]
+            else:
+                master_groups_list_groups[group.master_groups.name].append(
+                    {"group_name": group.name, "group_id": group.id}
+                )
+        mg_dict["master_groups_list_groups"] = master_groups_list_groups
+        return json.dumps(mg_dict)

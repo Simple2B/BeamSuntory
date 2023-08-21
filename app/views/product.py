@@ -42,7 +42,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
-    master_groups_rows_obj = db.session.execute(m.MasterGroup.select()).all()
+    master_groups = [row for row in db.session.execute(m.MasterGroup.select()).scalars()]
 
     groups_for_products_obj = db.session.execute(m.GroupProduct.select()).all()
     mastr_for_prods_groups_for_prods = {}
@@ -77,7 +77,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         m.UserGroup.select().where(m.UserGroup.left_id == current_user.id)
     ).all()
 
-    master_groups = [row[0] for row in master_groups_rows_obj]
     master_groups_search = {}
     for group in groups_for_products_obj:
         if group[0].master_groups_for_product.name not in master_groups_search:
