@@ -715,13 +715,13 @@ function deleteShipAssignButton(nameGroup: string, nameGroupValue: string) {
 function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: string, productParam: IProduct) {
     const groupUnderScore = group.replace(/ /g, '_')
     const groupProductIds = productParam.groups_ids
-    const productTypeContainer = document.querySelector(`#product-view-product_type-container`)
+    const productTypeContainer = document.querySelector(`#product-view-product-name-container`)
     const shipAssignContainer = document.createElement('div')
     shipAssignContainer.classList.add('sm:col-span-3', 'flex', 'gap-4')
     shipAssignContainer.setAttribute('id', `product-ship-assign-share-container-${masterGroup.replace(/ /g, '_')}`)
     shipAssignContainer.innerHTML = `
     <div>
-      <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
+      <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available</label>
         <div id="ship-product-quantity"
           class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
       ${productParam.available_quantity[group] || 0}</div>
@@ -746,7 +746,7 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
     shareContainer.setAttribute('id', `product-ship-assign-share-container-${masterGroup.replace(/ /g, '_')}`)
     shareContainer.innerHTML = `
     <div>
-      <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
+      <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available</label>
         <div id="ship-product-quantity"
           class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
       ${productParam.available_quantity[group] || 0}</div>
@@ -806,7 +806,7 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
             requestShare(product, shareGroup)
         })
     )
-    const productViewTypeContainer = document.querySelector('#product-view-product_type-container')
+    const productViewTypeContainer = document.querySelector('#product-view-product-name-container')
     const productMasterGroupContainer = document.createElement('div')
     productMasterGroupContainer.classList.add('sm:col-span-3')
     productMasterGroupContainer.setAttribute('id', `product-view-product_group-container-${groupUnderScore}`)
@@ -927,13 +927,13 @@ function getSessionStorageObject(
 function createAdjustAction(isEqual: boolean, masterGroup: string, group: string, productParam: IProduct) {
     const groupUnderScore = group.replace(/ /g, '_')
     const groupProductIds = productParam.groups_ids
-    const productTypeContainer = document.querySelector(`#product-adjust-product_type-container`)
+    const productTypeContainer = document.querySelector(`#product-adjust-product-name-container`)
     const adjustContainer = document.createElement('div')
     adjustContainer.classList.add('sm:col-span-2', 'flex', 'gap-4')
     adjustContainer.setAttribute('id', `product-adjust-container-${groupUnderScore}`)
     adjustContainer.innerHTML = `
     <div>
-      <label for="adjust-product-quantity-${groupUnderScore}" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
+      <label for="adjust-product-quantity-${groupUnderScore}" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available</label>
         <input id="adjust-product-quantity-${groupUnderScore}"
           class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
     </div>
@@ -949,14 +949,14 @@ function createAdjustAction(isEqual: boolean, masterGroup: string, group: string
 
     productTypeContainer.parentNode.insertBefore(adjustContainer, productTypeContainer.nextSibling)
 
-    const productViewTypeContainer = document.querySelector('#product-adjust-product_type-container')
+    const productViewTypeContainer = document.querySelector('#product-adjust-product-name-container')
     const masterGroupWarehouseContainer = document.createElement('div')
     masterGroupWarehouseContainer.classList.add('sm:col-span-4')
     masterGroupWarehouseContainer.setAttribute('id', `product-adjust-product_group-container-${groupUnderScore}`)
 
     masterGroupWarehouseContainer.innerHTML = `
   <div class="flex gap-4">
-  <div class="w-2/4">
+  <div class="w-1/2">
     <label for="for-group-${groupUnderScore}"
       class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">${masterGroup}</label>
     <select type="text" name="group-${groupUnderScore}" id="master-group-adjust-${groupUnderScore}"
@@ -966,7 +966,7 @@ function createAdjustAction(isEqual: boolean, masterGroup: string, group: string
       <option value="${groupProductIds[group]}">${group}</option>
     </select>
   </div>
-  <div class="w-2/4">
+  <div class="w-1/2">
     <label for="for-warehouse-${groupUnderScore}"
       class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Warehouse</label>
     <select type="text" name="group-${groupUnderScore}" id="warehouse-adjust-${groupUnderScore}"
