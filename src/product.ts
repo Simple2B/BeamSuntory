@@ -638,25 +638,25 @@ function requestShare(product: IProduct, group: string) {
     div = document.querySelector('#product-request-share-sku')
     div.innerHTML = product.SKU
     div = document.querySelector('#product-request-share-available-quantity')
-    div.innerHTML = product.available_quantity[group].toString()
+    div.innerHTML = product.available_quantity[group.replace('_', ' ')].toString()
     div = document.querySelector('#product-request-share-owner')
     // TODO change to something not hardcoded here and in rest funcs
     div.innerHTML = 'Mike'
     div = document.querySelector('#product-request-share-role')
     div.innerHTML = 'ADMIN'
     div = document.querySelector('#product-request-share-total-available-items')
-    div.innerHTML = product.total_available_items[group].toString()
+    div.innerHTML = product.total_available_items[group.replace('_', ' ')].toString()
     let input: HTMLInputElement = document.querySelector('#product-request-share-quantity')
-    input.max = product.available_quantity[group].toString()
+    input.max = product.available_quantity[group.replace('_', ' ')].toString()
     input.min = '1'
     input = document.querySelector('#product-request-share-name-hidden-input')
     input.value = product.name
     input = document.querySelector('#product-request-share-SKU-hidden-input')
     input.value = product.SKU
     input = document.querySelector('#product-request-share-available-quantity-hidden-input')
-    input.value = product.available_quantity[group].toString()
+    input.value = product.available_quantity[group.replace('_', ' ')].toString()
     input = document.querySelector('#product-request-share-from-group')
-    input.value = group
+    input.value = group.replace('_', ' ')
     requestShareModal.show()
 }
 
@@ -669,32 +669,29 @@ function ship(product: IProduct, group: string) {
     div = document.querySelector('#product-ship-sku')
     div.innerHTML = product.SKU
     div = document.querySelector('#product-ship-available-quantity')
-    div.innerHTML = product.available_quantity[group].toString()
+    div.innerHTML = product.available_quantity[group.replace('_', ' ')].toString()
     div = document.querySelector('#product-ship-total-available-items')
-    div.innerHTML = product.total_available_items[group].toString()
+    div.innerHTML = product.total_available_items[group.replace('_', ' ')].toString()
 
     let input: HTMLInputElement = document.querySelector('#product-ship-product-id')
     input.value = product.id.toString()
     input = document.querySelector('#product-ship-desire-quantity')
-    input.max = product.available_quantity[group].toString()
+    input.max = product.available_quantity[group.replace('_', ' ')].toString()
     input.min = '1'
     input = document.querySelector('#product-ship-group')
-    input.value = group
+    input.value = group.replace('_', ' ')
     shipModal.show()
 }
 
 // function to assign
 function assign(product: IProduct, group: string) {
-    console.log('assign group', group)
-    console.log('group available_quantity', product.available_quantity)
-
     let input: HTMLInputElement = document.querySelector('#product-assign-name')
     input.value = product.name
     input = document.querySelector('#product-assign-amount')
-    input.max = product.available_quantity[group].toString()
+    input.max = product.available_quantity[group.replace('_', ' ')].toString()
     input.min = '1'
     input = document.querySelector('#product-assign-from-group')
-    input.value = group
+    input.value = group.replace('_', ' ')
     assignModal.show()
 }
 
