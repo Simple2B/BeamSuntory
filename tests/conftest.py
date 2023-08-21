@@ -1,4 +1,5 @@
 import datetime
+import os
 
 import pytest
 from flask import Flask
@@ -254,6 +255,12 @@ def mg_g_populate(client: FlaskClient):
         active=True,
         image="",
     ).save(False)
+
+    m.StoreCategory(
+        name=BaseConfig.Config.SALES_REP_LOCKER_NAME,
+        active=True,
+        image=os.environ.get("DEFAULT_IMAGE", "default"),
+    ).save()
 
     m.Store(
         store_category_id=1,

@@ -163,31 +163,41 @@ def create():
             phone_number=form.phone_number.data,
         )
 
-        store_category: m.StoreCategory = db.session.execute(
-            m.StoreCategory.select().where(
-                m.StoreCategory.name == BaseConfig.Config.SALES_REP_LOCKER_NAME
-            )
-        ).scalar()
         user.save()
-        store = m.Store(
-            store_category_id=store_category.id,
-            store_name=f"{user.username}_{BaseConfig.Config.SALES_REP_LOCKER_NAME}",
-            contact_person=user.username,
-            email=user.email,
-            phone_numb=user.phone_number,
-            country=user.country if user.sales_rep else form.locker_country.data,
-            region=user.region if user.sales_rep else form.locker_region.data,
-            city=user.city if user.sales_rep else form.locker_city.data,
-            address=user.street_address
-            if user.sales_rep
-            else form.locker_street_address.data,
-            zip=user.zip_code if user.sales_rep else form.locker_zip_code.data,
-            active=True,
-            user_id=user.id,
+        sales_rep_role_id = (
+            db.session.execute(
+                m.Division.select().where(
+                    m.Division.role_name == BaseConfig.Config.SALES_REP
+                )
+            )
+            .scalar()
+            .id
         )
+        if user.role == sales_rep_role_id:
+            store_category: m.StoreCategory = db.session.execute(
+                m.StoreCategory.select().where(
+                    m.StoreCategory.name == BaseConfig.Config.SALES_REP_LOCKER_NAME
+                )
+            ).scalar()
+            store = m.Store(
+                store_category_id=store_category.id,
+                store_name=f"{user.username}_{BaseConfig.Config.SALES_REP_LOCKER_NAME}",
+                contact_person=user.username,
+                email=user.email,
+                phone_numb=user.phone_number,
+                country=user.country if user.sales_rep else form.locker_country.data,
+                region=user.region if user.sales_rep else form.locker_region.data,
+                city=user.city if user.sales_rep else form.locker_city.data,
+                address=user.street_address
+                if user.sales_rep
+                else form.locker_street_address.data,
+                zip=user.zip_code if user.sales_rep else form.locker_zip_code.data,
+                active=True,
+                user_id=user.id,
+            )
+            store.save()
         log(log.INFO, "Form submitted. User: [%s]", user)
         flash("User added!", "success")
-        store.save()
 
         g_query = m.Group.select().where(
             m.Group.name.in_(str(form.group.data).split(", "))
@@ -242,7 +252,6 @@ def delete(id: int):
         store = db.session.scalar(m.Store.select().where(m.Store.user_id == u.id))
         if store:
             db.session.delete(store)
-            # db.session.commit()
 
     delete_u = sa.delete(m.UserGroup).where(m.UserGroup.left_id == u.id)
     db.session.execute(delete_u)

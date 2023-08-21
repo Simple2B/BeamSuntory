@@ -45,7 +45,7 @@ def get_all():
 
     wh_role = db.session.execute(
         sa.select(m.Division).where(
-            m.Division.role_name == BaseConfig.WAREHOUSE_MANAGER
+            m.Division.role_name == BaseConfig.Config.WAREHOUSE_MANAGER
         )
     ).scalar()
 
