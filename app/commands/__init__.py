@@ -39,7 +39,11 @@ def init(app: Flask):
             BaseConfig.Config.SALES_REP,
             BaseConfig.Config.WAREHOUSE_MANAGER,
         ]:
-            m.Division(role_name=role, activated=True).save()
+            check_role = db.session.execute(
+                m.Division.select().where(m.Division.role_name == role)
+            ).scalar()
+            if not check_role:
+                m.Division(role_name=role, activated=True).save()
         role = db.session.execute(
             m.Division.select().where(m.Division.role_name == BaseConfig.Config.ADMIN)
         ).scalar()

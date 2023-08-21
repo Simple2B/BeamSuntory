@@ -12,21 +12,14 @@ def register(
     username=TEST_ADMIN_NAME,
     email=TEST_ADMIN_EMAIL,
     password=TEST_ADMIN_PASSWORD,
+    role=None,
 ):
-    for role in [
-        BaseConfig.Config.ADMIN,
-        BaseConfig.Config.SALES_REP,
-        BaseConfig.Config.WAREHOUSE_MANAGER,
-    ]:
-        check_role = db.session.execute(
-            Division.select().where(Division.role_name == role)
-        ).scalar()
-        if not check_role:
-            Division(role_name=role, activated=True).save()
+    create_default_divisions()
 
-    role = db.session.execute(
-        Division.select().where(Division.role_name == BaseConfig.Config.ADMIN)
-    ).scalar()
+    if not role:
+        role = db.session.execute(
+            Division.select().where(Division.role_name == BaseConfig.Config.ADMIN)
+        ).scalar()
     user = User(
         username=username,
         email=email,
@@ -54,3 +47,17 @@ def login(client, username=TEST_ADMIN_NAME, password=TEST_ADMIN_PASSWORD):
 
 def logout(client):
     return client.get("/logout", follow_redirects=True)
+
+
+def create_default_divisions():
+    for role in [
+        BaseConfig.Config.ADMIN,
+        BaseConfig.Config.SALES_REP,
+        BaseConfig.Config.WAREHOUSE_MANAGER,
+        "Manager",
+    ]:
+        check_role = db.session.execute(
+            Division.select().where(Division.role_name == role)
+        ).scalar()
+        if not check_role:
+            Division(role_name=role, activated=True).save()
