@@ -222,6 +222,16 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
         if (currentInboundOrder) {
             for (let i = 0; i < currentInboundOrder.length; i++) {
                 if (i === 0) {
+                    const firstProdSelect: HTMLSelectElement = document.querySelector(
+                        '#inbound-order-edit-add-product-1st-item'
+                    )
+                    firstProdSelect.innerHTML = ''
+                    inboundOrder.io_allocate_product[inboundOrder.id].forEach((e) => {
+                        const option = document.createElement('option')
+                        option.value = e.product.id.toString()
+                        option.innerHTML = e.product.name
+                        firstProdSelect.appendChild(option)
+                    })
                     const inboundOrderProductInput = inboundOrderProductsInputs[i]
                     const inboundOrderGroupInput = inboundOrderGroupsInputs[i]
                     const inboundOrderQuantityInput = inboundOrderQuantityInputs[i]
@@ -271,11 +281,7 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
 
         inboundOrderQuantityInputs[0].setAttribute('id', selectedProductQtyId)
 
-        console.log('inboundOrderProductsInputs[0]', inboundOrderProductsInputs[0])
-
         inboundOrderProductsInputs[0].addEventListener('change', () => {
-            console.log('inboundOrderProductsInputs[0]', inboundOrderProductsInputs[0])
-
             inboundOrderQuantityInputs[0].setAttribute(
                 'id',
                 `io-product-input-qty-${inboundOrderProductsInputs[0].options[
@@ -517,16 +523,26 @@ function createInboundOrderItems(inbOrder: IInboundOrder = null, curInbOrder: II
         '.inbound-order-edit-add-quantity'
     )
 
-    inbOrder.products.forEach((product) => {
+    // inbOrder.products.forEach((product) => {
+    //     const option = document.createElement('option')
+    //     curInbOrder
+    //     if (curInbOrder) {
+    //         option.value = curInbOrder.product.id.toString()
+    //         option.innerHTML = curInbOrder.product.name
+    //     } else {
+    //         option.value = product.id.toString()
+    //         option.innerHTML = product.name
+    //     }
+    //     if (curInbOrder) {
+    //         inboundOrderAddProductSelect.value = option.value
+    //         inboundOrderAddProductSelect.setAttribute('disabled', 'disabled')
+    //     }
+    //     inboundOrderAddProductSelect.appendChild(option)
+    // })
+    inbOrder.io_allocate_product[inbOrder.id].forEach((e) => {
         const option = document.createElement('option')
-        curInbOrder
-        if (curInbOrder) {
-            option.value = curInbOrder.product.id.toString()
-            option.innerHTML = curInbOrder.product.name
-        } else {
-            option.value = product.id.toString()
-            option.innerHTML = product.name
-        }
+        option.value = e.product.id.toString()
+        option.innerHTML = e.product.name
         if (curInbOrder) {
             inboundOrderAddProductSelect.value = option.value
             inboundOrderAddProductSelect.setAttribute('disabled', 'disabled')
@@ -596,8 +612,8 @@ function createInboundOrderItems(inbOrder: IInboundOrder = null, curInbOrder: II
     const addButton = inboundOrderAddItem.querySelector('.inbound-order-edit-add-item-btn')
     addButton.addEventListener('click', () => {
         createInboundOrderItems()
-        new Datepicker(document.querySelector(`#datepickerEl-start-${index + 1}`))
-        new Datepicker(document.querySelector(`#datepickerEl-end-${index + 1}`))
+        // new Datepicker(document.querySelector(`#datepickerEl-start-${index + 1}`))
+        // new Datepicker(document.querySelector(`#datepickerEl-end-${index + 1}`))
     })
 
     const deleteButtons = document.querySelectorAll('.inbound-order-edit-delete-item-btn')
@@ -615,10 +631,10 @@ function createInboundOrderItems(inbOrder: IInboundOrder = null, curInbOrder: II
 const addInboundOrderItemBtnById = document.querySelector('#inbound-order-edit-add-item-btn')
 addInboundOrderItemBtnById.addEventListener('click', () => {
     createInboundOrderItems()
-    const allInboundOrderItems = document.querySelectorAll('.inbound-order-edit-add-item')
-    const index = allInboundOrderItems.length
-    new Datepicker(document.querySelector(`#datepickerEl-start-${index}`))
-    new Datepicker(document.querySelector(`#datepickerEl-end-${index}`))
+    // const allInboundOrderItems = document.querySelectorAll('.inbound-order-edit-add-item')
+    // const index = allInboundOrderItems.length
+    // new Datepicker(document.querySelector(`#datepickerEl-start-${index}`))
+    // new Datepicker(document.querySelector(`#datepickerEl-end-${index}`))
 })
 
 // ----add inbound order item for add modal----
