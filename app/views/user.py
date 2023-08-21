@@ -168,26 +168,26 @@ def create():
                 m.StoreCategory.name == BaseConfig.Config.SALES_REP_LOCKER_NAME
             )
         ).scalar()
+        user.save()
         store = m.Store(
             store_category_id=store_category.id,
             store_name=f"{user.username}_{BaseConfig.Config.SALES_REP_LOCKER_NAME}",
             contact_person=user.username,
             email=user.email,
             phone_numb=user.phone_number,
-            country=user.country if not user.sales_rep else form.locker_country.data,
-            region=user.region if not user.sales_rep else form.locker_region.data,
-            city=user.city if not user.sales_rep else form.locker_city.data,
+            country=user.country if user.sales_rep else form.locker_country.data,
+            region=user.region if user.sales_rep else form.locker_region.data,
+            city=user.city if user.sales_rep else form.locker_city.data,
             address=user.street_address
-            if not user.sales_rep
+            if user.sales_rep
             else form.locker_street_address.data,
-            zip=user.zip_code if not user.sales_rep else form.locker_zip_code.data,
+            zip=user.zip_code if user.sales_rep else form.locker_zip_code.data,
             active=True,
             user_id=user.id,
         )
         log(log.INFO, "Form submitted. User: [%s]", user)
         flash("User added!", "success")
         store.save()
-        user.save()
 
         g_query = m.Group.select().where(
             m.Group.name.in_(str(form.group.data).split(", "))
@@ -224,11 +224,25 @@ def create():
 @bp.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
 def delete(id: int):
-    u = db.session.scalar(m.User.select().where(m.User.id == id))
+    u: m.User = db.session.scalar(m.User.select().where(m.User.id == id))
     if not u:
         log(log.INFO, "There is no user with id: [%s]", id)
         flash("There is no such user", "danger")
         return "no user", 404
+    sales_rep_role_id = (
+        db.session.execute(
+            m.Division.select().where(
+                m.Division.role_name == BaseConfig.Config.SALES_REP
+            )
+        )
+        .scalar()
+        .id
+    )
+    if u.role == sales_rep_role_id:
+        store = db.session.scalar(m.Store.select().where(m.Store.user_id == u.id))
+        if store:
+            db.session.delete(store)
+            # db.session.commit()
 
     delete_u = sa.delete(m.UserGroup).where(m.UserGroup.left_id == u.id)
     db.session.execute(delete_u)
