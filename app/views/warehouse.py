@@ -31,12 +31,12 @@ def get_all():
     if q:
         query = (
             m.Warehouse.select()
-            .where(m.Warehouse.name.like(f"{q}%"))
+            .where(m.Warehouse.name.ilike(f"%{q}%"))
             .order_by(m.Warehouse.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(m.Warehouse.name.like(f"{q}%"))
+            .where(m.Warehouse.name.ilike(f"%{q}%"))
             .select_from(m.Warehouse)
         )
 

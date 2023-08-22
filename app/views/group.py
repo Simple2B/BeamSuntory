@@ -8,6 +8,7 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
+from sqlalchemy.orm import aliased
 from app.controllers import create_pagination
 
 from app import models as m, db
@@ -26,27 +27,21 @@ def get_all():
     form_create = f.NewGroupForm()
     form_edit = f.GroupForm()
 
+    master_group = aliased(m.MasterGroup)
     q = request.args.get("q", type=str, default=None)
     query = m.Group.select().order_by(m.Group.id)
     count_query = sa.select(sa.func.count()).select_from(m.Group)
     if q:
-        master_group_query = db.session.execute(
-            m.MasterGroup.select()
-            .where(m.MasterGroup.name.like(f"{q}%"))
-            .order_by(m.MasterGroup.id)
-        ).scalar()
-        # TODO consider something better then in_
         query = (
             m.Group.select()
-            .where(
-                m.Group.name.like(f"{q}%")
-                | m.Group.master_group_id.in_([master_group_query.id])
-            )
+            .join(master_group, m.Group.master_group_id == master_group.id)
+            .where(m.Group.name.ilike(f"%{q}%") | master_group.name.ilike(f"%{q}%"))
             .order_by(m.Group.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(m.Group.name.like(f"{q}%"))
+            .join(master_group, m.Group.master_group_id == master_group.id)
+            .where(m.Group.name.ilike(f"%{q}%") | master_group.name.ilike(f"%{q}%"))
             .select_from(m.Group)
         )
 

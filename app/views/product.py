@@ -31,12 +31,20 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         if q:
             query = (
                 m.Product.select()
-                .where(m.Product.name.like(f"{q}%"))
+                .where(
+                    m.Product.name.ilike(f"%{q}%")
+                    | m.Product.SKU.ilike(f"%{q}%")
+                    | m.Product.description.ilike(f"%{q}%")
+                )
                 .order_by(m.Product.id)
             )
             count_query = (
                 sa.select(sa.func.count())
-                .where(m.Product.name.like(f"{q}%"))
+                .where(
+                    m.Product.name.ilike(f"%{q}%")
+                    | m.Product.SKU.ilike(f"%{q}%")
+                    | m.Product.description.ilike(f"%{q}%")
+                )
                 .select_from(m.Product)
             )
 
@@ -450,7 +458,7 @@ def sort():
             query = (
                 m.Product.select()
                 .where(
-                    m.Product.name.like(f"{q}%")
+                    m.Product.name.ilike(f"%{q}%")
                     | m.Product.id.in_(product_ids_to_return)
                 )
                 .order_by(m.Product.id)
@@ -458,7 +466,7 @@ def sort():
             count_query = (
                 sa.select(sa.func.count())
                 .where(
-                    m.Product.name.like(f"{q}%")
+                    m.Product.name.ilike(f"%{q}%")
                     | m.Product.id.in_(product_ids_to_return)
                 )
                 .select_from(m.Product)
@@ -746,14 +754,14 @@ def stocks_owned_by_me():
         query = (
             m.Product.select()
             .where(
-                m.Product.name.like(f"{q}%"), m.Product.id.in_(curr_user_products_ids)
+                m.Product.name.ilike(f"%{q}%"), m.Product.id.in_(curr_user_products_ids)
             )
             .order_by(m.Product.id)
         )
         count_query = (
             sa.select(sa.func.count())
             .where(
-                m.Product.name.like(f"{q}%"), m.Product.id.in_(curr_user_products_ids)
+                m.Product.name.ilike(f"%{q}%"), m.Product.id.in_(curr_user_products_ids)
             )
             .select_from(m.Product)
         )

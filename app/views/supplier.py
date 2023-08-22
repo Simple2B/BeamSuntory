@@ -30,12 +30,12 @@ def get_all():
     if q:
         query = (
             m.Supplier.select()
-            .where(m.Supplier.name.like(f"{q}%") | m.Supplier.email.like(f"{q}%"))
+            .where(m.Supplier.name.ilike(f"%{q}%") | m.Supplier.email.ilike(f"%{q}%"))
             .order_by(m.Supplier.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(m.Supplier.name.like(f"{q}%") | m.Supplier.email.like(f"{q}%"))
+            .where(m.Supplier.name.ilike(f"%{q}%") | m.Supplier.email.ilike(f"%{q}%"))
             .select_from(m.Supplier)
         )
 

@@ -91,5 +91,5 @@ if ($targetEl && $triggerEl) {
     })
     setTimeout(() => {
         dismiss.hide()
-    }, 5000)
+    }, 20000)
 }

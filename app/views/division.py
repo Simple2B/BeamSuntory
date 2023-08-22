@@ -30,12 +30,12 @@ def get_all():
     if q:
         query = (
             m.Division.select()
-            .where(m.Division.role_name.like(f"{q}%"))
+            .where(m.Division.role_name.ilike(f"%{q}%"))
             .order_by(m.Division.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(m.Division.role_name.like(f"{q}%"))
+            .where(m.Division.role_name.ilike(f"%{q}%"))
             .select_from(m.Division)
         )
 

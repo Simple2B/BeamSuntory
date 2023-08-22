@@ -8,6 +8,7 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
+from sqlalchemy.orm import aliased
 from app.controllers import create_pagination
 
 from app import models as m, db
@@ -26,27 +27,25 @@ def get_all():
     form_create: f.NewGroupProductForm = f.NewGroupProductForm()
     form_edit: f.GroupProductForm = f.GroupProductForm()
 
+    master_group = aliased(m.MasterGroupProduct)
     q = request.args.get("q", type=str, default=None)
     query = m.GroupProduct.select().order_by(m.GroupProduct.id)
     count_query = sa.select(sa.func.count()).select_from(m.GroupProduct)
     if q:
-        master_group_query = db.session.execute(
-            m.MasterGroupProduct.select()
-            .where(m.MasterGroupProduct.name.like(f"{q}%"))
-            .order_by(m.MasterGroupProduct.id)
-        ).scalar()
-        # TODO consider something better then in_
         query = (
             m.GroupProduct.select()
+            .join(master_group, m.GroupProduct.master_group_id == master_group.id)
             .where(
-                m.GroupProduct.name.like(f"{q}%")
-                | m.GroupProduct.master_group_id.in_([master_group_query.id])
+                m.GroupProduct.name.ilike(f"%{q}%") | master_group.name.ilike(f"%{q}%")
             )
             .order_by(m.GroupProduct.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(m.GroupProduct.name.like(f"{q}%"))
+            .join(master_group, m.GroupProduct.master_group_id == master_group.id)
+            .where(
+                m.GroupProduct.name.ilike(f"%{q}%") | master_group.name.ilike(f"%{q}%")
+            )
             .select_from(m.GroupProduct)
         )
 
