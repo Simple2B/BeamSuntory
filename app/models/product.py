@@ -98,11 +98,17 @@ class Product(db.Model, ModelMixin):
                 WarehouseProduct.product_id == mg_dict["id"]
             )
         ).scalars()
-        mg_dict["available_quantity"] = (
-            {wp.group.name: wp.product_quantity for wp in warehouse_products}
-            if warehouse_products
-            else {}
-        )
+
+        mg_dict["available_quantity"] = {}
+
+        for wp in warehouse_products:
+            if wp.group.name in mg_dict["available_quantity"]:
+                mg_dict["available_quantity"][wp.group.name] = int(
+                    mg_dict["available_quantity"][wp.group.name]
+                ) + int(wp.product_quantity)
+            else:
+                mg_dict["available_quantity"][wp.group.name] = wp.product_quantity
+
         mg_dict["all_warehouses"] = [
             {
                 "id": w.id,
