@@ -5,13 +5,15 @@ from flask import (
     flash,
     redirect,
     url_for,
+    current_app as app,
 )
-from flask_login import login_required
+from flask_login import login_required, current_user
+from flask_mail import Message
 import sqlalchemy as sa
 from sqlalchemy.orm import aliased
 from app.controllers import create_pagination
 
-from app import models as m, db
+from app import models as m, db, mail
 
 from app import forms as f
 from app.logger import log
@@ -184,3 +186,43 @@ def share(id: int):
     log(log.INFO, "Request Share share: [%s]", rs)
     flash("Request Share shared!", "success")
     return redirect(url_for("request_share.get_all"))
+
+
+@request_share_blueprint.route("/decline/<int:id>", methods=["GET"])
+@login_required
+def decline(id: int):
+    rs: m.RequestShare = db.session.scalar(
+        m.RequestShare.select().where(m.RequestShare.id == id)
+    )
+    if not rs:
+        log(log.INFO, "There is no request_share with id: [%s]", id)
+        flash("There is no such request_share", "danger")
+        return "no request_share", 404
+
+    rs.status = "declined"
+    rs.save()
+    msg = Message(
+        subject="Declined request share",
+        sender=app.config["MAIL_DEFAULT_SENDER"],
+        recipients=[current_user.email],
+    )
+    url = (
+        url_for(
+            "request_share.get_all",
+            _external=True,
+        )
+        + f"?q={rs.status}"
+    )
+
+    msg.html = render_template(
+        "email/request_share.html",
+        user=current_user,
+        action="declined",
+        request_share=rs,
+        url=url,
+    )
+    mail.send(msg)
+
+    log(log.INFO, "Request Share declined: [%s]", rs)
+    flash("Request Share declined!", "success")
+    return "ok", 200
