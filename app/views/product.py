@@ -698,7 +698,6 @@ def upload():
         csv_file = request.files["upload_csv"]
         file_io = BytesIO(csv_file.read())
 
-        # conn = sa.create_engine(BaseConfig.server_url)
         conn = db.get_engine()
 
         for table_name in ["Language", "Categories", "Brand"]:
@@ -710,6 +709,7 @@ def upload():
                 m.MasterGroup(name=table_name).save()
 
             df = pandas.read_csv(file_io, usecols=[table_name])
+            file_io.seek(0)
             df = df.drop_duplicates().dropna()
             df["master_group_id"] = master_group_obj.id
             df["created_at"] = datetime.now()
@@ -724,6 +724,18 @@ def upload():
                 # method="multi",
                 method=insert_do_nothing_on_conflicts,
             )
+
+        df = pandas.read_csv(file_io, usecols=["Name", "Description", "SKU"])
+        file_io.seek(0)
+        df = df.drop_duplicates().dropna()
+
+        df.rename(columns=dict(zip(df.columns, ["name", "description", "SKU"]))).to_sql(
+            "products",
+            con=conn,
+            if_exists="append",
+            index=False,
+            method=insert_do_nothing_on_conflicts,
+        )
 
         pandas_df = pandas.read_csv(
             file_io,
