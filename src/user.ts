@@ -43,6 +43,7 @@ const modalOptions: ModalOptions = {
     backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
     closable: true,
     onHide: () => {
+        document.querySelector('#user-edit-dropdown-btn').removeEventListener('click', showHideGroupUserOptions)
         console.log('modal is hidden')
     },
     onShow: () => {
@@ -121,6 +122,10 @@ resetPasswordButtons.forEach((e) => {
     })
 })
 
+function showHideGroupUserOptions() {
+    document.querySelector('#user-edit-dropdown-options').classList.toggle('hidden')
+}
+
 // -----user edit modal window----
 function editUser(user: IUser) {
     const lockerAddressContainer = document.querySelector('#user-edit-locker-address-container')
@@ -157,11 +162,13 @@ function editUser(user: IUser) {
     const userAddDropdownBtn = document.querySelector('#user-edit-dropdown-btn')
     const optionItems = document.querySelectorAll('.user-edit-dropdown-option')
     const selectedOptions: string[] = []
+    if (user.group_name) {
+        const groupNames = user.group_name.split(', ')
+        selectedOptions.push(...groupNames)
+    }
     const options = document.querySelector('#user-edit-dropdown-options')
 
-    userAddDropdownBtn.addEventListener('click', () => {
-        options.classList.toggle('hidden')
-    })
+    userAddDropdownBtn.addEventListener('click', showHideGroupUserOptions)
 
     optionItems.forEach((optionItem: HTMLElement) => {
         optionItem.addEventListener('click', (event) => {
