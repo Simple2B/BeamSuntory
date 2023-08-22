@@ -37,20 +37,20 @@ def get_all():
         query = (
             m.ShipRequest.select()
             .where(
-                m.ShipRequest.order_numb.like(f"{q}%")
-                | m.ShipRequest.store_category.like(f"{q}%")
-                | m.ShipRequest.order_type.like(f"{q}%")
-                | m.ShipRequest.status.like(f"{q}%")
+                m.ShipRequest.order_numb.ilike(f"%{q}%")
+                | m.ShipRequest.store_category.ilike(f"%{q}%")
+                | m.ShipRequest.order_type.ilike(f"%{q}%")
+                | m.ShipRequest.status.ilike(f"%{q}%")
             )
             .order_by(m.ShipRequest.id)
         )
         count_query = (
             sa.select(sa.func.count())
             .where(
-                m.ShipRequest.order_numb.like(f"{q}%")
-                | m.ShipRequest.store_category.like(f"{q}%")
-                | m.ShipRequest.order_type.like(f"{q}%")
-                | m.ShipRequest.status.like(f"{q}%")
+                m.ShipRequest.order_numb.ilike(f"%{q}%")
+                | m.ShipRequest.store_category.ilike(f"%{q}%")
+                | m.ShipRequest.order_type.ilike(f"%{q}%")
+                | m.ShipRequest.status.ilike(f"%{q}%")
             )
             .select_from(m.ShipRequest)
         )
@@ -227,10 +227,10 @@ def sort():
         query = (
             m.ShipRequest.select()
             .where(
-                m.ShipRequest.order_numb.like(f"{q}%")
-                | m.ShipRequest.store_category.like(f"{q}%")
-                | m.ShipRequest.order_type.like(f"{q}%")
-                | m.ShipRequest.status.like(f"{q}%"),
+                m.ShipRequest.order_numb.ilike(f"%{q}%")
+                | m.ShipRequest.store_category.ilike(f"%{q}%")
+                | m.ShipRequest.order_type.ilike(f"%{q}%")
+                | m.ShipRequest.status.ilike(f"%{q}%"),
                 m.ShipRequest.status == status,
             )
             .order_by(m.ShipRequest.id)
@@ -238,10 +238,10 @@ def sort():
         count_query = (
             sa.select(sa.func.count())
             .where(
-                m.ShipRequest.order_numb.like(f"{q}%")
-                | m.ShipRequest.store_category.like(f"{q}%")
-                | m.ShipRequest.order_type.like(f"{q}%")
-                | m.ShipRequest.status.like(f"{q}%"),
+                m.ShipRequest.order_numb.ilike(f"%{q}%")
+                | m.ShipRequest.store_category.ilike(f"%{q}%")
+                | m.ShipRequest.order_type.ilike(f"%{q}%")
+                | m.ShipRequest.status.ilike(f"%{q}%"),
                 m.ShipRequest.status == status,
             )
             .select_from(m.ShipRequest)

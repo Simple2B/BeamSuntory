@@ -8,7 +8,7 @@ class ShipRequest(BaseModel):
     order_numb: str
     status: str  # enum??
     order_type: str  # enum??? ask client
-    store_id: int
+    store_id: Optional[int]
     warehouse_id: Optional[int]
     comment: str | None
 

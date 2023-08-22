@@ -36,16 +36,18 @@ def get_all():
         query = (
             m.InboundOrder.select()
             .where(
-                m.InboundOrder.order_title.like(f"{q}%")
-                | m.InboundOrder.quantity.like(f"{q}%")
+                m.InboundOrder.order_title.ilike(f"%{q}%")
+                | m.InboundOrder.order_id.ilike(f"%{q}%")
+                | m.InboundOrder.status.ilike(f"%{q}%")
             )
             .order_by(m.InboundOrder.id)
         )
         count_query = (
             sa.select(sa.func.count())
             .where(
-                m.InboundOrder.order_title.like(f"{q}%")
-                | m.InboundOrder.quantity.like(f"{q}%")
+                m.InboundOrder.order_title.ilike(f"%{q}%")
+                | m.InboundOrder.order_id.ilike(f"%{q}%")
+                | m.InboundOrder.status.ilike(f"%{q}%")
             )
             .select_from(m.InboundOrder)
         )

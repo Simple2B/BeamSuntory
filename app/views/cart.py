@@ -30,11 +30,11 @@ def get_all():
     count_query = sa.select(sa.func.count()).select_from(m.Cart)
     if q:
         query = (
-            m.Cart.select().where(m.Cart.order_numb.like(f"{q}%")).order_by(m.Cart.id)
+            m.Cart.select().where(m.Cart.order_numb.ilike(f"%{q}%")).order_by(m.Cart.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(m.Cart.order_numb.like(f"{q}%"))
+            .where(m.Cart.order_numb.ilike(f"%{q}%"))
             .select_from(m.Cart)
         )
     pagination = create_pagination(total=db.session.scalar(count_query))

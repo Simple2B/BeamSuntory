@@ -32,12 +32,12 @@ def get_all():
     if q:
         query = (
             m.MasterGroupProduct.select()
-            .where(m.MasterGroupProduct.name.like(f"{q}%"))
+            .where(m.MasterGroupProduct.name.ilike(f"%{q}%"))
             .order_by(m.MasterGroupProduct.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(m.MasterGroupProduct.name.like(f"{q}%"))
+            .where(m.MasterGroupProduct.name.ilike(f"%{q}%"))
             .select_from(m.MasterGroupProduct)
         )
 

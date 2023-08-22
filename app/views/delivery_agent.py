@@ -33,16 +33,16 @@ def get_all():
         query = (
             m.DeliveryAgent.select()
             .where(
-                m.DeliveryAgent.username.like(f"{q}%")
-                | m.DeliveryAgent.email.like(f"{q}%")
+                m.DeliveryAgent.username.ilike(f"%{q}%")
+                | m.DeliveryAgent.email.ilike(f"%{q}%")
             )
             .order_by(m.DeliveryAgent.id)
         )
         count_query = (
             sa.select(sa.func.count())
             .where(
-                m.DeliveryAgent.username.like(f"{q}%")
-                | m.DeliveryAgent.email.like(f"{q}%")
+                m.DeliveryAgent.username.ilike(f"%{q}%")
+                | m.DeliveryAgent.email.ilike(f"%{q}%")
             )
             .select_from(m.DeliveryAgent)
         )

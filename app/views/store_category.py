@@ -34,18 +34,12 @@ def get_all():
     if q:
         query = (
             m.StoreCategory.select()
-            .where(
-                m.StoreCategory.name.like(f"{q}%")
-                | m.StoreCategory.parent_category.like(f"{q}%")
-            )
+            .where(m.StoreCategory.name.ilike(f"%{q}%"))
             .order_by(m.StoreCategory.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(
-                m.StoreCategory.name.like(f"{q}%")
-                | m.StoreCategory.parent_category.like(f"{q}%")
-            )
+            .where(m.StoreCategory.name.ilike(f"%{q}%"))
             .select_from(m.StoreCategory)
         )
 

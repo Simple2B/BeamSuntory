@@ -12,6 +12,7 @@ from flask import (
 from flask_login import login_required, current_user
 from flask_mail import Message
 import sqlalchemy as sa
+from sqlalchemy.orm import aliased
 from app.controllers import create_pagination
 
 from app import models as m, db, mail
@@ -29,26 +30,27 @@ def get_all():
     form_create: f.NewUserForm = f.NewUserForm()
     form_edit: f.UserForm = f.UserForm()
 
+    role = aliased(m.Division)
     q = request.args.get("q", type=str, default=None)
     query = m.User.select().order_by(m.User.id)
     count_query = sa.select(sa.func.count()).select_from(m.User)
     if q:
-        all_roles: list[m.Division] = db.session.execute(m.Division.select()).scalars()
         query = (
             m.User.select()
+            .join(role, m.User.role == role.id)
             .where(
-                m.User.username.like(f"{q}%")
-                | m.User.email.like(f"{q}%")
-                | m.User.role.in_([r.id for r in all_roles])
+                m.User.username.ilike(f"%{q}%")
+                | m.User.email.ilike(f"%{q}%")
+                | role.role_name.ilike(f"%{q}%")
             )
             .order_by(m.User.id)
         )
         count_query = (
             sa.select(sa.func.count())
             .where(
-                m.User.username.like(f"{q}%")
-                | m.User.email.like(f"{q}%")
-                | m.User.role.in_([r.id for r in all_roles])
+                m.User.username.ilike(f"%{q}%")
+                | m.User.email.ilike(f"%{q}%")
+                | role.role_name.ilike(f"%{q}%")
             )
             .select_from(m.User)
         )
