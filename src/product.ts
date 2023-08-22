@@ -40,6 +40,7 @@ interface IProduct {
     ]
     mstr_prod_grps_prod_grps_names: { [index: string]: { group_name: string; group_id: number }[] }
     mstr_grps_grps_names_in_prod: { [index: string]: { group_name: string; group_id: number }[] }
+    warehouse_product_qty: number
 }
 interface FilterJsonData {
     [key: string]: string
@@ -578,6 +579,8 @@ viewProductButtonElements.forEach((e) =>
             : (img.src = defaultBrandImage)
         div = document.querySelector('#product-view-price')
         div.innerHTML = product.price.toString()
+        div = document.querySelector('#product-view-warehouse-qty')
+        div.innerHTML = product.warehouse_product_qty.toString()
         // General Info ->
         div = document.querySelector('#product-view-SKU')
         div.innerHTML = product.SKU
