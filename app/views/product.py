@@ -766,8 +766,11 @@ def upload():
         df = pandas.read_csv(file_io, usecols=["Name", "Description", "SKU"])
         file_io.seek(0)
         df = df.drop_duplicates().dropna()
+        df["image"] = ""
 
-        df.rename(columns=dict(zip(df.columns, ["name", "description", "SKU"]))).to_sql(
+        df.rename(
+            columns=dict(zip(df.columns, ["name", "description", "SKU", "image"]))
+        ).to_sql(
             "products",
             con=conn,
             if_exists="append",
@@ -830,7 +833,7 @@ def insert_do_nothing_on_conflicts(sqltable, conn, keys, data_iter):
     mytable = sa.table(table_name, *columns)
 
     insert_stmt = insert(mytable).values(list(data_iter))
-    # do_nothing_stmt = insert_stmt.on_conflict_do_nothing(index_elements=["unique_code"])
+    # index_elements=["unique_code"] --- meaning unique constraint
     do_nothing_stmt = insert_stmt.on_conflict_do_nothing(index_elements=["name"])
 
     conn.execute(do_nothing_stmt)

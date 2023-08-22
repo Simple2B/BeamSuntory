@@ -22,6 +22,7 @@ class Product(db.Model, ModelMixin):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
     name: orm.Mapped[str] = orm.mapped_column(
         sa.String(128),
+        unique=True,
         nullable=False,
     )
 
