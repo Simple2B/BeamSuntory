@@ -7,9 +7,9 @@
 {% set base_url = url_for('incoming_stock.get_all') %}
 {% endif %}
 <div class="relative overflow-visible shadow-md sm:rounded-lg">
-  <div class="flex">
+  <div class="flex gap-5">
     <form id="incoming-stock-filter-form" action="{{url_for('incoming_stock.sort')}}" method="post"
-      class="flex flex-wrap py-4 gap-5 bg-white dark:bg-gray-800">
+      class="flex flex-wrap py-4 gap-3 bg-white dark:bg-gray-800">
       {{ form_sort.hidden_tag() }}
       <input id="sort_by" hidden type="text" value="" name="sort_by"
         class="incoming-stock-filter-input w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">

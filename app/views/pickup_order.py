@@ -8,6 +8,7 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
+from sqlalchemy.orm import aliased
 from app.controllers import create_pagination
 
 from app import models as m, db
@@ -27,27 +28,35 @@ def get_all():
     form_edit: f.ShipRequestForm = f.ShipRequestForm()
     form_sort: f.SortByStatusShipRequestForm = f.SortByStatusShipRequestForm()
 
+    store_category = aliased(m.StoreCategory)
+    store = aliased(m.Store)
     q = request.args.get("q", type=str, default=None)
     query = m.ShipRequest.select().order_by(m.ShipRequest.id)
     count_query = sa.select(sa.func.count()).select_from(m.ShipRequest)
     if q:
         query = (
             m.ShipRequest.select()
+            .join(store_category, m.ShipRequest.store_category_id == store_category.id)
+            .join(store, m.ShipRequest.store_id == store.id)
             .where(
                 m.ShipRequest.order_numb.ilike(f"%{q}%")
-                | m.ShipRequest.store_category.ilike(f"%{q}%")
                 | m.ShipRequest.order_type.ilike(f"%{q}%")
                 | m.ShipRequest.status.ilike(f"%{q}%")
+                | store_category.name.ilike(f"%{q}%")
+                | store.store_name.ilike(f"%{q}%")
             )
             .order_by(m.ShipRequest.id)
         )
         count_query = (
             sa.select(sa.func.count())
+            .join(store_category, m.ShipRequest.store_category_id == store_category.id)
+            .join(store, m.ShipRequest.store_id == store.id)
             .where(
                 m.ShipRequest.order_numb.ilike(f"%{q}%")
-                | m.ShipRequest.store_category.ilike(f"%{q}%")
                 | m.ShipRequest.order_type.ilike(f"%{q}%")
                 | m.ShipRequest.status.ilike(f"%{q}%")
+                | store_category.name.ilike(f"%{q}%")
+                | store.store_name.ilike(f"%{q}%")
             )
             .select_from(m.ShipRequest)
         )

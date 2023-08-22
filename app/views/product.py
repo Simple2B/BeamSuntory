@@ -31,12 +31,20 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         if q:
             query = (
                 m.Product.select()
-                .where(m.Product.name.ilike(f"%{q}%"))
+                .where(
+                    m.Product.name.ilike(f"%{q}%")
+                    | m.Product.SKU.ilike(f"%{q}%")
+                    | m.Product.description.ilike(f"%{q}%")
+                )
                 .order_by(m.Product.id)
             )
             count_query = (
                 sa.select(sa.func.count())
-                .where(m.Product.name.ilike(f"%{q}%"))
+                .where(
+                    m.Product.name.ilike(f"%{q}%")
+                    | m.Product.SKU.ilike(f"%{q}%")
+                    | m.Product.description.ilike(f"%{q}%")
+                )
                 .select_from(m.Product)
             )
 

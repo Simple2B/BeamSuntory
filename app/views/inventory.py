@@ -4,7 +4,6 @@ from flask import (
     request,
 )
 from flask_login import login_required
-import sqlalchemy as sa
 from sqlalchemy.orm import aliased
 from app.controllers import create_pagination
 
