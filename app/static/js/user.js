@@ -5829,6 +5829,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var flowbite_1 = __webpack_require__(/*! flowbite */ "./node_modules/flowbite/lib/esm/index.js");
+// TODO: consider better solution
+// enum for 3 main roles [Admin, Sales Rep, Warehouse Manager]
+var UserRole;
+(function (UserRole) {
+    UserRole["Admin"] = "Admin";
+    UserRole["SalesRep"] = "Sales Rep";
+    UserRole["WarehouseManager"] = "Warehouse Manager";
+})(UserRole || (UserRole = {}));
 var $modalElement = document.querySelector('#editUserModal');
 var $addUserModalElement = document.querySelector('#add-user-modal');
 var modalOptions = {
@@ -5937,7 +5945,7 @@ function editUser(user) {
     var salesRep = document.querySelector('#user-edit-sales_rep');
     var salesRepContainer = document.querySelector('#user-edit-sales_rep-container');
     // function to show locker address only for sales rep
-    if (userRole.value !== 'SALES_REP') {
+    if (userRole.value !== UserRole.SalesRep) {
         lockerAddressContainer.classList.add('hidden');
         salesRepContainer.classList.add('hidden');
     }
@@ -5947,7 +5955,7 @@ function editUser(user) {
     }
     userRole.addEventListener('change', function () {
         var role = userRole.value;
-        if (role !== 'SALES_REP') {
+        if (role !== UserRole.SalesRep) {
             lockerAddressContainer.classList.add('hidden');
             salesRepContainer.classList.add('hidden');
         }
@@ -6078,22 +6086,46 @@ viewUserButtonElements.forEach(function (e) {
 });
 //   ---add user modal window----
 // function to show additional locker address only for sales rep
-var salesRepAddUser = document.querySelector('#user-add-sales_rep');
+var salesRepAddUserCheckbox = document.querySelector('#user-add-sales_rep-checkbox');
 var salesRepAddUserContainer = document.querySelector('#user-add-sales_rep-container');
 var salesAddRepContainer = document.querySelector('#user-add-locker-address-container');
-var userRole = document.querySelector('#user-add-role');
-salesRepAddUser.addEventListener('click', function () {
-    salesAddRepContainer.classList.toggle('hidden');
+var userRoleSelect = document.querySelector('#user-add-role');
+function setRequiredLockerAddress() {
+    document.querySelector('#user-add-locker-country').setAttribute('required', '');
+    document.querySelector('#user-add-locker-region').setAttribute('required', '');
+    document.querySelector('#user-add-locker-city').setAttribute('required', '');
+    document.querySelector('#user-add-locker-zip_code').setAttribute('required', '');
+    document.querySelector('#user-add-locker-street_address').setAttribute('required', '');
+}
+function removeRequiredLockerAddress() {
+    document.querySelector('#user-add-locker-country').removeAttribute('required');
+    document.querySelector('#user-add-locker-region').removeAttribute('required');
+    document.querySelector('#user-add-locker-city').removeAttribute('required');
+    document.querySelector('#user-add-locker-zip_code').removeAttribute('required');
+    document.querySelector('#user-add-locker-street_address').removeAttribute('required');
+}
+salesRepAddUserCheckbox.addEventListener('change', function () {
+    if (salesRepAddUserCheckbox.checked) {
+        salesAddRepContainer.classList.add('hidden');
+        removeRequiredLockerAddress();
+    }
+    else {
+        salesAddRepContainer.classList.remove('hidden');
+        setRequiredLockerAddress();
+    }
 });
-userRole.addEventListener('change', function () {
-    var role = userRole.value;
-    if (role !== 'SALES_REP') {
+userRoleSelect.addEventListener('change', function () {
+    salesRepAddUserCheckbox.checked = false;
+    var selectedRole = userRoleSelect.options[userRoleSelect.selectedIndex].text;
+    if (selectedRole !== UserRole.SalesRep) {
         salesAddRepContainer.classList.add('hidden');
         salesRepAddUserContainer.classList.add('hidden');
+        removeRequiredLockerAddress();
     }
     else {
         salesAddRepContainer.classList.remove('hidden');
         salesRepAddUserContainer.classList.remove('hidden');
+        setRequiredLockerAddress();
     }
 });
 // function to select and add group in dropdown list

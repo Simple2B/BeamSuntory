@@ -26,6 +26,14 @@ interface IUser {
     group_name: string
 }
 
+// TODO: consider better solution
+// enum for 3 main roles [Admin, Sales Rep, Warehouse Manager]
+enum UserRole {
+    Admin = 'Admin',
+    SalesRep = 'Sales Rep',
+    WarehouseManager = 'Warehouse Manager',
+}
+
 const $modalElement: HTMLElement = document.querySelector('#editUserModal')
 const $addUserModalElement: HTMLElement = document.querySelector('#add-user-modal')
 
@@ -36,6 +44,7 @@ const modalOptions: ModalOptions = {
     closable: true,
     onHide: () => {
         document.querySelector('#user-edit-dropdown-btn').removeEventListener('click', showHideGroupUserOptions)
+        console.log('modal is hidden')
     },
     onShow: () => {
         console.log('user id: ')
@@ -119,15 +128,13 @@ function showHideGroupUserOptions() {
 
 // -----user edit modal window----
 function editUser(user: IUser) {
-    console.log(user)
-
     const lockerAddressContainer = document.querySelector('#user-edit-locker-address-container')
     const userRole: HTMLInputElement = document.querySelector('#user-edit-role')
     const salesRep: HTMLInputElement = document.querySelector('#user-edit-sales_rep')
     const salesRepContainer = document.querySelector('#user-edit-sales_rep-container')
 
     // function to show locker address only for sales rep
-    if (userRole.value !== 'SALES_REP') {
+    if (userRole.value !== UserRole.SalesRep) {
         lockerAddressContainer.classList.add('hidden')
         salesRepContainer.classList.add('hidden')
     } else {
@@ -138,7 +145,7 @@ function editUser(user: IUser) {
     userRole.addEventListener('change', () => {
         const role = userRole.value
 
-        if (role !== 'SALES_REP') {
+        if (role !== UserRole.SalesRep) {
             lockerAddressContainer.classList.add('hidden')
             salesRepContainer.classList.add('hidden')
         } else {
@@ -282,24 +289,49 @@ viewUserButtonElements.forEach((e) =>
 
 //   ---add user modal window----
 // function to show additional locker address only for sales rep
-const salesRepAddUser = document.querySelector('#user-add-sales_rep')
+const salesRepAddUserCheckbox: HTMLInputElement = document.querySelector('#user-add-sales_rep-checkbox')
 const salesRepAddUserContainer = document.querySelector('#user-add-sales_rep-container')
 const salesAddRepContainer = document.querySelector('#user-add-locker-address-container')
-const userRole: HTMLInputElement = document.querySelector('#user-add-role')
+const userRoleSelect: HTMLSelectElement = document.querySelector('#user-add-role')
 
-salesRepAddUser.addEventListener('click', () => {
-    salesAddRepContainer.classList.toggle('hidden')
+function setRequiredLockerAddress() {
+    document.querySelector('#user-add-locker-country').setAttribute('required', '')
+    document.querySelector('#user-add-locker-region').setAttribute('required', '')
+    document.querySelector('#user-add-locker-city').setAttribute('required', '')
+    document.querySelector('#user-add-locker-zip_code').setAttribute('required', '')
+    document.querySelector('#user-add-locker-street_address').setAttribute('required', '')
+}
+
+function removeRequiredLockerAddress() {
+    document.querySelector('#user-add-locker-country').removeAttribute('required')
+    document.querySelector('#user-add-locker-region').removeAttribute('required')
+    document.querySelector('#user-add-locker-city').removeAttribute('required')
+    document.querySelector('#user-add-locker-zip_code').removeAttribute('required')
+    document.querySelector('#user-add-locker-street_address').removeAttribute('required')
+}
+
+salesRepAddUserCheckbox.addEventListener('change', () => {
+    if (salesRepAddUserCheckbox.checked) {
+        salesAddRepContainer.classList.add('hidden')
+        removeRequiredLockerAddress()
+    } else {
+        salesAddRepContainer.classList.remove('hidden')
+        setRequiredLockerAddress()
+    }
 })
 
-userRole.addEventListener('change', () => {
-    const role = userRole.value
+userRoleSelect.addEventListener('change', () => {
+    salesRepAddUserCheckbox.checked = false
+    const selectedRole = userRoleSelect.options[userRoleSelect.selectedIndex].text
 
-    if (role !== 'SALES_REP') {
+    if (selectedRole !== UserRole.SalesRep) {
         salesAddRepContainer.classList.add('hidden')
         salesRepAddUserContainer.classList.add('hidden')
+        removeRequiredLockerAddress()
     } else {
         salesAddRepContainer.classList.remove('hidden')
         salesRepAddUserContainer.classList.remove('hidden')
+        setRequiredLockerAddress()
     }
 })
 

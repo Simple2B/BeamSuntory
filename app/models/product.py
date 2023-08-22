@@ -146,4 +146,5 @@ class Product(db.Model, ModelMixin):
                     group[0].master_groups_for_product.name
                 ].append({"group_name": group[0].name, "group_id": group[0].id})
         mg_dict["mstr_grps_grps_names_in_prod"] = mstr_grps_grps_names_in_prod
+
         return json.dumps(mg_dict)

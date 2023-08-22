@@ -222,8 +222,14 @@ def create():
         # save delivered product quantity, so this product would be available in warehouse
         products = json.loads(form.products.data)
         for product in products:
-            shelf_life_str_start = product["shelf_life_start"]
-            shelf_life_str_end = product["shelf_life_end"]
+            shelf_life_str_start = (
+                product["shelf_life_start"]
+                if product["shelf_life_start"]
+                else "01/01/2023"
+            )
+            shelf_life_str_end = (
+                product["shelf_life_end"] if product["shelf_life_end"] else "01/01/2023"
+            )
             shelf_life_stamp_start = datetime.datetime.strptime(
                 shelf_life_str_start, "%m/%d/%Y"
             )

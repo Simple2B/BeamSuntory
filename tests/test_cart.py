@@ -3,18 +3,18 @@ from app import models as m, db
 from tests.utils import login, register, logout
 
 
-def test_carts_pages(client):
-    logout(client)
-    response = client.get("/cart/")
+def test_carts_pages(mg_g_populate: FlaskClient):
+    logout(mg_g_populate)
+    response = mg_g_populate.get("/cart/")
     assert response.status_code == 302
 
     register("samg", "samg@test.com")
-    response = login(client, "samg")
+    response = login(mg_g_populate, "samg")
     assert b"Login successful." in response.data
 
-    response = client.get("/cart/")
+    response = mg_g_populate.get("/cart/")
     assert response.status_code == 200
-    response = client.get("/cart/create")
+    response = mg_g_populate.get("/cart/create")
     assert response.status_code == 405
 
 

@@ -4,7 +4,6 @@ import type { ModalOptions, ModalInterface } from 'flowbite'
 interface IProduct {
     id: number
     name: string
-    product_type: string
     supplier_id: number
     currency: string
     price: number
@@ -48,6 +47,11 @@ interface FilterJsonData {
 
 interface IProductMasterGroupGroup {
     [index: string]: { group_name: string; group_id: number }[]
+}
+
+interface IMasterGroup {
+    name: string
+    master_groups_list_groups: { [index: string]: { group_name: string; group_id: number }[] }
 }
 
 // variable to set default image to brand dynamically in modal window. Can we get link from the internet?
@@ -634,25 +638,25 @@ function requestShare(product: IProduct, group: string) {
     div = document.querySelector('#product-request-share-sku')
     div.innerHTML = product.SKU
     div = document.querySelector('#product-request-share-available-quantity')
-    div.innerHTML = product.available_quantity[group].toString()
+    div.innerHTML = product.available_quantity[group.replace('_', ' ')].toString()
     div = document.querySelector('#product-request-share-owner')
     // TODO change to something not hardcoded here and in rest funcs
     div.innerHTML = 'Mike'
     div = document.querySelector('#product-request-share-role')
     div.innerHTML = 'ADMIN'
     div = document.querySelector('#product-request-share-total-available-items')
-    div.innerHTML = product.total_available_items[group].toString()
+    div.innerHTML = product.total_available_items[group.replace('_', ' ')].toString()
     let input: HTMLInputElement = document.querySelector('#product-request-share-quantity')
-    input.max = product.available_quantity[group].toString()
+    input.max = product.available_quantity[group.replace('_', ' ')].toString()
     input.min = '1'
     input = document.querySelector('#product-request-share-name-hidden-input')
     input.value = product.name
     input = document.querySelector('#product-request-share-SKU-hidden-input')
     input.value = product.SKU
     input = document.querySelector('#product-request-share-available-quantity-hidden-input')
-    input.value = product.available_quantity[group].toString()
+    input.value = product.available_quantity[group.replace('_', ' ')].toString()
     input = document.querySelector('#product-request-share-from-group')
-    input.value = group
+    input.value = group.replace('_', ' ')
     requestShareModal.show()
 }
 
@@ -665,17 +669,17 @@ function ship(product: IProduct, group: string) {
     div = document.querySelector('#product-ship-sku')
     div.innerHTML = product.SKU
     div = document.querySelector('#product-ship-available-quantity')
-    div.innerHTML = product.available_quantity[group].toString()
+    div.innerHTML = product.available_quantity[group.replace('_', ' ')].toString()
     div = document.querySelector('#product-ship-total-available-items')
-    div.innerHTML = product.total_available_items[group].toString()
+    div.innerHTML = product.total_available_items[group.replace('_', ' ')].toString()
 
     let input: HTMLInputElement = document.querySelector('#product-ship-product-id')
     input.value = product.id.toString()
     input = document.querySelector('#product-ship-desire-quantity')
-    input.max = product.available_quantity[group].toString()
+    input.max = product.available_quantity[group.replace('_', ' ')].toString()
     input.min = '1'
     input = document.querySelector('#product-ship-group')
-    input.value = group
+    input.value = group.replace('_', ' ')
     shipModal.show()
 }
 
@@ -684,10 +688,10 @@ function assign(product: IProduct, group: string) {
     let input: HTMLInputElement = document.querySelector('#product-assign-name')
     input.value = product.name
     input = document.querySelector('#product-assign-amount')
-    input.max = product.available_quantity[group].toString()
+    input.max = product.available_quantity[group.replace('_', ' ')].toString()
     input.min = '1'
     input = document.querySelector('#product-assign-from-group')
-    input.value = group
+    input.value = group.replace('_', ' ')
     assignModal.show()
 }
 
@@ -711,13 +715,13 @@ function deleteShipAssignButton(nameGroup: string, nameGroupValue: string) {
 function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: string, productParam: IProduct) {
     const groupUnderScore = group.replace(/ /g, '_')
     const groupProductIds = productParam.groups_ids
-    const productTypeContainer = document.querySelector(`#product-view-product_type-container`)
+    const productTypeContainer = document.querySelector(`#product-view-product-name-container`)
     const shipAssignContainer = document.createElement('div')
     shipAssignContainer.classList.add('sm:col-span-3', 'flex', 'gap-4')
     shipAssignContainer.setAttribute('id', `product-ship-assign-share-container-${masterGroup.replace(/ /g, '_')}`)
     shipAssignContainer.innerHTML = `
     <div>
-      <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
+      <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available</label>
         <div id="ship-product-quantity"
           class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
       ${productParam.available_quantity[group] || 0}</div>
@@ -742,7 +746,7 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
     shareContainer.setAttribute('id', `product-ship-assign-share-container-${masterGroup.replace(/ /g, '_')}`)
     shareContainer.innerHTML = `
     <div>
-      <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
+      <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available</label>
         <div id="ship-product-quantity"
           class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
       ${productParam.available_quantity[group] || 0}</div>
@@ -802,7 +806,7 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
             requestShare(product, shareGroup)
         })
     )
-    const productViewTypeContainer = document.querySelector('#product-view-product_type-container')
+    const productViewTypeContainer = document.querySelector('#product-view-product-name-container')
     const productMasterGroupContainer = document.createElement('div')
     productMasterGroupContainer.classList.add('sm:col-span-3')
     productMasterGroupContainer.setAttribute('id', `product-view-product_group-container-${groupUnderScore}`)
@@ -923,13 +927,13 @@ function getSessionStorageObject(
 function createAdjustAction(isEqual: boolean, masterGroup: string, group: string, productParam: IProduct) {
     const groupUnderScore = group.replace(/ /g, '_')
     const groupProductIds = productParam.groups_ids
-    const productTypeContainer = document.querySelector(`#product-adjust-product_type-container`)
+    const productTypeContainer = document.querySelector(`#product-adjust-product-name-container`)
     const adjustContainer = document.createElement('div')
     adjustContainer.classList.add('sm:col-span-2', 'flex', 'gap-4')
     adjustContainer.setAttribute('id', `product-adjust-container-${groupUnderScore}`)
     adjustContainer.innerHTML = `
     <div>
-      <label for="adjust-product-quantity-${groupUnderScore}" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
+      <label for="adjust-product-quantity-${groupUnderScore}" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available</label>
         <input id="adjust-product-quantity-${groupUnderScore}"
           class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
     </div>
@@ -945,14 +949,14 @@ function createAdjustAction(isEqual: boolean, masterGroup: string, group: string
 
     productTypeContainer.parentNode.insertBefore(adjustContainer, productTypeContainer.nextSibling)
 
-    const productViewTypeContainer = document.querySelector('#product-adjust-product_type-container')
+    const productViewTypeContainer = document.querySelector('#product-adjust-product-name-container')
     const masterGroupWarehouseContainer = document.createElement('div')
     masterGroupWarehouseContainer.classList.add('sm:col-span-4')
     masterGroupWarehouseContainer.setAttribute('id', `product-adjust-product_group-container-${groupUnderScore}`)
 
     masterGroupWarehouseContainer.innerHTML = `
   <div class="flex gap-4">
-  <div class="w-2/4">
+  <div class="w-1/2">
     <label for="for-group-${groupUnderScore}"
       class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">${masterGroup}</label>
     <select type="text" name="group-${groupUnderScore}" id="master-group-adjust-${groupUnderScore}"
@@ -962,7 +966,7 @@ function createAdjustAction(isEqual: boolean, masterGroup: string, group: string
       <option value="${groupProductIds[group]}">${group}</option>
     </select>
   </div>
-  <div class="w-2/4">
+  <div class="w-1/2">
     <label for="for-warehouse-${groupUnderScore}"
       class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Warehouse</label>
     <select type="text" name="group-${groupUnderScore}" id="warehouse-adjust-${groupUnderScore}"
@@ -1407,7 +1411,7 @@ showProductByUserGroupCheckbox.addEventListener('change', async () => {
         }
     } else {
         try {
-            const response = await fetch(`/product`, {
+            const response = await fetch(`/product/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1420,4 +1424,30 @@ showProductByUserGroupCheckbox.addEventListener('change', async () => {
             console.log(error)
         }
     }
+})
+
+document.querySelector('#product-assign-master-group').addEventListener('change', () => {
+    const productAssignMasterGroupSelect: HTMLSelectElement = document.querySelector('#product-assign-master-group')
+    const productAssignGroupSelect: HTMLSelectElement = document.querySelector('#product-assign-group')
+    const groups: IMasterGroup = JSON.parse(
+        productAssignMasterGroupSelect[productAssignMasterGroupSelect.selectedIndex].getAttribute('data-target')
+    )
+    const availableMasterGroups = Object.keys(groups.master_groups_list_groups)
+
+    productAssignGroupSelect.innerHTML = ''
+
+    availableMasterGroups.forEach((masterGroup) => {
+        if (masterGroup === productAssignMasterGroupSelect.options[productAssignMasterGroupSelect.selectedIndex].text) {
+            const optionCategory = groups.master_groups_list_groups[masterGroup]
+
+            if (optionCategory) {
+                optionCategory.forEach((group: { group_name: string; group_id: number }) => {
+                    const storeSelectOption = document.createElement('option')
+                    storeSelectOption.setAttribute('value', group.group_id.toString())
+                    storeSelectOption.textContent = group.group_name
+                    productAssignGroupSelect.appendChild(storeSelectOption)
+                })
+            }
+        }
+    })
 })
