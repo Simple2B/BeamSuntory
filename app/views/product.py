@@ -27,7 +27,7 @@ from app.logger import log
 product_blueprint = Blueprint("product", __name__, url_prefix="/product")
 
 
-def get_all_products(request, query=None, count_query=None):
+def get_all_products(request, query=None, count_query=None, my_stocks=False):
     q = request.args.get("q", type=str, default=None)
     if query is None or count_query is None:
         query = m.Product.select().order_by(m.Product.id)
@@ -35,18 +35,28 @@ def get_all_products(request, query=None, count_query=None):
         if q:
             query = (
                 m.Product.select()
-                .where(m.Product.name.like(f"{q}%"))
+                .where(
+                    m.Product.name.ilike(f"%{q}%")
+                    | m.Product.SKU.ilike(f"%{q}%")
+                    | m.Product.description.ilike(f"%{q}%")
+                )
                 .order_by(m.Product.id)
             )
             count_query = (
                 sa.select(sa.func.count())
-                .where(m.Product.name.like(f"{q}%"))
+                .where(
+                    m.Product.name.ilike(f"%{q}%")
+                    | m.Product.SKU.ilike(f"%{q}%")
+                    | m.Product.description.ilike(f"%{q}%")
+                )
                 .select_from(m.Product)
             )
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
-    master_groups_rows_obj = db.session.execute(m.MasterGroup.select()).all()
+    master_groups = [
+        row for row in db.session.execute(m.MasterGroup.select()).scalars()
+    ]
 
     groups_for_products_obj = db.session.execute(m.GroupProduct.select()).all()
     mastr_for_prods_groups_for_prods = {}
@@ -81,7 +91,6 @@ def get_all_products(request, query=None, count_query=None):
         m.UserGroup.select().where(m.UserGroup.left_id == current_user.id)
     ).all()
 
-    master_groups = [row[0] for row in master_groups_rows_obj]
     master_groups_search = {}
     for group in groups_for_products_obj:
         if group[0].master_groups_for_product.name not in master_groups_search:
@@ -127,6 +136,32 @@ def get_all_products(request, query=None, count_query=None):
 
     suppliers = [i for i in db.session.execute(m.Supplier.select()).scalars()]
 
+    warehouse_product_query: list[m.WarehouseProduct] = [
+        i
+        for i in db.session.execute(
+            m.WarehouseProduct.select().order_by(m.WarehouseProduct.id)
+        ).scalars()
+    ]
+
+    warehouse_product_qty = dict()
+
+    warehouse_products = {wpq.product_id for wpq in warehouse_product_query}
+
+    for ware_prod in warehouse_products:
+        for wpq in warehouse_product_query:
+            if wpq.product_id != ware_prod:
+                continue
+            if my_stocks:
+                if wpq.group_id not in my_stocks:
+                    continue
+            if wpq.product.name in warehouse_product_qty:
+                warehouse_product_qty[wpq.product.name] = str(
+                    int(warehouse_product_qty[wpq.product.name])
+                    + int(wpq.product_quantity)
+                )
+            else:
+                warehouse_product_qty[wpq.product.name] = str(wpq.product_quantity)
+
     return {
         "query": query,
         "pagination": pagination,
@@ -146,6 +181,7 @@ def get_all_products(request, query=None, count_query=None):
             i[0].parent.name for i in current_user_groups_rows
         ],
         "mstr_prod_grps_prod_grps_names": json.dumps(mstr_prod_grps_prod_grps_names),
+        "warehouse_product_qty": warehouse_product_qty,
     }
 
 
@@ -186,6 +222,7 @@ def get_all():
         mstr_prod_grps_prod_grps_names=products_object[
             "mstr_prod_grps_prod_grps_names"
         ],
+        warehouse_product_qty=products_object["warehouse_product_qty"],
         form_sort=form_sort,
         form_create=form_create,
         form_edit=form_edit,
@@ -425,7 +462,7 @@ def sort():
             query = (
                 m.Product.select()
                 .where(
-                    m.Product.name.like(f"{q}%")
+                    m.Product.name.ilike(f"%{q}%")
                     | m.Product.id.in_(product_ids_to_return)
                 )
                 .order_by(m.Product.id)
@@ -433,7 +470,7 @@ def sort():
             count_query = (
                 sa.select(sa.func.count())
                 .where(
-                    m.Product.name.like(f"{q}%")
+                    m.Product.name.ilike(f"%{q}%")
                     | m.Product.id.in_(product_ids_to_return)
                 )
                 .select_from(m.Product)
@@ -469,6 +506,7 @@ def sort():
             mstr_prod_grps_prod_grps_names=products_object[
                 "mstr_prod_grps_prod_grps_names"
             ],
+            warehouse_product_qty=products_object["warehouse_product_qty"],
             form_sort=form,
             form_create=form_create,
             form_edit=form_edit,
@@ -496,7 +534,7 @@ def assign():
             )
         ).scalar()
 
-        # TODO sort also by group_id and warehouse_id
+        # TODO sort also by warehouse_id
         product_warehouse: m.WarehouseProduct = db.session.execute(
             m.WarehouseProduct.select().where(
                 m.WarehouseProduct.product_id == p.id,
@@ -796,3 +834,88 @@ def insert_do_nothing_on_conflicts(sqltable, conn, keys, data_iter):
     do_nothing_stmt = insert_stmt.on_conflict_do_nothing(index_elements=["name"])
 
     conn.execute(do_nothing_stmt)
+
+
+@product_blueprint.route("/stocks_owned_by_me", methods=["GET"])
+@login_required
+def stocks_owned_by_me():
+    curr_user_groups_ids = [
+        i.right_id
+        for i in db.session.execute(
+            m.UserGroup.select().where(
+                m.UserGroup.left_id == current_user.id,
+            )
+        ).scalars()
+    ]
+    curr_user_products_ids = [
+        i.product_id
+        for i in db.session.execute(
+            m.WarehouseProduct.select().where(
+                m.WarehouseProduct.group_id.in_(curr_user_groups_ids),
+            )
+        ).scalars()
+    ]
+    q = request.args.get("q", type=str, default=None)
+    query = (
+        m.Product.select()
+        .where(m.Product.id.in_(curr_user_products_ids))
+        .order_by(m.Product.id)
+    )
+    count_query = sa.select(sa.func.count()).select_from(m.Product)
+    if q:
+        query = (
+            m.Product.select()
+            .where(
+                m.Product.name.ilike(f"%{q}%"), m.Product.id.in_(curr_user_products_ids)
+            )
+            .order_by(m.Product.id)
+        )
+        count_query = (
+            sa.select(sa.func.count())
+            .where(
+                m.Product.name.ilike(f"%{q}%"), m.Product.id.in_(curr_user_products_ids)
+            )
+            .select_from(m.Product)
+        )
+
+    products_object = get_all_products(
+        request, query, count_query, my_stocks=curr_user_groups_ids
+    )
+    form_sort: f.SortByGroupProductForm = f.SortByGroupProductForm()
+    form_create: f.NewProductForm = f.NewProductForm()
+    form_edit: f.ProductForm = f.ProductForm()
+
+    return render_template(
+        "product/products.html",
+        products=db.session.execute(
+            products_object["query"]
+            .offset(
+                (products_object["pagination"].page - 1)
+                * products_object["pagination"].per_page
+            )
+            .limit(products_object["pagination"].per_page)
+        ).scalars(),
+        page=products_object["pagination"],
+        search_query=products_object["q"],
+        main_master_groups=products_object["master_groups"],
+        product_groups=products_object["product_groups"],
+        all_product_groups=products_object["all_product_groups"],
+        current_user_groups=[
+            row[0] for row in products_object["current_user_groups_rows"]
+        ],
+        current_user_groups_names=products_object["current_user_groups_names"],
+        master_groups_groups_available=products_object[
+            "mastr_for_prods_groups_for_prods"
+        ],
+        master_groups_search=products_object["master_groups_search"],
+        product_mg_g=products_object["product_mg_g"],
+        master_group_product_name=products_object["master_product_groups_name"],
+        suppliers=products_object["suppliers"],
+        mstr_prod_grps_prod_grps_names=products_object[
+            "mstr_prod_grps_prod_grps_names"
+        ],
+        warehouse_product_qty=products_object["warehouse_product_qty"],
+        form_sort=form_sort,
+        form_create=form_create,
+        form_edit=form_edit,
+    )

@@ -13,6 +13,7 @@ from app.controllers import create_pagination
 from app import models as m, db
 from app import forms as f
 from app.logger import log
+from config import BaseConfig
 
 
 warehouse_blueprint = Blueprint("warehouse", __name__, url_prefix="/warehouse")
@@ -30,12 +31,12 @@ def get_all():
     if q:
         query = (
             m.Warehouse.select()
-            .where(m.Warehouse.name.like(f"{q}%"))
+            .where(m.Warehouse.name.ilike(f"%{q}%"))
             .order_by(m.Warehouse.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(m.Warehouse.name.like(f"{q}%"))
+            .where(m.Warehouse.name.ilike(f"%{q}%"))
             .select_from(m.Warehouse)
         )
 
@@ -43,7 +44,9 @@ def get_all():
     master_groups_rows = db.session.execute(sa.select(m.MasterGroup)).all()
 
     wh_role = db.session.execute(
-        sa.select(m.Division).where(m.Division.role_name == "Warehouse Manager")
+        sa.select(m.Division).where(
+            m.Division.role_name == BaseConfig.Config.WAREHOUSE_MANAGER
+        )
     ).scalar()
 
     managers = [
@@ -91,7 +94,9 @@ def create():
             )
         )
         manager_role: m.Division = db.session.execute(
-            m.Division.select().where(m.Division.role_name == "Warehouse Manager")
+            m.Division.select().where(
+                m.Division.role_name == BaseConfig.Config.WAREHOUSE_MANAGER
+            )
         ).scalar()
 
         if int(manager.role) != manager_role.id:
@@ -143,7 +148,9 @@ def save():
             )
         )
         manager_role: m.Division = db.session.execute(
-            m.Division.select().where(m.Division.role_name == "Warehouse Manager")
+            m.Division.select().where(
+                m.Division.role_name == BaseConfig.Config.WAREHOUSE_MANAGER
+            )
         ).scalar()
 
         if int(manager.role) != manager_role.id:

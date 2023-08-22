@@ -5,6 +5,7 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
+from sqlalchemy.orm import aliased
 from app.controllers import create_pagination
 
 from app import models as m, db
@@ -16,14 +17,30 @@ assign_blueprint = Blueprint("assign", __name__, url_prefix="/assign")
 @assign_blueprint.route("/", methods=["GET"])
 @login_required
 def get_all():
+    product = aliased(m.Product)
+    group = aliased(m.Group)
     q = request.args.get("q", type=str, default=None)
     query = m.Assign.select().order_by(m.Assign.id)
     count_query = sa.select(sa.func.count()).select_from(m.Assign)
     if q:
-        query = m.Assign.select().where(m.Assign.id.like(f"{q}%")).order_by(m.Assign.id)
+        query = (
+            m.Assign.select()
+            .join(
+                product,
+                m.Assign.product_id == product.id,
+            )
+            .join(group, m.Assign.group_id == group.id)
+            .where(product.name.ilike(f"%{q}%") | group.name.ilike(f"%{q}%"))
+            .order_by(m.Assign.id)
+        )
         count_query = (
             sa.select(sa.func.count())
-            .where(m.Assign.id.like(f"{q}%"))
+            .join(
+                product,
+                m.Assign.product_id == product.id,
+            )
+            .join(group, m.Assign.group_id == group.id)
+            .where(product.name.ilike(f"%{q}%") | group.name.ilike(f"%{q}%"))
             .select_from(m.Assign)
         )
 

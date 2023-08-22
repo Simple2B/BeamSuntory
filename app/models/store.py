@@ -39,6 +39,9 @@ class Store(db.Model, ModelMixin):
     address: orm.Mapped[str] = orm.mapped_column(sa.String(64))
     zip: orm.Mapped[str] = orm.mapped_column(sa.String(64))
     active: orm.Mapped[bool] = orm.mapped_column(sa.Boolean())
+    user_id: orm.Mapped[int] = orm.mapped_column(
+        sa.ForeignKey("users.id"), nullable=True
+    )
 
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,

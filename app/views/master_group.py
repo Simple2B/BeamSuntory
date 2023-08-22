@@ -30,12 +30,12 @@ def get_all():
     if q:
         query = (
             m.MasterGroup.select()
-            .where(m.MasterGroup.name.like(f"{q}%"))
+            .where(m.MasterGroup.name.ilike(f"%{q}%"))
             .order_by(m.MasterGroup.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(m.MasterGroup.name.like(f"{q}%"))
+            .where(m.MasterGroup.name.ilike(f"%{q}%"))
             .select_from(m.MasterGroup)
         )
 

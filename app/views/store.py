@@ -8,6 +8,7 @@ from flask import (
 )
 from flask_login import login_required, current_user
 import sqlalchemy as sa
+from sqlalchemy.orm import aliased
 from app.controllers import create_pagination
 
 from app import models as m, db
@@ -24,18 +25,35 @@ def get_all():
     form_create: f.NewStoreForm = f.NewStoreForm()
     form_edit: f.StoreForm = f.StoreForm()
 
+    store_category = aliased(m.StoreCategory)
     q = request.args.get("q", type=str, default=None)
     query = m.Store.select().order_by(m.Store.id)
     count_query = sa.select(sa.func.count()).select_from(m.Store)
     if q:
         query = (
             m.Store.select()
-            .where(m.Store.store_name.like(f"{q}%") | m.Store.email.like(f"{q}%"))
+            .join(
+                store_category,
+                m.Store.store_category_id == store_category.id,
+            )
+            .where(
+                m.Store.store_name.ilike(f"%{q}%")
+                | m.Store.email.ilike(f"%{q}%")
+                | store_category.name.ilike(f"%{q}%")
+            )
             .order_by(m.Store.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(m.Store.store_name.like(f"{q}%") | m.Store.email.like(f"{q}%"))
+            .join(
+                store_category,
+                m.Store.store_category_id == store_category.id,
+            )
+            .where(
+                m.Store.store_name.ilike(f"%{q}%")
+                | m.Store.email.ilike(f"%{q}%")
+                | store_category.name.ilike(f"%{q}%")
+            )
             .select_from(m.Store)
         )
 

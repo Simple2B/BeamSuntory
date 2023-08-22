@@ -7,96 +7,97 @@
 {% set base_url = url_for('incoming_stock.get_all') %}
 {% endif %}
 <div class="relative overflow-visible shadow-md sm:rounded-lg">
-  <form id="incoming-stock-filter-form" action="{{url_for('incoming_stock.sort')}}" method="post"
-    class="flex flex-wrap py-4 gap-5 bg-white dark:bg-gray-800">
-    {{ form_sort.hidden_tag() }}
-    <input id="sort_by" hidden type="text" value="" name="sort_by"
-      class="incoming-stock-filter-input w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-    <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800">
-      <div>
-        <button id="dropdownRadioButton-incoming-stock-status"
-          data-dropdown-toggle="dropdownRadio-incoming-stock-status"
-          class="incoming-stock-filter-radio-button inline-flex items-center w-48 text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
-          type="button">
-          Status
-          <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-            viewBox="0 0 10 6">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="m1 1 4 4 4-4" />
-          </svg>
-        </button>
-        <!-- Dropdown menu -->
-        <div id="dropdownRadio-incoming-stock-status"
-          class="z-10 hidden w-48 bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600"
-          data-popper-reference-hidden="" data-popper-escaped="" data-popper-placement="top"
-          style="position: absolute; inset: auto auto 0px 0px; margin: 0px; transform: translate3d(522.5px, 3847.5px, 0px);">
-          <ul class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownRadioButton">
-            <li>
-              <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
-                <input id="incoming-stock-filter-input-default-value-status" type="radio" value=""
-                  data-target="{{master_group_search_no_space, master_group_search_no_space }}" name="filter-radio"
-                  class="incoming-stock-filter-input w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
-                <label for="incoming-stock-filter-input-default-value-status"
-                  class="w-full ml-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300 cursor-pointer">
-                  Default Value
-                </label>
-              </div>
-            </li>
-            {% for status in inbound_orders_status %}
-            <li>
-              <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
-                <input id="incoming-stock-filter-input-{{ status }}" type="radio" value="{{ status }}"
-                  class="incoming-stock-filter-input w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
-                <label for="incoming-stock-filter-input-{{ status }}"
-                  class="w-full ml-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300 cursor-pointer">
-                  {{ status }}
-                </label>
-              </div>
-            </li>
-            {% endfor %}
-          </ul>
+  <div class="flex gap-5">
+    <form id="incoming-stock-filter-form" action="{{url_for('incoming_stock.sort')}}" method="post"
+      class="flex flex-wrap py-4 gap-3 bg-white dark:bg-gray-800">
+      {{ form_sort.hidden_tag() }}
+      <input id="sort_by" hidden type="text" value="" name="sort_by"
+        class="incoming-stock-filter-input w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+      <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800">
+        <div>
+          <button id="dropdownRadioButton-incoming-stock-status"
+            data-dropdown-toggle="dropdownRadio-incoming-stock-status"
+            class="incoming-stock-filter-radio-button inline-flex items-center w-48 text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+            type="button">
+            Status
+            <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+              viewBox="0 0 10 6">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="m1 1 4 4 4-4" />
+            </svg>
+          </button>
+          <!-- Dropdown menu -->
+          <div id="dropdownRadio-incoming-stock-status"
+            class="z-10 hidden w-48 bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600"
+            data-popper-reference-hidden="" data-popper-escaped="" data-popper-placement="top"
+            style="position: absolute; inset: auto auto 0px 0px; margin: 0px; transform: translate3d(522.5px, 3847.5px, 0px);">
+            <ul class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownRadioButton">
+              <li>
+                <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
+                  <input id="incoming-stock-filter-input-default-value-status" type="radio" value=""
+                    data-target="{{master_group_search_no_space, master_group_search_no_space }}" name="filter-radio"
+                    class="incoming-stock-filter-input w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
+                  <label for="incoming-stock-filter-input-default-value-status"
+                    class="w-full ml-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300 cursor-pointer">
+                    Default Value
+                  </label>
+                </div>
+              </li>
+              {% for status in inbound_orders_status %}
+              <li>
+                <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
+                  <input id="incoming-stock-filter-input-{{ status }}" type="radio" value="{{ status }}"
+                    class="incoming-stock-filter-input w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
+                  <label for="incoming-stock-filter-input-{{ status }}"
+                    class="w-full ml-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300 cursor-pointer">
+                    {{ status }}
+                  </label>
+                </div>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="flex items-center space-x-2 sm:space-x-3">
-      <button type="submit" id="incoming-stock-filter-button" name="submit"
-        class="inline-flex items-center justify-center w-1/2 px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-blue-300 sm:w-auto dark:bg-yellow-400 dark:hover:bg-yellow-500 dark:focus:ring-blue-800">
-        <svg class="w-3 h-3 mr-2 -ml-1" fill="currentColor" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-          <path fill-rule="evenodd"
-            d="M137.4 41.4c12.5-12.5 32.8-12.5 45.3 0l128 128c9.2 9.2 11.9 22.9 6.9 34.9s-16.6 19.8-29.6 19.8H32c-12.9 0-24.6-7.8-29.6-19.8s-2.2-25.7 6.9-34.9l128-128zm0 429.3l-128-128c-9.2-9.2-11.9-22.9-6.9-34.9s16.6-19.8 29.6-19.8H288c12.9 0 24.6 7.8 29.6 19.8s2.2 25.7-6.9 34.9l-128 128c-12.5 12.5-32.8 12.5-45.3 0z"
-            clip-rule="evenodd">
-          </path>
-        </svg>
-        Filter
-      </button>
-    </div>
-  </form>
-  <div class="flex items-center justify-center py-4 bg-white dark:bg-gray-800">
-    <label for="table-search" class="sr-only">Search</label>
-    <div class="relative">
-      <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        <button type="submit" id="incoming-stock-filter-button" name="submit"
+          class="inline-flex items-center justify-center w-1/2 px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-blue-300 sm:w-auto dark:bg-yellow-400 dark:hover:bg-yellow-500 dark:focus:ring-blue-800">
+          <svg class="w-3 h-3 mr-2 -ml-1" fill="currentColor" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+              d="M137.4 41.4c12.5-12.5 32.8-12.5 45.3 0l128 128c9.2 9.2 11.9 22.9 6.9 34.9s-16.6 19.8-29.6 19.8H32c-12.9 0-24.6-7.8-29.6-19.8s-2.2-25.7 6.9-34.9l128-128zm0 429.3l-128-128c-9.2-9.2-11.9-22.9-6.9-34.9s16.6-19.8 29.6-19.8H288c12.9 0 24.6 7.8 29.6 19.8s2.2 25.7-6.9 34.9l-128 128c-12.5 12.5-32.8 12.5-45.3 0z"
+              clip-rule="evenodd">
+            </path>
+          </svg>
+          Filter
+        </button>
+      </div>
+    </form>
+    <div class="flex items-center justify-center py-4 bg-white dark:bg-gray-800">
+      <label for="table-search" class="sr-only">Search</label>
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <!-- prettier-ignore -->
+          <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" aria-hidden="true" fill="currentColor"
+            viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+              d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+              clip-rule="evenodd"></path>
+          </svg>
+        </div>
         <!-- prettier-ignore -->
-        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
-          xmlns="http://www.w3.org/2000/svg">
-          <path fill-rule="evenodd"
-            d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-            clip-rule="evenodd"></path>
-        </svg>
+        <input {% if search_query %}value={{ search_query }}{% endif %} type="text" id="table-search-incoming-stocks"
+          class="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          placeholder="Search for inbound orders" />
       </div>
       <!-- prettier-ignore -->
-      <input {% if search_query %}value={{ search_query }}{% endif %} type="text" id="table-search-incoming-stocks"
-        class="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-        placeholder="Search for inbound orders" />
+      <button type="button" id="table-search-incoming-stock-button"
+        class="px-3 py-2 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 ml-2 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"><svg
+          class="w-5 h-5 text-white-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+          stroke-width="1.5" stroke="currentColor" class="w-6 h-6 ml-0 mr-1">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M15.75 15.75l-2.489-2.489m0 0a3.375 3.375 0 10-4.773-4.773 3.375 3.375 0 004.774 4.774zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>Search</button>
     </div>
-    <!-- prettier-ignore -->
-    <button type="button" id="table-search-incoming-stock-button"
-      class="px-3 py-2 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 ml-2 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"><svg
-        class="w-5 h-5 text-white-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-        stroke-width="1.5" stroke="currentColor" class="w-6 h-6 ml-0 mr-1">
-        <path stroke-linecap="round" stroke-linejoin="round"
-          d="M15.75 15.75l-2.489-2.489m0 0a3.375 3.375 0 10-4.773-4.773 3.375 3.375 0 004.774 4.774zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>Search</button>
   </div>
   <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">

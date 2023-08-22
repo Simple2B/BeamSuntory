@@ -65,6 +65,7 @@ class User(db.Model, UserMixin, ModelMixin):
     role: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("divisions.id"), nullable=False
     )
+    role_obj: orm.Mapped[Division] = orm.relationship()
     country: orm.Mapped[str] = orm.mapped_column(
         sa.String(255),
         nullable=False,

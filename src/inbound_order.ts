@@ -222,6 +222,16 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
         if (currentInboundOrder) {
             for (let i = 0; i < currentInboundOrder.length; i++) {
                 if (i === 0) {
+                    const firstProdSelect: HTMLSelectElement = document.querySelector(
+                        '#inbound-order-edit-add-product-1st-item'
+                    )
+                    firstProdSelect.innerHTML = ''
+                    inboundOrder.io_allocate_product[inboundOrder.id].forEach((e) => {
+                        const option = document.createElement('option')
+                        option.value = e.product.id.toString()
+                        option.innerHTML = e.product.name
+                        firstProdSelect.appendChild(option)
+                    })
                     const inboundOrderProductInput = inboundOrderProductsInputs[i]
                     const inboundOrderGroupInput = inboundOrderGroupsInputs[i]
                     const inboundOrderQuantityInput = inboundOrderQuantityInputs[i]
@@ -238,13 +248,16 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
             }
         }
 
-        const selectedProduct = inboundOrderProductsInputs[0].options[inboundOrderProductsInputs[0].selectedIndex].text
+        const selectedProduct = inboundOrderProductsInputs[0].options[
+            inboundOrderProductsInputs[0].selectedIndex
+        ].text.replace(/ /g, '_')
 
         const selectedProductQtyId = `io-product-input-qty-${selectedProduct}`
 
         inboundOrderQuantityInputs[0].addEventListener('change', () => {
-            const selectedProduct =
-                inboundOrderProductsInputs[0].options[inboundOrderProductsInputs[0].selectedIndex].text
+            const selectedProduct = inboundOrderProductsInputs[0].options[
+                inboundOrderProductsInputs[0].selectedIndex
+            ].text.replace(/ /g, '_')
             const selectedProductQtyId = `io-product-input-qty-${selectedProduct}`
             const allocateQtyInput: HTMLDivElement = document.querySelector(
                 `#inbound-order-edit-check-quantity-${selectedProduct}`
@@ -268,16 +281,12 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
 
         inboundOrderQuantityInputs[0].setAttribute('id', selectedProductQtyId)
 
-        console.log('inboundOrderProductsInputs[0]', inboundOrderProductsInputs[0])
-
         inboundOrderProductsInputs[0].addEventListener('change', () => {
-            console.log('inboundOrderProductsInputs[0]', inboundOrderProductsInputs[0])
-
             inboundOrderQuantityInputs[0].setAttribute(
                 'id',
-                `io-product-input-qty-${
-                    inboundOrderProductsInputs[0].options[inboundOrderProductsInputs[0].selectedIndex].text
-                }`
+                `io-product-input-qty-${inboundOrderProductsInputs[0].options[
+                    inboundOrderProductsInputs[0].selectedIndex
+                ].text.replace(/ /g, '_')}`
             )
         })
     }
@@ -307,12 +316,12 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
                     const shelfLifeStartInput = shelfLifeStartInputs[i]
                     const shelfLifeEndInput = shelfLifeEndInputs[i]
 
-                    const prodName = currentInboundOrderCheck[i].product.name
+                    const prodName = currentInboundOrderCheck[i].product.name.replace(/ /g, '_')
                     const ioProdQtyCheckInput = document.querySelectorAll<HTMLInputElement>(
                         `io-product-input-qty-${prodName}`
                     )
 
-                    inboundOrderProductCheckInput.innerHTML = String(prodName)
+                    inboundOrderProductCheckInput.innerHTML = String(currentInboundOrderCheck[i].product.name)
                     if (ioProdQtyCheckInput) {
                         let preselectedQty = 0
                         ioProdQtyCheckInput.forEach((input: HTMLInputElement) => {
@@ -378,6 +387,7 @@ function createInboundOrderCheckItems(inbOrder: IInboundOrder = null, curInbOrde
         inbOrder = inboundOrder
     }
 
+    const productUnderscore = curInbOrder.product.name.replace(/ /g, '_')
     const inboundOrderCheckContainer = document.querySelector('#inbound-order-edit-check-container')
     const inboundOrderCheckItem = document.createElement('div')
     inboundOrderCheckItem.classList.add('grid', 'grid-cols-12', 'gap-5', `delete-id-check-${inbOrder.id}`)
@@ -389,12 +399,8 @@ function createInboundOrderCheckItems(inbOrder: IInboundOrder = null, curInbOrde
         </div>
       </div>
       <div class="col-span-6 sm:col-span-3">
-        <div type="text" name="check_quantity" id="inbound-order-edit-check-quantity-${String(
-            curInbOrder.product.name
-        )}-hidden" class="inbound-order-edit-check-quantity-hidden" hidden></div>
-        <div type="text" name="check_quantity_display" id="inbound-order-edit-check-quantity-${String(
-            curInbOrder.product.name
-        )}"
+        <div type="text" name="check_quantity" id="inbound-order-edit-check-quantity-${productUnderscore}-hidden" class="inbound-order-edit-check-quantity-hidden" hidden></div>
+        <div type="text" name="check_quantity_display" id="inbound-order-edit-check-quantity-${productUnderscore}"
           class="inbound-order-edit-check-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           placeholder="Quantity">
         </div>
@@ -405,18 +411,14 @@ function createInboundOrderCheckItems(inbOrder: IInboundOrder = null, curInbOrde
             <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
             </div>
-            <input id="datepickerEl-start-${String(
-                curInbOrder.product.name
-            )}" datepicker name="shelf_life_start" type="text" class="inbound-order-edit-add-shelf_life_start bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date start">
+            <input id="datepickerEl-start-${productUnderscore}" datepicker name="shelf_life_start" type="text" class="inbound-order-edit-add-shelf_life_start bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date start">
           </div>
           <span class="mx-4 text-gray-500">to</span>
           <div class="relative">
             <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
             </div>
-            <input name="shelf_life_end" id="datepickerEl-end-${String(
-                curInbOrder.product.name
-            )}" datepicker type="text" class="inbound-order-edit-add-shelf_life_end bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date end">
+            <input name="shelf_life_end" id="datepickerEl-end-${productUnderscore}" datepicker type="text" class="inbound-order-edit-add-shelf_life_end bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date end">
           </div>
         </div>
       </div>
@@ -521,16 +523,26 @@ function createInboundOrderItems(inbOrder: IInboundOrder = null, curInbOrder: II
         '.inbound-order-edit-add-quantity'
     )
 
-    inbOrder.products.forEach((product) => {
+    // inbOrder.products.forEach((product) => {
+    //     const option = document.createElement('option')
+    //     curInbOrder
+    //     if (curInbOrder) {
+    //         option.value = curInbOrder.product.id.toString()
+    //         option.innerHTML = curInbOrder.product.name
+    //     } else {
+    //         option.value = product.id.toString()
+    //         option.innerHTML = product.name
+    //     }
+    //     if (curInbOrder) {
+    //         inboundOrderAddProductSelect.value = option.value
+    //         inboundOrderAddProductSelect.setAttribute('disabled', 'disabled')
+    //     }
+    //     inboundOrderAddProductSelect.appendChild(option)
+    // })
+    inbOrder.io_allocate_product[inbOrder.id].forEach((e) => {
         const option = document.createElement('option')
-        curInbOrder
-        if (curInbOrder) {
-            option.value = curInbOrder.product.id.toString()
-            option.innerHTML = curInbOrder.product.name
-        } else {
-            option.value = product.id.toString()
-            option.innerHTML = product.name
-        }
+        option.value = e.product.id.toString()
+        option.innerHTML = e.product.name
         if (curInbOrder) {
             inboundOrderAddProductSelect.value = option.value
             inboundOrderAddProductSelect.setAttribute('disabled', 'disabled')
@@ -559,16 +571,18 @@ function createInboundOrderItems(inbOrder: IInboundOrder = null, curInbOrder: II
         inboundOrderAddQuantityInput.value = String(curInbOrder.quantity)
         inboundOrderAddQuantityInput.setAttribute(
             'id',
-            `io-product-input-qty-${
-                inboundOrderAddProductSelect.options[inboundOrderAddProductSelect.selectedIndex].text
-            }`
+            `io-product-input-qty-${inboundOrderAddProductSelect.options[
+                inboundOrderAddProductSelect.selectedIndex
+            ].text.replace(/ /g, '_')}`
         )
     }
 
     inboundOrderAddContainer.appendChild(inboundOrderAddItem)
 
     inboundOrderAddQuantityInput.addEventListener('change', () => {
-        const selectedProdName = inboundOrderAddProductSelect.options[inboundOrderAddProductSelect.selectedIndex].text
+        const selectedProdName = inboundOrderAddProductSelect.options[
+            inboundOrderAddProductSelect.selectedIndex
+        ].text.replace(/ /g, '_')
         const inboundOrderAddQuantityInputsAll = document.querySelectorAll(`#io-product-input-qty-${selectedProdName}`)
         const inboundOrderCheckQuantityInput: HTMLDivElement = document.querySelector(
             `#inbound-order-edit-check-quantity-${selectedProdName}`
@@ -589,17 +603,17 @@ function createInboundOrderItems(inbOrder: IInboundOrder = null, curInbOrder: II
     inboundOrderAddProductSelect.addEventListener('change', () => {
         inboundOrderAddQuantityInput.setAttribute(
             'id',
-            `io-product-input-qty-${
-                inboundOrderAddProductSelect.options[inboundOrderAddProductSelect.selectedIndex].text
-            }`
+            `io-product-input-qty-${inboundOrderAddProductSelect.options[
+                inboundOrderAddProductSelect.selectedIndex
+            ].text.replace(/ /g, '_')}`
         )
     })
 
     const addButton = inboundOrderAddItem.querySelector('.inbound-order-edit-add-item-btn')
     addButton.addEventListener('click', () => {
         createInboundOrderItems()
-        new Datepicker(document.querySelector(`#datepickerEl-start-${index + 1}`))
-        new Datepicker(document.querySelector(`#datepickerEl-end-${index + 1}`))
+        // new Datepicker(document.querySelector(`#datepickerEl-start-${index + 1}`))
+        // new Datepicker(document.querySelector(`#datepickerEl-end-${index + 1}`))
     })
 
     const deleteButtons = document.querySelectorAll('.inbound-order-edit-delete-item-btn')
@@ -617,10 +631,10 @@ function createInboundOrderItems(inbOrder: IInboundOrder = null, curInbOrder: II
 const addInboundOrderItemBtnById = document.querySelector('#inbound-order-edit-add-item-btn')
 addInboundOrderItemBtnById.addEventListener('click', () => {
     createInboundOrderItems()
-    const allInboundOrderItems = document.querySelectorAll('.inbound-order-edit-add-item')
-    const index = allInboundOrderItems.length
-    new Datepicker(document.querySelector(`#datepickerEl-start-${index}`))
-    new Datepicker(document.querySelector(`#datepickerEl-end-${index}`))
+    // const allInboundOrderItems = document.querySelectorAll('.inbound-order-edit-add-item')
+    // const index = allInboundOrderItems.length
+    // new Datepicker(document.querySelector(`#datepickerEl-start-${index}`))
+    // new Datepicker(document.querySelector(`#datepickerEl-end-${index}`))
 })
 
 // ----add inbound order item for add modal----
@@ -751,7 +765,9 @@ function setProducts(actionType: string) {
             shelfLifeStartInput = shelfLifeStartInputs[i] as HTMLSelectElement
             shelfLifeEndInput = shelfLifeEndInputs[i] as HTMLSelectElement
         } else {
-            const prodName = inboundOrderAddProductSelect.options[inboundOrderAddProductSelect.selectedIndex].text
+            const prodName = inboundOrderAddProductSelect.options[
+                inboundOrderAddProductSelect.selectedIndex
+            ].text.replace(/ /g, '_')
             shelfLifeStartInput = document.querySelector(`#datepickerEl-start-${prodName}`)
             shelfLifeEndInput = document.querySelector(`#datepickerEl-end-${prodName}`)
         }
@@ -783,9 +799,9 @@ function setProducts(actionType: string) {
             }
 
             const ProductQuantityCheck = document.querySelector(
-                `#inbound-order-edit-check-quantity-${
-                    inboundOrderAddProductSelect.options[inboundOrderAddProductSelect.selectedIndex].text
-                }-hidden`
+                `#inbound-order-edit-check-quantity-${inboundOrderAddProductSelect.options[
+                    inboundOrderAddProductSelect.selectedIndex
+                ].text.replace(/ /g, '_')}-hidden`
             )
 
             if (!ProductQuantityCheck) {
@@ -806,9 +822,9 @@ function setProducts(actionType: string) {
             const prodId = inboundOrderAddProductSelect.value.toString()
 
             const ProductQuantityCheck = document.querySelector(
-                `#inbound-order-edit-check-quantity-${
-                    inboundOrderAddProductSelect.options[inboundOrderAddProductSelect.selectedIndex].text
-                }-hidden`
+                `#inbound-order-edit-check-quantity-${inboundOrderAddProductSelect.options[
+                    inboundOrderAddProductSelect.selectedIndex
+                ].text.replace(/ /g, '_')}-hidden`
             )
 
             if (productsQuantities[prodId] > Number(ProductQuantityCheck.innerHTML)) {

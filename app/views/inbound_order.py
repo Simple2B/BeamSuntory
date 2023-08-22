@@ -36,16 +36,18 @@ def get_all():
         query = (
             m.InboundOrder.select()
             .where(
-                m.InboundOrder.order_title.like(f"{q}%")
-                | m.InboundOrder.quantity.like(f"{q}%")
+                m.InboundOrder.order_title.ilike(f"%{q}%")
+                | m.InboundOrder.order_id.ilike(f"%{q}%")
+                | m.InboundOrder.status.ilike(f"%{q}%")
             )
             .order_by(m.InboundOrder.id)
         )
         count_query = (
             sa.select(sa.func.count())
             .where(
-                m.InboundOrder.order_title.like(f"{q}%")
-                | m.InboundOrder.quantity.like(f"{q}%")
+                m.InboundOrder.order_title.ilike(f"%{q}%")
+                | m.InboundOrder.order_id.ilike(f"%{q}%")
+                | m.InboundOrder.status.ilike(f"%{q}%")
             )
             .select_from(m.InboundOrder)
         )
@@ -222,8 +224,14 @@ def create():
         # save delivered product quantity, so this product would be available in warehouse
         products = json.loads(form.products.data)
         for product in products:
-            shelf_life_str_start = product["shelf_life_start"]
-            shelf_life_str_end = product["shelf_life_end"]
+            shelf_life_str_start = (
+                product["shelf_life_start"]
+                if product["shelf_life_start"]
+                else "01/01/2023"
+            )
+            shelf_life_str_end = (
+                product["shelf_life_end"] if product["shelf_life_end"] else "01/01/2023"
+            )
             shelf_life_stamp_start = datetime.datetime.strptime(
                 shelf_life_str_start, "%m/%d/%Y"
             )

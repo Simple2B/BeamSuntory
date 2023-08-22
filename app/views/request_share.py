@@ -8,6 +8,7 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
+from sqlalchemy.orm import aliased
 from app.controllers import create_pagination
 
 from app import models as m, db
@@ -26,18 +27,32 @@ request_share_blueprint = Blueprint(
 def get_all():
     form_edit: f.RequestShareForm = f.RequestShareForm()
 
+    product = aliased(m.Product)
+    group = aliased(m.Group)
     q = request.args.get("q", type=str, default=None)
     query = m.RequestShare.select().order_by(m.RequestShare.id)
     count_query = sa.select(sa.func.count()).select_from(m.RequestShare)
     if q:
         query = (
             m.RequestShare.select()
-            .where(m.RequestShare.id.like(f"{q}%"))
+            .join(product, m.RequestShare.product_id == product.id)
+            .join(group, m.RequestShare.group_id == group.id)
+            .where(
+                product.name.ilike(f"%{q}%")
+                | m.RequestShare.status.ilike(f"%{q}%")
+                | group.name.ilike(f"%{q}%")
+            )
             .order_by(m.RequestShare.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(m.RequestShare.id.like(f"{q}%"))
+            .join(product, m.RequestShare.product_id == product.id)
+            .join(group, m.RequestShare.group_id == group.id)
+            .where(
+                product.name.ilike(f"%{q}%")
+                | m.RequestShare.status.ilike(f"%{q}%")
+                | group.name.ilike(f"%{q}%")
+            )
             .select_from(m.RequestShare)
         )
 

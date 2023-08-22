@@ -38,16 +38,18 @@ def get_all():
         query = (
             m.InboundOrder.select()
             .where(
-                m.InboundOrder.order_title.like(f"{q}%")
-                | m.InboundOrder.quantity.like(f"{q}%")
+                m.InboundOrder.order_title.ilike(f"%{q}%")
+                | m.InboundOrder.order_id.ilike(f"%{q}%")
+                | m.InboundOrder.status.ilike(f"%{q}%")
             )
             .order_by(m.InboundOrder.id)
         )
         count_query = (
             sa.select(sa.func.count())
             .where(
-                m.InboundOrder.order_title.like(f"{q}%")
-                | m.InboundOrder.quantity.like(f"{q}%")
+                m.InboundOrder.order_title.ilike(f"%{q}%")
+                | m.InboundOrder.order_id.ilike(f"%{q}%")
+                | m.InboundOrder.status.ilike(f"%{q}%")
             )
             .select_from(m.InboundOrder)
         )
@@ -140,8 +142,6 @@ def accept():
         )
         flash("There is no such inbound order", "danger")
         return redirect(url_for("incoming_stock.get_all"))
-    io.status = "Delivered"
-    io.save()
 
     # save delivered product quantity, so this product would be available in warehouse
     products_quantity_group: list[m.ProductQuantityGroup] = db.session.execute(
@@ -198,6 +198,8 @@ def accept():
             )
             warehouse_product.save()
 
+    io.status = "Delivered"
+    io.save()
     log(log.INFO, "Inbound order accepted. Inbound order: [%s]", io)
     if not quantity_received != product.quantity:
         flash("Inbound order accepted!", "success")
@@ -262,8 +264,8 @@ def sort():
         query = (
             m.InboundOrder.select()
             .where(
-                m.InboundOrder.order_title.like(f"{q}%")
-                | m.InboundOrder.quantity.like(f"{q}%"),
+                m.InboundOrder.order_title.ilike(f"%{q}%")
+                | m.InboundOrder.quantity.ilike(f"%{q}%"),
                 m.InboundOrder.status == status,
             )
             .order_by(m.InboundOrder.id)
@@ -271,8 +273,8 @@ def sort():
         count_query = (
             sa.select(sa.func.count())
             .where(
-                m.InboundOrder.order_title.like(f"{q}%")
-                | m.InboundOrder.quantity.like(f"{q}%"),
+                m.InboundOrder.order_title.ilike(f"%{q}%")
+                | m.InboundOrder.quantity.ilike(f"%{q}%"),
                 m.InboundOrder.status == status,
             )
             .select_from(m.InboundOrder)

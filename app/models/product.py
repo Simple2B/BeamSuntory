@@ -93,16 +93,25 @@ class Product(db.Model, ModelMixin):
             for grps in current_user_groups_rows
         }
         mg_dict["groups_ids"] = {i.group.name: i.group.id for i in whp}
-        warehouse_products = db.session.execute(
-            WarehouseProduct.select().where(
-                WarehouseProduct.product_id == mg_dict["id"]
-            )
-        ).scalars()
-        mg_dict["available_quantity"] = (
-            {wp.group.name: wp.product_quantity for wp in warehouse_products}
-            if warehouse_products
-            else {}
-        )
+        warehouse_products = [
+            wp
+            for wp in db.session.execute(
+                WarehouseProduct.select().where(
+                    WarehouseProduct.product_id == mg_dict["id"]
+                )
+            ).scalars()
+        ]
+
+        mg_dict["available_quantity"] = {}
+
+        for wp in warehouse_products:
+            if wp.group.name in mg_dict["available_quantity"]:
+                mg_dict["available_quantity"][wp.group.name] = int(
+                    mg_dict["available_quantity"][wp.group.name]
+                ) + int(wp.product_quantity)
+            else:
+                mg_dict["available_quantity"][wp.group.name] = wp.product_quantity
+
         mg_dict["all_warehouses"] = [
             {
                 "id": w.id,
@@ -146,4 +155,10 @@ class Product(db.Model, ModelMixin):
                     group[0].master_groups_for_product.name
                 ].append({"group_name": group[0].name, "group_id": group[0].id})
         mg_dict["mstr_grps_grps_names_in_prod"] = mstr_grps_grps_names_in_prod
+
+        mg_dict["warehouse_product_qty"] = 0
+
+        for wp in warehouse_products:
+            mg_dict["warehouse_product_qty"] += wp.product_quantity
+
         return json.dumps(mg_dict)
