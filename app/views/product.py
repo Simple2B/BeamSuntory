@@ -85,6 +85,16 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         row for row in db.session.execute(m.ProductGroup.select()).scalars()
     ]
 
+    product_groups: list[m.ProductGroup] = [
+        row
+        for row in db.session.execute(
+            m.ProductGroup.select()
+            .order_by(m.ProductGroup.id)
+            .offset((pagination.page - 1) * pagination.per_page * 4)
+            .limit(pagination.per_page)
+        ).scalars()
+    ]
+
     # TODO: consider using a join instead of two queries <- Copilot
     # get all groups ids for current user to compare with product groups ids in view.html
     current_user_groups_rows = db.session.execute(
@@ -142,6 +152,12 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
             m.WarehouseProduct.select().order_by(m.WarehouseProduct.id)
         ).scalars()
     ]
+    db.session.execute(
+        m.Product.select()
+        .order_by(m.Product.id)
+        .offset((pagination.page - 1) * pagination.per_page)
+        .limit(pagination.per_page)
+    ).scalars()
 
     warehouse_product_qty = dict()
 
