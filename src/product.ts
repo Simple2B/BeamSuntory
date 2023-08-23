@@ -6,7 +6,8 @@ interface IProduct {
     name: string
     supplier_id: number
     currency: string
-    price: number
+    regular_price: number
+    retail_price: number
     image: string
     description: string
     // General Info ->
@@ -418,8 +419,10 @@ function editProduct(product: IProduct) {
     // a loop that adds additional fields
     input = document.querySelector('#product-edit-currency')
     input.value = product.currency
-    input = document.querySelector('#product-edit-price')
-    input.value = product.price.toString()
+    input = document.querySelector('#product-edit-regular_price')
+    input.value = product.regular_price.toString()
+    input = document.querySelector('#product-edit-regular_price')
+    input.value = product.regular_price.toString()
     input = document.querySelector('#product-edit-description')
     input.value = product.description
     // General Info ->
@@ -577,8 +580,10 @@ viewProductButtonElements.forEach((e) =>
         product.image.length > 100
             ? (img.src = `data:image/png;base64, ${product.image}`)
             : (img.src = defaultBrandImage)
-        div = document.querySelector('#product-view-price')
-        div.innerHTML = product.price.toString()
+        div = document.querySelector('#product-view-regular_price')
+        div.innerHTML = product.regular_price.toString()
+        div = document.querySelector('#product-view-retail_price')
+        div.innerHTML = product.retail_price.toString()
         div = document.querySelector('#product-view-warehouse-qty')
         div.innerHTML = product.warehouse_product_qty.toString()
         // General Info ->

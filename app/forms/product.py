@@ -20,7 +20,8 @@ class ProductForm(FlaskForm):
     name = StringField("Name", [DataRequired()])
     supplier = IntegerField("Supplier ID", validators=[Optional()])
     currency = StringField("Currency", validators=[Optional()])
-    price = FloatField("Price", validators=[Optional()])
+    regular_price = FloatField("Regular price", validators=[Optional()])
+    retail_price = FloatField("Retail price", validators=[Optional()])
     image = FileField("Image", validators=[Optional()])
     description = StringField("Description", [DataRequired()])
     # General Info ->
@@ -55,7 +56,8 @@ class NewProductForm(FlaskForm):
     name = StringField("Name", [DataRequired()])
     supplier = IntegerField("Supplier ID", validators=[Optional()])
     currency = StringField("Currency", validators=[Optional()])
-    price = FloatField("Price", validators=[Optional()])
+    regular_price = FloatField("Regular price", validators=[Optional()])
+    retail_price = FloatField("Retail price", validators=[Optional()])
     image = FileField("Image", validators=[Optional()])
     description = StringField("Description", [DataRequired()])
     # General Info ->

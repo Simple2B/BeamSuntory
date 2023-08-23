@@ -32,7 +32,8 @@ class Product(db.Model, ModelMixin):
     currency: orm.Mapped[s.Currency] = orm.mapped_column(
         sa.Enum(s.Currency), nullable=True
     )
-    price: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
+    regular_price: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
+    retail_price: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
 
     image: orm.Mapped[str] = orm.mapped_column(sa.Text())  # png base64 str
     description: orm.Mapped[str] = orm.mapped_column(sa.String(256), nullable=False)

@@ -20,7 +20,8 @@ interface IProduct {
     id: number
     name: string
     quantity: string
-    price: number
+    regular_price: number
+    retail_price: number
     image: string
     SKU: string
     comment: string
@@ -153,7 +154,12 @@ function createPickupOrderItemTable(shipRqst: IShipRequest, typeModal: string) {
         </td>
         <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="cart-item-retail-price text-base font-semibold">${product.price}</div>
+            <div class="cart-item-retail-regular_price text-base font-semibold">${product.regular_price}</div>
+          </div>
+        </td>
+        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="cart-item-retail-retail_price text-base font-semibold">${product.retail_price}</div>
           </div>
         </td>
         <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
