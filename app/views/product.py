@@ -794,8 +794,12 @@ def upload():
             ],
         )
         file_io.seek(0)
-        df = df.drop_duplicates().dropna()
+        df = df.drop_duplicates()
         df["image"] = ""
+        df["Description"] = df["Description"].fillna("")
+        df["SKU"] = df["SKU"].fillna("")
+        df["Regular Price"] = df["Regular Price"].fillna(0)
+        df["Retail Price"] = df["Retail Price"].fillna(0)
 
         df.rename(
             columns=dict(
