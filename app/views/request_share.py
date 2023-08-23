@@ -42,6 +42,7 @@ def get_all():
             .where(
                 product.name.ilike(f"%{q}%")
                 | m.RequestShare.status.ilike(f"%{q}%")
+                | m.RequestShare.order_numb.ilike(f"%{q}%")
                 | group.name.ilike(f"%{q}%")
             )
             .order_by(m.RequestShare.id)
@@ -53,6 +54,7 @@ def get_all():
             .where(
                 product.name.ilike(f"%{q}%")
                 | m.RequestShare.status.ilike(f"%{q}%")
+                | m.RequestShare.order_numb.ilike(f"%{q}%")
                 | group.name.ilike(f"%{q}%")
             )
             .select_from(m.RequestShare)
@@ -201,27 +203,44 @@ def decline(id: int):
 
     rs.status = "declined"
     rs.save()
-    msg = Message(
-        subject="Declined request share",
-        sender=app.config["MAIL_DEFAULT_SENDER"],
-        recipients=[current_user.email],
-    )
-    url = (
-        url_for(
-            "request_share.get_all",
-            _external=True,
-        )
-        + f"?q={rs.status}"
-    )
 
-    msg.html = render_template(
-        "email/request_share.html",
-        user=current_user,
-        action="declined",
-        request_share=rs,
-        url=url,
-    )
-    mail.send(msg)
+    product_group: m.Group = db.session.execute(
+        m.Group.select().where(m.Group.id == rs.group_id)
+    ).scalar()
+
+    users: list[m.UserGroup] = [
+        u
+        for u in db.session.execute(
+            m.UserGroup.select().where(m.UserGroup.right_id == product_group.id)
+        ).scalars()
+    ]
+    if len(users) != 0:
+        for u in users:
+            # TODO: ask client about users notification without approval permission
+            if not u.child.approval_permission:
+                continue
+            msg = Message(
+                subject="Declined request share",
+                sender=app.config["MAIL_DEFAULT_SENDER"],
+                recipients=[u.child.email],
+            )
+            url = (
+                url_for(
+                    "request_share.get_all",
+                    _external=True,
+                )
+                + f"?q={rs.order_numb}"
+            )
+
+            msg.html = render_template(
+                "email/request_share.html",
+                user=u.child,
+                action="declined",
+                request_share=rs,
+                url=url,
+            )
+            # TODO uncomment when ready to notify
+            mail.send(msg)
 
     log(log.INFO, "Request Share declined: [%s]", rs)
     flash("Request Share declined!", "success")

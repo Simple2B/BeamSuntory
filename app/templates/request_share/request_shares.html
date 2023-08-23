@@ -33,6 +33,7 @@
     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
       <tr>
         <th scope="col" class="px-6 py-3">#</th>
+        <th scope="col" class="px-6 py-3">Order NO</th>
         <th scope="col" class="px-6 py-3">Product name</th>
         <th scope="col" class="px-6 py-3">Quantity</th>
         <th scope="col" class="px-6 py-3">Group name</th>
@@ -46,6 +47,11 @@
         <td class="w-4 p-4">
           <div class="flex items-center">
             {{ loop.index + page.skip }}
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ request_share.order_numb }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
