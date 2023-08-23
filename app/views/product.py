@@ -19,7 +19,7 @@ from sqlalchemy.dialects.postgresql import insert
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
-from app import models as m, db
+from app import models as m, db, mail
 from app import forms as f
 from app.logger import log
 
@@ -597,6 +597,7 @@ def request_share():
         )
 
         rs: m.RequestShare = m.RequestShare(
+            order_numb=f"BEAM-RS{int(datetime.now().timestamp())}",
             product_id=p.id,
             group_id=form.group_id.data,
             desire_quantity=form.desire_quantity.data,
@@ -616,9 +617,9 @@ def request_share():
                 m.UserGroup.select().where(m.UserGroup.right_id == product_group.id)
             ).scalars()
         ]
-
         if len(users) != 0:
             for u in users:
+                # TODO: ask client about users notification without approval permission
                 if not u.child.approval_permission:
                     continue
                 msg = Message(
@@ -626,16 +627,20 @@ def request_share():
                     sender=app.config["MAIL_DEFAULT_SENDER"],
                     recipients=[u.child.email],
                 )
-                url = url_for(
-                    "product.get_all",
-                    _external=True,
+                url = (
+                    url_for(
+                        "request_share.get_all",
+                        _external=True,
+                    )
+                    + f"?q={rs.order_numb}"
                 )
 
                 msg.html = render_template(
-                    "email/set.html",
+                    "email/request_share.html",
                     user=u.child,
-                    desire_quantity=form.desire_quantity.data,
+                    request_share=rs,
                     url=url,
+                    action="created",
                 )
                 sru = m.RequestShareUser(
                     user_id=u.child.id,
@@ -643,7 +648,8 @@ def request_share():
                 )
                 sru.save()
                 # TODO uncomment when ready to notify
-                # mail.send(msg)
+                mail.send(msg)
+
         flash("Share request created!", "success")
         return redirect(url_for("product.get_all"))
 

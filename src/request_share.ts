@@ -58,6 +58,22 @@ removeButtons.forEach((e) => {
     })
 })
 
+const declineButtons = document.querySelectorAll('.decline-request-share-btn')
+
+declineButtons.forEach((e) => {
+    e.addEventListener('click', async () => {
+        if (confirm('Are sure?')) {
+            let id = e.getAttribute('data-request-share-id')
+            const response = await fetch(`/request_share/decline/${id}`, {
+                method: 'GET',
+            })
+            if (response.status == 200) {
+                location.reload()
+            }
+        }
+    })
+})
+
 const $buttonEditElements = document.querySelectorAll('.request-share-edit-button')
 
 const modalEditOptions: ModalOptions = {

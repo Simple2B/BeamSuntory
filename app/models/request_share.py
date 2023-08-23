@@ -13,6 +13,11 @@ from .group import Group
 
 class RequestShare(db.Model, ModelMixin):
     __tablename__ = "request_share"
+    order_numb: orm.Mapped[str] = orm.mapped_column(
+        sa.String(64),
+        unique=True,
+        nullable=False,
+    )
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
     product_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("products.id"))
     group_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("groups.id"))
