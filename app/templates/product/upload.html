@@ -6,7 +6,6 @@
     <!-- Modal content -->
     <form action="{{url_for('product.upload')}}" method="post" enctype="multipart/form-data"
       class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-      <!-- TODO: Add csrf token -->
       {{ form_product_upload().hidden_tag() }}
       <!-- Modal header -->
       <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">

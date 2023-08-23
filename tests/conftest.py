@@ -17,6 +17,7 @@ def app():
     app.config.update(
         {
             "TESTING": True,
+            "DEFAULT_PAGE_SIZE": 8,
         }
     )
 

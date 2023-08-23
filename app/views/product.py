@@ -923,7 +923,7 @@ class DoNothingConflict:
         mytable = sa.table(table_name, *columns)
 
         insert_stmt = insert(mytable).values(list(data_iter))
-        # index_elements=["unique_code"] --- meaning unique constraint
+        # NOTE index_elements=["unique_code"] --- meaning unique constraint
         do_nothing_stmt = insert_stmt.on_conflict_do_nothing(
             index_elements=self.unique_constraint
         )

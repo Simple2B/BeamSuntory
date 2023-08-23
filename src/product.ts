@@ -594,7 +594,6 @@ viewProductButtonElements.forEach((e) =>
         div.innerHTML = product.SKU
         div = document.querySelector('#product-view-package_qty')
         product.package_qty ? (div.innerHTML = product.package_qty.toString()) : (div.innerHTML = '0')
-        // div.innerHTML = product.package_qty
         div = document.querySelector('#product-view-numb_of_items_per_case')
         product.numb_of_items_per_case
             ? (div.innerHTML = product.numb_of_items_per_case.toString())
