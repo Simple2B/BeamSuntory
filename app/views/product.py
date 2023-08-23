@@ -1,6 +1,8 @@
 import base64
 import json
-import datetime
+from datetime import datetime
+from io import BytesIO
+import pandas
 from flask import (
     Blueprint,
     jsonify,
@@ -13,6 +15,7 @@ from flask import (
 )
 from flask_login import login_required, current_user
 from flask_mail import Message
+from sqlalchemy.dialects.postgresql import insert
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
@@ -82,6 +85,16 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         row for row in db.session.execute(m.ProductGroup.select()).scalars()
     ]
 
+    product_groups: list[m.ProductGroup] = [
+        row
+        for row in db.session.execute(
+            m.ProductGroup.select()
+            .order_by(m.ProductGroup.id)
+            .offset((pagination.page - 1) * pagination.per_page * 4)
+            .limit(pagination.per_page)
+        ).scalars()
+    ]
+
     # TODO: consider using a join instead of two queries <- Copilot
     # get all groups ids for current user to compare with product groups ids in view.html
     current_user_groups_rows = db.session.execute(
@@ -139,6 +152,12 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
             m.WarehouseProduct.select().order_by(m.WarehouseProduct.id)
         ).scalars()
     ]
+    db.session.execute(
+        m.Product.select()
+        .order_by(m.Product.id)
+        .offset((pagination.page - 1) * pagination.per_page)
+        .limit(pagination.per_page)
+    ).scalars()
 
     warehouse_product_qty = dict()
 
@@ -245,7 +264,8 @@ def create():
             name=str(form.name.data).strip(" "),
             supplier_id=form.supplier.data if form.supplier.data else supplier.id,
             currency=form.currency.data if form.currency.data else "CAD",
-            price=form.price.data if form.price.data else 0,
+            regular_price=form.regular_price.data if form.regular_price.data else 0,
+            retail_price=form.retail_price.data if form.retail_price.data else 0,
             image=image_string,
             description=form.description.data,
             # General Info ->
@@ -303,7 +323,8 @@ def save():
         u.name = str(form.name.data).strip(" ")
         u.supplier_id = form.supplier.data if form.supplier.data else supplier.id
         u.currency = form.currency.data if form.currency.data else "CAD"
-        u.price = form.price.data if form.price.data else 0
+        u.regular_price = form.regular_price.data if form.regular_price.data else 0
+        u.retail_price = form.retail_price.data if form.retail_price.data else 0
 
         if len(image_string) == 0:
             image_string = u.image
@@ -594,7 +615,7 @@ def request_share():
         )
 
         rs: m.RequestShare = m.RequestShare(
-            order_numb=f"BEAM-RS{int(datetime.datetime.now().timestamp())}",
+            order_numb=f"BEAM-RS{int(datetime.now().timestamp())}",
             product_id=p.id,
             group_id=form.group_id.data,
             desire_quantity=form.desire_quantity.data,
@@ -729,6 +750,185 @@ def adjust():
         ),
         201,
     )
+
+
+@product_blueprint.route("/upload", methods=["POST"])
+@login_required
+def upload():
+    form: f.UploadProductForm = f.UploadProductForm()
+    if form.validate_on_submit():
+        master_product_groups = ["Language", "Categories", "Brand"]
+        csv_file = request.files["upload_csv"]
+        file_io = BytesIO(csv_file.read())
+
+        conn = db.get_engine()
+
+        new_groups = []
+
+        # NOTE write master groups and stock groups to DB
+        for table_name in master_product_groups:
+            master_group_obj = db.session.execute(
+                m.MasterGroupProduct.select().where(
+                    m.MasterGroupProduct.name == table_name
+                )
+            ).scalar()
+
+            if not master_group_obj:
+                master_group_obj = m.MasterGroupProduct(name=table_name)
+                master_group_obj.save()
+
+            df = pandas.read_csv(file_io, usecols=[table_name])
+            file_io.seek(0)
+            df = df.drop_duplicates().dropna()
+            df["master_group_id"] = master_group_obj.id
+            df["created_at"] = datetime.now()
+
+            new_groups.extend(df[table_name].to_list())
+
+            do_nothing_conflict_name = DoNothingConflict(["name"])
+
+            df.rename(
+                columns=dict(zip(df.columns, ["name", "master_group_id", "created_at"]))
+            ).to_sql(
+                "groups_for_product",
+                con=conn,
+                if_exists="append",
+                index=False,
+                # method="multi",
+                method=do_nothing_conflict_name.insert_do_nothing_on_conflicts,
+            )
+
+        # NOTE write products to DB
+        df = pandas.read_csv(
+            file_io,
+            usecols=[
+                "Name",
+                "Description",
+                "SKU",
+                "Regular Price",
+                "Retail Price",
+            ],
+        )
+        file_io.seek(0)
+        df = df.drop_duplicates()
+        df["image"] = ""
+        df["Description"] = df["Description"].fillna("")
+        df["SKU"] = df["SKU"].fillna("")
+        df["Regular Price"] = df["Regular Price"].fillna(0)
+        df["Retail Price"] = df["Retail Price"].fillna(0)
+
+        df.rename(
+            columns=dict(
+                zip(
+                    df.columns,
+                    [
+                        "name",
+                        "description",
+                        "SKU",
+                        "regular_price",
+                        "retail_price",
+                        "image",
+                    ],
+                )
+            )
+        ).to_sql(
+            "products",
+            con=conn,
+            if_exists="append",
+            index=False,
+            method=do_nothing_conflict_name.insert_do_nothing_on_conflicts,
+        )
+
+        # NOTE write product-groups relations to DB
+        new_products_obj: list[m.Product] = db.session.execute(
+            m.Product.select().where(m.Product.name.in_(df["Name"].to_list()))
+        ).scalars()
+
+        new_groups_obj: list[m.GroupProduct] = [
+            gr
+            for gr in db.session.execute(
+                m.GroupProduct.select().where(m.GroupProduct.name.in_(new_groups))
+            ).scalars()
+        ]
+
+        product_group_df = pandas.read_csv(
+            file_io,
+            usecols=[
+                "Name",
+                "Language",
+                "Brand",
+                "Categories",
+            ],
+        )
+
+        for product in new_products_obj:
+            product_group_df.loc[
+                product_group_df["Name"] == product.name, "Name"
+            ] = product.id
+
+        for mastr_grp in master_product_groups:
+            for group in new_groups_obj:
+                product_group_df.loc[
+                    product_group_df[mastr_grp] == group.name, mastr_grp
+                ] = group.id
+
+        for table_name in master_product_groups:
+            write_df = product_group_df[["Name", table_name]]
+            file_io.seek(0)
+            write_df = write_df.dropna()
+
+            write_df.rename(
+                columns=dict(zip(write_df.columns, ["product_id", "group_id"]))
+            ).to_sql(
+                "product_group",
+                con=conn,
+                if_exists="append",
+                index=False,
+                method=DoNothingConflict(None).insert_do_nothing_on_conflicts,
+            )
+
+        flash("Product added!", "success")
+        return redirect(url_for("product.get_all"))
+    else:
+        log(log.ERROR, "Product creation errors: [%s]", form.errors)
+        flash(f"{form.errors}", "danger")
+        return redirect(url_for("product.get_all"))
+
+
+class DoNothingConflict:
+    def __init__(self, unique_constraint: list[str]):
+        self.unique_constraint = unique_constraint
+
+    def insert_do_nothing_on_conflicts(self, sqltable, conn, keys, data_iter):
+        """
+        Execute SQL statement inserting data
+
+        Parameters
+        ----------
+        sqltable : pandas.io.sql.SQLTable
+        conn : sqlalchemy.engine.Engine or sqlalchemy.engine.Connection
+        keys : list of str
+            Column names
+        data_iter : Iterable that iterates the values to be inserted
+        """
+        columns = []
+        for c in keys:
+            columns.append(sa.column(c))
+
+        if sqltable.schema:
+            table_name = "{}.{}".format(sqltable.schema, sqltable.name)
+        else:
+            table_name = sqltable.name
+
+        mytable = sa.table(table_name, *columns)
+
+        insert_stmt = insert(mytable).values(list(data_iter))
+        # NOTE index_elements=["unique_code"] --- meaning unique constraint
+        do_nothing_stmt = insert_stmt.on_conflict_do_nothing(
+            index_elements=self.unique_constraint
+        )
+
+        conn.execute(do_nothing_stmt)
 
 
 @product_blueprint.route("/stocks_owned_by_me", methods=["GET"])

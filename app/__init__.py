@@ -43,7 +43,7 @@ def create_app(environment="development"):
         store_category_blueprint,
         inventory_blueprint,
     )
-    from app import models as m
+    from app import models as m, forms
 
     # Instantiate app.
     app = Flask(__name__)
@@ -96,6 +96,8 @@ def create_app(environment="development"):
     login_manager.login_view = "auth.login"
     login_manager.login_message_category = "info"
     login_manager.anonymous_user = m.AnonymousUser
+
+    app.jinja_env.globals["form_product_upload"] = forms.UploadProductForm
 
     # Error handlers.
     @app.errorhandler(HTTPException)

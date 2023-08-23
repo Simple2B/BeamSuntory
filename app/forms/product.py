@@ -20,7 +20,8 @@ class ProductForm(FlaskForm):
     name = StringField("Name", [DataRequired()])
     supplier = IntegerField("Supplier ID", validators=[Optional()])
     currency = StringField("Currency", validators=[Optional()])
-    price = FloatField("Price", validators=[Optional()])
+    regular_price = FloatField("Regular price", validators=[Optional()])
+    retail_price = FloatField("Retail price", validators=[Optional()])
     image = FileField("Image", validators=[Optional()])
     description = StringField("Description", [DataRequired()])
     # General Info ->
@@ -55,7 +56,8 @@ class NewProductForm(FlaskForm):
     name = StringField("Name", [DataRequired()])
     supplier = IntegerField("Supplier ID", validators=[Optional()])
     currency = StringField("Currency", validators=[Optional()])
-    price = FloatField("Price", validators=[Optional()])
+    regular_price = FloatField("Regular price", validators=[Optional()])
+    retail_price = FloatField("Retail price", validators=[Optional()])
     image = FileField("Image", validators=[Optional()])
     description = StringField("Description", [DataRequired()])
     # General Info ->
@@ -118,5 +120,11 @@ class DepleteProductForm(FlaskForm):
     group_id = IntegerField("Group ID", [DataRequired()])
     # NOTE: quantity is passed as string because 0 does not validate
     quantity = StringField("Quantity", [DataRequired()])
+
+    submit = SubmitField("Submit")
+
+
+class UploadProductForm(FlaskForm):
+    upload_csv = FileField("CSV", [DataRequired()])
 
     submit = SubmitField("Submit")
