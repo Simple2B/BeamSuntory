@@ -7,7 +7,7 @@ from flask import (
     url_for,
     current_app as app,
 )
-from flask_login import login_required, current_user
+from flask_login import login_required
 from flask_mail import Message
 import sqlalchemy as sa
 from sqlalchemy.orm import aliased
