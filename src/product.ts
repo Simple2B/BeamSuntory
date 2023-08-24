@@ -1466,3 +1466,74 @@ document.querySelector('#product-assign-master-group').addEventListener('change'
         }
     })
 })
+
+// ---image compressor----
+document.getElementById('product-add-image').addEventListener('change', async (e) => {
+    const desiredImageSize = 300 * 1024
+    const lowImageInput = document.querySelector<HTMLInputElement>('#product-add-low-image')
+    const initialImage = (e.target as HTMLInputElement).files[0]
+
+    if (initialImage.size > desiredImageSize) {
+        const compressedImage = await compressImage(initialImage)
+        const compressedImageFile = new File([compressedImage], `low_${initialImage.name}`, {
+            type: initialImage.type,
+        })
+
+        lowImageInput.files = setFileInput(compressedImageFile)
+    } else {
+        lowImageInput.files = setFileInput(initialImage)
+    }
+
+    async function compressImage(file: File) {
+        const maxFileSize = desiredImageSize
+        let quality = 0.6
+
+        while (quality > 0) {
+            const compressedFile = await compressQualityImage(file, quality)
+            if ((compressedFile as File).size < maxFileSize) {
+                return compressedFile
+            }
+            quality -= 0.1
+            if (quality < 0.1) {
+                return compressedFile
+            }
+        }
+    }
+
+    async function compressQualityImage(file: File, quality: number) {
+        return new Promise<Blob>((resolve, reject) => {
+            const image = new Image()
+            image.src = URL.createObjectURL(file)
+            image.onload = () => {
+                const canvas = document.createElement('canvas')
+                const context = canvas.getContext('2d')
+                canvas.width = 300
+                canvas.height = 300
+
+                context.drawImage(image, 0, 0, 300, 300)
+
+                canvas.toBlob(
+                    (blob) => {
+                        if (blob) {
+                            resolve(blob)
+                        } else {
+                            reject(new Error('Failed to convert'))
+                        }
+                    },
+                    file.type,
+                    quality
+                )
+            }
+
+            image.onerror = (err) => {
+                reject(err)
+            }
+        })
+    }
+
+    function setFileInput(file: File) {
+        const fileList = new DataTransfer()
+        fileList.items.add(file)
+        return fileList.files
+    }
+})
