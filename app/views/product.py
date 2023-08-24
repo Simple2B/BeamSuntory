@@ -258,8 +258,8 @@ def create():
 
         supplier: m.Supplier = db.session.scalar(m.Supplier.select())
 
-        image = request.files["image"]
-        type(image)
+        # TODO: use this original image in the future
+        # image = request.files["image"]
         low_image = request.files["low_image"]
         low_image_string = base64.b64encode(low_image.read()).decode()
         product: m.Product = m.Product(
