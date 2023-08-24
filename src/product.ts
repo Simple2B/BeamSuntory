@@ -8,7 +8,8 @@ interface IProduct {
     name: string
     supplier_id: number
     currency: string
-    price: number
+    regular_price: number
+    retail_price: number
     image: string
     description: string
     // General Info ->
@@ -419,36 +420,40 @@ function editProduct(product: IProduct) {
     input.value = product.id.toString()
     // a loop that adds additional fields
     input = document.querySelector('#product-edit-currency')
-    input.value = product.currency
-    input = document.querySelector('#product-edit-price')
-    input.value = product.price.toString()
+    product.currency ? (input.value = product.currency) : (input.value = 'Choose Currency')
+    input = document.querySelector('#product-edit-regular_price')
+    input.value = product.regular_price.toString()
+    input = document.querySelector('#product-edit-retail_price')
+    input.value = product.retail_price.toString()
     input = document.querySelector('#product-edit-description')
     input.value = product.description
     // General Info ->
     input = document.querySelector('#product-edit-SKU')
     input.value = product.SKU
     input = document.querySelector('#product-edit-low_stock_level')
-    input.value = product.low_stock_level.toString()
+    product.low_stock_level ? (input.value = product.low_stock_level.toString()) : (input.value = '0')
 
     input = document.querySelector('#product-edit-program_year')
-    input.value = product.program_year.toString()
+    product.program_year ? (input.value = product.program_year.toString()) : (input.value = '0')
     input = document.querySelector('#product-edit-package_qty')
-    input.value = product.package_qty.toString()
+    product.package_qty ? (input.value = product.package_qty.toString()) : (input.value = '0')
     input = document.querySelector('#product-edit-numb_of_items_per_case')
-    input.value = product.numb_of_items_per_case.toString()
+    product.numb_of_items_per_case ? (input.value = product.numb_of_items_per_case.toString()) : (input.value = '0')
     input = document.querySelector('#product-edit-numb_of_cases_per_outer_case')
-    input.value = product.numb_of_cases_per_outer_case.toString()
+    product.numb_of_cases_per_outer_case
+        ? (input.value = product.numb_of_cases_per_outer_case.toString())
+        : (input.value = '0')
     input = document.querySelector('#product-edit-comments')
-    input.value = product.comments
+    product.comments ? (input.value = product.comments) : (input.value = 'No comments')
     // shipping
     input = document.querySelector('#product-edit-weight')
-    input.value = product.weight.toString()
+    product.weight ? (input.value = product.weight.toString()) : (input.value = '0')
     input = document.querySelector('#product-edit-length')
-    input.value = product.length.toString()
+    product.length ? (input.value = product.length.toString()) : (input.value = '0')
     input = document.querySelector('#product-edit-width')
-    input.value = product.width.toString()
+    product.width ? (input.value = product.width.toString()) : (input.value = '0')
     input = document.querySelector('#product-edit-height')
-    input.value = product.height.toString()
+    product.height ? (input.value = product.height.toString()) : (input.value = '0')
     input = document.querySelector('#product-edit-next_url')
     input.value = window.location.href
 
@@ -576,24 +581,31 @@ viewProductButtonElements.forEach((e) =>
         div = document.querySelector('#product-view-id')
         div.innerHTML = product.id.toString()
         const img: HTMLImageElement = document.querySelector('#product-view-image')
+
         product.image.length > 100
             ? (img.src = `data:image/png;base64, ${product.image}`)
             : (img.src = defaultBrandImage)
-        div = document.querySelector('#product-view-price')
-        div.innerHTML = product.price.toString()
+        div = document.querySelector('#product-view-regular_price')
+        div.innerHTML = product.regular_price.toString()
+        div = document.querySelector('#product-view-retail_price')
+        div.innerHTML = product.retail_price.toString()
         div = document.querySelector('#product-view-warehouse-qty')
         div.innerHTML = product.warehouse_product_qty.toString()
         // General Info ->
         div = document.querySelector('#product-view-SKU')
         div.innerHTML = product.SKU
         div = document.querySelector('#product-view-package_qty')
-        div.innerHTML = product.package_qty.toString()
+        product.package_qty ? (div.innerHTML = product.package_qty.toString()) : (div.innerHTML = '0')
         div = document.querySelector('#product-view-numb_of_items_per_case')
-        div.innerHTML = product.numb_of_items_per_case.toString()
+        product.numb_of_items_per_case
+            ? (div.innerHTML = product.numb_of_items_per_case.toString())
+            : (div.innerHTML = '0')
         div = document.querySelector('#product-view-numb_of_cases_per_outer_case')
-        div.innerHTML = product.numb_of_cases_per_outer_case.toString()
+        product.numb_of_cases_per_outer_case
+            ? (div.innerHTML = product.numb_of_cases_per_outer_case.toString())
+            : (div.innerHTML = '0')
         div = document.querySelector('#product-view-comments')
-        div.innerHTML = product.comments
+        product.comments ? (div.innerHTML = product.comments.toString()) : (div.innerHTML = 'No comments')
         div = document.querySelector('#product-view-next_url')
         div.innerHTML = window.location.href
         viewModal.show()

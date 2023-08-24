@@ -17,6 +17,7 @@ def app():
     app.config.update(
         {
             "TESTING": True,
+            "DEFAULT_PAGE_SIZE": 8,
         }
     )
 
@@ -153,7 +154,8 @@ def mg_g_populate(client: FlaskClient):
         name="populate_test_product",
         supplier_id=1,
         currency="CAD",
-        price=11,
+        regular_price=9,
+        retail_price=11,
         image="imgpngbase64str",
         description="desc",
         SKU="322ewd3333rf",
@@ -173,7 +175,8 @@ def mg_g_populate(client: FlaskClient):
         name="populate_test_prod2",
         supplier_id=1,
         currency="USD",
-        price=11,
+        regular_price=9,
+        retail_price=11,
         image="imgpngbase64str",
         description="desc",
         SKU="322ewd3333rf",

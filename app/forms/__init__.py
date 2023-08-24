@@ -9,6 +9,7 @@ from .product import (
     AssignProductForm,
     RequestShareProductForm,
     DepleteProductForm,
+    UploadProductForm,
 )
 from .group_for_product import (
     GroupProductForm,

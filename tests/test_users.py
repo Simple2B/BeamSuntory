@@ -8,7 +8,7 @@ from tests.utils import login, register
 
 def test_list(populate: FlaskClient):
     login(populate)
-    DEFAULT_PAGE_SIZE = app.config["DEFAULT_PAGE_SIZE"]
+    DEFAULT_PAGE_SIZE = 8
     response = populate.get("/user/")
     assert response
     assert response.status_code == 200

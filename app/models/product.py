@@ -21,7 +21,8 @@ class Product(db.Model, ModelMixin):
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
     name: orm.Mapped[str] = orm.mapped_column(
-        sa.String(64),
+        sa.String(256),
+        unique=True,
         nullable=False,
     )
 
@@ -31,10 +32,11 @@ class Product(db.Model, ModelMixin):
     currency: orm.Mapped[s.Currency] = orm.mapped_column(
         sa.Enum(s.Currency), nullable=True
     )
-    price: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
+    regular_price: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
+    retail_price: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
 
     image: orm.Mapped[str] = orm.mapped_column(sa.Text())  # png base64 str
-    description: orm.Mapped[str] = orm.mapped_column(sa.String(256), nullable=False)
+    description: orm.Mapped[str] = orm.mapped_column(sa.String(512), nullable=False)
     # General Info ->
     SKU: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=False)
     low_stock_level: orm.Mapped[int] = orm.mapped_column(sa.Integer(), nullable=True)
@@ -47,7 +49,7 @@ class Product(db.Model, ModelMixin):
     numb_of_cases_per_outer_case: orm.Mapped[int] = orm.mapped_column(
         sa.Integer(), nullable=True
     )
-    comments: orm.Mapped[str] = orm.mapped_column(sa.String(128), nullable=True)
+    comments: orm.Mapped[str] = orm.mapped_column(sa.String(256), nullable=True)
     # shipping
     weight: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
     length: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)

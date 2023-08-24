@@ -1,5 +1,5 @@
 // --count total quantity and price--
-const priceElements = document.querySelectorAll('.cart-item-price')
+const priceElements = document.querySelectorAll('.cart-item-retail_price')
 const quantityElements = document.querySelectorAll('.cart-item-quantity')
 const totalPriceElement = document.querySelector('#cart-total-price')
 const totalQuantityElement = document.querySelector('#cart-total-quantity')
@@ -9,7 +9,7 @@ let totalPrice = 0
 let totalQuantity = 0
 
 tableCartItems.forEach((item) => {
-    const priceElement = item.querySelector('.cart-item-price')
+    const priceElement = item.querySelector('.cart-item-retail_price')
     const quantityElement: HTMLInputElement = item.querySelector('.cart-item-quantity')
     const availableProductQuantity = quantityElement.getAttribute('data-target-available-quantity')
 
