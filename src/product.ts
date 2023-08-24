@@ -1,6 +1,5 @@
 import { Modal } from 'flowbite'
 import type { ModalOptions, ModalInterface } from 'flowbite'
-import axios from 'axios'
 import Compressor from 'compressorjs'
 
 interface IProduct {
@@ -1471,20 +1470,32 @@ document.querySelector('#product-assign-master-group').addEventListener('change'
 
 // ---image compressor----
 document.getElementById('product-add-image').addEventListener('change', async (e) => {
-    console.log('image changed')
+    const desiredImageSize = 300 * 1024
+    const lowImageInput = document.querySelector<HTMLInputElement>('#product-add-low-image')
+    console.log('hiddenImageInput', lowImageInput)
 
-    const hiddenImageInput = document.querySelector<HTMLInputElement>('#product-add-low-image')
     const initialImage = (e.target as HTMLInputElement).files[0]
+    console.log('initialImage', initialImage)
 
-    if (initialImage.size > 300 * 1024) {
-        const compressedFile = await compressImage(initialImage)
-        hiddenImageInput.files = [compressedFile]
+    if (initialImage.size > desiredImageSize) {
+        console.log('image size > 300kb')
+
+        const compressedImage = await compressImage(initialImage)
+        console.log('compressedFile', compressedImage)
+        const compressedImageFile = new File([compressedImage], initialImage.name, {
+            type: initialImage.type,
+        })
+
+        lowImageInput.files = setFileInput(compressedImageFile)
     } else {
-        hiddenImageInput.files = [initialImage]
+        console.log('image size < 300kb')
+
+        lowImageInput.files = setFileInput(initialImage)
+        console.log('lowImageInput', lowImageInput.files)
     }
 
     async function compressImage(file: File) {
-        const maxFileSize = 300 * 1024
+        const maxFileSize = desiredImageSize
         let quality = 0.6
 
         while (quality > 0) {
@@ -1500,19 +1511,67 @@ document.getElementById('product-add-image').addEventListener('change', async (e
     }
 
     async function compressQualityImage(file: File, quality: number) {
-        return new Promise((resolve, reject) => {
-            new Compressor(file, {
-                quality: quality,
-                maxWidth: 60,
-                maxHeight: 60,
-                success(result) {
-                    resolve(result)
-                },
-                error(err) {
-                    console.error('Image compression error:', err)
-                    reject(err)
-                },
-            })
+        // return new Promise((resolve, reject) => {
+        // new Compressor(file, {
+        //     quality: quality,
+        //     maxWidth: 60,
+        //     maxHeight: 60,
+        //     success(result) {
+        //         resolve(result)
+        //     },
+        //     error(err) {
+        //         console.error('Image compression error:', err)
+        //         reject(err)
+        //     },
+        // })
+        // new Compressor(file, {
+        //     quality: 0.6,
+        //     // The compression process is asynchronous,
+        //     // which means you have to access the `result` in the `success` hook function.
+        //     success(result) {
+        //         const formData = new FormData()
+        //         // The third parameter is required for server
+        //         formData.append('file', result, result.name)
+        //         // Send the compressed image file to server with XMLHttpRequest.
+        //     },
+        //     error(err) {
+        //         console.log(err.message)
+        //     },
+        // })
+        // })
+        return new Promise<Blob>((resolve, reject) => {
+            const image = new Image()
+            image.src = URL.createObjectURL(file)
+            image.onload = () => {
+                const canvas = document.createElement('canvas')
+                const context = canvas.getContext('2d')
+                canvas.width = 60
+                canvas.height = 60
+
+                context.drawImage(image, 0, 0, 60, 60)
+
+                canvas.toBlob(
+                    (blob) => {
+                        if (blob) {
+                            resolve(blob)
+                        } else {
+                            reject(new Error('Failed to convert'))
+                        }
+                    },
+                    'image/jpeg',
+                    quality
+                )
+            }
+
+            image.onerror = (err) => {
+                reject(err)
+            }
         })
+    }
+
+    function setFileInput(file: File) {
+        const fileList = new DataTransfer()
+        fileList.items.add(file)
+        return fileList.files
     }
 })

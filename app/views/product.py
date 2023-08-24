@@ -259,14 +259,16 @@ def create():
         supplier: m.Supplier = db.session.scalar(m.Supplier.select())
 
         image = request.files["image"]
-        image_string = base64.b64encode(image.read()).decode()
+        type(image)
+        low_image = request.files["low_image"]
+        low_image_string = base64.b64encode(low_image.read()).decode()
         product: m.Product = m.Product(
             name=str(form.name.data).strip(" "),
             supplier_id=form.supplier.data if form.supplier.data else supplier.id,
             currency=form.currency.data if form.currency.data else "CAD",
             regular_price=form.regular_price.data if form.regular_price.data else 0,
             retail_price=form.retail_price.data if form.retail_price.data else 0,
-            image=image_string,
+            image=low_image_string,
             description=form.description.data,
             # General Info ->
             SKU=form.SKU.data,
