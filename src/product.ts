@@ -1459,30 +1459,48 @@ document.querySelector('#product-assign-master-group').addEventListener('change'
 
 // ---image compressor----
 document.getElementById('product-add-image').addEventListener('change', async (e) => {
-    const file = e.target.files[0]
+    console.log('image changed')
 
-    if (file.size > 300 * 1024) {
-        return
+    const hiddenImageInput = document.querySelector<HTMLInputElement>('#product-add-low-image')
+    const initialImage = (e.target as HTMLInputElement).files[0]
+
+    if (initialImage.size > 300 * 1024) {
+        const compressedFile = await compressImage(initialImage)
+        hiddenImageInput.files = [compressedFile]
+    } else {
+        hiddenImageInput.files = [initialImage]
     }
 
-    new Compressor(file, {
-        quality: 0.6,
+    async function compressImage(file: File) {
+        const maxFileSize = 300 * 1024
+        let quality = 0.6
 
-        // The compression process is asynchronous,
-        // which means you have to access the `result` in the `success` hook function.
-        success(result) {
-            const formData = new FormData()
+        while (quality > 0) {
+            const compressedFile = await compressQualityImage(file, quality)
+            if ((compressedFile as File).size < maxFileSize) {
+                return compressedFile
+            }
+            quality -= 0.1
+            if (quality < 0.1) {
+                return compressedFile
+            }
+        }
+    }
 
-            // The third parameter is required for server
-            formData.append('file', result, result.name)
-
-            // Send the compressed image file to server with XMLHttpRequest.
-            axios.post('/path/to/upload', formData).then(() => {
-                console.log('Upload success')
+    async function compressQualityImage(file: File, quality: number) {
+        return new Promise((resolve, reject) => {
+            new Compressor(file, {
+                quality: quality,
+                maxWidth: 60,
+                maxHeight: 60,
+                success(result) {
+                    resolve(result)
+                },
+                error(err) {
+                    console.error('Image compression error:', err)
+                    reject(err)
+                },
             })
-        },
-        error(err) {
-            console.log(err.message)
-        },
-    })
+        })
+    }
 })

@@ -22,6 +22,7 @@ class ProductForm(FlaskForm):
     currency = StringField("Currency", validators=[Optional()])
     price = FloatField("Price", validators=[Optional()])
     image = FileField("Image", validators=[Optional()])
+    low_image = FileField("Image", validators=[Optional()])
     description = StringField("Description", [DataRequired()])
     # General Info ->
     SKU = StringField("SKU", [DataRequired()])
@@ -57,6 +58,7 @@ class NewProductForm(FlaskForm):
     currency = StringField("Currency", validators=[Optional()])
     price = FloatField("Price", validators=[Optional()])
     image = FileField("Image", validators=[Optional()])
+    low_image = FileField("Image", validators=[Optional()])
     description = StringField("Description", [DataRequired()])
     # General Info ->
     SKU = StringField("SKU", [DataRequired()])
