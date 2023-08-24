@@ -2,9 +2,6 @@ from flask import (
     Blueprint,
     render_template,
     request,
-    flash,
-    redirect,
-    url_for,
 )
 from flask_login import login_required
 import sqlalchemy as sa
@@ -53,19 +50,9 @@ def get_all():
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
-    # adjusts = [
-    #     i
-    #     for i in db.session.execute(
-    #         query.offset((pagination.page - 1) * pagination.per_page).limit(
-    #             pagination.per_page
-    #         )
-    #     ).scalars()
-    # ]
-    all_adjust = db.session.execute(m.Adjust.select()).scalars()
-
     return render_template(
         "adjust/adjusts.html",
-        adjusts=db.session.execute(
+        adjust_groups=db.session.execute(
             query.offset((pagination.page - 1) * pagination.per_page).limit(
                 pagination.per_page
             )

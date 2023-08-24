@@ -991,40 +991,18 @@ function createAdjustAction(isEqual: boolean, masterGroup: string, group: string
     )
 }
 
-// async function adjustProduct(productId: number, quantity: number, groupId: number, group: string, csrfToken: string) {
-//     const adjustGroups = document.querySelectorAll('.product-adjust-group')
-//     const adjustGroupsQty = document.querySelectorAll('.product-adjust-group-quantity')
-//     const groupsQty = []
-
-//     for (let i = 0; i < adjustGroups.length; i++) {
-//         const adjustGroup = adjustGroups[i] as HTMLSelectElement
-//         const adjustGroupQty = adjustGroupsQty[i] as HTMLSelectElement
-
-//         const groupQty = {
-//             quantity: Number(adjustGroupQty.innerHTML),
-//             group_id: ,
-//         }
-//         groupsQty.push(groupQty)
-//     }
-
-//     const inputProducts: HTMLInputElement = document.querySelector('#outgoing-stock-edit-products')
-//     inputProducts.value = JSON.stringify(groupsQty)
-//     return true
-// }
 const adjustButton = document.querySelector(`#product-adjust-submit-btn`)
 adjustButton.addEventListener('click', () => {
     const product = JSON.parse(sessionStorage.getItem('product'))
     const csrfTokenInput = document.querySelector<HTMLInputElement>('#csrf_token')
     const csrfToken = csrfTokenInput ? csrfTokenInput.value : ''
-    // const groupId = groupProductIds[group]
-    // const productId = productParam.id
     adjustProduct(product, csrfToken)
 })
 
 async function adjustProduct(productParam: IProduct, csrfToken: string) {
     const adjustGroups = document.querySelectorAll('.product-adjust-group')
     const adjustGroupsQty = document.querySelectorAll('.product-adjust-group-quantity')
-    const adjustNote = document.querySelector('#product-adjust-note')
+    const adjustNote: HTMLInputElement = document.querySelector('#product-adjust-note')
     const groupsQty = []
 
     for (let i = 0; i < adjustGroups.length; i++) {

@@ -5,7 +5,6 @@ from io import BytesIO
 import pandas
 from flask import (
     Blueprint,
-    jsonify,
     render_template,
     request,
     flash,
@@ -684,7 +683,7 @@ def adjust():
     # product_desire_quantity = int(form.quantity.data)
 
     if form.validate_on_submit():
-        ai: m.AdjustGroupQty = m.AdjustGroupQty(
+        ai: m.Adjust = m.Adjust(
             product_id=form.product_id.data,
             note=form.note.data,
         )

@@ -16,7 +16,7 @@
         </svg>
       </div>
       <!-- prettier-ignore -->
-      <input {% if search_query %}value={{ search_query }}{% endif %} type="text" id="table-search-adjusts"
+      <input {% if search_query %}value={{ search_query }}{% endif %} type="text" id="table-search-adjust"
         class="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
         placeholder="Search" />
     </div>
@@ -36,11 +36,12 @@
         <th scope="col" class="px-6 py-3">Product Name</th>
         <th scope="col" class="px-6 py-3">Group</th>
         <th scope="col" class="px-6 py-3">Available</th>
+        <th scope="col" class="px-6 py-3">Created Date</th>
         <th scope="col" class="px-6 py-3">Note</th>
       </tr>
     </thead>
     <tbody>
-      {% for adjust in adjusts %}
+      {% for adjust_group in adjust_groups %}
       <tr
         class="table-adjust-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
         <td class="w-4 p-4">
@@ -50,21 +51,31 @@
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ adjust.product.name }}</div>
+            <div class="text-base font-semibold">{{ adjust_group.adjust.product.name }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ adjust.group.name }}</div>
+            <div class="text-base font-semibold">{{ adjust_group.group.name }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ adjust.adjust.note }}</div>
+            <div class="text-base font-semibold">{{ adjust_group.quantity }}</div>
           </div>
         </td>
-        <td class="p-4 space-x-2 whitespace-nowrap">
-          <button type="button" data-target="{{adjust.json}}"
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ adjust_group.adjust.created_at.date() }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ adjust_group.adjust.note }}</div>
+          </div>
+        </td>
+        <!-- <td class="p-4 space-x-2 whitespace-nowrap">
+          <button type="button"
             class="adjust-edit-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
               <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path>
@@ -74,7 +85,7 @@
             </svg>
             Edit adjust
           </button>
-          <button data-adjust-id={{ adjust.id }} type="button"
+          <button type="button"
             class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900 delete-adjust-btn">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
               <path fill-rule="evenodd"
@@ -83,7 +94,7 @@
             </svg>
             Delete adjust
           </button>
-        </td>
+        </td> -->
       </tr>
       {% endfor %}
     </tbody>
