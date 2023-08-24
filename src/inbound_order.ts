@@ -481,7 +481,7 @@ function createInboundOrderItems(inbOrder: IInboundOrder = null, curInbOrder: II
         'p-6',
         'space-y-6',
         'border-t',
-        'inbound-order-add-add-item',
+        'inbound-order-edit-add-item',
         `delete-id-${inbOrder.id}`
     )
     inboundOrderAddItem.innerHTML = `
