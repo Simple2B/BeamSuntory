@@ -411,6 +411,8 @@ function editProduct(product: IProduct) {
     sessionStorage.setItem('product', JSON.stringify(product))
 
     const img: HTMLImageElement = document.querySelector('#product-edit-show-image')
+    const fullImageAnchor = img.closest('.product-full-image-anchor')
+    fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
     product.image.length > 100 ? (img.src = `data:image/png;base64, ${product.image}`) : (img.src = defaultBrandImage)
     let input: HTMLInputElement = document.querySelector('#product-edit-name')
     input.value = product.name
@@ -579,7 +581,8 @@ viewProductButtonElements.forEach((e) =>
         div = document.querySelector('#product-view-id')
         div.innerHTML = product.id.toString()
         const img: HTMLImageElement = document.querySelector('#product-view-image')
-
+        const fullImageAnchor = img.closest('.product-full-image-anchor')
+        fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
         product.image.length > 100
             ? (img.src = `data:image/png;base64, ${product.image}`)
             : (img.src = defaultBrandImage)
@@ -635,6 +638,8 @@ adjustProductButtonElements.forEach((e) =>
         div = document.querySelector('#product-adjust-id')
         div.innerHTML = product.id.toString()
         const img: HTMLImageElement = document.querySelector('#product-adjust-image')
+        const fullImageAnchor = img.closest('.product-full-image-anchor')
+        fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
         product.image.length > 100
             ? (img.src = `data:image/png;base64, ${product.image}`)
             : (img.src = defaultBrandImage)

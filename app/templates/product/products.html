@@ -179,7 +179,8 @@
             {{ loop.index + page.skip }}
           </div>
         </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+        <td scope="row" data-target-product-id="{{ product.id }}"
+          class="product-full-image-anchor p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
             {% if product.image|length > 100 %}
             <img src="data:image/png;base64, {{ product.image }}" alt="{{ product.name }}" class="w-14 object-cover">
@@ -221,7 +222,8 @@
         </td>
         <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ warehouse_product_qty[product.name] if product.name in warehouse_product_qty else 0 }}</div>
+            <div class="text-base font-semibold">{{ warehouse_product_qty[product.name] if product.name in
+              warehouse_product_qty else 0 }}</div>
           </div>
         </td>
         <td class="p-4 space-x-2 whitespace-nowrap">
