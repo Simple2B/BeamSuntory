@@ -39,9 +39,7 @@ class ShipRequest(db.Model, ModelMixin):
     user_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
-    comment: orm.Mapped[str] = orm.mapped_column(
-        sa.String(256), default="", nullable=True
-    )
+    comment: orm.Mapped[str] = orm.mapped_column(sa.Text(), default="", nullable=True)
 
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
@@ -52,6 +50,9 @@ class ShipRequest(db.Model, ModelMixin):
         sa.ForeignKey("stores.id", ondelete="SET NULL"), nullable=True
     )
     store: orm.Mapped[Store] = orm.relationship()
+
+    wm_notes: orm.Mapped[str] = orm.mapped_column(sa.Text(), default="", nullable=True)
+    da_notes: orm.Mapped[str] = orm.mapped_column(sa.Text(), default="", nullable=True)
 
     def __repr__(self):
         return f"<{self.id}: {self.order_numb}>"

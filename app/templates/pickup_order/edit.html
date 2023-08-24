@@ -1,13 +1,19 @@
-<!-- View outgoing stock modal -->
+<!-- Edit pickup order modal -->
 <!-- prettier-ignore-->
-<div id="view-outgoing-stock-modal" tabindex="-1" aria-hidden="true"
+<div id="edit-pickup-order-modal" tabindex="-1" aria-hidden="true"
   class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
   <div class="relative w-full max-w-6xl max-h-full">
     <!-- Modal content -->
-    <form action="#" method="get" class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+    <!-- TODO change action for view form -->
+    <form action="{{url_for('pickup_order.save')}}" method="post"
+      class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+      {{ form_edit.hidden_tag() }}
+      <input type="hidden" name="ship_request_id" id="pickup-order-edit-id" value="0" />
+      <input type="hidden" name="next_url" id="pickup-order-edit-next_url" value="" />
+      <input type="hidden" name="products" id="pickup-order-edit-products" value="{'products': 'no products edit from da'}" />
       <!-- Modal header -->
       <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
-        <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> View outgoing stock </h3>
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Edit pickup order </h3>
       </div>
       <!-- Modal body -->
       <div class="p-6 space-y-6">
@@ -15,104 +21,123 @@
           <div class="col-span-3 sm:col-span-3">
             <label for="order_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Order
               Number</label>
-            <div id="outgoing-stock-view-order-number"
+            <div id="pickup-order-edit-order-number"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status</label>
-            <div id="outgoing-stock-view-status"
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            </div>
+            <label for="pickup-order-edit-status"
+              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status</label>
+            <select type="text" name="status" id="pickup-order-edit-status"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="Status" required>
+              <option selected="selected" value="" disabled>Choose Status</option>
+              <option value="Waiting for warehouse manager">Waiting for warehouse manager</option>
+              <option value="Assigned to pickup">Assigned to pickup</option>
+              <option value="Delivered">Delivered</option>
+              <option value="In transit">In transit</option>
+            </select>
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="created_date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Created
               Date</label>
-            <div id="outgoing-stock-view-created-date"
+            <div id="pickup-order-edit-created-date"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="expiry_date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Type</label>
-            <div id="outgoing-stock-view-type"
+            <label for="pickup-order-edit-type"
+              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Type</label>
+            <div id="pickup-order-edit-type"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="store" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store</label>
-            <div id="outgoing-stock-view-store"
+            <label for="pickup-order-edit-store"
+              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store</label>
+            <div id="pickup-order-edit-store"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
           </div>
-          <div class="col-span-6 sm:col-span-3">
-            <label for="outgoing-stock-view-warehouse-name"
+          <div class="col-span-4 sm:col-span-2">
+            <label for="pickup-order-edit-warehouse-name"
               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Warehouse</label>
-            <div id="outgoing-stock-view-warehouse-name"
+            <select type="text" id="pickup-order-edit-warehouse-name"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            </div>
+              <option value="" disabled selected>Select another warehouse</option>
+              {% for warehouse in warehouses %}
+              <option value={{ warehouse.id }}>{{ warehouse.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-span-2 sm:col-span-1">
+            <label for="pickup-order-edit-warehouse-set-all"
+              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Change for all products</label>
+            <input type="checkbox" name="activated" id="pickup-order-edit-warehouse-set-all"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block  p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="store_address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store
               Address</label>
-            <div id="outgoing-stock-view-store_address"
+            <div id="pickup-order-edit-store_address"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="store_phone" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store
               Phone</label>
-            <div id="outgoing-stock-view-store_phone"
+            <div id="pickup-order-edit-store_phone"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="store_country" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store
               Country</label>
-            <div id="outgoing-stock-view-store_country"
+            <div id="pickup-order-edit-store_country"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="store_province" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store
               Province</label>
-            <div id="outgoing-stock-view-store_province"
+            <div id="pickup-order-edit-store_province"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
           </div>
           <div class="col-span-6 sm:col-span-3 row-span-2 flex flex-col">
-            <label for="outgoing-stock-view-comment"
+            <label for="pickup-order-edit-comment"
               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Comment</label>
-            <div id="outgoing-stock-view-comment"
+            <div id="pickup-order-edit-comment"
               class="shadow-sm flex-grow bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="store_city" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store
               City</label>
-            <div id="outgoing-stock-view-store_city"
+            <div id="pickup-order-edit-store_city"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="store_zip_code" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store Zip
               Code</label>
-            <div id="outgoing-stock-view-store_zip_code"
+            <div id="pickup-order-edit-store_zip_code"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
           </div>
           <div class="col-span-6 sm:col-span-3 row-span-2 flex flex-col">
-            <label for="outgoing-stock-view-wm_notes"
+            <label for="pickup-order-edit-wm-notes"
               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Warehouse manager notes</label>
-            <div id="outgoing-stock-view-wm_notes"
+            <input type="text" name="wm_notes" id="pickup-order-edit-wm_notes"
               class="shadow-sm flex-grow bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            </div>
+            </input>
           </div>
           <div class="col-span-6 sm:col-span-3 row-span-2 flex flex-col">
-            <label for="outgoing-stock-view-da_notes"
+            <label for="pickup-order-edit-da-notes"
               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Delivery agent notes</label>
-            <div id="outgoing-stock-view-da_notes"
+            <input type="text" name="da_notes" id="pickup-order-edit-da_notes"
               class="shadow-sm flex-grow bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            </div>
+            </input>
           </div>
         </div>
       </div>
@@ -132,9 +157,14 @@
             <th scope="col" class="px-6 py-3">Warehouse</th>
           </tr>
         </thead>
-        <tbody id="table-outgoing-stock-body-view">
+        <tbody id="table-pickup-order-body-edit">
         </tbody>
       </table>
+      <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+        <button id="pickup-order-save-products-btn" name="save-products" type="submit"
+          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+          Save all </button>
+      </div>
     </form>
   </div>
 </div>

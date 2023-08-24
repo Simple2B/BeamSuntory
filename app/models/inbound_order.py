@@ -129,7 +129,9 @@ class InboundOrder(db.Model, ModelMixin):
                 {
                     "product": {
                         "id": io.product_id,
-                        "name": io.product.name,
+                        "name": str(io.product.name).replace(
+                            "  ", " "
+                        ),  # TODO handle better if there are some double symbols in csv
                         "shelf_life_start": io.shelf_life_start.strftime("%m/%d/%Y"),
                         "shelf_life_end": io.shelf_life_end.strftime("%m/%d/%Y"),
                     },
