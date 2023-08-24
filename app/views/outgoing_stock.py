@@ -118,7 +118,6 @@ def save():
             flash("Cannot save item data", "danger")
         sr.status = form_edit.status.data
         sr.wm_notes = form_edit.wm_notes.data
-        sr.da_notes = form_edit.da_notes.data
         sr.save()
 
         products = json.loads(form_edit.products.data)
