@@ -23,3 +23,4 @@ from .assign import assign_blueprint
 from .request_share import request_share_blueprint
 from .store_category import store_category_blueprint
 from .inventory import inventory_blueprint
+from .adjust import adjust_blueprint

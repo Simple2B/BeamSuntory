@@ -2,11 +2,12 @@
 <!-- prettier-ignore-->
 <div id="adjust-product-modal" tabindex="-1" aria-hidden="true"
   class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
-  <div class="relative w-full max-w-2xl max-h-full">
+  <div class="relative w-full max-w-lg max-h-full">
     <!-- Modal content -->
     <!-- TODO change action for adjust form -->
     <form action="#" method="get" class="relative bg-white rounded-lg shadow dark:bg-gray-700">
       <input type="hidden" name="product_id" id="product-adjust-id" value="0" />
+      <input type="hidden" name="groups_quantity" id="product-adjust-groups-quantity" value="" />
       <input type="hidden" name="next_url" id="product-adjust-next_url" value="" />
       {{ form_create.hidden_tag() }}
       <!-- Modal header -->
@@ -27,7 +28,19 @@
             </div>
           </div>
         </div>
+        <div class="w-full">
+          <label for="cart-store-request-comment"
+            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Comment</label>
+          <textarea id="product-adjust-note" rows="4"
+            class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+            placeholder="Write your comment"></textarea>
+        </div>
+        <button type="button" id="product-adjust-submit-btn"
+          class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+          Adjust
+        </button>
       </div>
+
       <!-- Modal footer -->
     </form>
   </div>
