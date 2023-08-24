@@ -248,16 +248,21 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
             }
         }
 
-        const selectedProduct = inboundOrderProductsInputs[0].options[
-            inboundOrderProductsInputs[0].selectedIndex
-        ].text.replace(/ /g, '_')
+        // TODO make up better method to clean setAttribute string from symbols that cause errors in HTML
+        const selectedProduct = inboundOrderProductsInputs[0].options[inboundOrderProductsInputs[0].selectedIndex].text
+            .replace(/ /g, '_')
+            .replace('(', '')
+            .replace(')', '')
 
         const selectedProductQtyId = `io-product-input-qty-${selectedProduct}`
 
         inboundOrderQuantityInputs[0].addEventListener('change', () => {
             const selectedProduct = inboundOrderProductsInputs[0].options[
                 inboundOrderProductsInputs[0].selectedIndex
-            ].text.replace(/ /g, '_')
+            ].text
+                .replace(/ /g, '_')
+                .replace('(', '')
+                .replace(')', '')
             const selectedProductQtyId = `io-product-input-qty-${selectedProduct}`
             const allocateQtyInput: HTMLDivElement = document.querySelector(
                 `#inbound-order-edit-check-quantity-${selectedProduct}`
@@ -286,7 +291,10 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
                 'id',
                 `io-product-input-qty-${inboundOrderProductsInputs[0].options[
                     inboundOrderProductsInputs[0].selectedIndex
-                ].text.replace(/ /g, '_')}`
+                ].text
+                    .replace(/ /g, '_')
+                    .replace('(', '')
+                    .replace(')', '')}`
             )
         })
     }
@@ -316,7 +324,11 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
                     const shelfLifeStartInput = shelfLifeStartInputs[i]
                     const shelfLifeEndInput = shelfLifeEndInputs[i]
 
-                    const prodName = currentInboundOrderCheck[i].product.name.replace(/ /g, '_')
+                    const prodName = currentInboundOrderCheck[i].product.name
+                        .replace(/ /g, '_')
+                        .replace('(', '')
+                        .replace(')', '')
+
                     const ioProdQtyCheckInput = document.querySelectorAll<HTMLInputElement>(
                         `io-product-input-qty-${prodName}`
                     )
@@ -387,7 +399,8 @@ function createInboundOrderCheckItems(inbOrder: IInboundOrder = null, curInbOrde
         inbOrder = inboundOrder
     }
 
-    const productUnderscore = curInbOrder.product.name.replace(/ /g, '_')
+    const productUnderscore = curInbOrder.product.name.replace(/ /g, '_').replace('(', '').replace(')', '')
+
     const inboundOrderCheckContainer = document.querySelector('#inbound-order-edit-check-container')
     const inboundOrderCheckItem = document.createElement('div')
     inboundOrderCheckItem.classList.add('grid', 'grid-cols-12', 'gap-5', `delete-id-check-${inbOrder.id}`)
@@ -573,16 +586,20 @@ function createInboundOrderItems(inbOrder: IInboundOrder = null, curInbOrder: II
             'id',
             `io-product-input-qty-${inboundOrderAddProductSelect.options[
                 inboundOrderAddProductSelect.selectedIndex
-            ].text.replace(/ /g, '_')}`
+            ].text
+                .replace(/ /g, '_')
+                .replace('(', '')
+                .replace(')', '')}`
         )
     }
 
     inboundOrderAddContainer.appendChild(inboundOrderAddItem)
 
     inboundOrderAddQuantityInput.addEventListener('change', () => {
-        const selectedProdName = inboundOrderAddProductSelect.options[
-            inboundOrderAddProductSelect.selectedIndex
-        ].text.replace(/ /g, '_')
+        const selectedProdName = inboundOrderAddProductSelect.options[inboundOrderAddProductSelect.selectedIndex].text
+            .replace(/ /g, '_')
+            .replace('(', '')
+            .replace(')', '')
         const inboundOrderAddQuantityInputsAll = document.querySelectorAll(`#io-product-input-qty-${selectedProdName}`)
         const inboundOrderCheckQuantityInput: HTMLDivElement = document.querySelector(
             `#inbound-order-edit-check-quantity-${selectedProdName}`
@@ -605,7 +622,10 @@ function createInboundOrderItems(inbOrder: IInboundOrder = null, curInbOrder: II
             'id',
             `io-product-input-qty-${inboundOrderAddProductSelect.options[
                 inboundOrderAddProductSelect.selectedIndex
-            ].text.replace(/ /g, '_')}`
+            ].text
+                .replace(/ /g, '_')
+                .replace('(', '')
+                .replace(')', '')}`
         )
     })
 
@@ -765,9 +785,10 @@ function setProducts(actionType: string) {
             shelfLifeStartInput = shelfLifeStartInputs[i] as HTMLSelectElement
             shelfLifeEndInput = shelfLifeEndInputs[i] as HTMLSelectElement
         } else {
-            const prodName = inboundOrderAddProductSelect.options[
-                inboundOrderAddProductSelect.selectedIndex
-            ].text.replace(/ /g, '_')
+            const prodName = inboundOrderAddProductSelect.options[inboundOrderAddProductSelect.selectedIndex].text
+                .replace(/ /g, '_')
+                .replace('(', '')
+                .replace(')', '')
             shelfLifeStartInput = document.querySelector(`#datepickerEl-start-${prodName}`)
             shelfLifeEndInput = document.querySelector(`#datepickerEl-end-${prodName}`)
         }
@@ -801,7 +822,10 @@ function setProducts(actionType: string) {
             const ProductQuantityCheck = document.querySelector(
                 `#inbound-order-edit-check-quantity-${inboundOrderAddProductSelect.options[
                     inboundOrderAddProductSelect.selectedIndex
-                ].text.replace(/ /g, '_')}-hidden`
+                ].text
+                    .replace(/ /g, '_')
+                    .replace('(', '')
+                    .replace(')', '')}-hidden`
             )
 
             if (!ProductQuantityCheck) {
@@ -824,7 +848,10 @@ function setProducts(actionType: string) {
             const ProductQuantityCheck = document.querySelector(
                 `#inbound-order-edit-check-quantity-${inboundOrderAddProductSelect.options[
                     inboundOrderAddProductSelect.selectedIndex
-                ].text.replace(/ /g, '_')}-hidden`
+                ].text
+                    .replace(/ /g, '_')
+                    .replace('(', '')
+                    .replace(')', '')}-hidden`
             )
 
             if (productsQuantities[prodId] > Number(ProductQuantityCheck.innerHTML)) {
