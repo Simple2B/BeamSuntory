@@ -10,14 +10,14 @@ on:
         branches: [main, develop]
 
 jobs:
-    tests:
-        strategy:
-            fail-fast: true
-            matrix:
-                python-version: [3.11]
-                poetry-version: [1.5.1]
-                os: [Linux]
-        runs-on: ${{ matrix.os }}
+    # tests:
+    #     strategy:
+    #         fail-fast: true
+    #         matrix:
+    #             python-version: [3.11]
+    #             poetry-version: [1.5.1]
+    #             os: [Linux]
+    #     runs-on: ${{ matrix.os }}
 
     #   steps:
     #     - uses: actions/checkout@v3.5.2
