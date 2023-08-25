@@ -75,7 +75,6 @@ const options: DismissOptions = {
     // callback functions
     onHide: (context, targetEl) => {
         console.log('element has been dismissed')
-        console.log(targetEl)
     },
 }
 
