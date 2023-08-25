@@ -3,11 +3,12 @@
 
 name: Beam Suntory CI/CD
 
-on:
-    push:
-        branches: [main, develop]
-    pull_request:
-        branches: [main, develop]
+on: push
+# on:
+#     push:
+#         branches: [main, develop]
+#     pull_request:
+#         branches: [main, develop]
 
 jobs:
     # tests:
