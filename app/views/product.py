@@ -2,6 +2,7 @@ import base64
 import json
 from datetime import datetime
 from io import BytesIO
+import os
 import pandas
 from flask import (
     Blueprint,
@@ -1016,3 +1017,19 @@ def stocks_owned_by_me():
         form_create=form_create,
         form_edit=form_edit,
     )
+
+
+@product_blueprint.route("/full_image/<int:id>", methods=["GET"])
+@login_required
+def full_image(id: int):
+    product: m.Product = db.session.execute(
+        m.Product.select().where(m.Product.id == id)
+    ).scalar()
+
+    data = {
+        "name": product.name,
+        "image": product.image if product.image else os.environ.get("DEFAULT_IMAGE"),
+    }
+    response = jsonify(data)
+    response.status_code = 200
+    return response

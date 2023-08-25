@@ -411,6 +411,8 @@ function editProduct(product: IProduct) {
     sessionStorage.setItem('product', JSON.stringify(product))
 
     const img: HTMLImageElement = document.querySelector('#product-edit-show-image')
+    const fullImageAnchor = img.closest('.product-full-image-anchor')
+    fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
     product.image.length > 100 ? (img.src = `data:image/png;base64, ${product.image}`) : (img.src = defaultBrandImage)
     let input: HTMLInputElement = document.querySelector('#product-edit-name')
     input.value = product.name
@@ -579,7 +581,8 @@ viewProductButtonElements.forEach((e) =>
         div = document.querySelector('#product-view-id')
         div.innerHTML = product.id.toString()
         const img: HTMLImageElement = document.querySelector('#product-view-image')
-
+        const fullImageAnchor = img.closest('.product-full-image-anchor')
+        fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
         product.image.length > 100
             ? (img.src = `data:image/png;base64, ${product.image}`)
             : (img.src = defaultBrandImage)
@@ -635,6 +638,8 @@ adjustProductButtonElements.forEach((e) =>
         div = document.querySelector('#product-adjust-id')
         div.innerHTML = product.id.toString()
         const img: HTMLImageElement = document.querySelector('#product-adjust-image')
+        const fullImageAnchor = img.closest('.product-full-image-anchor')
+        fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
         product.image.length > 100
             ? (img.src = `data:image/png;base64, ${product.image}`)
             : (img.src = defaultBrandImage)
@@ -647,6 +652,8 @@ adjustProductButtonElements.forEach((e) =>
 // function to request share
 function requestShare(product: IProduct, group: string) {
     const img: HTMLImageElement = document.querySelector('#product-request-share-image')
+    const fullImageAnchor = img.closest('.product-full-image-anchor')
+    fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
     product.image.length > 100 ? (img.src = `data:image/png;base64, ${product.image}`) : (img.src = defaultBrandImage)
     let div: HTMLDivElement = document.querySelector('#product-request-share-name')
     div.innerHTML = product.name
@@ -678,6 +685,8 @@ function requestShare(product: IProduct, group: string) {
 // function to ship
 function ship(product: IProduct, group: string) {
     const img: HTMLImageElement = document.querySelector('#product-ship-image')
+    const fullImageAnchor = img.closest('.product-full-image-anchor')
+    fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
     product.image.length > 100 ? (img.src = `data:image/png;base64, ${product.image}`) : (img.src = defaultBrandImage)
     let div: HTMLDivElement = document.querySelector('#product-ship-name')
     div.innerHTML = product.name
