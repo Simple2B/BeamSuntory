@@ -185,7 +185,7 @@ def share(id: int):
     warehouse_from_prod.save()
 
     rs.status = "shared"
-    rs.finished_date = datetime.now()
+    rs.finished_date = datetime.now().replace(microsecond=0)
     rs.save()
     log(log.INFO, "Request Share share: [%s]", rs)
     flash("Request Share shared!", "success")
@@ -202,7 +202,7 @@ def decline(id: int):
         return "no request_share", 404
 
     rs.status = "declined"
-    rs.finished_date = datetime.now()
+    rs.finished_date = datetime.now().replace(microsecond=0)
     rs.save()
 
     product_group: m.Group = db.session.execute(
