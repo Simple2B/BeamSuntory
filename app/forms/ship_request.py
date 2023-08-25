@@ -33,6 +33,8 @@ class ShipRequestForm(FlaskForm):
     store = StringField("Store")
     status = StringField("Status")
     products = StringField("Products", [DataRequired()])
+    wm_notes = StringField("Warehouse Manager Notes")
+    da_notes = StringField("Delivery Agent Notes")
 
     submit = SubmitField("Save")
 

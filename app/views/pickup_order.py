@@ -97,6 +97,35 @@ def get_all():
     )
 
 
+@pickup_order_blueprint.route("/edit", methods=["POST"])
+@login_required
+def save():
+    form_edit: f.ShipRequestForm = f.ShipRequestForm()
+    if form_edit.validate_on_submit():
+        query = m.ShipRequest.select().where(
+            m.ShipRequest.id == int(form_edit.ship_request_id.data)
+        )
+        sr: m.ShipRequest | None = db.session.scalar(query)
+        if not sr:
+            log(
+                log.ERROR,
+                "Not found ship request item by id : [%s]",
+                form_edit.ship_request_id.data,
+            )
+            flash("Cannot save item data", "danger")
+        sr.da_notes = form_edit.da_notes.data
+        sr.save()
+
+        if form_edit.next_url.data:
+            return redirect(form_edit.next_url.data)
+        return redirect(url_for("pickup_order.get_all"))
+
+    else:
+        log(log.ERROR, "Cart item save errors: [%s]", form_edit.errors)
+        flash(f"{form_edit.errors}", "danger")
+        return redirect(url_for("pickup_order.get_all"))
+
+
 @pickup_order_blueprint.route("/pickup/<int:id>", methods=["GET"])
 @login_required
 def pickup(id: int):
