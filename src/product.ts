@@ -704,8 +704,18 @@ function ship(product: IProduct, group: string) {
     input.min = '1'
     input = document.querySelector('#product-ship-group')
     input.value = group.replace('_', ' ')
+
     shipModal.show()
 }
+
+// -----count rest quantity in ship request product modal------
+const desiredQuantityInput: HTMLInputElement = document.querySelector('#product-ship-desire-quantity')
+desiredQuantityInput.addEventListener('change', () => {
+    const availableQuantityDiv = document.querySelector('#product-ship-available-quantity')
+    const desiredQuantity = Number(desiredQuantityInput.value)
+    const availableQuantity = Number(availableQuantityDiv.textContent)
+    availableQuantityDiv.innerHTML = (availableQuantity - desiredQuantity).toString()
+})
 
 // function to assign
 function assign(product: IProduct, group: string) {
