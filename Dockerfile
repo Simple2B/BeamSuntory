@@ -31,4 +31,4 @@ EXPOSE 8000
 
 COPY --chown=app:app . .
 RUN chmod +x ./start_server.sh
-CMD ["./start_server.sh"]
+CMD ["sh", "./start_server.sh"]
