@@ -103,7 +103,8 @@ jobs:
                   key: ${{ secrets.SSH_PROD_KEY }}
                   port: ${{ secrets.SSH_PROD_PORT }}
                   script: |
-                      cd beam_suntory
-                      cat docker-compose.prod.yml
-                      # cd BeamSuntory
-                      # ./up.sh
+                      cd beam_suntory &&
+                      mv docker-compose.prod.yml docker-compose.yml &&
+                      docker compose pull &&
+                      docker compose up -d &&
+                      docker system prune
