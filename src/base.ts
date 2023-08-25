@@ -116,8 +116,6 @@ const viewModal: ModalInterface = new Modal($viewImageModalElement, modalOptions
 const productImageAnchors = document.querySelectorAll('.product-full-image-anchor')
 productImageAnchors.forEach((e) => {
     e.addEventListener('click', async () => {
-        console.log('clicked')
-
         const productId = e.getAttribute('data-target-product-id')
 
         const response = await fetch(`/product/full_image/${productId}`, {
