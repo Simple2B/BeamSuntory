@@ -2,6 +2,7 @@ import base64
 import json
 from datetime import datetime
 from io import BytesIO
+import os
 import pandas
 from flask import (
     Blueprint,
@@ -1024,9 +1025,10 @@ def full_image(id: int):
     product: m.Product = db.session.execute(
         m.Product.select().where(m.Product.id == id)
     ).scalar()
+
     data = {
         "name": product.name,
-        "image": product.image,
+        "image": product.image if product.image else os.environ.get("DEFAULT_IMAGE"),
     }
     response = jsonify(data)
     response.status_code = 200

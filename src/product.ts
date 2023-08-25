@@ -652,6 +652,8 @@ adjustProductButtonElements.forEach((e) =>
 // function to request share
 function requestShare(product: IProduct, group: string) {
     const img: HTMLImageElement = document.querySelector('#product-request-share-image')
+    const fullImageAnchor = img.closest('.product-full-image-anchor')
+    fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
     product.image.length > 100 ? (img.src = `data:image/png;base64, ${product.image}`) : (img.src = defaultBrandImage)
     let div: HTMLDivElement = document.querySelector('#product-request-share-name')
     div.innerHTML = product.name
@@ -683,6 +685,8 @@ function requestShare(product: IProduct, group: string) {
 // function to ship
 function ship(product: IProduct, group: string) {
     const img: HTMLImageElement = document.querySelector('#product-ship-image')
+    const fullImageAnchor = img.closest('.product-full-image-anchor')
+    fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
     product.image.length > 100 ? (img.src = `data:image/png;base64, ${product.image}`) : (img.src = defaultBrandImage)
     let div: HTMLDivElement = document.querySelector('#product-ship-name')
     div.innerHTML = product.name

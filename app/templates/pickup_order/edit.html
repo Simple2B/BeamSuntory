@@ -10,7 +10,8 @@
       {{ form_edit.hidden_tag() }}
       <input type="hidden" name="ship_request_id" id="pickup-order-edit-id" value="0" />
       <input type="hidden" name="next_url" id="pickup-order-edit-next_url" value="" />
-      <input type="hidden" name="products" id="pickup-order-edit-products" value="{'products': 'no products edit from da'}" />
+      <input type="hidden" name="products" id="pickup-order-edit-products"
+        value="{'products': 'no products edit from da'}" />
       <!-- Modal header -->
       <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Edit pickup order </h3>
@@ -128,16 +129,16 @@
           <div class="col-span-6 sm:col-span-3 row-span-2 flex flex-col">
             <label for="pickup-order-edit-wm-notes"
               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Warehouse manager notes</label>
-            <input type="text" name="wm_notes" id="pickup-order-edit-wm_notes"
+            <textarea type="text" name="wm_notes" id="pickup-order-edit-wm_notes"
               class="shadow-sm flex-grow bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            </input>
+            </textarea>
           </div>
           <div class="col-span-6 sm:col-span-3 row-span-2 flex flex-col">
             <label for="pickup-order-edit-da-notes"
               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Delivery agent notes</label>
-            <input type="text" name="da_notes" id="pickup-order-edit-da_notes"
+            <textarea type="text" name="da_notes" id="pickup-order-edit-da_notes"
               class="shadow-sm flex-grow bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            </input>
+            </textarea>
           </div>
         </div>
       </div>
