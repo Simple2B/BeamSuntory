@@ -45,15 +45,11 @@ def get_all():
     warehouses_rows = db.session.execute(sa.select(m.Warehouse)).all()
     warehouses = [row[0] for row in warehouses_rows]
 
-    locker_id = (
-        db.session.execute(
-            m.StoreCategory.select().where(
-                m.StoreCategory.name == BaseConfig.Config.SALES_REP_LOCKER_NAME
-            )
-        )
-        .scalar()
-        .id
-    )
+    locker_id = db.session.execute(
+        m.StoreCategory.select()
+        .where(m.StoreCategory.name == BaseConfig.Config.SALES_REP_LOCKER_NAME)
+        .with_only_columns(m.StoreCategory.id)
+    ).scalar()
 
     stores_rows = db.session.execute(
         m.Store.select().where(m.Store.store_category_id != locker_id)
