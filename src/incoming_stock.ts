@@ -120,7 +120,7 @@ function createIncomingStockOrderItems(curInbOrder: IInboundOrderProd) {
     incomingStockAddItem.classList.add('p-6', 'space-y-6', 'border-t', 'incoming-stock-edit-add-item')
     incomingStockAddItem.innerHTML = `
     <div class="incoming-stock-product-item grid grid-cols-12 gap-4" data-target-product-id="${curInbOrder.product.id}" >
-      <div class="product-full-image-anchor col-span-6 sm:col-span-4 sm:row-span-2 max-height-image-container">
+      <div class="col-span-6 sm:col-span-4 sm:row-span-2 max-height-image-container">
         <img src="data:image/png;base64, ${curInbOrder.product.image}" class="incoming-stock-edit-product-image w-full h-full object-cover">
       </div>
       <div class="col-span-6 sm:col-span-8">
@@ -154,8 +154,6 @@ function createIncomingStockOrderItems(curInbOrder: IInboundOrderProd) {
     </div>
   `
     const img: HTMLImageElement = incomingStockAddItem.querySelector('.incoming-stock-edit-product-image')
-    const fullImageAnchor = img.closest('.product-full-image-anchor')
-    fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
     if (img.src.length < 100) {
         const defaultBrandImage =
             'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png'
