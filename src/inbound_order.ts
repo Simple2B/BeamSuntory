@@ -218,20 +218,19 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
             '.inbound-order-edit-add-shelf_life_start'
         )
         const shelfLifeEndInputs = document.querySelectorAll<HTMLInputElement>('.inbound-order-edit-add-shelf_life_end')
+        const firstProdSelect: HTMLSelectElement = document.querySelector('#inbound-order-edit-add-product-1st-item')
+        firstProdSelect.innerHTML = ''
+
+        inboundOrder.io_allocate_product[inboundOrder.id].forEach((e) => {
+            const option = document.createElement('option')
+            option.value = e.product.id.toString()
+            option.innerHTML = e.product.name
+            firstProdSelect.appendChild(option)
+        })
 
         if (currentInboundOrder) {
             for (let i = 0; i < currentInboundOrder.length; i++) {
                 if (i === 0) {
-                    const firstProdSelect: HTMLSelectElement = document.querySelector(
-                        '#inbound-order-edit-add-product-1st-item'
-                    )
-                    firstProdSelect.innerHTML = ''
-                    inboundOrder.io_allocate_product[inboundOrder.id].forEach((e) => {
-                        const option = document.createElement('option')
-                        option.value = e.product.id.toString()
-                        option.innerHTML = e.product.name
-                        firstProdSelect.appendChild(option)
-                    })
                     const inboundOrderProductInput = inboundOrderProductsInputs[i]
                     const inboundOrderGroupInput = inboundOrderGroupsInputs[i]
                     const inboundOrderQuantityInput = inboundOrderQuantityInputs[i]
@@ -271,7 +270,6 @@ function editInboundOrder(inboundOrder: IInboundOrder) {
             const inboundOrderCheckQuantityInputHidden: HTMLDivElement = document.querySelector(
                 `#inbound-order-edit-check-quantity-${selectedProduct}-hidden`
             )
-
             const changedQuantityInputs = document.querySelectorAll<HTMLInputElement>(`#${selectedProductQtyId}`)
 
             let totalProductChangedQty = 0

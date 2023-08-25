@@ -21,7 +21,7 @@ tableCartItems.forEach((item) => {
     quantityElement.max = availableProductQuantity
 })
 
-totalPriceElement.textContent = `${totalPrice.toFixed(2)}$`
+totalPriceElement.textContent = `$${totalPrice.toFixed(2)}`
 totalQuantityElement.textContent = totalQuantity.toString()
 
 // --add delivery form when create ship request--

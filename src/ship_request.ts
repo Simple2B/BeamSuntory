@@ -167,7 +167,7 @@ function createShipRequestItemTable(shipRqst: IShipRequest, typeModal: string) {
             }
           </div>
         </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+        <td scope="row" class="max-w-xs  p-4 text-base font-normal text-gray-900 dark:text-white">
           <div class="pl-3">
             <div class="text-base font-semibold">${product.name}</div>
           </div>
