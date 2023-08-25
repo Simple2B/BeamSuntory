@@ -58,6 +58,7 @@ class InboundOrder(db.Model, ModelMixin):
         current_io: InboundOrder = db.session.execute(
             InboundOrder.select().where(InboundOrder.id == mg_dict["id"])
         ).scalar()
+        # TODO move all groups json outside of the model
         mg_dict["groups"] = [
             {
                 "name": g.name,
@@ -65,6 +66,7 @@ class InboundOrder(db.Model, ModelMixin):
             }
             for g in db.session.execute(Group.select()).scalars()
         ]
+        # TODO move all products json outside of the model
         mg_dict["products"] = [
             {
                 "name": p.name,
@@ -78,6 +80,7 @@ class InboundOrder(db.Model, ModelMixin):
             "warehouse": current_io.warehouse.name,
         }
 
+        # # # TODO consider if this code could be moved to separate route
         apqg: list[ProductQuantityGroup] = [
             io for io in db.session.execute(ProductQuantityGroup.select()).scalars()
         ]
@@ -101,6 +104,7 @@ class InboundOrder(db.Model, ModelMixin):
             ]
             for io in apqg
         }
+        # # #
 
         package: PackageInfo = db.session.execute(
             PackageInfo.select().where(PackageInfo.inbound_order_id == mg_dict["id"])
