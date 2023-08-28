@@ -18,7 +18,7 @@
       </div>
       <div class="p-6 space-y-6">
         <div class="grid grid-cols-6 gap-5">
-          <div class="col-span-6 sm:col-span-2 sm:row-span-2 max-height-image-container">
+          <div class="product-full-image-anchor col-span-6 sm:col-span-2 sm:row-span-2 max-height-image-container">
             <img id="product-request-share-image" class="w-full h-full object-cover">
           </div>
           <div class="col-span-6 sm:col-span-4">
@@ -77,10 +77,10 @@
             <select type="text" name="group_id" id="product-request-share-define-brand"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Group" required>
-              {% for g in all_product_groups  %}
-                {% if g in current_user_groups_names%}
-                  <option value="{{ all_product_groups[g].id }}">{{ all_product_groups[g].name }}</option>
-                {% endif %}
+              {% for g in all_product_groups %}
+              {% if g in current_user_groups_names%}
+              <option value="{{ all_product_groups[g].id }}">{{ all_product_groups[g].name }}</option>
+              {% endif %}
               {% endfor %}
             </select>
           </div>

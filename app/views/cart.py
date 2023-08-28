@@ -45,15 +45,11 @@ def get_all():
     warehouses_rows = db.session.execute(sa.select(m.Warehouse)).all()
     warehouses = [row[0] for row in warehouses_rows]
 
-    locker_id = (
-        db.session.execute(
-            m.StoreCategory.select().where(
-                m.StoreCategory.name == BaseConfig.Config.SALES_REP_LOCKER_NAME
-            )
-        )
-        .scalar()
-        .id
-    )
+    locker_id = db.session.execute(
+        m.StoreCategory.select()
+        .where(m.StoreCategory.name == BaseConfig.Config.SALES_REP_LOCKER_NAME)
+        .with_only_columns(m.StoreCategory.id)
+    ).scalar()
 
     stores_rows = db.session.execute(
         m.Store.select().where(m.Store.store_category_id != locker_id)
@@ -90,15 +86,11 @@ def get_all():
             m.StoreCategory.select().where(m.StoreCategory.id != locker_id)
         ).scalars()
     ]
-    sales_rep_role_id = (
-        db.session.execute(
-            m.Division.select().where(
-                m.Division.role_name == BaseConfig.Config.SALES_REP
-            )
-        )
-        .scalar()
-        .id
-    )
+    sales_rep_role_id = db.session.execute(
+        m.Division.select()
+        .where(m.Division.role_name == BaseConfig.Config.SALES_REP)
+        .with_only_columns(m.Division.id)
+    ).scalar()
     locker_store_category_ids = None
     # TODO: decide behavior when edit user role to sales rep. Currently it errors out.
     if current_user.role == sales_rep_role_id:

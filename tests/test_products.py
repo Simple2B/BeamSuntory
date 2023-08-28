@@ -44,6 +44,7 @@ def test_create_product(client):
         product_groups="[1,2,3]",
     )
     data["image"] = (io.BytesIO(b"abcdef"), "test.png")
+    data["low_image"] = (io.BytesIO(b"abcdef"), "test.png")
     response = client.post(
         "/product/create",
         data=data,

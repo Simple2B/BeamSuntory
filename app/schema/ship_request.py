@@ -11,6 +11,8 @@ class ShipRequest(BaseModel):
     store_id: int
     warehouse_id: Optional[int]
     comment: str | None
+    wm_notes: Optional[str]
+    da_notes: Optional[str]
 
     created_at: datetime
 

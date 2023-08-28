@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 .text-danger {
     color: red;
 }
@@ -24,5 +23,9 @@
 }
 
 .max-height-image-container {
-  max-height: 164px;
+    max-height: 164px;
+}
+
+.full-image-z-index {
+    z-index: 60;
 }

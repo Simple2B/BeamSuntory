@@ -13,6 +13,8 @@ interface IShipRequest {
     quantity: number
     current_order_carts: IProduct[]
     comment: string
+    wm_notes: string
+    da_notes: string
     warehouses: IWarehouse[]
 }
 
@@ -151,6 +153,10 @@ viewOutgoingStockButtonElements.forEach((e) =>
         div.innerHTML = shipRequest.warehouse_name
         div = document.querySelector('#outgoing-stock-view-comment')
         div.innerHTML = shipRequest.comment
+        div = document.querySelector('#outgoing-stock-view-wm_notes')
+        shipRequest.wm_notes ? (div.innerHTML = shipRequest.wm_notes) : (div.innerHTML = '')
+        div = document.querySelector('#outgoing-stock-view-da_notes')
+        shipRequest.da_notes ? (div.innerHTML = shipRequest.da_notes) : (div.innerHTML = '')
         div = document.querySelector('#outgoing-stock-view-store')
         div.innerHTML = store.store_name
         div = document.querySelector('#outgoing-stock-view-store_address')
@@ -188,6 +194,10 @@ function editShipRequest(shipRequest: IShipRequest, store: IStore) {
     input.value = shipRequest.store_id.toString()
     input = document.querySelector('#outgoing-stock-edit-status')
     input.value = shipRequest.status
+    input = document.querySelector('#outgoing-stock-edit-wm_notes')
+    shipRequest.wm_notes ? (input.value = shipRequest.wm_notes) : (input.value = '')
+    input = document.querySelector('#outgoing-stock-edit-da_notes')
+    shipRequest.da_notes ? (input.value = shipRequest.da_notes) : (input.value = '')
 
     let div: HTMLDivElement = document.querySelector('#outgoing-stock-edit-order-number')
     div.innerHTML = shipRequest.order_numb
@@ -253,7 +263,7 @@ function createOutgoingStockItemTable(shipRqst: IShipRequest, typeModal: string)
             }
           </div>
         </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+        <td scope="row" class="max-w-xs p-4 text-base font-normal text-gray-900 dark:text-white">
           <div class="pl-3">
             <div class="cart-item-product-name text-base font-semibold" data-target-product-id="${product.id}">${
             product.name

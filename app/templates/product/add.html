@@ -7,6 +7,7 @@
     <form action="{{url_for('product.create')}}" method="post" enctype="multipart/form-data"
       class="relative bg-white rounded-lg shadow dark:bg-gray-700">
       <input type="hidden" name="product_groups" id="product-add-product-groups" value="1" />
+      <input hidden type="file" name="low_image" id="product-add-low-image" accept="image/png, image/gif, image/jpeg" />
       {{ form_create.hidden_tag() }}
       <!-- Modal header -->
       <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">

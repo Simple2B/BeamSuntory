@@ -29,8 +29,9 @@ class RequestShare(db.Model, ModelMixin):
     from_group: orm.Mapped[Group] = orm.relationship(foreign_keys=[from_group_id])
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
-        default=datetime.utcnow,
+        default=datetime.now(),
     )
+    finished_date: orm.Mapped[datetime] = orm.mapped_column(sa.DateTime, nullable=True)
 
     @property
     def json(self):

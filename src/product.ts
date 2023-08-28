@@ -413,6 +413,8 @@ function editProduct(product: IProduct) {
     sessionStorage.setItem('product', JSON.stringify(product))
 
     const img: HTMLImageElement = document.querySelector('#product-edit-show-image')
+    const fullImageAnchor = img.closest('.product-full-image-anchor')
+    fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
     product.image.length > 100 ? (img.src = `data:image/png;base64, ${product.image}`) : (img.src = defaultBrandImage)
     let input: HTMLInputElement = document.querySelector('#product-edit-name')
     input.value = product.name
@@ -581,7 +583,8 @@ viewProductButtonElements.forEach((e) =>
         div = document.querySelector('#product-view-id')
         div.innerHTML = product.id.toString()
         const img: HTMLImageElement = document.querySelector('#product-view-image')
-
+        const fullImageAnchor = img.closest('.product-full-image-anchor')
+        fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
         product.image.length > 100
             ? (img.src = `data:image/png;base64, ${product.image}`)
             : (img.src = defaultBrandImage)
@@ -637,6 +640,8 @@ adjustProductButtonElements.forEach((e) =>
         div = document.querySelector('#product-adjust-id')
         div.innerHTML = product.id.toString()
         const img: HTMLImageElement = document.querySelector('#product-adjust-image')
+        const fullImageAnchor = img.closest('.product-full-image-anchor')
+        fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
         product.image.length > 100
             ? (img.src = `data:image/png;base64, ${product.image}`)
             : (img.src = defaultBrandImage)
@@ -649,6 +654,8 @@ adjustProductButtonElements.forEach((e) =>
 // function to request share
 function requestShare(product: IProduct, group: string) {
     const img: HTMLImageElement = document.querySelector('#product-request-share-image')
+    const fullImageAnchor = img.closest('.product-full-image-anchor')
+    fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
     product.image.length > 100 ? (img.src = `data:image/png;base64, ${product.image}`) : (img.src = defaultBrandImage)
     let div: HTMLDivElement = document.querySelector('#product-request-share-name')
     div.innerHTML = product.name
@@ -680,6 +687,8 @@ function requestShare(product: IProduct, group: string) {
 // function to ship
 function ship(product: IProduct, group: string) {
     const img: HTMLImageElement = document.querySelector('#product-ship-image')
+    const fullImageAnchor = img.closest('.product-full-image-anchor')
+    fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
     product.image.length > 100 ? (img.src = `data:image/png;base64, ${product.image}`) : (img.src = defaultBrandImage)
     let div: HTMLDivElement = document.querySelector('#product-ship-name')
     div.innerHTML = product.name
@@ -697,7 +706,21 @@ function ship(product: IProduct, group: string) {
     input.min = '1'
     input = document.querySelector('#product-ship-group')
     input.value = group.replace('_', ' ')
+
     shipModal.show()
+
+    // -----count rest quantity in ship request product modal------
+    const desiredQuantityInput: HTMLInputElement = document.querySelector('#product-ship-desire-quantity')
+    desiredQuantityInput.addEventListener('change', () => {
+        const availableQuantityDiv = document.querySelector('#product-ship-available-quantity')
+        availableQuantityDiv.textContent = product.available_quantity[group.replace('_', ' ')].toString()
+        let desiredQuantity = Number(desiredQuantityInput.value)
+        const availableQuantity = Number(availableQuantityDiv.textContent)
+        if (desiredQuantity > availableQuantity) {
+            desiredQuantityInput.value = availableQuantity.toString()
+        }
+        availableQuantityDiv.textContent = (availableQuantity - desiredQuantity).toString()
+    })
 }
 
 // function to assign
@@ -1455,4 +1478,75 @@ document.querySelector('#product-assign-master-group').addEventListener('change'
             }
         }
     })
+})
+
+// ---image compressor----
+document.getElementById('product-add-image').addEventListener('change', async (e) => {
+    const desiredImageSize = 300 * 1024
+    const lowImageInput = document.querySelector<HTMLInputElement>('#product-add-low-image')
+    const initialImage = (e.target as HTMLInputElement).files[0]
+
+    if (initialImage.size > desiredImageSize) {
+        const compressedImage = await compressImage(initialImage)
+        const compressedImageFile = new File([compressedImage], `low_${initialImage.name}`, {
+            type: initialImage.type,
+        })
+
+        lowImageInput.files = setFileInput(compressedImageFile)
+    } else {
+        lowImageInput.files = setFileInput(initialImage)
+    }
+
+    async function compressImage(file: File) {
+        const maxFileSize = desiredImageSize
+        let quality = 0.6
+
+        while (quality > 0) {
+            const compressedFile = await compressQualityImage(file, quality)
+            if ((compressedFile as File).size < maxFileSize) {
+                return compressedFile
+            }
+            quality -= 0.1
+            if (quality < 0.1) {
+                return compressedFile
+            }
+        }
+    }
+
+    async function compressQualityImage(file: File, quality: number) {
+        return new Promise<Blob>((resolve, reject) => {
+            const image = new Image()
+            image.src = URL.createObjectURL(file)
+            image.onload = () => {
+                const canvas = document.createElement('canvas')
+                const context = canvas.getContext('2d')
+                canvas.width = 300
+                canvas.height = 300
+
+                context.drawImage(image, 0, 0, 300, 300)
+
+                canvas.toBlob(
+                    (blob) => {
+                        if (blob) {
+                            resolve(blob)
+                        } else {
+                            reject(new Error('Failed to convert'))
+                        }
+                    },
+                    file.type,
+                    quality
+                )
+            }
+
+            image.onerror = (err) => {
+                reject(err)
+            }
+        })
+    }
+
+    function setFileInput(file: File) {
+        const fileList = new DataTransfer()
+        fileList.items.add(file)
+        return fileList.files
+    }
 })

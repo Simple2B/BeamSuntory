@@ -2,6 +2,7 @@ import base64
 import json
 from datetime import datetime
 from io import BytesIO
+import os
 import pandas
 from flask import (
     Blueprint,
@@ -257,15 +258,17 @@ def create():
 
         supplier: m.Supplier = db.session.scalar(m.Supplier.select())
 
-        image = request.files["image"]
-        image_string = base64.b64encode(image.read()).decode()
+        # TODO: use this original image in the future
+        # image = request.files["image"]
+        low_image = request.files["low_image"]
+        low_image_string = base64.b64encode(low_image.read()).decode()
         product: m.Product = m.Product(
             name=str(form.name.data).strip(" "),
             supplier_id=form.supplier.data if form.supplier.data else supplier.id,
             currency=form.currency.data if form.currency.data else "CAD",
             regular_price=form.regular_price.data if form.regular_price.data else 0,
             retail_price=form.retail_price.data if form.retail_price.data else 0,
-            image=image_string,
+            image=low_image_string,
             description=form.description.data,
             # General Info ->
             SKU=form.SKU.data,
@@ -1016,3 +1019,19 @@ def stocks_owned_by_me():
         form_create=form_create,
         form_edit=form_edit,
     )
+
+
+@product_blueprint.route("/full_image/<int:id>", methods=["GET"])
+@login_required
+def full_image(id: int):
+    product: m.Product = db.session.execute(
+        m.Product.select().where(m.Product.id == id)
+    ).scalar()
+
+    data = {
+        "name": product.name,
+        "image": product.image if product.image else os.environ.get("DEFAULT_IMAGE"),
+    }
+    response = jsonify(data)
+    response.status_code = 200
+    return response

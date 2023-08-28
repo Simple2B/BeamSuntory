@@ -13,6 +13,8 @@ interface IShipRequest {
     quantity: number
     current_order_carts: IProduct[]
     comment: string
+    wm_notes: string
+    da_notes: string
     warehouses: IWarehouse[]
 }
 
@@ -46,6 +48,8 @@ interface IWarehouse {
 
 const $modalViewElement: HTMLElement = document.querySelector('#view-pickup-order-modal')
 
+const $modalEditElement: HTMLElement = document.querySelector('#edit-pickup-order-modal')
+
 const modalViewOptions: ModalOptions = {
     placement: 'bottom-right',
     backdrop: 'dynamic',
@@ -64,7 +68,27 @@ const modalViewOptions: ModalOptions = {
     },
 }
 
+const modalEditOptions: ModalOptions = {
+    placement: 'bottom-right',
+    backdrop: 'dynamic',
+    backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
+    closable: true,
+    onHide: () => {
+        console.log('modal is hidden')
+        const tableShipRequestBody = document.querySelector('#table-pickup-order-body-edit')
+        while (tableShipRequestBody.firstChild) {
+            tableShipRequestBody.removeChild(tableShipRequestBody.firstChild)
+        }
+    },
+    onShow: () => {},
+    onToggle: () => {
+        console.log('modal has been toggled')
+    },
+}
+
 const viewModal: ModalInterface = new Modal($modalViewElement, modalViewOptions)
+
+const editModal: ModalInterface = new Modal($modalEditElement, modalEditOptions)
 
 // ----view modal-----
 const viewPickupOrderButtonElements = document.querySelectorAll('.pickup-order-view-button')
@@ -85,6 +109,10 @@ viewPickupOrderButtonElements.forEach((e) =>
         div.innerHTML = shipRequest.warehouse_name
         div = document.querySelector('#pickup-order-view-comment')
         div.innerHTML = shipRequest.comment
+        div = document.querySelector('#pickup-order-view-wm_notes')
+        shipRequest.wm_notes ? (div.innerHTML = shipRequest.wm_notes) : (div.innerHTML = '')
+        div = document.querySelector('#pickup-order-view-da_notes')
+        shipRequest.da_notes ? (div.innerHTML = shipRequest.da_notes) : (div.innerHTML = '')
         div = document.querySelector('#pickup-order-view-store')
         div.innerHTML = store.store_name
         div = document.querySelector('#pickup-order-view-store_address')
@@ -104,6 +132,59 @@ viewPickupOrderButtonElements.forEach((e) =>
         viewModal.show()
     })
 )
+
+// -----edit modal------
+const $buttonEditElements = document.querySelectorAll('.pickup-order-edit-button')
+$buttonEditElements.forEach((e) =>
+    e.addEventListener('click', () => {
+        editShipRequest(JSON.parse(e.getAttribute('data-target')), JSON.parse(e.getAttribute('data-target-store')))
+    })
+)
+
+function editShipRequest(shipRequest: IShipRequest, store: IStore) {
+    let input: HTMLInputElement = document.querySelector('#pickup-order-edit-status')
+    input.value = shipRequest.status
+    input = document.querySelector('#pickup-order-edit-id')
+    input.value = shipRequest.id.toString()
+    input = document.querySelector('#pickup-order-edit-store')
+    input.value = shipRequest.store_id.toString()
+    input = document.querySelector('#pickup-order-edit-status')
+    input.value = shipRequest.status
+    input = document.querySelector('#pickup-order-edit-wm_notes')
+    shipRequest.wm_notes ? (input.value = shipRequest.wm_notes) : (input.value = '')
+    input = document.querySelector('#pickup-order-edit-da_notes')
+    shipRequest.da_notes ? (input.value = shipRequest.da_notes) : (input.value = '')
+
+    let div: HTMLDivElement = document.querySelector('#pickup-order-edit-order-number')
+    div.innerHTML = shipRequest.order_numb
+    div = document.querySelector('#pickup-order-edit-store')
+    div.innerHTML = store.store_name
+    div = document.querySelector('#pickup-order-edit-type')
+    div.innerHTML = shipRequest.order_type
+    div = document.querySelector('#pickup-order-edit-created-date')
+    div.innerHTML = shipRequest.created_at.slice(0, 10)
+    div = document.querySelector('#pickup-order-edit-comment')
+    div.innerHTML = shipRequest.comment
+    div = document.querySelector('#pickup-order-edit-store')
+    div.innerHTML = store.store_name
+    div = document.querySelector('#pickup-order-edit-store_address')
+    div.innerHTML = store.address
+    div = document.querySelector('#pickup-order-edit-store_phone')
+    div.innerHTML = store.phone_numb
+    div = document.querySelector('#pickup-order-edit-store_country')
+    div.innerHTML = store.country
+    div = document.querySelector('#pickup-order-edit-store_province')
+    div.innerHTML = store.region
+    div = document.querySelector('#pickup-order-edit-store_city')
+    div.innerHTML = store.city
+    div = document.querySelector('#pickup-order-edit-store_zip_code')
+    div.innerHTML = store.zip
+
+    createPickupOrderItemTable(shipRequest, 'edit')
+    console.log('shipRequest: ', shipRequest)
+
+    editModal.show()
+}
 
 // -----create ship request item table-----
 function createPickupOrderItemTable(shipRqst: IShipRequest, typeModal: string) {
