@@ -288,6 +288,7 @@ const configs = [
     storeCategoryConfig,
     assignConfig,
     inventoryConfig,
+    adjustConfig,
 ].map((conf) => merge(defaultConfig, conf))
 
 module.exports = configs

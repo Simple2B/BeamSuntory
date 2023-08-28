@@ -3,7 +3,7 @@ from sqlalchemy import ForeignKey, orm
 from app import db
 from .utils import ModelMixin
 from .group import Group
-from .adjust import Adjust
+from .warehouse import Warehouse
 
 
 class AdjustGroupQty(db.Model, ModelMixin):
@@ -12,5 +12,6 @@ class AdjustGroupQty(db.Model, ModelMixin):
     quantity: orm.Mapped[int] = orm.mapped_column()
     group_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("groups.id"))
     adjust_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("adjusts.id"))
+    warehouse_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("warehouses.id"))
     group: orm.Mapped[Group] = orm.relationship()
-    adjust: orm.Mapped[Adjust] = orm.relationship()
+    warehouse: orm.Mapped[Warehouse] = orm.relationship()

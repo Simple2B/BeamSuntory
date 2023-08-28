@@ -42,6 +42,7 @@ interface IProduct {
     mstr_prod_grps_prod_grps_names: { [index: string]: { group_name: string; group_id: number }[] }
     mstr_grps_grps_names_in_prod: { [index: string]: { group_name: string; group_id: number }[] }
     warehouse_product_qty: number
+    product_in_warehouses: { [index: string]: { [index: string]: number } }
 }
 interface FilterJsonData {
     [key: string]: string
@@ -298,6 +299,7 @@ const adjustModalOptions: ModalOptions = {
         mstrGroupsEntries.forEach(([key, value]: [string, string]) => {
             deleteAdjustContainer(value.replace(/\s/g, '_'), key)
         })
+        sessionStorage.removeItem('productInWarehouses')
     },
     onShow: () => {},
     onToggle: () => {
@@ -940,6 +942,10 @@ function getSessionStorageObject(
 }
 
 function createAdjustAction(isEqual: boolean, masterGroup: string, group: string, productParam: IProduct) {
+    const productInWarehouses = sessionStorage.setItem(
+        'productInWarehouses',
+        JSON.stringify(productParam.product_in_warehouses)
+    )
     console.log(productParam)
 
     const groupUnderScore = group.replace(/ /g, '_')
@@ -954,6 +960,7 @@ function createAdjustAction(isEqual: boolean, masterGroup: string, group: string
         <input id="adjust-product-quantity-${groupUnderScore}"
           class="product-adjust-group-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
     </div>
+
   `
 
     productTypeContainer.parentNode.insertBefore(adjustContainer, productTypeContainer.nextSibling)
@@ -965,30 +972,64 @@ function createAdjustAction(isEqual: boolean, masterGroup: string, group: string
 
     masterGroupWarehouseContainer.innerHTML = `
   <div class="flex gap-4">
-  <div class="w-full">
-    <label for="for-group-${groupUnderScore}"
-      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">${masterGroup}</label>
-    <select type="text" name="group-${groupUnderScore}" id="master-group-adjust-${groupUnderScore}"
-      class="product-adjust-group shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-      placeholder="Some Group" required
-    >
-      <option value="${groupProductIds[group]}">${group}</option>
-    </select>
-  </div>
+    <div class="w-1/2">
+      <label for="for-group-${groupUnderScore}"
+        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">${masterGroup}</label>
+      <select type="text" name="group-${groupUnderScore}" id="master-group-adjust-${groupUnderScore}"
+        class="product-adjust-group shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        placeholder="Some Group" required
+      >
+        <option value="${groupProductIds[group]}">${group}</option>
+      </select>
+    </div>
+    <div class="w-1/2">
+      <label for="for-warehouse-${groupUnderScore}"
+        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Warehouse</label>
+      <select type="text" name="group-${groupUnderScore}" id="warehouse-adjust-${groupUnderScore}" data-target-group="${group}"
+        class="product-adjust-warehouse-select shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        placeholder="Some Group" required
+      >
+      </select>
+    </div>
   </div>
     `
-
+    const selectWarehouse: HTMLInputElement = masterGroupWarehouseContainer.querySelector(
+        `#warehouse-adjust-${groupUnderScore}`
+    )
     const productQuantity: HTMLInputElement = adjustContainer.querySelector(
         `#adjust-product-quantity-${groupUnderScore}`
     )
 
-    const productQuantityValue = productParam.available_quantity[group] || 0
+    for (const warehouse of productParam.all_warehouses) {
+        const option = document.createElement('option')
+
+        option.value = warehouse.id.toString()
+        option.text = warehouse.name.toString()
+        selectWarehouse.appendChild(option)
+    }
+
+    const productQuantityValue = productParam.product_in_warehouses[group][selectWarehouse.value] || 0
+
     productQuantity.value = String(productQuantityValue)
 
     productViewTypeContainer.parentNode.insertBefore(
         masterGroupWarehouseContainer,
         productViewTypeContainer.nextSibling
     )
+
+    selectWarehouse.addEventListener('change', () => {
+        const productInWarehouses = JSON.parse(sessionStorage.getItem('productInWarehouses'))
+        const availableQuantity = productInWarehouses[group][selectWarehouse.value] || 0
+        productQuantity.value = String(availableQuantity)
+        productInWarehouses[group][selectWarehouse.value] = Number(productQuantity.value)
+        sessionStorage.setItem('productInWarehouses', JSON.stringify(productInWarehouses))
+    })
+
+    productQuantity.addEventListener('change', () => {
+        const productInWarehouses = JSON.parse(sessionStorage.getItem('productInWarehouses'))
+        productInWarehouses[group][selectWarehouse.value] = Number(productQuantity.value)
+        sessionStorage.setItem('productInWarehouses', JSON.stringify(productInWarehouses))
+    })
 }
 
 const adjustButton = document.querySelector(`#product-adjust-submit-btn`)
@@ -1000,30 +1041,16 @@ adjustButton.addEventListener('click', () => {
 })
 
 async function adjustProduct(productParam: IProduct, csrfToken: string) {
-    const adjustGroups = document.querySelectorAll('.product-adjust-group')
-    const adjustGroupsQty = document.querySelectorAll('.product-adjust-group-quantity')
     const adjustNote: HTMLInputElement = document.querySelector('#product-adjust-note')
-    const groupsQty = []
+    const productInWarehouses = JSON.parse(sessionStorage.getItem('productInWarehouses'))
 
-    for (let i = 0; i < adjustGroups.length; i++) {
-        const adjustGroup = adjustGroups[i] as HTMLSelectElement
-        const adjustGroupQty = adjustGroupsQty[i] as HTMLSelectElement
-        console.log('adjustGroup', adjustGroup.value)
-
-        const groupQty = {
-            quantity: Number(adjustGroupQty.value),
-            group_id: adjustGroup.value,
-        }
-        console.log('groupQty', groupQty)
-
-        groupsQty.push(groupQty)
-    }
     const data = {
         product_id: productParam.id,
-        groups_quantity: JSON.stringify(groupsQty),
+        groups_quantity: JSON.stringify(productInWarehouses),
         note: adjustNote.value,
         csrf_token: csrfToken,
     }
+
     const base_url = window.location.origin
 
     const response = await fetch(`/product/adjust`, {
@@ -1036,8 +1063,10 @@ async function adjustProduct(productParam: IProduct, csrfToken: string) {
 
     if (response.status === 201) {
         location.reload()
+        sessionStorage.removeItem('productInWarehouses')
     } else {
         location.reload()
+        sessionStorage.removeItem('productInWarehouses')
     }
 }
 

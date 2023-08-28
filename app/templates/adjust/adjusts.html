@@ -33,15 +33,15 @@
     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
       <tr>
         <th scope="col" class="px-6 py-3">#</th>
+        <th scope="col" class="px-6 py-3">Image</th>
         <th scope="col" class="px-6 py-3">Product Name</th>
-        <th scope="col" class="px-6 py-3">Group</th>
-        <th scope="col" class="px-6 py-3">Available</th>
         <th scope="col" class="px-6 py-3">Created Date</th>
-        <th scope="col" class="px-6 py-3">Note</th>
+        <th scope="col" class="px-6 py-3">Comment</th>
+        <th scope="col" class="px-6 py-3">Action</th>
       </tr>
     </thead>
     <tbody>
-      {% for adjust_group in adjust_groups %}
+      {% for adjust in adjusts %}
       <tr
         class="table-adjust-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
         <td class="w-4 p-4">
@@ -49,43 +49,48 @@
             {{ loop.index + page.skip }}
           </div>
         </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+        <td scope="row"
+          class="product-full-image-anchor p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white"
+          data-target-product-id="{{ adjust.product_id }}">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ adjust_group.adjust.product.name }}</div>
+            {% if adjust.product.image|length > 100 %}
+            <img src="data:image/png;base64, {{ adjust.product.image }}" alt="{{ adjust.product.name }}"
+              class="w-14 object-cover">
+            {% else %}
+            <img src="{{ url_for('static', filename='img/default_image_brand.png') }}" class="w-14 object-cover"
+              alt="{{ adjust.product.name }}">
+            {% endif %}
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ adjust_group.group.name }}</div>
+            <div class="text-base font-semibold">{{ adjust.product.name }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ adjust_group.quantity }}</div>
+            <div class="text-base font-semibold">{{ adjust.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ adjust_group.adjust.created_at.date() }}</div>
+            <div class="text-base font-semibold">{{ adjust.note if adjust.note != "" else "No comment" }}
+            </div>
           </div>
         </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="text-base font-semibold">{{ adjust_group.adjust.note }}</div>
-          </div>
-        </td>
-        <!-- <td class="p-4 space-x-2 whitespace-nowrap">
-          <button type="button"
-            class="adjust-edit-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+        <td class="p-4 space-x-2 whitespace-nowrap">
+          <button type="button" class="adjust-view-button inline-flex items-center px-3 py-2 text-sm font-medium
+            text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300
+            dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" data-target="{{ adjust.json }}">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
               <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path>
               <path fill-rule="evenodd"
                 d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
                 clip-rule="evenodd"></path>
             </svg>
-            Edit adjust
+            View
           </button>
-          <button type="button"
+          <!-- <button type="button"
             class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900 delete-adjust-btn">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
               <path fill-rule="evenodd"
@@ -93,8 +98,8 @@
                 clip-rule="evenodd"></path>
             </svg>
             Delete adjust
-          </button>
-        </td> -->
+          </button> -->
+        </td>
       </tr>
       {% endfor %}
     </tbody>
@@ -181,6 +186,8 @@
 </div>
 {% endif %}
 </div>
+{% include 'adjust/view.html' %}
+
 <!-- prettier-ignore -->
 {% endblock %}
 <!-- prettier-ignore -->

@@ -697,22 +697,47 @@ def adjust():
             .name
         )
 
-        for group in groups:
-            adjust_gr_qty: m.AdjustGroupQty = m.AdjustGroupQty(
-                adjust_id=ai.id,
-                quantity=group["quantity"],
-                group_id=group["group_id"],
-            )
-            db.session.add(adjust_gr_qty)
-            warehouse_products: m.WarehouseProduct = db.session.execute(
-                m.WarehouseProduct.select().where(
-                    m.WarehouseProduct.product_id == form.product_id.data,
-                    m.WarehouseProduct.group_id == group["group_id"],
-                )
-            ).scalars()
-            for whp in warehouse_products:
-                whp.product_quantity = group["quantity"]
-                db.session.add(whp)
+        for group_name, warehouses in groups.items():
+            print(group_name)
+            group_id = db.session.execute(
+                m.Group.select()
+                .where(m.Group.name == group_name)
+                .with_only_columns(m.Group.id)
+            ).scalar()
+            for warehouse_id, quantity in warehouses.items():
+                product_warehouse: m.WarehouseProduct = db.session.execute(
+                    m.WarehouseProduct.select().where(
+                        m.WarehouseProduct.product_id == form.product_id.data,
+                        m.WarehouseProduct.group_id == group_id,
+                        m.WarehouseProduct.warehouse_id == warehouse_id,
+                    )
+                ).scalar()
+                if product_warehouse:
+                    if product_warehouse.product_quantity != quantity:
+                        adjust_gr_qty: m.AdjustGroupQty = m.AdjustGroupQty(
+                            adjust_id=ai.id,
+                            quantity=quantity,
+                            group_id=group_id,
+                            warehouse_id=warehouse_id,
+                        )
+                        db.session.add(adjust_gr_qty)
+                    product_warehouse.product_quantity = quantity
+                    db.session.add(product_warehouse)
+                else:
+                    product_warehouse = m.WarehouseProduct(
+                        product_id=form.product_id.data,
+                        group_id=group_id,
+                        product_quantity=quantity,
+                        warehouse_id=warehouse_id,
+                    )
+                    db.session.add(product_warehouse)
+                    adjust_gr_qty: m.AdjustGroupQty = m.AdjustGroupQty(
+                        adjust_id=ai.id,
+                        quantity=quantity,
+                        group_id=group_id,
+                        warehouse_id=warehouse_id,
+                    )
+                    db.session.add(adjust_gr_qty)
         db.session.commit()
 
         log(

@@ -106,6 +106,8 @@ class Product(db.Model, ModelMixin):
 
         mg_dict["available_quantity"] = {}
 
+        mg_dict["product_in_warehouses"] = {}
+
         for wp in warehouse_products:
             if wp.group.name in mg_dict["available_quantity"]:
                 mg_dict["available_quantity"][wp.group.name] = int(
@@ -113,6 +115,15 @@ class Product(db.Model, ModelMixin):
                 ) + int(wp.product_quantity)
             else:
                 mg_dict["available_quantity"][wp.group.name] = wp.product_quantity
+
+            if wp.group.name in mg_dict["product_in_warehouses"]:
+                mg_dict["product_in_warehouses"][wp.group.name][
+                    f"{wp.warehouse_id}"
+                ] = wp.product_quantity
+            else:
+                mg_dict["product_in_warehouses"][wp.group.name] = {
+                    f"{wp.warehouse_id}": wp.product_quantity
+                }
 
         mg_dict["all_warehouses"] = [
             {

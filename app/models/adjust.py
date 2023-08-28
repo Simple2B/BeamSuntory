@@ -8,6 +8,7 @@ from app import db, schema as s
 from .utils import ModelMixin
 
 from .product import Product
+from .adjusts_group_qty import AdjustGroupQty
 
 
 class Adjust(db.Model, ModelMixin):
@@ -23,11 +24,24 @@ class Adjust(db.Model, ModelMixin):
 
     @property
     def json(self):
-        mg = s.RequestShare.from_orm(self)
+        mg = s.Adjust.from_orm(self)
         ujs = mg.json()
         mg_dict = json.loads(ujs)
 
-        mg_dict["product"] = self.product.name
-        mg_dict["group"] = self.group.name
+        mg_dict["product"] = {
+            "name": self.product.name,
+            "image": self.product.image,
+            "SKU": self.product.SKU,
+        }
+        mg_dict["groups_qty"] = [
+            {
+                "group": ag.group.name,
+                "quantity": ag.quantity,
+                "warehouse": ag.warehouse.name,
+            }
+            for ag in db.session.execute(
+                AdjustGroupQty.select().where(AdjustGroupQty.adjust_id == self.id)
+            ).scalars()
+        ]
 
         return json.dumps(mg_dict)
