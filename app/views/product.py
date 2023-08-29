@@ -684,7 +684,6 @@ def request_share():
 @login_required
 def adjust():
     form: f.AdjustProductForm = f.AdjustProductForm()
-    # product_desire_quantity = int(form.quantity.data)
 
     if form.validate_on_submit():
         ai: m.Adjust = m.Adjust(
@@ -750,6 +749,7 @@ def adjust():
             form.product_id.data,
             form.groups_quantity.data,
         )
+        # NOTE: should we notify users about adjust?
         flash(f"Product {product_name} was adjusted", "success")
         return redirect(url_for("product.get_all"))
 

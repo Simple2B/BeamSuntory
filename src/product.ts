@@ -1084,6 +1084,7 @@ async function adjustProduct(productParam: IProduct, csrfToken: string) {
         body: JSON.stringify(data),
     })
 
+    // NOTE: If we do not notify user about adjust, delete if else statement
     if (response.status === 201) {
         location.reload()
         sessionStorage.removeItem('productInWarehouses')
