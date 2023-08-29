@@ -683,76 +683,79 @@ def request_share():
 @product_blueprint.route("/adjust", methods=["POST"])
 @login_required
 def adjust():
-    form: f.DepleteProductForm = f.DepleteProductForm()
-    product_desire_quantity = int(form.quantity.data)
+    form: f.AdjustProductForm = f.AdjustProductForm()
 
     if form.validate_on_submit():
-        warehouse_product: m.WarehouseProduct = db.session.execute(
-            m.WarehouseProduct.select().where(
-                m.WarehouseProduct.warehouse_id == form.warehouse_id.data,
-                m.WarehouseProduct.product_id == form.product_id.data,
-                m.WarehouseProduct.group_id == form.group_id.data,
+        ai: m.Adjust = m.Adjust(
+            product_id=form.product_id.data,
+            note=form.note.data,
+        )
+        ai.save()
+        groups = json.loads(form.groups_quantity.data)
+        product_name = (
+            db.session.execute(
+                m.Product.select().where(m.Product.id == form.product_id.data)
             )
-        ).scalar()
-
-    product_name = (
-        db.session.execute(
-            m.Product.select().where(m.Product.id == form.product_id.data)
+            .scalar()
+            .name
         )
-        .scalar()
-        .name
-    )
-    warehouse_name = (
-        db.session.execute(
-            m.Warehouse.select().where(m.Warehouse.id == form.warehouse_id.data)
-        )
-        .scalar()
-        .name
-    )
 
-    if not warehouse_product:
+        for group_name, warehouses in groups.items():
+            print(group_name)
+            group_id = db.session.execute(
+                m.Group.select()
+                .where(m.Group.name == group_name)
+                .with_only_columns(m.Group.id)
+            ).scalar()
+            for warehouse_id, quantity in warehouses.items():
+                product_warehouse: m.WarehouseProduct = db.session.execute(
+                    m.WarehouseProduct.select().where(
+                        m.WarehouseProduct.product_id == form.product_id.data,
+                        m.WarehouseProduct.group_id == group_id,
+                        m.WarehouseProduct.warehouse_id == warehouse_id,
+                    )
+                ).scalar()
+                if product_warehouse:
+                    if product_warehouse.product_quantity != quantity:
+                        adjust_gr_qty: m.AdjustGroupQty = m.AdjustGroupQty(
+                            adjust_id=ai.id,
+                            quantity=quantity,
+                            group_id=group_id,
+                            warehouse_id=warehouse_id,
+                        )
+                        db.session.add(adjust_gr_qty)
+                    product_warehouse.product_quantity = quantity
+                    db.session.add(product_warehouse)
+                else:
+                    product_warehouse = m.WarehouseProduct(
+                        product_id=form.product_id.data,
+                        group_id=group_id,
+                        product_quantity=quantity,
+                        warehouse_id=warehouse_id,
+                    )
+                    db.session.add(product_warehouse)
+                    adjust_gr_qty: m.AdjustGroupQty = m.AdjustGroupQty(
+                        adjust_id=ai.id,
+                        quantity=quantity,
+                        group_id=group_id,
+                        warehouse_id=warehouse_id,
+                    )
+                    db.session.add(adjust_gr_qty)
+        db.session.commit()
+
         log(
             log.INFO,
-            "These product is not in warehouse. Product id: [%s]",
+            "Adjust products: [%s][%s",
             form.product_id.data,
+            form.groups_quantity.data,
         )
-        return (
-            jsonify(
-                message=f"""Product "{product_name}" is out of warehouse "{warehouse_name}".""",
-            ),
-            200,
-        )
+        # NOTE: should we notify users about adjust?
+        flash(f"Product {product_name} was adjusted", "success")
+        return redirect(url_for("product.get_all"))
 
-    if warehouse_product.product_quantity == product_desire_quantity:
-        log(
-            log.INFO,
-            "Quantity of product is the same. Product id: [%s]",
-            form.product_id.data,
-        )
-        return (
-            jsonify(
-                message=f"""Quantity of product "{product_name}" in warehouse "{warehouse_name}"
-                    is the same as you want to change.""",
-            ),
-            200,
-        )
-
-    warehouse_product.product_quantity = product_desire_quantity
-    warehouse_product.save()
-
-    log(
-        log.INFO,
-        "Adjust product: [%s][%s",
-        form.product_id.data,
-        form.warehouse_id.data,
-    )
-    return (
-        jsonify(
-            message=f"""Quantity of Product "{product_name}" in warehouse "{warehouse_name}"
-                was changed to {product_desire_quantity}""",
-        ),
-        201,
-    )
+    log(log.ERROR, "Adjust item save errors: [%s]", form.errors)
+    flash(f"{form.errors}", "danger")
+    return redirect(url_for("outgoing_stock.get_all"))
 
 
 @product_blueprint.route("/upload", methods=["POST"])
