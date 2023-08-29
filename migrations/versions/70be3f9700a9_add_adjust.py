@@ -1,8 +1,8 @@
-"""add adjust, adjust_group_qty
+"""add adjust
 
-Revision ID: 2d0e8d6473a9
-Revises: 6740fcf55222
-Create Date: 2023-08-24 09:56:16.192536
+Revision ID: 70be3f9700a9
+Revises: 901749b97d51
+Create Date: 2023-08-29 09:19:21.390689
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '2d0e8d6473a9'
-down_revision = '6740fcf55222'
+revision = '70be3f9700a9'
+down_revision = '901749b97d51'
 branch_labels = None
 depends_on = None
 
@@ -31,8 +31,10 @@ def upgrade():
     sa.Column('quantity', sa.Integer(), nullable=False),
     sa.Column('group_id', sa.Integer(), nullable=False),
     sa.Column('adjust_id', sa.Integer(), nullable=False),
+    sa.Column('warehouse_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['adjust_id'], ['adjusts.id'], name=op.f('fk_adjusts_group_qty_adjust_id_adjusts')),
     sa.ForeignKeyConstraint(['group_id'], ['groups.id'], name=op.f('fk_adjusts_group_qty_group_id_groups')),
+    sa.ForeignKeyConstraint(['warehouse_id'], ['warehouses.id'], name=op.f('fk_adjusts_group_qty_warehouse_id_warehouses')),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_adjusts_group_qty'))
     )
     with op.batch_alter_table('request_share', schema=None) as batch_op:
