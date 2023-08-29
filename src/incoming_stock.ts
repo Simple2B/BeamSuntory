@@ -1,5 +1,6 @@
 import { Modal } from 'flowbite'
 import type { ModalOptions, ModalInterface } from 'flowbite'
+import { getFullImage } from './base'
 
 interface SupDAWhProd {
     supplier: string
@@ -120,7 +121,7 @@ function createIncomingStockOrderItems(curInbOrder: IInboundOrderProd) {
     incomingStockAddItem.classList.add('p-6', 'space-y-6', 'border-t', 'incoming-stock-edit-add-item')
     incomingStockAddItem.innerHTML = `
     <div class="incoming-stock-product-item grid grid-cols-12 gap-4" data-target-product-id="${curInbOrder.product.id}" >
-      <div class="col-span-6 sm:col-span-4 sm:row-span-2 max-height-image-container">
+      <div class="product-full-image-anchor col-span-6 sm:col-span-4 sm:row-span-2 max-height-image-container">
         <img src="data:image/png;base64, ${curInbOrder.product.image}" class="incoming-stock-edit-product-image w-full h-full object-cover">
       </div>
       <div class="col-span-6 sm:col-span-8">
@@ -165,6 +166,10 @@ function createIncomingStockOrderItems(curInbOrder: IInboundOrderProd) {
     i++
 
     incomingStockAddContainer.appendChild(incomingStockAddItem)
+    const imageAnchor = incomingStockAddItem.querySelector('.product-full-image-anchor')
+    imageAnchor.addEventListener('click', () => {
+        getFullImage(curInbOrder.product.id.toString())
+    })
 }
 
 // search flow
