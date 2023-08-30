@@ -29,17 +29,11 @@ def app():
 @pytest.fixture()
 def client(app: Flask):
     with app.test_client() as client:
-        app_ctx = app.app_context()
-        app_ctx.push()
-
-        db.drop_all()
-        db.create_all()
-        register()
-
-        yield client
-        db.session.close_all()
-        db.drop_all()
-        app_ctx.pop()
+        with app.app_context():
+            db.drop_all()
+            db.create_all()
+            register()
+            yield client
 
 
 @pytest.fixture()
@@ -234,7 +228,7 @@ def mg_g_populate(client: FlaskClient):
         active_time="12:00 AM",
         order_title="Inbound Order test",
         delivery_date=datetime.datetime.strptime("07/19/2023", "%m/%d/%Y"),
-        status=s.InboundOrderStatus.delivered.name,
+        status=s.InboundOrderStatus.delivered,
         supplier_id=1,
         warehouse_id=1,
     ).save(False)

@@ -52,12 +52,13 @@ def get_all():
         )
 
     pagination = create_pagination(total=db.session.scalar(count_query))
+
     inbound_orders_json = json.dumps(
         [
             json.loads(io.json)
-            for io in db.session.execute(
+            for io in db.session.scalars(
                 m.InboundOrder.select().order_by(m.InboundOrder.id)
-            ).scalars()
+            )
         ]
     )
 

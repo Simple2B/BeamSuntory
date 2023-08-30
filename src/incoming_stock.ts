@@ -260,13 +260,6 @@ function viewIncomingStock(inboundOrder: IInboundOrder) {
     div = document.querySelector('#incoming-stock-view-warehouse-id')
     div.innerHTML = inboundOrder.sup_da_wh_prod_objs.warehouse
 
-    div = document.querySelector('#incoming-stock-view-quantity-wrap')
-    div.innerHTML = packageInfo.quantity_per_wrap.toString()
-    div = document.querySelector('#incoming-stock-view-quantity-wrap-carton')
-    div.innerHTML = packageInfo.quantity_wrap_carton.toString()
-    div = document.querySelector('#incoming-stock-view-quantity-carton-master')
-    div.innerHTML = packageInfo.quantity_carton_master.toString()
-
     if (Object.keys(inboundOrder.inbound_order_prods).length > 0) {
         const currentInboundOrder = inboundOrder.inbound_order_prods[inboundOrder.order_id]
 

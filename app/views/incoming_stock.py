@@ -130,13 +130,13 @@ def accept():
         return redirect(url_for("incoming_stock.get_all"))
 
     for product in products_quantity_group:
-        warehouse_product: m.WarehouseProduct = db.session.execute(
+        warehouse_product: m.WarehouseProduct = db.session.scalar(
             m.WarehouseProduct.select().where(
                 m.WarehouseProduct.product_id == product.product_id,
                 m.WarehouseProduct.warehouse_id == product.warehouse_id,
                 m.WarehouseProduct.group_id == product.group_id,
             )
-        ).scalar()
+        )
 
         # TODO: validate real quantity
         quantity_received = int(
@@ -169,7 +169,7 @@ def accept():
             )
             warehouse_product.save()
 
-    io.status = "Delivered"
+    io.status = s.InboundOrderStatus.delivered
     io.save()
     log(log.INFO, "Inbound order accepted. Inbound order: [%s]", io)
     if not quantity_received != product.quantity:
@@ -192,7 +192,7 @@ def cancel(id: int):
         log(log.INFO, "There is no inbound order with id: [%s]", id)
         flash("There is no such inbound order", "danger")
         return "no inbound order", 404
-    io.status = "Cancelled"
+    io.status = s.InboundOrderStatus.cancelled
     io.save()
 
     log(log.INFO, "Inbound order cancelled. Inbound order: [%s]", io)
@@ -203,7 +203,7 @@ def cancel(id: int):
 @incoming_stock_blueprint.route("/sort", methods=["GET", "POST"])
 @login_required
 def sort():
-    # TODO: handle GET request without
+    # TODO: move to incoming stocks get request
     if (
         request.method == "GET"
         and request.args.get("page", type=str, default=None) is None
@@ -223,72 +223,47 @@ def sort():
     q = request.args.get("q", type=str, default=None)
     query = (
         m.InboundOrder.select()
-        .where(m.InboundOrder.status == status)
+        .where(m.InboundOrder.status == s.InboundOrderStatus(status))
         .order_by(m.InboundOrder.id)
     )
     count_query = (
         sa.select(sa.func.count())
-        .where(m.InboundOrder.status == status)
+        .where(m.InboundOrder.status == s.InboundOrderStatus(status))
         .select_from(m.InboundOrder)
     )
     if q:
-        query = (
-            m.InboundOrder.select()
-            .where(
-                m.InboundOrder.order_title.ilike(f"%{q}%")
-                | m.InboundOrder.quantity.ilike(f"%{q}%"),
-                m.InboundOrder.status == status,
-            )
-            .order_by(m.InboundOrder.id)
+        query = query.where(
+            m.InboundOrder.order_title.ilike(f"%{q}%")
+            | m.InboundOrder.quantity.ilike(f"%{q}%"),
         )
-        count_query = (
-            sa.select(sa.func.count())
-            .where(
-                m.InboundOrder.order_title.ilike(f"%{q}%")
-                | m.InboundOrder.quantity.ilike(f"%{q}%"),
-                m.InboundOrder.status == status,
-            )
-            .select_from(m.InboundOrder)
+
+        count_query = count_query.where(
+            m.InboundOrder.order_title.ilike(f"%{q}%")
+            | m.InboundOrder.quantity.ilike(f"%{q}%"),
         )
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
     return render_template(
         "incoming_stock/incoming_stocks.html",
-        inbound_orders=db.session.execute(
+        inbound_orders=db.session.scalars(
             query.offset((pagination.page - 1) * pagination.per_page).limit(
                 pagination.per_page
             )
-        ).scalars(),
+        ),
         page=pagination,
         search_query=q,
-        suppliers=[
-            s
-            for s in db.session.execute(
-                m.Supplier.select().order_by(m.Supplier.id)
-            ).scalars()
-        ],
-        delivery_agents=[
-            da
-            for da in db.session.execute(
-                m.DeliveryAgent.select().order_by(m.DeliveryAgent.id)
-            ).scalars()
-        ],
-        warehouses=[
-            w
-            for w in db.session.execute(
-                m.Warehouse.select().order_by(m.Warehouse.id)
-            ).scalars()
-        ],
-        products=[
-            p
-            for p in db.session.execute(
-                m.Product.select().order_by(m.Product.id)
-            ).scalars()
-        ],
+        suppliers=db.session.scalars(m.Supplier.select().order_by(m.Supplier.id)).all(),
+        delivery_agents=db.session.scalars(
+            m.DeliveryAgent.select().order_by(m.DeliveryAgent.id)
+        ).all(),
+        warehouses=db.session.scalars(
+            m.Warehouse.select().order_by(m.Warehouse.id)
+        ).all(),
+        products=db.session.scalars(m.Product.select().order_by(m.Product.id)).all(),
         form_create=form_create,
         form_edit=form_edit,
         form_sort=form_sort,
         filtered=filtered,
-        inbound_orders_status=BaseConfig.Config.INBOUND_ORDER_STATUS,
+        inbound_orders_status=BaseConfig.Config.INBOUND_ORDER_STATUS,  # TODO replace with enum
     )
