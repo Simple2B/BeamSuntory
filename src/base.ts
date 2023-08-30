@@ -114,19 +114,22 @@ const viewModal: ModalInterface = new Modal($viewImageModalElement, modalOptions
 
 const productImageAnchors = document.querySelectorAll('.product-full-image-anchor')
 productImageAnchors.forEach((e) => {
-    e.addEventListener('click', async () => {
+    e.addEventListener('click', () => {
         const productId = e.getAttribute('data-target-product-id')
-
-        const response = await fetch(`/product/full_image/${productId}`, {
-            method: 'GET',
-        })
-        if (response.status === 200) {
-            const data = await response.json()
-            const image = document.querySelector('#product-image-full-img')
-            const productName = document.querySelector('#product-image-name')
-            image.setAttribute('src', `data:image/png;base64, ${data.image}`)
-            productName.innerHTML = data.name
-            viewModal.show()
-        }
+        getFullImage(productId)
     })
 })
+
+export async function getFullImage(id: string) {
+    const response = await fetch(`/product/full_image/${id}`, {
+        method: 'GET',
+    })
+    if (response.status === 200) {
+        const data = await response.json()
+        const image = document.querySelector('#product-image-full-img')
+        const productName = document.querySelector('#product-image-name')
+        image.setAttribute('src', `data:image/png;base64, ${data.image}`)
+        productName.innerHTML = data.name
+        viewModal.show()
+    }
+}

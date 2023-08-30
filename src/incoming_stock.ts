@@ -1,5 +1,6 @@
 import { Modal } from 'flowbite'
 import type { ModalOptions, ModalInterface } from 'flowbite'
+import { getFullImage } from './base'
 
 interface SupDAWhProd {
     supplier: string
@@ -120,7 +121,7 @@ function createIncomingStockOrderItems(curInbOrder: IInboundOrderProd) {
     incomingStockAddItem.classList.add('p-6', 'space-y-6', 'border-t', 'incoming-stock-edit-add-item')
     incomingStockAddItem.innerHTML = `
     <div class="incoming-stock-product-item grid grid-cols-12 gap-4" data-target-product-id="${curInbOrder.product.id}" >
-      <div class="col-span-6 sm:col-span-4 sm:row-span-2 max-height-image-container">
+      <div class="product-full-image-anchor col-span-6 sm:col-span-4 sm:row-span-2 max-height-image-container">
         <img src="data:image/png;base64, ${curInbOrder.product.image}" class="incoming-stock-edit-product-image w-full h-full object-cover">
       </div>
       <div class="col-span-6 sm:col-span-8">
@@ -165,6 +166,10 @@ function createIncomingStockOrderItems(curInbOrder: IInboundOrderProd) {
     i++
 
     incomingStockAddContainer.appendChild(incomingStockAddItem)
+    const imageAnchor = incomingStockAddItem.querySelector('.product-full-image-anchor')
+    imageAnchor.addEventListener('click', () => {
+        getFullImage(curInbOrder.product.id.toString())
+    })
 }
 
 // search flow
@@ -296,36 +301,44 @@ function createViewIncomingStockItems(inbOrder: IInboundOrder = null, curInbOrde
     inboundOrderAddItem.classList.add('p-6', 'space-y-6', 'border-t', 'incoming-stock-view-add-item')
     inboundOrderAddItem.innerHTML = `
     <div class="grid grid-cols-12 gap-5">
-    <div class="col-span-6 sm:col-span-4">
-      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product</label>
-      <div
-        class="incoming-stock-view-add-product shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-      </div>
+        <div class="col-span-6 sm:col-span-4">
+            <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product</label>
+            <div
+                class="incoming-stock-view-add-product shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
+        </div>
+        <div class="col-span-6 sm:col-span-3">
+            <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">SKU</label>
+            <div
+                class="incoming-stock-view-add-SKU shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
+        </div>
+        <div class="col-span-6 sm:col-span-3">
+        <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label>
+        <div
+            class="incoming-stock-view-add-group shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+        </div>
+        </div>
+        <div class="col-span-6 sm:col-span-2">
+        <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
+        <div
+            class="incoming-stock-view-add-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+        </div>
+        </div>
     </div>
-    <div class="col-span-6 sm:col-span-4">
-      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label>
-      <div
-        class="incoming-stock-view-add-group shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-      </div>
-    </div>
-    <div class="col-span-6 sm:col-span-4">
-      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
-      <div
-        class="incoming-stock-view-add-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-      </div>
-    </div>
-  </div>
   `
 
     const inboundOrderAddProduct: HTMLInputElement = inboundOrderAddItem.querySelector(
         '.incoming-stock-view-add-product'
     )
+    const inboundOrderAddSKU: HTMLInputElement = inboundOrderAddItem.querySelector('.incoming-stock-view-add-SKU')
     const inboundOrderAddGroup: HTMLInputElement = inboundOrderAddItem.querySelector('.incoming-stock-view-add-group')
     const inboundOrderAddQuantity: HTMLInputElement = inboundOrderAddItem.querySelector(
         '.incoming-stock-view-add-quantity'
     )
 
     inboundOrderAddProduct.innerHTML = curInbOrder.product.name
+    inboundOrderAddSKU.innerHTML = curInbOrder.product.SKU
     inboundOrderAddGroup.innerHTML = curInbOrder.group.name
     inboundOrderAddQuantity.innerHTML = curInbOrder.quantity.toString()
 

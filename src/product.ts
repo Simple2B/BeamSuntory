@@ -639,6 +639,8 @@ adjustProductButtonElements.forEach((e) =>
         div.innerHTML = product.name
         div = document.querySelector('#product-adjust-id')
         div.innerHTML = product.id.toString()
+        div = document.querySelector('#product-adjust-SKU')
+        div.innerHTML = product.SKU
         const img: HTMLImageElement = document.querySelector('#product-adjust-image')
         const fullImageAnchor = img.closest('.product-full-image-anchor')
         fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
