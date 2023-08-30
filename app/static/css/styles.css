@@ -542,6 +542,11 @@ select:not([size]) {
   box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
 }
 
+input[type="radio"]:checked {
+  background-color: transparent !important;
+  background: url(../img/checkmark.png);
+}
+
 [type='checkbox']:checked,[type='radio']:checked,.dark [type='checkbox']:checked,.dark [type='radio']:checked {
   border-color: transparent;
   background-color: currentColor;
