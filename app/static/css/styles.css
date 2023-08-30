@@ -452,6 +452,10 @@ video {
   border-color: #1C64F2;
 }
 
+.relative .transparent-offset-ring{
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) rgba(0, 0, 0, 0);
+}
+
 input::-moz-placeholder, textarea::-moz-placeholder {
   color: #6B7280;
   opacity: 1;
