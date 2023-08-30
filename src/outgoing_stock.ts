@@ -150,13 +150,13 @@ viewOutgoingStockButtonElements.forEach((e) =>
         div = document.querySelector('#outgoing-stock-view-type')
         div.innerHTML = shipRequest.order_type
         div = document.querySelector('#outgoing-stock-view-warehouse-name')
-        div.innerHTML = shipRequest.warehouse_name
+        div.innerHTML = shipRequest.warehouse_name || 'No Warehouse'
         div = document.querySelector('#outgoing-stock-view-comment')
         div.innerHTML = shipRequest.comment
         div = document.querySelector('#outgoing-stock-view-wm_notes')
-        shipRequest.wm_notes ? (div.innerHTML = shipRequest.wm_notes) : (div.innerHTML = '')
+        shipRequest.wm_notes ? (div.innerHTML = shipRequest.wm_notes) : (div.innerHTML = 'No comments')
         div = document.querySelector('#outgoing-stock-view-da_notes')
-        shipRequest.da_notes ? (div.innerHTML = shipRequest.da_notes) : (div.innerHTML = '')
+        shipRequest.da_notes ? (div.innerHTML = shipRequest.da_notes) : (div.innerHTML = 'No comments')
         div = document.querySelector('#outgoing-stock-view-store')
         div.innerHTML = store.store_name
         div = document.querySelector('#outgoing-stock-view-store_address')

@@ -106,13 +106,13 @@ viewPickupOrderButtonElements.forEach((e) =>
         div = document.querySelector('#pickup-order-view-type')
         div.innerHTML = shipRequest.order_type
         div = document.querySelector('#pickup-order-view-warehouse-name')
-        div.innerHTML = shipRequest.warehouse_name
+        div.innerHTML = shipRequest.warehouse_name || 'No warehouse'
         div = document.querySelector('#pickup-order-view-comment')
         div.innerHTML = shipRequest.comment
         div = document.querySelector('#pickup-order-view-wm_notes')
-        shipRequest.wm_notes ? (div.innerHTML = shipRequest.wm_notes) : (div.innerHTML = '')
+        shipRequest.wm_notes ? (div.innerHTML = shipRequest.wm_notes) : (div.innerHTML = 'No comments')
         div = document.querySelector('#pickup-order-view-da_notes')
-        shipRequest.da_notes ? (div.innerHTML = shipRequest.da_notes) : (div.innerHTML = '')
+        shipRequest.da_notes ? (div.innerHTML = shipRequest.da_notes) : (div.innerHTML = 'No comments')
         div = document.querySelector('#pickup-order-view-store')
         div.innerHTML = store.store_name
         div = document.querySelector('#pickup-order-view-store_address')
@@ -266,10 +266,11 @@ function createPickupOrderItemTable(shipRqst: IShipRequest, typeModal: string) {
 
         const warehouseViewElement = document.createElement('td')
         warehouseViewElement.classList.add('p-4', 'space-x-2', 'whitespace-nowrap')
+        const warehouseNameView = shipRqst.warehouse_name || 'No warehouse'
         warehouseViewElement.innerHTML = `
       <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
         <div class="pl-3">
-          <div class="text-base text-gray-900 dark:text-white font-semibold">${shipRqst.warehouse_name}</div>
+          <div class="text-base text-gray-900 dark:text-white font-semibold">${warehouseNameView}</div>
         </div>
       </td>
     `

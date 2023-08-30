@@ -116,6 +116,8 @@ function viewPickupInbound(inboundOrder: IInboundOrder) {
     div.innerHTML = inboundOrder.status
     div = document.querySelector('#pickup-inbound-view-supplier-id')
     div.innerHTML = inboundOrder.sup_da_wh_prod_objs.supplier
+    div = document.querySelector('#pickup-inbound-view-delivery-agent-id')
+    div.innerHTML = inboundOrder.sup_da_wh_prod_objs.delivery_agent
     div = document.querySelector('#pickup-inbound-view-warehouse-id')
     div.innerHTML = inboundOrder.sup_da_wh_prod_objs.warehouse
 
@@ -165,13 +167,19 @@ function createViewPickupInboundOrderItems(inbOrder: IInboundOrder = null, curIn
         class="pickup-inbound-view-add-product shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
       </div>
     </div>
-    <div class="col-span-6 sm:col-span-4">
+        <div class="col-span-6 sm:col-span-3">
+            <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">SKU</label>
+            <div
+                class="pickup-inbound-view-add-SKU shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
+        </div>
+    <div class="col-span-6 sm:col-span-3">
       <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label>
       <div
         class="pickup-inbound-view-add-group shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
       </div>
     </div>
-    <div class="col-span-6 sm:col-span-4">
+    <div class="col-span-6 sm:col-span-2">
       <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
       <div
         class="pickup-inbound-view-add-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
@@ -183,12 +191,14 @@ function createViewPickupInboundOrderItems(inbOrder: IInboundOrder = null, curIn
     const inboundOrderAddProduct: HTMLInputElement = inboundOrderAddItem.querySelector(
         '.pickup-inbound-view-add-product'
     )
+    const inboundOrderAddSKU: HTMLInputElement = inboundOrderAddItem.querySelector('.pickup-inbound-view-add-SKU')
     const inboundOrderAddGroup: HTMLInputElement = inboundOrderAddItem.querySelector('.pickup-inbound-view-add-group')
     const inboundOrderAddQuantity: HTMLInputElement = inboundOrderAddItem.querySelector(
         '.pickup-inbound-view-add-quantity'
     )
 
     inboundOrderAddProduct.innerHTML = curInbOrder.product.name
+    inboundOrderAddSKU.innerHTML = curInbOrder.product.SKU
     inboundOrderAddGroup.innerHTML = curInbOrder.group.name
     inboundOrderAddQuantity.innerHTML = curInbOrder.quantity.toString()
 
