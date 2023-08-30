@@ -241,6 +241,7 @@ viewIncomingStockButtons.forEach((e) =>
 
 function viewIncomingStock(inboundOrder: IInboundOrder) {
     const packageInfo: IPackageInfo = inboundOrder.package_info
+    console.log(inboundOrder)
 
     let div: HTMLDivElement = document.querySelector('#incoming-stock-view-order-id')
     div.innerHTML = inboundOrder.order_id
@@ -256,17 +257,8 @@ function viewIncomingStock(inboundOrder: IInboundOrder) {
     div.innerHTML = inboundOrder.status
     div = document.querySelector('#incoming-stock-view-supplier-id')
     div.innerHTML = inboundOrder.sup_da_wh_prod_objs.supplier
-    div = document.querySelector('#incoming-stock-view-delivery-agent-id')
-    div.innerHTML = inboundOrder.sup_da_wh_prod_objs.delivery_agent
     div = document.querySelector('#incoming-stock-view-warehouse-id')
     div.innerHTML = inboundOrder.sup_da_wh_prod_objs.warehouse
-
-    div = document.querySelector('#incoming-stock-view-quantity-wrap')
-    div.innerHTML = packageInfo.quantity_per_wrap.toString()
-    div = document.querySelector('#incoming-stock-view-quantity-wrap-carton')
-    div.innerHTML = packageInfo.quantity_wrap_carton.toString()
-    div = document.querySelector('#incoming-stock-view-quantity-carton-master')
-    div.innerHTML = packageInfo.quantity_carton_master.toString()
 
     if (Object.keys(inboundOrder.inbound_order_prods).length > 0) {
         const currentInboundOrder = inboundOrder.inbound_order_prods[inboundOrder.order_id]
@@ -292,6 +284,8 @@ function convertDate(date: string) {
 
 // ----add inbound order item----
 function createViewIncomingStockItems(inbOrder: IInboundOrder = null, curInbOrder: IInboundOrderProd = null) {
+    console.log(inbOrder)
+
     if (!inbOrder) {
         const inboundOrder: IInboundOrder = JSON.parse(sessionStorage.getItem('inboundOrder'))
         inbOrder = inboundOrder

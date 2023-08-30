@@ -92,7 +92,7 @@ def get_all():
         .with_only_columns(m.Division.id)
     ).scalar()
     locker_store_category_ids = None
-    # TODO: decide behavior when edit user role to sales rep. Currently it errors out.
+
     if current_user.role == sales_rep_role_id:
         sales_rep_locker = db.session.execute(
             m.Store.select().where(m.Store.user_id == current_user.id)

@@ -28,6 +28,7 @@ from app.logger import log
 product_blueprint = Blueprint("product", __name__, url_prefix="/product")
 
 
+# TODO: needs refactor FIRST!!
 def get_all_products(request, query=None, count_query=None, my_stocks=False):
     q = request.args.get("q", type=str, default=None)
     if query is None or count_query is None:
@@ -98,7 +99,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
 
     # TODO: consider using a join instead of two queries <- Copilot
     # get all groups ids for current user to compare with product groups ids in view.html
-    current_user_groups_rows = db.session.execute(
+    current_user_groups_rows = db.session.scalars(
         m.UserGroup.select().where(m.UserGroup.left_id == current_user.id)
     ).all()
 

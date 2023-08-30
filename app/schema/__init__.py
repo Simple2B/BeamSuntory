@@ -4,7 +4,7 @@ from .user import User, UserRole
 from .master_group import MasterGroup
 from .group import Group
 from .warehouse import Warehouse
-from .inbound_order import InboundOrder
+from .inbound_order import InboundOrder, InboundOrderStatus
 from .product import Product, Currency
 from .product_category import ProductCategory
 from .ship_request import ShipRequest

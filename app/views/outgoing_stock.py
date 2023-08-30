@@ -205,7 +205,7 @@ def cancel(id: int):
 @outgoing_stock_blueprint.route("/sort", methods=["GET", "POST"])
 @login_required
 def sort():
-    # TODO: handle GET request without
+    # TODO: Move to outgoing stock GET
     if (
         request.method == "GET"
         and request.args.get("page", type=str, default=None) is None
