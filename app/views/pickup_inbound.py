@@ -10,6 +10,7 @@ from flask_login import login_required
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
+from app import schema as s
 from app import models as m, db
 from app import forms as f
 from app.logger import log
@@ -33,94 +34,54 @@ def get_all():
     query = m.InboundOrder.select().order_by(m.InboundOrder.id)
     count_query = sa.select(sa.func.count()).select_from(m.InboundOrder)
     if q:
-        query = (
-            m.InboundOrder.select()
-            .where(
-                m.InboundOrder.order_title.ilike(f"%{q}%")
-                | m.InboundOrder.order_id.ilike(f"%{q}%")
-                | m.InboundOrder.status.ilike(f"%{q}%")
-            )
-            .order_by(m.InboundOrder.id)
+        query = query.where(
+            m.InboundOrder.order_title.ilike(f"%{q}%")
+            | m.InboundOrder.order_id.ilike(f"%{q}%")
         )
-        count_query = (
-            sa.select(sa.func.count())
-            .where(
-                m.InboundOrder.order_title.ilike(f"%{q}%")
-                | m.InboundOrder.order_id.ilike(f"%{q}%")
-                | m.InboundOrder.status.ilike(f"%{q}%")
-            )
-            .select_from(m.InboundOrder)
+
+        count_query = count_query.where(
+            m.InboundOrder.order_title.ilike(f"%{q}%")
+            | m.InboundOrder.order_id.ilike(f"%{q}%")
         )
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
-    inbound_orders = [
-        i
-        for i in db.session.execute(
-            query.offset((pagination.page - 1) * pagination.per_page).limit(
-                pagination.per_page
-            )
-        ).scalars()
-    ]
-    package_info = [
-        p
-        for p in db.session.execute(
-            m.PackageInfo.select().order_by(m.PackageInfo.id)
-        ).scalars()
-    ]
-    package_info_by_io = {pi.inbound_order_id: pi for pi in package_info}
+    inbound_orders = db.session.scalars(
+        query.offset((pagination.page - 1) * pagination.per_page).limit(
+            pagination.per_page
+        )
+    )
 
     return render_template(
         "pickup_inbound/pickup_inbounds.html",
         inbound_orders=inbound_orders,
         page=pagination,
         search_query=q,
-        suppliers=[
-            s
-            for s in db.session.execute(
-                m.Supplier.select().order_by(m.Supplier.id)
-            ).scalars()
-        ],
-        delivery_agents=[
-            da
-            for da in db.session.execute(
-                m.DeliveryAgent.select().order_by(m.DeliveryAgent.id)
-            ).scalars()
-        ],
-        warehouses=[
-            w
-            for w in db.session.execute(
-                m.Warehouse.select().order_by(m.Warehouse.id)
-            ).scalars()
-        ],
-        products=[
-            p
-            for p in db.session.execute(
-                m.Product.select().order_by(m.Product.id)
-            ).scalars()
-        ],
-        package_info_by_io=package_info_by_io,
+        suppliers=db.session.scalars(m.Supplier.select().order_by(m.Supplier.id)),
+        delivery_agents=db.session.scalars(
+            m.DeliveryAgent.select().order_by(m.DeliveryAgent.id)
+        ),
+        warehouses=db.session.scalars(m.Warehouse.select().order_by(m.Warehouse.id)),
+        products=db.session.scalars(m.Product.select().order_by(m.Product.id)),
         form_create=form_create,
         form_edit=form_edit,
         form_sort=form_sort,
-        inbound_orders_status=BaseConfig.Config.INBOUND_ORDER_STATUS,
+        inbound_orders_status=s.InboundOrderStatus,
     )
 
 
-@pickup_inbound_blueprint.route("/pickup/<int:id>", methods=["GET"])
+@pickup_inbound_blueprint.route("/pickup/<int:id>", methods=["GET"])  # TODO GET -> PUT
 @login_required
 def pickup(id: int):
-    io: m.InboundOrder = db.session.scalar(
-        m.InboundOrder.select().where(m.InboundOrder.id == id)
-    )
-    if not io:
+    inbound_order: m.InboundOrder = db.session.get(m.InboundOrder, id)
+    if not inbound_order:
         log(log.INFO, "There is no inbound order with id: [%s]", id)
         flash("There is no such inbound order", "danger")
         return "no inbound order", 404
-    io.status = "In transit"
-    io.save()
+    inbound_order.status = s.InboundOrderStatus.in_transit  # TODO remove
+    inbound_order.save()
 
-    log(log.INFO, "Inbound order pickup done. Inbound order: [%s]", io)
+    log(log.INFO, "Inbound order pickup done. Inbound order: [%s]", inbound_order)
     flash("Inbound order pickup done!", "success")
     return "ok", 200
 

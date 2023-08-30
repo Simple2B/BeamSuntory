@@ -14,6 +14,7 @@ import sqlalchemy as sa
 from app.controllers import create_pagination
 
 from app import models as m, db
+from app import schema as s
 from app import forms as f
 from app.logger import log
 
@@ -38,7 +39,6 @@ def get_all():
             .where(
                 m.InboundOrder.order_title.ilike(f"%{q}%")
                 | m.InboundOrder.order_id.ilike(f"%{q}%")
-                | m.InboundOrder.status.ilike(f"%{q}%")
             )
             .order_by(m.InboundOrder.id)
         )
@@ -47,7 +47,6 @@ def get_all():
             .where(
                 m.InboundOrder.order_title.ilike(f"%{q}%")
                 | m.InboundOrder.order_id.ilike(f"%{q}%")
-                | m.InboundOrder.status.ilike(f"%{q}%")
             )
             .select_from(m.InboundOrder)
         )
@@ -96,6 +95,7 @@ def get_all():
         ],
         form_create=form_create,
         form_edit=form_edit,
+        inbound_order_statuses=[status.value for status in s.InboundOrderStatus],
     )
 
 
@@ -122,7 +122,7 @@ def save():
         io.delivery_date = datetime.datetime.strptime(
             form.delivery_date.data, "%m/%d/%Y"
         )
-        io.status = form.status.data
+        io.status = s.InboundOrderStatus(form.status.data)
         io.supplier_id = form.supplier_id.data
         io.warehouse_id = form.warehouse_id.data
         io.save()
@@ -212,11 +212,12 @@ def create():
             delivery_date=datetime.datetime.strptime(
                 form.delivery_date.data, "%m/%d/%Y"
             ),
-            status=form.status.data,
+            status=s.InboundOrderStatus(form.status.data),
             supplier_id=form.supplier_id.data,
             warehouse_id=form.warehouse_id.data,
         )
-        inbound_order.save()
+        db.session.add(inbound_order)
+        db.session.commit()
         log(log.INFO, "Form submitted. Inbound order: [%s]", inbound_order)
         # NOTE: don't rename message, it is used in frontend to connect create and edit
         flash("Inbound order added!", "success")

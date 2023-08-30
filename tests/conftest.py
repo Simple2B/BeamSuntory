@@ -5,8 +5,10 @@ import pytest
 from flask import Flask
 from flask.testing import FlaskClient
 
+
 from app import create_app, db
 from app import models as m
+from app import schema as s
 from tests.utils import register, create_default_divisions
 from config import BaseConfig
 
@@ -232,7 +234,7 @@ def mg_g_populate(client: FlaskClient):
         active_time="12:00 AM",
         order_title="Inbound Order test",
         delivery_date=datetime.datetime.strptime("07/19/2023", "%m/%d/%Y"),
-        status="Delivered",
+        status=s.InboundOrderStatus.delivered.name,
         supplier_id=1,
         warehouse_id=1,
     ).save(False)
@@ -313,7 +315,7 @@ def mg_g_populate(client: FlaskClient):
         active_time="12:00 AM",
         order_title="Inbound Order Assigned to pickup",
         delivery_date=datetime.datetime.strptime("07/19/2023", "%m/%d/%Y"),
-        status="Assigned to pickup",
+        status=s.InboundOrderStatus.assigned.name,
         supplier_id=1,
         warehouse_id=1,
     ).save(False)
@@ -324,7 +326,7 @@ def mg_g_populate(client: FlaskClient):
         active_time="12:00 AM",
         order_title="Inbound Order In transit",
         delivery_date=datetime.datetime.strptime("07/19/2023", "%m/%d/%Y"),
-        status="In transit",
+        status=s.InboundOrderStatus.in_transit.name,
         supplier_id=1,
         warehouse_id=1,
     )
