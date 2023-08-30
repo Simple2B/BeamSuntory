@@ -151,7 +151,26 @@ function createIncomingStockOrderItems(curInbOrder: IInboundOrderProd) {
           class="incoming-stock-edit-received-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           placeholder="Quantity" required>
       </div>
-    </div>
+      <div class="col-span-6 sm:col-span-6">
+      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity Per Wrap</label>
+      <input type="text" name="per_wrap_quantity"
+        class="incoming-stock-edit-per-wrap-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        placeholder="Quantity" required>
+      </div>
+
+      <div class="col-span-6 sm:col-span-6">
+        <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity Of Wraps Per Carton</label>
+        <input type="text" name="wraps_per_carton_quantity"
+          class="incoming-stock-edit-wraps-per-carton-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          placeholder="Quantity" required>
+      </div>
+
+      <div class="col-span-6 sm:col-span-6">
+        <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity Of Cartons Per Master Carton (Optional)</label>
+        <input type="text" name="carton_per_mater_carton_quantity"
+          class="incoming-stock-edit-carton-per-mater-carton-quantity-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          placeholder="Quantity" required>
+      </div>
   `
     const img: HTMLImageElement = incomingStockAddItem.querySelector('.incoming-stock-edit-product-image')
     if (img.src.length < 100) {
