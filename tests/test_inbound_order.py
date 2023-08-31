@@ -1,5 +1,6 @@
 from flask.testing import FlaskClient
 from app import models as m, db
+from app import schema as s
 from tests.utils import login, register, logout
 
 
@@ -30,7 +31,7 @@ def test_create_inbound_order(mg_g_populate: FlaskClient):
             order_title="Inbound Order 1",
             quantity=5,
             delivery_date="07/19/2023",
-            status="Draft",
+            status=s.InboundOrderStatus.draft.value,
             supplier_id=1,
             warehouse_id=1,
             products="""[{"product_id": 1, "quantity": 5, "group_id": 1,

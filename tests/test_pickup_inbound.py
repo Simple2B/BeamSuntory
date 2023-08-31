@@ -1,4 +1,5 @@
 from flask.testing import FlaskClient
+from app import schema as s
 from app import models as m, db
 from tests.utils import login, register, logout
 
@@ -24,7 +25,7 @@ def test_pickup_pickup_inbound(mg_g_populate: FlaskClient):
     ).scalar()
 
     assert order_to_pickup
-    assert order_to_pickup.status == "Assigned to pickup"
+    assert order_to_pickup.status == s.InboundOrderStatus.assigned
 
     mg_g_populate.get(f"/pickup_inbound/pickup/{order_to_pickup.id}")
 
@@ -32,7 +33,7 @@ def test_pickup_pickup_inbound(mg_g_populate: FlaskClient):
         m.InboundOrder.select().where(m.InboundOrder.order_id == "IO-BEAM-A-t-p")
     ).scalar()
     assert order_to_pickup
-    assert order_to_pickup.status == "In transit"
+    assert order_to_pickup.status == s.InboundOrderStatus.in_transit
 
 
 def test_sort_pickup_inbound(mg_g_populate: FlaskClient):

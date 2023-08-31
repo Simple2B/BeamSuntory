@@ -1,23 +1,22 @@
 import json
 from flask.testing import FlaskClient
+from app import schema as s
 from app import models as m, db
 from tests.utils import login, register, logout
 
 
-def test_incoming_stocks_pages(client):
-    logout(client)
-    response = client.get("/incoming_stock/")
+def test_incoming_stocks_pages(mg_g_populate: FlaskClient):
+    logout(mg_g_populate)
+    response = mg_g_populate.get("/incoming_stock/")
     assert response.status_code == 302
 
     register("samg", "samg@test.com")
-    response = login(client, "samg")
+    response = login(mg_g_populate, "samg")
     assert b"Login successful." in response.data
 
-    response = client.get("/incoming_stock/")
+    response = mg_g_populate.get("/incoming_stock/")
     assert response.status_code == 200
 
-
-def test_accept_incoming_stock(mg_g_populate: FlaskClient):
     login(mg_g_populate)
 
     order_to_accept: m.InboundOrder = db.session.execute(
@@ -30,7 +29,7 @@ def test_accept_incoming_stock(mg_g_populate: FlaskClient):
     ).scalar()
 
     assert order_to_accept
-    assert order_to_accept.status == "In transit"
+    assert order_to_accept.status == s.InboundOrderStatus.in_transit
 
     quantity_received = 90
 
@@ -61,7 +60,7 @@ def test_accept_incoming_stock(mg_g_populate: FlaskClient):
         m.InboundOrder.select().where(m.InboundOrder.order_id == "IO-BEAM-I-t")
     ).scalar()
     assert order_to_accept
-    assert order_to_accept.status == "Delivered"
+    assert order_to_accept.status == s.InboundOrderStatus.delivered
 
     products_quantity_group: m.ProductQuantityGroup = db.session.execute(
         m.ProductQuantityGroup.select().where(
@@ -100,7 +99,7 @@ def test_cancel_incoming_stock(mg_g_populate: FlaskClient):
     ).scalar()
 
     assert order_to_accept
-    assert order_to_accept.status == "In transit"
+    assert order_to_accept.status == s.InboundOrderStatus.in_transit
 
     mg_g_populate.get(f"/incoming_stock/cancel/{order_to_accept.id}")
 
@@ -108,7 +107,7 @@ def test_cancel_incoming_stock(mg_g_populate: FlaskClient):
         m.InboundOrder.select().where(m.InboundOrder.order_id == "IO-BEAM-I-t")
     ).scalar()
     assert order_to_accept
-    assert order_to_accept.status == "Cancelled"
+    assert order_to_accept.status == s.InboundOrderStatus.cancelled
 
 
 def test_sort_incoming_stock(mg_g_populate: FlaskClient):

@@ -1,5 +1,14 @@
+from enum import Enum
 from datetime import datetime
 from pydantic import BaseModel
+
+
+class InboundOrderStatus(Enum):
+    draft = "Draft"
+    assigned = "Assigned to pickup"
+    delivered = "Delivered"
+    in_transit = "In transit"
+    cancelled = "Cancelled"
 
 
 class InboundOrder(BaseModel):
@@ -9,7 +18,7 @@ class InboundOrder(BaseModel):
     active_time: str
     order_title: str
     delivery_date: datetime
-    status: str
+    status: InboundOrderStatus
     supplier_id: int
     warehouse_id: int
     created_at: datetime

@@ -32,7 +32,9 @@ class InboundOrder(db.Model, ModelMixin):
         nullable=False,
     )
     delivery_date: orm.Mapped[datetime] = orm.mapped_column(sa.DateTime)
-    status: orm.Mapped[str] = orm.mapped_column(sa.String(64))
+    status: orm.Mapped[s.InboundOrderStatus] = orm.mapped_column(
+        sa.Enum(s.InboundOrderStatus)
+    )
 
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,

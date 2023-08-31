@@ -369,6 +369,8 @@ const viewInboundOrderButtonElements = document.querySelectorAll('.inbound-order
 viewInboundOrderButtonElements.forEach((e) =>
     e.addEventListener('click', () => {
         const inboundOrder: IInboundOrder = JSON.parse(e.getAttribute('data-target'))
+        console.log(inboundOrder)
+
         let div: HTMLDivElement = document.querySelector('#inbound-order-view-order_id')
         div.innerHTML = inboundOrder.order_id
         div = document.querySelector('#inbound-order-view-id')
