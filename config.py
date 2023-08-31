@@ -46,24 +46,6 @@ class BaseConfig(BaseSettings):
         # `.env` takes priority over `project.env`
         env_file = "project.env", ".env"
 
-        # Inbound order status
-        INBOUND_ORDER_STATUS: list[str] = [
-            "Draft",
-            "Assigned to pickup",
-            "Delivered",
-            "In transit",
-            "Cancelled",
-        ]
-
-        # Ship request status
-        SHIP_REQUEST_STATUS: list[str] = [
-            "Waiting for warehouse manager",
-            "Assigned to pickup",
-            "Delivered",
-            "In transit",
-            "Cancelled",
-        ]
-
         # Locker name for sales rep
         SALES_REP_LOCKER_NAME: str = "Locker"
 

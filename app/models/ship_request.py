@@ -25,8 +25,8 @@ class ShipRequest(db.Model, ModelMixin):
         unique=True,
         nullable=False,
     )
-    status: orm.Mapped[str] = orm.mapped_column(
-        sa.String(64),
+    status: orm.Mapped[s.ShipRequestStatus] = orm.mapped_column(
+        sa.Enum(s.ShipRequestStatus),
     )
     store_category_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("store_categories.id")

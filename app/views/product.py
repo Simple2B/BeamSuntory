@@ -99,7 +99,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
 
     # TODO: consider using a join instead of two queries <- Copilot
     # get all groups ids for current user to compare with product groups ids in view.html
-    current_user_groups_rows = db.session.scalars(
+    current_user_groups_rows = db.session.execute(
         m.UserGroup.select().where(m.UserGroup.left_id == current_user.id)
     ).all()
 
