@@ -12,6 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import aliased
 from app.controllers import create_pagination
 
+from app import schema as s
 from app import models as m, db
 from app import forms as f
 from app.logger import log
@@ -22,6 +23,7 @@ ship_request_blueprint = Blueprint("ship_request", __name__, url_prefix="/ship_r
 @ship_request_blueprint.route("/", methods=["GET"])
 @login_required
 def get_all():
+    # TODO: refactor or delete comments in queries
     form_create: f.NewShipRequestForm = f.NewShipRequestForm()
     form_edit: f.ShipRequestForm = f.ShipRequestForm()
 
@@ -41,7 +43,6 @@ def get_all():
             .where(
                 m.ShipRequest.order_numb.ilike(f"%{q}%")
                 | m.ShipRequest.order_type.ilike(f"%{q}%")
-                | m.ShipRequest.status.ilike(f"%{q}%")
                 | store_category.name.ilike(f"%{q}%")
                 | store.store_name.ilike(f"%{q}%")
             )
@@ -57,7 +58,6 @@ def get_all():
             .where(
                 m.ShipRequest.order_numb.ilike(f"%{q}%")
                 | m.ShipRequest.order_type.ilike(f"%{q}%")
-                | m.ShipRequest.status.ilike(f"%{q}%")
                 | store_category.name.ilike(f"%{q}%")
                 | store.store_name.ilike(f"%{q}%")
             )
@@ -66,14 +66,12 @@ def get_all():
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
-    ship_requests = [
-        i
-        for i in db.session.execute(
-            query.offset((pagination.page - 1) * pagination.per_page).limit(
-                pagination.per_page
-            )
-        ).scalars()
-    ]
+    ship_requests = db.session.scalars(
+        query.offset((pagination.page - 1) * pagination.per_page).limit(
+            pagination.per_page
+        )
+    ).all()
+
     current_order_carts = {
         spr.order_numb: [
             cart
@@ -114,7 +112,7 @@ def create():
         ship_request = m.ShipRequest(
             order_numb=f"BEAM-DO{int(datetime.datetime.now().timestamp())}",
             # NOTE: what status is default?
-            status="Waiting for warehouse manager",
+            status=s.ShipRequestStatus.waiting_for_warehouse,
             store_id=form_create.store.data,
             store_category_id=int(form_create.store_category.data),
             comment=form_create.comment.data,

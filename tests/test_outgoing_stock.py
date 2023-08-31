@@ -1,5 +1,6 @@
 from flask.testing import FlaskClient
 from app import models as m, db
+from app import schema as s
 from tests.utils import login, register, logout
 
 
@@ -26,7 +27,7 @@ def test_dispatch_outgoing_stock(mg_g_populate: FlaskClient):
     ).scalar()
 
     assert order_to_dispatch
-    assert order_to_dispatch.status == "Waiting for warehouse manager"
+    assert order_to_dispatch.status == s.ShipRequestStatus.waiting_for_warehouse
 
     mg_g_populate.get(f"/outgoing_stock/dispatch/{order_to_dispatch.id}")
 
@@ -36,7 +37,7 @@ def test_dispatch_outgoing_stock(mg_g_populate: FlaskClient):
         )
     ).scalar()
     assert order_to_dispatch
-    assert order_to_dispatch.status == "Assigned to pickup"
+    assert order_to_dispatch.status == s.ShipRequestStatus.assigned
 
 
 def test_cancel_outgoing_stock(mg_g_populate: FlaskClient):
@@ -49,7 +50,7 @@ def test_cancel_outgoing_stock(mg_g_populate: FlaskClient):
     ).scalar()
 
     assert order_to_cancel
-    assert order_to_cancel.status == "Assigned to pickup"
+    assert order_to_cancel.status == s.ShipRequestStatus.assigned
 
     mg_g_populate.get(f"/outgoing_stock/cancel/{order_to_cancel.id}")
 
@@ -59,7 +60,7 @@ def test_cancel_outgoing_stock(mg_g_populate: FlaskClient):
         )
     ).scalar()
     assert order_to_cancel
-    assert order_to_cancel.status == "Cancelled"
+    assert order_to_cancel.status == s.ShipRequestStatus.cancelled
 
 
 def test_sort_outgoing_stock(mg_g_populate: FlaskClient):
@@ -67,7 +68,7 @@ def test_sort_outgoing_stock(mg_g_populate: FlaskClient):
 
     response = mg_g_populate.post(
         "/outgoing_stock/sort",
-        data=dict(sort_by="In transit"),
+        data=dict(sort_by=s.ShipRequestStatus.in_transit.value),
     )
     assert ("Order-12345-In-transit" in response.text) is True
     assert ("Order-12345-Waiting-for-warehouse-manager" in response.text) is False
@@ -75,7 +76,7 @@ def test_sort_outgoing_stock(mg_g_populate: FlaskClient):
 
     response = mg_g_populate.post(
         "/outgoing_stock/sort",
-        data=dict(sort_by="Waiting for warehouse manager"),
+        data=dict(sort_by=s.ShipRequestStatus.waiting_for_warehouse.value),
     )
     assert ("Order-12345-Waiting-for-warehouse-manager" in response.text) is True
     assert ("Order-12345-In-transit" in response.text) is False
@@ -107,7 +108,7 @@ def test_edit_outgoing_stock(mg_g_populate: FlaskClient):
         "/outgoing_stock/edit",
         data=dict(
             ship_request_id=1,
-            status="Edited",
+            status=s.ShipRequestStatus.assigned.value,
             store_category=1,
             order_type="test type",
             store=1,
@@ -118,6 +119,8 @@ def test_edit_outgoing_stock(mg_g_populate: FlaskClient):
     assert response.status_code == 302
     assert "outgoing_stock" in response.text
     ship_request: m.ShipRequest = db.session.execute(
-        m.ShipRequest.select().where(m.ShipRequest.status == "Edited")
+        m.ShipRequest.select().where(
+            m.ShipRequest.status == s.ShipRequestStatus.assigned
+        )
     ).scalar()
     assert ship_request

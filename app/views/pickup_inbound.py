@@ -14,8 +14,6 @@ from app import schema as s
 from app import models as m, db
 from app import forms as f
 from app.logger import log
-from config import BaseConfig
-
 
 # NOTE pickup inbound IS inbound order. Meaning goods going from supplier to warehouse
 pickup_inbound_blueprint = Blueprint(
@@ -159,5 +157,5 @@ def sort():
         form_edit=form_edit,
         form_sort=form_sort,
         filtered=filtered,
-        inbound_orders_status=BaseConfig.Config.INBOUND_ORDER_STATUS,  # TODO remove to enum
+        inbound_orders_status=s.ShipRequestStatus,
     )

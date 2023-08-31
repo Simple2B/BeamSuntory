@@ -7,7 +7,7 @@ from .warehouse import Warehouse
 from .inbound_order import InboundOrder, InboundOrderStatus
 from .product import Product, Currency
 from .product_category import ProductCategory
-from .ship_request import ShipRequest
+from .ship_request import ShipRequest, ShipRequestStatus
 from .store import Store
 from .supplier import Supplier
 from .property import Property
