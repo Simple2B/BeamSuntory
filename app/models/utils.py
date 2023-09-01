@@ -1,4 +1,9 @@
+import uuid
 from app import db
+
+
+def generate_uuid() -> str:
+    return str(uuid.uuid4())
 
 
 class ModelMixin(object):

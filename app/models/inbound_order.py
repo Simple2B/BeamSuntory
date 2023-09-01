@@ -5,7 +5,7 @@ import sqlalchemy as sa
 from sqlalchemy import orm
 
 from app.database import db
-from .utils import ModelMixin
+from .utils import ModelMixin, generate_uuid
 from app import schema as s
 from .supplier import Supplier
 from .warehouse import Warehouse
@@ -20,11 +20,18 @@ class InboundOrder(db.Model, ModelMixin):
     __tablename__ = "inbound_orders"
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
+    uuid: orm.Mapped[str] = orm.mapped_column(
+        sa.String(36),
+        default=generate_uuid,
+        index=True,
+    )
+
     order_id: orm.Mapped[str] = orm.mapped_column(
         sa.String(64),
         unique=True,
         nullable=False,
     )
+
     active_date: orm.Mapped[datetime] = orm.mapped_column(sa.DateTime)
     active_time: orm.Mapped[str] = orm.mapped_column(sa.String(64))
     order_title: orm.Mapped[str] = orm.mapped_column(
@@ -45,7 +52,7 @@ class InboundOrder(db.Model, ModelMixin):
     supplier: orm.Mapped[Supplier] = orm.relationship()
     warehouse_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("warehouses.id"))
     warehouse: orm.Mapped[Warehouse] = orm.relationship()
-    io_allocate_products: orm.Mapped[IOAllocateProduct] = orm.relationship(
+    io_allocate_products: orm.Mapped[list[IOAllocateProduct]] = orm.relationship(
         "IOAllocateProduct", backref="inbound_order", cascade="all, delete-orphan"
     )
 

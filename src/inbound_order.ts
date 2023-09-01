@@ -86,9 +86,9 @@ const modalOptions: ModalOptions = {
     backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
     closable: true,
     onHide: () => {
-        const inboundOrder = JSON.parse(sessionStorage.inboundOrder)
-        deleteProductFields(inboundOrder.id)
-        sessionStorage.removeItem('inboundOrder')
+        // const inboundOrder = JSON.parse(sessionStorage.inboundOrder)
+        // deleteProductFields(inboundOrder.id)
+        // sessionStorage.removeItem('inboundOrder')
     },
     onShow: () => {
         console.log('inbound-order modal Show ')
@@ -123,17 +123,15 @@ $buttonElements.forEach((e) =>
     e.addEventListener('click', () => {
         const inboundOrder: IInboundOrder = JSON.parse(e.getAttribute('data-target'))
         editInboundOrder(inboundOrder)
-        sessionStorage.setItem('inboundOrder', JSON.stringify(inboundOrder))
+        //sessionStorage.setItem('inboundOrder', JSON.stringify(inboundOrder))
     })
 )
 
 const addModalButton = document.querySelector('#inbound-order-add-modal-button')
 
-addModalButton.addEventListener('click', () => {
-    const createdInboundOrderId = `IO-BEAM-${Math.floor(Date.now() / 1000)}`
-    const inboundOrderIdInput: HTMLInputElement = document.querySelector('#inbound-order-add-id')
-    inboundOrderIdInput.value = createdInboundOrderId
-    sessionStorage.setItem('inboundOrderId', createdInboundOrderId)
+
+addModalButton.addEventListener('click', () => {    
+    //sessionStorage.setItem('inboundOrderId', createdInboundOrderId)
     addModal.show()
 })
 
@@ -165,29 +163,20 @@ deleteButtons.forEach((e) => {
 
 // # NOTE: depends on flash from create route on inbound_order_blueprint
 document.addEventListener('DOMContentLoaded', () => {
-    const successFlash = document.querySelector('#toast-success')
-    if (successFlash) {
-        const successMessage = successFlash.children[1] as HTMLDivElement
-        if (successMessage.innerText === 'Inbound order added!') {
-            const inboundOrders = JSON.parse(sessionStorage.getItem('inboundOrders'))
-            const inboundOrderId = sessionStorage.getItem('inboundOrderId')
-            for (const inboundOrder of inboundOrders) {
-                if (inboundOrder.order_id === inboundOrderId) {
-                    sessionStorage.setItem('inboundOrder', JSON.stringify(inboundOrder))
-                    editInboundOrder(inboundOrder)
-                    break
-                }
-            }
-        }
-        sessionStorage.removeItem('inboundOrders')
-        sessionStorage.removeItem('inboundOrderId')
-    }
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderUuid = urlParams.get('current_inbound_uuid');
+
+    if(!orderUuid){
+        return
+    }    
+        
+    const orderColumn = document.querySelector(`#inbound-order-${orderUuid}`);
+    const orderEditButton = orderColumn.querySelector('.inbound-order-edit-button') as HTMLButtonElement;
+    orderEditButton.click();  
 })
 
 function editInboundOrder(inboundOrder: IInboundOrder) {
-    let input: HTMLInputElement = document.querySelector('#inbound-order-edit-id')
-    input.value = inboundOrder.id.toString()
-    input = document.querySelector('#inbound-order-edit-active_date')
+    let input: HTMLInputElement = document.querySelector('#inbound-order-edit-active_date')
     input.value = convertDate(inboundOrder.active_date.toString())
     input = document.querySelector('#inbound-order-edit-active_time')
     input.value = inboundOrder.active_time

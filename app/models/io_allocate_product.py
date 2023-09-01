@@ -3,6 +3,7 @@ from sqlalchemy import ForeignKey, orm, DateTime
 
 from app import db
 from .utils import ModelMixin
+from .product import Product
 
 
 class IOAllocateProduct(db.Model, ModelMixin):
@@ -11,7 +12,7 @@ class IOAllocateProduct(db.Model, ModelMixin):
     product_id: orm.Mapped[int] = orm.mapped_column(
         ForeignKey("products.id", ondelete="CASCADE")
     )
-    product = orm.relationship("Product")
+    product: orm.Mapped[Product] = orm.relationship()
     quantity: orm.Mapped[int] = orm.mapped_column()
     inbound_order_id: orm.Mapped[int] = orm.mapped_column(
         ForeignKey("inbound_orders.id", ondelete="CASCADE")

@@ -1,8 +1,8 @@
-"""init migrations
+"""inbound order uuid
 
-Revision ID: 5028b9d074ae
+Revision ID: 80e7f5590345
 Revises: 
-Create Date: 2023-08-30 15:49:06.055979
+Create Date: 2023-08-31 21:05:38.309398
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '5028b9d074ae'
+revision = '80e7f5590345'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -318,6 +318,7 @@ def upgrade():
     )
     op.create_table('inbound_orders',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('uuid', sa.String(length=36), nullable=False),
     sa.Column('order_id', sa.String(length=64), nullable=False),
     sa.Column('active_date', sa.DateTime(), nullable=False),
     sa.Column('active_time', sa.String(length=64), nullable=False),
@@ -332,6 +333,9 @@ def upgrade():
     sa.PrimaryKeyConstraint('id', name=op.f('pk_inbound_orders')),
     sa.UniqueConstraint('order_id', name=op.f('uq_inbound_orders_order_id'))
     )
+    with op.batch_alter_table('inbound_orders', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_inbound_orders_uuid'), ['uuid'], unique=False)
+
     op.create_table('request_share_user',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -343,7 +347,7 @@ def upgrade():
     op.create_table('ship_requests',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('order_numb', sa.String(length=64), nullable=False),
-    sa.Column('status', sa.String(length=64), nullable=False),
+    sa.Column('status', sa.Enum('waiting_for_warehouse', 'assigned', 'delivered', 'in_transit', 'cancelled', name='shiprequeststatus'), nullable=False),
     sa.Column('store_category_id', sa.Integer(), nullable=False),
     sa.Column('order_type', sa.String(length=128), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
@@ -434,6 +438,9 @@ def downgrade():
     op.drop_table('warehouse_product')
     op.drop_table('ship_requests')
     op.drop_table('request_share_user')
+    with op.batch_alter_table('inbound_orders', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_inbound_orders_uuid'))
+
     op.drop_table('inbound_orders')
     op.drop_table('favorite_store_user')
     op.drop_table('adjusts_group_qty')
