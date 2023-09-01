@@ -23,3 +23,4 @@ from .assign import Assign
 from .request_share import RequestShare
 from .store_category import StoreCategory
 from .adjust import Adjust
+from .product_quantity_group import ProductQuantityGroups, ProductQuantityGroup

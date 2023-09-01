@@ -16,6 +16,10 @@ from .package_info import PackageInfo
 from .io_allocate_product import IOAllocateProduct
 
 
+def generate_order_id_timestamp():
+    return f"IO-BEAM-{int(datetime.now().timestamp())}"
+
+
 class InboundOrder(db.Model, ModelMixin):
     __tablename__ = "inbound_orders"
 
@@ -28,8 +32,8 @@ class InboundOrder(db.Model, ModelMixin):
 
     order_id: orm.Mapped[str] = orm.mapped_column(
         sa.String(64),
-        unique=True,
         nullable=False,
+        default=generate_order_id_timestamp,
     )
 
     active_date: orm.Mapped[datetime] = orm.mapped_column(sa.DateTime)
@@ -40,7 +44,8 @@ class InboundOrder(db.Model, ModelMixin):
     )
     delivery_date: orm.Mapped[datetime] = orm.mapped_column(sa.DateTime)
     status: orm.Mapped[s.InboundOrderStatus] = orm.mapped_column(
-        sa.Enum(s.InboundOrderStatus)
+        sa.Enum(s.InboundOrderStatus),
+        default=s.InboundOrderStatus.draft,
     )
 
     created_at: orm.Mapped[datetime] = orm.mapped_column(
@@ -97,12 +102,12 @@ class InboundOrder(db.Model, ModelMixin):
         mg_dict["inbound_order_prods"] = {
             io.inbound_order.order_id: [
                 {
-                    "group": {"id": uio.group_id, "name": uio.parent.name},
+                    "group": {"id": uio.group_id, "name": uio.group.name},
                     "product": {
                         "id": uio.product_id,
-                        "name": uio.child.name,
-                        "SKU": uio.child.SKU,
-                        "image": uio.child.image,
+                        "name": uio.product.name,
+                        "SKU": uio.product.SKU,
+                        "image": uio.product.image,
                     },
                     "quantity": uio.quantity,
                     "shelf_life_start": uio.shelf_life_start.strftime("%m/%d/%Y"),
@@ -153,5 +158,6 @@ class InboundOrder(db.Model, ModelMixin):
                 for io in io_allocate_product
             ]
         }
+        mg_dict["uuid"] = self.uuid
 
         return json.dumps(mg_dict)

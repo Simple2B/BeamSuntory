@@ -16,15 +16,10 @@
       <div class="p-6 space-y-6">
         <div class="grid grid-cols-6 gap-6">
           <div class="col-span-6 sm:col-span-3">
-            <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status</label>
-            <select type="text" name="status" id="inbound-order-add-status"
+            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Order status</label>
+            <input type="text"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Status" required>
-              <option selected="selected" value="" disabled>Choose Status</option>
-              {% for status in inbound_order_statuses %}
-              <option value="{{ status }}">{{ status }}</option>
-              {% endfor %}
-            </select>
+              placeholder="Draft" readonly/>
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="order_title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Order
@@ -138,7 +133,7 @@
                     </path>
                   </svg>
                 </button>
-                <button type="button" id="inbound-order-add-add-item-btn"
+                <button type="button" id="inbound-order-add-item-btn"
                   class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300">
                   <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
                     <path
