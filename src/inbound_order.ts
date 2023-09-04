@@ -1095,14 +1095,13 @@ document.addEventListener('DOMContentLoaded', () => {
           const currentProductAllocatedContainer = orderEditProductsAllocatedContainer.children[i];
           const productAllocatedNameDiv = currentProductAllocatedContainer.querySelector('.inbound-order-edit-check-product') as HTMLDivElement;
           const productAllocatedQuantityDiv = currentProductAllocatedContainer.querySelector('.inbound-order-edit-check-quantity') as HTMLDivElement;
-          // TODO: replace input by div
-          const productAllocatedShelfLifeStartDiv = currentProductAllocatedContainer.querySelector('.inbound-order-edit-add-shelf_life_start') as HTMLInputElement;
-          const productAllocatedShelfLifeEndDiv = currentProductAllocatedContainer.querySelector('.inbound-order-edit-add-shelf_life_end') as HTMLInputElement;
+          const productAllocatedShelfLifeFromDiv = currentProductAllocatedContainer.querySelector('.inbound-order-edit-shelf-life-from') as HTMLDivElement;
+          const productAllocatedShelfLifeToDiv = currentProductAllocatedContainer.querySelector('.inbound-order-edit-shelf-life-to') as HTMLDivElement;
 
           productAllocatedNameDiv.innerHTML = productAllocated.product.name;
           productAllocatedQuantityDiv.innerHTML = productAllocated.quantity.toString();
-          productAllocatedShelfLifeStartDiv.value = productAllocated.shelfLifeStart;
-          productAllocatedShelfLifeEndDiv.value = productAllocated.shelfLifeEnd;          
+          productAllocatedShelfLifeFromDiv.innerHTML = productAllocated.shelfLifeStart;
+          productAllocatedShelfLifeToDiv.innerHTML = productAllocated.shelfLifeEnd;          
         });
 
         orderEditModal.show();
