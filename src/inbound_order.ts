@@ -68,6 +68,13 @@ interface IOAllocateProduct {
     quantity: number
 }
 
+interface IAllocatedProduct {
+  id: number
+  quantity: number
+  shelf_life_start: string
+  shelf_life_end: string
+}
+
 function convertDate(date: string) {
     const inputDate = date.split('T')[0]
     const dateParts = inputDate.split('-')
@@ -79,7 +86,7 @@ function convertDate(date: string) {
 
 const $modalElement: HTMLElement = document.querySelector('#editInboundOrderModal')
 const $addInboundOrderModalElement: HTMLElement = document.querySelector('#add-inbound-order-modal')
-const $viewInboundOrderModalElement: HTMLElement = document.querySelector('#view-inbound-order-modal')
+
 
 const modalOptions: ModalOptions = {
     placement: 'bottom-right',
@@ -117,22 +124,22 @@ const addModalOptions: ModalOptions = {
 
 const modal: ModalInterface = new Modal($modalElement, modalOptions)
 const addModal: ModalInterface = new Modal($addInboundOrderModalElement, addModalOptions)
-const viewModal: ModalInterface = new Modal($viewInboundOrderModalElement, modalOptions)
 
 const $buttonElements = document.querySelectorAll('.inbound-order-edit-button')
+console.log($buttonElements)
 $buttonElements.forEach((e) =>
     e.addEventListener('click', () => {
         const inboundOrder: IInboundOrder = JSON.parse(e.getAttribute('data-target'))
         editInboundOrder(inboundOrder)
     })
-)
+);
 
 const addModalButton = document.querySelector('#inbound-order-add-modal-button')
 
 
 addModalButton.addEventListener('click', () => {    
     //sessionStorage.setItem('inboundOrderId', createdInboundOrderId)
-    addModal.show()
+    addModal.show();
 })
 
 // search flow
@@ -162,22 +169,25 @@ deleteButtons.forEach((e) => {
 })
 
 const openCurrentOrder = () =>{
-    const urlParams = new URLSearchParams(window.location.search);
-    const orderUuid = urlParams.get('current_inbound_uuid');
+  const urlParams = new URLSearchParams(window.location.search);
+  const orderUuid = urlParams.get('current_inbound_uuid');
 
-    if(!orderUuid){
-        return
-    }    
-        
-    const orderColumn = document.querySelector(`#inbound-order-${orderUuid}`);
-    const orderEditButton = orderColumn.querySelector('.inbound-order-edit-button') as HTMLButtonElement;
-    orderEditButton.click();  
+  if(!orderUuid){
+    return;
+  }
+
+  const orderColumn = document.querySelector(`#inbound-order-${orderUuid}`);
+
+  if (!orderColumn) {
+    return;
+  }
+
+  const orderEditButton = orderColumn.querySelector('.inbound-order-edit-button') as HTMLButtonElement;
+  orderEditButton.click();  
 }
 
 // ----add inbound order item for add modal----
 function createInboundOrderAddItems() {
-
-    
     // console.log(inbOrder, curInbOrder);
 //     if (!inbOrder) {
 //         const inboundOrder: IInboundOrder = JSON.parse(sessionStorage.getItem('inboundOrder'))
@@ -262,223 +272,224 @@ function createInboundOrderAddItems() {
 }
 
 function editInboundOrder(inboundOrder: IInboundOrder) {
-    const editForm = document.getElementById('inbound-order-edit-form') as HTMLFormElement
-    editForm.reset()
+  const editForm = document.getElementById('inbound-order-edit-form') as HTMLFormElement
+  editForm.reset()
 
-    let input: HTMLInputElement = document.querySelector('#inbound-order-edit-active_date')
-    input.value = convertDate(inboundOrder.active_date.toString())
-    input = document.querySelector('#inbound-order-edit-active_time')
-    input.value = inboundOrder.active_time
-    input = document.querySelector('#inbound-order-edit-order_title')
-    input.value = inboundOrder.order_title
-    input = document.querySelector('#inbound-order-edit-delivery_date')
-    input.value = convertDate(inboundOrder.delivery_date.toString())
-    input = document.querySelector('#inbound-order-edit-status')
-    input.value = inboundOrder.status
-    input = document.querySelector('#inbound-order-edit-supplier_id')
-    input.value = inboundOrder.supplier_id.toString()
-    input = document.querySelector('#inbound-order-edit-warehouse_id')
-    input.value = inboundOrder.warehouse_id.toString()
-    input = document.querySelector('#inbound-order-edit-next_url')
-    input.value = window.location.href
-    input = document.querySelector('#inbound-order-uuid')
-    input.value = inboundOrder.uuid
+  let input: HTMLInputElement = document.querySelector('#inbound-order-edit-active_date')
+  input.value = convertDate(inboundOrder.active_date.toString())
+  input = document.querySelector('#inbound-order-edit-active_time')
+  input.value = inboundOrder.active_time
+  input = document.querySelector('#inbound-order-edit-order_title')
+  input.value = inboundOrder.order_title
+  input = document.querySelector('#inbound-order-edit-delivery_date')
+  input.value = convertDate(inboundOrder.delivery_date.toString())
+  input = document.querySelector('#inbound-order-edit-status')
+  input.value = inboundOrder.status
+  input = document.querySelector('#inbound-order-edit-supplier_id')
+  input.value = inboundOrder.supplier_id.toString()
+  input = document.querySelector('#inbound-order-edit-warehouse_id')
+  input.value = inboundOrder.warehouse_id.toString()
+  input = document.querySelector('#inbound-order-edit-next_url')
+  input.value = window.location.href
+  input = document.querySelector('#inbound-order-uuid')
+  input.value = inboundOrder.uuid
 
-    if (Object.keys(inboundOrder.inbound_order_prods).length > 0) {
-        const currentInboundOrder = inboundOrder.inbound_order_prods[inboundOrder.order_id]
-        const inboundOrderProductsInputs = document.querySelectorAll<HTMLSelectElement>(
-            '.inbound-order-edit-add-product'
-        )
-        const inboundOrderGroupsInputs = document.querySelectorAll<HTMLSelectElement>('.inbound-order-edit-add-group')
-        const inboundOrderQuantityInputs = document.querySelectorAll<HTMLInputElement>(
-            '.inbound-order-edit-add-quantity'
-        )
+  if (Object.keys(inboundOrder.inbound_order_prods).length > 0) {
+      const currentInboundOrder = inboundOrder.inbound_order_prods[inboundOrder.order_id]
+      const inboundOrderProductsInputs = document.querySelectorAll<HTMLSelectElement>(
+          '.inbound-order-edit-add-product'
+      )
+      const inboundOrderGroupsInputs = document.querySelectorAll<HTMLSelectElement>('.inbound-order-edit-add-group')
+      const inboundOrderQuantityInputs = document.querySelectorAll<HTMLInputElement>(
+          '.inbound-order-edit-add-quantity'
+      )
 
-        const shelfLifeStartInputs = document.querySelectorAll<HTMLInputElement>(
-            '.inbound-order-edit-add-shelf_life_start'
-        )
-        const shelfLifeEndInputs = document.querySelectorAll<HTMLInputElement>('.inbound-order-edit-add-shelf_life_end')
-        const firstProdSelect: HTMLSelectElement = document.querySelector('#inbound-order-edit-add-product-1st-item')
-        firstProdSelect.innerHTML = ''
+      const shelfLifeStartInputs = document.querySelectorAll<HTMLInputElement>(
+          '.inbound-order-edit-add-shelf_life_start'
+      )
+      const shelfLifeEndInputs = document.querySelectorAll<HTMLInputElement>('.inbound-order-edit-add-shelf_life_end')
+      const firstProdSelect: HTMLSelectElement = document.querySelector('#inbound-order-edit-add-product-1st-item')
+      firstProdSelect.innerHTML = ''
 
-        inboundOrder.io_allocate_product[inboundOrder.id].forEach((e) => {
-            const option = document.createElement('option')
-            option.value = e.product.id.toString()
-            option.innerHTML = e.product.name
-            firstProdSelect.appendChild(option)
-        })
+      inboundOrder.io_allocate_product[inboundOrder.id].forEach((e) => {
+          const option = document.createElement('option')
+          option.value = e.product.id.toString()
+          option.innerHTML = e.product.name
+          firstProdSelect.appendChild(option)
+      })
 
-    //     if (currentInboundOrder) {
-    //         for (let i = 0; i < currentInboundOrder.length; i++) {
-    //             if (i === 0) {
-    //                 const inboundOrderProductInput = inboundOrderProductsInputs[i]
-    //                 const inboundOrderGroupInput = inboundOrderGroupsInputs[i]
-    //                 const inboundOrderQuantityInput = inboundOrderQuantityInputs[i]
-    //                 const shelfLifeStartInput = shelfLifeStartInputs[i]
-    //                 const shelfLifeEndInput = shelfLifeEndInputs[i]
-    //                 inboundOrderProductInput.value = String(currentInboundOrder[i].product.id)
-    //                 inboundOrderGroupInput.value = String(currentInboundOrder[i].group.id)
-    //                 inboundOrderQuantityInput.value = String(currentInboundOrder[i].quantity)
-    //                 shelfLifeStartInput.value = currentInboundOrder[i].shelf_life_start.toString()
-    //                 shelfLifeEndInput.value = currentInboundOrder[i].shelf_life_end.toString()
-    //                 continue
-    //             }
-    //             createInboundOrderItems(inboundOrder, currentInboundOrder[i])
-    //         }
-    //     }
+  //     if (currentInboundOrder) {
+  //         for (let i = 0; i < currentInboundOrder.length; i++) {
+  //             if (i === 0) {
+  //                 const inboundOrderProductInput = inboundOrderProductsInputs[i]
+  //                 const inboundOrderGroupInput = inboundOrderGroupsInputs[i]
+  //                 const inboundOrderQuantityInput = inboundOrderQuantityInputs[i]
+  //                 const shelfLifeStartInput = shelfLifeStartInputs[i]
+  //                 const shelfLifeEndInput = shelfLifeEndInputs[i]
+  //                 inboundOrderProductInput.value = String(currentInboundOrder[i].product.id)
+  //                 inboundOrderGroupInput.value = String(currentInboundOrder[i].group.id)
+  //                 inboundOrderQuantityInput.value = String(currentInboundOrder[i].quantity)
+  //                 shelfLifeStartInput.value = currentInboundOrder[i].shelf_life_start.toString()
+  //                 shelfLifeEndInput.value = currentInboundOrder[i].shelf_life_end.toString()
+  //                 continue
+  //             }
+  //             createInboundOrderItems(inboundOrder, currentInboundOrder[i])
+  //         }
+  //     }
 
-    //     // TODO make up better method to clean setAttribute string from symbols that cause errors in HTML
-    //     const selectedProduct = inboundOrderProductsInputs[0].options[inboundOrderProductsInputs[0].selectedIndex].text
-    //         .replace(/ /g, '_')
-    //         .replace('(', '')
-    //         .replace(')', '')
+  //     // TODO make up better method to clean setAttribute string from symbols that cause errors in HTML
+  //     const selectedProduct = inboundOrderProductsInputs[0].options[inboundOrderProductsInputs[0].selectedIndex].text
+  //         .replace(/ /g, '_')
+  //         .replace('(', '')
+  //         .replace(')', '')
 
-    //     const selectedProductQtyId = `io-product-input-qty-${selectedProduct}`
+  //     const selectedProductQtyId = `io-product-input-qty-${selectedProduct}`
 
-    //     inboundOrderQuantityInputs[0].addEventListener('change', () => {
-    //         const selectedProduct = inboundOrderProductsInputs[0].options[
-    //             inboundOrderProductsInputs[0].selectedIndex
-    //         ].text
-    //             .replace(/ /g, '_')
-    //             .replace('(', '')
-    //             .replace(')', '')
-    //         const selectedProductQtyId = `io-product-input-qty-${selectedProduct}`
-    //         const allocateQtyInput: HTMLDivElement = document.querySelector(
-    //             `#inbound-order-edit-check-quantity-${selectedProduct}`
-    //         )
+  //     inboundOrderQuantityInputs[0].addEventListener('change', () => {
+  //         const selectedProduct = inboundOrderProductsInputs[0].options[
+  //             inboundOrderProductsInputs[0].selectedIndex
+  //         ].text
+  //             .replace(/ /g, '_')
+  //             .replace('(', '')
+  //             .replace(')', '')
+  //         const selectedProductQtyId = `io-product-input-qty-${selectedProduct}`
+  //         const allocateQtyInput: HTMLDivElement = document.querySelector(
+  //             `#inbound-order-edit-check-quantity-${selectedProduct}`
+  //         )
 
-    //         const inboundOrderCheckQuantityInputHidden: HTMLDivElement = document.querySelector(
-    //             `#inbound-order-edit-check-quantity-${selectedProduct}-hidden`
-    //         )
-    //         const changedQuantityInputs = document.querySelectorAll<HTMLInputElement>(`#${selectedProductQtyId}`)
+  //         const inboundOrderCheckQuantityInputHidden: HTMLDivElement = document.querySelector(
+  //             `#inbound-order-edit-check-quantity-${selectedProduct}-hidden`
+  //         )
+  //         const changedQuantityInputs = document.querySelectorAll<HTMLInputElement>(`#${selectedProductQtyId}`)
 
-    //         let totalProductChangedQty = 0
+  //         let totalProductChangedQty = 0
 
-    //         changedQuantityInputs.forEach((input: HTMLInputElement) => {
-    //             totalProductChangedQty += Number(input.value)
-    //             allocateQtyInput.innerHTML = (
-    //                 Number(inboundOrderCheckQuantityInputHidden.innerHTML) - totalProductChangedQty
-    //             ).toString()
-    //         })
-    //     })
+  //         changedQuantityInputs.forEach((input: HTMLInputElement) => {
+  //             totalProductChangedQty += Number(input.value)
+  //             allocateQtyInput.innerHTML = (
+  //                 Number(inboundOrderCheckQuantityInputHidden.innerHTML) - totalProductChangedQty
+  //             ).toString()
+  //         })
+  //     })
 
-    //     inboundOrderQuantityInputs[0].setAttribute('id', selectedProductQtyId)
+  //     inboundOrderQuantityInputs[0].setAttribute('id', selectedProductQtyId)
 
-    //     inboundOrderProductsInputs[0].addEventListener('change', () => {
-    //         inboundOrderQuantityInputs[0].setAttribute(
-    //             'id',
-    //             `io-product-input-qty-${inboundOrderProductsInputs[0].options[
-    //                 inboundOrderProductsInputs[0].selectedIndex
-    //             ].text
-    //                 .replace(/ /g, '_')
-    //                 .replace('(', '')
-    //                 .replace(')', '')}`
-    //         )
-    //     })
-    // }
+  //     inboundOrderProductsInputs[0].addEventListener('change', () => {
+  //         inboundOrderQuantityInputs[0].setAttribute(
+  //             'id',
+  //             `io-product-input-qty-${inboundOrderProductsInputs[0].options[
+  //                 inboundOrderProductsInputs[0].selectedIndex
+  //             ].text
+  //                 .replace(/ /g, '_')
+  //                 .replace('(', '')
+  //                 .replace(')', '')}`
+  //         )
+  //     })
+  // }
 
-    if (Object.keys(inboundOrder.io_allocate_product).length > 0) {
-        const currentInboundOrderCheck = inboundOrder.io_allocate_product[inboundOrder.id]
-        const inboundOrderProductsCheckInputs = document.querySelectorAll<HTMLInputElement>(
-            '.inbound-order-edit-check-product'
-        )
-        const inboundOrderQuantityCheckInputs = document.querySelectorAll<HTMLInputElement>(
-            '.inbound-order-edit-check-quantity'
-        )
-        const inboundOrderQuantityCheckInputsHidden = document.querySelectorAll<HTMLInputElement>(
-            '.inbound-order-edit-check-quantity-hidden'
-        )
-        const shelfLifeStartInputs = document.querySelectorAll<HTMLInputElement>(
-            '.inbound-order-edit-add-shelf_life_start'
-        )
-        const shelfLifeEndInputs = document.querySelectorAll<HTMLInputElement>('.inbound-order-edit-add-shelf_life_end')
+  if (Object.keys(inboundOrder.io_allocate_product).length > 0) {
+      const currentInboundOrderCheck = inboundOrder.io_allocate_product[inboundOrder.id]
+      const inboundOrderProductsCheckInputs = document.querySelectorAll<HTMLInputElement>(
+          '.inbound-order-edit-check-product'
+      )
+      const inboundOrderQuantityCheckInputs = document.querySelectorAll<HTMLInputElement>(
+          '.inbound-order-edit-check-quantity'
+      )
+      const inboundOrderQuantityCheckInputsHidden = document.querySelectorAll<HTMLInputElement>(
+          '.inbound-order-edit-check-quantity-hidden'
+      )
+      const shelfLifeStartInputs = document.querySelectorAll<HTMLInputElement>(
+          '.inbound-order-edit-add-shelf_life_start'
+      )
+      const shelfLifeEndInputs = document.querySelectorAll<HTMLInputElement>('.inbound-order-edit-add-shelf_life_end')
 
-        console.log(currentInboundOrderCheck)
+      console.log(currentInboundOrderCheck)
 
-        if (currentInboundOrderCheck) {
-            for (let i = 0; i < currentInboundOrderCheck.length; i++) {
-                if (i === 0) {
-                    const inboundOrderProductCheckInput = inboundOrderProductsCheckInputs[i]
-                    const inboundOrderQuantityCheckInput = inboundOrderQuantityCheckInputs[i]
-                    const inboundOrderQuantityCheckInputHidden = inboundOrderQuantityCheckInputsHidden[i]
-                    const shelfLifeStartInput = shelfLifeStartInputs[i]
-                    const shelfLifeEndInput = shelfLifeEndInputs[i]
+      if (currentInboundOrderCheck) {
+          for (let i = 0; i < currentInboundOrderCheck.length; i++) {
+              if (i === 0) {
+                  const inboundOrderProductCheckInput = inboundOrderProductsCheckInputs[i]
+                  const inboundOrderQuantityCheckInput = inboundOrderQuantityCheckInputs[i]
+                  const inboundOrderQuantityCheckInputHidden = inboundOrderQuantityCheckInputsHidden[i]
+                  const shelfLifeStartInput = shelfLifeStartInputs[i]
+                  const shelfLifeEndInput = shelfLifeEndInputs[i]
 
-                    const prodName = currentInboundOrderCheck[i].product.name
-                        .replace(/ /g, '_')
-                        .replace('(', '')
-                        .replace(')', '')
+                  const prodName = currentInboundOrderCheck[i].product.name
+                      .replace(/ /g, '_')
+                      .replace('(', '')
+                      .replace(')', '')
 
-                    const ioProdQtyCheckInput = document.querySelectorAll<HTMLInputElement>(
-                        `io-product-input-qty-${prodName}`
-                    )
+                  const ioProdQtyCheckInput = document.querySelectorAll<HTMLInputElement>(
+                      `io-product-input-qty-${prodName}`
+                  )
 
-                    inboundOrderProductCheckInput.innerHTML = String(currentInboundOrderCheck[i].product.name)
-                    if (ioProdQtyCheckInput) {
-                        let preselectedQty = 0
-                        ioProdQtyCheckInput.forEach((input: HTMLInputElement) => {
-                            preselectedQty += Number(input.value)
-                        })
-                        inboundOrderQuantityCheckInput.innerHTML = String(
-                            Number(currentInboundOrderCheck[i].quantity) - preselectedQty
-                        )
-                    } else {
-                        inboundOrderQuantityCheckInput.innerHTML = String(currentInboundOrderCheck[i].quantity)
-                    }
-                    inboundOrderQuantityCheckInputHidden.innerHTML = String(currentInboundOrderCheck[i].quantity)
-                    shelfLifeStartInput.value = currentInboundOrderCheck[i].product.shelf_life_start.toString()
-                    shelfLifeEndInput.value = currentInboundOrderCheck[i].product.shelf_life_end.toString()
+                  inboundOrderProductCheckInput.innerHTML = String(currentInboundOrderCheck[i].product.name)
+                  if (ioProdQtyCheckInput) {
+                      let preselectedQty = 0
+                      ioProdQtyCheckInput.forEach((input: HTMLInputElement) => {
+                          preselectedQty += Number(input.value)
+                      })
+                      inboundOrderQuantityCheckInput.innerHTML = String(
+                          Number(currentInboundOrderCheck[i].quantity) - preselectedQty
+                      )
+                  } else {
+                      inboundOrderQuantityCheckInput.innerHTML = String(currentInboundOrderCheck[i].quantity)
+                  }
+                  inboundOrderQuantityCheckInputHidden.innerHTML = String(currentInboundOrderCheck[i].quantity)
+                  shelfLifeStartInput.value = currentInboundOrderCheck[i].product.shelf_life_start.toString()
+                  shelfLifeEndInput.value = currentInboundOrderCheck[i].product.shelf_life_end.toString()
 
-                    inboundOrderQuantityCheckInput.setAttribute('id', `inbound-order-edit-check-quantity-${prodName}`)
-                    inboundOrderQuantityCheckInputHidden.setAttribute(
-                        'id',
-                        `inbound-order-edit-check-quantity-${prodName}-hidden`
-                    )
-                    shelfLifeStartInput.setAttribute('id', `datepickerEl-start-${prodName}`)
-                    shelfLifeEndInput.setAttribute('id', `datepickerEl-end-${prodName}`)
+                  inboundOrderQuantityCheckInput.setAttribute('id', `inbound-order-edit-check-quantity-${prodName}`)
+                  inboundOrderQuantityCheckInputHidden.setAttribute(
+                      'id',
+                      `inbound-order-edit-check-quantity-${prodName}-hidden`
+                  )
+                  shelfLifeStartInput.setAttribute('id', `datepickerEl-start-${prodName}`)
+                  shelfLifeEndInput.setAttribute('id', `datepickerEl-end-${prodName}`)
 
-                    continue
-                }
-                createInboundOrderCheckItems(inboundOrder, currentInboundOrderCheck[i])
-            }
-        }
-    }
-    modal.show()
-}
+                  continue
+              }
+              createInboundOrderCheckItems(inboundOrder, currentInboundOrderCheck[i])
+          }
+      }
+  }
+  modal.show()
+  
+  }
 
-// ----view inbound order modal window----
-const viewInboundOrderButtonElements = document.querySelectorAll('.inbound-order-view-button')
-viewInboundOrderButtonElements.forEach((e) =>
-    e.addEventListener('click', () => {
-        const inboundOrder: IInboundOrder = JSON.parse(e.getAttribute('data-target'))
-        console.log(inboundOrder)
+  // // ----view inbound order modal window----
+  // const viewInboundOrderButtonElements = document.querySelectorAll('.inbound-order-view-button')
+  // viewInboundOrderButtonElements.forEach((e) =>
+  //   e.addEventListener('click', () => {
+  //     const inboundOrder: IInboundOrder = JSON.parse(e.getAttribute('data-target'))
+  //     console.log(inboundOrder)
 
-        let div: HTMLDivElement = document.querySelector('#inbound-order-view-order_id')
-        div.innerHTML = inboundOrder.order_id
-        div = document.querySelector('#inbound-order-view-id')
-        div.innerHTML = inboundOrder.id.toString()
-        div = document.querySelector('#inbound-order-view-active_date')
-        div.innerHTML = convertDate(inboundOrder.active_date.toString())
-        div = document.querySelector('#inbound-order-view-active_time')
-        div.innerHTML = inboundOrder.active_time
-        div = document.querySelector('#inbound-order-view-order_title')
-        div.innerHTML = inboundOrder.order_title
-        div = document.querySelector('#inbound-order-view-delivery_date')
-        div.innerHTML = convertDate(inboundOrder.delivery_date.toString())
-        div = document.querySelector('#inbound-order-view-status')
-        div.innerHTML = inboundOrder.status
-        div = document.querySelector('#inbound-order-view-supplier_id')
-        div.innerHTML = inboundOrder.sup_da_wh_prod_objs.supplier
-        div = document.querySelector('#inbound-order-view-warehouse_id')
-        div.innerHTML = inboundOrder.sup_da_wh_prod_objs.warehouse
-    })
-)
+  //     let div: HTMLDivElement = document.querySelector('#inbound-order-view-order_id')
+  //     div.innerHTML = inboundOrder.order_id
+  //     div = document.querySelector('#inbound-order-view-id')
+  //     div.innerHTML = inboundOrder.id.toString()
+  //     div = document.querySelector('#inbound-order-view-active_date')
+  //     div.innerHTML = convertDate(inboundOrder.active_date.toString())
+  //     div = document.querySelector('#inbound-order-view-active_time')
+  //     div.innerHTML = inboundOrder.active_time
+  //     div = document.querySelector('#inbound-order-view-order_title')
+  //     div.innerHTML = inboundOrder.order_title
+  //     div = document.querySelector('#inbound-order-view-delivery_date')
+  //     div.innerHTML = convertDate(inboundOrder.delivery_date.toString())
+  //     div = document.querySelector('#inbound-order-view-status')
+  //     div.innerHTML = inboundOrder.status
+  //     div = document.querySelector('#inbound-order-view-supplier_id')
+  //     div.innerHTML = inboundOrder.sup_da_wh_prod_objs.supplier
+  //     div = document.querySelector('#inbound-order-view-warehouse_id')
+  //     div.innerHTML = inboundOrder.sup_da_wh_prod_objs.warehouse
+  //   })
+  // )
 
-// ----add inbound order check item for edit modal----
-function createInboundOrderCheckItems(inbOrder: IInboundOrder = null, curInbOrder: IOAllocateProduct = null) {
+  // ----add inbound order check item for edit modal----
+  function createInboundOrderCheckItems(inbOrder: IInboundOrder = null, curInbOrder: IOAllocateProduct = null) {
     if (!inbOrder) {
-        const inboundOrder: IInboundOrder = JSON.parse(sessionStorage.getItem('inboundOrder'))
-        inbOrder = inboundOrder
+      const inboundOrder: IInboundOrder = JSON.parse(sessionStorage.getItem('inboundOrder'))
+      inbOrder = inboundOrder
     }
 
     const productUnderscore = curInbOrder.product.name.replace(/ /g, '_').replace('(', '').replace(')', '')
@@ -487,37 +498,36 @@ function createInboundOrderCheckItems(inbOrder: IInboundOrder = null, curInbOrde
     const inboundOrderCheckItem = document.createElement('div')
     inboundOrderCheckItem.classList.add('grid', 'grid-cols-12', 'gap-5', `delete-id-check-${inbOrder.id}`)
     inboundOrderCheckItem.innerHTML = `
-    <div class="col-span-6 sm:col-span-3">
-        <div type="text" name="check_product"
-        class="inbound-order-edit-check-product shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-        placeholder="Product">
-        </div>
-    </div>
-    <div class="col-span-6 sm:col-span-3">
-        <div type="text" name="check_quantity" id="inbound-order-edit-check-quantity-${productUnderscore}-hidden" class="inbound-order-edit-check-quantity-hidden" hidden></div>
-        <div type="text" name="check_quantity_display" id="inbound-order-edit-check-quantity-${productUnderscore}"
-        class="inbound-order-edit-check-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-        placeholder="Quantity">
-        </div>
-    </div>
-    <div class="col-span-6 sm:col-span-6">
-        <div class="flex items-center">
-        <div class="relative">
-            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
-            </div>
-            <input id="datepickerEl-start-${productUnderscore}" datepicker name="shelf_life_start" type="text" class="inbound-order-edit-add-shelf_life_start bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date start">
-        </div>
-        <span class="mx-4 text-gray-500">to</span>
-        <div class="relative">
-            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
-            </div>
-            <input name="shelf_life_end" id="datepickerEl-end-${productUnderscore}" datepicker type="text" class="inbound-order-edit-add-shelf_life_end bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date end">
-        </div>
-        </div>
-    </div>
-`
+      <div class="col-span-6 sm:col-span-3">
+          <div type="text" name="check_product"
+          class="inbound-order-edit-check-product shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          placeholder="Product">
+          </div>
+      </div>
+      <div class="col-span-6 sm:col-span-3">
+          <div type="text" name="check_quantity" id="inbound-order-edit-check-quantity-${productUnderscore}-hidden" class="inbound-order-edit-check-quantity-hidden" hidden></div>
+          <div type="text" name="check_quantity_display" id="inbound-order-edit-check-quantity-${productUnderscore}"
+          class="inbound-order-edit-check-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          placeholder="Quantity">
+          </div>
+      </div>
+      <div class="col-span-6 sm:col-span-6">
+          <div class="flex items-center">
+          <div class="relative">
+              <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
+              </div>
+              <input id="datepickerEl-start-${productUnderscore}" datepicker name="shelf_life_start" type="text" class="inbound-order-edit-add-shelf_life_start bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date start">
+          </div>
+          <span class="mx-4 text-gray-500">to</span>
+          <div class="relative">
+              <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
+              </div>
+              <input name="shelf_life_end" id="datepickerEl-end-${productUnderscore}" datepicker type="text" class="inbound-order-edit-add-shelf_life_end bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date end">
+          </div>
+          </div>
+      </div>`
 
     const inboundOrderCheckProductInput: HTMLDivElement = inboundOrderCheckItem.querySelector(
         '.inbound-order-edit-check-product'
@@ -544,10 +554,10 @@ function createInboundOrderCheckItems(inbOrder: IInboundOrder = null, curInbOrde
     }
 
     inboundOrderCheckContainer.appendChild(inboundOrderCheckItem)
-}
+  }
 
-// ----add inbound order item for edit modal----
-function createInboundOrderItems(inbOrder: IInboundOrder = null, curInbOrder: IInboundOrderProd = null) {
+  // ----add inbound order item for edit modal----
+  function createInboundOrderItems(inbOrder: IInboundOrder = null, curInbOrder: IInboundOrderProd = null) {
     if (!inbOrder) {
         const inboundOrder: IInboundOrder = JSON.parse(sessionStorage.getItem('inboundOrder'))
         inbOrder = inboundOrder
@@ -727,251 +737,293 @@ function createInboundOrderItems(inbOrder: IInboundOrder = null, curInbOrder: II
             }
         })
     )
+  }
+
+  // this button need to add first item from template
+  const addInboundOrderItemBtnById = document.querySelector('#inbound-order-edit-add-item-btn')
+  // addInboundOrderItemBtnById.addEventListener('click', () => {
+  //     createInboundOrderItems()
+  //     // const allInboundOrderItems = document.querySelectorAll('.inbound-order-edit-add-item')
+  //     // const index = allInboundOrderItems.length
+  //     // new Datepicker(document.querySelector(`#datepickerEl-start-${index}`))
+  //     // new Datepicker(document.querySelector(`#datepickerEl-end-${index}`))
+  // })
+
+  // this button need to add first item from template
+  const createAddInboundOrderItemBtnById = document.querySelector('#inbound-order-add-item-btn')
+  createAddInboundOrderItemBtnById.addEventListener('click', () => {
+      createInboundOrderAddItems()
+      const allInboundOrderItems = document.querySelectorAll('.inbound-order-add-add-item')
+      const index = allInboundOrderItems.length
+      new Datepicker(document.querySelector(`#datepickerEl-start-add-${index}`))
+      new Datepicker(document.querySelector(`#datepickerEl-end-add-${index}`))
+  })
+
+  // ----set product to JSON hidden input in inbound-order-edit-form----
+  function setProducts(actionType: string) {
+      let inboundOrderAddGroupSelects: any
+      let shelfLifeStartInputs
+      let shelfLifeEndInputs
+      if (actionType === 'edit') {
+          inboundOrderAddGroupSelects = document.querySelectorAll('.inbound-order-edit-add-group')
+          shelfLifeStartInputs = document.querySelectorAll('.inbound-order-edit-add-shelf_life_start')
+          shelfLifeEndInputs = document.querySelectorAll('.inbound-order-edit-add-shelf_life_end')
+      } else {
+          shelfLifeStartInputs = document.querySelectorAll('.inbound-order-add-add-shelf_life_start')
+          shelfLifeEndInputs = document.querySelectorAll('.inbound-order-add-add-shelf_life_end')
+      }
+      const inboundOrderAddProductSelects = document.querySelectorAll(`.inbound-order-${actionType}-add-product`);
+      const inboundOrderAddQuantityInputs = document.querySelectorAll(`.inbound-order-${actionType}-add-quantity`);
+
+      const products = []
+      const productsQuantities: { [index: string]: number } = {}
+
+      for (let i = 0; i < inboundOrderAddProductSelects.length; i++) {
+          const inboundOrderAddProductSelect = inboundOrderAddProductSelects[i] as HTMLSelectElement
+          const inboundOrderAddQuantityInput = inboundOrderAddQuantityInputs[i] as HTMLSelectElement
+          let shelfLifeStartInput: HTMLSelectElement
+          let shelfLifeEndInput: HTMLSelectElement
+          if (actionType === 'add') {
+              shelfLifeStartInput = shelfLifeStartInputs[i] as HTMLSelectElement
+              shelfLifeEndInput = shelfLifeEndInputs[i] as HTMLSelectElement
+          } else {
+              const prodName = inboundOrderAddProductSelect.options[inboundOrderAddProductSelect.selectedIndex].text
+                  .replace(/ /g, '_')
+                  .replace('(', '')
+                  .replace(')', '')
+              shelfLifeStartInput = document.querySelector(`#datepickerEl-start-${prodName}`)
+              shelfLifeEndInput = document.querySelector(`#datepickerEl-end-${prodName}`)
+          }
+
+          const product = {
+              product_id: inboundOrderAddProductSelect.value,
+              quantity: inboundOrderAddQuantityInput.value,
+              shelf_life_start: shelfLifeStartInput.value,
+              shelf_life_end: shelfLifeEndInput.value,
+          }
+          if (actionType === 'edit') {
+              const inboundOrderAddGroupSelect = inboundOrderAddGroupSelects[i] as HTMLSelectElement
+
+              Object.assign(product, { group_id: inboundOrderAddGroupSelect.value })
+              Object.assign(product, {
+                  shelf_life_start: shelfLifeStartInput.value.toString(),
+              })
+              Object.assign(product, {
+                  shelf_life_end: shelfLifeEndInput.value.toString(),
+              })
+
+              // NOTE sum qty of the same product and check if it is not more or less than available qty
+              const prodId = inboundOrderAddProductSelect.value.toString()
+
+              if (inboundOrderAddProductSelect.value in productsQuantities) {
+                  productsQuantities[prodId] += Number(inboundOrderAddQuantityInput.value)
+              } else {
+                  productsQuantities[prodId] = Number(inboundOrderAddQuantityInput.value)
+              }
+
+              const ProductQuantityCheck = document.querySelector(
+                  `#inbound-order-edit-check-quantity-${inboundOrderAddProductSelect.options[
+                      inboundOrderAddProductSelect.selectedIndex
+                  ].text
+                      .replace(/ /g, '_')
+                      .replace('(', '')
+                      .replace(')', '')}-hidden`
+              )
+
+              if (!ProductQuantityCheck) {
+                  alert(
+                      `Product ${
+                          inboundOrderAddProductSelect.options[inboundOrderAddProductSelect.selectedIndex].text
+                      } can't be allocated for this order. Please, choose another product`
+                  )
+                  return false
+              }
+          }
+          products.push(product)
+      }
+
+      if (actionType === 'edit') {
+          for (let i = 0; i < inboundOrderAddProductSelects.length; i++) {
+              const inboundOrderAddProductSelect = inboundOrderAddProductSelects[i] as HTMLSelectElement
+              const prodId = inboundOrderAddProductSelect.value.toString()
+
+              const ProductQuantityCheck = document.querySelector(
+                  `#inbound-order-edit-check-quantity-${inboundOrderAddProductSelect.options[
+                      inboundOrderAddProductSelect.selectedIndex
+                  ].text
+                      .replace(/ /g, '_')
+                      .replace('(', '')
+                      .replace(')', '')}-hidden`
+              )
+
+              if (productsQuantities[prodId] > Number(ProductQuantityCheck.innerHTML)) {
+                  alert(
+                      `Quantity of product ${
+                          inboundOrderAddProductSelect.options[inboundOrderAddProductSelect.selectedIndex].text
+                      } in orders can not be more than ${Number(ProductQuantityCheck.innerHTML)}`
+                  )
+                  return false
+              } else if (productsQuantities[prodId] < Number(ProductQuantityCheck.innerHTML)) {
+                  alert(
+                      `Quantity of product ${
+                          inboundOrderAddProductSelect.options[inboundOrderAddProductSelect.selectedIndex].text
+                      } in orders can not be less than ${Number(
+                          ProductQuantityCheck.innerHTML
+                      )}. Please, allocate all products`
+                  )
+                  return false
+              }
+          }
+      }
+
+      const inputProducts: HTMLInputElement = document.querySelector(`#inbound-order-${actionType}-products`)
+      inputProducts.value = JSON.stringify(products)
+      return true
+  }
+
+  // ----submit edit form through hidden submit button----
+  const inboundOrderSubmitButton: HTMLButtonElement = document.querySelector('#inbound-order-submit-btn')
+  const inboundOrderSaveProductsButton = document.querySelector('#inbound-order-save-products-btn')
+
+  console.log('processing') // current point
+
+  inboundOrderSaveProductsButton.addEventListener('click', () => {
+      const result = setProducts('edit')
+      if (result) {
+          inboundOrderSubmitButton.click()
+      }
+  })
+
+  // ----submit add through hidden submit button----
+  const inboundOrderSubmitAddButton: HTMLButtonElement = document.querySelector('#inbound-order-add-submit-btn');
+  const inboundOrderSaveProductsAddButton = document.querySelector('#inbound-order-create-btn');
+
+  inboundOrderSaveProductsAddButton.addEventListener('click', () => {
+      setProducts('add')
+      inboundOrderSubmitAddButton.click()
+  })
+
+  // function to delete product fields
+  function deleteProductFields(ioId: string) {
+      const editProductFields = document.querySelectorAll(`.delete-id-${ioId}`)
+      const checkProductFields = document.querySelectorAll(`.delete-id-check-${ioId}`)
+      if (editProductFields) {
+          editProductFields.forEach((el) => {
+              el.remove()
+          })
+      }
+      if (checkProductFields) {
+          checkProductFields.forEach((el) => {
+              el.remove()
+          })
+      }
+  }
 }
 
-// this button need to add first item from template
-const addInboundOrderItemBtnById = document.querySelector('#inbound-order-edit-add-item-btn')
-// addInboundOrderItemBtnById.addEventListener('click', () => {
-//     createInboundOrderItems()
-//     // const allInboundOrderItems = document.querySelectorAll('.inbound-order-edit-add-item')
-//     // const index = allInboundOrderItems.length
-//     // new Datepicker(document.querySelector(`#datepickerEl-start-${index}`))
-//     // new Datepicker(document.querySelector(`#datepickerEl-end-${index}`))
-// })
+const createInboundOrderHandler = () => {
+  const createInboundOrderBtn = document.getElementById('inbound-order-create-btn') as HTMLButtonElement;
+  const createInboundOrderBtnSubmit = document.getElementById('inbound-order-add-submit-btn') as HTMLButtonElement;
+  if(!createInboundOrderBtn) {
+    console.log("Error: no create inbound order button");
+    return;
+  }
 
+  createInboundOrderBtn.addEventListener('click', () => {
+    const allocatedProductsData: IAllocatedProduct[] = []
+    // Set products as JSON to field
+    const productsAllocatedContainers = document.querySelectorAll('.product-allocated');
 
+    productsAllocatedContainers.forEach((productContainer) => {
+      // Get HTML nodes with product values
+      const productAllocatedSelectHTML = productContainer.querySelector('.product-allocated-add') as HTMLSelectElement;
+      const productAllocatedQuantityInput = productContainer.querySelector('.product-allocated-quantity') as HTMLInputElement;
+      const productAllocatedShelfLifeStartInput = productContainer.querySelector('.product-allocated-shelf-life-start') as HTMLInputElement;
+      const productAllocatedShelfLifeEndInput = productContainer.querySelector('.product-allocated-shelf-life-end') as HTMLInputElement;
 
-// this button need to add first item from template
-const createAddInboundOrderItemBtnById = document.querySelector('#inbound-order-add-item-btn')
-createAddInboundOrderItemBtnById.addEventListener('click', () => {
-    createInboundOrderAddItems()
-    const allInboundOrderItems = document.querySelectorAll('.inbound-order-add-add-item')
-    const index = allInboundOrderItems.length
-    new Datepicker(document.querySelector(`#datepickerEl-start-add-${index}`))
-    new Datepicker(document.querySelector(`#datepickerEl-end-add-${index}`))
-})
+      // Retrieve values from Nodes
+      const productAllocatedId = parseInt(productAllocatedSelectHTML.value);
+      const productAllocatedQuantity = parseInt(productAllocatedQuantityInput.value);
+      const productAllocatedShelfLifeStart = productAllocatedShelfLifeStartInput.value;
+      const productAllocatedShelfLifeEnd = productAllocatedShelfLifeEndInput.value;
 
-// ----set product to JSON hidden input in inbound-order-edit-form----
-function setProducts(actionType: string) {
-    let inboundOrderAddGroupSelects: any
-    let shelfLifeStartInputs
-    let shelfLifeEndInputs
-    if (actionType === 'edit') {
-        inboundOrderAddGroupSelects = document.querySelectorAll('.inbound-order-edit-add-group')
-        shelfLifeStartInputs = document.querySelectorAll('.inbound-order-edit-add-shelf_life_start')
-        shelfLifeEndInputs = document.querySelectorAll('.inbound-order-edit-add-shelf_life_end')
-    } else {
-        shelfLifeStartInputs = document.querySelectorAll('.inbound-order-add-add-shelf_life_start')
-        shelfLifeEndInputs = document.querySelectorAll('.inbound-order-add-add-shelf_life_end')
-    }
-    const inboundOrderAddProductSelects = document.querySelectorAll(`.inbound-order-${actionType}-add-product`)
-    const inboundOrderAddQuantityInputs = document.querySelectorAll(`.inbound-order-${actionType}-add-quantity`)
+      allocatedProductsData.push({
+        id: productAllocatedId,
+        quantity: productAllocatedQuantity,
+        shelf_life_start: productAllocatedShelfLifeStart,
+        shelf_life_end: productAllocatedShelfLifeEnd,
+      })
+    });
 
-    const products = []
-    const productsQuantities: { [index: string]: number } = {}
-
-    for (let i = 0; i < inboundOrderAddProductSelects.length; i++) {
-        const inboundOrderAddProductSelect = inboundOrderAddProductSelects[i] as HTMLSelectElement
-        const inboundOrderAddQuantityInput = inboundOrderAddQuantityInputs[i] as HTMLSelectElement
-        let shelfLifeStartInput: HTMLSelectElement
-        let shelfLifeEndInput: HTMLSelectElement
-        if (actionType === 'add') {
-            shelfLifeStartInput = shelfLifeStartInputs[i] as HTMLSelectElement
-            shelfLifeEndInput = shelfLifeEndInputs[i] as HTMLSelectElement
-        } else {
-            const prodName = inboundOrderAddProductSelect.options[inboundOrderAddProductSelect.selectedIndex].text
-                .replace(/ /g, '_')
-                .replace('(', '')
-                .replace(')', '')
-            shelfLifeStartInput = document.querySelector(`#datepickerEl-start-${prodName}`)
-            shelfLifeEndInput = document.querySelector(`#datepickerEl-end-${prodName}`)
-        }
-
-        const product = {
-            product_id: inboundOrderAddProductSelect.value,
-            quantity: inboundOrderAddQuantityInput.value,
-            shelf_life_start: shelfLifeStartInput.value,
-            shelf_life_end: shelfLifeEndInput.value,
-        }
-        if (actionType === 'edit') {
-            const inboundOrderAddGroupSelect = inboundOrderAddGroupSelects[i] as HTMLSelectElement
-
-            Object.assign(product, { group_id: inboundOrderAddGroupSelect.value })
-            Object.assign(product, {
-                shelf_life_start: shelfLifeStartInput.value.toString(),
-            })
-            Object.assign(product, {
-                shelf_life_end: shelfLifeEndInput.value.toString(),
-            })
-
-            // NOTE sum qty of the same product and check if it is not more or less than available qty
-            const prodId = inboundOrderAddProductSelect.value.toString()
-
-            if (inboundOrderAddProductSelect.value in productsQuantities) {
-                productsQuantities[prodId] += Number(inboundOrderAddQuantityInput.value)
-            } else {
-                productsQuantities[prodId] = Number(inboundOrderAddQuantityInput.value)
-            }
-
-            const ProductQuantityCheck = document.querySelector(
-                `#inbound-order-edit-check-quantity-${inboundOrderAddProductSelect.options[
-                    inboundOrderAddProductSelect.selectedIndex
-                ].text
-                    .replace(/ /g, '_')
-                    .replace('(', '')
-                    .replace(')', '')}-hidden`
-            )
-
-            if (!ProductQuantityCheck) {
-                alert(
-                    `Product ${
-                        inboundOrderAddProductSelect.options[inboundOrderAddProductSelect.selectedIndex].text
-                    } can't be allocated for this order. Please, choose another product`
-                )
-                return false
-            }
-        }
-        products.push(product)
-    }
-
-    if (actionType === 'edit') {
-        for (let i = 0; i < inboundOrderAddProductSelects.length; i++) {
-            const inboundOrderAddProductSelect = inboundOrderAddProductSelects[i] as HTMLSelectElement
-            const prodId = inboundOrderAddProductSelect.value.toString()
-
-            const ProductQuantityCheck = document.querySelector(
-                `#inbound-order-edit-check-quantity-${inboundOrderAddProductSelect.options[
-                    inboundOrderAddProductSelect.selectedIndex
-                ].text
-                    .replace(/ /g, '_')
-                    .replace('(', '')
-                    .replace(')', '')}-hidden`
-            )
-
-            if (productsQuantities[prodId] > Number(ProductQuantityCheck.innerHTML)) {
-                alert(
-                    `Quantity of product ${
-                        inboundOrderAddProductSelect.options[inboundOrderAddProductSelect.selectedIndex].text
-                    } in orders can not be more than ${Number(ProductQuantityCheck.innerHTML)}`
-                )
-                return false
-            } else if (productsQuantities[prodId] < Number(ProductQuantityCheck.innerHTML)) {
-                alert(
-                    `Quantity of product ${
-                        inboundOrderAddProductSelect.options[inboundOrderAddProductSelect.selectedIndex].text
-                    } in orders can not be less than ${Number(
-                        ProductQuantityCheck.innerHTML
-                    )}. Please, allocate all products`
-                )
-                return false
-            }
-        }
-    }
-
-    const inputProducts: HTMLInputElement = document.querySelector(`#inbound-order-${actionType}-products`)
-    inputProducts.value = JSON.stringify(products)
-    return true
+    const inputProducts: HTMLInputElement = document.querySelector(`#inbound-order-add-products`)
+    inputProducts.value = JSON.stringify(allocatedProductsData)
+    console.log('submit')
+    createInboundOrderBtnSubmit.click()
+    console.log('after submit')
+  });
 }
 
-// ----submit edit form through hidden submit button----
-const inboundOrderSubmitButton: HTMLButtonElement = document.querySelector('#inbound-order-submit-btn')
-const inboundOrderSaveProductsButton = document.querySelector('#inbound-order-save-products-btn')
+const deleteAllocatedProduct = (e: MouseEvent) => {
+    const productAllocatedContainer = (e.currentTarget as HTMLSpanElement).parentNode as HTMLDivElement;
+    const productsAllocatedContainer = productAllocatedContainer.parentNode as HTMLDivElement;
 
-inboundOrderSaveProductsButton.addEventListener('click', () => {
-    const result = setProducts('edit')
-    if (result) {
-        inboundOrderSubmitButton.click()
-    }
-})
-
-// ----submit add through hidden submit button----
-const inboundOrderSubmitAddButton: HTMLButtonElement = document.querySelector('#inbound-order-add-submit-btn')
-const inboundOrderSaveProductsAddButton = document.querySelector('#inbound-order-save-add-products-btn')
-
-inboundOrderSaveProductsAddButton.addEventListener('click', () => {
-    setProducts('add')
-    inboundOrderSubmitAddButton.click()
-})
-
-// function to delete product fields
-function deleteProductFields(ioId: string) {
-    const editProductFields = document.querySelectorAll(`.delete-id-${ioId}`)
-    const checkProductFields = document.querySelectorAll(`.delete-id-check-${ioId}`)
-    if (editProductFields) {
-        editProductFields.forEach((el) => {
-            el.remove()
-        })
-    }
-    if (checkProductFields) {
-        checkProductFields.forEach((el) => {
-            el.remove()
-        })
+    productAllocatedContainer.remove()
+    console.log(productsAllocatedContainer.children.length)
+    if (productsAllocatedContainer.children.length == 2) {
+        const productAllocatedDeleteButton = productsAllocatedContainer.querySelector('.product-allocated-delete-button');
+        console.log(productAllocatedDeleteButton)
+        productAllocatedDeleteButton.classList.add('invisible');
     }
 }
+
+const createAllocationProductContainer = (e: MouseEvent) => {
+    const btn = e.currentTarget as HTMLButtonElement;
+    const productAllocatedContainer = document.querySelector('.product-allocated').parentNode as HTMLDivElement;
+
+    if(productAllocatedContainer.parentNode.children.length == 2){
+        const buttonRemoveProductAllocated = productAllocatedContainer.querySelector('.product-allocated-delete-button');
+        buttonRemoveProductAllocated.classList.remove('invisible');
+    }
+
+    const productAllocatedNew = productAllocatedContainer.cloneNode(true) as HTMLDivElement;
+    // Clear inputs
+    productAllocatedNew.querySelectorAll('input').forEach(input => {
+        input.value = '';
+    })
+
+    const buttonDeleteAllocatedProduct = productAllocatedNew.querySelector('.product-allocated-delete-button');
+    buttonDeleteAllocatedProduct.addEventListener('click', deleteAllocatedProduct);
+
+    const productsAllocatedContainer = btn.parentNode.parentNode as HTMLDivElement;
+
+    productsAllocatedContainer.insertBefore(productAllocatedNew, btn.parentNode);
 }
 
 // # NOTE: depends on flash from create route on inbound_order_blueprint
 document.addEventListener('DOMContentLoaded', () => {
+    // Create product
     openCurrentOrder();
+    createInboundOrderHandler();
 
-    const addButton = document.querySelector('#inbound-order-add-item-btn') as HTMLButtonElement;
-    addButton.addEventListener('click', (e: MouseEvent) => {
-        const buttonContainer = (e.currentTarget as HTMLButtonElement).parentNode
-        const productQuantityGroupForm = buttonContainer.previousSibling.previousSibling as HTMLDivElement
+    const buttonAllocateProduct = document.getElementById('inbound-order-allocate-product-btn') as HTMLButtonElement;
+    buttonAllocateProduct.addEventListener('click', createAllocationProductContainer);
 
-        function onClickDelete() {
-          const currentQuantityGroup = (e.currentTarget as HTMLButtonElement).parentNode.parentNode.parentNode as HTMLDivElement
-          currentQuantityGroup.remove()
+    const buttonDeleteAllocatedProduct = document.querySelector('.product-allocated-delete-button');
+    buttonDeleteAllocatedProduct.addEventListener('click', deleteAllocatedProduct);
 
-          if (globalContainer.children.length === 2) {
-              console.log(productQuantityGroupForm.querySelector('.quantity-group-delete-btn'))
-              productQuantityGroupForm.querySelector('.quantity-group-delete-btn').remove()
-          }
-        }
+    // View
+    const viewInboundOrderModalElement: HTMLDivElement = document.querySelector('#view-inbound-order-modal');
+    const viewModalOptions: ModalOptions = {
+        placement: 'bottom-right',
+        backdrop: 'dynamic',
+        backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
+        closable: true,    
+        onToggle: (e) => {
+          console.log('on show');
+          console.log(console.log(e))
+        },
+    }
 
-        const globalContainer = document.querySelector('#inbound-order-edit-add-container') as HTMLDivElement
-        if (globalContainer.children.length === 2) {
-            const buttonDelete = document.createElement('button')
+    console.log(viewInboundOrderModalElement);
 
-            buttonDelete.classList.add('inbound-order-add-delete-item-btn', 'quantity-group-delete-btn', 'inline-flex', 'items-center', 'px-3', 'py-2', 'mr-3', 'text-sm', 'font-medium', 'text-center', 'text-white', 'rounded-lg', 'bg-red-600', 'hover:bg-red-800', 'focus:ring-4', 'focus:ring-red-300', 'dark:focus:ring-red-900')
-            buttonDelete.setAttribute("type", "button");
-            buttonDelete.innerHTML = `
-            
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
-                <path d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z"></path>
-                </svg>
-            `
-
-            const quantityGroupFirstConteiner = globalContainer.children[0]
-            const actionsContainer = quantityGroupFirstConteiner.querySelector('.actions-container')
-
-            buttonDelete.addEventListener('click', (e: MouseEvent) => {
-                
-            })
-
-            actionsContainer.appendChild(buttonDelete)
-        }
-
-
-        const newProductQuantityGroupForm = productQuantityGroupForm.cloneNode(true) as HTMLDivElement
-        productQuantityGroupForm.parentNode.insertBefore(newProductQuantityGroupForm, productQuantityGroupForm)
-
-        const productSelect = newProductQuantityGroupForm.querySelector(
-            '#inbound-order-edit-add-product-1st-item'
-        ) as HTMLSelectElement
-        const groupSelect = newProductQuantityGroupForm.querySelector(
-            '.inbound-order-edit-add-group'
-        ) as HTMLScriptElement
-        const quantityInput = newProductQuantityGroupForm.querySelector('input')
-
-        // console.log(productSelect, groupSelect, quantityInput);
-
-        const productActionContainer = productQuantityGroupForm.querySelector('.actions-container')
-        // createInboundOrderAddItems();
-        // new Datepicker(document.querySelector(`#datepickerEl-start-add-${index + 1}`))
-        // new Datepicker(document.querySelector(`#datepickerEl-end-add-${index + 1}`))
-    });
-
-
-
+    new Modal(viewInboundOrderModalElement, viewModalOptions);
 })

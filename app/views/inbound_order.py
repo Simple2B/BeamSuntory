@@ -94,6 +94,82 @@ def get_all():
     )
 
 
+@inbound_order_blueprint.route("/create", methods=["POST"])
+@login_required
+def create():
+    form: f.NewInboundOrderForm = f.NewInboundOrderForm()
+    if not form.validate_on_submit():
+        flash(f"Inbound order validation failed: {form.errors}", "danger")
+        log(log.INFO, "Inbound order validation failed: [%s]", form.errors)
+        return redirect(url_for("inbound_order.get_all"))
+    if form.validate_on_submit():
+        # Get supplier
+        supplier = db.session.get(m.Supplier, form.supplier_id.data)
+        if not supplier:
+            flash(f"Supplier with id: {form.supplier_id.data} not found")
+            log(
+                log.INFO,
+                "Inbound order validation failed: cannot find supplier with id [%s]",
+                form.supplier_id.data,
+            )
+            return redirect(url_for("inbound_order.get_all"))
+
+        # Get warehouse
+        warehouse = db.session.get(m.Warehouse, form.warehouse_id.data)
+        if not warehouse:
+            flash(f"Warehouse with id: {form.warehouse_id.data} not found")
+            log(
+                log.INFO,
+                "Inbound order validation failed: cannot find warehouse with id [%s]",
+                form.warehouse_id.data,
+            )
+            return redirect(url_for("inbound_order.get_all"))
+
+        # Create order
+        inbound_order = m.InboundOrder(
+            active_date=form.active_date.data,
+            active_time=form.active_time.data,
+            order_title=form.order_title.data,
+            delivery_date=form.delivery_date.data,
+            supplier=supplier,
+            warehouse=warehouse,
+        )
+
+        # save delivered product quantity, so this product would be available in warehouse
+        products_data = s.ProductAllocatedList.parse_raw(form.products.data)
+        for product_data in products_data.__root__:
+            product = db.session.get(m.Product, product_data.id)
+            # Find product
+            if not product:
+                flash(f"Product with id: {product_data.id} not found")
+                log(
+                    log.INFO,
+                    "Inbound order validation failed: cannot find product with id [%s]",
+                    product_data.id,
+                )
+                return redirect(url_for("inbound_order.get_all"))
+            # Allocate product with all data
+            inbound_order.io_allocate_products.append(
+                m.IOAllocateProduct(
+                    product=product,
+                    quantity=product_data.quantity,
+                    shelf_life_start=product_data.shelf_life_start,
+                    shelf_life_end=product_data.shelf_life_end,
+                )
+            )
+
+        log(log.INFO, "Form submitted. Inbound order: [%s]", inbound_order)
+        inbound_order.save()
+        flash("Inbound order added!", "success")
+
+        return redirect(
+            url_for("inbound_order.get_all", current_inbound_uuid=inbound_order.uuid)
+        )
+
+    flash("Something went wrong!", "danger")
+    return redirect(url_for("inbound_order.get_all"))
+
+
 @inbound_order_blueprint.route("/save", methods=["POST"])
 @login_required
 def save():
@@ -204,105 +280,6 @@ def save():
         log(log.ERROR, "inbound_order save errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("inbound_order.get_all"))
-
-
-@inbound_order_blueprint.route("/create", methods=["POST"])
-@login_required
-def create():
-    form: f.NewInboundOrderForm = f.NewInboundOrderForm()
-    if not form.validate_on_submit():
-        flash(f"Inbound order validation failed: {form.errors}", "danger")
-        log(log.INFO, "Inbound order validation failed: [%s]", form.errors)
-        return redirect(url_for("inbound_order.get_all"))
-    if form.validate_on_submit():
-        # Get supplier
-        supplier = db.session.get(m.Supplier, form.supplier_id.data)
-        if not supplier:
-            flash(f"Supplier with id: {form.supplier_id.data} not found")
-            log(
-                log.INFO,
-                "Inbound order validation failed: cannot find supplier with id [%s]",
-                form.supplier_id.data,
-            )
-            return redirect(url_for("inbound_order.get_all"))
-
-        # Get warehouse
-        warehouse = db.session.get(m.Warehouse, form.warehouse_id.data)
-        if not warehouse:
-            flash(f"Warehouse with id: {form.warehouse_id.data} not found")
-            log(
-                log.INFO,
-                "Inbound order validation failed: cannot find warehouse with id [%s]",
-                form.warehouse_id.data,
-            )
-            return redirect(url_for("inbound_order.get_all"))
-
-        # Create order
-        inbound_order = m.InboundOrder(
-            active_date=datetime.datetime.strptime(form.active_date.data, "%m/%d/%Y"),
-            active_time=form.active_time.data,
-            order_title=form.order_title.data,
-            delivery_date=datetime.datetime.strptime(
-                form.delivery_date.data,
-                "%m/%d/%Y",
-            ),
-            supplier=supplier,
-            warehouse=warehouse,
-        )
-        if form.status.data:
-            inbound_order.status = s.InboundOrderStatus(form.status.data)
-
-        inbound_order.save()
-        log(log.INFO, "Form submitted. Inbound order: [%s]", inbound_order)
-        flash("Inbound order added!", "success")
-
-        # save delivered product quantity, so this product would be available in warehouse
-        products_data = json.loads(form.products.data)
-        for product_data in products_data:
-            product = db.session.get(m.Product, product_data["product_id"])
-
-            if not product:
-                flash(f"Product with id: {product_data['product_id']} not found")
-                log(
-                    log.INFO,
-                    "Inbound order validation failed: cannot find product with id [%s]",
-                    product_data["product_id"],
-                )
-                return redirect(url_for("inbound_order.get_all"))
-
-            shelf_life_str_start = (
-                product_data["shelf_life_start"]
-                if product_data["shelf_life_start"]
-                else "01/01/2023"
-            )
-            shelf_life_str_end = (
-                product_data["shelf_life_end"]
-                if product_data["shelf_life_end"]
-                else "01/01/2023"
-            )
-            shelf_life_stamp_start = datetime.datetime.strptime(
-                shelf_life_str_start, "%m/%d/%Y"
-            )
-            shelf_life_stamp_end = datetime.datetime.strptime(
-                shelf_life_str_end, "%m/%d/%Y"
-            )
-
-            inbound_order.io_allocate_products.append(
-                m.IOAllocateProduct(
-                    product=product,
-                    quantity=int(product_data["quantity"]),
-                    shelf_life_start=shelf_life_stamp_start,  # calendar
-                    shelf_life_end=shelf_life_stamp_end,  # calendar
-                )
-            )
-
-        inbound_order.save()
-        return redirect(
-            url_for("inbound_order.get_all", current_inbound_uuid=inbound_order.uuid)
-        )
-
-    flash("Something went wrong!", "danger")
-    return redirect(url_for("inbound_order.get_all"))
 
 
 @inbound_order_blueprint.route("/delete/<int:id>", methods=["DELETE"])

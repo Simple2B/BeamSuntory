@@ -1,5 +1,5 @@
 from enum import Enum
-from datetime import datetime
+from datetime import datetime, date
 from pydantic import BaseModel
 
 
@@ -14,10 +14,10 @@ class InboundOrderStatus(Enum):
 class InboundOrder(BaseModel):
     id: int
     order_id: str
-    active_date: datetime
+    active_date: date
     active_time: str
     order_title: str
-    delivery_date: datetime
+    delivery_date: date
     status: InboundOrderStatus
     supplier_id: int
     warehouse_id: int

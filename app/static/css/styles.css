@@ -1183,6 +1183,18 @@ input:checked + .toggle-bg {
   top: 13px;
 }
 
+.left-\[97\%\] {
+  left: 97%;
+}
+
+.top-\[2\%\] {
+  top: 2%;
+}
+
+.top-\[15\%\] {
+  top: 15%;
+}
+
 .z-10 {
   z-index: 10;
 }
@@ -3346,6 +3358,11 @@ input:checked + .toggle-bg {
 .text-yellow-400 {
   --tw-text-opacity: 1;
   color: rgb(227 160 8 / var(--tw-text-opacity));
+}
+
+.text-red-600 {
+  --tw-text-opacity: 1;
+  color: rgb(224 36 36 / var(--tw-text-opacity));
 }
 
 .underline {

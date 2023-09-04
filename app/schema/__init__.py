@@ -7,6 +7,8 @@ from .warehouse import Warehouse
 from .inbound_order import InboundOrder, InboundOrderStatus
 from .product import Product, Currency
 from .product_category import ProductCategory
+from .product_quantity_group import ProductQuantityGroups, ProductQuantityGroup
+from .product_allocated import ProductAllocated, ProductAllocatedList
 from .ship_request import ShipRequest, ShipRequestStatus
 from .store import Store
 from .supplier import Supplier
@@ -23,4 +25,3 @@ from .assign import Assign
 from .request_share import RequestShare
 from .store_category import StoreCategory
 from .adjust import Adjust
-from .product_quantity_group import ProductQuantityGroups, ProductQuantityGroup

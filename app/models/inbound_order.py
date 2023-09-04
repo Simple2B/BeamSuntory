@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 import json
 
 import sqlalchemy as sa
@@ -36,13 +36,13 @@ class InboundOrder(db.Model, ModelMixin):
         default=generate_order_id_timestamp,
     )
 
-    active_date: orm.Mapped[datetime] = orm.mapped_column(sa.DateTime)
+    active_date: orm.Mapped[date] = orm.mapped_column(sa.Date)
     active_time: orm.Mapped[str] = orm.mapped_column(sa.String(64))
     order_title: orm.Mapped[str] = orm.mapped_column(
         sa.String(64),
         nullable=False,
     )
-    delivery_date: orm.Mapped[datetime] = orm.mapped_column(sa.DateTime)
+    delivery_date: orm.Mapped[date] = orm.mapped_column(sa.Date)
     status: orm.Mapped[s.InboundOrderStatus] = orm.mapped_column(
         sa.Enum(s.InboundOrderStatus),
         default=s.InboundOrderStatus.draft,
