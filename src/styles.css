@@ -29,3 +29,22 @@
 .full-image-z-index {
     z-index: 60;
 }
+
+label:has(+ *:required):after,
+label:has(~ div *:required):after {
+  content: ' *';
+  color: red;
+}
+
+.relative .transparent-offset-ring{
+    --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) rgba(0, 0, 0, 0);
+}
+
+input[type="radio"]:checked {
+    background-color: transparent !important;
+    background: url(../img/checkmark.png);
+}
+
+.gap-4{
+    gap:16px;
+}

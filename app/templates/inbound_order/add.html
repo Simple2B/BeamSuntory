@@ -6,7 +6,6 @@
     <!-- Modal content -->
     <form action="{{url_for('inbound_order.create')}}" method="post"
       class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-      <input type="hidden" name="inbound_order_id" id="inbound-order-add-id" value="0" />
       <input type="hidden" name="products" id="inbound-order-add-products" value="" />
       {{ form_create.hidden_tag() }}
       <!-- Modal header -->
@@ -17,15 +16,10 @@
       <div class="p-6 space-y-6">
         <div class="grid grid-cols-6 gap-6">
           <div class="col-span-6 sm:col-span-3">
-            <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status</label>
-            <select type="text" name="status" id="inbound-order-add-status"
+            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Order status</label>
+            <input type="text"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Status" required>
-              <option selected="selected" value="" disabled>Choose Status</option>
-              {% for status in inbound_order_statuses %}
-              <option value="{{ status }}">{{ status }}</option>
-              {% endfor %}
-            </select>
+              placeholder="Draft" readonly/>
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="order_title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Order
@@ -78,19 +72,16 @@
                       clip-rule="evenodd"></path>
                   </svg>
                 </div>
-                <input datepicker datepicker-autohide name="active_date" id="inbound-order-add-active_date" type="text"
-                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  placeholder="Select date" required>
+                <input name="active_date" id="inbound-order-add-active_date" datepicker datepicker-autohide placeholder="Select date" required type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
               </div>
             </div>
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="active_time" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Active
-              time</label>
+            <label for="active_time" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Active time</label>
             <div class="relative" id="timepicker-inline-12" data-te-input-wrapper-init>
               <input type="text"
-                class="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 peer-focus:text-primary data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:text-neutral-200 dark:placeholder:text-neutral-200 dark:peer-focus:text-primary [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0"
-                name="active_time" id="inbound-order-add-active_time" required />
+                class="transparent-offset-ring peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 peer-focus:text-primary data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:text-neutral-200 dark:placeholder:text-neutral-200 dark:peer-focus:text-primary [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0"
+                name="active_time" id="inbound-order-add-active_time" required/>
               <label for="active_time"
                 class="pointer-events-none absolute left-3 top-0 mb-0 max-w-[90%] origin-[0_0] truncate pt-[0.37rem] leading-[1.6] text-neutral-500 transition-all duration-200 ease-out peer-focus:-translate-y-[0.9rem] peer-focus:scale-[0.8] peer-focus:text-primary peer-data-[te-input-state-active]:-translate-y-[0.9rem] peer-data-[te-input-state-active]:scale-[0.8] motion-reduce:transition-none dark:text-neutral-200 dark:peer-focus:text-primary">Select
                 a time</label>
@@ -109,13 +100,12 @@
           </div>
         </div>
         <div id="inbound-order-add-add-container">
-          <div class="p-6 space-y-6 border-t">
-            <div class="grid grid-cols-12 gap-5">
+          <div class="pb-6 space-y-6 border-t relative">
+            <span class="product-allocated-delete-button absolute text-red-600 top-[15%] left-[97%] cursor-pointer invisible">&#x2715</span>
+            <div class="grid grid-cols-12 gap-5 product-allocated">
               <div class="col-span-6 sm:col-span-3">
                 <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product</label>
-                <select type="text" name="add_product" id="inbound-order-add-add-product-select"
-                  class="inbound-order-add-add-product shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  placeholder="Product" required>
+                <select type="text" name="add_product" id="inbound-order-add-add-product-select" placeholder="Product" required class="product-allocated-add inbound-order-add-add-product shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                   <option value="" disabled selected>Select product</option>
                   {% for product in products %}
                   <option value="{{ product.id }}">{{ product.name }}</option>
@@ -123,34 +113,12 @@
                 </select>
               </div>
               <div class="col-span-6 sm:col-span-3">
-                <label for="status"
-                  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
-                <input type="text" name="add_quantity"
-                  class="inbound-order-add-add-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  placeholder="Quantity" required>
+                <label for="add_quantity" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
+                <input type="number" min="1" name="add_quantity" placeholder="Quantity" required class="product-allocated-quantity inbound-order-add-add-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
               </div>
-              <div class="col-span-6 sm:col-span-3">
-                <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Action</label>
-                <button type="button" data-target=""
-                  class="invisible inline-flex items-center px-3 py-2 mr-3 text-sm font-medium text-center text-white rounded-lg bg-red-600 hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
-                  <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z">
-                    </path>
-                  </svg>
-                </button>
-                <button type="button" id="inbound-order-add-add-item-btn"
-                  class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300">
-                  <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      d="M64 80c-8.8 0-16 7.2-16 16V416c0 8.8 7.2 16 16 16H384c8.8 0 16-7.2 16-16V96c0-8.8-7.2-16-16-16H64zM0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96zM200 344V280H136c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H248v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z">
-                    </path>
-                  </svg>
-                </button>
-              </div>
+              
               <div class="inbound-order-add-add-item col-span-6 sm:col-span-6">
-                <label for="shelf_life_start" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Shelf
-                  life</label>
+                <label for="shelf_life_start" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Shelf life</label>
                 <div class="flex items-center">
                   <div class="relative">
                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -161,9 +129,7 @@
                           clip-rule="evenodd"></path>
                       </svg>
                     </div>
-                    <input id="datepickerEl-start-add-1" name="shelf_life_start" type="text" datepicker
-                      class="inbound-order-add-add-shelf_life_start bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      placeholder="Select date start">
+                    <input id="datepickerEl-start-add-1" name="shelf_life_start" type="text" datepicker placeholder="Select date" class="product-allocated-shelf-life-start inbound-order-add-add-shelf_life_start bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                   </div>
                   <span class="mx-4 text-gray-500">to</span>
                   <div class="relative max-w-sm">
@@ -174,21 +140,24 @@
                           d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
                       </svg>
                     </div>
-                    <input id="datepickerEl-end-add-1" datepicker type="text"
-                      class="inbound-order-add-add-shelf_life_end bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      placeholder="Select date">
+                    <input id="datepickerEl-end-add-1" datepicker type="text" placeholder="Select date" class="product-allocated-shelf-life-end inbound-order-add-add-shelf_life_end bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                   </div>
                 </div>
               </div>
             </div>
           </div>
+        <div class="p-6 space-y-6 border-t flex justify-center">
+          <button type="button" data-target="" id="inbound-order-allocate-product-btn" class="inbound-order-add-item-btn inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300 justify-center w-full">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+              <path d="M64 80c-8.8 0-16 7.2-16 16V416c0 8.8 7.2 16 16 16H384c8.8 0 16-7.2 16-16V96c0-8.8-7.2-16-16-16H64zM0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96zM200 344V280H136c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H248v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"></path>
+            </svg>
+          </button>
+        </div>
         </div>
         <!-- Modal footer -->
         <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
           <button id="inbound-order-add-submit-btn" name="submit" type="submit" class="hidden"></button>
-          <button id="inbound-order-save-add-products-btn" name="save-products" type="button"
-            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-            Save all </button>
+          <button id="inbound-order-create-btn" name="save-products" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Save all </button>
         </div>
     </form>
   </div>

@@ -7,9 +7,9 @@
     <form action="{{url_for('inbound_order.save')}}" id="inbound-order-edit-form" method="post"
       class="relative bg-white rounded-lg shadow dark:bg-gray-700">
       {{ form_edit.hidden_tag() }}
-      <input type="hidden" name="inbound_order_id" id="inbound-order-edit-id" value="0" />
       <input type="hidden" name="products" id="inbound-order-edit-products" value="" />
       <input type="hidden" name="next_url" id="inbound-order-edit-next_url" value="" />
+      <input type="hidden" name="inbound_order_uuid" id="inbound-order-uuid" value="" />
       <!-- Modal header -->
       <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Edit inbound order </h3>
@@ -23,10 +23,8 @@
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Status" required>
               <option selected="selected" value="" disabled>Choose Status</option>
-              <option value="Draft">Draft</option>
-              <option value="Assigned to pickup">Assigned to pickup</option>
-              <option value="Delivered">Delivered</option>
-              <option value="In transit">In transit</option>
+              <option value="{{inbound_order_statuses.draft.value}}">{{inbound_order_statuses.draft.value}}</option>
+              <option value="{{inbound_order_statuses.assigned.value}}">{{inbound_order_statuses.assigned.value}}</option>
             </select>
           </div>
           <div class="col-span-6 sm:col-span-3">
@@ -188,7 +186,7 @@
                 class="inbound-order-edit-add-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 placeholder="Quantity" required>
             </div>
-            <div class="col-span-6 sm:col-span-3">
+            <div class="actions-container col-span-6 sm:col-span-3">
               <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Action</label>
               <button type="button" data-target=""
                 class="invisible inline-flex items-center px-3 py-2 mr-3 text-sm font-medium text-center text-white rounded-lg bg-red-600 hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
@@ -197,26 +195,28 @@
                     d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z">
                   </path>
                 </svg>
-              </button>
-              <button type="button" id="inbound-order-edit-add-item-btn"
-                class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    d="M64 80c-8.8 0-16 7.2-16 16V416c0 8.8 7.2 16 16 16H384c8.8 0 16-7.2 16-16V96c0-8.8-7.2-16-16-16H64zM0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96zM200 344V280H136c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H248v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z">
-                  </path>
-                </svg>
-              </button>
+              </button>              
             </div>
           </div>
         </div>
+        <div class="p-6 space-y-6 border-t flex justify-center">
+          <button type="button" data-target="" id="inbound-order-add-item-btn"
+            class="inbound-order-add-item-btn inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+              <path d="M64 80c-8.8 0-16 7.2-16 16V416c0 8.8 7.2 16 16 16H384c8.8 0 16-7.2 16-16V96c0-8.8-7.2-16-16-16H64zM0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96zM200 344V280H136c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H248v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"></path>
+            </svg>
+          </button>
       </div>
+      </div>
+      
       <!-- Modal footer -->
       <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
         <button id="inbound-order-submit-btn" name="submit" type="submit" class="hidden"></button>
         <button id="inbound-order-save-products-btn" name="save-products" type="button"
           class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
           Save all </button>
-      </div>
+          
+      </div>      
     </form>
   </div>
 </div>

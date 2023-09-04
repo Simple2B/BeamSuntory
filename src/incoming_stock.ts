@@ -35,6 +35,15 @@ interface IPackageInfo {
     quantity_wrap_carton: number
 }
 
+interface IIncomingStockProduct{
+    product_id: number,
+    quantity_received: number,
+    quantity_per_wrap: number,
+    quantity_wrap_carton: number,
+    quantity_carton_master: number,
+    group_id: number,
+}
+
 interface IInboundOrderProd {
     product: { id: number; name: string; SKU: string; image: string }
     group: { id: number; name: string }
@@ -44,8 +53,9 @@ interface IInboundOrderProd {
 let productGroupQuantity = {} as { [index: string]: number }
 let i = 0
 
-const $editModalElement: HTMLElement = document.querySelector('#editIncomingStockModal')
-const $viewModalElement: HTMLElement = document.querySelector('#viewIncomingStockModal')
+const $editModalElement: HTMLElement = document.querySelector('#editIncomingStockModal');
+const $viewModalElement: HTMLElement = document.querySelector('#viewIncomingStockModal');
+const inputReceivedProducts: HTMLInputElement = document.querySelector('#incoming-stock-edit-received-products');
 
 const editModalOptions: ModalOptions = {
     placement: 'bottom-right',
@@ -95,7 +105,7 @@ $buttonElements.forEach((e) =>
     e.addEventListener('click', () => {
         const inboundOrder: IInboundOrder = JSON.parse(e.getAttribute('data-target'))
         editIncomingStock(inboundOrder)
-        sessionStorage.setItem('inboundOrder', JSON.stringify(inboundOrder))
+        //sessionStorage.setItem('inboundOrder', JSON.stringify(inboundOrder))
     })
 )
 
@@ -152,7 +162,26 @@ function createIncomingStockOrderItems(curInbOrder: IInboundOrderProd) {
           class="incoming-stock-edit-received-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           placeholder="Quantity" required>
       </div>
-    </div>
+      <div class="col-span-6 sm:col-span-6">
+      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity Per Wrap</label>
+      <input type="text"
+        class="quantity-per-wrap shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        placeholder="Quantity" required>
+      </div>
+
+      <div class="col-span-6 sm:col-span-6">
+        <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity Of Wraps Per Carton</label>
+        <input type="text"
+          class="quantity-wrap-carton shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          placeholder="Quantity" required>
+      </div>
+
+      <div class="col-span-6 sm:col-span-6">
+        <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity Of Cartons Per Master Carton (Optional)</label>
+        <input type="text"
+          class="quantity-carton-master shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          placeholder="Quantity" required>
+      </div>
   `
     const img: HTMLImageElement = incomingStockAddItem.querySelector('.incoming-stock-edit-product-image')
     if (img.src.length < 100) {
@@ -201,22 +230,25 @@ cancelOrderButtons.forEach((e) => {
 function setProducts() {
     const incomingStockProducts = document.querySelectorAll('.incoming-stock-product-item')
     const incomingStockProductsQuantity = document.querySelectorAll('.incoming-stock-edit-received-quantity')
-    const products = []
+    const products: IIncomingStockProduct[] = []
 
-    for (let i = 0; i < incomingStockProducts.length; i++) {
-        const incomingStockProduct = incomingStockProducts[i] as HTMLDivElement
+    incomingStockProducts.forEach((incomingStockProduct, i) => {
         const incomingStockQuantity = incomingStockProductsQuantity[i] as HTMLInputElement
         const productId = incomingStockProduct.getAttribute('data-target-product-id')
+        const quantityPerWrap = incomingStockProduct.querySelector('.quantity-per-wrap') as HTMLInputElement
+        const quantityWrapCarton = incomingStockProduct.querySelector('.quantity-wrap-carton') as HTMLInputElement
+        const quantityCartonMaster = incomingStockProduct.querySelector('.quantity-carton-master') as HTMLInputElement
 
-        const product = {
-            product_id: productId,
-            quantity_received: incomingStockQuantity.value,
+        const product: IIncomingStockProduct = {
+            product_id: parseInt(productId),
+            quantity_received: parseInt(incomingStockQuantity.value),
+            quantity_per_wrap: parseInt(quantityPerWrap.value),
+            quantity_wrap_carton: parseInt(quantityWrapCarton.value),
+            quantity_carton_master: parseInt(quantityCartonMaster.value),
             group_id: productGroupQuantity[`group_id-${i}`],
         }
         products.push(product)
-    }
-
-    const inputReceivedProducts: HTMLInputElement = document.querySelector('#incoming-stock-edit-received-products')
+    })
 
     inputReceivedProducts.value = JSON.stringify(products)
 }
@@ -226,7 +258,7 @@ const inboundOrderSubmitButton: HTMLButtonElement = document.querySelector('#inc
 const inboundOrderSaveProductsButton = document.querySelector('#incoming-stock-save-products-btn')
 
 inboundOrderSaveProductsButton.addEventListener('click', () => {
-    setProducts()
+    setProducts();
     inboundOrderSubmitButton.click()
 })
 

@@ -25,7 +25,7 @@ def test_create_inbound_order(mg_g_populate: FlaskClient):
     response = mg_g_populate.post(
         "/inbound_order/create",
         data=dict(
-            inbound_order_id="IO-0001",
+            # inbound_order_id="IO-0001",
             active_date="07/19/2023",
             active_time="12:00 AM",
             order_title="Inbound Order 1",
@@ -63,10 +63,12 @@ def test_delete_inbound_order(mg_g_populate: FlaskClient):
 def test_edit_inbound_order(mg_g_populate: FlaskClient):
     login(mg_g_populate)
 
+    inbound_order = db.session.scalar(m.InboundOrder.select())
+
     response = mg_g_populate.post(
         "/inbound_order/save",
         data=dict(
-            inbound_order_id=1,
+            inbound_order_uuid=inbound_order.uuid,
             active_date="07/24/2023",
             active_time="12:00 AM",
             order_title="Inbound Order 111",

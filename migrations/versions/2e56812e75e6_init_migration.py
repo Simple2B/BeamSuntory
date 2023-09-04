@@ -1,8 +1,8 @@
-"""init migrations
+"""Init migration
 
-Revision ID: 5028b9d074ae
+Revision ID: 2e56812e75e6
 Revises: 
-Create Date: 2023-08-30 15:49:06.055979
+Create Date: 2023-09-04 12:06:19.864584
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '5028b9d074ae'
+revision = '2e56812e75e6'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -318,20 +318,23 @@ def upgrade():
     )
     op.create_table('inbound_orders',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('uuid', sa.String(length=36), nullable=False),
+    sa.Column('title', sa.String(length=64), nullable=False),
     sa.Column('order_id', sa.String(length=64), nullable=False),
-    sa.Column('active_date', sa.DateTime(), nullable=False),
+    sa.Column('active_date', sa.Date(), nullable=False),
     sa.Column('active_time', sa.String(length=64), nullable=False),
-    sa.Column('order_title', sa.String(length=64), nullable=False),
-    sa.Column('delivery_date', sa.DateTime(), nullable=False),
+    sa.Column('delivery_date', sa.Date(), nullable=False),
     sa.Column('status', sa.Enum('draft', 'assigned', 'delivered', 'in_transit', 'cancelled', name='inboundorderstatus'), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('supplier_id', sa.Integer(), nullable=False),
     sa.Column('warehouse_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['supplier_id'], ['suppliers.id'], name=op.f('fk_inbound_orders_supplier_id_suppliers')),
     sa.ForeignKeyConstraint(['warehouse_id'], ['warehouses.id'], name=op.f('fk_inbound_orders_warehouse_id_warehouses')),
-    sa.PrimaryKeyConstraint('id', name=op.f('pk_inbound_orders')),
-    sa.UniqueConstraint('order_id', name=op.f('uq_inbound_orders_order_id'))
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_inbound_orders'))
     )
+    with op.batch_alter_table('inbound_orders', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_inbound_orders_uuid'), ['uuid'], unique=False)
+
     op.create_table('request_share_user',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -343,7 +346,7 @@ def upgrade():
     op.create_table('ship_requests',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('order_numb', sa.String(length=64), nullable=False),
-    sa.Column('status', sa.String(length=64), nullable=False),
+    sa.Column('status', sa.Enum('waiting_for_warehouse', 'assigned', 'delivered', 'in_transit', 'cancelled', name='shiprequeststatus'), nullable=False),
     sa.Column('store_category_id', sa.Integer(), nullable=False),
     sa.Column('order_type', sa.String(length=128), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
@@ -391,8 +394,8 @@ def upgrade():
     sa.Column('product_id', sa.Integer(), nullable=False),
     sa.Column('quantity', sa.Integer(), nullable=False),
     sa.Column('inbound_order_id', sa.Integer(), nullable=False),
-    sa.Column('shelf_life_start', sa.DateTime(), nullable=False),
-    sa.Column('shelf_life_end', sa.DateTime(), nullable=False),
+    sa.Column('shelf_life_start', sa.Date(), nullable=False),
+    sa.Column('shelf_life_end', sa.Date(), nullable=False),
     sa.ForeignKeyConstraint(['inbound_order_id'], ['inbound_orders.id'], name=op.f('fk_io_allocate_product_inbound_order_id_inbound_orders'), ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['product_id'], ['products.id'], name=op.f('fk_io_allocate_product_product_id_products'), ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_io_allocate_product'))
@@ -434,6 +437,9 @@ def downgrade():
     op.drop_table('warehouse_product')
     op.drop_table('ship_requests')
     op.drop_table('request_share_user')
+    with op.batch_alter_table('inbound_orders', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_inbound_orders_uuid'))
+
     op.drop_table('inbound_orders')
     op.drop_table('favorite_store_user')
     op.drop_table('adjusts_group_qty')
