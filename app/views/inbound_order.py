@@ -129,7 +129,7 @@ def create():
         inbound_order = m.InboundOrder(
             active_date=form.active_date.data,
             active_time=form.active_time.data,
-            order_title=form.order_title.data,
+            title=form.order_title.data,
             delivery_date=form.delivery_date.data,
             supplier=supplier,
             warehouse=warehouse,

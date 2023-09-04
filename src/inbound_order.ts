@@ -23,17 +23,30 @@ interface SupDAWhProd {
     product: string
 }
 
+interface ISupplier {
+  name: string
+  address: string
+}
+
+interface IWarehouse {
+  name: string
+}
+
 interface IInboundOrder {
     id: number
     uuid: string
-    order_id: string
-    active_date: number
-    active_time: string
-    order_title: string
-    delivery_date: string
+    orderId: string
+    activeDate: string
+    activeTime: string
+    title: string
+    deliveryDate: string
     status: string
+    supplier: ISupplier
+    warehouse: IWarehouse
+    
     supplier_id: number
     warehouse_id: number
+
     sup_da_wh_prod_objs: SupDAWhProd
     products: IProduct[]
     groups: IGroup[]
@@ -130,7 +143,7 @@ console.log($buttonElements)
 $buttonElements.forEach((e) =>
     e.addEventListener('click', () => {
         const inboundOrder: IInboundOrder = JSON.parse(e.getAttribute('data-target'))
-        editInboundOrder(inboundOrder)
+        // editInboundOrder(inboundOrder)
     })
 );
 
@@ -1010,20 +1023,54 @@ document.addEventListener('DOMContentLoaded', () => {
     const buttonDeleteAllocatedProduct = document.querySelector('.product-allocated-delete-button');
     buttonDeleteAllocatedProduct.addEventListener('click', deleteAllocatedProduct);
 
-    // View
-    const viewInboundOrderModalElement: HTMLDivElement = document.querySelector('#view-inbound-order-modal');
+    // Order view
+    // modal Nodes
+    const viewInboundOrderModalElement: HTMLDivElement = document.querySelector('#view-inbound-order-modal') as HTMLDivElement;
+    const orderIdView = viewInboundOrderModalElement.querySelector('#inbound-order-view-order_id') as HTMLDivElement;
+    const orderStatus = viewInboundOrderModalElement.querySelector('#inbound-order-view-status') as HTMLDivElement;
+    const orderActiveDate = viewInboundOrderModalElement.querySelector('#inbound-order-view-active_date') as HTMLDivElement;
+    const orderActiveTime = viewInboundOrderModalElement.querySelector('#inbound-order-view-active_time') as HTMLDivElement;
+    const orderTitle = viewInboundOrderModalElement.querySelector('#inbound-order-view-order_title') as HTMLDivElement;
+    const orderDeliveryDate = viewInboundOrderModalElement.querySelector('#inbound-order-view-delivery_date') as HTMLDivElement;
+    const orderSupplierId = viewInboundOrderModalElement.querySelector('#inbound-order-view-supplier_id') as HTMLDivElement;
+    const orderWarehouseName = viewInboundOrderModalElement.querySelector('#inbound-order-view-warehouse-name') as HTMLDivElement;
+
+    const modalViewDivs = [orderIdView, orderStatus, orderActiveDate, orderActiveTime, orderTitle, orderDeliveryDate, orderSupplierId, orderWarehouseName];
+
     const viewModalOptions: ModalOptions = {
         placement: 'bottom-right',
         backdrop: 'dynamic',
         backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
-        closable: true,    
-        onToggle: (e) => {
-          console.log('on show');
-          console.log(console.log(e))
+        closable: true,
+        onHide: () => {
+            modalViewDivs.forEach(modalDiv => {
+              modalDiv.innerHTML = '';
+            })
         },
     }
 
-    console.log(viewInboundOrderModalElement);
+    const modal = new Modal(viewInboundOrderModalElement, viewModalOptions);
+    const orderViewButtons = document.querySelectorAll('.inbound-order-view-button');
 
-    new Modal(viewInboundOrderModalElement, viewModalOptions);
+    orderViewButtons.forEach((viewButton) => {
+      const inboundOrderData = JSON.parse(viewButton.getAttribute('data-target')) as IInboundOrder;
+      // Nodes
+      console.log(inboundOrderData)
+      viewButton.addEventListener('click', () => {
+        // Fill order view modal data
+        orderIdView.innerHTML = inboundOrderData.orderId;
+        orderStatus.innerHTML = inboundOrderData.status;
+        orderActiveDate.innerHTML = inboundOrderData.activeDate;
+        orderActiveTime.innerHTML = inboundOrderData.activeTime;
+        orderTitle.innerHTML = inboundOrderData.title;
+        orderDeliveryDate.innerHTML = inboundOrderData.deliveryDate;
+        orderWarehouseName.innerHTML = inboundOrderData.warehouse.name;
+
+        // TODO supplier
+
+        modal.show();
+
+      });
+    })
+
 })
