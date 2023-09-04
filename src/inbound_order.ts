@@ -1032,10 +1032,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const orderActiveTime = viewInboundOrderModalElement.querySelector('#inbound-order-view-active_time') as HTMLDivElement;
     const orderTitle = viewInboundOrderModalElement.querySelector('#inbound-order-view-order_title') as HTMLDivElement;
     const orderDeliveryDate = viewInboundOrderModalElement.querySelector('#inbound-order-view-delivery_date') as HTMLDivElement;
-    const orderSupplierId = viewInboundOrderModalElement.querySelector('#inbound-order-view-supplier_id') as HTMLDivElement;
     const orderWarehouseName = viewInboundOrderModalElement.querySelector('#inbound-order-view-warehouse-name') as HTMLDivElement;
 
-    const modalViewDivs = [orderIdView, orderStatus, orderActiveDate, orderActiveTime, orderTitle, orderDeliveryDate, orderSupplierId, orderWarehouseName];
+    const orderSupplierName = viewInboundOrderModalElement.querySelector('#inbound-order-view-supplier-name')
+    const orderSupplierAddress = viewInboundOrderModalElement.querySelector('#inbound-order-view-supplier-address')
+
+    const modalViewDivs = [orderIdView, orderStatus, orderActiveDate, orderActiveTime, orderTitle, orderDeliveryDate, orderWarehouseName, orderSupplierName, orderSupplierAddress];
 
     const viewModalOptions: ModalOptions = {
         placement: 'bottom-right',
@@ -1043,7 +1045,9 @@ document.addEventListener('DOMContentLoaded', () => {
         backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
         closable: true,
         onHide: () => {
+            console.log(modalViewDivs)
             modalViewDivs.forEach(modalDiv => {
+              console.log(modalDiv);
               modalDiv.innerHTML = '';
             })
         },
@@ -1065,8 +1069,8 @@ document.addEventListener('DOMContentLoaded', () => {
         orderTitle.innerHTML = inboundOrderData.title;
         orderDeliveryDate.innerHTML = inboundOrderData.deliveryDate;
         orderWarehouseName.innerHTML = inboundOrderData.warehouse.name;
-
-        // TODO supplier
+        orderSupplierName.innerHTML = inboundOrderData.supplier.name;
+        orderSupplierAddress.innerHTML = inboundOrderData.supplier.address;
 
         modal.show();
 
