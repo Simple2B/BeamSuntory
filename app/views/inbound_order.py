@@ -149,8 +149,8 @@ def create():
                 )
                 return redirect(url_for("inbound_order.get_all"))
             # Allocate product with all data
-            inbound_order.io_allocate_products.append(
-                m.IOAllocateProduct(
+            inbound_order.products_allocated.append(
+                m.ProductAllocated(
                     product=product,
                     quantity=product_data.quantity,
                     shelf_life_start=product_data.shelf_life_start,

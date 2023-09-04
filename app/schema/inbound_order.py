@@ -3,6 +3,7 @@ from datetime import datetime, date
 from pydantic import BaseModel, Field
 from .supplier import Supplier
 from .warehouse import Warehouse
+from .product_allocated import ProductAllocatedOut
 
 
 class InboundOrderStatus(Enum):
@@ -21,8 +22,11 @@ class InboundOrder(BaseModel):
     title: str
     delivery_date: date = Field(alias="deliveryDate")
     status: InboundOrderStatus
+
     supplier: Supplier
     warehouse: Warehouse
+
+    products_allocated: list[ProductAllocatedOut] = Field(alias="productsAllocated")
 
     supplier_id: int
     warehouse_id: int
