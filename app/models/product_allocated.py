@@ -7,8 +7,9 @@ from .utils import ModelMixin
 from .product import Product
 
 
-class IOAllocateProduct(db.Model, ModelMixin):
-    __tablename__ = "io_allocate_product"
+class ProductAllocated(db.Model, ModelMixin):
+    __tablename__ = "products_allocated"
+
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
     product_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("products.id", ondelete="CASCADE")

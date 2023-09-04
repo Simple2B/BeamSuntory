@@ -1,6 +1,6 @@
 <!-- Edit inbound order modal -->
 <!-- prettier-ignore-->
-<div id="editInboundOrderModal" tabindex="-1" aria-hidden="true"
+<div id="edit-inbound-order-modal" tabindex="-1" aria-hidden="true"
   class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
   <div class="relative w-full max-w-3xl max-h-full">
     <!-- Modal content -->
@@ -30,7 +30,7 @@
           <div class="col-span-6 sm:col-span-3">
             <label for="order_title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Order
               title</label>
-            <input type="text" name="order_title" id="inbound-order-edit-order_title"
+            <input type="text" name="order_title" id="inbound-order-edit-order-title"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Order title" required />
           </div>
@@ -47,7 +47,7 @@
                       clip-rule="evenodd"></path>
                   </svg>
                 </div>
-                <input datepicker datepicker-autohide name="active_date" id="inbound-order-edit-active_date" type="text"
+                <input datepicker datepicker-autohide name="active_date" id="inbound-order-edit-active-date" type="text"
                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="Select date">
               </div>
@@ -56,7 +56,7 @@
           <div class="col-span-6 sm:col-span-3">
             <label for="active_time" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Active
               time</label>
-            <input type="text" name="active_time" id="inbound-order-edit-active_time"
+            <input type="text" name="active_time" id="inbound-order-edit-active-time"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Active time" required />
           </div>
@@ -73,7 +73,7 @@
                       clip-rule="evenodd"></path>
                   </svg>
                 </div>
-                <input datepicker datepicker-autohide name="delivery_date" id="inbound-order-edit-delivery_date"
+                <input datepicker datepicker-autohide name="delivery_date" id="inbound-order-edit-delivery-date"
                   type="text"
                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="Select date">
@@ -83,7 +83,7 @@
           <div class="col-span-6 sm:col-span-3">
             <label for="supplier_id"
               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Supplier</label>
-            <select type="text" name="supplier_id" id="inbound-order-edit-supplier_id"
+            <select type="text" name="supplier_id" id="inbound-order-edit-supplier-id"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Supplier" required>
               {% for supplier in suppliers %}
@@ -94,7 +94,7 @@
           <div class="col-span-6 sm:col-span-3">
             <label for="warehouse_id"
               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Warehouse</label>
-            <select type="text" name="warehouse_id" id="inbound-order-edit-warehouse_id"
+            <select type="text" name="warehouse_id" id="inbound-order-edit-warehouse-id"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Warehouse" required>
               {% for warehouse in warehouses %}
