@@ -139,9 +139,18 @@
           </div>
         </div>
       <div id="inbound-order-edit-add-container">
-        <div class="inbound-order-edit-add-item p-6 space-y-6 border-t">
+        <div class="inbound-order-edit-add-item p-6 space-y-6 border-t relative">
+          <div class="product-allocated-delete-button absolute top-[15%] left-[95%] bg-red-600 hover:bg-red-800 rounded-lg cursor-pointer invisible">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+              <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+              <g id="SVGRepo_iconCarrier"> 
+                <path d="M6.99486 7.00636C6.60433 7.39689 6.60433 8.03005 6.99486 8.42058L10.58 12.0057L6.99486 15.5909C6.60433 15.9814 6.60433 16.6146 6.99486 17.0051C7.38538 17.3956 8.01855 17.3956 8.40907 17.0051L11.9942 13.4199L15.5794 17.0051C15.9699 17.3956 16.6031 17.3956 16.9936 17.0051C17.3841 16.6146 17.3841 15.9814 16.9936 15.5909L13.4084 12.0057L16.9936 8.42059C17.3841 8.03007 17.3841 7.3969 16.9936 7.00638C16.603 6.61585 15.9699 6.61585 15.5794 7.00638L11.9942 10.5915L8.40907 7.00636C8.01855 6.61584 7.38538 6.61584 6.99486 7.00636Z" fill="#ffffff"></path> 
+              </g>
+            </svg>
+          </div>
           <div class="grid grid-cols-12 gap-5" id="inbound-order-edit-item">
-            <div class="col-span-6 sm:col-span-3">
+            <div class="col-span-6 sm:col-span-4">
               <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product</label>
               <select type="text" name="add_product" id="inbound-order-edit-add-product-1st-item"
                 class="inbound-order-edit-add-product shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -152,7 +161,7 @@
                 {% endfor %}
               </select>
             </div>
-            <div class="col-span-6 sm:col-span-3">
+            <div class="col-span-6 sm:col-span-4">
               <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label>
               <select type="text" name="add_group"
                 class="inbound-order-edit-add-group shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -163,23 +172,12 @@
                 {% endfor %}
               </select>
             </div>
-            <div class="col-span-6 sm:col-span-3">
+            <div class="col-span-6 sm:col-span-4">
               <label for="status" id="inbound-order-edit-add-quantity-label" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
               <input type="text" name="add_quantity"
                 class="inbound-order-edit-add-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 placeholder="Quantity" required>
-            </div>
-            <div class="actions-container col-span-6 sm:col-span-3">
-              <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Action</label>
-              <button type="button" data-target=""
-                class="invisible inline-flex items-center px-3 py-2 mr-3 text-sm font-medium text-center text-white rounded-lg bg-red-600 hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z">
-                  </path>
-                </svg>
-              </button>              
-            </div>
+            </div>       
           </div>
         </div>
         <div class="p-6 space-y-6 border-t flex justify-center">
