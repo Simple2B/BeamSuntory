@@ -1056,6 +1056,28 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
+    //copy current link
+    const linkCopiedPopup = document.getElementById("link-copied-popup");    
+
+    const copyLinkButton = document.querySelector('#inbound-order-share') as HTMLButtonElement;
+    copyLinkButton.addEventListener('click', () => {
+      const currentURL = window.location.href;
+      const tempInput = document.createElement("input");
+      tempInput.value = currentURL;
+      document.body.appendChild(tempInput);      
+      tempInput.select();
+      tempInput.setSelectionRange(0, 99999);
+      document.execCommand("copy");
+      document.body.removeChild(tempInput);
+
+      linkCopiedPopup.classList.remove('invisible');
+      const timeout = setTimeout(() => {
+        linkCopiedPopup.classList.add('invisible');
+        clearTimeout(timeout);
+      }, 800); 
+    });
+
+
     // Edit order
     // Nodes
     const orderEditButtons = document.querySelectorAll('.inbound-order-edit-button') as NodeListOf<HTMLButtonElement>;
