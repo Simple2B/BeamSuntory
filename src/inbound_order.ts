@@ -126,8 +126,14 @@ const addModalButton = document.querySelector('#inbound-order-add-modal-button')
 
 
 addModalButton.addEventListener('click', () => {    
-    //sessionStorage.setItem('inboundOrderId', createdInboundOrderId)
     addModal.show();
+})
+
+
+const addModalCloseButton = document.querySelector('#add-modal-btn-hide') as HTMLButtonElement;
+
+addModalCloseButton.addEventListener('click', () => {
+  addModal.hide();
 })
 
 // search flow
@@ -1016,14 +1022,19 @@ document.addEventListener('DOMContentLoaded', () => {
         backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
         closable: true,
         onHide: () => {
-            modalViewDivs.forEach(modalDiv => {
-              modalDiv.innerHTML = '';
-            });
+          modalViewDivs.forEach(modalDiv => {
+            modalDiv.innerHTML = '';
+          });
         },
     }
 
     const viewModal = new Modal(viewInboundOrderModalElement, viewModalOptions);
     const orderViewButtons = document.querySelectorAll('.inbound-order-view-button');
+
+    const viewModalCloseButton = viewInboundOrderModalElement.querySelector('#view-modal-btn-hide') as HTMLButtonElement;
+    viewModalCloseButton.addEventListener('click', () => {
+      viewModal.hide();
+    }); 
 
     orderViewButtons.forEach((viewButton) => {
       const inboundOrderData = JSON.parse(viewButton.getAttribute('data-target')) as IInboundOrderOut;
@@ -1071,6 +1082,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // Create modal
     const orderEditModal = new Modal(orderEditModalHTML, modalEditOptions);
+
+    const editModalCloseButton = document.querySelector('#edit-modal-btn-hide') as HTMLButtonElement;
+
+    editModalCloseButton.addEventListener('click', () => {
+      orderEditModal.hide();
+    });
 
     orderEditButtons.forEach(orderEditButton => {
       const inboundOrderData = JSON.parse(orderEditButton.getAttribute('data-target')) as IInboundOrderOut;
