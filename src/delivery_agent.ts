@@ -49,6 +49,11 @@ const addModal: ModalInterface = new Modal(
   modalOptions,
 );
 
+const editDeliveryAgentCloseModalButton: HTMLButtonElement = document.querySelector('#edit-delivery-agent-modal-close-btn');
+editDeliveryAgentCloseModalButton.addEventListener('click', () => {
+  modal.hide();
+});
+
 const $buttonElements = document.querySelectorAll(
   '.delivery-agent-edit-button',
 );
