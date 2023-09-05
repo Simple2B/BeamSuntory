@@ -1195,6 +1195,14 @@ input:checked + .toggle-bg {
   top: 15%;
 }
 
+.-top-\[4\%\] {
+  top: -4%;
+}
+
+.right-\[1\%\] {
+  right: 1%;
+}
+
 .z-10 {
   z-index: 10;
 }
@@ -2254,6 +2262,10 @@ input:checked + .toggle-bg {
   gap: 1.5rem;
 }
 
+.gap-4 {
+  gap: 1rem;
+}
+
 .-space-x-px > :not([hidden]) ~ :not([hidden]) {
   --tw-space-x-reverse: 0;
   margin-right: calc(-1px * var(--tw-space-x-reverse));
@@ -3020,6 +3032,10 @@ input:checked + .toggle-bg {
   text-align: right;
 }
 
+.align-baseline {
+  vertical-align: baseline;
+}
+
 .align-middle {
   vertical-align: middle;
 }
@@ -3362,6 +3378,10 @@ input:checked + .toggle-bg {
 .text-yellow-400 {
   --tw-text-opacity: 1;
   color: rgb(227 160 8 / var(--tw-text-opacity));
+}
+
+.text-\[currentColor\] {
+  color: currentColor;
 }
 
 .underline {
