@@ -27,8 +27,8 @@ inbound_order_blueprint = Blueprint(
 @inbound_order_blueprint.route("/", methods=["GET"])
 @login_required
 def get_all():
-    form_create: f.NewInboundOrderForm = f.NewInboundOrderForm()
-    form_edit: f.InboundOrderForm = f.InboundOrderForm()
+    form_create = f.InboundOrderUpdateForm()
+    form_edit = f.InboundOrderUpdateForm()
 
     q = request.args.get("q", type=str, default=None)
     current_inbound_uuid = request.args.get(
@@ -97,7 +97,7 @@ def get_all():
 @inbound_order_blueprint.route("/create", methods=["POST"])
 @login_required
 def create():
-    form: f.NewInboundOrderForm = f.NewInboundOrderForm()
+    form = f.InboundOrderCreateForm()
     if not form.validate_on_submit():
         flash(f"Inbound order validation failed: {form.errors}", "danger")
         log(log.INFO, "Inbound order validation failed: [%s]", form.errors)
@@ -173,7 +173,7 @@ def create():
 @inbound_order_blueprint.route("/save", methods=["POST"])
 @login_required
 def save():
-    form: f.InboundOrderForm = f.InboundOrderForm()
+    form = f.InboundOrderUpdateForm()
     if form.validate_on_submit():
         inbound_order = db.session.scalar(
             m.InboundOrder.select().where(
@@ -212,18 +212,17 @@ def save():
             flash("Cannot save inbound order data", "danger")
             return redirect(url_for("inbound_order.get_all"))
 
-        inbound_order.active_date = datetime.datetime.strptime(
-            form.active_date.data, "%m/%d/%Y"
-        )
+        inbound_order.active_date = form.active_date.data
         inbound_order.active_time = form.active_time.data
         inbound_order.order_title = form.order_title.data
-        inbound_order.delivery_date = datetime.datetime.strptime(
-            form.delivery_date.data, "%m/%d/%Y"
-        )
+        inbound_order.delivery_date = form.delivery_date.data
+
         inbound_order.supplier = supplier
         inbound_order.warehouse = warehouse
 
-        product_quantity_groups = s.ProductQuantityGroups.parse_raw(form.products.data)
+        product_quantity_groups = s.ProductQuantityGroups.parse_raw(
+            form.product_groups.data
+        )
 
         db.session.execute(
             m.ProductQuantityGroup.delete().where(
@@ -261,8 +260,6 @@ def save():
                 return redirect(url_for("inbound_order.get_all"))
 
             product_quantity_group = m.ProductQuantityGroup(
-                inbound_order=inbound_order,
-                product=product,
                 warehouse=inbound_order.warehouse,  # TODO maybe we could delete it
                 group=group,
                 quantity=product_quantity_group.quantity,

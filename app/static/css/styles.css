@@ -1123,10 +1123,6 @@ input:checked + .toggle-bg {
   left: 0.75rem;
 }
 
-.left-\[95\%\] {
-  left: 95%;
-}
-
 .left-\[97\%\] {
   left: 97%;
 }
@@ -1195,6 +1191,22 @@ input:checked + .toggle-bg {
   top: 15%;
 }
 
+.left-\[95\%\] {
+  left: 95%;
+}
+
+.left-\[90\%\] {
+  left: 90%;
+}
+
+.left-\[92\%\] {
+  left: 92%;
+}
+
+.left-\[94\%\] {
+  left: 94%;
+}
+
 .z-10 {
   z-index: 10;
 }
@@ -1253,6 +1265,22 @@ input:checked + .toggle-bg {
 
 .col-span-6 {
   grid-column: span 6 / span 6;
+}
+
+.col-span-8 {
+  grid-column: span 8 / span 8;
+}
+
+.col-start-1 {
+  grid-column-start: 1;
+}
+
+.col-end-12 {
+  grid-column-end: 12;
+}
+
+.col-end-13 {
+  grid-column-end: 13;
 }
 
 .row-span-2 {
@@ -3349,6 +3377,11 @@ input:checked + .toggle-bg {
   color: rgb(240 82 82 / var(--tw-text-opacity));
 }
 
+.text-red-600 {
+  --tw-text-opacity: 1;
+  color: rgb(224 36 36 / var(--tw-text-opacity));
+}
+
 .text-teal-700 {
   --tw-text-opacity: 1;
   color: rgb(3 102 114 / var(--tw-text-opacity));
@@ -3971,11 +4004,6 @@ input[type="radio"]:checked {
 .hover\:bg-neutral-200:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(229 229 229 / var(--tw-bg-opacity));
-}
-
-.hover\:bg-red-700:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(200 30 30 / var(--tw-bg-opacity));
 }
 
 .hover\:bg-red-800:hover {

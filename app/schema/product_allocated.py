@@ -2,6 +2,7 @@ from datetime import date, datetime
 from pydantic import BaseModel, validator, Field
 
 from .product import Product
+from .product_group import ProductGroupOut
 
 
 class ProductAllocated(BaseModel):
@@ -29,6 +30,9 @@ class ProductAllocatedOut(BaseModel):
     shelf_life_start: date = Field(alias="shelfLifeStart")
     shelf_life_end: date = Field(alias="shelfLifeEnd")
     product: Product
+    product_quantity_groups: list[ProductGroupOut] = Field(
+        alias="productQuantityGroups"
+    )
 
     class Config:
         orm_mode = True

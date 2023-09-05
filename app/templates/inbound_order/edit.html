@@ -3,13 +3,43 @@
 <div id="edit-inbound-order-modal" tabindex="-1" aria-hidden="true"
   class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
   <div class="relative w-full max-w-3xl max-h-full">
+    <div class="invisible group-quantity-item col-start-1 col-end-13 grid grid-cols-12 gap-5">
+      <div class="quantity-group-delete-button absolute left-[95%] bg-red-600 hover:bg-red-800 rounded-lg cursor-pointer">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+          <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+          <g id="SVGRepo_iconCarrier"> 
+            <path d="M6.99486 7.00636C6.60433 7.39689 6.60433 8.03005 6.99486 8.42058L10.58 12.0057L6.99486 15.5909C6.60433 15.9814 6.60433 16.6146 6.99486 17.0051C7.38538 17.3956 8.01855 17.3956 8.40907 17.0051L11.9942 13.4199L15.5794 17.0051C15.9699 17.3956 16.6031 17.3956 16.9936 17.0051C17.3841 16.6146 17.3841 15.9814 16.9936 15.5909L13.4084 12.0057L16.9936 8.42059C17.3841 8.03007 17.3841 7.3969 16.9936 7.00638C16.603 6.61585 15.9699 6.61585 15.5794 7.00638L11.9942 10.5915L8.40907 7.00636C8.01855 6.61584 7.38538 6.61584 6.99486 7.00636Z" fill="#ffffff"></path> 
+          </g>
+        </svg>
+      </div>
+      <div class="col-span-6">
+        <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label>
+        <select type="text" name="add_group" placeholder="Group" required class="inbound-order-edit-add-group shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" >
+          <option value="" disabled selected>Select group</option>
+          {% for group in groups %}
+          <option value="{{ group.id }}">{{ group.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-span-6">
+        <label for="status" id="inbound-order-edit-add-quantity-label" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
+        <input type="number" name="add_quantity" placeholder="Quantity" required class="inbound-order-edit-add-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" >
+      </div>  
+    </div>
+
+    <button type="button" class="inbound-order-add-product-group-btn col-start-1 col-end-13 inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300 justify-center w-full invisible">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+        <path d="M64 80c-8.8 0-16 7.2-16 16V416c0 8.8 7.2 16 16 16H384c8.8 0 16-7.2 16-16V96c0-8.8-7.2-16-16-16H64zM0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96zM200 344V280H136c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H248v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"></path>
+      </svg>
+    </button>
     <!-- Modal content -->
     <form action="{{url_for('inbound_order.save')}}" id="inbound-order-edit-form" method="post"
       class="relative bg-white rounded-lg shadow dark:bg-gray-700">
       {{ form_edit.hidden_tag() }}
-      <input type="hidden" name="products" id="inbound-order-edit-products" value="" />
+      <input type="hidden" name="product_groups" id="inbound-order-edit-product-quantities" value="" />
       <input type="hidden" name="next_url" id="inbound-order-edit-next_url" value="" />
-      <input type="hidden" name="inbound_order_uuid" id="inbound-order-uuid" value="" />
+      <input type="hidden" name="inbound_order_uuid" id="inbound-order-uuid" />
       <!-- Modal header -->
       <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Edit inbound order </h3>
@@ -73,10 +103,7 @@
                       clip-rule="evenodd"></path>
                   </svg>
                 </div>
-                <input datepicker datepicker-autohide name="delivery_date" id="inbound-order-edit-delivery-date"
-                  type="text"
-                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  placeholder="Select date">
+                <input datepicker datepicker-autohide name="delivery_date" id="inbound-order-edit-delivery-date" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date">
               </div>
             </div>
           </div>
@@ -136,59 +163,10 @@
                   </div> 
               </div>
             </div>
+            
           </div>
+          
         </div>
-      <div id="inbound-order-edit-add-container">
-        <div class="inbound-order-edit-add-item p-6 space-y-6 border-t relative">
-          <div class="product-allocated-delete-button absolute top-[15%] left-[95%] bg-red-600 hover:bg-red-800 rounded-lg cursor-pointer invisible">
-            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-              <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-              <g id="SVGRepo_iconCarrier"> 
-                <path d="M6.99486 7.00636C6.60433 7.39689 6.60433 8.03005 6.99486 8.42058L10.58 12.0057L6.99486 15.5909C6.60433 15.9814 6.60433 16.6146 6.99486 17.0051C7.38538 17.3956 8.01855 17.3956 8.40907 17.0051L11.9942 13.4199L15.5794 17.0051C15.9699 17.3956 16.6031 17.3956 16.9936 17.0051C17.3841 16.6146 17.3841 15.9814 16.9936 15.5909L13.4084 12.0057L16.9936 8.42059C17.3841 8.03007 17.3841 7.3969 16.9936 7.00638C16.603 6.61585 15.9699 6.61585 15.5794 7.00638L11.9942 10.5915L8.40907 7.00636C8.01855 6.61584 7.38538 6.61584 6.99486 7.00636Z" fill="#ffffff"></path> 
-              </g>
-            </svg>
-          </div>
-          <div class="grid grid-cols-12 gap-5" id="inbound-order-edit-item">
-            <div class="col-span-6 sm:col-span-4">
-              <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product</label>
-              <select type="text" name="add_product" id="inbound-order-edit-add-product-1st-item"
-                class="inbound-order-edit-add-product shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="Product" required>
-                <option value="" disabled selected>Select product</option>
-                {% for product in products %}
-                <option value="{{ product.id }}">{{ product.name }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="col-span-6 sm:col-span-4">
-              <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label>
-              <select type="text" name="add_group"
-                class="inbound-order-edit-add-group shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="Group" required>
-                <option value="" disabled selected>Select group</option>
-                {% for group in groups %}
-                <option value="{{ group.id }}">{{ group.name }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="col-span-6 sm:col-span-4">
-              <label for="status" id="inbound-order-edit-add-quantity-label" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
-              <input type="text" name="add_quantity"
-                class="inbound-order-edit-add-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="Quantity" required>
-            </div>       
-          </div>
-        </div>
-        <div class="p-6 space-y-6 border-t flex justify-center">
-          <button type="button" data-target="" id="inbound-order-add-item-btn"
-            class="inbound-order-add-item-btn inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300 justify-center w-full">
-            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
-              <path d="M64 80c-8.8 0-16 7.2-16 16V416c0 8.8 7.2 16 16 16H384c8.8 0 16-7.2 16-16V96c0-8.8-7.2-16-16-16H64zM0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96zM200 344V280H136c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H248v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"></path>
-            </svg>
-          </button>
-      </div>
-      </div>
       
       <!-- Modal footer -->
       <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
