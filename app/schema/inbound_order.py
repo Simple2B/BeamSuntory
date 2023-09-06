@@ -16,6 +16,7 @@ class InboundOrderStatus(Enum):
 
 class InboundOrder(BaseModel):
     id: int
+    uuid: str
     order_id: str = Field(alias="orderId")
     active_date: date = Field(alias="activeDate")
     active_time: str = Field(alias="activeTime")

@@ -103,6 +103,7 @@ def populate_one_user(client: FlaskClient):
 
 @pytest.fixture
 def mg_g_populate(client: FlaskClient):
+    # TODO refactoring
     master_groups = ["Country", "Brand"]
     groups = {"Canada": "1", "JB": "2", "Bombay": "2"}
     create_default_divisions()
@@ -223,10 +224,9 @@ def mg_g_populate(client: FlaskClient):
     ).save(False)
 
     m.InboundOrder(
-        order_id=f"IO-BEAM-{int(datetime.datetime.now().timestamp())}",
         active_date=datetime.datetime.strptime("07/20/2023", "%m/%d/%Y"),
         active_time="12:00 AM",
-        order_title="Inbound Order test",
+        title="Inbound Order test",
         delivery_date=datetime.datetime.strptime("07/19/2023", "%m/%d/%Y"),
         status=s.InboundOrderStatus.delivered,
         supplier_id=1,
@@ -277,7 +277,7 @@ def mg_g_populate(client: FlaskClient):
 
     sr_atp = m.ShipRequest(
         order_numb="Order-12345-Assigned-to-pickup",
-        status=s.ShipRequestStatus.assigned.name,
+        status=s.ShipRequestStatus.assigned,
         store_category_id=1,
         order_type="Regular",
         store_id=1,
@@ -287,7 +287,7 @@ def mg_g_populate(client: FlaskClient):
 
     m.ShipRequest(
         order_numb="Order-12345-In-transit",
-        status=s.ShipRequestStatus.in_transit.name,
+        status=s.ShipRequestStatus.in_transit,
         store_category_id=1,
         order_type="Regular",
         store_id=1,
@@ -296,7 +296,7 @@ def mg_g_populate(client: FlaskClient):
 
     m.ShipRequest(
         order_numb="Order-12345-Waiting-for-warehouse-manager",
-        status=s.ShipRequestStatus.waiting_for_warehouse.name,
+        status=s.ShipRequestStatus.waiting_for_warehouse,
         store_category_id=1,
         order_type="Regular",
         store_id=1,
@@ -304,54 +304,55 @@ def mg_g_populate(client: FlaskClient):
     ).save(False)
 
     m.InboundOrder(
-        order_id="IO-BEAM-A-t-p",
         active_date=datetime.datetime.strptime("07/20/2023", "%m/%d/%Y"),
         active_time="12:00 AM",
-        order_title="Inbound Order Assigned to pickup",
+        title="Inbound Order Assigned to pickup",
         delivery_date=datetime.datetime.strptime("07/19/2023", "%m/%d/%Y"),
-        status=s.InboundOrderStatus.assigned.name,
+        status=s.InboundOrderStatus.assigned,
         supplier_id=1,
         warehouse_id=1,
     ).save(False)
 
-    io_it = m.InboundOrder(
-        order_id="IO-BEAM-I-t",
+    inbound_order = m.InboundOrder(
         active_date=datetime.datetime.strptime("07/20/2023", "%m/%d/%Y"),
         active_time="12:00 AM",
-        order_title="Inbound Order In transit",
+        title="Inbound Order In transit",
         delivery_date=datetime.datetime.strptime("07/19/2023", "%m/%d/%Y"),
-        status=s.InboundOrderStatus.in_transit.name,
+        status=s.InboundOrderStatus.in_transit,
         supplier_id=1,
         warehouse_id=1,
     )
-    io_it.save(False)
-
-    # NOTE actually save everything above
-    db.session.commit()
 
     m.WarehouseProduct(
         product_id=populate_test_product.id,
         group_id=1,
         product_quantity=100,
         warehouse_id=jw.id,
-    ).save()
+    ).save(False)
 
-    m.ProductQuantityGroup(
-        product_id=populate_test_product.id,
-        warehouse_id=jw.id,
-        group_id=1,
-        quantity=100,
-        inbound_order_id=io_it.id,
-        shelf_life_start=datetime.datetime.now(),
-        shelf_life_end=datetime.datetime.now(),
-    ).save()
+    inbound_order.products_allocated.append(
+        m.ProductAllocated(
+            product=populate_test_product,
+            quantity=100,
+            shelf_life_start=datetime.datetime.now().date(),
+            shelf_life_end=datetime.datetime.now().date(),
+            product_quantity_groups=[
+                m.ProductQuantityGroup(
+                    group_id=1,
+                    quantity=100,
+                )
+            ],
+        )
+    )
+    inbound_order.save(False)
 
     m.Cart(
-        product_id=populate_test_product.id,
+        product=populate_test_product,
         quantity=11,
         user_id=1,
         group="Canada",
         ship_request_id=sr_atp.id,
-    ).save()
+    ).save(False)
 
+    db.session.commit()
     yield client

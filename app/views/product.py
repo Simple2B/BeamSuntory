@@ -400,42 +400,40 @@ def save():
         return redirect(url_for("product.get_all"))
 
 
+# TODO brainstorm
 @product_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
 def delete(id: int):
-    prod: m.Product = db.session.scalar(m.Product.select().where(m.Product.id == id))
-    if not prod:
+    product: m.Product = db.session.get(m.Product, id)
+    if not product:
         log(log.INFO, "There is no product with id: [%s]", id)
         flash("There is no such product", "danger")
         return "no product", 404
-
-    # NOTE should we allow to delete product if it is in product_group, warehouse_product, carts, product_quantity_group
-    product_warehouses = db.session.execute(
-        m.WarehouseProduct.select().where(m.WarehouseProduct.product_id == prod.id)
-    ).scalars()
-    product_carts = db.session.execute(
-        m.Cart.select().where(m.Cart.product_id == prod.id)
-    ).scalars()
-    product_groups = db.session.execute(
-        m.ProductGroup.select().where(m.ProductGroup.product_id == prod.id)
-    ).scalars()
-    product_io = db.session.execute(
-        m.ProductQuantityGroup.select().where(
-            m.ProductQuantityGroup.product_id == prod.id
+    db.session.execute(
+        m.WarehouseProduct.delete().where(m.WarehouseProduct.product == product)
+    )
+    db.session.execute(m.Cart.delete().where(m.Cart.product == product))
+    db.session.execute(
+        m.ProductGroup.delete().where(m.ProductGroup.product_id == product.id)
+    )
+    db.session.execute(
+        m.ProductQuantityGroup.delete().where(
+            m.ProductAllocated.product_quantity_groups.any(
+                m.ProductAllocated.product == product
+            )
         )
-    ).scalars()
-
-    for prod_conn in [product_warehouses, product_carts, product_groups, product_io]:
-        for pw in prod_conn:
-            db.session.delete(pw)
-
-    db.session.delete(prod)
+    )
+    db.session.execute(
+        m.ProductAllocated.delete().where(m.ProductAllocated.product == product)
+    )
+    db.session.delete(product)
     db.session.commit()
-    log(log.INFO, "Product deleted. Product: [%s]", prod)
+    log(log.INFO, "Product deleted. Product: [%s]", product)
     flash("Product deleted!", "success")
     return "ok", 200
 
 
+# TODO refactor
 @product_blueprint.route("/sort", methods=["GET", "POST"])
 @login_required
 def sort():

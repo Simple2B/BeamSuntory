@@ -24,8 +24,8 @@ pickup_inbound_blueprint = Blueprint(
 @pickup_inbound_blueprint.route("/", methods=["GET"])
 @login_required
 def get_all():
-    form_create: f.NewInboundOrderForm = f.NewInboundOrderForm()
-    form_edit: f.InboundOrderForm = f.InboundOrderForm()
+    form_create = f.InboundOrderCreateForm()
+    form_edit = f.InboundOrderUpdateForm()
     form_sort: f.SortByStatusInboundOrderForm = f.SortByStatusInboundOrderForm()
 
     q = request.args.get("q", type=str, default=None)
@@ -96,8 +96,8 @@ def sort():
         flash("Sort without any arguments", "danger")
         return redirect(url_for("pickup_inbound.get_all"))
     form_sort: f.SortByStatusInboundOrderForm = f.SortByStatusInboundOrderForm()
-    form_create: f.NewInboundOrderForm = f.NewInboundOrderForm()
-    form_edit: f.InboundOrderForm = f.InboundOrderForm()
+    form_create = f.InboundOrderCreateForm()
+    form_edit = f.InboundOrderUpdateForm()
     if not form_sort.validate_on_submit() and request.method == "POST":
         # NOTE: this is drop filters action
         return redirect(url_for("pickup_inbound.get_all"))
