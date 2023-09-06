@@ -114,12 +114,14 @@ export const initEditOrderModal = () => {
           const productAllocatedQuantityDiv = currentProductAllocatedContainer.querySelector('.inbound-order-edit-check-quantity') as HTMLDivElement;
           const productAllocatedShelfLifeFromDiv = currentProductAllocatedContainer.querySelector('.inbound-order-edit-shelf-life-from') as HTMLDivElement;
           const productAllocatedShelfLifeToDiv = currentProductAllocatedContainer.querySelector('.inbound-order-edit-shelf-life-to') as HTMLDivElement;
+          const productAllocatedTotalQuantityDiv = currentProductAllocatedContainer.querySelector('.inbound-order-edit-total-quantity') as HTMLDivElement;
 
           productAllocatedIdInput.value = productAllocated.id.toString();
 
           productAllocatedNameDiv.innerHTML = productAllocated.product.name;
           productAllocatedQuantityDiv.innerHTML = productAllocated.quantity.toString();
           productAllocatedQuantityDiv.setAttribute('data-quantity', productAllocated.quantity.toString());
+          productAllocatedTotalQuantityDiv.innerHTML = productAllocated.quantity.toString();
           productAllocatedShelfLifeFromDiv.innerHTML = getDatepickerDateFormat(productAllocated.shelfLifeStart);
           productAllocatedShelfLifeToDiv.innerHTML = getDatepickerDateFormat(productAllocated.shelfLifeEnd);
 
@@ -148,6 +150,16 @@ export const initEditOrderModal = () => {
     // submit update order
     const buttonSave = document.querySelector('#inbound-order-save-products-btn') as HTMLButtonElement;
     buttonSave.addEventListener('click', () => {
+      const orderStatusSelect = document.querySelector('#inbound-order-edit-status') as HTMLSelectElement;
+
+      if (orderStatusSelect.value === 'Assigned to pickup') {
+        const isValid = validateAssignedToPickUpForm();
+        if (!isValid) {
+          alert('Available Quantity is not valid');
+          return; 
+        }                
+      }     
+
       const productAllocatedGroupsContainers = document.querySelectorAll('.product-allocated-groups-container') as NodeListOf<HTMLDivElement>;
       const productGroups: IProductGroupCreate[] = [];
 
@@ -185,4 +197,14 @@ export const initEditOrderModal = () => {
       const buttonSubmit = document.querySelector('#inbound-order-submit-btn') as HTMLButtonElement;
       buttonSubmit.click();
     });
+}
+
+const validateAssignedToPickUpForm = () => {  
+  const productAllocatedQuantity = document.querySelectorAll('.inbound-order-edit-check-quantity')
+
+  const isUsedAllProducts = Array.from(productAllocatedQuantity).every(quantityNode => {
+    const quantity = parseInt(quantityNode.innerHTML);
+    return quantity === 0;
+  });
+  return isUsedAllProducts;
 }
