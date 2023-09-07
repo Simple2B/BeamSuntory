@@ -104,7 +104,7 @@ def populate_one_user(client: FlaskClient):
 @pytest.fixture
 def mg_g_populate(client: FlaskClient):
     # TODO refactoring
-    master_groups = ["Country", "Brand"]
+    master_groups = ["Country", "Brand", s.ProductMasterGroupMandatory.events.value]
     groups = {"Canada": "1", "JB": "2", "Bombay": "2"}
     create_default_divisions()
     role = db.session.execute(
