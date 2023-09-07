@@ -3,6 +3,7 @@ import { IInboundOrderBase } from './types';
 import { initAddInboundOrderModal } from './add';
 import { initViewInboundOrderModal } from './view';
 import {initEditOrderModal} from './edit';
+import Datepicker from 'flowbite-datepicker/Datepicker';
 
 initTE({ Input, Timepicker })
 
@@ -93,6 +94,7 @@ const createAllocationProductContainer = (e: MouseEvent) => {
     const productsAllocatedContainer = btn.parentNode.parentNode as HTMLDivElement;
 
     productsAllocatedContainer.insertBefore(productAllocatedNew, btn.parentNode);
+    addDateRangePicker();
 }
 
 // # NOTE: depends on flash from create route on inbound_order_blueprint
@@ -113,3 +115,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Open current order
     openCurrentOrder();
 });
+
+const addDateRangePicker = () => {
+    const shelfLifeStartElements = document.querySelectorAll('#datepickerEl-start-add-1');
+    const shelfLifeEndElements = document.querySelectorAll('#datepickerEl-end-add-1');
+    const currentShelfLifeStart = shelfLifeStartElements[shelfLifeStartElements.length - 1] as HTMLInputElement;
+    const currentShelfLifeEnd = shelfLifeEndElements[shelfLifeEndElements.length - 1] as HTMLInputElement;
+
+    const datepickerStart = new Datepicker(currentShelfLifeStart, {})
+    const datepickerEnd = new Datepicker(currentShelfLifeEnd, {})
+}  
