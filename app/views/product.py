@@ -57,11 +57,12 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
                 .select_from(m.Product)
             )
 
-    event_master_group = db.session.scalar(
+    event_master_group: m.MasterGroupProduct = db.session.scalar(
         m.MasterGroupProduct.select().where(
             m.MasterGroupProduct.name == s.ProductMasterGroupMandatory.events.value
         )
     )
+
     if is_events:
         event_sub_groups = db.session.scalars(
             m.GroupProduct.select().where(
@@ -544,7 +545,7 @@ def sort():
             ).scalars(),
             page=products_object["pagination"],
             search_query=products_object["q"],
-            search_query=products_object["is_events"],
+            is_events=products_object["is_events"],
             main_master_groups=products_object["master_groups"],
             product_groups=products_object["product_groups"],
             all_product_groups=products_object["all_product_groups"],

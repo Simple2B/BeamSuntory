@@ -1609,7 +1609,7 @@ function getFilterValues(isChecked: boolean) {
     window.location.href = `${url.href}`
 }
 
-const eventSortToggleButton = document.querySelector('#product-show-events-toggle-btn')
+const eventSortToggleButton: HTMLInputElement = document.querySelector('#product-show-events-toggle-btn')
 eventSortToggleButton.addEventListener('change', () => {
     getFilterValues(eventSortToggleButton.checked)
     console.log(eventSortToggleButton.checked)
