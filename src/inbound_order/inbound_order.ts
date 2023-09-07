@@ -14,6 +14,12 @@ $buttonElements.forEach((e) =>
     })
 );
 
+const pickerInline = document.querySelector('#timepicker-inline-12')
+const timepickerMaxMin = new Timepicker(pickerInline, {
+    format12: true,
+    inline: true,
+})
+
 // search flow
 const searchInput: HTMLInputElement = document.querySelector('#table-search-inbound-orders');
 const searchInputButton = document.querySelector('#table-search-inbound-order-button');
