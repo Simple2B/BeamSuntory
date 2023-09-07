@@ -24,7 +24,7 @@
       </div>
       <div class="col-span-6">
         <label for="status" id="inbound-order-edit-add-quantity-label" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
-        <input type="number" name="add_quantity" placeholder="Quantity" required class="inbound-order-edit-add-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" >
+        <input type="number" name="add_quantity" placeholder="Quantity" required min="0" class="inbound-order-edit-add-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" >
       </div>  
     </div>
 
@@ -139,16 +139,16 @@
         </div>
       </div>
         <div class="p-6 space-y-6 border-t" id="inbound-order-edit-check-container">
-          <div class="grid grid-cols-12 gap-5 product-allocated-groups-container">
+          <div class="grid grid-cols-12 gap-5 product-allocated-groups-container items-end">
             <input class="product-allocated-id" hidden/>
-            <div class="col-span-6 sm:col-span-3">
+            <div class="col-span-4 sm:col-span-2">
               <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product to allocate</label>
               <div type="text" name="check_product"
                 class="inbound-order-edit-check-product shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 placeholder="Product">
               </div>
             </div>
-            <div class="col-span-6 sm:col-span-3">
+            <div class="col-span-4 sm:col-span-2">
               <label for="status" id="inbound-order-edit-check-quantity-label" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available Quantity</label>
               <div type="text" name="check_quantity" class="inbound-order-edit-check-quantity-hidden" hidden></div>
               <div type="text" name="check_quantity_display"
@@ -156,7 +156,15 @@
                 placeholder="Quantity">
               </div>
             </div>
-            <div class="col-span-6 sm:col-span-6">
+            <div class="col-span-4 sm:col-span-2">
+              <label for="status" id="inbound-order-edit-check-quantity-label" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Total Quantity</label>
+              <div type="text" name="check_quantity" class="inbound-order-edit-check-quantity-hidden" hidden></div>
+              <div type="text" name="check_quantity_display"
+                class="inbound-order-edit-total-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                placeholder="Quantity">
+              </div>
+            </div>
+            <div class="col-span-12 sm:col-span-6">
               <label for="shelf_life_start" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Shelf
                 life</label>
               <div class="flex items-center">                

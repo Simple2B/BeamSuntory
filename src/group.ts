@@ -38,6 +38,11 @@ const modalOptions: ModalOptions = {
 const modal: ModalInterface = new Modal($modalElement, modalOptions);
 const addModal: ModalInterface = new Modal($addGroupModalElement, modalOptions);
 
+const closingEditModalButton = document.getElementById('edit-stock-target-group-modal-close-btn')
+closingEditModalButton.addEventListener('click', () => {
+  modal.hide();
+})
+
 const $buttonElements = document.querySelectorAll('.group-edit-button');
 $buttonElements.forEach(e =>
   e.addEventListener('click', () => {

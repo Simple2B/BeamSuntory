@@ -72,6 +72,11 @@ if ($buttonClose) {
     })
 }
 
+const closingEditModalButton = document.querySelector('#edit-current-user-modal-close-btn')
+closingEditModalButton.addEventListener('click', () => {
+    modal.hide()
+})
+
 // closing add user modal
 const addModalCloseBtn = document.querySelector('#modalAddCloseButton')
 if (addModalCloseBtn) {
