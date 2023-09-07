@@ -1,18 +1,36 @@
-from datetime import datetime, date
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, Field
 
 
 class ProductQuantityGroup(BaseModel):
-    product_id: int
-    group_id: int
+    product_id: int = Field(alias="productId")
+    group_id: int = Field(alias="groupId")
     quantity: int
-    shelf_life_start: date
-    shelf_life_end: date
 
-    @validator("shelf_life_start", "shelf_life_end", pre=True)
-    def validate_start_date(cls, value):
-        return datetime.strptime(value, "%m/%d/%Y").date()
+    class Config:
+        allow_population_by_field_name = True
 
 
 class ProductQuantityGroups(BaseModel):
     __root__: list[ProductQuantityGroup]
+
+
+class ProductAllocatedGroupCreate(BaseModel):
+    group_id: int = Field(alias="groupId")
+    quantity: int = Field(ge=0)
+
+    class Config:
+        allow_population_by_field_name = True
+
+
+class ProductQuantityGroupCreate(BaseModel):
+    product_allocated_id: int = Field(alias="productAllocatedId")
+    product_allocated_groups: list[ProductAllocatedGroupCreate] = Field(
+        alias="productAllocatedGroups"
+    )
+
+    class Config:
+        allow_population_by_field_name = True
+
+
+class ProductQuantityGroupsCreate(BaseModel):
+    __root__: list[ProductQuantityGroupCreate]

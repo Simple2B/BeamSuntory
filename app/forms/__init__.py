@@ -27,8 +27,8 @@ from .ship_request import (
 from .supplier import SupplierForm, NewSupplierForm
 from .cart import CartForm, NewCartForm
 from .inbound_order import (
-    InboundOrderForm,
-    NewInboundOrderForm,
+    InboundOrderCreateForm,
+    InboundOrderUpdateForm,
     SortByStatusInboundOrderForm,
 )
 from .store import StoreForm, NewStoreForm

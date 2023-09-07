@@ -6,17 +6,32 @@ from wtforms.validators import DataRequired, Optional, Regexp, AnyOf
 from app import schema as s
 
 
-class InboundOrderForm(FlaskForm):
+class InboundOrderBaseForm(FlaskForm):
     next_url = StringField("next_url")
-    inbound_order_uuid = StringField("inbound_order_uuid", [DataRequired()])
-    active_date = DateField("Active date", [DataRequired()])
-    delivery_date = DateField("Delivery date", [DataRequired()])
-    active_time = StringField("Active time", [DataRequired()])  # datetime
     order_title = StringField("Order title", [DataRequired()])
-    status = StringField("Status", [DataRequired()])
+    delivery_date = DateField("Delivery date", [DataRequired()], format="%m/%d/%Y")
+    active_date = DateField("Active date", [DataRequired()], format="%m/%d/%Y")
+    active_time = StringField(
+        "Active time",
+        [
+            DataRequired(),
+            Regexp(
+                r"((1[0-2]|0?[1-9]):([0-5][0-9]) ?([AaPp][Mm]))",
+                message="Wrong time format",
+            ),
+        ],
+    )
+
     supplier_id = IntegerField("Supplier ID", [DataRequired()])
     warehouse_id = IntegerField("Warehouse ID", [DataRequired()])
+
+
+class InboundOrderCreateForm(InboundOrderBaseForm):
     products = StringField("Products", [DataRequired()])
+
+
+class InboundOrderUpdateForm(InboundOrderBaseForm):
+    inbound_order_uuid = StringField("inbound_order_uuid", [DataRequired()])
     status = StringField(
         "status",
         [
@@ -30,25 +45,7 @@ class InboundOrderForm(FlaskForm):
             ),
         ],
     )
-
-
-class NewInboundOrderForm(FlaskForm):
-    delivery_date = DateField("Delivery date", [DataRequired()], format="%m/%d/%Y")
-    active_date = DateField("Active date", [DataRequired()], format="%m/%d/%Y")
-    active_time = StringField(
-        "Active time",
-        [
-            DataRequired(),
-            Regexp(
-                r"((1[0-2]|0?[1-9]):([0-5][0-9]) ?([AaPp][Mm]))",
-                message="Wrong time format",
-            ),
-        ],
-    )
-    order_title = StringField("Order title", [DataRequired()])
-    supplier_id = IntegerField("Supplier ID", [DataRequired()])
-    warehouse_id = IntegerField("Warehouse ID", [DataRequired()])
-    products = StringField("Products", [DataRequired()])
+    product_groups = StringField("Product Groups", [DataRequired()])
 
 
 class SortByStatusInboundOrderForm(FlaskForm):

@@ -26,8 +26,8 @@ incoming_stock_blueprint = Blueprint(
 @login_required
 def get_all():
     form_sort: f.SortByStatusInboundOrderForm = f.SortByStatusInboundOrderForm()
-    form_create: f.NewInboundOrderForm = f.NewInboundOrderForm()
-    form_edit: f.InboundOrderForm = f.InboundOrderForm()
+    form_create = f.InboundOrderCreateForm()
+    form_edit = f.InboundOrderUpdateForm()
     filtered = False
 
     q = request.args.get("q", type=str, default=None)
@@ -209,8 +209,8 @@ def sort():
         flash("Sort without any arguments", "danger")
         return redirect(url_for("incoming_stock.get_all"))
     form_sort: f.SortByStatusInboundOrderForm = f.SortByStatusInboundOrderForm()
-    form_create: f.NewInboundOrderForm = f.NewInboundOrderForm()
-    form_edit: f.InboundOrderForm = f.InboundOrderForm()
+    form_create = f.InboundOrderCreateForm()
+    form_edit = f.InboundOrderUpdateForm()
     if not form_sort.validate_on_submit() and request.method == "POST":
         # NOTE: this is drop filters action
         return redirect(url_for("incoming_stock.get_all"))

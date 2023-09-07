@@ -177,33 +177,24 @@ def save():
 @warehouse_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
 def delete(id: int):
-    w: m.Warehouse = db.session.scalar(m.Warehouse.select().where(m.Warehouse.id == id))
-    if not w:
+    warehouse: m.Warehouse = db.session.get(m.Warehouse, id)
+    if not warehouse:
         log(log.INFO, "There is no warehouse with id: [%s]", id)
         flash("There is no such warehouse", "danger")
         return "no warehouse", 404
 
-    delete_w = sa.delete(m.Warehouse).where(m.Warehouse.id == id)
     # TODO: replace with cascade
-    product_warehouses = db.session.execute(
-        m.WarehouseProduct.select().where(m.WarehouseProduct.warehouse_id == w.id)
-    ).scalars()
-    inbound_orders = db.session.execute(
-        m.InboundOrder.select().where(m.InboundOrder.warehouse_id == w.id)
-    ).scalars()
-    product_io = db.session.execute(
-        m.ProductQuantityGroup.select().where(
-            m.ProductQuantityGroup.warehouse_id == w.id
+    db.session.execute(
+        m.WarehouseProduct.delete().where(
+            m.WarehouseProduct.warehouse_id == warehouse.id
         )
-    ).scalars()
+    )
+    db.session.execute(
+        m.InboundOrder.delete().where(m.InboundOrder.warehouse_id == warehouse.id)
+    )
 
-    for prod_conn in [product_warehouses, inbound_orders, product_io]:
-        for pw in prod_conn:
-            db.session.delete(pw)
-
-    db.session.execute(delete_w)
-
+    db.session.delete(warehouse)
     db.session.commit()
-    log(log.INFO, "Warehouse deleted: [%s]", w)
+    log(log.INFO, "Warehouse deleted: [%s]", warehouse)
     flash("Warehouse deleted!", "success")
     return "ok", 200
