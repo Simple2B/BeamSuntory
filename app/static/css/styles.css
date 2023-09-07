@@ -1123,6 +1123,10 @@ input:checked + .toggle-bg {
   left: 0.75rem;
 }
 
+.left-\[95\%\] {
+  left: 95%;
+}
+
 .left-\[97\%\] {
   left: 97%;
 }
@@ -1191,20 +1195,12 @@ input:checked + .toggle-bg {
   top: 15%;
 }
 
-.left-\[95\%\] {
-  left: 95%;
+.-top-\[4\%\] {
+  top: -4%;
 }
 
-.left-\[90\%\] {
-  left: 90%;
-}
-
-.left-\[92\%\] {
-  left: 92%;
-}
-
-.left-\[94\%\] {
-  left: 94%;
+.right-\[1\%\] {
+  right: 1%;
 }
 
 .z-10 {
@@ -1267,16 +1263,12 @@ input:checked + .toggle-bg {
   grid-column: span 6 / span 6;
 }
 
-.col-span-8 {
-  grid-column: span 8 / span 8;
+.col-span-12 {
+  grid-column: span 12 / span 12;
 }
 
 .col-start-1 {
   grid-column-start: 1;
-}
-
-.col-end-12 {
-  grid-column-end: 12;
 }
 
 .col-end-13 {
@@ -2282,6 +2274,10 @@ input:checked + .toggle-bg {
   gap: 1.5rem;
 }
 
+.gap-4 {
+  gap: 1rem;
+}
+
 .-space-x-px > :not([hidden]) ~ :not([hidden]) {
   --tw-space-x-reverse: 0;
   margin-right: calc(-1px * var(--tw-space-x-reverse));
@@ -3048,6 +3044,10 @@ input:checked + .toggle-bg {
   text-align: right;
 }
 
+.align-baseline {
+  vertical-align: baseline;
+}
+
 .align-middle {
   vertical-align: middle;
 }
@@ -3377,11 +3377,6 @@ input:checked + .toggle-bg {
   color: rgb(240 82 82 / var(--tw-text-opacity));
 }
 
-.text-red-600 {
-  --tw-text-opacity: 1;
-  color: rgb(224 36 36 / var(--tw-text-opacity));
-}
-
 .text-teal-700 {
   --tw-text-opacity: 1;
   color: rgb(3 102 114 / var(--tw-text-opacity));
@@ -3395,6 +3390,10 @@ input:checked + .toggle-bg {
 .text-yellow-400 {
   --tw-text-opacity: 1;
   color: rgb(227 160 8 / var(--tw-text-opacity));
+}
+
+.text-\[currentColor\] {
+  color: currentColor;
 }
 
 .underline {

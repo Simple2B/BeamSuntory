@@ -65,5 +65,10 @@ export const initAddInboundOrderModal = () => {
     addModal.show();
   });
 
+  const addModalCloseButton = document.querySelector('#add-modal-btn-hide') as HTMLButtonElement;
+  addModalCloseButton.addEventListener('click', () => {
+    addModal.hide();
+  })
+
   createInboundOrderHandler();
 }

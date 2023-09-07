@@ -13,7 +13,6 @@ $buttonElements.forEach((e) =>
     })
 );
 
-
 // search flow
 const searchInput: HTMLInputElement = document.querySelector('#table-search-inbound-orders');
 const searchInputButton = document.querySelector('#table-search-inbound-order-button');

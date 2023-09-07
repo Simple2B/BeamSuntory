@@ -44,6 +44,11 @@ const addModal: ModalInterface = new Modal(
   modalOptions,
 );
 
+const editGroupProductCloseModalButton: HTMLButtonElement = document.querySelector('#edit-groop-product-modal-close-btn');
+editGroupProductCloseModalButton.addEventListener('click', () => {
+  modal.hide();
+});
+
 const $buttonElements = document.querySelectorAll('.group-product-edit-button');
 $buttonElements.forEach(e =>
   e.addEventListener('click', () => {
