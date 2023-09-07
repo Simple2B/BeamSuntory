@@ -50,4 +50,32 @@ export const initViewInboundOrderModal = () => {
         viewModal.show();
       });
     });
+
+    const viewModalCloseButton = document.querySelector('#view-modal-btn-hide') as HTMLButtonElement;
+    viewModalCloseButton.addEventListener('click', () => {
+      viewModal.hide();
+    })
+
+    
+    const copyLinkButton = document.querySelector('#inbound-order-share') as HTMLButtonElement;
+    copyLinkButton.addEventListener('click', () => {
+      copyCurrentLink()
+    });
+}
+
+const copyCurrentLink = () => {
+  const currentURL = window.location.href;
+  const tempInput = document.createElement('input');
+  tempInput.value = currentURL;
+  document.body.appendChild(tempInput);
+  tempInput.select();
+  document.execCommand('copy');
+  document.body.removeChild(tempInput);
+
+  const linkCopiedPopup = document.querySelector('#link-copied-popup');
+  linkCopiedPopup.classList.remove('invisible');
+  const hidePopupTimeout = setTimeout(() => {
+    linkCopiedPopup.classList.add('invisible');
+    clearTimeout(hidePopupTimeout);
+  }, 1000); 
 }

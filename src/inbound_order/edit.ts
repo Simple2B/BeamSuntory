@@ -89,6 +89,11 @@ export const initEditOrderModal = () => {
     }
     const orderEditModal = new Modal(orderEditModalHTML, modalEditOptions);
 
+    const editModalCloseButton = document.querySelector('#edit-modal-btn-hide') as HTMLButtonElement;
+    editModalCloseButton.addEventListener('click', () => {
+      orderEditModal.hide();
+    })
+
     orderEditButtons.forEach(orderEditButton => {
       const inboundOrderData = JSON.parse(orderEditButton.getAttribute('data-target')) as IInboundOrderOut;
       orderEditButton.addEventListener('click', () => {
