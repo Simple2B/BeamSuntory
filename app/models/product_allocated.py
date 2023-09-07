@@ -5,6 +5,7 @@ from sqlalchemy import orm
 from app import db
 from .utils import ModelMixin
 from .product import Product
+from .product_quantity_group import ProductQuantityGroup
 
 
 class ProductAllocated(db.Model, ModelMixin):
@@ -21,3 +22,5 @@ class ProductAllocated(db.Model, ModelMixin):
     )
     shelf_life_start: orm.Mapped[date] = orm.mapped_column(sa.Date)
     shelf_life_end: orm.Mapped[date] = orm.mapped_column(sa.Date)
+
+    product_quantity_groups: orm.Mapped[ProductQuantityGroup] = orm.relationship()

@@ -333,6 +333,23 @@ const shipModal: ModalInterface = new Modal($shipModalElement, modalShipAssignOp
 const assignModal: ModalInterface = new Modal($assignModalElement, modalShipAssignOptions)
 const eventModal: ModalInterface = new Modal($eventProductModalElement, modalOptions)
 
+const closingAddModalButton = document.getElementById('add-product-modal-close-btn')
+closingAddModalButton.addEventListener('click', () => {
+    addModal.hide()
+})
+const closingAdjustModalButton = document.getElementById('adjust-product-modal-close-btn')
+closingAdjustModalButton.addEventListener('click', () => {
+    adjustModal.hide()
+})
+const closingEditModalButton = document.getElementById('edit-product-modal-close-btn')
+closingEditModalButton.addEventListener('click', () => {
+    editModal.hide()
+})
+const closingViewModalButton = document.getElementById('view-product-modal-close-btn')
+closingViewModalButton.addEventListener('click', () => {
+    viewModal.hide()
+})
+
 const $buttonElements = document.querySelectorAll('.product-edit-button')
 $buttonElements.forEach((e) =>
     e.addEventListener('click', () => {

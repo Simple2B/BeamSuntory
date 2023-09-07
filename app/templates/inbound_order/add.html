@@ -9,9 +9,14 @@
       <input type="hidden" name="products" id="inbound-order-add-products" value="" />
       {{ form_create.hidden_tag() }}
       <!-- Modal header -->
-      <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
-        <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Add new inbound order </h3>
-      </div>
+        <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Add new inbound order </h3>
+          <button id="add-modal-btn-hide" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+            </svg>
+          </button>
+        </div>
       <!-- Modal body -->
       <div class="p-6 space-y-6">
         <div class="grid grid-cols-6 gap-6">
@@ -101,7 +106,15 @@
         </div>
         <div id="inbound-order-add-add-container">
           <div class="pb-6 space-y-6 border-t relative">
-            <span class="product-allocated-delete-button absolute text-red-600 top-[15%] left-[97%] cursor-pointer invisible">&#x2715</span>
+            <div class="product-allocated-delete-button absolute top-[15%] left-[97%] bg-red-600 hover:bg-red-800 rounded-lg cursor-pointer invisible">
+              <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                <g id="SVGRepo_iconCarrier"> 
+                  <path d="M6.99486 7.00636C6.60433 7.39689 6.60433 8.03005 6.99486 8.42058L10.58 12.0057L6.99486 15.5909C6.60433 15.9814 6.60433 16.6146 6.99486 17.0051C7.38538 17.3956 8.01855 17.3956 8.40907 17.0051L11.9942 13.4199L15.5794 17.0051C15.9699 17.3956 16.6031 17.3956 16.9936 17.0051C17.3841 16.6146 17.3841 15.9814 16.9936 15.5909L13.4084 12.0057L16.9936 8.42059C17.3841 8.03007 17.3841 7.3969 16.9936 7.00638C16.603 6.61585 15.9699 6.61585 15.5794 7.00638L11.9942 10.5915L8.40907 7.00636C8.01855 6.61584 7.38538 6.61584 6.99486 7.00636Z" fill="#ffffff"></path> 
+                </g>
+              </svg>
+            </div>
             <div class="grid grid-cols-12 gap-5 product-allocated">
               <div class="col-span-6 sm:col-span-3">
                 <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product</label>
@@ -117,7 +130,7 @@
                 <input type="number" min="1" name="add_quantity" placeholder="Quantity" required class="product-allocated-quantity inbound-order-add-add-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
               </div>
               
-              <div class="inbound-order-add-add-item col-span-6 sm:col-span-6">
+              <div class="inbound-order-add-add-item col-span-12 sm:col-span-6">
                 <label for="shelf_life_start" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Shelf life</label>
                 <div class="flex items-center">
                   <div class="relative">

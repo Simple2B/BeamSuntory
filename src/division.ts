@@ -38,6 +38,11 @@ const modalOptions: ModalOptions = {
 
 const modal: ModalInterface = new Modal($modalElement, modalOptions);
 
+const editDivisionCloseModalButton: HTMLButtonElement = document.querySelector('#edit-division-modal-close-btn');
+editDivisionCloseModalButton.addEventListener('click', () => {
+  modal.hide();
+});
+
 const $buttonElements = document.querySelectorAll('.division-edit-button');
 $buttonElements.forEach(e =>
   e.addEventListener('click', () => {

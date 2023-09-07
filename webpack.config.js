@@ -138,7 +138,7 @@ const cartConfig = {
 
 const inboundOrderConfig = {
     entry: {
-        main: './src/inbound_order.ts',
+        main: './src/inbound_order/inbound_order.ts',
     },
     output: {
         path: path.resolve(__dirname, './app/static'),

@@ -1083,6 +1083,10 @@ input:checked + .toggle-bg {
   top: -35px;
 }
 
+.-top-\[4\%\] {
+  top: -4%;
+}
+
 .bottom-0 {
   bottom: 0px;
 }
@@ -1123,6 +1127,10 @@ input:checked + .toggle-bg {
   left: 0.75rem;
 }
 
+.left-\[95\%\] {
+  left: 95%;
+}
+
 .left-\[97\%\] {
   left: 97%;
 }
@@ -1153,6 +1161,10 @@ input:checked + .toggle-bg {
 
 .right-9 {
   right: 2.25rem;
+}
+
+.right-\[1\%\] {
+  right: 1%;
 }
 
 .right-\[2px\] {
@@ -1235,6 +1247,10 @@ input:checked + .toggle-bg {
   z-index: 999;
 }
 
+.col-span-12 {
+  grid-column: span 12 / span 12;
+}
+
 .col-span-2 {
   grid-column: span 2 / span 2;
 }
@@ -1249,6 +1265,14 @@ input:checked + .toggle-bg {
 
 .col-span-6 {
   grid-column: span 6 / span 6;
+}
+
+.col-start-1 {
+  grid-column-start: 1;
+}
+
+.col-end-13 {
+  grid-column-end: 13;
 }
 
 .row-span-2 {
@@ -3020,6 +3044,10 @@ input:checked + .toggle-bg {
   text-align: right;
 }
 
+.align-baseline {
+  vertical-align: baseline;
+}
+
 .align-middle {
   vertical-align: middle;
 }
@@ -3256,6 +3284,10 @@ input:checked + .toggle-bg {
   color: #ffffff8a;
 }
 
+.text-\[currentColor\] {
+  color: currentColor;
+}
+
 .text-\[rgb\(220\2c 76\2c 100\)\] {
   --tw-text-opacity: 1;
   color: rgb(220 76 100 / var(--tw-text-opacity));
@@ -3347,11 +3379,6 @@ input:checked + .toggle-bg {
 .text-red-500 {
   --tw-text-opacity: 1;
   color: rgb(240 82 82 / var(--tw-text-opacity));
-}
-
-.text-red-600 {
-  --tw-text-opacity: 1;
-  color: rgb(224 36 36 / var(--tw-text-opacity));
 }
 
 .text-teal-700 {

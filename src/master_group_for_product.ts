@@ -43,6 +43,11 @@ const addModal: ModalInterface = new Modal(
   modalOptions,
 );
 
+const editMasterGroupCloseModalButton: HTMLButtonElement = document.querySelector('#edit-product-master-group-modal-close-btn');
+editMasterGroupCloseModalButton.addEventListener('click', () => {
+  modal.hide();
+});
+
 const $buttonElements = document.querySelectorAll(
   '.master-group-product-edit-button',
 );
