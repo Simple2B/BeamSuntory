@@ -85,6 +85,14 @@
         </div>
         <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Stocks Own By Me</span>
       </label>
+      <label class="ml-13 relative inline-flex items-center cursor-pointer">
+        <input id="product-show-events-toggle-btn" {% if is_events %}checked{% endif %} type="checkbox" value=""
+          class="sr-only peer">
+        <div
+          class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-400">
+        </div>
+        <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Events</span>
+      </label>
     </div>
   </form>
   <div class="flex items-center justify-center py-4 bg-white dark:bg-gray-800">
@@ -232,9 +240,17 @@
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
               <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-              <g id="SVGRepo_iconCarrier"> <defs> <style> .cls-1 { fill-rule: evenodd; } </style> </defs> 
-                <path id="accept" class="cls-1" d="M1008,120a12,12,0,1,1,12-12A12,12,0,0,1,1008,120Zm0-22a10,10,0,1,0,10,10A10,10,0,0,0,1008,98Zm-0.08,14.333a0.819,0.819,0,0,1-.22.391,0.892,0.892,0,0,1-.72.259,0.913,0.913,0,0,1-.94-0.655l-2.82-2.818a0.9,0.9,0,0,1,1.27-1.271l2.18,2.184,4.46-7.907a1,1,0,0,1,1.38-.385,1.051,1.051,0,0,1,.36,1.417Z" 
-                  transform="translate(-996 -96)"></path> 
+              <g id="SVGRepo_iconCarrier">
+                <defs>
+                  <style>
+                    .cls-1 {
+                      fill-rule: evenodd;
+                    }
+                  </style>
+                </defs>
+                <path id="accept" class="cls-1"
+                  d="M1008,120a12,12,0,1,1,12-12A12,12,0,0,1,1008,120Zm0-22a10,10,0,1,0,10,10A10,10,0,0,0,1008,98Zm-0.08,14.333a0.819,0.819,0,0,1-.22.391,0.892,0.892,0,0,1-.72.259,0.913,0.913,0,0,1-.94-0.655l-2.82-2.818a0.9,0.9,0,0,1,1.27-1.271l2.18,2.184,4.46-7.907a1,1,0,0,1,1.38-.385,1.051,1.051,0,0,1,.36,1.417Z"
+                  transform="translate(-996 -96)"></path>
               </g>
             </svg>
             Adjust
@@ -248,6 +264,17 @@
             </svg>
             View
           </button>
+          {% if is_events %}
+          <button type="button" data-target="{{product.json}}" data-modal-toggle="event-product-modal"
+            class="product-booking-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M128 0c13.3 0 24 10.7 24 24V64H296V24c0-13.3 10.7-24 24-24s24 10.7 24 24V64h40c35.3 0 64 28.7 64 64v16 48V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V192 144 128C0 92.7 28.7 64 64 64h40V24c0-13.3 10.7-24 24-24zM400 192H48V448c0 8.8 7.2 16 16 16H384c8.8 0 16-7.2 16-16V192zM329 297L217 409c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47 95-95c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"
+                clip-rule="evenodd"></path>
+            </svg>
+            Booking
+          </button>
+          {% endif %}
           <button type="button" data-target="{{product.json}}"
             class="product-edit-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-blue-300 sm:w-auto dark:bg-yellow-400 dark:hover:bg-yellow-500 dark:focus:ring-blue-800">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -381,6 +408,7 @@
 {% include 'product/ship.html' %}
 {% include 'product/assign.html' %}
 {% include 'product/adjust.html' %}
+{% include 'product/event.html' %}
 <!-- prettier-ignore -->
 {% endblock %}
 <!-- prettier-ignore -->

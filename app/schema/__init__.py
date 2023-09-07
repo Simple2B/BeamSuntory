@@ -1,7 +1,7 @@
 # flake8: noqa F401
 from .pagination import Pagination
 from .user import User, UserRole
-from .master_group import MasterGroup
+from .master_group import MasterGroup, MasterGroupMandatory
 from .group import Group
 from .warehouse import Warehouse
 from .inbound_order import InboundOrder, InboundOrderStatus
@@ -14,7 +14,7 @@ from .store import Store
 from .supplier import Supplier
 from .property import Property
 from .group_for_product import GroupProduct
-from .master_group_for_product import MasterGroupProduct
+from .master_group_for_product import MasterGroupProduct, ProductMasterGroupMandatory
 from .product_group import ProductGroup
 from .delivery_agent import DeliveryAgent
 from .cart import Cart
@@ -25,3 +25,4 @@ from .assign import Assign
 from .request_share import RequestShare
 from .store_category import StoreCategory
 from .adjust import Adjust
+from .event import Event

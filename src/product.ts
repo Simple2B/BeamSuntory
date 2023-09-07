@@ -1,5 +1,6 @@
 import { Modal } from 'flowbite'
 import type { ModalOptions, ModalInterface } from 'flowbite'
+import Datepicker from 'flowbite-datepicker/Datepicker'
 
 interface IProduct {
     id: number
@@ -82,7 +83,7 @@ if (filterData !== null || filterData !== undefined) {
         }
 
         productItemTrs.forEach((product: HTMLTableRowElement) => {
-            const referenceTd = product.cells[3]
+            const referenceTd = product.cells[4]
             const productName = product.cells[2].innerText
 
             for (const key in filterData) {
@@ -142,7 +143,7 @@ if (globalFilterMasterGroup && globalFilterMasterGroup.length !== 0) {
             referenceTh.parentNode.insertBefore(productFilterTh, referenceTh.nextSibling)
 
             productItemTrs.forEach((productItem: HTMLTableRowElement) => {
-                const referenceTd = productItem.cells[3]
+                const referenceTd = productItem.cells[4]
                 const productName = productItem.cells[2].innerText
                 const productFilterName = productMgGGlobal[productName][masterGroupName] || '-'
                 const productFilterTd = document.createElement('td')
@@ -204,8 +205,9 @@ checkboxFilterProductMasterGroups.forEach((checkbox) => {
                 productFilterTh.innerHTML = masterGroupName.replace(/_/g, ' ')
                 referenceTh.parentNode.insertBefore(productFilterTh, referenceTh.nextSibling)
                 productItemTrs.forEach((productItem: HTMLTableRowElement) => {
-                    const referenceTd = productItem.cells[3]
+                    const referenceTd = productItem.cells[4]
                     const productName = productItem.cells[2].innerText
+
                     const productFilterName = productMgG[productName][masterGroupName] || '-'
                     const productFilterTd = document.createElement('td')
                     productFilterTd.setAttribute(
@@ -266,6 +268,7 @@ const $addProductModalElement: HTMLElement = document.querySelector('#add-produc
 const $viewProductModalElement: HTMLElement = document.querySelector('#view-product-modal')
 const $adjustProductModalElement: HTMLElement = document.querySelector('#adjust-product-modal')
 const $editProductModalElement: HTMLElement = document.querySelector('#editProductModal')
+const $eventProductModalElement: HTMLElement = document.querySelector('#event-product-modal')
 
 const modalOptions: ModalOptions = {
     placement: 'bottom-right',
@@ -328,6 +331,7 @@ const editModal: ModalInterface = new Modal($editProductModalElement, modalOptio
 const requestShareModal: ModalInterface = new Modal($requestShareModalElement, modalShipAssignOptions)
 const shipModal: ModalInterface = new Modal($shipModalElement, modalShipAssignOptions)
 const assignModal: ModalInterface = new Modal($assignModalElement, modalShipAssignOptions)
+const eventModal: ModalInterface = new Modal($eventProductModalElement, modalOptions)
 
 const $buttonElements = document.querySelectorAll('.product-edit-button')
 $buttonElements.forEach((e) =>
@@ -1552,4 +1556,61 @@ document.getElementById('product-add-image').addEventListener('change', async (e
         fileList.items.add(file)
         return fileList.files
     }
+})
+
+// event button to show modal
+const productBookingButtons = document.querySelectorAll('.product-booking-button')
+
+productBookingButtons.forEach((button) =>
+    button.addEventListener('click', () => {
+        const product = JSON.parse(button.getAttribute('data-target'))
+
+        let div: HTMLDivElement = document.querySelector('#product-event-name')
+        div.innerHTML = product.name
+        const img: HTMLImageElement = document.querySelector('#product-event-image')
+        const fullImageAnchor = img.closest('.product-full-image-anchor')
+        fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
+        product.image.length > 100
+            ? (img.src = `data:image/png;base64, ${product.image}`)
+            : (img.src = defaultBrandImage)
+        div = document.querySelector('#product-event-SKU')
+        div.innerHTML = product.SKU
+        div = document.querySelector('#product-event-next_url')
+        div.innerHTML = window.location.href
+
+        const productIdInput: HTMLInputElement = document.querySelector('#product-event-product-id')
+        productIdInput.value = product.id.toString()
+
+        // datepicker
+        const eventDatepickers = document.querySelectorAll('.product-event-datepicker')
+        const dateCurrent = new Date()
+        const dateEvent = new Date(dateCurrent.getFullYear(), dateCurrent.getMonth(), dateCurrent.getDate() + 5)
+
+        const option = {
+            todayHighlight: true,
+            minDate: dateEvent,
+        }
+
+        eventDatepickers.forEach((datepicker: HTMLDivElement, index) => {
+            const eventDatePicker = new Datepicker(datepicker)
+            eventDatePicker.setOptions(option)
+            if (index === 0) {
+                eventDatePicker.setDate(dateEvent)
+            }
+        })
+    })
+)
+
+function getFilterValues(isChecked: boolean) {
+    const url = new URL(window.location.href)
+    const eventSortToggleButton = document.querySelector('#product-show-events-toggle-btn')
+
+    isChecked ? url.searchParams.set('events', 'true') : url.searchParams.delete('events')
+    window.location.href = `${url.href}`
+}
+
+const eventSortToggleButton = document.querySelector('#product-show-events-toggle-btn')
+eventSortToggleButton.addEventListener('change', () => {
+    getFilterValues(eventSortToggleButton.checked)
+    console.log(eventSortToggleButton.checked)
 })

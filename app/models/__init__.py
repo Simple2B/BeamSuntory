@@ -32,3 +32,4 @@ from .request_share_user import RequestShareUser
 from .store_category import StoreCategory
 from .adjust import Adjust
 from .adjusts_group_qty import AdjustGroupQty
+from .event import Event

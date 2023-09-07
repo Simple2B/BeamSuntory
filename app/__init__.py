@@ -43,6 +43,7 @@ def create_app(environment="development"):
         store_category_blueprint,
         inventory_blueprint,
         adjust_blueprint,
+        event_blueprint,
     )
     from app import models as m, forms
 
@@ -88,6 +89,7 @@ def create_app(environment="development"):
     app.register_blueprint(store_category_blueprint)
     app.register_blueprint(inventory_blueprint)
     app.register_blueprint(adjust_blueprint)
+    app.register_blueprint(event_blueprint)
 
     # Set up flask login.
     @login_manager.user_loader
