@@ -11,3 +11,10 @@ class Pagination(BaseModel):
     skip: int  # number items on all previous pages
     pages: int  # total pages
     pages_for_links: list[int]  # number of links
+
+
+class PaginationOut(BaseModel):
+    page: int
+    pages: int
+    per_page: int
+    total: int
