@@ -116,15 +116,14 @@ def save():
 @stock_target_group_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
 def delete(id: int):
-    u = db.session.scalar(m.Group.select().where(m.Group.id == id))
-    if not u:
+    group = db.session.get(m.Group, id)
+    if not group:
         log(log.INFO, "There is no group with id: [%s]", id)
         flash("There is no such group", "danger")
         return "no group", 404
 
-    delete_u = sa.delete(m.Group).where(m.Group.id == id)
-    db.session.execute(delete_u)
+    db.session.delete(group)
     db.session.commit()
-    log(log.INFO, "Group deleted. Group: [%s]", u)
+    log(log.INFO, "Group deleted. Group: [%s]", group)
     flash("Group deleted!", "success")
     return "ok", 200

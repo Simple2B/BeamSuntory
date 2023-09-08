@@ -136,6 +136,17 @@
                             </a>
                         </li>
                         <li>
+                            <a href="{{ url_for('event.get_all') }}"
+                                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <svg class="flex-shrink-0 w-4 h-4 ml-1 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
+                                    fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                                    <path
+                                        d="M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256z" />
+                                </svg>
+                                <span class="flex-1 ml-4 whitespace-nowrap">Events</span>
+                            </a>
+                        </li>
+                        <li>
                             <a data-modal-toggle="upload-product-modal"
                                 class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
                                 <svg class="flex-shrink-0 w-4 h-4 ml-1 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
@@ -480,6 +491,7 @@
                     <span class="flex-1 ml-3 whitespace-nowrap">Pickup inbound</span>
                 </a>
             </li>
+
             <li>
                 <a href="https://github.com/Simple2B/BeamSuntory"
                     class="absolute bottom-14 left-3 flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">

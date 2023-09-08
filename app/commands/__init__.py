@@ -72,12 +72,14 @@ def init(app: Flask):
             "Mixit": ["Mixit"],
             "Key Accounts": ["Key Accounts"],
             "Sales Manager": ["Sales Manager"],
+            "Events": ["Events"],
         }
         product_master_groups = {
             "Brand": ["Brugal", "Banff Ice", "Alberta Springs"],
             "Language": ["English", "French"],
             "Premises": ["On Premises", "Off Premises"],
             "Category": ["NLVA", "GWP", "Kit", "Bareware", "Signage"],
+            "Events": ["Events"],
         }
 
         for mg in stock_master_groups:

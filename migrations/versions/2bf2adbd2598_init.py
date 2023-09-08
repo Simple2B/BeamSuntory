@@ -1,8 +1,8 @@
-"""Init migration
+"""init
 
-Revision ID: 2e56812e75e6
+Revision ID: 2bf2adbd2598
 Revises: 
-Create Date: 2023-09-04 12:06:19.864584
+Create Date: 2023-09-08 11:22:12.321072
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '2e56812e75e6'
+revision = '2bf2adbd2598'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -201,6 +201,17 @@ def upgrade():
     sa.ForeignKeyConstraint(['property_id'], ['properties.id'], name=op.f('fk_date_values_property_id_properties')),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_date_values'))
     )
+    op.create_table('events',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('date_from', sa.Date(), nullable=False),
+    sa.Column('date_to', sa.Date(), nullable=False),
+    sa.Column('quantity', sa.Integer(), nullable=False),
+    sa.Column('comment', sa.Text(), nullable=True),
+    sa.Column('product_id', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.ForeignKeyConstraint(['product_id'], ['products.id'], name=op.f('fk_events_product_id_products')),
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_events'))
+    )
     op.create_table('float_values',
     sa.Column('value', sa.Float(), nullable=False),
     sa.Column('group_id', sa.Integer(), nullable=False),
@@ -389,17 +400,6 @@ def upgrade():
     sa.ForeignKeyConstraint(['warehouse_id'], ['warehouses.id'], name=op.f('fk_carts_warehouse_id_warehouses')),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_carts'))
     )
-    op.create_table('io_allocate_product',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('product_id', sa.Integer(), nullable=False),
-    sa.Column('quantity', sa.Integer(), nullable=False),
-    sa.Column('inbound_order_id', sa.Integer(), nullable=False),
-    sa.Column('shelf_life_start', sa.Date(), nullable=False),
-    sa.Column('shelf_life_end', sa.Date(), nullable=False),
-    sa.ForeignKeyConstraint(['inbound_order_id'], ['inbound_orders.id'], name=op.f('fk_io_allocate_product_inbound_order_id_inbound_orders'), ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['product_id'], ['products.id'], name=op.f('fk_io_allocate_product_product_id_products'), ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id', name=op.f('pk_io_allocate_product'))
-    )
     op.create_table('package_info',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('quantity_per_wrap', sa.Integer(), nullable=False),
@@ -409,20 +409,25 @@ def upgrade():
     sa.ForeignKeyConstraint(['inbound_order_id'], ['inbound_orders.id'], name=op.f('fk_package_info_inbound_order_id_inbound_orders')),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_package_info'))
     )
-    op.create_table('product_quantity_group',
+    op.create_table('products_allocated',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('product_id', sa.Integer(), nullable=False),
+    sa.Column('quantity', sa.Integer(), nullable=False),
+    sa.Column('inbound_order_id', sa.Integer(), nullable=False),
+    sa.Column('shelf_life_start', sa.Date(), nullable=False),
+    sa.Column('shelf_life_end', sa.Date(), nullable=False),
+    sa.ForeignKeyConstraint(['inbound_order_id'], ['inbound_orders.id'], name=op.f('fk_products_allocated_inbound_order_id_inbound_orders'), ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['product_id'], ['products.id'], name=op.f('fk_products_allocated_product_id_products'), ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_products_allocated'))
+    )
+    op.create_table('product_quantity_group',
+    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('group_id', sa.Integer(), nullable=False),
     sa.Column('quantity', sa.Integer(), nullable=False),
     sa.Column('quantity_received', sa.Integer(), nullable=True),
-    sa.Column('warehouse_id', sa.Integer(), nullable=False),
-    sa.Column('inbound_order_id', sa.Integer(), nullable=False),
-    sa.Column('shelf_life_start', sa.DateTime(), nullable=False),
-    sa.Column('shelf_life_end', sa.DateTime(), nullable=False),
+    sa.Column('product_allocated_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['group_id'], ['groups.id'], name=op.f('fk_product_quantity_group_group_id_groups')),
-    sa.ForeignKeyConstraint(['inbound_order_id'], ['inbound_orders.id'], name=op.f('fk_product_quantity_group_inbound_order_id_inbound_orders')),
-    sa.ForeignKeyConstraint(['product_id'], ['products.id'], name=op.f('fk_product_quantity_group_product_id_products')),
-    sa.ForeignKeyConstraint(['warehouse_id'], ['warehouses.id'], name=op.f('fk_product_quantity_group_warehouse_id_warehouses')),
+    sa.ForeignKeyConstraint(['product_allocated_id'], ['products_allocated.id'], name=op.f('fk_product_quantity_group_product_allocated_id_products_allocated')),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_product_quantity_group'))
     )
     # ### end Alembic commands ###
@@ -431,8 +436,8 @@ def upgrade():
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_table('product_quantity_group')
+    op.drop_table('products_allocated')
     op.drop_table('package_info')
-    op.drop_table('io_allocate_product')
     op.drop_table('carts')
     op.drop_table('warehouse_product')
     op.drop_table('ship_requests')
@@ -451,6 +456,7 @@ def downgrade():
     op.drop_table('product_group')
     op.drop_table('int_values')
     op.drop_table('float_values')
+    op.drop_table('events')
     op.drop_table('date_values')
     op.drop_table('bool_values')
     op.drop_table('assigns')
