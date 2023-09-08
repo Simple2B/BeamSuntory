@@ -1243,6 +1243,10 @@ input:checked + .toggle-bg {
   z-index: 1080;
 }
 
+.z-\[60\] {
+  z-index: 60;
+}
+
 .z-\[999\] {
   z-index: 999;
 }
@@ -3718,6 +3722,15 @@ input[type="radio"]:checked {
 
 .gap-4{
   gap:16px;
+}
+
+.z-51{
+  z-index: 51;
+}
+
+button:disabled,
+button[disabled]{
+  background-color: rgb(124, 138, 168) !important;
 }
 
 .selection\:bg-transparent *::-moz-selection {
