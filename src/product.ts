@@ -424,7 +424,10 @@ const picker = new easepick.create({
     ],
     plugins: ['RangePlugin', 'LockPlugin'],
     RangePlugin: {
-        tooltipNumber(num: number) {
+        tooltipNumber(num: number, date: any) {
+            console.log('num', num)
+            console.log('date', date)
+
             return num - 1
         },
     },
@@ -843,20 +846,21 @@ function ship(product: IProduct, group: string) {
 }
 // function to booking
 function booking(product: IProduct, group: string) {
-    eventModal.show()
+    console.log('product', product)
+    const img: HTMLImageElement = document.querySelector('#product-event-image')
+    const fullImageAnchor = img.closest('.product-full-image-anchor')
+    fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
+    product.image.length > 100 ? (img.src = `data:image/png;base64, ${product.image}`) : (img.src = defaultBrandImage)
+    let div: HTMLDivElement = document.querySelector('#product-event-name')
+    div.innerHTML = product.name
+    div = document.querySelector('#product-event-SKU')
+    console.log(product.SKU)
+    div.innerHTML = product.SKU
 
-    // -----count rest quantity in ship request product modal------
-    const desiredQuantityInput: HTMLInputElement = document.querySelector('#product-ship-desire-quantity')
-    desiredQuantityInput.addEventListener('change', () => {
-        const availableQuantityDiv = document.querySelector('#product-ship-available-quantity')
-        availableQuantityDiv.textContent = product.available_quantity[group.replace('_', ' ')].toString()
-        let desiredQuantity = Number(desiredQuantityInput.value)
-        const availableQuantity = Number(availableQuantityDiv.textContent)
-        if (desiredQuantity > availableQuantity) {
-            desiredQuantityInput.value = availableQuantity.toString()
-        }
-        availableQuantityDiv.textContent = (availableQuantity - desiredQuantity).toString()
-    })
+    const input: HTMLInputElement = document.querySelector('#product-event-group-hidden')
+    input.value = group.replace('_', ' ')
+
+    eventModal.show()
 }
 
 // function to assign
@@ -972,8 +976,6 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
     const bookingButtons = document.querySelectorAll('.booking-product-button')
     bookingButtons.forEach((e) =>
         e.addEventListener('click', () => {
-            viewModal.hide()
-            editModal.hide()
             let shipGroup = e.getAttribute('ship-group-data')
             const product = JSON.parse(sessionStorage.product)
             booking(product, shipGroup)
@@ -1771,24 +1773,6 @@ const eventSortToggleButton: HTMLInputElement = document.querySelector('#product
 eventSortToggleButton.addEventListener('change', () => {
     getFilterValues(eventSortToggleButton.checked)
     console.log(eventSortToggleButton.checked)
-})
-
-// event button to show modal
-const productBookingButton = document.querySelector('.product-booking-button')
-productBookingButton.addEventListener('click', () => {
-    eventModal.show()
-    const bookingButton = document.querySelector('.product-booking-button')
-    const product = JSON.parse(bookingButton.getAttribute('data-target'))
-
-    let div: HTMLDivElement = document.querySelector('#product-event-name')
-    div.innerHTML = product.name
-    div = document.querySelector('#product-event-SKU')
-    div.innerHTML = product.SKU
-
-    const img: HTMLImageElement = document.querySelector('#product-event-image')
-    const fullImageAnchor = img.closest('.product-full-image-anchor')
-    fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
-    product.image.length > 100 ? (img.src = `data:image/png;base64, ${product.image}`) : (img.src = defaultBrandImage)
 })
 
 const bookingAvaliableQuantity = document.querySelector('#product-available-quantity-by-date') as HTMLInputElement
