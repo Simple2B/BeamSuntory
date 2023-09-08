@@ -40,6 +40,9 @@
       </button>
     </div>
   </div>
+  <input id="datepicker"
+    class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+  />
   <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
       <tr>
@@ -165,6 +168,7 @@
   //sessionStorage.setItem('inboundOrders', inboundOrders); 
 </script>
 <script src="{{ url_for('static', filename='js/inbound_order.js') }}" type="text/javascript" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.umd.min.js"></script>
 
 
 {% endblock %}
