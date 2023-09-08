@@ -11,7 +11,7 @@ from flask_login import login_required
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
-
+from app import schema as s
 from app import models as m, db
 from app import forms as f
 from app.logger import log
@@ -20,9 +20,7 @@ from app.logger import log
 event_blueprint = Blueprint("event", __name__, url_prefix="/event")
 
 
-@event_blueprint.route("/", methods=["GET"])
-@login_required
-def get_all():
+def get_events():
     q = request.args.get("q", type=str, default=None)
     start_from = request.args.get("start_from", type=str, default=None)
     start_to = request.args.get("start_to", type=str, default=None)
@@ -67,6 +65,28 @@ def get_all():
             pagination.per_page
         )
     )
+    return pagination, events
+
+
+@event_blueprint.route("/api", methods=["GET"])
+@login_required
+def get_events_json():
+    pagination, events = get_events()
+    return s.EventsApiOut(pagination=pagination, events=events.all()).json(
+        by_alias=True
+    )
+
+
+@event_blueprint.route("/", methods=["GET"])
+@login_required
+def get_all():
+    q = request.args.get("q", type=str, default=None)
+    start_from = request.args.get("start_from", type=str, default=None)
+    start_to = request.args.get("start_to", type=str, default=None)
+    end_from = request.args.get("end_from", type=str, default=None)
+    end_to = request.args.get("end_to", type=str, default=None)
+
+    pagination, events = get_events()
 
     return render_template(
         "event/events.html",
