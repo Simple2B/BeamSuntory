@@ -4,7 +4,6 @@ import { initAddInboundOrderModal } from './add';
 import { initViewInboundOrderModal } from './view';
 import {initEditOrderModal} from './edit';
 import Datepicker from 'flowbite-datepicker/Datepicker';
-import { easepick } from '@easepick/bundle';
 
 initTE({ Input, Timepicker })
 
@@ -46,84 +45,6 @@ deleteButtons.forEach((e) => {
         }
     })
 })
-
-
-const { DateTime } = easepick;
-function formatDate(date: Date) {
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-  
-  function getFirstAndLastDate() {
-    const today = new Date();
-    const dateArray = [];
-  
-    for (let i = -5; i <= 5; i++) {
-      const currentDate = new Date(today);
-      currentDate.setDate(today.getDate() + i);
-      dateArray.push(formatDate(currentDate));
-    }
-  
-    const firstDate = dateArray[0];
-    const lastDate = dateArray[dateArray.length - 1];
-  
-    return [firstDate, lastDate];
-  }
-  
-  const bookedDates = [getFirstAndLastDate()].map(d => {
-    if (d instanceof Array) {
-      const start = new Date(d[0]);
-      const end = new Date(d[1]);
-      return [start, end];
-    }
-    return new DateTime(d, 'YYYY-MM-DD');
-  });
-  
-  // Create the datepicker using easepick
-  const picker = new easepick.create({
-    element: document.getElementById('datepicker'),
-    css: [
-      'https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.css',
-      'https://easepick.com/css/demo_hotelcal.css',
-    ],
-    plugins: ['RangePlugin', 'LockPlugin'],
-    RangePlugin: {
-      tooltipNumber(num: number) {
-        return num - 1;
-      },
-    },
-    LockPlugin: {
-      minDate: new Date(),
-      minDays: 2,
-      inseparable: true,
-      filter(date: any, picked: any) {
-        if (picked.length === 1) {
-          const incl = date.isBefore(picked[0]) ? '[)' : '(]';
-          return !picked[0].isSame(date, 'day') && date.inArray(bookedDates, incl);
-        }
-        return date.inArray(bookedDates, '[)');
-      },
-    },
-  });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 const openCurrentOrder = () =>{
   const urlParams = new URLSearchParams(window.location.search);
