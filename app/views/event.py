@@ -7,7 +7,7 @@ from flask import (
     url_for,
     render_template,
 )
-from flask_login import login_required
+from flask_login import login_required, current_user
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
@@ -121,9 +121,76 @@ def create():
         product=product,
         comment=form.comment.data,
     )
+    db.session.add(event)
 
-    event.save()
-    log(log.INFO, "Event added: [%s]", event)
-    flash("Event added!", "success")
+    cart: m.Cart = m.Cart(
+        product_id=product.id,
+        quantity=form.quantity.data,
+        user_id=current_user.id,
+        group=form.group.data,
+    )
+    db.session.add(cart)
+
+    db.session.commit()
+    log(log.INFO, "Item added: [%s]", event)
+    flash("Item added!", "success")
+
+    return redirect(url_for("product.get_all"))
+
+
+@event_blueprint.route("/get_available_quantity", methods=["GET"])
+@login_required
+def get_available_quantity():
+    form: f.EventFormCreate = f.EventFormCreate()
+    if not form.validate_on_submit():
+        flash("Event must validation failed: {form.errors}", "danger")
+        log(log.INFO, "Event validation failed: [%s]", form.errors)
+        return redirect(url_for("product.get_all"))
+
+    current_date = datetime.now()
+    start_date = datetime.strptime(form.date_from.data, "%m/%d/%Y")
+    end_date = datetime.strptime(form.date_to.data, "%m/%d/%Y")
+    difference_date = start_date - current_date
+    if difference_date < timedelta(days=5):
+        flash("The event must be created more than 5 days in advance", "danger")
+        log(
+            log.INFO,
+            "The event must be created more than 5 days: [%s]",
+            form.product_id.data,
+        )
+        return redirect(url_for("product.get_all"))
+
+    # check product
+    product = db.session.get(m.Product, form.product_id.data)
+    if not product:
+        flash("Product not found")
+        log(
+            log.INFO,
+            "Product validation failed: cannot find product with id [%s]",
+            form.product_id.data,
+        )
+        return redirect(url_for("product.get_all"))
+
+    # create event
+    event: m.Event = m.Event(
+        date_from=start_date,
+        date_to=end_date,
+        quantity=form.quantity.data,
+        product=product,
+        comment=form.comment.data,
+    )
+    db.session.add(event)
+
+    cart: m.Cart = m.Cart(
+        product_id=product.id,
+        quantity=form.quantity.data,
+        user_id=current_user.id,
+        group=form.group.data,
+    )
+    db.session.add(cart)
+
+    db.session.commit()
+    log(log.INFO, "Item added: [%s]", event)
+    flash("Item added!", "success")
 
     return redirect(url_for("product.get_all"))
