@@ -331,7 +331,7 @@ const editModal: ModalInterface = new Modal($editProductModalElement, modalOptio
 const requestShareModal: ModalInterface = new Modal($requestShareModalElement, modalShipAssignOptions)
 const shipModal: ModalInterface = new Modal($shipModalElement, modalShipAssignOptions)
 const assignModal: ModalInterface = new Modal($assignModalElement, modalShipAssignOptions)
-const eventModal: ModalInterface = new Modal($eventProductModalElement, modalOptions)
+const eventModal: ModalInterface = new Modal($eventProductModalElement, modalShipAssignOptions)
 
 const closingAddModalButton = document.getElementById('add-product-modal-close-btn')
 closingAddModalButton.addEventListener('click', () => {
@@ -585,18 +585,24 @@ viewProductButtonElements.forEach((e) =>
         const product = JSON.parse(e.getAttribute('data-target'))
         sessionStorage.setItem('product', JSON.stringify(product))
         const prodGroups = Object.keys(product.mstr_groups_groups)
+        const eventCheckbox: HTMLInputElement = document.querySelector('#product-show-events-toggle-btn')
+        const isEvent = eventCheckbox.checked
 
         prodGroups.forEach((groupName) => {
             let isEqual = false
 
             const mstrGroupName = product.mstr_groups_groups[groupName]
+            console.log('mstrGroupName', mstrGroupName)
+
             if (product.current_user_groups.hasOwnProperty(mstrGroupName)) {
                 const currentUserValue = product.current_user_groups[mstrGroupName]
                 if (currentUserValue.includes(groupName)) {
                     isEqual = true
                 }
             }
-            addShipAssignShareButton(isEqual, mstrGroupName, groupName, product)
+            if (mstrGroupName !== 'Events' || isEvent) {
+                addShipAssignShareButton(isEqual, mstrGroupName, groupName, product)
+            }
         })
 
         let div: HTMLDivElement = document.querySelector('#product-view-name')
@@ -745,6 +751,23 @@ function ship(product: IProduct, group: string) {
         availableQuantityDiv.textContent = (availableQuantity - desiredQuantity).toString()
     })
 }
+// function to booking
+function booking(product: IProduct, group: string) {
+    eventModal.show()
+
+    // -----count rest quantity in ship request product modal------
+    const desiredQuantityInput: HTMLInputElement = document.querySelector('#product-ship-desire-quantity')
+    desiredQuantityInput.addEventListener('change', () => {
+        const availableQuantityDiv = document.querySelector('#product-ship-available-quantity')
+        availableQuantityDiv.textContent = product.available_quantity[group.replace('_', ' ')].toString()
+        let desiredQuantity = Number(desiredQuantityInput.value)
+        const availableQuantity = Number(availableQuantityDiv.textContent)
+        if (desiredQuantity > availableQuantity) {
+            desiredQuantityInput.value = availableQuantity.toString()
+        }
+        availableQuantityDiv.textContent = (availableQuantity - desiredQuantity).toString()
+    })
+}
 
 // function to assign
 function assign(product: IProduct, group: string) {
@@ -776,13 +799,15 @@ function deleteShipAssignButton(nameGroup: string, nameGroupValue: string) {
 
 // function to add ship, assign, button to view product modal
 function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: string, productParam: IProduct) {
+    const eventCheckbox: HTMLInputElement = document.querySelector('#product-show-events-toggle-btn')
+    const isEvent = eventCheckbox.checked
     const groupUnderScore = group.replace(/ /g, '_')
     const groupProductIds = productParam.groups_ids
     const productTypeContainer = document.querySelector(`#product-view-product-name-container`)
     const shipAssignContainer = document.createElement('div')
     shipAssignContainer.classList.add('sm:col-span-3', 'flex', 'gap-4')
     shipAssignContainer.setAttribute('id', `product-ship-assign-share-container-${masterGroup.replace(/ /g, '_')}`)
-    shipAssignContainer.innerHTML = `
+    const shipAssignContainerDiv = `
     <div>
       <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available</label>
         <div id="ship-product-quantity"
@@ -801,9 +826,26 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
       </button>
     </div>
   `
+    const bookingContainerDiv = `
+        <div>
+        <label for="product_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Action</label >
+        <button ship-group-data=${groupUnderScore} type="button" id="booking-product-button-${groupUnderScore}" class="booking-product-button inline-flex items-center mr-2 px-3 py-2.5 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+            <path
+                d="M128 0c13.3 0 24 10.7 24 24V64H296V24c0-13.3 10.7-24 24-24s24 10.7 24 24V64h40c35.3 0 64 28.7 64 64v16 48V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V192 144 128C0 92.7 28.7 64 64 64h40V24c0-13.3 10.7-24 24-24zM400 192H48V448c0 8.8 7.2 16 16 16H384c8.8 0 16-7.2 16-16V192zM329 297L217 409c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47 95-95c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"
+                clip-rule="evenodd"></path>
+            </svg>
+            Booking
+        </button>
+        </div>
+    `
+    isEvent
+        ? (shipAssignContainer.innerHTML = bookingContainerDiv)
+        : (shipAssignContainer.innerHTML = shipAssignContainerDiv)
     const shareContainer = document.createElement('div')
     const shipProductBtn = shipAssignContainer.querySelector(`#ship-product-button-${groupUnderScore}`)
     const assignProductBtn = shipAssignContainer.querySelector(`#assign-product-button-${groupUnderScore}`)
+    const bookingProductBtn = shipAssignContainer.querySelector(`#booking-product-button-${groupUnderScore}`)
 
     shareContainer.classList.add('sm:col-span-3', 'flex', 'gap-4')
     shareContainer.setAttribute('id', `product-ship-assign-share-container-${masterGroup.replace(/ /g, '_')}`)
@@ -836,6 +878,17 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
     } else {
         productTypeContainer.parentNode.insertBefore(shareContainer, productTypeContainer.nextSibling)
     }
+
+    const bookingButtons = document.querySelectorAll('.booking-product-button')
+    bookingButtons.forEach((e) =>
+        e.addEventListener('click', () => {
+            viewModal.hide()
+            editModal.hide()
+            let shipGroup = e.getAttribute('ship-group-data')
+            const product = JSON.parse(sessionStorage.product)
+            booking(product, shipGroup)
+        })
+    )
 
     const shipButtons = document.querySelectorAll('.ship-product-button')
     shipButtons.forEach((e) =>
