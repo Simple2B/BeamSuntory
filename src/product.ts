@@ -443,6 +443,15 @@ LockPlugin: {
 });
 
 
+const checkQuantityByDateButton = document.querySelector('#check-quantity-by-date-btn')
+const datepicker = document.querySelector('#datepicker') as HTMLInputElement
+
+checkQuantityByDateButton.addEventListener("click", ()=>{
+    const dateRange = datepicker.value
+    const [startDate, endDate] = dateRange.split(' - ')
+
+    console.log(startDate, endDate);
+});
 
 // search flow
 const searchInput: HTMLInputElement = document.querySelector('#table-search-products')
@@ -660,6 +669,10 @@ function editProduct(product: IProduct) {
 const viewProductButtonElements = document.querySelectorAll('.product-view-button')
 viewProductButtonElements.forEach((e) =>
     e.addEventListener('click', () => {
+        const bookingButton = document.querySelector('.product-booking-button')
+        if(bookingButton){
+            bookingButton.setAttribute('data-target', e.getAttribute('data-target'))
+        }
         const product = JSON.parse(e.getAttribute('data-target'))
         sessionStorage.setItem('product', JSON.stringify(product))
         const prodGroups = Object.keys(product.mstr_groups_groups)
@@ -1716,6 +1729,20 @@ eventSortToggleButton.addEventListener('change', () => {
 
 // event button to show modal
 const productBookingButton = document.querySelector('.product-booking-button')
-productBookingButton.addEventListener('click', () => {
+productBookingButton.addEventListener('click', () => {    
    eventModal.show()
+   const bookingButton = document.querySelector('.product-booking-button')
+   const product = JSON.parse(bookingButton.getAttribute('data-target'))
+
+   let div: HTMLDivElement = document.querySelector('#product-event-name')
+    div.innerHTML = product.name
+    div = document.querySelector('#product-event-SKU')
+    div.innerHTML = product.SKU
+
+    const img: HTMLImageElement = document.querySelector('#product-event-image')
+    const fullImageAnchor = img.closest('.product-full-image-anchor')
+    fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
+    product.image.length > 100
+        ? (img.src = `data:image/png;base64, ${product.image}`)
+        : (img.src = defaultBrandImage)
 })
