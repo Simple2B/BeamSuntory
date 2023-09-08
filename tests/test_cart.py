@@ -18,10 +18,10 @@ def test_carts_pages(mg_g_populate: FlaskClient):
     assert response.status_code == 405
 
 
-def test_create_cart(client):
-    login(client, "bob")
+def test_create_cart(mg_g_populate: FlaskClient):
+    login(mg_g_populate, "bob")
 
-    response = client.post(
+    response = mg_g_populate.post(
         "/cart/create",
         data=dict(
             product_id=1,
