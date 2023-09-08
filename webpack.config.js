@@ -262,6 +262,15 @@ const adjustConfig = {
         filename: 'js/adjust.js', // <--- Will be compiled to this single file
     },
 }
+const eventConfig = {
+    entry: {
+        main: './src/event.ts',
+    },
+    output: {
+        path: path.resolve(__dirname, './app/static'),
+        filename: 'js/event.js', // <--- Will be compiled to this single file
+    },
+}
 
 const configs = [
     baseConfig,
@@ -289,6 +298,7 @@ const configs = [
     assignConfig,
     inventoryConfig,
     adjustConfig,
+    eventConfig,
 ].map((conf) => merge(defaultConfig, conf))
 
 module.exports = configs

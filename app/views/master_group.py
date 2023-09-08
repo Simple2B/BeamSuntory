@@ -11,6 +11,7 @@ import sqlalchemy as sa
 from app.controllers import create_pagination
 
 from app import models as m, db
+from app import schema as s
 from app import forms as f
 from app.logger import log
 
@@ -41,6 +42,7 @@ def get_all():
 
     pagination = create_pagination(total=db.session.scalar(count_query))
     master_groups_rows = db.session.execute(sa.select(m.MasterGroup)).all()
+    master_groups_mandatory = [group.value for group in s.MasterGroupMandatory]
 
     return render_template(
         "master_group/master_groups.html",
@@ -52,6 +54,7 @@ def get_all():
         page=pagination,
         search_query=q,
         main_master_groups=[i[0] for i in master_groups_rows],
+        master_groups_mandatory=master_groups_mandatory,
         form_create=form_create,
         form_edit=form_edit,
     )
@@ -111,22 +114,38 @@ def save():
 @master_group_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
 def delete(id: int):
-    u = db.session.scalar(m.MasterGroup.select().where(m.MasterGroup.id == id))
-    if not u:
+    master_group = db.session.get(m.MasterGroup, id)
+    master_groups_mandatory = [group.value for group in s.MasterGroupMandatory]
+
+    if not master_group:
         log(log.INFO, "There is no master group with id: [%s]", id)
         flash("There is no such master group", "danger")
         return "no master group", 404
 
     query_group = db.session.scalar(
-        m.Group.select().where(m.Group.master_group_id == u.id)
+        m.Group.select().where(m.Group.master_group_id == master_group.id)
     )
 
     if query_group:
+        log(
+            log.INFO,
+            "Can not delete master group, while groups are connected to it: [%s]",
+            id,
+        )
         flash("Can not delete master group, while groups are connected to it", "danger")
         return "can not delete master group", 202
 
-    db.session.delete(u)
+    if master_group.name in master_groups_mandatory:
+        log(
+            log.INFO,
+            "Can not delete master group, while master group is mandatory: [%s]",
+            id,
+        )
+        flash("Can not delete master group, while master group is mandatory", "danger")
+        return redirect(url_for("master_group.get_all"))
+
+    db.session.delete(master_group)
     db.session.commit()
-    log(log.INFO, "Master group deleted. Master group: [%s]", u)
+    log(log.INFO, "Master group deleted. Master group: [%s]", master_group)
     flash("Master group deleted!", "success")
     return "ok", 200
