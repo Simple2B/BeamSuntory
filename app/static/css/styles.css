@@ -3723,6 +3723,11 @@ input[type="radio"]:checked {
   z-index: 51;
 }
 
+button:disabled,
+button[disabled]{
+  background-color: rgb(124, 138, 168) !important;
+}
+
 .selection\:bg-transparent *::-moz-selection {
   background-color: transparent;
 }

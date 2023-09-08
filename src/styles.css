@@ -52,3 +52,8 @@ input[type="radio"]:checked {
 .z-51{
     z-index: 51;
 }
+
+button:disabled,
+button[disabled]{
+  background-color: rgb(124, 138, 168) !important;
+}

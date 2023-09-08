@@ -1746,3 +1746,25 @@ productBookingButton.addEventListener('click', () => {
         ? (img.src = `data:image/png;base64, ${product.image}`)
         : (img.src = defaultBrandImage)
 })
+
+
+const bookingAvaliableQuantity = document.querySelector('#product-available-quantity-by-date') as HTMLInputElement
+const bookingDesiredQuantity = document.querySelector('#product-event-quantity') as HTMLInputElement
+
+bookingAvaliableQuantity.addEventListener('change', () => {
+    validateBookingQuantity()
+})
+
+bookingDesiredQuantity.addEventListener('change', () => {
+    validateBookingQuantity()
+})
+
+const validateBookingQuantity = () => {
+    const bookingButton = document.querySelector('#product-event-submit-btn') as HTMLButtonElement
+    bookingButton.disabled = true; 
+
+    if(parseInt(bookingAvaliableQuantity.value) < parseInt(bookingDesiredQuantity.value)){
+        bookingButton.disabled = false; 
+    }
+   
+}
