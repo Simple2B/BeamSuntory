@@ -117,15 +117,17 @@ productImageAnchors.forEach((e) => {
     e.addEventListener('click', () => {
         const productId = e.getAttribute('data-target-product-id')
         getFullImage(productId)
-    })
+    });
 })
 
 export async function getFullImage(id: string) {
+    console.log(id);
     const response = await fetch(`/product/full_image/${id}`, {
         method: 'GET',
     })
     if (response.status === 200) {
         const data = await response.json()
+
         const image = document.querySelector('#product-image-full-img')
         const productName = document.querySelector('#product-image-name')
         image.setAttribute('src', `data:image/png;base64, ${data.image}`)

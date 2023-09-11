@@ -24,6 +24,7 @@ class BaseConfig(BaseSettings):
     MAIL_USERNAME: str = os.environ.get("MAIL_USERNAME")
     MAIL_PASSWORD: str = os.environ.get("MAIL_PASSWORD")
     MAIL_DEFAULT_SENDER: str = os.environ.get("MAIL_DEFAULT_SENDER")
+    DEFAULT_IMAGE: str
 
     # Super admin
     ADMIN_USERNAME: str

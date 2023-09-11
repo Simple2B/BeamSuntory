@@ -23,6 +23,8 @@ export interface IWarehouse {
 export interface IProduct {
     id: number
     name: string
+    image: string
+    SKU: string
 }
 
 export interface IGroup {

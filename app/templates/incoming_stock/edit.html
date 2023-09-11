@@ -1,30 +1,84 @@
 <!-- Edit incoming stock modal -->
 <!-- prettier-ignore-->
-<div id="editIncomingStockModal" tabindex="-1" aria-hidden="true"
-  class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
-  <div class="relative w-full max-w-2xl max-h-full">
-    <!-- Modal content -->
-    <form action="{{ url_for('incoming_stock.accept') }}" id="incoming-stock-edit-form" method="post"
-      class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-      {{ form_edit.hidden_tag() }}
-      <input type="hidden" name="inbound_order_id" id="incoming-stock-edit-id" value="0" />
-      <input type="hidden" name="received_products" id="incoming-stock-edit-received-products" value="0" />
-      <input type="hidden" name="next_url" id="inbound-order-edit-next_url" value="" />
-      <!-- Modal header -->
-      <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
-        <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Edit incoming stock </h3>
-      </div>
-      <!-- Modal body -->
-      <div id="incoming-stock-edit-add-container">
-      </div>
-      
-      <!-- Modal footer -->
-      <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
-        <button id="incoming-stock-submit-btn" name="submit" type="submit" class="hidden"></button>
-        <button id="incoming-stock-save-products-btn" name="save-products" type="button"
-          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-          Save all </button>
-      </div>
-    </form>
+
+<!-- Templates -->
+<!-- prettier-ignore-->
+<div id="product-incoming-stock-edit-template" class="hidden incoming-stock-product-item grid-cols-12 gap-4 p-4 border-t border-gray-200" data-target-product-id="${productAllocated.product.id}">
+  <div class="product-full-image-anchor col-span-6 sm:col-span-4 sm:row-span-3 max-height-image-container">
+    <img class="product-incoming-stock-image w-full h-full object-contain" class="incoming-stock-edit-product-image w-full h-full object-cover">
   </div>
+  <div class="col-span-6 sm:col-span-8">
+    <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Name</label>
+    <div class="product-incoming-stock-edit-product-name shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>
+  </div>
+  <div class="col-span-6 sm:col-span-8">
+    <label for="SKU" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">SKU</label>
+    <div class="product-incoming-stock-edit-product-sku shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>
+  </div>
+  <div class="col-span-6 sm:col-span-8">
+    <label for="package_qty" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Total ordered</label>
+    <div class="product-incoming-stock-edit-total-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>
+  </div>
+</div>
+
+<!-- prettier-ignore-->
+<div id="product-allocated-quantity-container-template" class="product-allocated-quantity-groups-edit hidden">
+    <div class="col-span-6 sm:col-span-12">
+        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group name</label>
+        <div class="product-quantity-group-name shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>
+    </div>
+
+    <div class="col-span-6 sm:col-span-6">
+        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group ordered quantity</label>
+        <div class="group-ordered-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>
+    </div>
+
+    <div class="col-span-6 sm:col-span-6">
+      <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Received quantity</label>
+      <input type="number" class="group-received-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+    </div>
+
+</div>
+
+<!--------------->
+
+<div
+    id="editIncomingStockModal"
+    tabindex="-1"
+    aria-hidden="true"
+    class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full"
+>
+    <div class="relative w-full max-w-4xl max-h-full">
+        <!-- Modal content -->
+        <form
+            action="{{ url_for('incoming_stock.accept') }}"
+            id="incoming-stock-edit-form"
+            method="post"
+            class="relative bg-white rounded-lg shadow dark:bg-gray-700"
+        >
+            {{ form_edit.hidden_tag() }}
+            <input type="hidden" name="inbound_order_id" id="incoming-stock-edit-id" value="0" />
+            <input type="hidden" name="received_products" id="incoming-stock-edit-received-products" value="0" />
+            <input type="hidden" name="next_url" id="inbound-order-edit-next_url" value="" />
+            <!-- Modal header -->
+            <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Edit incoming stock</h3>
+            </div>
+            <!-- Modal body -->
+            <div id="incoming-stock-edit-add-container"></div>
+
+            <!-- Modal footer -->
+            <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+                <button id="incoming-stock-submit-btn" name="submit" type="submit" class="hidden"></button>
+                <button
+                    id="incoming-stock-save-products-btn"
+                    name="save-products"
+                    type="button"
+                    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                >
+                    Accept goods
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
