@@ -874,8 +874,10 @@ function booking(product: IProduct, group: string) {
     console.log(product.SKU)
     div.innerHTML = product.SKU
 
-    const input: HTMLInputElement = document.querySelector('#product-event-group-hidden')
+    let input: HTMLInputElement = document.querySelector('#product-event-group-hidden')
     input.value = group.replace('_', ' ')
+    input = document.querySelector('#product-event-product-id')
+    input.value = product.id.toString()
 
     viewModal.hide()
     eventModal.show()

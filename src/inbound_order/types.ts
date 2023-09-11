@@ -23,6 +23,8 @@ export interface IWarehouse {
 export interface IProduct {
     id: number
     name: string
+    image: string
+    SKU: string
 }
 
 export interface IGroup {
@@ -59,6 +61,7 @@ export interface IInboundOrderBase {
 }
 
 export interface IInboundOrderOut extends IInboundOrderBase {
+  id: number
   uuid: string
   productsAllocated: IAllocatedProductOut[]
 }

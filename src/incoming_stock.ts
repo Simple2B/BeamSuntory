@@ -1,32 +1,13 @@
 import { Modal } from 'flowbite'
 import type { ModalOptions, ModalInterface } from 'flowbite'
 import { getFullImage } from './base'
+import { IInboundOrderOut, IAllocatedProductOut } from './inbound_order/types'
 
 interface SupDAWhProd {
     supplier: string
     delivery_agent: string
     warehouse: string
     product: string
-}
-
-interface IInboundOrder {
-    id: number
-    order_id: string
-    active_date: number
-    active_time: string
-    order_title: string
-    quantity: number
-    delivery_date: string
-    status: string
-    supplier_id: number
-    delivery_agent_id: number
-    warehouse_id: number
-    product_id: number
-    sup_da_wh_prod_objs: SupDAWhProd
-    inbound_order_prods: {
-        [index: string]: IInboundOrderProd[]
-    }
-    package_info: IPackageInfo
 }
 
 interface IPackageInfo {
@@ -43,13 +24,6 @@ interface IIncomingStockProduct{
     quantity_carton_master: number,
     group_id: number,
 }
-
-interface IInboundOrderProd {
-    product: { id: number; name: string; SKU: string; image: string }
-    group: { id: number; name: string }
-    quantity: number
-}
-
 let productGroupQuantity = {} as { [index: string]: number }
 let i = 0
 
@@ -63,11 +37,13 @@ const editModalOptions: ModalOptions = {
     backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
     closable: true,
     onHide: () => {
-        const incomingStockItems = document.querySelectorAll('.incoming-stock-edit-add-item')
+        const incomingStocksContainer = document.getElementById('incoming-stock-edit-add-container') as HTMLDivElement;
+        console.log(incomingStocksContainer);
+        const incomingStockItems = incomingStocksContainer.querySelectorAll('.incoming-stock-product-item');
+        console.log(incomingStockItems);
         incomingStockItems.forEach((item) => {
             item.remove()
-        })
-        sessionStorage.removeItem('inboundOrder')
+        });
     },
     onShow: () => {
         console.log('incoming-stock id: ')
@@ -83,11 +59,12 @@ const viewModalOptions: ModalOptions = {
     backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
     closable: true,
     onHide: () => {
-        const incomingStockItems = document.querySelectorAll('.incoming-stock-view-add-item')
-        incomingStockItems.forEach((item) => {
-            item.remove()
-        })
-        sessionStorage.removeItem('inboundOrder')
+        // const incomingStocksContainer = document.getElementById('incoming-stock-edit-add-container') as HTMLDivElement;
+        // const incomingStockItems = incomingStocksContainer.querySelectorAll('.product-incoming-stock-edit-template');
+        // console.log(incomingStockItems);
+        // incomingStockItems.forEach((item) => {
+        //     item.remove()
+        // });
     },
     onShow: () => {
         console.log('incoming-stock id: ')
@@ -103,102 +80,74 @@ const viewModal: ModalInterface = new Modal($viewModalElement, viewModalOptions)
 const $buttonElements = document.querySelectorAll('.accept-incoming-stock-edit-button')
 $buttonElements.forEach((e) =>
     e.addEventListener('click', () => {
-        const inboundOrder: IInboundOrder = JSON.parse(e.getAttribute('data-target'))
+        const inboundOrder: IInboundOrderOut = JSON.parse(e.getAttribute('data-target'))
         editIncomingStock(inboundOrder)
         //sessionStorage.setItem('inboundOrder', JSON.stringify(inboundOrder))
     })
 )
 
-function editIncomingStock(inboundOrder: IInboundOrder) {
+function editIncomingStock(inboundOrder: IInboundOrderOut) {
     let input: HTMLInputElement = document.querySelector('#incoming-stock-edit-id')
-    input.value = inboundOrder.id.toString()
+    input.value = inboundOrder.orderId;
 
-    if (Object.keys(inboundOrder.inbound_order_prods).length > 0) {
-        const currentInboundOrder = inboundOrder.inbound_order_prods[inboundOrder.order_id]
+    inboundOrder.productsAllocated.forEach(productAllocated => {
+        createIncomingStockOrderItems(productAllocated);
+    })
 
-        if (currentInboundOrder) {
-            for (let i = 0; i < currentInboundOrder.length; i++) {
-                createIncomingStockOrderItems(currentInboundOrder[i])
-            }
-        }
-    }
     editModal.show()
 }
 
-function createIncomingStockOrderItems(curInbOrder: IInboundOrderProd) {
+function createIncomingStockOrderItems(productAllocated: IAllocatedProductOut) {
     const incomingStockAddContainer = document.querySelector('#incoming-stock-edit-add-container')
-    const incomingStockAddItem = document.createElement('div')
-    incomingStockAddItem.classList.add('p-6', 'space-y-6', 'border-t', 'incoming-stock-edit-add-item')
-    incomingStockAddItem.innerHTML = `
-    <div class="incoming-stock-product-item grid grid-cols-12 gap-4" data-target-product-id="${curInbOrder.product.id}" >
-      <div class="product-full-image-anchor col-span-6 sm:col-span-4 sm:row-span-2 max-height-image-container">
-        <img src="data:image/png;base64, ${curInbOrder.product.image}" class="incoming-stock-edit-product-image w-full h-full object-cover">
-      </div>
-      <div class="col-span-6 sm:col-span-8">
-        <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Name</label>
-        <div
-          class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-        ${curInbOrder.product.name}
-        </div>
-      </div>
-      <div class="col-span-6 sm:col-span-8">
-        <label for="SKU" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">SKU</label>
-        <div
-          class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-        ${curInbOrder.product.SKU}
-        </div>
-      </div>
-      <div class="col-span-6 sm:col-span-6">
-        <label for="package_qty" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-          Qty. Ordered</label>
-        <div
-          class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-        ${curInbOrder.quantity}
-        </div>
-      </div>
-      <div class="col-span-6 sm:col-span-6">
-        <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Qty. received</label>
-        <input type="text" name="received_quantity"
-          class="incoming-stock-edit-received-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          placeholder="Quantity" required>
-      </div>
-      <div class="col-span-6 sm:col-span-6">
-      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity Per Wrap</label>
-      <input type="text"
-        class="quantity-per-wrap shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-        placeholder="Quantity" required>
-      </div>
+    // const incomingStockAddItem = document.createElement('div')
+    // incomingStockAddItem.classList.add('p-6', 'space-y-6', 'border-t', 'incoming-stock-edit-add-item')
 
-      <div class="col-span-6 sm:col-span-6">
-        <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity Of Wraps Per Carton</label>
-        <input type="text"
-          class="quantity-wrap-carton shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          placeholder="Quantity" required>
-      </div>
+    const productAllocatedContainer = document.getElementById('product-incoming-stock-edit-template').cloneNode(true) as HTMLDivElement;
+    productAllocatedContainer.classList.remove('hidden');
+    productAllocatedContainer.classList.add('grid');
+    productAllocatedContainer.removeAttribute('id');
 
-      <div class="col-span-6 sm:col-span-6">
-        <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity Of Cartons Per Master Carton (Optional)</label>
-        <input type="text"
-          class="quantity-carton-master shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          placeholder="Quantity" required>
-      </div>
-  `
-    const img: HTMLImageElement = incomingStockAddItem.querySelector('.incoming-stock-edit-product-image')
-    if (img.src.length < 100) {
-        const defaultBrandImage =
-            'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png'
-        img.src = defaultBrandImage
-    }
+    // Set image
+    const imageURL = productAllocated.product.image ? `data:image/png;base64, ${productAllocated.product.image}`: 'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png';
 
-    // NOTE: this counter needs to identify group id
-    productGroupQuantity[`group_id-${i}`] = curInbOrder.group.id
-    i++
-
-    incomingStockAddContainer.appendChild(incomingStockAddItem)
-    const imageAnchor = incomingStockAddItem.querySelector('.product-full-image-anchor')
-    imageAnchor.addEventListener('click', () => {
-        getFullImage(curInbOrder.product.id.toString())
+    const productImage: HTMLImageElement = productAllocatedContainer.querySelector('.product-incoming-stock-image');
+    productImage.setAttribute('src', imageURL);
+    productImage.addEventListener('click', () => {
+        getFullImage(productAllocated.product.id.toString())
     })
+
+    const productNameDiv = productAllocatedContainer.querySelector('.product-incoming-stock-edit-product-name');
+    productNameDiv.innerHTML = productAllocated.product.name;
+
+    const productSKUDiv = productAllocatedContainer.querySelector('.product-incoming-stock-edit-product-sku');
+    productSKUDiv.innerHTML = productAllocated.product.SKU;
+
+    const totalAllocatedQuantityDiv = productAllocatedContainer.querySelector('.product-incoming-stock-edit-total-quantity');
+    totalAllocatedQuantityDiv.innerHTML = productAllocated.quantity.toString();
+
+
+
+    const groupQuantityContainerTemplate = document.getElementById('product-allocated-quantity-container-template') as HTMLDivElement;
+    productAllocated.productQuantityGroups.forEach(quantityGroup => {
+        const groupQuantityContainer = groupQuantityContainerTemplate.cloneNode(true) as HTMLDivElement;
+        groupQuantityContainer.removeAttribute('id');
+        groupQuantityContainer.classList.remove('hidden');
+
+        const groupQuantityNameDiv = groupQuantityContainer.querySelector('.product-quantity-group-name');
+        groupQuantityNameDiv.innerHTML = quantityGroup.group.name;
+
+        const groupQuantityTotalDiv = groupQuantityContainer.querySelector('.group-ordered-quantity');
+        groupQuantityTotalDiv.innerHTML = quantityGroup.quantity.toString();
+
+        const groupQuantityReceivedInput = groupQuantityContainer.querySelector('.group-received-quantity') as HTMLInputElement;
+        groupQuantityReceivedInput.value = quantityGroup.quantity.toString();
+
+        productAllocatedContainer.appendChild(groupQuantityNameDiv.parentNode);
+        productAllocatedContainer.appendChild(groupQuantityTotalDiv.parentNode);
+        productAllocatedContainer.appendChild(groupQuantityReceivedInput.parentNode);
+    });
+
+    incomingStockAddContainer.appendChild(productAllocatedContainer);
 }
 
 // search flow
@@ -262,135 +211,162 @@ inboundOrderSaveProductsButton.addEventListener('click', () => {
     inboundOrderSubmitButton.click()
 })
 
-// ----view modal----
-const viewIncomingStockButtons = document.querySelectorAll('.incoming-stock-view-button')
-viewIncomingStockButtons.forEach((e) =>
-    e.addEventListener('click', () => {
-        const inboundOrder: IInboundOrder = JSON.parse(e.getAttribute('data-target'))
-        viewIncomingStock(inboundOrder)
-    })
-)
+document.addEventListener('DOMContentLoaded', () => {
+    // ----accept goods---
+    const acceptGoodsSubmitButton: HTMLButtonElement = document.querySelector('#incoming-stock-save-products-btn')
+    // ----view modal----
+    const viewIncomingStockButtons = document.querySelectorAll('.incoming-stock-view-button') as NodeListOf<HTMLButtonElement>;
+    const viewModalOrderId: HTMLDivElement = document.querySelector('#incoming-stock-view-order-id');
+    const viewModalOrderTitle: HTMLDivElement = document.querySelector('#incoming-stock-view-order-title');
+    const viewModalOrderStatus: HTMLDivElement = document.querySelector('#incoming-stock-view-status');
+    const viewModalSupplier: HTMLDivElement = document.querySelector('#incoming-stock-view-supplier-id');
+    const viewModalWarehouse: HTMLDivElement = document.querySelector('#incoming-stock-view-warehouse-id');
+    const viewModalActiveDate: HTMLDivElement = document.querySelector('#incoming-stock-view-active-date');
+    const viewModalActiveTime: HTMLDivElement = document.querySelector('#incoming-stock-view-active-time');
+    const viewModalDeliveryDate: HTMLDivElement = document.querySelector('#incoming-stock-view-delivery-date');
 
-function viewIncomingStock(inboundOrder: IInboundOrder) {
-    const packageInfo: IPackageInfo = inboundOrder.package_info
-    console.log(inboundOrder)
-
-    let div: HTMLDivElement = document.querySelector('#incoming-stock-view-order-id')
-    div.innerHTML = inboundOrder.order_id
-    div = document.querySelector('#incoming-stock-view-order-title')
-    div.innerHTML = inboundOrder.order_title
-    div = document.querySelector('#incoming-stock-view-active-date')
-    div.innerHTML = convertDate(inboundOrder.active_date.toString())
-    div = document.querySelector('#incoming-stock-view-active-time')
-    div.innerHTML = inboundOrder.active_time
-    div = document.querySelector('#incoming-stock-view-delivery-date')
-    div.innerHTML = convertDate(inboundOrder.delivery_date.toString())
-    div = document.querySelector('#incoming-stock-view-status')
-    div.innerHTML = inboundOrder.status
-    div = document.querySelector('#incoming-stock-view-supplier-id')
-    div.innerHTML = inboundOrder.sup_da_wh_prod_objs.supplier
-    div = document.querySelector('#incoming-stock-view-warehouse-id')
-    div.innerHTML = inboundOrder.sup_da_wh_prod_objs.warehouse
-
-    if (Object.keys(inboundOrder.inbound_order_prods).length > 0) {
-        const currentInboundOrder = inboundOrder.inbound_order_prods[inboundOrder.order_id]
-
-        if (currentInboundOrder) {
-            for (let i = 0; i < currentInboundOrder.length; i++) {
-                createViewIncomingStockItems(inboundOrder, currentInboundOrder[i])
-            }
-        }
-    }
-
-    viewModal.show()
-}
-
-function convertDate(date: string) {
-    const inputDate = date.split('T')[0]
-    const dateParts = inputDate.split('-')
-    const year = dateParts[0]
-    const month = dateParts[1]
-    const day = dateParts[2]
-    return `${month}/${day}/${year}`
-}
-
-// ----add inbound order item----
-function createViewIncomingStockItems(inbOrder: IInboundOrder = null, curInbOrder: IInboundOrderProd = null) {
-    console.log(inbOrder)
-
-    if (!inbOrder) {
-        const inboundOrder: IInboundOrder = JSON.parse(sessionStorage.getItem('inboundOrder'))
-        inbOrder = inboundOrder
-    }
-    const inboundOrderAddContainer = document.querySelector('#incoming-stock-view-add-container')
-    const inboundOrderAddItem = document.createElement('div')
-    inboundOrderAddItem.classList.add('p-6', 'space-y-6', 'border-t', 'incoming-stock-view-add-item')
-    inboundOrderAddItem.innerHTML = `
-    <div class="grid grid-cols-12 gap-5">
-        <div class="col-span-6 sm:col-span-4">
-            <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product</label>
-            <div
-                class="incoming-stock-view-add-product shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            </div>
-        </div>
-        <div class="col-span-6 sm:col-span-3">
-            <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">SKU</label>
-            <div
-                class="incoming-stock-view-add-SKU shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            </div>
-        </div>
-        <div class="col-span-6 sm:col-span-3">
-        <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label>
-        <div
-            class="incoming-stock-view-add-group shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-        </div>
-        </div>
-        <div class="col-span-6 sm:col-span-2">
-        <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
-        <div
-            class="incoming-stock-view-add-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-        </div>
-        </div>
-    </div>
-  `
-
-    const inboundOrderAddProduct: HTMLInputElement = inboundOrderAddItem.querySelector(
-        '.incoming-stock-view-add-product'
+    viewIncomingStockButtons.forEach(viewButton =>
+        viewButton.addEventListener('click', () => {
+            const inboundOrder: IInboundOrderOut = JSON.parse(viewButton.getAttribute('data-target'));
+            viewModalOrderId.innerHTML = inboundOrder.orderId;
+            viewModalOrderTitle.innerHTML = inboundOrder.title;
+            viewModalOrderStatus.innerHTML = inboundOrder.status;
+            viewModalSupplier.innerHTML = inboundOrder.supplier.name;
+            viewModalWarehouse.innerHTML = inboundOrder.warehouse.name;
+            viewModalActiveDate.innerHTML = inboundOrder.activeDate;
+            viewModalActiveTime.innerHTML = inboundOrder.activeTime;
+            viewModalDeliveryDate.innerHTML = inboundOrder.deliveryDate;
+            viewModal.show();
+        })
     )
-    const inboundOrderAddSKU: HTMLInputElement = inboundOrderAddItem.querySelector('.incoming-stock-view-add-SKU')
-    const inboundOrderAddGroup: HTMLInputElement = inboundOrderAddItem.querySelector('.incoming-stock-view-add-group')
-    const inboundOrderAddQuantity: HTMLInputElement = inboundOrderAddItem.querySelector(
-        '.incoming-stock-view-add-quantity'
-    )
-
-    inboundOrderAddProduct.innerHTML = curInbOrder.product.name
-    inboundOrderAddSKU.innerHTML = curInbOrder.product.SKU
-    inboundOrderAddGroup.innerHTML = curInbOrder.group.name
-    inboundOrderAddQuantity.innerHTML = curInbOrder.quantity.toString()
-
-    inboundOrderAddContainer.appendChild(inboundOrderAddItem)
-}
-
-// function to filter order by status
-const orderFilterInputs = document.querySelectorAll('.incoming-stock-filter-input')
-const sortByNameIncomingStockStorage = JSON.parse(sessionStorage.getItem('sortByNameIncomingStock'))
-
-if (sortByNameIncomingStockStorage) {
-    const filterDropdownContainer = document.querySelector('#dropdownRadioButton-incoming-stock-status')
-    filterDropdownContainer.innerHTML = `${sortByNameIncomingStockStorage}
-          <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-          viewBox="0 0 10 6">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="m1 1 4 4 4-4" />
-        </svg>`
-}
-
-orderFilterInputs.forEach((input: HTMLInputElement) => {
-    const hiddenInput = document.querySelector('#sort_by') as HTMLInputElement
-    input.addEventListener('change', () => {
-        if (input.checked) {
-            hiddenInput.value = input.value
-            sessionStorage.setItem('sortByNameIncomingStock', JSON.stringify(input.value))
-        }
+    
+    // accept goods submit
+    acceptGoodsSubmitButton.addEventListener('click', () => {
+        console.log('click');
     })
 })
+
+
+// function viewIncomingStock(inboundOrder: IInboundOrder) {
+//     const packageInfo: IPackageInfo = inboundOrder.package_info
+//     console.log(inboundOrder)
+
+//     let div: HTMLDivElement = document.querySelector('#incoming-stock-view-order-id')
+//     div.innerHTML = inboundOrder.order_id
+//     div = document.querySelector('#incoming-stock-view-order-title')
+//     div.innerHTML = inboundOrder.order_title
+//     div = document.querySelector('#incoming-stock-view-active-date')
+//     div.innerHTML = convertDate(inboundOrder.active_date.toString())
+//     div = document.querySelector('#incoming-stock-view-active-time')
+//     div.innerHTML = inboundOrder.active_time
+//     div = document.querySelector('#incoming-stock-view-delivery-date')
+//     div.innerHTML = convertDate(inboundOrder.delivery_date.toString())
+//     div = document.querySelector('#incoming-stock-view-status')
+//     div.innerHTML = inboundOrder.status
+//     div = document.querySelector('#incoming-stock-view-supplier-id')
+//     div.innerHTML = inboundOrder.sup_da_wh_prod_objs.supplier
+//     div = document.querySelector('#incoming-stock-view-warehouse-id')
+//     div.innerHTML = inboundOrder.sup_da_wh_prod_objs.warehouse
+
+//     if (Object.keys(inboundOrder.inbound_order_prods).length > 0) {
+//         const currentInboundOrder = inboundOrder.inbound_order_prods[inboundOrder.order_id]
+
+//         if (currentInboundOrder) {
+//             for (let i = 0; i < currentInboundOrder.length; i++) {
+//                 createViewIncomingStockItems(inboundOrder, currentInboundOrder[i])
+//             }
+//         }
+//     }
+
+//     viewModal.show()
+// }
+
+// function convertDate(date: string) {
+//     const inputDate = date.split('T')[0]
+//     const dateParts = inputDate.split('-')
+//     const year = dateParts[0]
+//     const month = dateParts[1]
+//     const day = dateParts[2]
+//     return `${month}/${day}/${year}`
+// }
+
+// ----add inbound order item----
+// function createViewIncomingStockItems(inbOrder: IInboundOrder = null, curInbOrder: IInboundOrderProd = null) {
+//     console.log(inbOrder)
+
+//     if (!inbOrder) {
+//         const inboundOrder: IInboundOrder = JSON.parse(sessionStorage.getItem('inboundOrder'))
+//         inbOrder = inboundOrder
+//     }
+//     const inboundOrderAddContainer = document.querySelector('#incoming-stock-view-add-container')
+//     const inboundOrderAddItem = document.createElement('div')
+//     inboundOrderAddItem.classList.add('p-6', 'space-y-6', 'border-t', 'incoming-stock-view-add-item')
+//     inboundOrderAddItem.innerHTML = `
+//     <div class="grid grid-cols-12 gap-5">
+//         <div class="col-span-6 sm:col-span-4">
+//             <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product</label>
+//             <div
+//                 class="incoming-stock-view-add-product shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+//             </div>
+//         </div>
+//         <div class="col-span-6 sm:col-span-3">
+//             <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">SKU</label>
+//             <div
+//                 class="incoming-stock-view-add-SKU shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+//             </div>
+//         </div>
+//         <div class="col-span-6 sm:col-span-3">
+//         <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label>
+//         <div
+//             class="incoming-stock-view-add-group shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+//         </div>
+//         </div>
+//         <div class="col-span-6 sm:col-span-2">
+//         <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
+//         <div
+//             class="incoming-stock-view-add-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+//         </div>
+//         </div>
+//     </div>
+//   `
+
+//     const inboundOrderAddProduct: HTMLInputElement = inboundOrderAddItem.querySelector(
+//         '.incoming-stock-view-add-product'
+//     )
+//     const inboundOrderAddSKU: HTMLInputElement = inboundOrderAddItem.querySelector('.incoming-stock-view-add-SKU')
+//     const inboundOrderAddGroup: HTMLInputElement = inboundOrderAddItem.querySelector('.incoming-stock-view-add-group')
+//     const inboundOrderAddQuantity: HTMLInputElement = inboundOrderAddItem.querySelector(
+//         '.incoming-stock-view-add-quantity'
+//     )
+
+//     inboundOrderAddProduct.innerHTML = curInbOrder.product.name
+//     inboundOrderAddSKU.innerHTML = curInbOrder.product.SKU
+//     inboundOrderAddGroup.innerHTML = curInbOrder.group.name
+//     inboundOrderAddQuantity.innerHTML = curInbOrder.quantity.toString()
+
+//     inboundOrderAddContainer.appendChild(inboundOrderAddItem)
+// }
+
+// // function to filter order by status
+// const orderFilterInputs = document.querySelectorAll('.incoming-stock-filter-input')
+// const sortByNameIncomingStockStorage = JSON.parse(sessionStorage.getItem('sortByNameIncomingStock'))
+
+// if (sortByNameIncomingStockStorage) {
+//     const filterDropdownContainer = document.querySelector('#dropdownRadioButton-incoming-stock-status')
+//     filterDropdownContainer.innerHTML = `${sortByNameIncomingStockStorage}
+//           <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+//           viewBox="0 0 10 6">
+//           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+//             d="m1 1 4 4 4-4" />
+//         </svg>`
+// }
+
+// orderFilterInputs.forEach((input: HTMLInputElement) => {
+//     const hiddenInput = document.querySelector('#sort_by') as HTMLInputElement
+//     input.addEventListener('change', () => {
+//         if (input.checked) {
+//             hiddenInput.value = input.value
+//             sessionStorage.setItem('sortByNameIncomingStock', JSON.stringify(input.value))
+//         }
+//     })
+// })

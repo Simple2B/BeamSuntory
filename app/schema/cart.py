@@ -1,5 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel
+from .product import Product
 
 
 class Cart(BaseModel):
@@ -8,6 +9,7 @@ class Cart(BaseModel):
     status: str
     quantity: int
     user_id: int
+    product: Product
 
     created_at: datetime
 

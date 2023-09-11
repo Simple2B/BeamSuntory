@@ -25,3 +25,32 @@ from .store_category import store_category_blueprint
 from .inventory import inventory_blueprint
 from .adjust import adjust_blueprint
 from .event import event_blueprint
+
+BLUEPRINTS = (
+    main_blueprint,
+    auth_blueprint,
+    user_blueprint,
+    stock_target_group_blueprint,
+    master_group_blueprint,
+    product_blueprint,
+    group_for_product_blueprint,
+    master_group_for_product_blueprint,
+    warehouse_blueprint,
+    delivery_agent_blueprint,
+    ship_request_blueprint,
+    supplier_blueprint,
+    cart_blueprint,
+    inbound_order_blueprint,
+    store_blueprint,
+    incoming_stock_blueprint,
+    outgoing_stock_blueprint,
+    pickup_order_blueprint,
+    pickup_inbound_blueprint,
+    division_blueprint,
+    assign_blueprint,
+    request_share_blueprint,
+    store_category_blueprint,
+    inventory_blueprint,
+    adjust_blueprint,
+    event_blueprint,
+)
