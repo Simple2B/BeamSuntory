@@ -6,6 +6,7 @@
 {% else %}
 {% set base_url = url_for('incoming_stock.get_all') %}
 {% endif %}
+
 <div class="relative overflow-visible shadow-md sm:rounded-lg">
   <div class="flex gap-5">
     <form id="incoming-stock-filter-form" action="{{url_for('incoming_stock.sort')}}" method="post"

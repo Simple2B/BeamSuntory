@@ -1066,8 +1066,6 @@ def full_image(id: int):
 
     data = {
         "name": product.name,
-        "image": product.image if product.image else os.environ.get("DEFAULT_IMAGE"),
+        "image": product.image if product.image else app.config["DEFAULT_IMAGE"],
     }
-    response = jsonify(data)
-    response.status_code = 200
-    return response
+    return jsonify(data)
