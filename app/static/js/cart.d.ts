@@ -1,16 +1,1 @@
-declare const priceElements: NodeListOf<Element>;
-declare const quantityElements: NodeListOf<Element>;
-declare const totalPriceElement: Element;
-declare const totalQuantityElement: Element;
-declare const tableCartItems: NodeListOf<Element>;
-declare let totalPrice: number;
-declare let totalQuantity: number;
-declare const deliverToStoreBtn: Element;
-declare const createStoreRequestContainer: HTMLDivElement;
-declare const deleteButtons: NodeListOf<Element>;
-declare const favoriteCheckbox: HTMLInputElement;
-declare const storeSelect: HTMLSelectElement;
-declare const optionsStore: NodeListOf<Element>;
-declare const storeCategorySelect: HTMLSelectElement;
-declare const options: NodeListOf<HTMLOptionElement>;
-declare const salesRepLockerCheckbox: HTMLInputElement;
+export {};

@@ -97,6 +97,7 @@ def get_all():
         start_to=start_to,
         end_from=end_from,
         end_to=end_to,
+        user=current_user,
     )
 
 
@@ -139,16 +140,15 @@ def create():
         date_to=end_date,
         quantity=form.quantity.data,
         product=product,
+        cart_id=form.cart_id.data,
         comment=form.comment.data,
     )
     db.session.add(event)
 
-    cart: m.Cart = m.Cart(
-        product_id=product.id,
-        quantity=form.quantity.data,
-        user_id=current_user.id,
-        group=form.group.data,
-    )
+    cart: m.Cart = db.session.get(m.Cart, form.cart_id.data)
+    if cart:
+        cart.quantity = form.quantity.data
+        log(log.INFO, "Cart item quantity updated. Cart: [%s]", cart)
     db.session.add(cart)
 
     db.session.commit()
