@@ -2,7 +2,6 @@ import base64
 import json
 from datetime import datetime
 from io import BytesIO
-import os
 import pandas
 from flask import (
     Blueprint,

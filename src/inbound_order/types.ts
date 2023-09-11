@@ -61,6 +61,7 @@ export interface IInboundOrderBase {
 }
 
 export interface IInboundOrderOut extends IInboundOrderBase {
+  id: number
   uuid: string
   productsAllocated: IAllocatedProductOut[]
 }
