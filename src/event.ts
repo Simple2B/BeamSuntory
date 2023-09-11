@@ -68,60 +68,52 @@ const clearDateSearchButton = document.querySelector('#product-event-clear-butto
 clearDateSearchButton.addEventListener('click', clearSearchDateInput)
 
 const downloadCSV = async function () {
-  // Filters
-  const searchEventInput: HTMLInputElement = document.querySelector('#table-search-event')
-  const dateEventStartFromInput: HTMLInputElement = document.querySelector(
-      '#product-event-sort-start-from-datepicker'
-  )
-  const dateEventStartToInput: HTMLInputElement = document.querySelector('#product-event-sort-start-to-datepicker')
-  const dateEventEndFromInput: HTMLInputElement = document.querySelector('#product-event-sort-end-from-datepicker')
-  const dateEventEndToInput: HTMLInputElement = document.querySelector('#product-event-sort-end-to-datepicker')
+    // Filters
+    const searchEventInput: HTMLInputElement = document.querySelector('#table-search-event')
+    const dateEventStartFromInput: HTMLInputElement = document.querySelector(
+        '#product-event-sort-start-from-datepicker'
+    )
+    const dateEventStartToInput: HTMLInputElement = document.querySelector('#product-event-sort-start-to-datepicker')
+    const dateEventEndFromInput: HTMLInputElement = document.querySelector('#product-event-sort-end-from-datepicker')
+    const dateEventEndToInput: HTMLInputElement = document.querySelector('#product-event-sort-end-to-datepicker')
 
-  const filtersMap = {
-    'q': searchEventInput,
-    'start_from': dateEventStartFromInput,
-    'start_to': dateEventStartToInput,
-    'end_from': dateEventEndFromInput,
-    'end_to': dateEventEndToInput,
-  }
+    const filtersMap = {
+        q: searchEventInput,
+        start_from: dateEventStartFromInput,
+        start_to: dateEventStartToInput,
+        end_from: dateEventEndFromInput,
+        end_to: dateEventEndToInput,
+    }
 
-  const filterQuery = [];
-  for(const [queryKey, queryInput] of Object.entries(filtersMap)) {
-    filterQuery.push(`${queryKey}=${queryInput.value}`);
-  }
+    const filterQuery = []
+    for (const [queryKey, queryInput] of Object.entries(filtersMap)) {
+        filterQuery.push(`${queryKey}=${queryInput.value}`)
+    }
 
+    // CSV Headers
+    const csvData = ['id,product_name,sku,date_start,date_end,comment']
+    let pages = 1
+    const queryTail = filterQuery.join('&')
 
-  // CSV Headers
-  const csvData = ["id,product_name,sku,date_start,date_end,comment"]
-  let pages = 1
-  const queryTail = filterQuery.join('&');
+    for (let page = 1; page <= pages; page++) {
+        const url = [`api?page={page}`, queryTail].join('&')
+        const res = await fetch(url)
+        const data: IEventsResponse = await res.json()
+        data.events.forEach((event) => {
+            csvData.push(
+                [event.id, event.product.name, event.product.SKU, event.dateFrom, event.dateTo, event.comment].join(',')
+            )
+        })
+        pages = data.pagination.pages
+    }
 
-  for(let page = 1; page <= pages; page++){
-      const url = [`api?page={page}`, queryTail].join('&')
-      const res = await fetch(url);
-      const data: IEventsResponse = await res.json();
-      data.events.forEach((event) => {
-          csvData.push(
-              [
-                  event.id,
-                  event.product.name,
-                  event.product.SKU,
-                  event.dateFrom,
-                  event.dateTo,
-                  event.comment,
-              ].join(',')
-          )
-      })
-      pages = data.pagination.pages;
-  }
-
-  const blob = new Blob([csvData.join('\n')], { type: 'text/csv' });
-  const url = window.URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.setAttribute('href', url)
-  a.setAttribute('download', 'events.csv');
-  a.click()
-  a.remove();
+    const blob = new Blob([csvData.join('\n')], { type: 'text/csv' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.setAttribute('href', url)
+    a.setAttribute('download', 'events.csv')
+    a.click()
+    a.remove()
 }
 
 // search flow
@@ -140,8 +132,8 @@ document.addEventListener('DOMContentLoaded', () => {
         datepicker.addEventListener('changeDate', (e) => {
             getFilterValues()
         })
-    });
+    })
 
-    const buttonDownloadCSV = document.getElementById('button-csv-download');
-    buttonDownloadCSV.addEventListener('click', downloadCSV);
+    const buttonDownloadCSV = document.getElementById('button-csv-download')
+    buttonDownloadCSV.addEventListener('click', downloadCSV)
 })

@@ -9,5 +9,5 @@ class EventFormCreate(FlaskForm):
     date_from = StringField("Date from", [DataRequired()])
     date_to = StringField("Date to", [DataRequired()])
     quantity = IntegerField("Quantity", [DataRequired()])
-    group = StringField("Group", [DataRequired()])
+    cart_id = IntegerField("Cart ID", [DataRequired()])
     comment = StringField("Comment")
