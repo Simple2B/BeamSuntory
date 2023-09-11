@@ -155,20 +155,6 @@ def create():
         cart.quantity = form.quantity.data
         log(log.INFO, "Cart item quantity updated. Cart: [%s]", cart)
 
-    warehouse_product: m.WarehouseProduct = db.session.scalar(
-        m.WarehouseProduct.select().where(
-            m.WarehouseProduct.product_id == product.id,
-            m.WarehouseProduct.warehouse_id == cart.warehouse_id,
-        )
-    )
-    # if warehouse_product:
-    #     warehouse_product.product_quantity -= form.quantity.data
-    #     log(
-    #         log.INFO,
-    #         "Warehouse product quantity updated. Warehouse product: [%s]",
-    #         warehouse_product,
-    #     )
-
     db.session.commit()
     log(log.INFO, "Item added: [%s]", event)
     flash("Item added!", "success")
