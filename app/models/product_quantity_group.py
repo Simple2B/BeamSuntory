@@ -8,6 +8,7 @@ from .utils import ModelMixin
 
 if TYPE_CHECKING:
     from .group import Group
+    from .package_info import PackageInfo
 
 
 class ProductQuantityGroup(db.Model, ModelMixin):
@@ -22,3 +23,4 @@ class ProductQuantityGroup(db.Model, ModelMixin):
     product_allocated_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("products_allocated.id")
     )
+    package_info: orm.Mapped["PackageInfo"] = orm.relationship()

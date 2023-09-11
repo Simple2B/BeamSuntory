@@ -10,8 +10,8 @@ class PackageInfo(db.Model, ModelMixin):
     quantity_per_wrap: orm.Mapped[int] = orm.mapped_column()
     quantity_wrap_carton: orm.Mapped[int] = orm.mapped_column()
     quantity_carton_master: orm.Mapped[int] = orm.mapped_column()
-    inbound_order_id: orm.Mapped[int] = orm.mapped_column(
-        ForeignKey("inbound_orders.id")
+    product_quantity_group_id: orm.Mapped[int] = orm.mapped_column(
+        ForeignKey("product_quantity_group.id")
     )
 
     @property
