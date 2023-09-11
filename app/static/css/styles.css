@@ -3355,6 +3355,11 @@ input:checked + .toggle-bg {
   color: rgb(55 65 81 / var(--tw-text-opacity));
 }
 
+.text-gray-800 {
+  --tw-text-opacity: 1;
+  color: rgb(31 41 55 / var(--tw-text-opacity));
+}
+
 .text-gray-900 {
   --tw-text-opacity: 1;
   color: rgb(17 24 39 / var(--tw-text-opacity));
@@ -3398,11 +3403,6 @@ input:checked + .toggle-bg {
 .text-yellow-400 {
   --tw-text-opacity: 1;
   color: rgb(227 160 8 / var(--tw-text-opacity));
-}
-
-.text-gray-800 {
-  --tw-text-opacity: 1;
-  color: rgb(31 41 55 / var(--tw-text-opacity));
 }
 
 .underline {
@@ -3731,6 +3731,14 @@ input[type="radio"]:checked {
 button:disabled,
 button[disabled]{
   background-color: rgb(124, 138, 168) !important;
+}
+
+.datepicker::-moz-placeholder {
+  color: rgb(255, 255, 255) !important;
+}
+
+.datepicker::placeholder {
+  color: rgb(255, 255, 255) !important;
 }
 
 .selection\:bg-transparent *::-moz-selection {

@@ -372,6 +372,10 @@ const closingViewModalButton = document.getElementById('view-product-modal-close
 closingViewModalButton.addEventListener('click', () => {
     viewModal.hide()
 })
+const closingEventModalButton = document.getElementById('event-product-modal-close-btn')
+closingEventModalButton.addEventListener('click', () => {
+    eventModal.hide()
+})
 
 const $buttonElements = document.querySelectorAll('.product-edit-button')
 $buttonElements.forEach((e) =>
@@ -416,44 +420,52 @@ const bookedDates = [getFirstAndLastDate()].map((d) => {
     return new DateTime(d, 'YYYY-MM-DD')
 })
 
-const picker = new easepick.create({
+
+const DATA_FROM_BE = {
+    '2023-09-03': '25',
+    '2023-09-04': '26',
+    '2023-09-05': '27',
+    '2023-09-06': '28',
+    '2023-09-07': '29',
+    '2023-09-11': '28',
+
+}
+
+  const picker = new easepick.create({
     element: document.getElementById('datepicker'),
     css: [
-        'https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.css',
-        'https://easepick.com/css/demo_hotelcal.css',
+      'https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.css',
+      'https://easepick.com/css/demo_prices.css',
     ],
-    plugins: ['RangePlugin', 'LockPlugin'],
-    RangePlugin: {
-        tooltipNumber(num: number, date: any) {
-            console.log('num', num)
-            console.log('date', date)
+    setup(picker: any) {
+      // generate random prices
+      const randomInt = (min: number, max: number) => {
+        return Math.floor(Math.random() * (max - min + 1) + min)
+    }
+    const prices: { [key: string]: string } = {};
 
-            return num - 1
-        },
-    },
-    LockPlugin: {
-        minDate: new Date(),
-        minDays: 2,
-        inseparable: true,
-        filter(date: any, picked: any) {
-            if (picked.length === 1) {
-                const incl = date.isBefore(picked[0]) ? '[)' : '(]'
-                return !picked[0].isSame(date, 'day') && date.inArray(bookedDates, incl)
-            }
-            return date.inArray(bookedDates, '[)')
-        },
-    },
-})
 
-const checkQuantityByDateButton = document.querySelector('#check-quantity-by-date-btn')
+    Object.entries(DATA_FROM_BE).forEach(([date, price]) => {
+        prices[date] = price;
+    });
+
+      
+      // add price to day element
+    picker.on('view', (evt: any) => {
+    const { view, date, target } = evt.detail;
+    const d = date ? date.format('YYYY-MM-DD') : null;
+
+    if (view === 'CalendarDay' && prices[d]) {
+        const span = target.querySelector('.day-price') || document.createElement('span');
+        span.className = 'day-price';
+        span.innerHTML = prices[d];
+        target.append(span);
+    }
+    });
+}
+  });
+
 const datepicker = document.querySelector('#datepicker') as HTMLInputElement
-
-checkQuantityByDateButton.addEventListener('click', () => {
-    const dateRange = datepicker.value
-    const [startDate, endDate] = dateRange.split(' - ')
-
-    console.log(startDate, endDate)
-})
 
 // search flow
 const searchInput: HTMLInputElement = document.querySelector('#table-search-products')
@@ -860,6 +872,7 @@ function booking(product: IProduct, group: string) {
     const input: HTMLInputElement = document.querySelector('#product-event-group-hidden')
     input.value = group.replace('_', ' ')
 
+    viewModal.hide()
     eventModal.show()
 }
 
@@ -1774,23 +1787,3 @@ eventSortToggleButton.addEventListener('change', () => {
     getFilterValues(eventSortToggleButton.checked)
     console.log(eventSortToggleButton.checked)
 })
-
-const bookingAvaliableQuantity = document.querySelector('#product-available-quantity-by-date') as HTMLInputElement
-const bookingDesiredQuantity = document.querySelector('#product-event-quantity') as HTMLInputElement
-
-bookingAvaliableQuantity.addEventListener('change', () => {
-    validateBookingQuantity()
-})
-
-bookingDesiredQuantity.addEventListener('change', () => {
-    validateBookingQuantity()
-})
-
-const validateBookingQuantity = () => {
-    const bookingButton = document.querySelector('#product-event-submit-btn') as HTMLButtonElement
-    bookingButton.disabled = true
-
-    if (parseInt(bookingAvaliableQuantity.value) < parseInt(bookingDesiredQuantity.value)) {
-        bookingButton.disabled = false
-    }
-}
