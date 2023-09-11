@@ -428,44 +428,49 @@ const DATA_FROM_BE = {
     '2023-09-06': '28',
     '2023-09-07': '29',
     '2023-09-11': '28',
-
 }
 
-  const picker = new easepick.create({
+const picker = new easepick.create({
     element: document.getElementById('datepicker'),
     css: [
-      'https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.css',
-      'https://easepick.com/css/demo_prices.css',
+        'https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.css',
+        'https://easepick.com/css/demo_prices.css',
     ],
+    autoApply: true,
+    inline: true,
+    plugins: ['LockPlugin'],
+    LockPlugin: {        
+        filter(date: any) {          
+            return date.inArray(bookedDates, '[)');
+        }
+    },    
+
     setup(picker: any) {
-      // generate random prices
-      const randomInt = (min: number, max: number) => {
-        return Math.floor(Math.random() * (max - min + 1) + min)
+        const randomInt = (min: number, max: number) => {
+            return Math.floor(Math.random() * (max - min + 1) + min)
+        }
+        const prices: { [key: string]: string } = {};
+
+        Object.entries(DATA_FROM_BE).forEach(([date, price]) => {
+            prices[date] = price;
+        });
+        
+        picker.on('view', (evt: any) => {
+            const { view, date, target } = evt.detail;            
+            const d = date ? date.format('YYYY-MM-DD') : null;
+            const month = date ? date.format('MM') : null;
+
+            if (view === 'CalendarDay' && prices[d]) {
+                const span = target.querySelector('.day-price') || document.createElement('span');
+                span.className = 'day-price';
+                span.innerHTML = prices[d];
+                target.append(span);
+            }      
+            //GET DATA AND AMOUNT FORM BE
+        });        
     }
-    const prices: { [key: string]: string } = {};
+});
 
-
-    Object.entries(DATA_FROM_BE).forEach(([date, price]) => {
-        prices[date] = price;
-    });
-
-      
-      // add price to day element
-    picker.on('view', (evt: any) => {
-    const { view, date, target } = evt.detail;
-    const d = date ? date.format('YYYY-MM-DD') : null;
-
-    if (view === 'CalendarDay' && prices[d]) {
-        const span = target.querySelector('.day-price') || document.createElement('span');
-        span.className = 'day-price';
-        span.innerHTML = prices[d];
-        target.append(span);
-    }
-    });
-}
-  });
-
-const datepicker = document.querySelector('#datepicker') as HTMLInputElement
 
 // search flow
 const searchInput: HTMLInputElement = document.querySelector('#table-search-products')
