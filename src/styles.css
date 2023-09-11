@@ -57,3 +57,7 @@ button:disabled,
 button[disabled]{
   background-color: rgb(124, 138, 168) !important;
 }
+
+.datepicker::placeholder {
+    color: rgb(255, 255, 255) !important;
+}

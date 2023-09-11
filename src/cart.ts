@@ -45,7 +45,7 @@ totalPriceElement.textContent = `$${totalPrice.toFixed(2)}`
 totalQuantityElement.textContent = totalQuantity.toString()
 
 // --add delivery form when create ship request--
-const deliverToStoreBtn = document.querySelector('#cart-deliver-to-store-btn')
+const deliverToStoreBtn = document.querySelector('#cart-deliver-to-store-btn') as HTMLButtonElement
 const createStoreRequestContainer = document.querySelector('#cart-create-store-request-container') as HTMLDivElement
 
 deliverToStoreBtn.addEventListener('click', () => {
@@ -221,7 +221,7 @@ const picker = new easepick.create({
     },
     LockPlugin: {
         minDate: new Date(),
-        minDays: 2,
+        minDays: 1,
         inseparable: true,
         filter(date: any, picked: any) {
             if (picked.length === 1) {
