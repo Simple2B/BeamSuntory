@@ -68,7 +68,7 @@ def get_all():
     )
 
 
-@pickup_inbound_blueprint.route("/pickup/<int:id>", methods=["GET"])  # TODO GET -> PUT
+@pickup_inbound_blueprint.route("/pickup/<int:id>", methods=["PUT"])
 @login_required
 def pickup(id: int):
     inbound_order: m.InboundOrder = db.session.get(m.InboundOrder, id)
@@ -76,7 +76,7 @@ def pickup(id: int):
         log(log.INFO, "There is no inbound order with id: [%s]", id)
         flash("There is no such inbound order", "danger")
         return "no inbound order", 404
-    inbound_order.status = s.InboundOrderStatus.in_transit  # TODO remove
+    inbound_order.status = s.InboundOrderStatus.in_transit
     inbound_order.save()
 
     log(log.INFO, "Inbound order pickup done. Inbound order: [%s]", inbound_order)

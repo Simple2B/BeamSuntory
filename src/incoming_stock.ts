@@ -236,7 +236,6 @@ document.addEventListener('DOMContentLoaded', () => {
             viewModalActiveDate.innerHTML = inboundOrder.activeDate;
             viewModalActiveTime.innerHTML = inboundOrder.activeTime;
             viewModalDeliveryDate.innerHTML = inboundOrder.deliveryDate;
-
             viewModal.show();
         })
     )
