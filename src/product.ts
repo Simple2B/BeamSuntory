@@ -1,6 +1,7 @@
 import { Modal } from 'flowbite'
 import type { ModalOptions, ModalInterface } from 'flowbite'
 import Datepicker from 'flowbite-datepicker/Datepicker'
+import { easepick } from '@easepick/bundle'
 
 interface IProduct {
     id: number
@@ -313,12 +314,34 @@ const adjustModalOptions: ModalOptions = {
 const modalShipAssignOptions: ModalOptions = {
     placement: 'bottom-right',
     backdrop: 'dynamic',
-    backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
+    backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-51',
     closable: true,
     onHide: () => {
         sessionStorage.removeItem('product')
     },
     onShow: () => {},
+    onToggle: () => {
+        console.log('modal has been toggled')
+    },
+}
+
+const eventModalOptions: ModalOptions = {
+    placement: 'bottom-right',
+    backdrop: 'dynamic',
+    backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-51',
+    closable: true,
+    onHide: () => {
+        const product = JSON.parse(sessionStorage.product)
+        const mstrGroupsEntries = Object.entries(product.mstr_groups_groups)
+
+        mstrGroupsEntries.forEach(([key, value]: [string, string]) => {
+            deleteShipAssignButton(value.replace(/\s/g, '_'), key)
+        })
+        clearProductGroupContainer()
+    },
+    onShow: () => {
+        console.log('modal has been shown')
+    },
     onToggle: () => {
         console.log('modal has been toggled')
     },
@@ -331,7 +354,7 @@ const editModal: ModalInterface = new Modal($editProductModalElement, modalOptio
 const requestShareModal: ModalInterface = new Modal($requestShareModalElement, modalShipAssignOptions)
 const shipModal: ModalInterface = new Modal($shipModalElement, modalShipAssignOptions)
 const assignModal: ModalInterface = new Modal($assignModalElement, modalShipAssignOptions)
-const eventModal: ModalInterface = new Modal($eventProductModalElement, modalOptions)
+const eventModal: ModalInterface = new Modal($eventProductModalElement, modalShipAssignOptions)
 
 const closingAddModalButton = document.getElementById('add-product-modal-close-btn')
 closingAddModalButton.addEventListener('click', () => {
@@ -365,6 +388,72 @@ $addButtonElements.forEach((e) =>
         addProduct(groups)
     })
 )
+
+// pick date range
+const { DateTime } = easepick
+function formatDate(date: Date): string {
+    const year = date.getFullYear()
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const day = date.getDate().toString().padStart(2, '0')
+    return `${year}-${month}-${day}`
+}
+
+function getFirstAndLastDate() {
+    const today = new Date()
+    const fifthDayBefore = new Date(today)
+    fifthDayBefore.setDate(today.getDate() - 5)
+    const fifthDayAfter = new Date(today)
+    fifthDayAfter.setDate(today.getDate() + 6)
+    return [formatDate(fifthDayBefore), formatDate(fifthDayAfter)]
+}
+
+const bookedDates = [getFirstAndLastDate()].map((d) => {
+    if (d instanceof Array) {
+        const start = new Date(d[0])
+        const end = new Date(d[1])
+        return [start, end]
+    }
+    return new DateTime(d, 'YYYY-MM-DD')
+})
+
+const picker = new easepick.create({
+    element: document.getElementById('datepicker'),
+    css: [
+        'https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.css',
+        'https://easepick.com/css/demo_hotelcal.css',
+    ],
+    plugins: ['RangePlugin', 'LockPlugin'],
+    RangePlugin: {
+        tooltipNumber(num: number, date: any) {
+            console.log('num', num)
+            console.log('date', date)
+
+            return num - 1
+        },
+    },
+    LockPlugin: {
+        minDate: new Date(),
+        minDays: 2,
+        inseparable: true,
+        filter(date: any, picked: any) {
+            if (picked.length === 1) {
+                const incl = date.isBefore(picked[0]) ? '[)' : '(]'
+                return !picked[0].isSame(date, 'day') && date.inArray(bookedDates, incl)
+            }
+            return date.inArray(bookedDates, '[)')
+        },
+    },
+})
+
+const checkQuantityByDateButton = document.querySelector('#check-quantity-by-date-btn')
+const datepicker = document.querySelector('#datepicker') as HTMLInputElement
+
+checkQuantityByDateButton.addEventListener('click', () => {
+    const dateRange = datepicker.value
+    const [startDate, endDate] = dateRange.split(' - ')
+
+    console.log(startDate, endDate)
+})
 
 // search flow
 const searchInput: HTMLInputElement = document.querySelector('#table-search-products')
@@ -582,21 +671,31 @@ function editProduct(product: IProduct) {
 const viewProductButtonElements = document.querySelectorAll('.product-view-button')
 viewProductButtonElements.forEach((e) =>
     e.addEventListener('click', () => {
+        const bookingButton = document.querySelector('.product-booking-button')
+        if (bookingButton) {
+            bookingButton.setAttribute('data-target', e.getAttribute('data-target'))
+        }
         const product = JSON.parse(e.getAttribute('data-target'))
         sessionStorage.setItem('product', JSON.stringify(product))
         const prodGroups = Object.keys(product.mstr_groups_groups)
+        const eventCheckbox: HTMLInputElement = document.querySelector('#product-show-events-toggle-btn')
+        const isEvent = eventCheckbox.checked
 
         prodGroups.forEach((groupName) => {
             let isEqual = false
 
             const mstrGroupName = product.mstr_groups_groups[groupName]
+            console.log('mstrGroupName', mstrGroupName)
+
             if (product.current_user_groups.hasOwnProperty(mstrGroupName)) {
                 const currentUserValue = product.current_user_groups[mstrGroupName]
                 if (currentUserValue.includes(groupName)) {
                     isEqual = true
                 }
             }
-            addShipAssignShareButton(isEqual, mstrGroupName, groupName, product)
+            if (mstrGroupName !== 'Events' || isEvent) {
+                addShipAssignShareButton(isEqual, mstrGroupName, groupName, product)
+            }
         })
 
         let div: HTMLDivElement = document.querySelector('#product-view-name')
@@ -745,6 +844,24 @@ function ship(product: IProduct, group: string) {
         availableQuantityDiv.textContent = (availableQuantity - desiredQuantity).toString()
     })
 }
+// function to booking
+function booking(product: IProduct, group: string) {
+    console.log('product', product)
+    const img: HTMLImageElement = document.querySelector('#product-event-image')
+    const fullImageAnchor = img.closest('.product-full-image-anchor')
+    fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
+    product.image.length > 100 ? (img.src = `data:image/png;base64, ${product.image}`) : (img.src = defaultBrandImage)
+    let div: HTMLDivElement = document.querySelector('#product-event-name')
+    div.innerHTML = product.name
+    div = document.querySelector('#product-event-SKU')
+    console.log(product.SKU)
+    div.innerHTML = product.SKU
+
+    const input: HTMLInputElement = document.querySelector('#product-event-group-hidden')
+    input.value = group.replace('_', ' ')
+
+    eventModal.show()
+}
 
 // function to assign
 function assign(product: IProduct, group: string) {
@@ -776,13 +893,15 @@ function deleteShipAssignButton(nameGroup: string, nameGroupValue: string) {
 
 // function to add ship, assign, button to view product modal
 function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: string, productParam: IProduct) {
+    const eventCheckbox: HTMLInputElement = document.querySelector('#product-show-events-toggle-btn')
+    const isEvent = eventCheckbox.checked
     const groupUnderScore = group.replace(/ /g, '_')
     const groupProductIds = productParam.groups_ids
     const productTypeContainer = document.querySelector(`#product-view-product-name-container`)
     const shipAssignContainer = document.createElement('div')
     shipAssignContainer.classList.add('sm:col-span-3', 'flex', 'gap-4')
     shipAssignContainer.setAttribute('id', `product-ship-assign-share-container-${masterGroup.replace(/ /g, '_')}`)
-    shipAssignContainer.innerHTML = `
+    const shipAssignContainerDiv = `
     <div>
       <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available</label>
         <div id="ship-product-quantity"
@@ -801,9 +920,26 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
       </button>
     </div>
   `
+    const bookingContainerDiv = `
+        <div>
+        <label for="product_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Action</label >
+        <button ship-group-data=${groupUnderScore} type="button" id="booking-product-button-${groupUnderScore}" class="booking-product-button inline-flex items-center mr-2 px-3 py-2.5 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+            <path
+                d="M128 0c13.3 0 24 10.7 24 24V64H296V24c0-13.3 10.7-24 24-24s24 10.7 24 24V64h40c35.3 0 64 28.7 64 64v16 48V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V192 144 128C0 92.7 28.7 64 64 64h40V24c0-13.3 10.7-24 24-24zM400 192H48V448c0 8.8 7.2 16 16 16H384c8.8 0 16-7.2 16-16V192zM329 297L217 409c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47 95-95c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"
+                clip-rule="evenodd"></path>
+            </svg>
+            Booking
+        </button>
+        </div>
+    `
+    isEvent
+        ? (shipAssignContainer.innerHTML = bookingContainerDiv)
+        : (shipAssignContainer.innerHTML = shipAssignContainerDiv)
     const shareContainer = document.createElement('div')
     const shipProductBtn = shipAssignContainer.querySelector(`#ship-product-button-${groupUnderScore}`)
     const assignProductBtn = shipAssignContainer.querySelector(`#assign-product-button-${groupUnderScore}`)
+    const bookingProductBtn = shipAssignContainer.querySelector(`#booking-product-button-${groupUnderScore}`)
 
     shareContainer.classList.add('sm:col-span-3', 'flex', 'gap-4')
     shareContainer.setAttribute('id', `product-ship-assign-share-container-${masterGroup.replace(/ /g, '_')}`)
@@ -836,6 +972,15 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
     } else {
         productTypeContainer.parentNode.insertBefore(shareContainer, productTypeContainer.nextSibling)
     }
+
+    const bookingButtons = document.querySelectorAll('.booking-product-button')
+    bookingButtons.forEach((e) =>
+        e.addEventListener('click', () => {
+            let shipGroup = e.getAttribute('ship-group-data')
+            const product = JSON.parse(sessionStorage.product)
+            booking(product, shipGroup)
+        })
+    )
 
     const shipButtons = document.querySelectorAll('.ship-product-button')
     shipButtons.forEach((e) =>
@@ -1575,48 +1720,46 @@ document.getElementById('product-add-image').addEventListener('change', async (e
     }
 })
 
-// event button to show modal
-const productBookingButtons = document.querySelectorAll('.product-booking-button')
+// productBookingButtons.forEach((button) =>
+//     button.addEventListener('click', () => {
+//         const product = JSON.parse(button.getAttribute('data-target'))
+//         console.log(product)
 
-productBookingButtons.forEach((button) =>
-    button.addEventListener('click', () => {
-        const product = JSON.parse(button.getAttribute('data-target'))
+//         let div: HTMLDivElement = document.querySelector('#product-event-name')
+//         div.innerHTML = product.name
+//         const img: HTMLImageElement = document.querySelector('#product-event-image')
+//         const fullImageAnchor = img.closest('.product-full-image-anchor')
+//         fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
+//         product.image.length > 100
+//             ? (img.src = `data:image/png;base64, ${product.image}`)
+//             : (img.src = defaultBrandImage)
+//         div = document.querySelector('#product-event-SKU')
+//         div.innerHTML = product.SKU
+//         div = document.querySelector('#product-event-next_url')
+//         div.innerHTML = window.location.href
 
-        let div: HTMLDivElement = document.querySelector('#product-event-name')
-        div.innerHTML = product.name
-        const img: HTMLImageElement = document.querySelector('#product-event-image')
-        const fullImageAnchor = img.closest('.product-full-image-anchor')
-        fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
-        product.image.length > 100
-            ? (img.src = `data:image/png;base64, ${product.image}`)
-            : (img.src = defaultBrandImage)
-        div = document.querySelector('#product-event-SKU')
-        div.innerHTML = product.SKU
-        div = document.querySelector('#product-event-next_url')
-        div.innerHTML = window.location.href
+//         const productIdInput: HTMLInputElement = document.querySelector('#product-event-product-id')
+//         productIdInput.value = product.id.toString()
 
-        const productIdInput: HTMLInputElement = document.querySelector('#product-event-product-id')
-        productIdInput.value = product.id.toString()
+//         // datepicker
+//         const eventDatepickers = document.querySelectorAll('.product-event-datepicker')
+//         const dateCurrent = new Date()
+//         const dateEvent = new Date(dateCurrent.getFullYear(), dateCurrent.getMonth(), dateCurrent.getDate() + 5)
 
-        // datepicker
-        const eventDatepickers = document.querySelectorAll('.product-event-datepicker')
-        const dateCurrent = new Date()
-        const dateEvent = new Date(dateCurrent.getFullYear(), dateCurrent.getMonth(), dateCurrent.getDate() + 5)
+//         const option = {
+//             todayHighlight: true,
+//             minDate: dateEvent,
+//         }
 
-        const option = {
-            todayHighlight: true,
-            minDate: dateEvent,
-        }
-
-        eventDatepickers.forEach((datepicker: HTMLDivElement, index) => {
-            const eventDatePicker = new Datepicker(datepicker)
-            eventDatePicker.setOptions(option)
-            if (index === 0) {
-                eventDatePicker.setDate(dateEvent)
-            }
-        })
-    })
-)
+//         eventDatepickers.forEach((datepicker: HTMLDivElement, index) => {
+//             const eventDatePicker = new Datepicker(datepicker)
+//             eventDatePicker.setOptions(option)
+//             if (index === 0) {
+//                 eventDatePicker.setDate(dateEvent)
+//             }
+//         })
+//     })
+// )
 
 function getFilterValues(isChecked: boolean) {
     const url = new URL(window.location.href)
@@ -1631,3 +1774,23 @@ eventSortToggleButton.addEventListener('change', () => {
     getFilterValues(eventSortToggleButton.checked)
     console.log(eventSortToggleButton.checked)
 })
+
+const bookingAvaliableQuantity = document.querySelector('#product-available-quantity-by-date') as HTMLInputElement
+const bookingDesiredQuantity = document.querySelector('#product-event-quantity') as HTMLInputElement
+
+bookingAvaliableQuantity.addEventListener('change', () => {
+    validateBookingQuantity()
+})
+
+bookingDesiredQuantity.addEventListener('change', () => {
+    validateBookingQuantity()
+})
+
+const validateBookingQuantity = () => {
+    const bookingButton = document.querySelector('#product-event-submit-btn') as HTMLButtonElement
+    bookingButton.disabled = true
+
+    if (parseInt(bookingAvaliableQuantity.value) < parseInt(bookingDesiredQuantity.value)) {
+        bookingButton.disabled = false
+    }
+}
