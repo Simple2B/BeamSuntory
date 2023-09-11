@@ -12,6 +12,8 @@ import sqlalchemy as sa
 from app.controllers import create_pagination
 
 from app import models as m, db
+
+# from app import schema as s
 from app import forms as f
 from app.logger import log
 from config import BaseConfig
@@ -108,6 +110,29 @@ def get_all():
         .scalar()
         .role_name
     )
+
+    # TODO: add correct logic for checking if product belongs to events
+    # event_master_group: m.MasterGroupProduct = db.session.scalar(
+    #     m.MasterGroupProduct.select().where(
+    #         m.MasterGroupProduct.name == s.ProductMasterGroupMandatory.events.value
+    #     )
+    # )
+    # event_sub_groups = [
+    #     i.name
+    #     for i in db.session.scalars(
+    #         m.GroupProduct.select().where(
+    #             m.GroupProduct.master_group_id == event_master_group.id
+    #         )
+    #     )
+    # ]
+
+    # if cart.group in event_sub_groups:
+    #     event = m.Event(
+    #         date_from=form.event_date_from.data,
+    #         date_to=form.event_date_to.data,
+    #         quantity=form.quantity.data if form.quantity.data else cart.quantity,
+    #         product_id=cart.product_id,
+    #     )
 
     return render_template(
         "cart.html",
