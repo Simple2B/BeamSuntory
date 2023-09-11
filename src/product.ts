@@ -857,8 +857,10 @@ function booking(product: IProduct, group: string) {
     console.log(product.SKU)
     div.innerHTML = product.SKU
 
-    const input: HTMLInputElement = document.querySelector('#product-event-group-hidden')
+    let input: HTMLInputElement = document.querySelector('#product-event-group-hidden')
     input.value = group.replace('_', ' ')
+    input = document.querySelector('#product-event-product-id')
+    input.value = product.id.toString()
 
     eventModal.show()
 }
@@ -1778,19 +1780,19 @@ eventSortToggleButton.addEventListener('change', () => {
 const bookingAvaliableQuantity = document.querySelector('#product-available-quantity-by-date') as HTMLInputElement
 const bookingDesiredQuantity = document.querySelector('#product-event-quantity') as HTMLInputElement
 
-bookingAvaliableQuantity.addEventListener('change', () => {
-    validateBookingQuantity()
-})
+// bookingAvaliableQuantity.addEventListener('change', () => {
+//     validateBookingQuantity()
+// })
 
-bookingDesiredQuantity.addEventListener('change', () => {
-    validateBookingQuantity()
-})
+// bookingDesiredQuantity.addEventListener('change', () => {
+//     validateBookingQuantity()
+// })
 
-const validateBookingQuantity = () => {
-    const bookingButton = document.querySelector('#product-event-submit-btn') as HTMLButtonElement
-    bookingButton.disabled = true
+// const validateBookingQuantity = () => {
+//     const bookingButton = document.querySelector('#product-event-submit-btn') as HTMLButtonElement
+//     bookingButton.disabled = true
 
-    if (parseInt(bookingAvaliableQuantity.value) < parseInt(bookingDesiredQuantity.value)) {
-        bookingButton.disabled = false
-    }
-}
+//     if (parseInt(bookingAvaliableQuantity.value) < parseInt(bookingDesiredQuantity.value)) {
+//         bookingButton.disabled = false
+//     }
+// }
