@@ -149,7 +149,17 @@ def create():
 
         for cart in carts:
             # TODO: Change hardcode "Events" to check that group belongs to Master Group "Events"
-            if start_date and end_date and cart.group == "Events":
+            is_group_in_master_group = (
+                db.session.query(m.Group)
+                .join(m.MasterGroup)
+                .filter(
+                    m.MasterGroup.name == s.MasterGroupMandatory.events.value,
+                    m.Group.name == cart.group,
+                )
+                .count()
+                > 0
+            )
+            if start_date and end_date and is_group_in_master_group:
                 event = m.Event(
                     date_from=start_date,
                     date_to=end_date,
@@ -174,7 +184,7 @@ def create():
                     m.WarehouseProduct.group_id == cart_user_group.id,
                 )
             ).scalar()
-            if warehouse_product:
+            if warehouse_product and not is_group_in_master_group:
                 warehouse_product.product_quantity -= cart.quantity
                 warehouse_product.save()
 
