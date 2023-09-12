@@ -171,43 +171,39 @@ def get_available_quantity():
     product_id = request.args.get("product_id", type=int, default=None)
     group_name = request.args.get("group_name", type=str, default=None)
     group = db.session.scalar(m.Group.select().where(m.Group.name == group_name))
-    if group:
-        warehouse: m.Warehouse = db.session.scalar(
-            m.Warehouse.select().where(
-                m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value
-            )
+    if not group:
+        log(log.INFO, "Group not found")
+        return "Group not found", 404
+    warehouse: m.Warehouse = db.session.scalar(
+        m.Warehouse.select().where(
+            m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value
         )
-        warehouse_product: m.WarehouseProduct = db.session.scalar(
-            m.WarehouseProduct.select().where(
-                m.WarehouseProduct.product_id == product_id,
-                m.WarehouseProduct.warehouse_id == warehouse.id,
-                m.WarehouseProduct.group_id == group.id,
-            )
+    )
+    warehouse_product: m.WarehouseProduct = db.session.scalar(
+        m.WarehouseProduct.select().where(
+            m.WarehouseProduct.product_id == product_id,
+            m.WarehouseProduct.warehouse_id == warehouse.id,
+            m.WarehouseProduct.group_id == group.id,
         )
-        if warehouse_product:
-            num_days = calendar.monthrange(year_from, month_from)[1]
-            total_available_quantity = []
-            for day in range(1, num_days + 1):
-                current_date = Date(year_from, month_from, day)
-                events: list[m.Event] = db.session.scalars(
-                    m.Event.select().where(
-                        m.Event.date_from <= current_date,
-                        m.Event.date_to >= current_date,
-                    )
-                ).all()
-                total_quantity = functools.reduce(
-                    lambda a, b: a + b.quantity, events, 0
-                )
-                quantity = warehouse_product.product_quantity - total_quantity
-                date = current_date.strftime("%Y-%m-%d")
-                total_available_quantity.append({"date": date, "quantity": quantity})
-
-            log(log.INFO, "Total available quantity: [%s]", quantity)
-            return jsonify(total_available_quantity)
-
+    )
+    if not warehouse_product:
         log(log.INFO, "Warehouse product not found")
         return "Warehouse product not found", 404
 
-    log(log.INFO, "Group not found")
-    return "Group not found", 404
-    ...
+    num_days = calendar.monthrange(year_from, month_from)[1]
+    total_available_quantity = []
+    for day in range(1, num_days + 1):
+        current_date = Date(year_from, month_from, day)
+        events: list[m.Event] = db.session.scalars(
+            m.Event.select().where(
+                m.Event.date_from <= current_date,
+                m.Event.date_to >= current_date,
+            )
+        ).all()
+        total_quantity = functools.reduce(lambda a, b: a + b.quantity, events, 0)
+        quantity = warehouse_product.product_quantity - total_quantity
+        date = current_date.strftime("%Y-%m-%d")
+        total_available_quantity.append({"date": date, "quantity": quantity})
+
+    log(log.INFO, "Total available quantity: [%s]", quantity)
+    return jsonify(total_available_quantity)

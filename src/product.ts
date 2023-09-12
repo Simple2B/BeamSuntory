@@ -325,6 +325,20 @@ const modalShipAssignOptions: ModalOptions = {
     },
 }
 
+const modalEventOptions: ModalOptions = {
+    placement: 'bottom-right',
+    backdrop: 'dynamic',
+    backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-51',
+    closable: true,
+    onHide: () => {
+        sessionStorage.removeItem('product')
+    },
+    onShow: () => {},
+    onToggle: () => {
+        console.log('modal has been toggled')
+    },
+}
+
 const eventModalOptions: ModalOptions = {
     placement: 'bottom-right',
     backdrop: 'dynamic',
@@ -338,6 +352,7 @@ const eventModalOptions: ModalOptions = {
             deleteShipAssignButton(value.replace(/\s/g, '_'), key)
         })
         clearProductGroupContainer()
+        picker.destroy()
     },
     onShow: () => {
         console.log('modal has been shown')
@@ -354,7 +369,7 @@ const editModal: ModalInterface = new Modal($editProductModalElement, modalOptio
 const requestShareModal: ModalInterface = new Modal($requestShareModalElement, modalShipAssignOptions)
 const shipModal: ModalInterface = new Modal($shipModalElement, modalShipAssignOptions)
 const assignModal: ModalInterface = new Modal($assignModalElement, modalShipAssignOptions)
-const eventModal: ModalInterface = new Modal($eventProductModalElement, modalShipAssignOptions)
+const eventModal: ModalInterface = new Modal($eventProductModalElement, eventModalOptions)
 
 const closingAddModalButton = document.getElementById('add-product-modal-close-btn')
 closingAddModalButton.addEventListener('click', () => {
@@ -833,6 +848,8 @@ function ship(product: IProduct, group: string) {
     })
 }
 
+let picker: Datepicker
+
 // function to booking
 function booking(product: IProduct, group: string) {
     console.log('product', product)
@@ -863,7 +880,7 @@ function booking(product: IProduct, group: string) {
             date: string
             quantity: number
         }[]
-        const picker = new easepick.create({
+        picker = new easepick.create({
             element: document.getElementById('datepicker'),
             css: [
                 'https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.css',
@@ -887,10 +904,6 @@ function booking(product: IProduct, group: string) {
 
                 fetchedAmountByDate.forEach(({ date, quantity }) => {
                     quantities[date] = quantity.toString()
-                })
-
-                picker.trigger('click', () => {
-                    console.log('click')
                 })
 
                 picker.on('view', async (evt: any) => {
@@ -924,12 +937,10 @@ function booking(product: IProduct, group: string) {
                         const jsDate = new Date(date)
 
                         jsDate.setHours(0, 0, 0)
-                        console.log('from backend', jsDate.getMonth())
 
                         const dayContainer = document
                             .querySelector('.easepick-wrapper')
                             .shadowRoot.querySelector(`div[data-time='${jsDate.getTime()}']`)
-                        console.log(dayContainer, jsDate.getTime())
                         const span = dayContainer.querySelector('.day-price') || document.createElement('span')
                         span.className = 'day-price'
                         span.innerHTML = quantity.toString()
