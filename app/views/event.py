@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from datetime import date as Date
 import functools
 import calendar
 from flask import (
@@ -165,41 +166,43 @@ def create():
 @event_blueprint.route("/get_available_quantity", methods=["GET"])
 @login_required
 def get_available_quantity():
-    date_from = request.args.get("date_from", type=str, default=None)
-    warehouse_id = request.args.get("warehouse_id", type=int, default=None)
+    month_from = request.args.get("month_from", type=int, default=None)
+    year_from = request.args.get("year_from", type=int, default=None)
     product_id = request.args.get("product_id", type=int, default=None)
     group_name = request.args.get("group_name", type=str, default=None)
     group = db.session.scalar(m.Group.select().where(m.Group.name == group_name))
     if group:
+        warehouse: m.Warehouse = db.session.scalar(
+            m.Warehouse.select().where(
+                m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value
+            )
+        )
         warehouse_product: m.WarehouseProduct = db.session.scalar(
             m.WarehouseProduct.select().where(
                 m.WarehouseProduct.product_id == product_id,
-                m.WarehouseProduct.warehouse_id == warehouse_id,
+                m.WarehouseProduct.warehouse_id == warehouse.id,
                 m.WarehouseProduct.group_id == group.id,
             )
         )
         if warehouse_product:
-            year = datetime.strptime(date_from, "%Y-%m-%d").year
-            month = datetime.strptime(date_from, "%Y-%m-%d").month
-
-            num_days = calendar.monthrange(year, month)[1]
+            num_days = calendar.monthrange(year_from, month_from)[1]
             total_available_quantity = []
             for day in range(1, num_days + 1):
-                start_date = datetime(year, month, day, 0, 0, 0)
-                end_date = datetime(year, month, day, 23, 59, 59)
+                current_date = Date(year_from, month_from, day)
                 events: list[m.Event] = db.session.scalars(
                     m.Event.select().where(
-                        m.Event.date_from <= start_date, m.Event.date_to >= end_date
+                        m.Event.date_from <= current_date,
+                        m.Event.date_to >= current_date,
                     )
                 ).all()
                 total_quantity = functools.reduce(
                     lambda a, b: a + b.quantity, events, 0
                 )
-                available_quantity = warehouse_product.product_quantity - total_quantity
-                date = start_date.strftime("%Y-%m-%d")
-                total_available_quantity.append({date: available_quantity})
+                quantity = warehouse_product.product_quantity - total_quantity
+                date = current_date.strftime("%Y-%m-%d")
+                total_available_quantity.append({"date": date, "quantity": quantity})
 
-            log(log.INFO, "Total available quantity: [%s]", total_available_quantity)
+            log(log.INFO, "Total available quantity: [%s]", quantity)
             return jsonify(total_available_quantity)
 
         log(log.INFO, "Warehouse product not found")

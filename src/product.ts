@@ -420,7 +420,6 @@ const bookedDates = [getFirstAndLastDate()].map((d) => {
     return new DateTime(d, 'YYYY-MM-DD')
 })
 
-
 const DATA_FROM_BE = {
     '2023-09-03': '25',
     '2023-09-04': '26',
@@ -429,48 +428,20 @@ const DATA_FROM_BE = {
     '2023-09-07': '29',
     '2023-09-11': '28',
 }
+let fetchedAmountByDate = [] as { date: string; quantity: number }[]
 
-const picker = new easepick.create({
-    element: document.getElementById('datepicker'),
-    css: [
-        'https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.css',
-        'https://easepick.com/css/demo_prices.css',
-    ],
-    autoApply: true,
-    inline: true,
-    plugins: ['LockPlugin'],
-    LockPlugin: {        
-        filter(date: any) {          
-            return date.inArray(bookedDates, '[)');
-        }
-    },    
+async function getEventAvailableQuantity(product_id: number, group: string, month: number, year: number) {
+    const response = await fetch(
+        `/event/get_available_quantity?month_from=${
+            month + 1
+        }&year_from=${year}&group_name=${group}&product_id=${product_id}`
+    )
+    const data = await response.json()
+    fetchedAmountByDate = data
 
-    setup(picker: any) {
-        const randomInt = (min: number, max: number) => {
-            return Math.floor(Math.random() * (max - min + 1) + min)
-        }
-        const prices: { [key: string]: string } = {};
-
-        Object.entries(DATA_FROM_BE).forEach(([date, price]) => {
-            prices[date] = price;
-        });
-        
-        picker.on('view', (evt: any) => {
-            const { view, date, target } = evt.detail;            
-            const d = date ? date.format('YYYY-MM-DD') : null;
-            const month = date ? date.format('MM') : null;
-
-            if (view === 'CalendarDay' && prices[d]) {
-                const span = target.querySelector('.day-price') || document.createElement('span');
-                span.className = 'day-price';
-                span.innerHTML = prices[d];
-                target.append(span);
-            }      
-            //GET DATA AND AMOUNT FORM BE
-        });        
-    }
-});
-
+    console.log('fetchedAmountByDate inside function', fetchedAmountByDate[0])
+    return data
+}
 
 // search flow
 const searchInput: HTMLInputElement = document.querySelector('#table-search-products')
@@ -861,6 +832,7 @@ function ship(product: IProduct, group: string) {
         availableQuantityDiv.textContent = (availableQuantity - desiredQuantity).toString()
     })
 }
+
 // function to booking
 function booking(product: IProduct, group: string) {
     console.log('product', product)
@@ -878,6 +850,97 @@ function booking(product: IProduct, group: string) {
     input.value = group.replace('_', ' ')
     input = document.querySelector('#product-event-product-id')
     input.value = product.id.toString()
+
+    const currentDate = new Date()
+
+    async function createDatepicker() {
+        const fetchedAmountByDate = (await getEventAvailableQuantity(
+            product.id,
+            group,
+            currentDate.getMonth(),
+            currentDate.getFullYear()
+        )) as {
+            date: string
+            quantity: number
+        }[]
+        const picker = new easepick.create({
+            element: document.getElementById('datepicker'),
+            css: [
+                'https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.css',
+                'https://easepick.com/css/demo_prices.css',
+            ],
+            autoApply: true,
+            inline: true,
+            plugins: ['LockPlugin'],
+            LockPlugin: {
+                filter(date: any) {
+                    return date.inArray(bookedDates, '[)')
+                },
+            },
+
+            setup(picker: any) {
+                const randomInt = (min: number, max: number) => {
+                    return Math.floor(Math.random() * (max - min + 1) + min)
+                }
+                const quantities: { [key: string]: string } = {}
+                console.log('fetchedAmountByDate', fetchedAmountByDate)
+
+                fetchedAmountByDate.forEach(({ date, quantity }) => {
+                    quantities[date] = quantity.toString()
+                })
+
+                picker.trigger('click', () => {
+                    console.log('click')
+                })
+
+                picker.on('view', async (evt: any) => {
+                    const { view, date, target } = evt.detail
+
+                    if ((view as string).toLowerCase() !== 'main') {
+                        return
+                    }
+
+                    date.setMonth(date.getMonth() - 1)
+
+                    const chosenMonth = date.getMonth()
+                    const chosenYear = date.getFullYear()
+
+                    const fetchedAmountByDate = (await getEventAvailableQuantity(
+                        product.id,
+                        group,
+                        chosenMonth,
+                        chosenYear
+                    )) as {
+                        date: string
+                        quantity: number
+                    }[]
+
+                    fetchedAmountByDate.forEach(({ date, quantity }) => {
+                        const splittedDate = date.split('-')
+                        splittedDate[1] = (parseInt(splittedDate[1]) - 1).toString()
+
+                        const jsDateString = splittedDate.join('-')
+
+                        const jsDate = new Date(date)
+
+                        jsDate.setHours(0, 0, 0)
+                        console.log('from backend', jsDate.getMonth())
+
+                        const dayContainer = document
+                            .querySelector('.easepick-wrapper')
+                            .shadowRoot.querySelector(`div[data-time='${jsDate.getTime()}']`)
+                        console.log(dayContainer, jsDate.getTime())
+                        const span = dayContainer.querySelector('.day-price') || document.createElement('span')
+                        span.className = 'day-price'
+                        span.innerHTML = quantity.toString()
+                        dayContainer.append(span)
+                    })
+                })
+            },
+        })
+    }
+
+    createDatepicker()
 
     viewModal.hide()
     eventModal.show()
@@ -959,7 +1022,6 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
     const shareContainer = document.createElement('div')
     const shipProductBtn = shipAssignContainer.querySelector(`#ship-product-button-${groupUnderScore}`)
     const assignProductBtn = shipAssignContainer.querySelector(`#assign-product-button-${groupUnderScore}`)
-    const bookingProductBtn = shipAssignContainer.querySelector(`#booking-product-button-${groupUnderScore}`)
 
     shareContainer.classList.add('sm:col-span-3', 'flex', 'gap-4')
     shareContainer.setAttribute('id', `product-ship-assign-share-container-${masterGroup.replace(/ /g, '_')}`)

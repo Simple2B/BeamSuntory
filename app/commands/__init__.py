@@ -72,14 +72,16 @@ def init(app: Flask):
             "Mixit": ["Mixit"],
             "Key Accounts": ["Key Accounts"],
             "Sales Manager": ["Sales Manager"],
-            "Events": ["Events"],
+            s.MasterGroupMandatory.events.value: [s.MasterGroupMandatory.events.value],
         }
         product_master_groups = {
             "Brand": ["Brugal", "Banff Ice", "Alberta Springs"],
             "Language": ["English", "French"],
             "Premises": ["On Premises", "Off Premises"],
             "Category": ["NLVA", "GWP", "Kit", "Bareware", "Signage"],
-            "Events": ["Events"],
+            s.ProductMasterGroupMandatory.events.value: [
+                s.ProductMasterGroupMandatory.events.value
+            ],
         }
 
         for mg in stock_master_groups:
@@ -156,6 +158,15 @@ def init(app: Flask):
                 city="Al",
                 zip="unzip",
                 address="sserdda",
+                manager_id=wh_manager.id,
+            ).save(False)
+
+            m.Warehouse(
+                name=s.WarehouseMandatory.warehouse_events.value,
+                phone_number="380362470344",
+                city="Kv",
+                zip="unzip",
+                address="street",
                 manager_id=wh_manager.id,
             ).save(False)
 
