@@ -207,8 +207,8 @@ def delete(id: int):
         flash("There is no such item", "danger")
         return "no item", 404
 
-    delete_c = sa.delete(m.Cart).where(m.Cart.id == id)
-    db.session.execute(delete_c)
+    db.session.execute(m.Event.delete().where(m.Event.cart_id == id))
+    db.session.delete(c)
     db.session.commit()
     log(log.INFO, "Cart item deleted. Group: [%s]", c)
     flash("Item deleted!", "success")
