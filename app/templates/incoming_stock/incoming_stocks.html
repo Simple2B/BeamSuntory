@@ -156,7 +156,7 @@
             View
           </button>
           {% if inbound_order.status == inbound_orders_status.in_transit %}
-          <button data-incoming-stock-id={{ inbound_order.id }} data-target="{{inbound_order.json}}" type="button"
+          <!-- <button data-incoming-stock-id={{ inbound_order.id }} data-target="{{inbound_order.json}}" type="button"
             class="accept-incoming-stock-edit-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900 accept-incoming-stock-btn">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
@@ -167,7 +167,7 @@
               </g>
             </svg>
             Accept goods
-          </button>
+          </button> -->
           {% endif %}
           {% if inbound_order.status != inbound_orders_status.cancelled and inbound_order.status !=
           inbound_orders_status.delivered
@@ -271,8 +271,8 @@
 {% endif %}
 </div>
 
-{% include 'incoming_stock/edit.html' %}
 {% include 'incoming_stock/view.html' %}
+{% include 'incoming_stock/edit.html' %}
 <!-- prettier-ignore -->
 {% endblock %}
 <!-- prettier-ignore -->

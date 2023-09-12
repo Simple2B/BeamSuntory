@@ -1,23 +1,22 @@
-
 export interface IProductAllocatedGroup {
-  groupId: number
-  quantity: number
+    groupId: number
+    quantity: number
 }
 
 export interface IProductGroupCreate {
-  productAllocatedId: number
-  productAllocatedGroups: IProductAllocatedGroup[]
+    productAllocatedId: number
+    productAllocatedGroups: IProductAllocatedGroup[]
 }
 
 export interface ISupplier {
-  id: number
-  name: string
-  address: string
+    id: number
+    name: string
+    address: string
 }
 
 export interface IWarehouse {
-  id: number
-  name: string
+    id: number
+    name: string
 }
 
 export interface IProduct {
@@ -33,35 +32,36 @@ export interface IGroup {
 }
 
 export interface IProductAllocatedBase {
-  id: number
-  quantity: number
-  shelfLifeStart: string
-  shelfLifeEnd: string
+    id: number
+    quantity: number
+    shelfLifeStart: string
+    shelfLifeEnd: string
 }
 
 export interface IProductQuantityGroupOut {
-  quantity: number
-  group: IGroup  
+    id: number
+    quantity: number
+    group: IGroup
 }
 
 export interface IAllocatedProductOut extends IProductAllocatedBase {
-  product: IProduct
-  productQuantityGroups: IProductQuantityGroupOut[]
+    product: IProduct
+    productQuantityGroups: IProductQuantityGroupOut[]
 }
 
 export interface IInboundOrderBase {
-  orderId: string
-  status: string
-  title: string
-  activeDate: string
-  activeTime: string
-  deliveryDate: string
-  supplier: ISupplier
-  warehouse: IWarehouse
+    orderId: string
+    status: string
+    title: string
+    activeDate: string
+    activeTime: string
+    deliveryDate: string
+    supplier: ISupplier
+    warehouse: IWarehouse
 }
 
 export interface IInboundOrderOut extends IInboundOrderBase {
-  id: number
-  uuid: string
-  productsAllocated: IAllocatedProductOut[]
+    id: number
+    uuid: string
+    productsAllocated: IAllocatedProductOut[]
 }
