@@ -31,3 +31,20 @@ class EventCSVOut(BaseModel):
 class EventsApiOut(BaseModel):
     pagination: PaginationOut
     events: list[EventCSVOut]
+
+
+class EventsDateQuantity(BaseModel):
+    date: str
+    quantity: int
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+
+
+class EventsCalendar(BaseModel):
+    __root__: list[EventsDateQuantity]
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True

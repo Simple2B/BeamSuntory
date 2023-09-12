@@ -1,7 +1,11 @@
 from datetime import datetime, timedelta
+from datetime import date as Date
+import functools
+import calendar
 from flask import (
     Blueprint,
     flash,
+    jsonify,
     redirect,
     request,
     url_for,
@@ -111,8 +115,10 @@ def create():
         return redirect(url_for("product.get_all"))
 
     current_date = datetime.now()
-    start_date = datetime.strptime(form.date_from.data, "%m/%d/%Y")
-    end_date = datetime.strptime(form.date_to.data, "%m/%d/%Y")
+    date_from = form.date_range.data.split(" - ")[0]
+    date_to = form.date_range.data.split(" - ")[1]
+    start_date = datetime.strptime(date_from, "%Y-%m-%d")
+    end_date = datetime.strptime(date_to, "%Y-%m-%d")
     difference_date = start_date - current_date
     if difference_date < timedelta(days=5):
         flash("The event must be created more than 5 days in advance", "danger")
@@ -149,7 +155,6 @@ def create():
     if cart:
         cart.quantity = form.quantity.data
         log(log.INFO, "Cart item quantity updated. Cart: [%s]", cart)
-    db.session.add(cart)
 
     db.session.commit()
     log(log.INFO, "Item added: [%s]", event)
@@ -161,56 +166,48 @@ def create():
 @event_blueprint.route("/get_available_quantity", methods=["GET"])
 @login_required
 def get_available_quantity():
-    form: f.EventFormCreate = f.EventFormCreate()
-    if not form.validate_on_submit():
-        flash("Event must validation failed: {form.errors}", "danger")
-        log(log.INFO, "Event validation failed: [%s]", form.errors)
-        return redirect(url_for("product.get_all"))
-
-    current_date = datetime.now()
-    start_date = datetime.strptime(form.date_from.data, "%m/%d/%Y")
-    end_date = datetime.strptime(form.date_to.data, "%m/%d/%Y")
-    difference_date = start_date - current_date
-    if difference_date < timedelta(days=5):
-        flash("The event must be created more than 5 days in advance", "danger")
-        log(
-            log.INFO,
-            "The event must be created more than 5 days: [%s]",
-            form.product_id.data,
+    month_from = request.args.get("month_from", type=int, default=None)
+    year_from = request.args.get("year_from", type=int, default=None)
+    product_id = request.args.get("product_id", type=int, default=None)
+    group_name = request.args.get("group_name", type=str, default=None)
+    group = db.session.scalar(m.Group.select().where(m.Group.name == group_name))
+    if group:
+        warehouse: m.Warehouse = db.session.scalar(
+            m.Warehouse.select().where(
+                m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value
+            )
         )
-        return redirect(url_for("product.get_all"))
-
-    # check product
-    product = db.session.get(m.Product, form.product_id.data)
-    if not product:
-        flash("Product not found")
-        log(
-            log.INFO,
-            "Product validation failed: cannot find product with id [%s]",
-            form.product_id.data,
+        warehouse_product: m.WarehouseProduct = db.session.scalar(
+            m.WarehouseProduct.select().where(
+                m.WarehouseProduct.product_id == product_id,
+                m.WarehouseProduct.warehouse_id == warehouse.id,
+                m.WarehouseProduct.group_id == group.id,
+            )
         )
-        return redirect(url_for("product.get_all"))
+        if warehouse_product:
+            num_days = calendar.monthrange(year_from, month_from)[1]
+            total_available_quantity = []
+            for day in range(1, num_days + 1):
+                current_date = Date(year_from, month_from, day)
+                events: list[m.Event] = db.session.scalars(
+                    m.Event.select().where(
+                        m.Event.date_from <= current_date,
+                        m.Event.date_to >= current_date,
+                    )
+                ).all()
+                total_quantity = functools.reduce(
+                    lambda a, b: a + b.quantity, events, 0
+                )
+                quantity = warehouse_product.product_quantity - total_quantity
+                date = current_date.strftime("%Y-%m-%d")
+                total_available_quantity.append({"date": date, "quantity": quantity})
 
-    # create event
-    event: m.Event = m.Event(
-        date_from=start_date,
-        date_to=end_date,
-        quantity=form.quantity.data,
-        product=product,
-        comment=form.comment.data,
-    )
-    db.session.add(event)
+            log(log.INFO, "Total available quantity: [%s]", quantity)
+            return jsonify(total_available_quantity)
 
-    cart: m.Cart = m.Cart(
-        product_id=product.id,
-        quantity=form.quantity.data,
-        user_id=current_user.id,
-        group=form.group.data,
-    )
-    db.session.add(cart)
+        log(log.INFO, "Warehouse product not found")
+        return "Warehouse product not found", 404
 
-    db.session.commit()
-    log(log.INFO, "Item added: [%s]", event)
-    flash("Item added!", "success")
-
-    return redirect(url_for("product.get_all"))
+    log(log.INFO, "Group not found")
+    return "Group not found", 404
+    ...
