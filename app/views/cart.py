@@ -111,36 +111,26 @@ def get_all():
         .role_name
     )
 
-    # TODO: add correct logic for checking if product belongs to events
-    # event_master_group: m.MasterGroupProduct = db.session.scalar(
-    #     m.MasterGroupProduct.select().where(
-    #         m.MasterGroupProduct.name == s.ProductMasterGroupMandatory.events.value
-    #     )
-    # )
-    # event_sub_groups = [
-    #     i.name
-    #     for i in db.session.scalars(
-    #         m.GroupProduct.select().where(
-    #             m.GroupProduct.master_group_id == event_master_group.id
-    #         )
-    #     )
-    # ]
-
-    # if cart.group in event_sub_groups:
-    #     event = m.Event(
-    #         date_from=form.event_date_from.data,
-    #         date_to=form.event_date_to.data,
-    #         quantity=form.quantity.data if form.quantity.data else cart.quantity,
-    #         product_id=cart.product_id,
-    #     )
-
-    return render_template(
-        "cart.html",
-        cart_items=db.session.execute(
+    cart_items = [
+        cart
+        for cart in db.session.execute(
             query.offset((pagination.page - 1) * pagination.per_page).limit(
                 pagination.per_page
             )
-        ).scalars(),
+        ).scalars()
+    ]
+    carts = [
+        {
+            "group": cart.group,
+            "id": cart.id,
+            "quantity": cart.quantity,
+            "product_id": cart.product_id,
+        }
+        for cart in cart_items
+    ]
+    return render_template(
+        "cart.html",
+        cart_items=cart_items,
         page=pagination,
         search_query=q,
         form=form,
@@ -151,6 +141,7 @@ def get_all():
         store_categories=store_categories,
         current_user_role_name=current_user_role_name,
         sales_rep_role=BaseConfig.Config.SALES_REP,
+        carts=carts,
         locker_store_category_ids=json.dumps(locker_store_category_ids)
         if locker_store_category_ids
         else None,

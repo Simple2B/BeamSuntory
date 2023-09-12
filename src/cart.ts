@@ -1,5 +1,7 @@
 import { easepick } from '@easepick/bundle'
 
+console.log('carts', JSON.parse(carts))
+
 interface ICart {
     id: number
     product: IProduct
@@ -14,6 +16,13 @@ interface IProduct {
     image: string
 }
 
+interface ICartItem {
+    id: number
+    product_id: number
+    quantity: number
+    group: string
+}
+
 // variable to set default image to brand dynamically in modal window. Can we get link from the internet?
 const defaultImage =
     'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png'
@@ -24,11 +33,23 @@ const quantityElements = document.querySelectorAll('.cart-item-quantity')
 const totalPriceElement = document.querySelector('#cart-total-price')
 const totalQuantityElement = document.querySelector('#cart-total-quantity')
 const tableCartItems = document.querySelectorAll('.table-cart-item')
+const submitBtn = document.querySelector('#cart-ship-request-submit-btn') as HTMLButtonElement
 
 let totalPrice = 0
 let totalQuantity = 0
 
+// check if cart has event group
 tableCartItems.forEach((item) => {
+    console.log('item', item)
+    const group = item.getAttribute('data-target-group')
+    if (group === 'Events') {
+        const eventContainer = document.querySelector('#cart-event-container') as HTMLDivElement
+        eventContainer.classList.remove('hidden')
+        eventContainer.classList.add('flex')
+    } else {
+        submitBtn.removeAttribute('disabled')
+    }
+
     const priceElement = item.querySelector('.cart-item-retail_price')
     const quantityElement: HTMLInputElement = item.querySelector('.cart-item-quantity')
     const availableProductQuantity = quantityElement.getAttribute('data-target-available-quantity')
@@ -232,8 +253,41 @@ const picker = new easepick.create({
         },
     },
     setup(picker: any) {
-        picker.on('view', (evt: any) => {
-            //
+        picker.on('view', async (evt: any) => {
+            const { view, date, target } = evt.detail
+
+            if ((view as string).toLowerCase() !== 'main') {
+                return
+            }
+
+            const isAvailableEventQuantity = await getEventAvailableQuantityByDate(
+                JSON.parse(carts),
+                '09%2F17%2F2023',
+                '09%2F30%2F2023'
+            )
+            if (!isAvailableEventQuantity) {
+                alert('Not enough quantity')
+                return
+            } else {
+                submitBtn.removeAttribute('disabled')
+            }
         })
     },
+})
+
+async function getEventAvailableQuantityByDate(carts: ICartItem[], dateFrom: string, dateTo: string) {
+    carts.forEach(async (cart) => {
+        const response = await fetch(
+            `/event/get_available_quantity_by_date?date_from=${dateFrom}&date_to=${dateTo}&group_name=${cart.group}&product_id=${cart.product_id}&quantity_desired=${cart.quantity}`
+        )
+        if (response.status !== 200) {
+            return false
+        }
+    })
+    return true
+}
+
+const eventDateRangeInput = document.querySelector('#datepicker') as HTMLInputElement
+eventDateRangeInput.addEventListener('change', () => {
+    console.log('eventDateRangeInput.value', eventDateRangeInput.value)
 })

@@ -198,6 +198,7 @@ def get_available_quantity():
             m.Event.select().where(
                 m.Event.date_from <= current_date,
                 m.Event.date_to >= current_date,
+                m.Event.product_id == product_id,
             )
         ).all()
         total_quantity = functools.reduce(lambda a, b: a + b.quantity, events, 0)
@@ -207,3 +208,55 @@ def get_available_quantity():
 
     log(log.INFO, "Total available quantity: [%s]", quantity)
     return jsonify(total_available_quantity)
+
+
+@event_blueprint.route("/get_available_quantity_by_date", methods=["GET"])
+@login_required
+def get_available_quantity_by_date():
+    date_from = request.args.get("date_from", type=str, default=None)
+    date_to = request.args.get("date_to", type=str, default=None)
+    product_id = request.args.get("product_id", type=int, default=None)
+    group_name = request.args.get("group_name", type=str, default=None)
+    quantity_desired = request.args.get("quantity", type=int, default=None)
+    group = db.session.scalar(m.Group.select().where(m.Group.name == group_name))
+    # TODO: Could be better split validation by params
+    if (
+        not group
+        or not quantity_desired
+        or not product_id
+        or not date_from
+        or not date_to
+    ):
+        log(log.INFO, "Some query params not found")
+        return "Some query params not found", 404
+    warehouse: m.Warehouse = db.session.scalar(
+        m.Warehouse.select().where(
+            m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value
+        )
+    )
+    warehouse_product: m.WarehouseProduct = db.session.scalar(
+        m.WarehouseProduct.select().where(
+            m.WarehouseProduct.product_id == product_id,
+            m.WarehouseProduct.warehouse_id == warehouse.id,
+            m.WarehouseProduct.group_id == group.id,
+        )
+    )
+    if not warehouse_product:
+        log(log.INFO, "Warehouse product not found")
+        return "Warehouse product not found", 404
+
+    date_start = datetime.strptime(date_from, "%Y/%m/%d")
+    date_end = datetime.strptime(date_to, "%Y/%m/%d")
+    events: list[m.Event] = db.session.scalars(
+        m.Event.select().where(
+            m.Event.date_from <= date_start,
+            m.Event.date_to >= date_end,
+            m.Event.product_id == product_id,
+        )
+    ).all()
+    total_quantity = functools.reduce(lambda a, b: a + b.quantity, events, 0)
+    quantity = warehouse_product.product_quantity - total_quantity - quantity_desired
+    if quantity < 0:
+        log(log.INFO, "Not enough quantity: [%s]", quantity)
+        return "Not enough quantity", 400
+    return "ok", 200
