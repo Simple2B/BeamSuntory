@@ -11,7 +11,7 @@ interface SupDAWhProd {
 }
 
 interface IPackageInfo {
-    groupId: number
+    productQuantityGroupId: number
     quantityCartonMaster: number
     quantityPerWrap: number
     quantityWrapCarton: number
@@ -21,11 +21,6 @@ interface IPackageInfo {
 interface IIncomingStockProduct {
     allocatedProductId: number
     packages: IPackageInfo[]
-    // quantity_received: number
-    // quantity_per_wrap: number
-    // quantity_wrap_carton: number
-    // quantity_carton_master: number
-    // group_id: number
 }
 let productGroupQuantity = {} as { [index: string]: number }
 let i = 0
@@ -88,7 +83,7 @@ $buttonElements.forEach((e) =>
 
 function editIncomingStock(inboundOrder: IInboundOrderOut) {
     let input: HTMLInputElement = document.querySelector('#incoming-stock-edit-id')
-    input.value = inboundOrder.orderId
+    input.value = inboundOrder.id.toString()
 
     inboundOrder.productsAllocated.forEach((productAllocated) => {
         createIncomingStockOrderItems(productAllocated)
@@ -272,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const inboundOrder: IInboundOrderOut = JSON.parse(
             (e.currentTarget as HTMLButtonElement).getAttribute('data-target')
         )
-        orderIdInput.value = inboundOrder.orderId
+        orderIdInput.value = inboundOrder.id.toString()
 
         inboundOrder.productsAllocated.forEach((productAllocated) => {
             createIncomingStockOrderItems(productAllocated)
@@ -319,6 +314,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 allocatedProductId: productAllocated.id,
                 packages: [],
             }
+            console.log('productAllocated', productAllocated)
+
             productAllocated.productQuantityGroups.forEach((productQuantityGroup) => {
                 const receivedQtyInput: HTMLInputElement = document.querySelector(
                     `.product-${productAllocated.id}-group-${productQuantityGroup.group.id}-received-quantity`
@@ -333,7 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     `.product-${productAllocated.id}-group-${productQuantityGroup.group.id}-carton-master`
                 )
                 const packageInfoData: IPackageInfo = {
-                    groupId: productQuantityGroup.group.id,
+                    productQuantityGroupId: productQuantityGroup.id,
                     quantityPerWrap: parseInt(perWrapInput.value),
                     quantityWrapCarton: parseInt(wrapCartonInput.value),
                     quantityCartonMaster: parseInt(cartonMasterInput.value),
