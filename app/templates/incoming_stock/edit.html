@@ -3,7 +3,7 @@
 
 <!-- Templates -->
 <!-- prettier-ignore-->
-<div id="product-incoming-stock-edit-template" class="hidden incoming-stock-product-item grid-cols-12 gap-4 p-4 border-t border-gray-200" data-target-product-id="${productAllocated.product.id}">
+<div id="product-incoming-stock-edit-template" class="hidden incoming-stock-product-item grid-cols-12 gap-4 p-4 border-t-[3px] border-gray-200" data-target-product-id="${productAllocated.product.id}">
   <div class="product-full-image-anchor col-span-6 sm:col-span-4 sm:row-span-3 max-height-image-container">
     <img class="product-incoming-stock-image w-full h-full object-contain" class="incoming-stock-edit-product-image w-full h-full object-cover">
   </div>
@@ -23,17 +23,17 @@
 
 <!-- prettier-ignore-->
 <div id="product-allocated-quantity-container-template" class="product-allocated-quantity-groups-edit hidden">
-    <div class="col-span-6 sm:col-span-12">
+    <div class="col-span-6 sm:col-span-4">
     <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group name</label>
         <div class="product-quantity-group-name shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>
     </div>
 
-    <div class="col-span-6 sm:col-span-6">
+    <div class="col-span-6 sm:col-span-4">
         <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group ordered quantity</label>
         <div class="group-ordered-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>
     </div>
 
-    <div class="col-span-6 sm:col-span-6">
+    <div class="col-span-6 sm:col-span-4">
       <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Received quantity</label>
       <input type="number" class="group-received-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
     </div>
@@ -44,17 +44,17 @@
 
 <!-- prettier-ignore-->
 <div id="product-package-info-container-template" class="product-package-info-groups-edit hidden">
-  <div class="col-span-6 sm:col-span-6 quantity-container">
+  <div class="col-span-6 sm:col-span-4 quantity-container">
       <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity Per Wrap</label>
       <input type="number" class="quantity-per-wrap shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
   </div>
 
-  <div class="col-span-6 sm:col-span-6 quantity-container">
+  <div class="col-span-6 sm:col-span-4 quantity-container">
       <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity Wrap Carton</label>
       <input type="number" class="quantity-wrap-carton shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
   </div>
 
-  <div class="col-span-6 sm:col-span-12 quantity-container border-b border-gray-100 pb-2">
+  <div class="col-span-6 sm:col-span-4 quantity-container">
     <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity Carton Master</label>
     <input type="number" class="quantity-carton-master shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
   </div>
