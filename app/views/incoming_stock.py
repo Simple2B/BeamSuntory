@@ -1,4 +1,3 @@
-import json
 from flask import (
     Blueprint,
     render_template,
@@ -70,113 +69,113 @@ def get_all():
 @login_required
 def accept():
     form_edit: f.PackageInfoForm = f.PackageInfoForm()
-    if form_edit.validate_on_submit():
-        package_info: m.PackageInfo = db.session.execute(
-            m.PackageInfo.select()
-            .order_by(m.PackageInfo.id)
-            .where(m.PackageInfo.inbound_order_id == form_edit.inbound_order_id.data)
-        ).scalar()
-        if package_info:
-            package_info.quantity_carton_master = form_edit.quantity_carton_master.data
-            package_info.quantity_per_wrap = form_edit.quantity_per_wrap.data
-            package_info.quantity_wrap_carton = form_edit.quantity_wrap_carton.data
-            package_info.save()
-        else:
-            package_info = m.PackageInfo(
-                inbound_order_id=int(form_edit.inbound_order_id.data),
-                quantity_carton_master=form_edit.quantity_carton_master.data,
-                quantity_per_wrap=form_edit.quantity_per_wrap.data,
-                quantity_wrap_carton=form_edit.quantity_wrap_carton.data,
-            )
-            package_info.save()
 
-    products_info_json = json.loads(form_edit.received_products.data)
+    if not form_edit.validate_on_submit():
+        log(log.WARNING, "Form is not valid: [%s]", form_edit.errors)
+        flash("Form is not valid", "danger")
+        return redirect(url_for("incoming_stock.get_all"))
 
-    # NOTE transform json, so it would be easier to compare with db data
-    products_received_quantity = {
-        f'{i["product_id"]}_{i["group_id"]}': i["quantity_received"]
-        for i in products_info_json
-    }
-
-    io: m.InboundOrder = db.session.scalar(
-        m.InboundOrder.select().where(
-            m.InboundOrder.id == int(form_edit.inbound_order_id.data)
-        )
+    inbound_order: m.InboundOrder = db.session.get(
+        m.InboundOrder, form_edit.inbound_order_id.data
     )
-    if not io:
+    if not inbound_order:
         log(
             log.INFO,
             "There is no inbound order with id: [%s]",
-            int(form_edit.inbound_order_id.data),
+            form_edit.inbound_order_id.data,
         )
         flash("There is no such inbound order", "danger")
         return redirect(url_for("incoming_stock.get_all"))
 
-    # save delivered product quantity, so this product would be available in warehouse
-    products_quantity_group: list[m.ProductQuantityGroup] = db.session.execute(
-        m.ProductQuantityGroup.select().where(
-            m.ProductQuantityGroup.inbound_order_id == io.id,
-        )
-    ).scalars()
-    if not products_quantity_group:
-        log(
-            log.INFO,
-            "There is no ProductQuantityGroup for inbound order with id: [%s]",
-            int(form_edit.inbound_order_id.data),
-        )
-        flash("There is no such ProductQuantityGroup", "danger")
-        return redirect(url_for("incoming_stock.get_all"))
+    products_info_json = s.IncomingStocks.parse_raw(
+        form_edit.received_products.data
+    ).__root__
 
-    for product in products_quantity_group:
-        warehouse_product: m.WarehouseProduct = db.session.scalar(
-            m.WarehouseProduct.select().where(
-                m.WarehouseProduct.product_id == product.product_id,
-                m.WarehouseProduct.warehouse_id == product.warehouse_id,
-                m.WarehouseProduct.group_id == product.group_id,
+    for allocated_product in products_info_json:
+        for new_package_info in allocated_product.packages:
+            product_quantity_group: m.ProductQuantityGroup = db.session.scalar(
+                m.ProductQuantityGroup.select().where(
+                    m.ProductQuantityGroup.id
+                    == new_package_info.product_quantity_group_id,
+                    m.ProductQuantityGroup.product_allocated_id
+                    == allocated_product.allocated_product_id,
+                    m.ProductQuantityGroup.product_allocated.has(
+                        m.ProductAllocated.inbound_order_id
+                        == form_edit.inbound_order_id.data
+                    ),
+                )
             )
-        )
+            if not product_quantity_group:
+                log(
+                    log.WARNING,
+                    "There is no product_quantity_group with id: [%s]",
+                    new_package_info.product_quantity_group_id,
+                )
+                flash("There is no such product_quantity_group", "danger")
+                return redirect(url_for("incoming_stock.get_all"))
 
-        # TODO: validate real quantity
-        quantity_received = int(
-            products_received_quantity[f"{product.product_id}_{product.group_id}"]
-        )
-        product.quantity_received = quantity_received
-        product.save()
+            if new_package_info.quantity_received != product_quantity_group.quantity:
+                log(
+                    log.INFO,
+                    "Inbound order accepted! Ordered quantity: [%s], != received quantity: [%s]",
+                    product_quantity_group.quantity,
+                    new_package_info.quantity_received,
+                )
+                flash(
+                    f"Inbound order accepted! Ordered qty: {product_quantity_group.quantity}, \
+                        != received qty: {new_package_info.quantity_received}",
+                    "warning",
+                )
 
-        if quantity_received != product.quantity:
-            log(
-                log.INFO,
-                "Inbound order accepted! Ordered quantity: [%s], != received quantity: [%s]",
-                product.quantity,
-                quantity_received,
+            product_quantity_group.quantity_received = (
+                new_package_info.quantity_received
             )
-            flash(
-                f"Inbound order accepted! Ordered qty: {product.quantity}, != received qty: {quantity_received}",
-                "warning",
-            )
 
-        if warehouse_product:
-            warehouse_product.product_quantity += quantity_received
-            warehouse_product.save()
-        else:
-            warehouse_product = m.WarehouseProduct(
-                product_id=product.product_id,
-                warehouse_id=product.warehouse_id,
-                product_quantity=quantity_received,
-                group_id=product.group_id,
-            )
-            warehouse_product.save()
+            # update or create package info
+            if product_quantity_group.package_info_id:
+                product_quantity_group.package_info.quantity_carton_master = (
+                    new_package_info.quantity_carton_master
+                )
+                product_quantity_group.package_info.quantity_per_wrap = (
+                    new_package_info.quantity_per_wrap
+                )
+                product_quantity_group.package_info.quantity_wrap_carton = (
+                    new_package_info.quantity_wrap_carton
+                )
+            else:
+                create_package_info = m.PackageInfo(
+                    quantity_carton_master=new_package_info.quantity_carton_master,
+                    quantity_per_wrap=new_package_info.quantity_per_wrap,
+                    quantity_wrap_carton=new_package_info.quantity_wrap_carton,
+                    product_quantity_group_id=product_quantity_group.id,
+                )
+                create_package_info.save(False)
 
-    io.status = s.InboundOrderStatus.delivered
-    io.save()
-    log(log.INFO, "Inbound order accepted. Inbound order: [%s]", io)
-    if not quantity_received != product.quantity:
-        flash("Inbound order accepted!", "success")
-    else:
-        flash(
-            "Inbound order accepted! But received quantity is different from ordered",
-            "warning",
-        )
+            # update or create warehouse product
+            warehouse_product: m.WarehouseProduct = db.session.scalar(
+                m.WarehouseProduct.select().where(
+                    m.WarehouseProduct.product_id
+                    == product_quantity_group.product_allocated.product_id,
+                    m.WarehouseProduct.warehouse_id == inbound_order.warehouse_id,
+                    m.WarehouseProduct.group_id == product_quantity_group.group_id,
+                )
+            )
+            if warehouse_product:
+                warehouse_product.product_quantity += new_package_info.quantity_received
+            else:
+                warehouse_product = m.WarehouseProduct(
+                    product_id=product_quantity_group.product_allocated.product_id,
+                    warehouse_id=inbound_order.warehouse_id,
+                    product_quantity=new_package_info.quantity_received,
+                    group_id=product_quantity_group.group_id,
+                )
+                warehouse_product.save(False)
+
+    inbound_order.status = s.InboundOrderStatus.delivered
+    log(log.INFO, "Inbound order accepted. Inbound order: [%s]", inbound_order)
+
+    db.session.commit()
+
     return redirect(url_for("incoming_stock.get_all"))
 
 

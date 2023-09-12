@@ -32,6 +32,7 @@ export interface IProductAllocatedBase {
     shelfLifeEnd: string;
 }
 export interface IProductQuantityGroupOut {
+    id: number;
     quantity: number;
     group: IGroup;
 }

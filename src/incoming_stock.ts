@@ -11,18 +11,16 @@ interface SupDAWhProd {
 }
 
 interface IPackageInfo {
-    quantity_carton_master: number
-    quantity_per_wrap: number
-    quantity_wrap_carton: number
+    productQuantityGroupId: number
+    quantityCartonMaster: number
+    quantityPerWrap: number
+    quantityWrapCarton: number
+    quantityReceived: number
 }
 
 interface IIncomingStockProduct {
-    product_id: number
-    quantity_received: number
-    quantity_per_wrap: number
-    quantity_wrap_carton: number
-    quantity_carton_master: number
-    group_id: number
+    allocatedProductId: number
+    packages: IPackageInfo[]
 }
 let productGroupQuantity = {} as { [index: string]: number }
 let i = 0
@@ -85,7 +83,7 @@ $buttonElements.forEach((e) =>
 
 function editIncomingStock(inboundOrder: IInboundOrderOut) {
     let input: HTMLInputElement = document.querySelector('#incoming-stock-edit-id')
-    input.value = inboundOrder.orderId
+    input.value = inboundOrder.id.toString()
 
     inboundOrder.productsAllocated.forEach((productAllocated) => {
         createIncomingStockOrderItems(productAllocated)
@@ -138,6 +136,11 @@ function createIncomingStockOrderItems(productAllocated: IAllocatedProductOut) {
 
         const groupQuantityNameDiv = groupQuantityContainer.querySelector('.product-quantity-group-name')
         groupQuantityNameDiv.innerHTML = quantityGroup.group.name
+        groupQuantityNameDiv.setAttribute('data-target', quantityGroup.group.id.toString())
+
+        const groupQuantityNameIdInput = document.createElement('input')
+        groupQuantityNameIdInput.classList.add('group-quantity-name-id-input', 'hidden')
+        groupQuantityNameIdInput.value = quantityGroup.group.id.toString()
 
         const groupQuantityTotalDiv = groupQuantityContainer.querySelector('.group-ordered-quantity')
         groupQuantityTotalDiv.innerHTML = quantityGroup.quantity.toString()
@@ -146,10 +149,17 @@ function createIncomingStockOrderItems(productAllocated: IAllocatedProductOut) {
             '.group-received-quantity'
         ) as HTMLInputElement
         groupQuantityReceivedInput.value = quantityGroup.quantity.toString()
+        groupQuantityReceivedInput.classList.add(
+            `product-${productAllocated.id}-group-${quantityGroup.group.id}-received-quantity`
+        )
 
         productAllocatedContainer.appendChild(groupQuantityNameDiv.parentNode)
         productAllocatedContainer.appendChild(groupQuantityTotalDiv.parentNode)
         productAllocatedContainer.appendChild(groupQuantityReceivedInput.parentNode)
+
+        const packageInfoContainer = document.createElement('div')
+        packageInfoContainer.classList.add('grid', 'grid-cols-12', 'col-span-12', 'gap-4', 'package-info-container')
+        packageInfoContainer.appendChild(groupQuantityNameIdInput)
 
         const productGroupQuantityPackageInfoContainer = document
             .getElementById('product-package-info-container-template')
@@ -159,9 +169,22 @@ function createIncomingStockOrderItems(productAllocated: IAllocatedProductOut) {
         const packageInfoFields: NodeListOf<HTMLDivElement> =
             productGroupQuantityPackageInfoContainer.querySelectorAll('.quantity-container')
 
+        productGroupQuantityPackageInfoContainer
+            .querySelector('.quantity-per-wrap')
+            .classList.add(`product-${productAllocated.id}-group-${quantityGroup.group.id}-per-wrap`)
+        productGroupQuantityPackageInfoContainer
+            .querySelector('.quantity-wrap-carton')
+            .classList.add(`product-${productAllocated.id}-group-${quantityGroup.group.id}-wrap-carton`)
+        productGroupQuantityPackageInfoContainer
+            .querySelector('.quantity-carton-master')
+            .classList.add(`product-${productAllocated.id}-group-${quantityGroup.group.id}-carton-master`)
+
         packageInfoFields.forEach((packageInfoField) => {
-            productAllocatedContainer.appendChild(packageInfoField)
+            // packageInfoField.classList.add()
+
+            packageInfoContainer.appendChild(packageInfoField)
         })
+        productAllocatedContainer.appendChild(packageInfoContainer)
     })
 
     incomingStockAddContainer.appendChild(productAllocatedContainer)
@@ -193,31 +216,31 @@ cancelOrderButtons.forEach((e) => {
     })
 })
 
-function setProducts() {
-    const incomingStockProducts = document.querySelectorAll('.incoming-stock-product-item')
-    const incomingStockProductsQuantity = document.querySelectorAll('.incoming-stock-edit-received-quantity')
-    const products: IIncomingStockProduct[] = []
+// function setProducts() {
+//     const incomingStockProducts = document.querySelectorAll('.incoming-stock-product-item')
+//     const incomingStockProductsQuantity = document.querySelectorAll('.incoming-stock-edit-received-quantity')
+//     const products: IIncomingStockProduct[] = []
 
-    incomingStockProducts.forEach((incomingStockProduct, i) => {
-        const incomingStockQuantity = incomingStockProductsQuantity[i] as HTMLInputElement
-        const productId = incomingStockProduct.getAttribute('data-target-product-id')
-        const quantityPerWrap = incomingStockProduct.querySelector('.quantity-per-wrap') as HTMLInputElement
-        const quantityWrapCarton = incomingStockProduct.querySelector('.quantity-wrap-carton') as HTMLInputElement
-        const quantityCartonMaster = incomingStockProduct.querySelector('.quantity-carton-master') as HTMLInputElement
+//     incomingStockProducts.forEach((incomingStockProduct, i) => {
+//         const incomingStockQuantity = incomingStockProductsQuantity[i] as HTMLInputElement
+//         const productId = incomingStockProduct.getAttribute('data-target-product-id')
+//         const quantityPerWrap = incomingStockProduct.querySelector('.quantity-per-wrap') as HTMLInputElement
+//         const quantityWrapCarton = incomingStockProduct.querySelector('.quantity-wrap-carton') as HTMLInputElement
+//         const quantityCartonMaster = incomingStockProduct.querySelector('.quantity-carton-master') as HTMLInputElement
 
-        const product: IIncomingStockProduct = {
-            product_id: parseInt(productId),
-            quantity_received: parseInt(incomingStockQuantity.value),
-            quantity_per_wrap: parseInt(quantityPerWrap.value),
-            quantity_wrap_carton: parseInt(quantityWrapCarton.value),
-            quantity_carton_master: parseInt(quantityCartonMaster.value),
-            group_id: productGroupQuantity[`group_id-${i}`],
-        }
-        products.push(product)
-    })
+//         const product: IIncomingStockProduct = {
+//             product_id: parseInt(productId),
+//             quantity_received: parseInt(incomingStockQuantity.value),
+//             quantity_per_wrap: parseInt(quantityPerWrap.value),
+//             quantity_wrap_carton: parseInt(quantityWrapCarton.value),
+//             quantity_carton_master: parseInt(quantityCartonMaster.value),
+//             group_id: productGroupQuantity[`group_id-${i}`],
+//         }
+//         products.push(product)
+//     })
 
-    inputReceivedProducts.value = JSON.stringify(products)
-}
+//     inputReceivedProducts.value = JSON.stringify(products)
+// }
 
 // ----submit form through hidden submit button----
 const inboundOrderSubmitButton: HTMLButtonElement = document.querySelector('#incoming-stock-submit-btn')
@@ -238,13 +261,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const viewModalActiveTime: HTMLDivElement = document.querySelector('#incoming-stock-view-active-time')
     const viewModalDeliveryDate: HTMLDivElement = document.querySelector('#incoming-stock-view-delivery-date')
     const viewModalAcceptButton: HTMLButtonElement = document.querySelector('#accept-incoming-stock-edit-button')
+    const orderIdInput: HTMLInputElement = document.querySelector('#incoming-stock-edit-id')
 
     viewModalAcceptButton.addEventListener('click', (e: MouseEvent) => {
         const inboundOrder: IInboundOrderOut = JSON.parse(
             (e.currentTarget as HTMLButtonElement).getAttribute('data-target')
         )
-        let input: HTMLInputElement = document.querySelector('#incoming-stock-edit-id')
-        input.value = inboundOrder.orderId
+        orderIdInput.value = inboundOrder.id.toString()
 
         inboundOrder.productsAllocated.forEach((productAllocated) => {
             createIncomingStockOrderItems(productAllocated)
@@ -283,10 +306,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const inboundOrderSaveProductsButton = document.querySelector('#incoming-stock-save-products-btn')
     inboundOrderSaveProductsButton.addEventListener('click', () => {
-        setProducts()
-        console.log('inboundOrderSaveProductsButton')
+        // setProducts()
+        const products: IIncomingStockProduct[] = []
+        const inboundOrder: IInboundOrderOut = JSON.parse(viewModalAcceptButton.getAttribute('data-target'))
+        inboundOrder.productsAllocated.forEach((productAllocated) => {
+            const stock: IIncomingStockProduct = {
+                allocatedProductId: productAllocated.id,
+                packages: [],
+            }
+            console.log('productAllocated', productAllocated)
 
-        // inboundOrderSubmitButton.click()
+            productAllocated.productQuantityGroups.forEach((productQuantityGroup) => {
+                const receivedQtyInput: HTMLInputElement = document.querySelector(
+                    `.product-${productAllocated.id}-group-${productQuantityGroup.group.id}-received-quantity`
+                )
+                const perWrapInput: HTMLInputElement = document.querySelector(
+                    `.product-${productAllocated.id}-group-${productQuantityGroup.group.id}-per-wrap`
+                )
+                const wrapCartonInput: HTMLInputElement = document.querySelector(
+                    `.product-${productAllocated.id}-group-${productQuantityGroup.group.id}-wrap-carton`
+                )
+                const cartonMasterInput: HTMLInputElement = document.querySelector(
+                    `.product-${productAllocated.id}-group-${productQuantityGroup.group.id}-carton-master`
+                )
+                const packageInfoData: IPackageInfo = {
+                    productQuantityGroupId: productQuantityGroup.id,
+                    quantityPerWrap: parseInt(perWrapInput.value),
+                    quantityWrapCarton: parseInt(wrapCartonInput.value),
+                    quantityCartonMaster: parseInt(cartonMasterInput.value),
+                    quantityReceived: parseInt(receivedQtyInput.value),
+                }
+
+                stock.packages.push(packageInfoData)
+            })
+            products.push(stock)
+        })
+
+        inputReceivedProducts.value = JSON.stringify(products)
+
+        inboundOrderSubmitButton.click()
     })
 })
 

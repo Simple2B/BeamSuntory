@@ -343,8 +343,15 @@ def delete(id: int):
             )
         )
     )
+
     db.session.execute(
-        m.PackageInfo.delete().where(m.PackageInfo.inbound_order_id == inbound_order.id)
+        m.PackageInfo.delete().where(
+            m.PackageInfo.product_quantity_group.has(
+                m.ProductQuantityGroup.product_allocated.has(
+                    m.ProductAllocated.inbound_order_id == inbound_order.id
+                )
+            )
+        )
     )
     db.session.execute(
         m.ProductAllocated.delete().where(
