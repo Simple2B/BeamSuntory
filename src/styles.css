@@ -61,3 +61,11 @@ button[disabled]{
 .datepicker::placeholder {
     color: rgb(255, 255, 255) !important;
 }
+
+.margin-b-5{
+    margin-bottom: 20px;
+}
+
+.packageInfoContainer-border{ 
+    border-bottom: dashed 1px rgb(107 114 128);
+}

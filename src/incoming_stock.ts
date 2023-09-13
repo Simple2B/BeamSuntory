@@ -129,7 +129,9 @@ function createIncomingStockOrderItems(productAllocated: IAllocatedProductOut) {
     const groupQuantityContainerTemplate = document.getElementById(
         'product-allocated-quantity-container-template'
     ) as HTMLDivElement
-    productAllocated.productQuantityGroups.forEach((quantityGroup) => {
+
+    const productQuantityGroupsLength = productAllocated.productQuantityGroups.length
+    productAllocated.productQuantityGroups.forEach((quantityGroup, index) => {
         const groupQuantityContainer = groupQuantityContainerTemplate.cloneNode(true) as HTMLDivElement
         groupQuantityContainer.removeAttribute('id')
         groupQuantityContainer.classList.remove('hidden')
@@ -159,6 +161,11 @@ function createIncomingStockOrderItems(productAllocated: IAllocatedProductOut) {
 
         const packageInfoContainer = document.createElement('div')
         packageInfoContainer.classList.add('grid', 'grid-cols-12', 'col-span-12', 'gap-4', 'package-info-container')
+        if(index !== productQuantityGroupsLength - 1) {
+            packageInfoContainer.classList.add('packageInfoContainer-border', 'pb-4')
+        }else{
+            packageInfoContainer.classList.add('margin-b-5')
+        }
         packageInfoContainer.appendChild(groupQuantityNameIdInput)
 
         const productGroupQuantityPackageInfoContainer = document
@@ -169,15 +176,23 @@ function createIncomingStockOrderItems(productAllocated: IAllocatedProductOut) {
         const packageInfoFields: NodeListOf<HTMLDivElement> =
             productGroupQuantityPackageInfoContainer.querySelectorAll('.quantity-container')
 
-        productGroupQuantityPackageInfoContainer
-            .querySelector('.quantity-per-wrap')
-            .classList.add(`product-${productAllocated.id}-group-${quantityGroup.group.id}-per-wrap`)
-        productGroupQuantityPackageInfoContainer
-            .querySelector('.quantity-wrap-carton')
-            .classList.add(`product-${productAllocated.id}-group-${quantityGroup.group.id}-wrap-carton`)
-        productGroupQuantityPackageInfoContainer
-            .querySelector('.quantity-carton-master')
-            .classList.add(`product-${productAllocated.id}-group-${quantityGroup.group.id}-carton-master`)
+        
+        const quantityPerWrapDiv = productGroupQuantityPackageInfoContainer
+            .querySelector('.quantity-per-wrap') as HTMLInputElement
+        quantityPerWrapDiv.classList.add(`product-${productAllocated.id}-group-${quantityGroup.group.id}-per-wrap`)
+        quantityPerWrapDiv.setAttribute('required', 'true')
+        quantityPerWrapDiv.placeholder = 'Quantity'
+
+        const quantityWrapCartonDiv = productGroupQuantityPackageInfoContainer
+            .querySelector('.quantity-wrap-carton') as HTMLInputElement
+        quantityWrapCartonDiv.classList.add(`product-${productAllocated.id}-group-${quantityGroup.group.id}-wrap-carton`)
+        quantityWrapCartonDiv.setAttribute('required', 'true')
+        quantityWrapCartonDiv.placeholder = 'Quantity'
+
+        const quantityCartonMasterDiv = productGroupQuantityPackageInfoContainer
+            .querySelector('.quantity-carton-master') as HTMLInputElement
+        quantityCartonMasterDiv.classList.add(`product-${productAllocated.id}-group-${quantityGroup.group.id}-carton-master`)
+        quantityCartonMasterDiv.placeholder = 'Quantity'
 
         packageInfoFields.forEach((packageInfoField) => {
             // packageInfoField.classList.add()
