@@ -456,7 +456,6 @@ async function getEventAvailableQuantity(product_id: number, group: string, mont
     const data = await response.json()
     fetchedAmountByDate = data
 
-    console.log('fetchedAmountByDate inside function', fetchedAmountByDate[0])
     return data
 }
 
@@ -524,7 +523,6 @@ function addProduct(groups: IProductMasterGroupGroup) {
 }
 
 function editProduct(product: IProduct) {
-    console.log(' product', product)
     sessionStorage.setItem('product', JSON.stringify(product))
 
     const img: HTMLImageElement = document.querySelector('#product-edit-show-image')
@@ -627,7 +625,6 @@ function editProduct(product: IProduct) {
 
                 if (product.mstr_grps_grps_names_in_prod[productMasterGroups[i]].length > 1) {
                     for (let j = 1; j < product.mstr_grps_grps_names_in_prod[productMasterGroups[i]].length; j++) {
-                        console.log('if product')
                         createProductGroupEditItem(null, productMasterGroups[i], j)
                     }
                     continue
@@ -690,8 +687,6 @@ viewProductButtonElements.forEach((e) =>
             let isEqual = false
 
             const mstrGroupName = product.mstr_groups_groups[groupName]
-            console.log('mstrGroupName', mstrGroupName)
-
             if (product.current_user_groups.hasOwnProperty(mstrGroupName)) {
                 const currentUserValue = product.current_user_groups[mstrGroupName]
                 if (currentUserValue.includes(groupName)) {
@@ -699,8 +694,6 @@ viewProductButtonElements.forEach((e) =>
                 }
             }
             if (mstrGroupName !== eventMasterGroup || isEvent) {
-                console.log('mstrGroupName', mstrGroupName)
-
                 addShipAssignShareButton(isEqual, mstrGroupName, groupName, product)
             }
         })
@@ -856,7 +849,6 @@ let picker: Datepicker
 
 // function to booking
 function booking(product: IProduct, group: string) {
-    console.log('product', product)
     const img: HTMLImageElement = document.querySelector('#product-event-image')
     const fullImageAnchor = img.closest('.product-full-image-anchor')
     fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
@@ -864,7 +856,6 @@ function booking(product: IProduct, group: string) {
     let div: HTMLDivElement = document.querySelector('#product-event-name')
     div.innerHTML = product.name
     div = document.querySelector('#product-event-SKU')
-    console.log(product.SKU)
     div.innerHTML = product.SKU
 
     let input: HTMLInputElement = document.querySelector('#product-event-group-hidden')
@@ -904,7 +895,6 @@ function booking(product: IProduct, group: string) {
                     return Math.floor(Math.random() * (max - min + 1) + min)
                 }
                 const quantities: { [key: string]: string } = {}
-                console.log('fetchedAmountByDate', fetchedAmountByDate)
 
                 fetchedAmountByDate.forEach(({ date, quantity }) => {
                     quantities[date] = quantity.toString()
@@ -1074,8 +1064,6 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
         const bookingButtons = document.querySelectorAll('.booking-product-button')
         bookingButtons.forEach((e) =>
             e.addEventListener('click', () => {
-                console.log(e)
-
                 let shipGroup = e.getAttribute('ship-group-data')
                 const product = JSON.parse(sessionStorage.product)
                 booking(product, shipGroup)
@@ -1238,8 +1226,6 @@ function createAdjustAction(isEqual: boolean, masterGroup: string, group: string
         'productInWarehouses',
         JSON.stringify(productParam.product_in_warehouses)
     )
-    console.log(productParam)
-
     const groupUnderScore = group.replace(/ /g, '_')
     const groupProductIds = productParam.groups_ids
     const productTypeContainer = document.querySelector(`#product-adjust-product-name-container`)
@@ -1873,5 +1859,4 @@ function getFilterValues(isChecked: boolean) {
 const eventSortToggleButton: HTMLInputElement = document.querySelector('#product-show-events-toggle-btn')
 eventSortToggleButton.addEventListener('change', () => {
     getFilterValues(eventSortToggleButton.checked)
-    console.log(eventSortToggleButton.checked)
 })

@@ -143,8 +143,6 @@ $buttonEditElements.forEach((e) =>
 )
 
 function editShipRequest(shipRequest: IShipRequest, store: IStore) {
-    console.log('shipRequest: ', shipRequest)
-
     let input: HTMLInputElement = document.querySelector('#pickup-order-edit-status')
     input.value = shipRequest.status
     input = document.querySelector('#pickup-order-edit-id')
