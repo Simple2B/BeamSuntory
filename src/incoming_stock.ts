@@ -161,9 +161,9 @@ function createIncomingStockOrderItems(productAllocated: IAllocatedProductOut) {
 
         const packageInfoContainer = document.createElement('div')
         packageInfoContainer.classList.add('grid', 'grid-cols-12', 'col-span-12', 'gap-4', 'package-info-container')
-        if(index !== productQuantityGroupsLength - 1) {
+        if (index !== productQuantityGroupsLength - 1) {
             packageInfoContainer.classList.add('packageInfoContainer-border', 'pb-4')
-        }else{
+        } else {
             packageInfoContainer.classList.add('margin-b-5')
         }
         packageInfoContainer.appendChild(groupQuantityNameIdInput)
@@ -176,22 +176,28 @@ function createIncomingStockOrderItems(productAllocated: IAllocatedProductOut) {
         const packageInfoFields: NodeListOf<HTMLDivElement> =
             productGroupQuantityPackageInfoContainer.querySelectorAll('.quantity-container')
 
-        
-        const quantityPerWrapDiv = productGroupQuantityPackageInfoContainer
-            .querySelector('.quantity-per-wrap') as HTMLInputElement
+        const quantityPerWrapDiv = productGroupQuantityPackageInfoContainer.querySelector(
+            '.quantity-per-wrap'
+        ) as HTMLInputElement
         quantityPerWrapDiv.classList.add(`product-${productAllocated.id}-group-${quantityGroup.group.id}-per-wrap`)
         quantityPerWrapDiv.setAttribute('required', 'true')
         quantityPerWrapDiv.placeholder = 'Quantity'
 
-        const quantityWrapCartonDiv = productGroupQuantityPackageInfoContainer
-            .querySelector('.quantity-wrap-carton') as HTMLInputElement
-        quantityWrapCartonDiv.classList.add(`product-${productAllocated.id}-group-${quantityGroup.group.id}-wrap-carton`)
+        const quantityWrapCartonDiv = productGroupQuantityPackageInfoContainer.querySelector(
+            '.quantity-wrap-carton'
+        ) as HTMLInputElement
+        quantityWrapCartonDiv.classList.add(
+            `product-${productAllocated.id}-group-${quantityGroup.group.id}-wrap-carton`
+        )
         quantityWrapCartonDiv.setAttribute('required', 'true')
         quantityWrapCartonDiv.placeholder = 'Quantity'
 
-        const quantityCartonMasterDiv = productGroupQuantityPackageInfoContainer
-            .querySelector('.quantity-carton-master') as HTMLInputElement
-        quantityCartonMasterDiv.classList.add(`product-${productAllocated.id}-group-${quantityGroup.group.id}-carton-master`)
+        const quantityCartonMasterDiv = productGroupQuantityPackageInfoContainer.querySelector(
+            '.quantity-carton-master'
+        ) as HTMLInputElement
+        quantityCartonMasterDiv.classList.add(
+            `product-${productAllocated.id}-group-${quantityGroup.group.id}-carton-master`
+        )
         quantityCartonMasterDiv.placeholder = 'Quantity'
 
         packageInfoFields.forEach((packageInfoField) => {
@@ -267,6 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const viewIncomingStockButtons = document.querySelectorAll(
         '.incoming-stock-view-button'
     ) as NodeListOf<HTMLButtonElement>
+    const viewModalInboundOrderId: HTMLInputElement = document.querySelector('#incoming-stock-view-inbound-order-id')
     const viewModalOrderId: HTMLDivElement = document.querySelector('#incoming-stock-view-order-id')
     const viewModalOrderTitle: HTMLDivElement = document.querySelector('#incoming-stock-view-order-title')
     const viewModalOrderStatus: HTMLDivElement = document.querySelector('#incoming-stock-view-status')
@@ -276,6 +283,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const viewModalActiveTime: HTMLDivElement = document.querySelector('#incoming-stock-view-active-time')
     const viewModalDeliveryDate: HTMLDivElement = document.querySelector('#incoming-stock-view-delivery-date')
     const viewModalAcceptButton: HTMLButtonElement = document.querySelector('#accept-incoming-stock-edit-button')
+    const wmNotesView: HTMLInputElement = document.querySelector('#incoming-stock-view-wm-notes')
+    const daNotesView: HTMLInputElement = document.querySelector('#incoming-stock-view-da-notes')
     const orderIdInput: HTMLInputElement = document.querySelector('#incoming-stock-edit-id')
 
     viewModalAcceptButton.addEventListener('click', (e: MouseEvent) => {
@@ -294,6 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
     viewIncomingStockButtons.forEach((viewButton) =>
         viewButton.addEventListener('click', () => {
             const inboundOrder: IInboundOrderOut = JSON.parse(viewButton.getAttribute('data-target'))
+            viewModalInboundOrderId.value = inboundOrder.id.toString()
             viewModalOrderId.innerHTML = inboundOrder.orderId
             viewModalOrderTitle.innerHTML = inboundOrder.title
             viewModalOrderStatus.innerHTML = inboundOrder.status
@@ -302,6 +312,8 @@ document.addEventListener('DOMContentLoaded', () => {
             viewModalActiveDate.innerHTML = inboundOrder.activeDate
             viewModalActiveTime.innerHTML = inboundOrder.activeTime
             viewModalDeliveryDate.innerHTML = inboundOrder.deliveryDate
+            wmNotesView.value = inboundOrder.wmNotes
+            daNotesView.value = inboundOrder.daNotes
             if (inboundOrder.status !== 'In transit') {
                 viewModalAcceptButton.classList.add('invisible')
             } else {

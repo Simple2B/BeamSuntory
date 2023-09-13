@@ -316,7 +316,7 @@ const adjustModalOptions: ModalOptions = {
 const modalShipAssignOptions: ModalOptions = {
     placement: 'bottom-right',
     backdrop: 'dynamic',
-    backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-51',
+    backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
     closable: true,
     onHide: () => {
         sessionStorage.removeItem('product')

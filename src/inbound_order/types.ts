@@ -58,6 +58,8 @@ export interface IInboundOrderBase {
     deliveryDate: string
     supplier: ISupplier
     warehouse: IWarehouse
+    wmNotes: string
+    daNotes: string
 }
 
 export interface IInboundOrderOut extends IInboundOrderBase {
