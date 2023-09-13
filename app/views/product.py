@@ -34,7 +34,15 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     is_events = request.args.get("events", type=bool, default=False)
 
     if query is None or count_query is None:
-        query = m.Product.select().order_by(m.Product.id)
+        reverse_event_filter = ~m.Product.warehouse_products.any(
+            m.WarehouseProduct.group.has(
+                m.Group.master_groups.has(
+                    m.MasterGroup.name == s.MasterGroupMandatory.events.value
+                )
+            )
+        )
+        query = m.Product.select().where(reverse_event_filter).order_by(m.Product.id)
+
         count_query = sa.select(sa.func.count()).select_from(m.Product)
         if q:
             query = (
@@ -43,6 +51,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
                     m.Product.name.ilike(f"%{q}%")
                     | m.Product.SKU.ilike(f"%{q}%")
                     | m.Product.description.ilike(f"%{q}%")
+                    | reverse_event_filter
                 )
                 .order_by(m.Product.id)
             )
@@ -52,50 +61,33 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
                     m.Product.name.ilike(f"%{q}%")
                     | m.Product.SKU.ilike(f"%{q}%")
                     | m.Product.description.ilike(f"%{q}%")
+                    | reverse_event_filter
                 )
                 .select_from(m.Product)
             )
 
-    event_master_group: m.MasterGroupProduct = db.session.scalar(
-        m.MasterGroupProduct.select().where(
-            m.MasterGroupProduct.name == s.ProductMasterGroupMandatory.events.value
-        )
-    )
-
     if is_events:
-        event_sub_groups = db.session.scalars(
-            m.GroupProduct.select().where(
-                m.GroupProduct.master_group_id == event_master_group.id
-            )
-        )
-        sub_groups_ids = [sg.id for sg in event_sub_groups]
-
-        query = query.where(
-            m.Product.id.in_(
-                sa.select(m.ProductGroup.product_id).where(
-                    m.ProductGroup.group_id.in_(sub_groups_ids)
+        event_filter = m.Product.warehouse_products.any(
+            m.WarehouseProduct.group.has(
+                m.Group.master_groups.has(
+                    m.MasterGroup.name == s.MasterGroupMandatory.events.value
                 )
             )
         )
-        groups_for_products_obj = db.session.execute(m.GroupProduct.select()).all()
 
-    else:
-        groups_for_products_obj = db.session.execute(
-            m.GroupProduct.select().where(
-                m.GroupProduct.master_group_id != event_master_group.id
-            )
-        ).all()
+        query = m.Product.select().where(event_filter).order_by(m.Product.id)
+
+    groups_for_products_obj = db.session.execute(m.GroupProduct.select()).all()
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
     master_groups = [
         row for row in db.session.execute(m.MasterGroup.select()).scalars()
     ]
-    all_groups_for_product = db.session.execute(m.GroupProduct.select()).all()
 
     mastr_for_prods_groups_for_prods = {}
     mstr_prod_grps_prod_grps_names = {}
-    for group in all_groups_for_product:
+    for group in groups_for_products_obj:
         if (
             group[0].master_groups_for_product.name
             not in mastr_for_prods_groups_for_prods
