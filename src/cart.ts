@@ -202,8 +202,8 @@ eventButtons.forEach((btn) => {
 const { DateTime } = easepick
 function formatDate(date: Date): string {
     const year = date.getFullYear()
-    const month = (date.getMonth() + 1).toString().padStart(2, '0')
-    const day = date.getDate().toString().padStart(2, '0')
+    const month = (date.getMonth() + 1).toString()
+    const day = date.getDate().toString()
     return `${year}-${month}-${day}`
 }
 
@@ -225,14 +225,6 @@ const bookedDates = [getFirstAndLastDate()].map((d) => {
     return new DateTime(d, 'YYYY-MM-DD')
 })
 
-const DATA_FROM_BE = {
-    '2023-09-03': '25',
-    '2023-09-04': '26',
-    '2023-09-05': '27',
-    '2023-09-06': '28',
-    '2023-09-07': '29',
-    '2023-09-11': '28',
-}
 
 const picker = new easepick.create({
     element: document.getElementById('datepicker'),
