@@ -180,6 +180,10 @@ def get_available_quantity():
             m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value
         )
     )
+    if not warehouse:
+        log(log.INFO, "Warehouse not found")
+        return "Warehouse not found", 404
+
     warehouse_product: m.WarehouseProduct = db.session.scalar(
         m.WarehouseProduct.select().where(
             m.WarehouseProduct.product_id == product_id,

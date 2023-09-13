@@ -414,8 +414,8 @@ $addButtonElements.forEach((e) =>
 const { DateTime } = easepick
 function formatDate(date: Date): string {
     const year = date.getFullYear()
-    const month = (date.getMonth() + 1).toString().padStart(2, '0')
-    const day = date.getDate().toString().padStart(2, '0')
+    const month = (date.getMonth() + 1).toString()
+    const day = date.getDate().toString()
     return `${year}-${month}-${day}`
 }
 
@@ -437,14 +437,6 @@ const bookedDates = [getFirstAndLastDate()].map((d) => {
     return new DateTime(d, 'YYYY-MM-DD')
 })
 
-const DATA_FROM_BE = {
-    '2023-09-03': '25',
-    '2023-09-04': '26',
-    '2023-09-05': '27',
-    '2023-09-06': '28',
-    '2023-09-07': '29',
-    '2023-09-11': '28',
-}
 let fetchedAmountByDate = [] as { date: string; quantity: number }[]
 
 async function getEventAvailableQuantity(product_id: number, group: string, month: number, year: number) {
@@ -484,15 +476,6 @@ deleteButtons.forEach((e) => {
         }
     })
 })
-
-function convertDate(date: string) {
-    const inputDate = date.split('T')[0]
-    const dateParts = inputDate.split('-')
-    const year = dateParts[0]
-    const month = dateParts[1]
-    const day = dateParts[2]
-    return `${month}/${day}/${year}`
-}
 
 function addProduct(groups: IProductMasterGroupGroup) {
     addModal.show()
@@ -934,11 +917,18 @@ function booking(product: IProduct, group: string) {
 
                         const dayContainer = document
                             .querySelector('.easepick-wrapper')
+
+                        const dayContainerShadow = dayContainer
                             .shadowRoot.querySelector(`div[data-time='${jsDate.getTime()}']`)
-                        const span = dayContainer.querySelector('.day-price') || document.createElement('span')
+
+                        if(!dayContainerShadow) {
+                            return
+                        }
+
+                        const span = dayContainerShadow.querySelector('.day-price') ?? document.createElement('span')
                         span.className = 'day-price'
                         span.innerHTML = quantity.toString()
-                        dayContainer.append(span)
+                        dayContainerShadow.append(span)
                     })
                 })
             },
