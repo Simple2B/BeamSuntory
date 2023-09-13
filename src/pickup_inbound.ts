@@ -67,18 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const daNotesView: HTMLInputElement = document.querySelector('#pickup-inbound-view-da-notes')
     const pickupInboundButton: HTMLDivElement = document.querySelector('.pickup-inbound-btn')
 
-    // pickupInboundButton.addEventListener('click', async () => {
-    //   const orderId = pickupInboundButton.getAttribute('data-target');
-    //   if (confirm('Are sure?')) {
-    //     const response = await fetch(`/pickup_inbound/pickup/${orderId}`, {
-    //       method: 'PUT',
-    //     })
-    //     if (response.status == 200) {
-    //       location.reload();
-    //     }
-    //   }
-    // })
-
     buttonsOpenViewModal.forEach((button) => {
         button.addEventListener('click', () => {
             const inboundOrder: IInboundOrderOut = JSON.parse(button.getAttribute('data-target'))
