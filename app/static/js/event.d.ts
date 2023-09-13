@@ -11,6 +11,10 @@ interface IEvents {
     dateFrom: string;
     dateTo: string;
     comment: string;
+    user: IUser;
+}
+interface IUser {
+    username: string;
 }
 interface IEventsResponse {
     pagination: IPagination;

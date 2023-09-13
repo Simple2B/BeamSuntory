@@ -222,12 +222,14 @@ def init(app: Flask):
             name="Bottle",
             description="Just a Bottle",
             SKU="CV-BOT23-27661",
+            image=os.environ.get("DEFAULT_IMAGE", "default"),
         )
         bottle.save(False)
         cup = m.Product(
             name="Cup",
             description="Just a Cup",
             SKU="CV-CUP23-27662",
+            image=os.environ.get("DEFAULT_IMAGE", "default"),
         )
         cup.save(False)
 
