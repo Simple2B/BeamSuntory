@@ -11,7 +11,7 @@ from flask import (
     url_for,
     render_template,
 )
-from flask_login import login_required, current_user
+from flask_login import login_required
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
