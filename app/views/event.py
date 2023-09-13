@@ -220,21 +220,33 @@ def get_available_quantity_by_date():
     group_name = request.args.get("group_name", type=str, default=None)
     quantity_desired = request.args.get("quantity", type=int, default=None)
     group = db.session.scalar(m.Group.select().where(m.Group.name == group_name))
-    # TODO: Could be better split validation by params
-    if (
-        not group
-        or not quantity_desired
-        or not product_id
-        or not date_from
-        or not date_to
-    ):
-        log(log.INFO, "Some query params not found")
-        return "Some query params not found", 404
+    # TODO: use cases or better solution
+    if not group_name:
+        log(log.INFO, "Group_name query param not found")
+        return "Group name not found", 404
+    if not quantity_desired:
+        log(log.INFO, "Quantity query param not found")
+        return "Quantity not found", 404
+    if not product_id:
+        log(log.INFO, "Product_id query param not found")
+        return "Product id not found", 404
+    if not date_from:
+        log(log.INFO, "Date_from query param not found")
+        return "Date from not found", 404
+    if not date_to:
+        log(log.INFO, "Date_to query param not found")
+        return "Date to not found", 404
+    if not group:
+        log(log.INFO, "Group not found")
+        return "Group not found", 404
     warehouse: m.Warehouse = db.session.scalar(
         m.Warehouse.select().where(
             m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value
         )
     )
+    if not warehouse:
+        log(log.INFO, "Warehouse not found")
+        return "Warehouse not found", 404
     warehouse_product: m.WarehouseProduct = db.session.scalar(
         m.WarehouseProduct.select().where(
             m.WarehouseProduct.product_id == product_id,
@@ -243,7 +255,7 @@ def get_available_quantity_by_date():
         )
     )
     if not warehouse_product:
-        log(log.INFO, "Warehouse product not found")
+        log(log.INFO, "Warehouse product not found. Product id: [%s]", product_id)
         return "Warehouse product not found", 404
 
     date_start = datetime.strptime(date_from, "%Y_%m_%d")
