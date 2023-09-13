@@ -51,53 +51,45 @@ orderFilterPickupInboundInputs.forEach((input: HTMLInputElement) => {
     })
 })
 
-
 document.addEventListener('DOMContentLoaded', () => {
     // open view modal
-    const buttonsOpenViewModal: NodeListOf<HTMLButtonElement> = document.querySelectorAll('.pickup-inbound-view-button');
-    const orderIdView: HTMLDivElement = document.querySelector('#pickup-inbound-view-order-id');
-    const orderTitleView: HTMLDivElement = document.querySelector('#pickup-inbound-view-order-title');
-    const orderStatusView: HTMLDivElement = document.querySelector('#pickup-inbound-view-status');
-    const orderSupplierView: HTMLDivElement = document.querySelector('#pickup-inbound-view-supplier-id');
-    const orderWarehouseView: HTMLDivElement = document.querySelector('#pickup-inbound-view-warehouse-id');
-    const orderActiveDateView: HTMLDivElement = document.querySelector('#pickup-inbound-view-active-date');
-    const orderActiveTimeView: HTMLDivElement = document.querySelector('#pickup-inbound-view-active-time');
-    const orderDeliveryDateView: HTMLDivElement = document.querySelector('#pickup-inbound-view-delivery-date');
-    const pickupInboundButton: HTMLDivElement = document.querySelector('.pickup-inbound-btn');
-    
-    pickupInboundButton.addEventListener('click', async () => {
-      const orderId = pickupInboundButton.getAttribute('data-target');
-      if (confirm('Are sure?')) {   
-        const response = await fetch(`/pickup_inbound/pickup/${orderId}`, {
-          method: 'PUT',
-        })
-        if (response.status == 200) {
-          location.reload();
-        }
-      }
-    })
+    const buttonsOpenViewModal: NodeListOf<HTMLButtonElement> = document.querySelectorAll('.pickup-inbound-view-button')
+    const inboundOrderId: HTMLInputElement = document.querySelector('#pickup-inbound-view-inbound-order-id')
+    const orderIdView: HTMLDivElement = document.querySelector('#pickup-inbound-view-order-id')
+    const orderTitleView: HTMLDivElement = document.querySelector('#pickup-inbound-view-order-title')
+    const orderStatusView: HTMLDivElement = document.querySelector('#pickup-inbound-view-status')
+    const orderSupplierView: HTMLDivElement = document.querySelector('#pickup-inbound-view-supplier-id')
+    const orderWarehouseView: HTMLDivElement = document.querySelector('#pickup-inbound-view-warehouse-id')
+    const orderActiveDateView: HTMLDivElement = document.querySelector('#pickup-inbound-view-active-date')
+    const orderActiveTimeView: HTMLDivElement = document.querySelector('#pickup-inbound-view-active-time')
+    const orderDeliveryDateView: HTMLDivElement = document.querySelector('#pickup-inbound-view-delivery-date')
+    const wmNotesView: HTMLInputElement = document.querySelector('#pickup-inbound-view-wm-notes')
+    const daNotesView: HTMLInputElement = document.querySelector('#pickup-inbound-view-da-notes')
+    const pickupInboundButton: HTMLDivElement = document.querySelector('.pickup-inbound-btn')
 
-    buttonsOpenViewModal.forEach(button => {
+    buttonsOpenViewModal.forEach((button) => {
         button.addEventListener('click', () => {
-            const inboundOrder: IInboundOrderOut = JSON.parse(button.getAttribute('data-target'));
-            orderIdView.innerHTML = inboundOrder.orderId;
-            orderTitleView.innerHTML = inboundOrder.title;
-            orderStatusView.innerHTML = inboundOrder.status;
-            orderSupplierView.innerHTML = inboundOrder.supplier.name;
-            orderWarehouseView.innerHTML = inboundOrder.warehouse.name;
-            orderActiveDateView.innerHTML = inboundOrder.activeDate;
-            orderActiveTimeView.innerHTML = inboundOrder.activeTime;
-            orderDeliveryDateView.innerHTML = inboundOrder.deliveryDate;
+            const inboundOrder: IInboundOrderOut = JSON.parse(button.getAttribute('data-target'))
+            inboundOrderId.value = inboundOrder.id.toString()
+            orderIdView.innerHTML = inboundOrder.orderId
+            orderTitleView.innerHTML = inboundOrder.title
+            orderStatusView.innerHTML = inboundOrder.status
+            orderSupplierView.innerHTML = inboundOrder.supplier.name
+            orderWarehouseView.innerHTML = inboundOrder.warehouse.name
+            orderActiveDateView.innerHTML = inboundOrder.activeDate
+            orderActiveTimeView.innerHTML = inboundOrder.activeTime
+            orderDeliveryDateView.innerHTML = inboundOrder.deliveryDate
+            wmNotesView.value = inboundOrder.wmNotes
+            daNotesView.value = inboundOrder.daNotes
 
-            if (inboundOrder.status !== 'Assigned to pickup'){
-              pickupInboundButton.classList.add('invisible');
+            if (inboundOrder.status !== 'Assigned to pickup') {
+                pickupInboundButton.classList.add('invisible')
             } else {
-              // Pickup order
-              pickupInboundButton.classList.remove('invisible');
-              pickupInboundButton.setAttribute('data-target', inboundOrder.id.toString());
+                // Pickup order
+                pickupInboundButton.classList.remove('invisible')
+                pickupInboundButton.setAttribute('data-target', inboundOrder.id.toString())
             }
-            viewModal.show();
+            viewModal.show()
         })
     })
 })
-
