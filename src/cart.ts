@@ -255,23 +255,29 @@ const picker = new easepick.create({
     setup(picker: any) {
         picker.on('select', async (evt: any) => {
             const { view, date, target } = evt.detail
-            console.log(evt)
-
-            // if ((view as string).toLowerCase() !== 'main') {
-            //     return
-            // }
-            console.log('date', date)
+            console.log(typeof evt.detail.start)
+            const startDate =
+                evt.detail.start.getFullYear() +
+                '_' +
+                (evt.detail.start.getMonth() + 1) +
+                '_' +
+                evt.detail.start.getDate()
+            const endDate =
+                evt.detail.end.getFullYear() + '_' + (evt.detail.end.getMonth() + 1) + '_' + evt.detail.end.getDate()
+            console.log('startDate', endDate)
 
             const isAvailableEventQuantity = await getEventAvailableQuantityByDate(
                 JSON.parse(carts),
-                '09%2F17%2F2023',
-                '09%2F30%2F2023'
+                startDate,
+                endDate
             )
+            console.log('isAvailableEventQuantity', isAvailableEventQuantity)
+
             if (!isAvailableEventQuantity) {
                 alert('Not enough quantity')
                 return
             } else {
-                // submitBtn.removeAttribute('disabled')
+                submitBtn.removeAttribute('disabled')
             }
         })
     },
@@ -279,8 +285,10 @@ const picker = new easepick.create({
 
 async function getEventAvailableQuantityByDate(carts: ICartItem[], dateFrom: string, dateTo: string) {
     carts.forEach(async (cart) => {
+        console.log(location.href)
+
         const response = await fetch(
-            `/event/get_available_quantity_by_date?date_from=${dateFrom}&date_to=${dateTo}&group_name=${cart.group}&product_id=${cart.product_id}&quantity_desired=${cart.quantity}`
+            `/event/get_available_quantity_by_date?date_from=${dateFrom}&date_to=${dateTo}&group_name=${cart.group}&product_id=${cart.product_id}&quantity=${cart.quantity}`
         )
         if (response.status !== 200) {
             return false

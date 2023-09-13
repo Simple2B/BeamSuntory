@@ -24,6 +24,7 @@ class EventCSVOut(BaseModel):
     date_to: date = Field(alias="dateTo")
     comment: str
     product: Product
+    user: User
 
     class Config:
         orm_mode = True

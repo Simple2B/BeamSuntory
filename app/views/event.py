@@ -244,8 +244,8 @@ def get_available_quantity_by_date():
         log(log.INFO, "Warehouse product not found")
         return "Warehouse product not found", 404
 
-    date_start = datetime.strptime(date_from, "%Y/%m/%d")
-    date_end = datetime.strptime(date_to, "%Y/%m/%d")
+    date_start = datetime.strptime(date_from, "%Y_%m_%d")
+    date_end = datetime.strptime(date_to, "%Y_%m_%d")
     events: list[m.Event] = db.session.scalars(
         m.Event.select().where(
             m.Event.date_from <= date_start,
