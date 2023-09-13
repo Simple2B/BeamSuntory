@@ -47,7 +47,7 @@ tableCartItems.forEach((item) => {
         eventContainer.classList.remove('hidden')
         eventContainer.classList.add('flex')
     } else {
-        submitBtn.removeAttribute('disabled')
+        // submitBtn.removeAttribute('disabled')
     }
 
     const priceElement = item.querySelector('.cart-item-retail_price')
@@ -253,12 +253,14 @@ const picker = new easepick.create({
         },
     },
     setup(picker: any) {
-        picker.on('view', async (evt: any) => {
+        picker.on('select', async (evt: any) => {
             const { view, date, target } = evt.detail
+            console.log(evt)
 
-            if ((view as string).toLowerCase() !== 'main') {
-                return
-            }
+            // if ((view as string).toLowerCase() !== 'main') {
+            //     return
+            // }
+            console.log('date', date)
 
             const isAvailableEventQuantity = await getEventAvailableQuantityByDate(
                 JSON.parse(carts),
@@ -269,7 +271,7 @@ const picker = new easepick.create({
                 alert('Not enough quantity')
                 return
             } else {
-                submitBtn.removeAttribute('disabled')
+                // submitBtn.removeAttribute('disabled')
             }
         })
     },

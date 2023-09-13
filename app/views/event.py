@@ -101,7 +101,6 @@ def get_all():
         start_to=start_to,
         end_from=end_from,
         end_to=end_to,
-        user=current_user,
     )
 
 

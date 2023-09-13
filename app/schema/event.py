@@ -2,6 +2,7 @@ from datetime import date
 from pydantic import BaseModel, Field
 from .pagination import PaginationOut
 from .product import Product
+from .user import User
 
 
 class Event(BaseModel):
@@ -10,6 +11,7 @@ class Event(BaseModel):
     date_to: date = Field(alias="dateTo")
     quantity: int
     product: Product
+    user: User
 
     class Config:
         orm_mode = True

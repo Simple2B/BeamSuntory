@@ -13,7 +13,7 @@ from app.controllers import create_pagination
 
 from app import models as m, db
 
-# from app import schema as s
+from app import schema as s
 from app import forms as f
 from app.logger import log
 from config import BaseConfig
@@ -127,6 +127,14 @@ def get_all():
             "product_id": cart.product_id,
         }
         for cart in cart_items
+        if db.session.query(m.Group)
+        .join(m.MasterGroup)
+        .filter(
+            m.MasterGroup.name == s.MasterGroupMandatory.events.value,
+            m.Group.name == cart.group,
+        )
+        .count()
+        > 0
     ]
     return render_template(
         "cart.html",

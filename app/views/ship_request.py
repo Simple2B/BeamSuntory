@@ -148,7 +148,6 @@ def create():
         ).scalars()
 
         for cart in carts:
-            # TODO: Change hardcode "Events" to check that group belongs to Master Group "Events"
             is_group_in_master_group = (
                 db.session.query(m.Group)
                 .join(m.MasterGroup)
@@ -167,6 +166,7 @@ def create():
                     product_id=cart.product_id,
                     cart_id=cart.id,
                     comment=form_create.event_comment.data,
+                    user=current_user,
                 )
                 db.session.add(event)
                 log(log.INFO, "Event added. Event: [%s]", event)

@@ -13,6 +13,11 @@ interface IEvents {
     dateFrom: string
     dateTo: string
     comment: string
+    user: IUser
+}
+
+interface IUser {
+    username: string
 }
 
 interface IEventsResponse {
@@ -91,7 +96,7 @@ const downloadCSV = async function () {
     }
 
     // CSV Headers
-    const csvData = ['id,product_name,sku,date_start,date_end,comment']
+    const csvData = ['id,product_name,sku,username,date_start,date_end,comment']
     let pages = 1
     const queryTail = filterQuery.join('&')
 
@@ -99,9 +104,19 @@ const downloadCSV = async function () {
         const url = [`api?page={page}`, queryTail].join('&')
         const res = await fetch(url)
         const data: IEventsResponse = await res.json()
+        console.log(data.events)
+
         data.events.forEach((event) => {
             csvData.push(
-                [event.id, event.product.name, event.product.SKU, event.dateFrom, event.dateTo, event.comment].join(',')
+                [
+                    event.id,
+                    event.product.name,
+                    event.product.SKU,
+                    event.user.username,
+                    event.dateFrom,
+                    event.dateTo,
+                    event.comment,
+                ].join(',')
             )
         })
         pages = data.pagination.pages
