@@ -218,5 +218,23 @@ def init(app: Flask):
             active=True,
         ).save(False)
 
+        bottle = m.Product(
+            name="Bottle",
+            description="Just a Bottle",
+            SKU="CV-BOT23-27661",
+        )
+        bottle.save(False)
+        cup = m.Product(
+            name="Cup",
+            description="Just a Cup",
+            SKU="CV-CUP23-27662",
+        )
+        cup.save(False)
+
+        db.session.commit()
+
+        m.ProductGroup(product_id=bottle.id, group_id=1).save(False)
+        m.ProductGroup(product_id=cup.id, group_id=1).save(False)
+
         db.session.commit()
         print("database filled")
