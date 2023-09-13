@@ -91,10 +91,11 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     master_groups = [
         row for row in db.session.execute(m.MasterGroup.select()).scalars()
     ]
+    all_groups_for_product = db.session.execute(m.GroupProduct.select()).all()
 
     mastr_for_prods_groups_for_prods = {}
     mstr_prod_grps_prod_grps_names = {}
-    for group in groups_for_products_obj:
+    for group in all_groups_for_product:
         if (
             group[0].master_groups_for_product.name
             not in mastr_for_prods_groups_for_prods

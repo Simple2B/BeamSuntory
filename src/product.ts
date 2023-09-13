@@ -59,6 +59,8 @@ interface IMasterGroup {
     master_groups_list_groups: { [index: string]: { group_name: string; group_id: number }[] }
 }
 
+const eventMasterGroup = 'Events'
+
 // variable to set default image to brand dynamically in modal window. Can we get link from the internet?
 const defaultBrandImage =
     'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png'
@@ -696,7 +698,9 @@ viewProductButtonElements.forEach((e) =>
                     isEqual = true
                 }
             }
-            if (mstrGroupName !== 'Events' || isEvent) {
+            if (mstrGroupName !== eventMasterGroup || isEvent) {
+                console.log('mstrGroupName', mstrGroupName)
+
                 addShipAssignShareButton(isEqual, mstrGroupName, groupName, product)
             }
         })
@@ -988,7 +992,7 @@ function deleteShipAssignButton(nameGroup: string, nameGroupValue: string) {
 // function to add ship, assign, button to view product modal
 function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: string, productParam: IProduct) {
     const eventCheckbox: HTMLInputElement = document.querySelector('#product-show-events-toggle-btn')
-    const isEvent = eventCheckbox.checked
+    const isEvent = eventCheckbox.checked && masterGroup === eventMasterGroup
     const groupUnderScore = group.replace(/ /g, '_')
     const groupProductIds = productParam.groups_ids
     const productTypeContainer = document.querySelector(`#product-view-product-name-container`)
@@ -1066,14 +1070,18 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
         productTypeContainer.parentNode.insertBefore(shareContainer, productTypeContainer.nextSibling)
     }
 
-    const bookingButtons = document.querySelectorAll('.booking-product-button')
-    bookingButtons.forEach((e) =>
-        e.addEventListener('click', () => {
-            let shipGroup = e.getAttribute('ship-group-data')
-            const product = JSON.parse(sessionStorage.product)
-            booking(product, shipGroup)
-        })
-    )
+    if (isEvent) {
+        const bookingButtons = document.querySelectorAll('.booking-product-button')
+        bookingButtons.forEach((e) =>
+            e.addEventListener('click', () => {
+                console.log(e)
+
+                let shipGroup = e.getAttribute('ship-group-data')
+                const product = JSON.parse(sessionStorage.product)
+                booking(product, shipGroup)
+            })
+        )
+    }
 
     const shipButtons = document.querySelectorAll('.ship-product-button')
     shipButtons.forEach((e) =>

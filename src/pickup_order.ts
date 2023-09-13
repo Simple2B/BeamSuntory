@@ -27,6 +27,7 @@ interface IProduct {
     image: string
     SKU: string
     comment: string
+    group: string
 }
 
 interface IStore {
@@ -142,6 +143,8 @@ $buttonEditElements.forEach((e) =>
 )
 
 function editShipRequest(shipRequest: IShipRequest, store: IStore) {
+    console.log('shipRequest: ', shipRequest)
+
     let input: HTMLInputElement = document.querySelector('#pickup-order-edit-status')
     input.value = shipRequest.status
     input = document.querySelector('#pickup-order-edit-id')
@@ -241,6 +244,11 @@ function createPickupOrderItemTable(shipRqst: IShipRequest, typeModal: string) {
         <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
             <div class="cart-item-retail-retail_price text-base font-semibold">${product.retail_price}</div>
+          </div>
+        </td>
+        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="cart-item-group text-base font-semibold">${product.group}</div>
           </div>
         </td>
         <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">

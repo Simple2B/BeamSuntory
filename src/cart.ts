@@ -37,17 +37,14 @@ const submitBtn = document.querySelector('#cart-ship-request-submit-btn') as HTM
 
 let totalPrice = 0
 let totalQuantity = 0
+let hasEventGroup = false
 
 // check if cart has event group
 tableCartItems.forEach((item) => {
     console.log('item', item)
     const group = item.getAttribute('data-target-group')
     if (group === 'Events') {
-        const eventContainer = document.querySelector('#cart-event-container') as HTMLDivElement
-        eventContainer.classList.remove('hidden')
-        eventContainer.classList.add('flex')
-    } else {
-        // submitBtn.removeAttribute('disabled')
+        hasEventGroup = true
     }
 
     const priceElement = item.querySelector('.cart-item-retail_price')
@@ -64,6 +61,15 @@ tableCartItems.forEach((item) => {
 
 totalPriceElement.textContent = `$${totalPrice.toFixed(2)}`
 totalQuantityElement.textContent = totalQuantity.toString()
+
+// add event date range, disable submit button if cart has event group
+if (hasEventGroup) {
+    const eventContainer = document.querySelector('#cart-event-container') as HTMLDivElement
+    eventContainer.classList.remove('hidden')
+    eventContainer.classList.add('flex')
+} else {
+    submitBtn.removeAttribute('disabled')
+}
 
 // --add delivery form when create ship request--
 const deliverToStoreBtn = document.querySelector('#cart-deliver-to-store-btn') as HTMLButtonElement
@@ -255,7 +261,6 @@ const picker = new easepick.create({
     setup(picker: any) {
         picker.on('select', async (evt: any) => {
             const { view, date, target } = evt.detail
-            console.log(typeof evt.detail.start)
             const startDate =
                 evt.detail.start.getFullYear() +
                 '_' +
@@ -264,7 +269,6 @@ const picker = new easepick.create({
                 evt.detail.start.getDate()
             const endDate =
                 evt.detail.end.getFullYear() + '_' + (evt.detail.end.getMonth() + 1) + '_' + evt.detail.end.getDate()
-            console.log('startDate', endDate)
 
             const isAvailableEventQuantity = await getEventAvailableQuantityByDate(
                 JSON.parse(carts),
@@ -274,7 +278,7 @@ const picker = new easepick.create({
             console.log('isAvailableEventQuantity', isAvailableEventQuantity)
 
             if (!isAvailableEventQuantity) {
-                alert('Not enough quantity')
+                alert('Not enough quantity. Choose another date.')
                 return
             } else {
                 submitBtn.removeAttribute('disabled')
@@ -284,20 +288,19 @@ const picker = new easepick.create({
 })
 
 async function getEventAvailableQuantityByDate(carts: ICartItem[], dateFrom: string, dateTo: string) {
-    carts.forEach(async (cart) => {
-        console.log(location.href)
-
+    const fetchPromises = carts.map(async (cart) => {
         const response = await fetch(
             `/event/get_available_quantity_by_date?date_from=${dateFrom}&date_to=${dateTo}&group_name=${cart.group}&product_id=${cart.product_id}&quantity=${cart.quantity}`
         )
+
         if (response.status !== 200) {
             return false
         }
+        return true
     })
-    return true
-}
 
-const eventDateRangeInput = document.querySelector('#datepicker') as HTMLInputElement
-eventDateRangeInput.addEventListener('change', () => {
-    console.log('eventDateRangeInput.value', eventDateRangeInput.value)
-})
+    const results = await Promise.all(fetchPromises)
+    const isAvailableEventQuantity = results.every((result) => result === true)
+
+    return isAvailableEventQuantity
+}

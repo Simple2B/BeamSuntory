@@ -39,11 +39,13 @@ def get_events():
         query = query.where(
             m.Event.product.has(m.Product.name.ilike(f"%{q}%"))
             | m.Event.product.has(m.Product.SKU.ilike(f"%{q}%"))
+            | m.Event.user.has(m.User.username.ilike(f"%{q}%"))
         )
 
         count_query = count_query.where(
             m.Event.product.has(m.Product.name.ilike(f"%{q}%"))
             | m.Event.product.has(m.Product.SKU.ilike(f"%{q}%"))
+            | m.Event.user.has(m.User.username.ilike(f"%{q}%"))
         )
 
     if start_from:
