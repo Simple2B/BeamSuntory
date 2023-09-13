@@ -30,6 +30,7 @@ from .inbound_order import (
     InboundOrderCreateForm,
     InboundOrderUpdateForm,
     SortByStatusInboundOrderForm,
+    InboundOrderPickupForm,
 )
 from .store import StoreForm, NewStoreForm
 from .package_info import PackageInfoForm

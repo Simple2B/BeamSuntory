@@ -51,3 +51,10 @@ class InboundOrderUpdateForm(InboundOrderBaseForm):
 class SortByStatusInboundOrderForm(FlaskForm):
     sort_by = StringField("Sort by", [DataRequired()])
     submit = SubmitField("Submit")
+
+
+class InboundOrderPickupForm(FlaskForm):
+    inbound_order_id = StringField("Inbound order id", [DataRequired()])
+    wm_notes = StringField("Warehouse manager notes")
+    da_notes = StringField("Delivery agent notes")
+    submit = SubmitField("Submit")

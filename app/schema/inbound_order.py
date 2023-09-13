@@ -32,6 +32,9 @@ class InboundOrder(BaseModel):
     supplier_id: int
     warehouse_id: int
 
+    wm_notes: str | None = Field(alias="wmNotes")
+    da_notes: str | None = Field(alias="daNotes")
+
     created_at: datetime
 
     class Config:
