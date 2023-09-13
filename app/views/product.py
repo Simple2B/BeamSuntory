@@ -43,7 +43,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         )
         query = m.Product.select().where(reverse_event_filter).order_by(m.Product.id)
 
-        # query = m.Product.select().order_by(m.Product.id)
         count_query = sa.select(sa.func.count()).select_from(m.Product)
         if q:
             query = (
