@@ -79,3 +79,8 @@ button[disabled]{
 .w-24-important{
     width: 96px !important;
 }
+.max-width-100 {
+    max-width: 100px;
+    text-overflow: ellipsis;
+  }
+  
