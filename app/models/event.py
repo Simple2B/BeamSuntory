@@ -7,6 +7,7 @@ from app.database import db
 from .utils import ModelMixin
 from app import schema as s
 from .product import Product
+from .user import User
 
 
 class Event(db.Model, ModelMixin):
@@ -20,6 +21,8 @@ class Event(db.Model, ModelMixin):
     product_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("products.id"))
     cart_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("carts.id"))
     product: orm.Mapped[Product] = orm.relationship()
+    user_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("users.id"))
+    user: orm.Mapped[User] = orm.relationship()
 
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,

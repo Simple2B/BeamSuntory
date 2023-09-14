@@ -56,6 +56,9 @@ class InboundOrder(db.Model, ModelMixin):
         cascade="all, delete-orphan"
     )
 
+    wm_notes: orm.Mapped[str] = orm.mapped_column(sa.Text(), default="", nullable=True)
+    da_notes: orm.Mapped[str] = orm.mapped_column(sa.Text(), default="", nullable=True)
+
     def __repr__(self):
         return f"<{self.id}: {self.order_id}>"
 

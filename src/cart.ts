@@ -1,5 +1,7 @@
 import { easepick } from '@easepick/bundle'
 
+console.log('carts', JSON.parse(carts))
+
 interface ICart {
     id: number
     product: IProduct
@@ -14,6 +16,13 @@ interface IProduct {
     image: string
 }
 
+interface ICartItem {
+    id: number
+    product_id: number
+    quantity: number
+    group: string
+}
+
 // variable to set default image to brand dynamically in modal window. Can we get link from the internet?
 const defaultImage =
     'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png'
@@ -24,11 +33,20 @@ const quantityElements = document.querySelectorAll('.cart-item-quantity')
 const totalPriceElement = document.querySelector('#cart-total-price')
 const totalQuantityElement = document.querySelector('#cart-total-quantity')
 const tableCartItems = document.querySelectorAll('.table-cart-item')
+const submitBtn = document.querySelector('#cart-ship-request-submit-btn') as HTMLButtonElement
 
 let totalPrice = 0
 let totalQuantity = 0
+let hasEventGroup = false
 
+// check if cart has event group
 tableCartItems.forEach((item) => {
+    console.log('item', item)
+    const group = item.getAttribute('data-target-group')
+    if (group === 'Events') {
+        hasEventGroup = true
+    }
+
     const priceElement = item.querySelector('.cart-item-retail_price')
     const quantityElement: HTMLInputElement = item.querySelector('.cart-item-quantity')
     const availableProductQuantity = quantityElement.getAttribute('data-target-available-quantity')
@@ -43,6 +61,15 @@ tableCartItems.forEach((item) => {
 
 totalPriceElement.textContent = `$${totalPrice.toFixed(2)}`
 totalQuantityElement.textContent = totalQuantity.toString()
+
+// add event date range, disable submit button if cart has event group
+if (hasEventGroup) {
+    const eventContainer = document.querySelector('#cart-event-container') as HTMLDivElement
+    eventContainer.classList.remove('hidden')
+    eventContainer.classList.add('flex')
+} else {
+    submitBtn.removeAttribute('disabled')
+}
 
 // --add delivery form when create ship request--
 const deliverToStoreBtn = document.querySelector('#cart-deliver-to-store-btn') as HTMLButtonElement
@@ -175,8 +202,8 @@ eventButtons.forEach((btn) => {
 const { DateTime } = easepick
 function formatDate(date: Date): string {
     const year = date.getFullYear()
-    const month = (date.getMonth() + 1).toString().padStart(2, '0')
-    const day = date.getDate().toString().padStart(2, '0')
+    const month = (date.getMonth() + 1).toString()
+    const day = date.getDate().toString()
     return `${year}-${month}-${day}`
 }
 
@@ -198,14 +225,6 @@ const bookedDates = [getFirstAndLastDate()].map((d) => {
     return new DateTime(d, 'YYYY-MM-DD')
 })
 
-const DATA_FROM_BE = {
-    '2023-09-03': '25',
-    '2023-09-04': '26',
-    '2023-09-05': '27',
-    '2023-09-06': '28',
-    '2023-09-07': '29',
-    '2023-09-11': '28',
-}
 
 const picker = new easepick.create({
     element: document.getElementById('datepicker'),
@@ -232,8 +251,48 @@ const picker = new easepick.create({
         },
     },
     setup(picker: any) {
-        picker.on('view', (evt: any) => {
-            //
+        picker.on('select', async (evt: any) => {
+            const { view, date, target } = evt.detail
+            const startDate =
+                evt.detail.start.getFullYear() +
+                '_' +
+                (evt.detail.start.getMonth() + 1) +
+                '_' +
+                evt.detail.start.getDate()
+            const endDate =
+                evt.detail.end.getFullYear() + '_' + (evt.detail.end.getMonth() + 1) + '_' + evt.detail.end.getDate()
+
+            const isAvailableEventQuantity = await getEventAvailableQuantityByDate(
+                JSON.parse(carts),
+                startDate,
+                endDate
+            )
+            console.log('isAvailableEventQuantity', isAvailableEventQuantity)
+
+            if (!isAvailableEventQuantity) {
+                alert('Not enough quantity. Choose another date.')
+                return
+            } else {
+                submitBtn.removeAttribute('disabled')
+            }
         })
     },
 })
+
+async function getEventAvailableQuantityByDate(carts: ICartItem[], dateFrom: string, dateTo: string) {
+    const fetchPromises = carts.map(async (cart) => {
+        const response = await fetch(
+            `/event/get_available_quantity_by_date?date_from=${dateFrom}&date_to=${dateTo}&group_name=${cart.group}&product_id=${cart.product_id}&quantity=${cart.quantity}`
+        )
+
+        if (response.status !== 200) {
+            return false
+        }
+        return true
+    })
+
+    const results = await Promise.all(fetchPromises)
+    const isAvailableEventQuantity = results.every((result) => result === true)
+
+    return isAvailableEventQuantity
+}

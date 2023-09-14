@@ -11,7 +11,7 @@ from flask import (
     url_for,
     render_template,
 )
-from flask_login import login_required, current_user
+from flask_login import login_required
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
@@ -39,11 +39,13 @@ def get_events():
         query = query.where(
             m.Event.product.has(m.Product.name.ilike(f"%{q}%"))
             | m.Event.product.has(m.Product.SKU.ilike(f"%{q}%"))
+            | m.Event.user.has(m.User.username.ilike(f"%{q}%"))
         )
 
         count_query = count_query.where(
             m.Event.product.has(m.Product.name.ilike(f"%{q}%"))
             | m.Event.product.has(m.Product.SKU.ilike(f"%{q}%"))
+            | m.Event.user.has(m.User.username.ilike(f"%{q}%"))
         )
 
     if start_from:
@@ -101,7 +103,6 @@ def get_all():
         start_to=start_to,
         end_from=end_from,
         end_to=end_to,
-        user=current_user,
     )
 
 
@@ -171,43 +172,108 @@ def get_available_quantity():
     product_id = request.args.get("product_id", type=int, default=None)
     group_name = request.args.get("group_name", type=str, default=None)
     group = db.session.scalar(m.Group.select().where(m.Group.name == group_name))
-    if group:
-        warehouse: m.Warehouse = db.session.scalar(
-            m.Warehouse.select().where(
-                m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value
-            )
+    if not group:
+        log(log.INFO, "Group not found")
+        return "Group not found", 404
+    warehouse: m.Warehouse = db.session.scalar(
+        m.Warehouse.select().where(
+            m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value
         )
-        warehouse_product: m.WarehouseProduct = db.session.scalar(
-            m.WarehouseProduct.select().where(
-                m.WarehouseProduct.product_id == product_id,
-                m.WarehouseProduct.warehouse_id == warehouse.id,
-                m.WarehouseProduct.group_id == group.id,
-            )
+    )
+    if not warehouse:
+        log(log.INFO, "Warehouse not found")
+        return "Warehouse not found", 404
+
+    warehouse_product: m.WarehouseProduct = db.session.scalar(
+        m.WarehouseProduct.select().where(
+            m.WarehouseProduct.product_id == product_id,
+            m.WarehouseProduct.warehouse_id == warehouse.id,
+            m.WarehouseProduct.group_id == group.id,
         )
-        if warehouse_product:
-            num_days = calendar.monthrange(year_from, month_from)[1]
-            total_available_quantity = []
-            for day in range(1, num_days + 1):
-                current_date = Date(year_from, month_from, day)
-                events: list[m.Event] = db.session.scalars(
-                    m.Event.select().where(
-                        m.Event.date_from <= current_date,
-                        m.Event.date_to >= current_date,
-                    )
-                ).all()
-                total_quantity = functools.reduce(
-                    lambda a, b: a + b.quantity, events, 0
-                )
-                quantity = warehouse_product.product_quantity - total_quantity
-                date = current_date.strftime("%Y-%m-%d")
-                total_available_quantity.append({"date": date, "quantity": quantity})
-
-            log(log.INFO, "Total available quantity: [%s]", quantity)
-            return jsonify(total_available_quantity)
-
+    )
+    if not warehouse_product:
         log(log.INFO, "Warehouse product not found")
         return "Warehouse product not found", 404
 
-    log(log.INFO, "Group not found")
-    return "Group not found", 404
-    ...
+    num_days = calendar.monthrange(year_from, month_from)[1]
+    total_available_quantity = []
+    for day in range(1, num_days + 1):
+        current_date = Date(year_from, month_from, day)
+        events: list[m.Event] = db.session.scalars(
+            m.Event.select().where(
+                m.Event.date_from <= current_date,
+                m.Event.date_to >= current_date,
+                m.Event.product_id == product_id,
+            )
+        ).all()
+        total_quantity = functools.reduce(lambda a, b: a + b.quantity, events, 0)
+        quantity = warehouse_product.product_quantity - total_quantity
+        date = current_date.strftime("%Y-%m-%d")
+        total_available_quantity.append({"date": date, "quantity": quantity})
+
+    log(log.INFO, "Total available quantity: [%s]", quantity)
+    return jsonify(total_available_quantity)
+
+
+@event_blueprint.route("/get_available_quantity_by_date", methods=["GET"])
+@login_required
+def get_available_quantity_by_date():
+    date_from = request.args.get("date_from", type=str, default=None)
+    date_to = request.args.get("date_to", type=str, default=None)
+    product_id = request.args.get("product_id", type=int, default=None)
+    group_name = request.args.get("group_name", type=str, default=None)
+    quantity_desired = request.args.get("quantity", type=int, default=None)
+    group = db.session.scalar(m.Group.select().where(m.Group.name == group_name))
+    # TODO: use cases or better solution
+    if not group_name:
+        log(log.INFO, "Group_name query param not found")
+        return "Group name not found", 404
+    if not quantity_desired:
+        log(log.INFO, "Quantity query param not found")
+        return "Quantity not found", 404
+    if not product_id:
+        log(log.INFO, "Product_id query param not found")
+        return "Product id not found", 404
+    if not date_from:
+        log(log.INFO, "Date_from query param not found")
+        return "Date from not found", 404
+    if not date_to:
+        log(log.INFO, "Date_to query param not found")
+        return "Date to not found", 404
+    if not group:
+        log(log.INFO, "Group not found")
+        return "Group not found", 404
+    warehouse: m.Warehouse = db.session.scalar(
+        m.Warehouse.select().where(
+            m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value
+        )
+    )
+    if not warehouse:
+        log(log.INFO, "Warehouse not found")
+        return "Warehouse not found", 404
+    warehouse_product: m.WarehouseProduct = db.session.scalar(
+        m.WarehouseProduct.select().where(
+            m.WarehouseProduct.product_id == product_id,
+            m.WarehouseProduct.warehouse_id == warehouse.id,
+            m.WarehouseProduct.group_id == group.id,
+        )
+    )
+    if not warehouse_product:
+        log(log.INFO, "Warehouse product not found. Product id: [%s]", product_id)
+        return "Warehouse product not found", 404
+
+    date_start = datetime.strptime(date_from, "%Y_%m_%d")
+    date_end = datetime.strptime(date_to, "%Y_%m_%d")
+    events: list[m.Event] = db.session.scalars(
+        m.Event.select().where(
+            m.Event.date_from <= date_start,
+            m.Event.date_to >= date_end,
+            m.Event.product_id == product_id,
+        )
+    ).all()
+    total_quantity = functools.reduce(lambda a, b: a + b.quantity, events, 0)
+    quantity = warehouse_product.product_quantity - total_quantity - quantity_desired
+    if quantity < 0:
+        log(log.INFO, "Not enough quantity: [%s]", quantity)
+        return "Not enough quantity", 400
+    return "ok", 200

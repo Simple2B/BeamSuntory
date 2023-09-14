@@ -264,3 +264,34 @@ def sort():
         filtered=filtered,
         inbound_orders_status=s.ShipRequestStatus,
     )
+
+
+@incoming_stock_blueprint.route("/notes", methods=["POST"])
+@login_required
+def notes():
+    form_note: f.InboundOrderPickupForm = f.InboundOrderPickupForm()
+
+    if not form_note.validate_on_submit():
+        log(log.ERROR, "Incoming stock form errors: [%s]", form_note.errors)
+        flash(f"{form_note.errors}", "danger")
+        return redirect(url_for("incoming_stock.get_all"))
+
+    inbound_order: m.InboundOrder = db.session.get(
+        m.InboundOrder, int(form_note.inbound_order_id.data)
+    )
+
+    if not inbound_order:
+        log(
+            log.INFO,
+            "There is no inbound order with id: [%s]",
+            form_note.inbound_order_id.data,
+        )
+        flash("There is no such inbound order", "danger")
+        return redirect(url_for("incoming_stock.get_all"))
+
+    inbound_order.wm_notes = form_note.wm_notes.data
+    inbound_order.save()
+
+    log(log.INFO, "Warehouse manager notes updated. Inbound order: [%s]", inbound_order)
+    flash("Warehouse manager notes updated!", "success")
+    return redirect(url_for("incoming_stock.get_all"))
