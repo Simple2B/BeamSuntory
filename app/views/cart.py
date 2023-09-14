@@ -180,7 +180,9 @@ def create():
         log(log.INFO, "Form submitted. Cart: [%s]", item)
         item.save()
         flash("Item added!", "success")
-        return redirect(url_for("product.get_all", query="events=true"))
+        if query:
+            return redirect(url_for("product.get_all", events="true"))
+        return redirect(url_for("product.get_all"))
     else:
         log(log.ERROR, "Item creation errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
