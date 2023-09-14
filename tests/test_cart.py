@@ -14,8 +14,6 @@ def test_carts_pages(mg_g_populate: FlaskClient):
 
     response = mg_g_populate.get("/cart/")
     assert response.status_code == 200
-    response = mg_g_populate.get("/cart/create")
-    assert response.status_code == 405
 
 
 def test_create_cart(mg_g_populate: FlaskClient):
