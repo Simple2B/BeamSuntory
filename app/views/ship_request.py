@@ -160,6 +160,8 @@ def create():
             )
             if start_date and end_date and is_group_in_master_group:
                 event = m.Event(
+                    date_reserve_from=start_date - timedelta(days=5),
+                    date_reserve_to=end_date + timedelta(days=5),
                     date_from=start_date,
                     date_to=end_date,
                     quantity=cart.quantity,

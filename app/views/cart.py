@@ -1,4 +1,5 @@
 import json
+from werkzeug.urls import url_parse
 from flask import (
     Blueprint,
     render_template,
@@ -167,6 +168,8 @@ def get_all():
 @login_required
 def create():
     form: f.NewCartForm = f.NewCartForm()
+    url = request.referrer
+    query = url_parse(url).query
     if form.validate_on_submit():
         item = m.Cart(
             product_id=int(form.product_id.data),
@@ -177,11 +180,11 @@ def create():
         log(log.INFO, "Form submitted. Cart: [%s]", item)
         item.save()
         flash("Item added!", "success")
-        return redirect(url_for("product.get_all"))
+        return redirect(url_for("product.get_all", query="events=true"))
     else:
         log(log.ERROR, "Item creation errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
-        return redirect(url_for("product.get_all"))
+        return redirect(url_for("product.get_all", query=query))
 
 
 @cart_blueprint.route("/edit", methods=["POST"])

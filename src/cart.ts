@@ -21,6 +21,12 @@ interface ICartItem {
     group: string
 }
 
+interface IEventCart {
+    cartId: number
+    error?: string
+    status: boolean
+}
+
 // variable to set default image to brand dynamically in modal window. Can we get link from the internet?
 const defaultImage =
     'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png'
@@ -263,7 +269,7 @@ const picker = new easepick.create({
 
             if (availableEventQuantity.length !== 0) {
                 const errorMessages = availableEventQuantity.map((e) => e.error)
-                alert(errorMessages.join('\n'))
+                alert('Maximum quantity exceeded!' + '\n' + errorMessages.join('\n'))
                 return
             } else {
                 submitBtn.removeAttribute('disabled')
@@ -289,15 +295,16 @@ async function getEventAvailableQuantityByDate(carts: ICartItem[], dateFrom: str
             return data
         }
         const data = {
+            cartId: cart.id,
             status: true,
         }
 
         return data
     })
-    const resultAllPromises = []
+    const resultAllPromises: IEventCart[] = []
 
     const results = await Promise.all(fetchPromises)
-    const isAvailableEventQuantity = results.forEach((result) => {
+    results.forEach((result) => {
         if (result.status !== true) {
             return resultAllPromises.push(result)
         }
