@@ -111,16 +111,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         row for row in db.session.execute(m.ProductGroup.select()).scalars()
     ]
 
-    product_groups: list[m.ProductGroup] = [
-        row
-        for row in db.session.execute(
-            m.ProductGroup.select()
-            .order_by(m.ProductGroup.id)
-            .offset((pagination.page - 1) * pagination.per_page * 4)
-            .limit(pagination.per_page)
-        ).scalars()
-    ]
-
     # TODO: consider using a join instead of two queries <- Copilot
     # get all groups ids for current user to compare with product groups ids in view.html
     current_user_groups_rows = db.session.execute(
@@ -141,7 +131,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     # NOTE: Create json object for "show-all-groups" button in products.html
     product_mg_g = (
         {
-            p.child.name: {
+            p.child.SKU: {
                 mg.parent.master_groups_for_product.name: "".join(
                     [
                         g.parent.name
@@ -168,7 +158,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     master_group_product_name = [
         mgp[0].name for mgp in db.session.execute(m.MasterGroupProduct.select()).all()
     ]
-    product_mg_g["master_group_product_name"] = master_group_product_name
 
     suppliers = [i for i in db.session.execute(m.Supplier.select()).scalars()]
 
@@ -489,35 +478,34 @@ def sort():
             ]
             for pg in product_groups
         }
-        product_ids_to_return = [
-            pid for pid in product_to_group if len(product_to_group[pid]) == len(groups)
-        ]
+        # TODO remove if unused
+        # product_ids_to_return = [
+        #     pid for pid in product_to_group if len(product_to_group[pid]) == len(groups)
+        # ]
 
         q = request.args.get("q", type=str, default=None)
         query = (
             m.Product.select()
-            .where(m.Product.id.in_(product_ids_to_return))
+            .where(m.Product.id.in_(product_to_group))
             .order_by(m.Product.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(m.Product.id.in_(product_ids_to_return))
+            .where(m.Product.id.in_(product_to_group))
             .select_from(m.Product)
         )
         if q:
             query = (
                 m.Product.select()
                 .where(
-                    m.Product.name.ilike(f"%{q}%")
-                    | m.Product.id.in_(product_ids_to_return)
+                    m.Product.name.ilike(f"%{q}%") | m.Product.id.in_(product_to_group)
                 )
                 .order_by(m.Product.id)
             )
             count_query = (
                 sa.select(sa.func.count())
                 .where(
-                    m.Product.name.ilike(f"%{q}%")
-                    | m.Product.id.in_(product_ids_to_return)
+                    m.Product.name.ilike(f"%{q}%") | m.Product.id.in_(product_to_group)
                 )
                 .select_from(m.Product)
             )
