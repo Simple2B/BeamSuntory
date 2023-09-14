@@ -87,14 +87,14 @@ if (filterData !== null || filterData !== undefined) {
 
         productItemTrs.forEach((product: HTMLTableRowElement) => {
             const referenceTd = product.cells[4]
-            const productName = product.cells[2].innerText
+            const productSKU = product.cells[3].innerText
 
             for (const key in filterData) {
                 const productFilterName = filterData[key]
                 const productFilterTd = document.createElement('td')
                 productFilterTd.setAttribute(
                     'id',
-                    `product-table-filter-${key}-${productFilterName.replace(/ /g, '_')}-${productName.replace(
+                    `product-table-filter-${key}-${productFilterName.replace(/ /g, '_')}-${productSKU.replace(
                         / /g,
                         '_'
                     )}`
@@ -147,15 +147,16 @@ if (globalFilterMasterGroup && globalFilterMasterGroup.length !== 0) {
 
             productItemTrs.forEach((productItem: HTMLTableRowElement) => {
                 const referenceTd = productItem.cells[4]
-                const productName = productItem.cells[2].innerText
-                const productFilterName = productMgGGlobal[productName][masterGroupName] || '-'
+                const productSKU = productItem.cells[3].innerText.replace("'", '')
+
+                const productFilterName = productMgGGlobal[productSKU][masterGroupName] || '-'
                 const productFilterTd = document.createElement('td')
                 productFilterTd.setAttribute(
                     'id',
                     `product-table-filter-${masterGroupName}-${productFilterName.replace(
                         / /g,
                         '_'
-                    )}-${productName.replace(/ /g, '_')}`
+                    )}-${productSKU.replace(/ /g, '_')}`
                 )
                 productFilterTd.classList.add(
                     'p-4',
@@ -209,16 +210,16 @@ checkboxFilterProductMasterGroups.forEach((checkbox) => {
                 referenceTh.parentNode.insertBefore(productFilterTh, referenceTh.nextSibling)
                 productItemTrs.forEach((productItem: HTMLTableRowElement) => {
                     const referenceTd = productItem.cells[4]
-                    const productName = productItem.cells[2].innerText
+                    const productSKU = productItem.cells[3].innerText
 
-                    const productFilterName = productMgG[productName][masterGroupName] || '-'
+                    const productFilterName = productMgG[productSKU][masterGroupName] || '-'
                     const productFilterTd = document.createElement('td')
                     productFilterTd.setAttribute(
                         'id',
                         `product-table-filter-${masterGroupName}-${productFilterName.replace(
                             / /g,
                             '_'
-                        )}-${productName.replace(/ /g, '_')}`
+                        )}-${productSKU.replace(/ /g, '_')}`
                     )
                     productFilterTd.classList.add(
                         'p-4',
@@ -247,13 +248,13 @@ checkboxFilterProductMasterGroups.forEach((checkbox) => {
             if (isMasterGroupExist) {
                 isMasterGroupExist.remove()
                 productItemTrs.forEach((productItem: HTMLTableRowElement) => {
-                    const productName = productItem.cells[2].innerText
-                    const productFilterName = productMgG[productName][masterGroupName] || '-'
+                    const productSKU = productItem.cells[3].innerText
+                    const productFilterName = productMgG[productSKU][masterGroupName] || '-'
                     const isProductFilterExist = document.querySelector(
                         `#product-table-filter-${masterGroupName}-${productFilterName.replace(
                             / /g,
                             '_'
-                        )}-${productName.replace(/ /g, '_')}`
+                        )}-${productSKU.replace(/ /g, '_')}`
                     )
                     if (isProductFilterExist) {
                         isProductFilterExist.remove()
