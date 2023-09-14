@@ -8,7 +8,6 @@ const createInboundOrderHandler = () => {
     console.log("Error: no create inbound order button");
     return;
   }
-
   createInboundOrderBtn.addEventListener('click', () => {
     const allocatedProductsData: IProductAllocatedBase[] = []
     // Set products as JSON to field
@@ -16,19 +15,26 @@ const createInboundOrderHandler = () => {
 
     productsAllocatedContainers.forEach((productContainer) => {
       // Get HTML nodes with product values
-      const productAllocatedSelectHTML = productContainer.querySelector('.product-allocated-add') as HTMLSelectElement;
       const productAllocatedQuantityInput = productContainer.querySelector('.product-allocated-quantity') as HTMLInputElement;
       const productAllocatedShelfLifeStartInput = productContainer.querySelector('.product-allocated-shelf-life-start') as HTMLInputElement;
       const productAllocatedShelfLifeEndInput = productContainer.querySelector('.product-allocated-shelf-life-end') as HTMLInputElement;
 
+      let productId;      
+      const inputField = productContainer.querySelector('#inbound-order-add-add-product-select') as HTMLInputElement;
+      const selectedOption = productContainer.querySelector(`#product-list option[value="${inputField.value}"]`);
+
+      if(!selectedOption) {
+        event.preventDefault();
+        alert('Please select a valid product from the list');
+      }           
+      productId = parseInt(selectedOption.getAttribute('data-product-id')) ?? 0 ;     
       // Retrieve values from Nodes
-      const productAllocatedId = parseInt(productAllocatedSelectHTML.value);
       const productAllocatedQuantity = parseInt(productAllocatedQuantityInput.value);
       const productAllocatedShelfLifeStart = productAllocatedShelfLifeStartInput.value;
       const productAllocatedShelfLifeEnd = productAllocatedShelfLifeEndInput.value;
 
       allocatedProductsData.push({
-        id: productAllocatedId,
+        id: productId,
         quantity: productAllocatedQuantity,
         shelfLifeStart: productAllocatedShelfLifeStart,
         shelfLifeEnd: productAllocatedShelfLifeEnd,

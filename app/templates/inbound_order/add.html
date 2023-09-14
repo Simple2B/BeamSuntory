@@ -118,12 +118,12 @@
             <div class="grid grid-cols-12 gap-5 product-allocated">
               <div class="col-span-6 sm:col-span-3">
                 <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product</label>
-                <select type="text" name="add_product" id="inbound-order-add-add-product-select" placeholder="Product" required class="product-allocated-add inbound-order-add-add-product shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                  <option value="" disabled selected>Select product</option>
+                <input list="product-list" name="add_product" id="inbound-order-add-add-product-select" placeholder="Product" required class="product-allocated-add inbound-order-add-add-product shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+                <datalist id="product-list">
                   {% for product in products %}
-                  <option value="{{ product.id }}">{{ product.name }}</option>
+                  <option value="{{ product.name }}" data-product-id="{{ product.id }}"></option>
                   {% endfor %}
-                </select>
+                </datalist>                
               </div>
               <div class="col-span-6 sm:col-span-3">
                 <label for="add_quantity" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
