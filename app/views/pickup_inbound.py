@@ -68,20 +68,36 @@ def get_all():
     )
 
 
-@pickup_inbound_blueprint.route("/pickup/<int:id>", methods=["GET"])  # TODO GET -> PUT
+@pickup_inbound_blueprint.route("/pickup", methods=["POST"])
 @login_required
-def pickup(id: int):
-    inbound_order: m.InboundOrder = db.session.get(m.InboundOrder, id)
+def pickup():
+    form_pickup: f.InboundOrderPickupForm = f.InboundOrderPickupForm()
+
+    if not form_pickup.validate_on_submit():
+        log(log.ERROR, "Pickup inbound form errors: [%s]", form_pickup.errors)
+        flash(f"{form_pickup.errors}", "danger")
+        return redirect(url_for("pickup_inbound.get_all"))
+
+    inbound_order: m.InboundOrder = db.session.get(
+        m.InboundOrder, int(form_pickup.inbound_order_id.data)
+    )
+
     if not inbound_order:
-        log(log.INFO, "There is no inbound order with id: [%s]", id)
+        log(
+            log.INFO,
+            "There is no inbound order with id: [%s]",
+            form_pickup.inbound_order_id.data,
+        )
         flash("There is no such inbound order", "danger")
-        return "no inbound order", 404
-    inbound_order.status = s.InboundOrderStatus.in_transit  # TODO remove
+        return redirect(url_for("pickup_inbound.get_all"))
+
+    inbound_order.status = s.InboundOrderStatus.in_transit
+    inbound_order.da_notes = form_pickup.da_notes.data
     inbound_order.save()
 
     log(log.INFO, "Inbound order pickup done. Inbound order: [%s]", inbound_order)
     flash("Inbound order pickup done!", "success")
-    return "ok", 200
+    return redirect(url_for("pickup_inbound.get_all"))
 
 
 @pickup_inbound_blueprint.route(

@@ -11,39 +11,35 @@ interface SupDAWhProd {
 }
 
 interface IPackageInfo {
-    quantity_carton_master: number
-    quantity_per_wrap: number
-    quantity_wrap_carton: number
+    productQuantityGroupId: number
+    quantityCartonMaster: number
+    quantityPerWrap: number
+    quantityWrapCarton: number
+    quantityReceived: number
 }
 
-interface IIncomingStockProduct{
-    product_id: number,
-    quantity_received: number,
-    quantity_per_wrap: number,
-    quantity_wrap_carton: number,
-    quantity_carton_master: number,
-    group_id: number,
+interface IIncomingStockProduct {
+    allocatedProductId: number
+    packages: IPackageInfo[]
 }
 let productGroupQuantity = {} as { [index: string]: number }
 let i = 0
 
-const $editModalElement: HTMLElement = document.querySelector('#editIncomingStockModal');
-const $viewModalElement: HTMLElement = document.querySelector('#viewIncomingStockModal');
-const inputReceivedProducts: HTMLInputElement = document.querySelector('#incoming-stock-edit-received-products');
+const $acceptModalElement: HTMLElement = document.querySelector('#editIncomingStockModal')
+const $viewModalElement: HTMLElement = document.querySelector('#viewIncomingStockModal')
+const inputReceivedProducts: HTMLInputElement = document.querySelector('#incoming-stock-edit-received-products')
 
-const editModalOptions: ModalOptions = {
+const acceptModalOptions: ModalOptions = {
     placement: 'bottom-right',
     backdrop: 'dynamic',
     backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
     closable: true,
     onHide: () => {
-        const incomingStocksContainer = document.getElementById('incoming-stock-edit-add-container') as HTMLDivElement;
-        console.log(incomingStocksContainer);
-        const incomingStockItems = incomingStocksContainer.querySelectorAll('.incoming-stock-product-item');
-        console.log(incomingStockItems);
+        const incomingStocksContainer = document.getElementById('incoming-stock-edit-add-container') as HTMLDivElement
+        const incomingStockItems = incomingStocksContainer.querySelectorAll('.incoming-stock-product-item')
         incomingStockItems.forEach((item) => {
             item.remove()
-        });
+        })
     },
     onShow: () => {
         console.log('incoming-stock id: ')
@@ -59,12 +55,11 @@ const viewModalOptions: ModalOptions = {
     backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
     closable: true,
     onHide: () => {
-        // const incomingStocksContainer = document.getElementById('incoming-stock-edit-add-container') as HTMLDivElement;
-        // const incomingStockItems = incomingStocksContainer.querySelectorAll('.product-incoming-stock-edit-template');
-        // console.log(incomingStockItems);
-        // incomingStockItems.forEach((item) => {
-        //     item.remove()
-        // });
+        const incomingStocksContainer = document.getElementById('incoming-stock-edit-add-container') as HTMLDivElement
+        const incomingStockItems = incomingStocksContainer.querySelectorAll('.incoming-stock-product-item')
+        incomingStockItems.forEach((item) => {
+            item.remove()
+        })
     },
     onShow: () => {
         console.log('incoming-stock id: ')
@@ -74,7 +69,7 @@ const viewModalOptions: ModalOptions = {
     },
 }
 
-const editModal: ModalInterface = new Modal($editModalElement, editModalOptions)
+const acceptModal: ModalInterface = new Modal($acceptModalElement, acceptModalOptions)
 const viewModal: ModalInterface = new Modal($viewModalElement, viewModalOptions)
 
 const $buttonElements = document.querySelectorAll('.accept-incoming-stock-edit-button')
@@ -88,13 +83,13 @@ $buttonElements.forEach((e) =>
 
 function editIncomingStock(inboundOrder: IInboundOrderOut) {
     let input: HTMLInputElement = document.querySelector('#incoming-stock-edit-id')
-    input.value = inboundOrder.orderId;
+    input.value = inboundOrder.id.toString()
 
-    inboundOrder.productsAllocated.forEach(productAllocated => {
-        createIncomingStockOrderItems(productAllocated);
+    inboundOrder.productsAllocated.forEach((productAllocated) => {
+        createIncomingStockOrderItems(productAllocated)
     })
 
-    editModal.show()
+    acceptModal.show()
 }
 
 function createIncomingStockOrderItems(productAllocated: IAllocatedProductOut) {
@@ -102,52 +97,118 @@ function createIncomingStockOrderItems(productAllocated: IAllocatedProductOut) {
     // const incomingStockAddItem = document.createElement('div')
     // incomingStockAddItem.classList.add('p-6', 'space-y-6', 'border-t', 'incoming-stock-edit-add-item')
 
-    const productAllocatedContainer = document.getElementById('product-incoming-stock-edit-template').cloneNode(true) as HTMLDivElement;
-    productAllocatedContainer.classList.remove('hidden');
-    productAllocatedContainer.classList.add('grid');
-    productAllocatedContainer.removeAttribute('id');
+    const productAllocatedContainer = document
+        .getElementById('product-incoming-stock-edit-template')
+        .cloneNode(true) as HTMLDivElement
+    productAllocatedContainer.classList.remove('hidden')
+    productAllocatedContainer.classList.add('grid')
+    productAllocatedContainer.removeAttribute('id')
 
     // Set image
-    const imageURL = productAllocated.product.image ? `data:image/png;base64, ${productAllocated.product.image}`: 'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png';
+    const imageURL = productAllocated.product.image
+        ? `data:image/png;base64, ${productAllocated.product.image}`
+        : 'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png'
 
-    const productImage: HTMLImageElement = productAllocatedContainer.querySelector('.product-incoming-stock-image');
-    productImage.setAttribute('src', imageURL);
+    const productImage: HTMLImageElement = productAllocatedContainer.querySelector('.product-incoming-stock-image')
+    productImage.setAttribute('src', imageURL)
     productImage.addEventListener('click', () => {
         getFullImage(productAllocated.product.id.toString())
     })
 
-    const productNameDiv = productAllocatedContainer.querySelector('.product-incoming-stock-edit-product-name');
-    productNameDiv.innerHTML = productAllocated.product.name;
+    const productNameDiv = productAllocatedContainer.querySelector('.product-incoming-stock-edit-product-name')
+    productNameDiv.innerHTML = productAllocated.product.name
 
-    const productSKUDiv = productAllocatedContainer.querySelector('.product-incoming-stock-edit-product-sku');
-    productSKUDiv.innerHTML = productAllocated.product.SKU;
+    const productSKUDiv = productAllocatedContainer.querySelector('.product-incoming-stock-edit-product-sku')
+    productSKUDiv.innerHTML = productAllocated.product.SKU
 
-    const totalAllocatedQuantityDiv = productAllocatedContainer.querySelector('.product-incoming-stock-edit-total-quantity');
-    totalAllocatedQuantityDiv.innerHTML = productAllocated.quantity.toString();
+    const totalAllocatedQuantityDiv = productAllocatedContainer.querySelector(
+        '.product-incoming-stock-edit-total-quantity'
+    )
+    totalAllocatedQuantityDiv.innerHTML = productAllocated.quantity.toString()
 
+    const groupQuantityContainerTemplate = document.getElementById(
+        'product-allocated-quantity-container-template'
+    ) as HTMLDivElement
 
+    const productQuantityGroupsLength = productAllocated.productQuantityGroups.length
+    productAllocated.productQuantityGroups.forEach((quantityGroup, index) => {
+        const groupQuantityContainer = groupQuantityContainerTemplate.cloneNode(true) as HTMLDivElement
+        groupQuantityContainer.removeAttribute('id')
+        groupQuantityContainer.classList.remove('hidden')
 
-    const groupQuantityContainerTemplate = document.getElementById('product-allocated-quantity-container-template') as HTMLDivElement;
-    productAllocated.productQuantityGroups.forEach(quantityGroup => {
-        const groupQuantityContainer = groupQuantityContainerTemplate.cloneNode(true) as HTMLDivElement;
-        groupQuantityContainer.removeAttribute('id');
-        groupQuantityContainer.classList.remove('hidden');
+        const groupQuantityNameDiv = groupQuantityContainer.querySelector('.product-quantity-group-name')
+        groupQuantityNameDiv.innerHTML = quantityGroup.group.name
+        groupQuantityNameDiv.setAttribute('data-target', quantityGroup.group.id.toString())
 
-        const groupQuantityNameDiv = groupQuantityContainer.querySelector('.product-quantity-group-name');
-        groupQuantityNameDiv.innerHTML = quantityGroup.group.name;
+        const groupQuantityNameIdInput = document.createElement('input')
+        groupQuantityNameIdInput.classList.add('group-quantity-name-id-input', 'hidden')
+        groupQuantityNameIdInput.value = quantityGroup.group.id.toString()
 
-        const groupQuantityTotalDiv = groupQuantityContainer.querySelector('.group-ordered-quantity');
-        groupQuantityTotalDiv.innerHTML = quantityGroup.quantity.toString();
+        const groupQuantityTotalDiv = groupQuantityContainer.querySelector('.group-ordered-quantity')
+        groupQuantityTotalDiv.innerHTML = quantityGroup.quantity.toString()
 
-        const groupQuantityReceivedInput = groupQuantityContainer.querySelector('.group-received-quantity') as HTMLInputElement;
-        groupQuantityReceivedInput.value = quantityGroup.quantity.toString();
+        const groupQuantityReceivedInput = groupQuantityContainer.querySelector(
+            '.group-received-quantity'
+        ) as HTMLInputElement
+        groupQuantityReceivedInput.value = quantityGroup.quantity.toString()
+        groupQuantityReceivedInput.classList.add(
+            `product-${productAllocated.id}-group-${quantityGroup.group.id}-received-quantity`
+        )
 
-        productAllocatedContainer.appendChild(groupQuantityNameDiv.parentNode);
-        productAllocatedContainer.appendChild(groupQuantityTotalDiv.parentNode);
-        productAllocatedContainer.appendChild(groupQuantityReceivedInput.parentNode);
-    });
+        productAllocatedContainer.appendChild(groupQuantityNameDiv.parentNode)
+        productAllocatedContainer.appendChild(groupQuantityTotalDiv.parentNode)
+        productAllocatedContainer.appendChild(groupQuantityReceivedInput.parentNode)
 
-    incomingStockAddContainer.appendChild(productAllocatedContainer);
+        const packageInfoContainer = document.createElement('div')
+        packageInfoContainer.classList.add('grid', 'grid-cols-12', 'col-span-12', 'gap-4', 'package-info-container')
+        if (index !== productQuantityGroupsLength - 1) {
+            packageInfoContainer.classList.add('packageInfoContainer-border', 'pb-4')
+        } else {
+            packageInfoContainer.classList.add('margin-b-5')
+        }
+        packageInfoContainer.appendChild(groupQuantityNameIdInput)
+
+        const productGroupQuantityPackageInfoContainer = document
+            .getElementById('product-package-info-container-template')
+            .cloneNode(true) as HTMLDivElement
+        productGroupQuantityPackageInfoContainer.classList.remove('hidden')
+        productGroupQuantityPackageInfoContainer.removeAttribute('id')
+        const packageInfoFields: NodeListOf<HTMLDivElement> =
+            productGroupQuantityPackageInfoContainer.querySelectorAll('.quantity-container')
+
+        const quantityPerWrapDiv = productGroupQuantityPackageInfoContainer.querySelector(
+            '.quantity-per-wrap'
+        ) as HTMLInputElement
+        quantityPerWrapDiv.classList.add(`product-${productAllocated.id}-group-${quantityGroup.group.id}-per-wrap`)
+        quantityPerWrapDiv.setAttribute('required', 'true')
+        quantityPerWrapDiv.placeholder = 'Quantity'
+
+        const quantityWrapCartonDiv = productGroupQuantityPackageInfoContainer.querySelector(
+            '.quantity-wrap-carton'
+        ) as HTMLInputElement
+        quantityWrapCartonDiv.classList.add(
+            `product-${productAllocated.id}-group-${quantityGroup.group.id}-wrap-carton`
+        )
+        quantityWrapCartonDiv.setAttribute('required', 'true')
+        quantityWrapCartonDiv.placeholder = 'Quantity'
+
+        const quantityCartonMasterDiv = productGroupQuantityPackageInfoContainer.querySelector(
+            '.quantity-carton-master'
+        ) as HTMLInputElement
+        quantityCartonMasterDiv.classList.add(
+            `product-${productAllocated.id}-group-${quantityGroup.group.id}-carton-master`
+        )
+        quantityCartonMasterDiv.placeholder = 'Quantity'
+
+        packageInfoFields.forEach((packageInfoField) => {
+            // packageInfoField.classList.add()
+
+            packageInfoContainer.appendChild(packageInfoField)
+        })
+        productAllocatedContainer.appendChild(packageInfoContainer)
+    })
+
+    incomingStockAddContainer.appendChild(productAllocatedContainer)
 }
 
 // search flow
@@ -176,77 +237,143 @@ cancelOrderButtons.forEach((e) => {
     })
 })
 
-function setProducts() {
-    const incomingStockProducts = document.querySelectorAll('.incoming-stock-product-item')
-    const incomingStockProductsQuantity = document.querySelectorAll('.incoming-stock-edit-received-quantity')
-    const products: IIncomingStockProduct[] = []
+// function setProducts() {
+//     const incomingStockProducts = document.querySelectorAll('.incoming-stock-product-item')
+//     const incomingStockProductsQuantity = document.querySelectorAll('.incoming-stock-edit-received-quantity')
+//     const products: IIncomingStockProduct[] = []
 
-    incomingStockProducts.forEach((incomingStockProduct, i) => {
-        const incomingStockQuantity = incomingStockProductsQuantity[i] as HTMLInputElement
-        const productId = incomingStockProduct.getAttribute('data-target-product-id')
-        const quantityPerWrap = incomingStockProduct.querySelector('.quantity-per-wrap') as HTMLInputElement
-        const quantityWrapCarton = incomingStockProduct.querySelector('.quantity-wrap-carton') as HTMLInputElement
-        const quantityCartonMaster = incomingStockProduct.querySelector('.quantity-carton-master') as HTMLInputElement
+//     incomingStockProducts.forEach((incomingStockProduct, i) => {
+//         const incomingStockQuantity = incomingStockProductsQuantity[i] as HTMLInputElement
+//         const productId = incomingStockProduct.getAttribute('data-target-product-id')
+//         const quantityPerWrap = incomingStockProduct.querySelector('.quantity-per-wrap') as HTMLInputElement
+//         const quantityWrapCarton = incomingStockProduct.querySelector('.quantity-wrap-carton') as HTMLInputElement
+//         const quantityCartonMaster = incomingStockProduct.querySelector('.quantity-carton-master') as HTMLInputElement
 
-        const product: IIncomingStockProduct = {
-            product_id: parseInt(productId),
-            quantity_received: parseInt(incomingStockQuantity.value),
-            quantity_per_wrap: parseInt(quantityPerWrap.value),
-            quantity_wrap_carton: parseInt(quantityWrapCarton.value),
-            quantity_carton_master: parseInt(quantityCartonMaster.value),
-            group_id: productGroupQuantity[`group_id-${i}`],
-        }
-        products.push(product)
-    })
+//         const product: IIncomingStockProduct = {
+//             product_id: parseInt(productId),
+//             quantity_received: parseInt(incomingStockQuantity.value),
+//             quantity_per_wrap: parseInt(quantityPerWrap.value),
+//             quantity_wrap_carton: parseInt(quantityWrapCarton.value),
+//             quantity_carton_master: parseInt(quantityCartonMaster.value),
+//             group_id: productGroupQuantity[`group_id-${i}`],
+//         }
+//         products.push(product)
+//     })
 
-    inputReceivedProducts.value = JSON.stringify(products)
-}
+//     inputReceivedProducts.value = JSON.stringify(products)
+// }
 
 // ----submit form through hidden submit button----
 const inboundOrderSubmitButton: HTMLButtonElement = document.querySelector('#incoming-stock-submit-btn')
-const inboundOrderSaveProductsButton = document.querySelector('#incoming-stock-save-products-btn')
-
-inboundOrderSaveProductsButton.addEventListener('click', () => {
-    setProducts();
-    inboundOrderSubmitButton.click()
-})
 
 document.addEventListener('DOMContentLoaded', () => {
     // ----accept goods---
     const acceptGoodsSubmitButton: HTMLButtonElement = document.querySelector('#incoming-stock-save-products-btn')
     // ----view modal----
-    const viewIncomingStockButtons = document.querySelectorAll('.incoming-stock-view-button') as NodeListOf<HTMLButtonElement>;
-    const viewModalOrderId: HTMLDivElement = document.querySelector('#incoming-stock-view-order-id');
-    const viewModalOrderTitle: HTMLDivElement = document.querySelector('#incoming-stock-view-order-title');
-    const viewModalOrderStatus: HTMLDivElement = document.querySelector('#incoming-stock-view-status');
-    const viewModalSupplier: HTMLDivElement = document.querySelector('#incoming-stock-view-supplier-id');
-    const viewModalWarehouse: HTMLDivElement = document.querySelector('#incoming-stock-view-warehouse-id');
-    const viewModalActiveDate: HTMLDivElement = document.querySelector('#incoming-stock-view-active-date');
-    const viewModalActiveTime: HTMLDivElement = document.querySelector('#incoming-stock-view-active-time');
-    const viewModalDeliveryDate: HTMLDivElement = document.querySelector('#incoming-stock-view-delivery-date');
+    const viewIncomingStockButtons = document.querySelectorAll(
+        '.incoming-stock-view-button'
+    ) as NodeListOf<HTMLButtonElement>
+    const viewModalInboundOrderId: HTMLInputElement = document.querySelector('#incoming-stock-view-inbound-order-id')
+    const viewModalOrderId: HTMLDivElement = document.querySelector('#incoming-stock-view-order-id')
+    const viewModalOrderTitle: HTMLDivElement = document.querySelector('#incoming-stock-view-order-title')
+    const viewModalOrderStatus: HTMLDivElement = document.querySelector('#incoming-stock-view-status')
+    const viewModalSupplier: HTMLDivElement = document.querySelector('#incoming-stock-view-supplier-id')
+    const viewModalWarehouse: HTMLDivElement = document.querySelector('#incoming-stock-view-warehouse-id')
+    const viewModalActiveDate: HTMLDivElement = document.querySelector('#incoming-stock-view-active-date')
+    const viewModalActiveTime: HTMLDivElement = document.querySelector('#incoming-stock-view-active-time')
+    const viewModalDeliveryDate: HTMLDivElement = document.querySelector('#incoming-stock-view-delivery-date')
+    const viewModalAcceptButton: HTMLButtonElement = document.querySelector('#accept-incoming-stock-edit-button')
+    const wmNotesView: HTMLInputElement = document.querySelector('#incoming-stock-view-wm-notes')
+    const daNotesView: HTMLInputElement = document.querySelector('#incoming-stock-view-da-notes')
+    const orderIdInput: HTMLInputElement = document.querySelector('#incoming-stock-edit-id')
 
-    viewIncomingStockButtons.forEach(viewButton =>
+    viewModalAcceptButton.addEventListener('click', (e: MouseEvent) => {
+        const inboundOrder: IInboundOrderOut = JSON.parse(
+            (e.currentTarget as HTMLButtonElement).getAttribute('data-target')
+        )
+        orderIdInput.value = inboundOrder.id.toString()
+
+        inboundOrder.productsAllocated.forEach((productAllocated) => {
+            createIncomingStockOrderItems(productAllocated)
+        })
+
+        acceptModal.show()
+    })
+
+    viewIncomingStockButtons.forEach((viewButton) =>
         viewButton.addEventListener('click', () => {
-            const inboundOrder: IInboundOrderOut = JSON.parse(viewButton.getAttribute('data-target'));
-            viewModalOrderId.innerHTML = inboundOrder.orderId;
-            viewModalOrderTitle.innerHTML = inboundOrder.title;
-            viewModalOrderStatus.innerHTML = inboundOrder.status;
-            viewModalSupplier.innerHTML = inboundOrder.supplier.name;
-            viewModalWarehouse.innerHTML = inboundOrder.warehouse.name;
-            viewModalActiveDate.innerHTML = inboundOrder.activeDate;
-            viewModalActiveTime.innerHTML = inboundOrder.activeTime;
-            viewModalDeliveryDate.innerHTML = inboundOrder.deliveryDate;
+            const inboundOrder: IInboundOrderOut = JSON.parse(viewButton.getAttribute('data-target'))
+            viewModalInboundOrderId.value = inboundOrder.id.toString()
+            viewModalOrderId.innerHTML = inboundOrder.orderId
+            viewModalOrderTitle.innerHTML = inboundOrder.title
+            viewModalOrderStatus.innerHTML = inboundOrder.status
+            viewModalSupplier.innerHTML = inboundOrder.supplier.name
+            viewModalWarehouse.innerHTML = inboundOrder.warehouse.name
+            viewModalActiveDate.innerHTML = inboundOrder.activeDate
+            viewModalActiveTime.innerHTML = inboundOrder.activeTime
+            viewModalDeliveryDate.innerHTML = inboundOrder.deliveryDate
+            wmNotesView.value = inboundOrder.wmNotes
+            daNotesView.value = inboundOrder.daNotes
+            if (inboundOrder.status !== 'In transit') {
+                viewModalAcceptButton.classList.add('invisible')
+            } else {
+                // Pickup order
+                viewModalAcceptButton.classList.remove('invisible')
+                viewModalAcceptButton.setAttribute('data-target', viewButton.getAttribute('data-target'))
+            }
 
-            viewModal.show();
+            viewModal.show()
         })
     )
-    
+
     // accept goods submit
     acceptGoodsSubmitButton.addEventListener('click', () => {
-        console.log('click');
+        console.log('click')
+    })
+
+    const inboundOrderSaveProductsButton = document.querySelector('#incoming-stock-save-products-btn')
+    inboundOrderSaveProductsButton.addEventListener('click', () => {
+        // setProducts()
+        const products: IIncomingStockProduct[] = []
+        const inboundOrder: IInboundOrderOut = JSON.parse(viewModalAcceptButton.getAttribute('data-target'))
+        inboundOrder.productsAllocated.forEach((productAllocated) => {
+            const stock: IIncomingStockProduct = {
+                allocatedProductId: productAllocated.id,
+                packages: [],
+            }
+            console.log('productAllocated', productAllocated)
+
+            productAllocated.productQuantityGroups.forEach((productQuantityGroup) => {
+                const receivedQtyInput: HTMLInputElement = document.querySelector(
+                    `.product-${productAllocated.id}-group-${productQuantityGroup.group.id}-received-quantity`
+                )
+                const perWrapInput: HTMLInputElement = document.querySelector(
+                    `.product-${productAllocated.id}-group-${productQuantityGroup.group.id}-per-wrap`
+                )
+                const wrapCartonInput: HTMLInputElement = document.querySelector(
+                    `.product-${productAllocated.id}-group-${productQuantityGroup.group.id}-wrap-carton`
+                )
+                const cartonMasterInput: HTMLInputElement = document.querySelector(
+                    `.product-${productAllocated.id}-group-${productQuantityGroup.group.id}-carton-master`
+                )
+                const packageInfoData: IPackageInfo = {
+                    productQuantityGroupId: productQuantityGroup.id,
+                    quantityPerWrap: parseInt(perWrapInput.value),
+                    quantityWrapCarton: parseInt(wrapCartonInput.value),
+                    quantityCartonMaster: parseInt(cartonMasterInput.value),
+                    quantityReceived: parseInt(receivedQtyInput.value),
+                }
+
+                stock.packages.push(packageInfoData)
+            })
+            products.push(stock)
+        })
+
+        inputReceivedProducts.value = JSON.stringify(products)
+
+        inboundOrderSubmitButton.click()
     })
 })
-
 
 // function viewIncomingStock(inboundOrder: IInboundOrder) {
 //     const packageInfo: IPackageInfo = inboundOrder.package_info

@@ -1,70 +1,6 @@
 import { Modal } from 'flowbite'
 import type { ModalOptions, ModalInterface } from 'flowbite'
-
-interface SupDAWhProd {
-    supplier: string
-    delivery_agent: string
-    warehouse: string
-    product: string
-}
-
-interface IInboundOrder {
-    id: number
-    order_id: string
-    active_date: number
-    active_time: string
-    order_title: string
-    quantity: number
-    delivery_date: string
-    status: string
-    supplier_id: number
-    delivery_agent_id: number
-    warehouse_id: number
-    product_id: number
-    sup_da_wh_prod_objs: SupDAWhProd
-    inbound_order_prods: {
-        [index: string]: IInboundOrderProd[]
-    }
-    package_info: IPackageInfo
-}
-
-interface IPackageInfo {
-    quantity_carton_master: number
-    quantity_per_wrap: number
-    quantity_wrap_carton: number
-}
-
-interface IInboundOrderProd {
-    product: { id: number; name: string; SKU: string; image: string }
-    group: { id: number; name: string }
-    quantity: number
-}
-
-// search flow
-const searchPickupInboundInput: HTMLInputElement = document.querySelector('#table-search-pickup-inbounds')
-const searchPickupInboundInputButton = document.querySelector('#table-search-pickup-inbound-button')
-if (searchPickupInboundInputButton && searchPickupInboundInput) {
-    searchPickupInboundInputButton.addEventListener('click', () => {
-        const url = new URL(window.location.href)
-        url.searchParams.set('q', searchPickupInboundInput.value)
-        window.location.href = `${url.href}`
-    })
-}
-const pickupInboundButtons = document.querySelectorAll('.pickup-inbound-btn')
-
-pickupInboundButtons.forEach((e) => {
-    e.addEventListener('click', async () => {
-        if (confirm('Are sure?')) {
-            let id = e.getAttribute('data-pickup-inbound-id')
-            const response = await fetch(`/pickup_inbound/pickup/${id}`, {
-                method: 'GET',
-            })
-            if (response.status == 200) {
-                location.reload()
-            }
-        }
-    })
-})
+import { IInboundOrderOut } from './inbound_order/types'
 
 // ----view modal----
 const $viewModalElement: HTMLElement = document.querySelector('#viewPickupInboundModal')
@@ -91,120 +27,6 @@ const viewModalOptions: ModalOptions = {
 
 const viewModal: ModalInterface = new Modal($viewModalElement, viewModalOptions)
 
-const viewPickupInboundButtons = document.querySelectorAll('.pickup-inbound-view-button')
-viewPickupInboundButtons.forEach((e) =>
-    e.addEventListener('click', () => {
-        const inboundOrder: IInboundOrder = JSON.parse(e.getAttribute('data-target'))
-        viewPickupInbound(inboundOrder)
-    })
-)
-
-function viewPickupInbound(inboundOrder: IInboundOrder) {
-    const packageInfo: IPackageInfo = inboundOrder.package_info
-
-    let div: HTMLDivElement = document.querySelector('#pickup-inbound-view-order-id')
-    div.innerHTML = inboundOrder.order_id
-    div = document.querySelector('#pickup-inbound-view-order-title')
-    div.innerHTML = inboundOrder.order_title
-    div = document.querySelector('#pickup-inbound-view-active-date')
-    div.innerHTML = convertDate(inboundOrder.active_date.toString())
-    div = document.querySelector('#pickup-inbound-view-active-time')
-    div.innerHTML = inboundOrder.active_time
-    div = document.querySelector('#pickup-inbound-view-delivery-date')
-    div.innerHTML = convertDate(inboundOrder.delivery_date.toString())
-    div = document.querySelector('#pickup-inbound-view-status')
-    div.innerHTML = inboundOrder.status
-    div = document.querySelector('#pickup-inbound-view-supplier-id')
-    div.innerHTML = inboundOrder.sup_da_wh_prod_objs.supplier
-    div = document.querySelector('#pickup-inbound-view-delivery-agent-id')
-    div.innerHTML = inboundOrder.sup_da_wh_prod_objs.delivery_agent
-    div = document.querySelector('#pickup-inbound-view-warehouse-id')
-    div.innerHTML = inboundOrder.sup_da_wh_prod_objs.warehouse
-
-    div = document.querySelector('#pickup-inbound-view-quantity-wrap')
-    div.innerHTML = packageInfo.quantity_per_wrap.toString()
-    div = document.querySelector('#pickup-inbound-view-quantity-wrap-carton')
-    div.innerHTML = packageInfo.quantity_wrap_carton.toString()
-    div = document.querySelector('#pickup-inbound-view-quantity-carton-master')
-    div.innerHTML = packageInfo.quantity_carton_master.toString()
-
-    if (Object.keys(inboundOrder.inbound_order_prods).length > 0) {
-        const currentInboundOrder = inboundOrder.inbound_order_prods[inboundOrder.order_id]
-
-        if (currentInboundOrder) {
-            for (let i = 0; i < currentInboundOrder.length; i++) {
-                createViewPickupInboundOrderItems(inboundOrder, currentInboundOrder[i])
-            }
-        }
-    }
-
-    viewModal.show()
-}
-
-function convertDate(date: string) {
-    const inputDate = date.split('T')[0]
-    const dateParts = inputDate.split('-')
-    const year = dateParts[0]
-    const month = dateParts[1]
-    const day = dateParts[2]
-    return `${month}/${day}/${year}`
-}
-
-// ----add inbound order item----
-function createViewPickupInboundOrderItems(inbOrder: IInboundOrder = null, curInbOrder: IInboundOrderProd = null) {
-    if (!inbOrder) {
-        const inboundOrder: IInboundOrder = JSON.parse(sessionStorage.getItem('inboundOrder'))
-        inbOrder = inboundOrder
-    }
-    const inboundOrderAddContainer = document.querySelector('#pickup-inbound-view-add-container')
-    const inboundOrderAddItem = document.createElement('div')
-    inboundOrderAddItem.classList.add('p-6', 'space-y-6', 'border-t', 'pickup-inbound-view-add-item')
-    inboundOrderAddItem.innerHTML = `
-    <div class="grid grid-cols-12 gap-5">
-    <div class="col-span-6 sm:col-span-4">
-      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product</label>
-      <div
-        class="pickup-inbound-view-add-product shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-      </div>
-    </div>
-        <div class="col-span-6 sm:col-span-3">
-            <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">SKU</label>
-            <div
-                class="pickup-inbound-view-add-SKU shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            </div>
-        </div>
-    <div class="col-span-6 sm:col-span-3">
-      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label>
-      <div
-        class="pickup-inbound-view-add-group shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-      </div>
-    </div>
-    <div class="col-span-6 sm:col-span-2">
-      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
-      <div
-        class="pickup-inbound-view-add-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-      </div>
-    </div>
-  </div>
-  `
-
-    const inboundOrderAddProduct: HTMLInputElement = inboundOrderAddItem.querySelector(
-        '.pickup-inbound-view-add-product'
-    )
-    const inboundOrderAddSKU: HTMLInputElement = inboundOrderAddItem.querySelector('.pickup-inbound-view-add-SKU')
-    const inboundOrderAddGroup: HTMLInputElement = inboundOrderAddItem.querySelector('.pickup-inbound-view-add-group')
-    const inboundOrderAddQuantity: HTMLInputElement = inboundOrderAddItem.querySelector(
-        '.pickup-inbound-view-add-quantity'
-    )
-
-    inboundOrderAddProduct.innerHTML = curInbOrder.product.name
-    inboundOrderAddSKU.innerHTML = curInbOrder.product.SKU
-    inboundOrderAddGroup.innerHTML = curInbOrder.group.name
-    inboundOrderAddQuantity.innerHTML = curInbOrder.quantity.toString()
-
-    inboundOrderAddContainer.appendChild(inboundOrderAddItem)
-}
-
 // function to filter order by status
 const orderFilterPickupInboundInputs = document.querySelectorAll('.pickup-inbound-filter-input')
 const sortByNamePickupInboundStorage = JSON.parse(sessionStorage.getItem('sortByNamePickupInbound'))
@@ -226,5 +48,48 @@ orderFilterPickupInboundInputs.forEach((input: HTMLInputElement) => {
             hiddenInput.value = input.value
             sessionStorage.setItem('sortByNamePickupInbound', JSON.stringify(input.value))
         }
+    })
+})
+
+document.addEventListener('DOMContentLoaded', () => {
+    // open view modal
+    const buttonsOpenViewModal: NodeListOf<HTMLButtonElement> = document.querySelectorAll('.pickup-inbound-view-button')
+    const inboundOrderId: HTMLInputElement = document.querySelector('#pickup-inbound-view-inbound-order-id')
+    const orderIdView: HTMLDivElement = document.querySelector('#pickup-inbound-view-order-id')
+    const orderTitleView: HTMLDivElement = document.querySelector('#pickup-inbound-view-order-title')
+    const orderStatusView: HTMLDivElement = document.querySelector('#pickup-inbound-view-status')
+    const orderSupplierView: HTMLDivElement = document.querySelector('#pickup-inbound-view-supplier-id')
+    const orderWarehouseView: HTMLDivElement = document.querySelector('#pickup-inbound-view-warehouse-id')
+    const orderActiveDateView: HTMLDivElement = document.querySelector('#pickup-inbound-view-active-date')
+    const orderActiveTimeView: HTMLDivElement = document.querySelector('#pickup-inbound-view-active-time')
+    const orderDeliveryDateView: HTMLDivElement = document.querySelector('#pickup-inbound-view-delivery-date')
+    const wmNotesView: HTMLInputElement = document.querySelector('#pickup-inbound-view-wm-notes')
+    const daNotesView: HTMLInputElement = document.querySelector('#pickup-inbound-view-da-notes')
+    const pickupInboundButton: HTMLDivElement = document.querySelector('.pickup-inbound-btn')
+
+    buttonsOpenViewModal.forEach((button) => {
+        button.addEventListener('click', () => {
+            const inboundOrder: IInboundOrderOut = JSON.parse(button.getAttribute('data-target'))
+            inboundOrderId.value = inboundOrder.id.toString()
+            orderIdView.innerHTML = inboundOrder.orderId
+            orderTitleView.innerHTML = inboundOrder.title
+            orderStatusView.innerHTML = inboundOrder.status
+            orderSupplierView.innerHTML = inboundOrder.supplier.name
+            orderWarehouseView.innerHTML = inboundOrder.warehouse.name
+            orderActiveDateView.innerHTML = inboundOrder.activeDate
+            orderActiveTimeView.innerHTML = inboundOrder.activeTime
+            orderDeliveryDateView.innerHTML = inboundOrder.deliveryDate
+            wmNotesView.value = inboundOrder.wmNotes
+            daNotesView.value = inboundOrder.daNotes
+
+            if (inboundOrder.status !== 'Assigned to pickup') {
+                pickupInboundButton.classList.add('invisible')
+            } else {
+                // Pickup order
+                pickupInboundButton.classList.remove('invisible')
+                pickupInboundButton.setAttribute('data-target', inboundOrder.id.toString())
+            }
+            viewModal.show()
+        })
     })
 })

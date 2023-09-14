@@ -12,6 +12,7 @@ ENV PYTHONUNBUFFERED 1
 ENV PYTHONHASHSEED random
 ENV PIP_NO_CACHE_DIR off
 ENV PIP_DISABLE_PIP_VERSION_CHECK on
+ENV APP_ENV production
 
 # install poetry
 RUN pip install --user poetry
@@ -28,3 +29,5 @@ RUN poetry add gunicorn
 
 COPY --chown=app:app . .
 RUN chmod +x ./start_server.sh
+CMD ["ch", "./start_server.sh"]
+EXPOSE 8000

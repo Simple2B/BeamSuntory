@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta
 from flask import (
     Blueprint,
     render_template,
@@ -109,8 +109,25 @@ def create():
         log(log.ERROR, "Validation failed: [%s]", form_create.errors)
         return redirect(url_for("ship_request.get_all"))
     if form_create.validate_on_submit():
+        if form_create.event_date_range.data:
+            current_date = datetime.now()
+            date_from = form_create.event_date_range.data.split(" - ")[0]
+            date_to = form_create.event_date_range.data.split(" - ")[1]
+            start_date = datetime.strptime(date_from, "%Y-%m-%d")
+            end_date = datetime.strptime(date_to, "%Y-%m-%d")
+            difference_date = start_date - current_date
+
+            if difference_date < timedelta(days=5):
+                flash("The event must be created more than 5 days in advance", "danger")
+                log(
+                    log.INFO,
+                    "The event must be created more than 5 days: [%s]",
+                    start_date,
+                )
+                return redirect(url_for("product.get_all"))
+
         ship_request = m.ShipRequest(
-            order_numb=f"BEAM-DO{int(datetime.datetime.now().timestamp())}",
+            order_numb=f"BEAM-DO{int(datetime.now().timestamp())}",
             # NOTE: what status is default?
             status=s.ShipRequestStatus.waiting_for_warehouse,
             store_id=form_create.store.data,
@@ -122,7 +139,7 @@ def create():
         )
         log(log.INFO, "Form submitted. Ship Request: [%s]", ship_request)
         flash("Ship request added!", "success")
-        ship_request.save()
+        ship_request.save(False)
 
         carts: list[m.Cart] = db.session.execute(
             m.Cart.select().where(
@@ -131,6 +148,28 @@ def create():
         ).scalars()
 
         for cart in carts:
+            is_group_in_master_group = (
+                db.session.query(m.Group)
+                .join(m.MasterGroup)
+                .filter(
+                    m.MasterGroup.name == s.MasterGroupMandatory.events.value,
+                    m.Group.name == cart.group,
+                )
+                .count()
+                > 0
+            )
+            if start_date and end_date and is_group_in_master_group:
+                event = m.Event(
+                    date_from=start_date,
+                    date_to=end_date,
+                    quantity=cart.quantity,
+                    product_id=cart.product_id,
+                    cart_id=cart.id,
+                    comment=form_create.event_comment.data,
+                    user=current_user,
+                )
+                db.session.add(event)
+                log(log.INFO, "Event added. Event: [%s]", event)
             cart.status = "completed"
             cart.order_numb = ship_request.order_numb
             cart.ship_request_id = ship_request.id
@@ -145,7 +184,7 @@ def create():
                     m.WarehouseProduct.group_id == cart_user_group.id,
                 )
             ).scalar()
-            if warehouse_product:
+            if warehouse_product and not is_group_in_master_group:
                 warehouse_product.product_quantity -= cart.quantity
                 warehouse_product.save()
 

@@ -40,9 +40,11 @@ label:has(~ div *:required):after {
     --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) rgba(0, 0, 0, 0);
 }
 
-input[type="radio"]:checked {
-    background-color: transparent !important;
+
+input[type="checkbox"]:checked,  input[type="radio"]:checked{
+    background-color: rgba(255, 255, 255, 0.144) !important;
     background: url(../img/checkmark.png);
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
 }
 
 .gap-4{
@@ -57,3 +59,28 @@ button:disabled,
 button[disabled]{
   background-color: rgb(124, 138, 168) !important;
 }
+
+.datepicker::placeholder {
+    color: rgb(255, 255, 255) !important;
+}
+
+.margin-b-5{
+    margin-bottom: 20px;
+}
+
+.packageInfoContainer-border{ 
+    border-bottom: dashed 1px rgb(107 114 128);
+}
+
+.no-m-l{
+    margin-left: 0px !important;
+}
+
+.w-24-important{
+    width: 96px !important;
+}
+.max-width-100 {
+    max-width: 100px;
+    text-overflow: ellipsis;
+  }
+  

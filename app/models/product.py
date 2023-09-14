@@ -56,6 +56,8 @@ class Product(db.Model, ModelMixin):
     width: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
     height: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
 
+    warehouse_products: orm.Mapped[WarehouseProduct] = orm.relationship()
+
     # TODO is overlaps="user_obj" correct decision? remove it to see the warning
     product_groups: orm.Mapped[ProductGroup] = orm.relationship(
         cascade="all, delete-orphan", overlaps="child"

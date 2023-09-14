@@ -72,14 +72,16 @@ def init(app: Flask):
             "Mixit": ["Mixit"],
             "Key Accounts": ["Key Accounts"],
             "Sales Manager": ["Sales Manager"],
-            "Events": ["Events"],
+            s.MasterGroupMandatory.events.value: [s.MasterGroupMandatory.events.value],
         }
         product_master_groups = {
             "Brand": ["Brugal", "Banff Ice", "Alberta Springs"],
             "Language": ["English", "French"],
             "Premises": ["On Premises", "Off Premises"],
             "Category": ["NLVA", "GWP", "Kit", "Bareware", "Signage"],
-            "Events": ["Events"],
+            s.ProductMasterGroupMandatory.events.value: [
+                s.ProductMasterGroupMandatory.events.value
+            ],
         }
 
         for mg in stock_master_groups:
@@ -159,6 +161,15 @@ def init(app: Flask):
                 manager_id=wh_manager.id,
             ).save(False)
 
+            m.Warehouse(
+                name=s.WarehouseMandatory.warehouse_events.value,
+                phone_number="380362470344",
+                city="Kv",
+                zip="unzip",
+                address="street",
+                manager_id=wh_manager.id,
+            ).save(False)
+
         m.DeliveryAgent(
             first_name="May",
             last_name="Wood",
@@ -206,6 +217,26 @@ def init(app: Flask):
             zip="45778",
             active=True,
         ).save(False)
+
+        bottle = m.Product(
+            name="Bottle",
+            description="Just a Bottle",
+            SKU="CV-BOT23-27661",
+            image=os.environ.get("DEFAULT_IMAGE", "default"),
+        )
+        bottle.save(False)
+        cup = m.Product(
+            name="Cup",
+            description="Just a Cup",
+            SKU="CV-CUP23-27662",
+            image=os.environ.get("DEFAULT_IMAGE", "default"),
+        )
+        cup.save(False)
+
+        db.session.commit()
+
+        m.ProductGroup(product_id=bottle.id, group_id=1).save(False)
+        m.ProductGroup(product_id=cup.id, group_id=1).save(False)
 
         db.session.commit()
         print("database filled")

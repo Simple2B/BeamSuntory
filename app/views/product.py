@@ -2,7 +2,6 @@ import base64
 import json
 from datetime import datetime
 from io import BytesIO
-import os
 import pandas
 from flask import (
     Blueprint,
@@ -35,7 +34,15 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     is_events = request.args.get("events", type=bool, default=False)
 
     if query is None or count_query is None:
-        query = m.Product.select().order_by(m.Product.id)
+        reverse_event_filter = ~m.Product.warehouse_products.any(
+            m.WarehouseProduct.group.has(
+                m.Group.master_groups.has(
+                    m.MasterGroup.name == s.MasterGroupMandatory.events.value
+                )
+            )
+        )
+        query = m.Product.select().where(reverse_event_filter).order_by(m.Product.id)
+
         count_query = sa.select(sa.func.count()).select_from(m.Product)
         if q:
             query = (
@@ -44,6 +51,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
                     m.Product.name.ilike(f"%{q}%")
                     | m.Product.SKU.ilike(f"%{q}%")
                     | m.Product.description.ilike(f"%{q}%")
+                    | reverse_event_filter
                 )
                 .order_by(m.Product.id)
             )
@@ -53,39 +61,23 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
                     m.Product.name.ilike(f"%{q}%")
                     | m.Product.SKU.ilike(f"%{q}%")
                     | m.Product.description.ilike(f"%{q}%")
+                    | reverse_event_filter
                 )
                 .select_from(m.Product)
             )
 
-    event_master_group: m.MasterGroupProduct = db.session.scalar(
-        m.MasterGroupProduct.select().where(
-            m.MasterGroupProduct.name == s.ProductMasterGroupMandatory.events.value
-        )
-    )
-
     if is_events:
-        event_sub_groups = db.session.scalars(
-            m.GroupProduct.select().where(
-                m.GroupProduct.master_group_id == event_master_group.id
-            )
-        )
-        sub_groups_ids = [sg.id for sg in event_sub_groups]
-
-        query = query.where(
-            m.Product.id.in_(
-                sa.select(m.ProductGroup.product_id).where(
-                    m.ProductGroup.group_id.in_(sub_groups_ids)
+        event_filter = m.Product.warehouse_products.any(
+            m.WarehouseProduct.group.has(
+                m.Group.master_groups.has(
+                    m.MasterGroup.name == s.MasterGroupMandatory.events.value
                 )
             )
         )
-        groups_for_products_obj = db.session.execute(m.GroupProduct.select()).all()
 
-    else:
-        groups_for_products_obj = db.session.execute(
-            m.GroupProduct.select().where(
-                m.GroupProduct.master_group_id != event_master_group.id
-            )
-        ).all()
+        query = m.Product.select().where(event_filter).order_by(m.Product.id)
+
+    groups_for_products_obj = db.session.execute(m.GroupProduct.select()).all()
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
@@ -119,16 +111,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         row for row in db.session.execute(m.ProductGroup.select()).scalars()
     ]
 
-    product_groups: list[m.ProductGroup] = [
-        row
-        for row in db.session.execute(
-            m.ProductGroup.select()
-            .order_by(m.ProductGroup.id)
-            .offset((pagination.page - 1) * pagination.per_page * 4)
-            .limit(pagination.per_page)
-        ).scalars()
-    ]
-
     # TODO: consider using a join instead of two queries <- Copilot
     # get all groups ids for current user to compare with product groups ids in view.html
     current_user_groups_rows = db.session.execute(
@@ -149,7 +131,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     # NOTE: Create json object for "show-all-groups" button in products.html
     product_mg_g = (
         {
-            p.child.name: {
+            p.child.SKU: {
                 mg.parent.master_groups_for_product.name: "".join(
                     [
                         g.parent.name
@@ -176,7 +158,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     master_group_product_name = [
         mgp[0].name for mgp in db.session.execute(m.MasterGroupProduct.select()).all()
     ]
-    product_mg_g["master_group_product_name"] = master_group_product_name
 
     suppliers = [i for i in db.session.execute(m.Supplier.select()).scalars()]
 
@@ -497,35 +478,34 @@ def sort():
             ]
             for pg in product_groups
         }
-        product_ids_to_return = [
-            pid for pid in product_to_group if len(product_to_group[pid]) == len(groups)
-        ]
+        # TODO remove if unused
+        # product_ids_to_return = [
+        #     pid for pid in product_to_group if len(product_to_group[pid]) == len(groups)
+        # ]
 
         q = request.args.get("q", type=str, default=None)
         query = (
             m.Product.select()
-            .where(m.Product.id.in_(product_ids_to_return))
+            .where(m.Product.id.in_(product_to_group))
             .order_by(m.Product.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(m.Product.id.in_(product_ids_to_return))
+            .where(m.Product.id.in_(product_to_group))
             .select_from(m.Product)
         )
         if q:
             query = (
                 m.Product.select()
                 .where(
-                    m.Product.name.ilike(f"%{q}%")
-                    | m.Product.id.in_(product_ids_to_return)
+                    m.Product.name.ilike(f"%{q}%") | m.Product.id.in_(product_to_group)
                 )
                 .order_by(m.Product.id)
             )
             count_query = (
                 sa.select(sa.func.count())
                 .where(
-                    m.Product.name.ilike(f"%{q}%")
-                    | m.Product.id.in_(product_ids_to_return)
+                    m.Product.name.ilike(f"%{q}%") | m.Product.id.in_(product_to_group)
                 )
                 .select_from(m.Product)
             )

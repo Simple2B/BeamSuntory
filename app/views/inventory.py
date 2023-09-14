@@ -37,22 +37,20 @@ def get_all():
         i for i in db.session.execute(query).scalars()
     ]
 
-    warehouse_product_qty = []
+    warehouse_product_qty = {}
 
-    warehouse_products = {wpq.product_id for wpq in query_result_list}
-
-    for ware_prod in warehouse_products:
+    for wpq in query_result_list:
         warehouse_product_qty_dict = dict()
-        for wpq in query_result_list:
-            if wpq.product_id == ware_prod:
-                warehouse_product_qty_dict["warehouse"] = wpq.warehouse
-                warehouse_product_qty_dict["product"] = wpq.product
-                if "qty" in warehouse_product_qty_dict:
-                    warehouse_product_qty_dict["qty"] += wpq.product_quantity
-                else:
-                    warehouse_product_qty_dict["qty"] = wpq.product_quantity
+        wpq_key = f"{wpq.warehouse.name}-{wpq.product.name}"
+        if wpq_key in warehouse_product_qty:
+            warehouse_product_qty[wpq_key]["qty"] += wpq.product_quantity
+        else:
+            warehouse_product_qty_dict["warehouse"] = wpq.warehouse
+            warehouse_product_qty_dict["product"] = wpq.product
+            warehouse_product_qty_dict["qty"] = wpq.product_quantity
+            warehouse_product_qty[wpq_key] = warehouse_product_qty_dict
 
-        warehouse_product_qty.append(warehouse_product_qty_dict)
+    warehouse_product_qty = list(warehouse_product_qty.values())
 
     pagination = create_pagination(total=len(warehouse_product_qty))
 
