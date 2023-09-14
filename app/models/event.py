@@ -16,6 +16,8 @@ class Event(db.Model, ModelMixin):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
     date_from: orm.Mapped[date] = orm.mapped_column(sa.Date, nullable=True)
     date_to: orm.Mapped[date] = orm.mapped_column(sa.Date, nullable=True)
+    date_reserve_from: orm.Mapped[date] = orm.mapped_column(sa.Date, nullable=True)
+    date_reserve_to: orm.Mapped[date] = orm.mapped_column(sa.Date, nullable=True)
     quantity: orm.Mapped[int] = orm.mapped_column()
     comment: orm.Mapped[str] = orm.mapped_column(sa.Text(), nullable=True)
     product_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("products.id"))

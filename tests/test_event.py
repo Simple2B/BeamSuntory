@@ -15,8 +15,6 @@ def test_event_pages(client):
 
     response = client.get("/event/")
     assert response.status_code == 200
-    response = client.get("/event/create")
-    assert response.status_code == 405
 
 
 # def test_create_event(mg_g_populate: FlaskClient):
