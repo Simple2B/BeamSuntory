@@ -69,16 +69,23 @@ def get_all():
         else:
             store.favorite = False
 
-    warehouse_products = db.session.execute(
+    warehouse_products = db.session.scalars(
         m.WarehouseProduct.select().where(
             m.WarehouseProduct.product_id.in_(
                 [wp.product_id for wp in db.session.execute(query).scalars()]
             )
         )
-    ).scalars()
+    ).all()
 
     available_products = (
-        {wp.group.name: wp.product_quantity for wp in warehouse_products}
+        {
+            wg.group.name: {
+                wprod.product.SKU: wprod.product_quantity
+                for wprod in warehouse_products
+                if wg.group.name == wprod.group.name
+            }
+            for wg in warehouse_products
+        }
         if warehouse_products
         else {}
     )
