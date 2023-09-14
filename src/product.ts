@@ -521,9 +521,9 @@ function editProduct(product: IProduct) {
     input = document.querySelector('#product-edit-currency')
     product.currency ? (input.value = product.currency) : (input.value = 'Choose Currency')
     input = document.querySelector('#product-edit-regular_price')
-    input.value = product.regular_price.toString()
+    input.value = product.regular_price?.toString() ?? '0'
     input = document.querySelector('#product-edit-retail_price')
-    input.value = product.retail_price.toString()
+    input.value = product.retail_price?.toString() ?? '0'
     input = document.querySelector('#product-edit-description')
     input.value = product.description
     // General Info ->
@@ -693,9 +693,9 @@ viewProductButtonElements.forEach((e) =>
             ? (img.src = `data:image/png;base64, ${product.image}`)
             : (img.src = defaultBrandImage)
         div = document.querySelector('#product-view-regular_price')
-        div.innerHTML = product.regular_price.toString()
+        div.innerHTML = product.regular_price?.toString() ?? '0'
         div = document.querySelector('#product-view-retail_price')
-        div.innerHTML = product.retail_price.toString()
+        div.innerHTML = product.retail_price?.toString() ?? '0'
         div = document.querySelector('#product-view-warehouse-qty')
         div.innerHTML = product.warehouse_product_qty.toString()
         // General Info ->
