@@ -329,6 +329,12 @@ def mg_g_populate(client: FlaskClient):
         product_quantity=100,
         warehouse_id=jw.id,
     ).save(False)
+    m.WarehouseProduct(
+        product_id=populate_test_product.id,
+        group_id=2,
+        product_quantity=200,
+        warehouse_id=jw.id,
+    ).save(False)
 
     inbound_order.products_allocated.append(
         m.ProductAllocated(

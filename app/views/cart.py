@@ -29,6 +29,7 @@ def get_all():
     form = f.CartForm()
 
     q = request.args.get("q", type=str, default=None)
+    # TODO what if couple users make carts simulteniously???
     query = m.Cart.select().where(m.Cart.status == "pending").order_by(m.Cart.id)
     count_query = sa.select(sa.func.count()).select_from(m.Cart)
     if q:
@@ -119,14 +120,11 @@ def get_all():
         .role_name
     )
 
-    cart_items = [
-        cart
-        for cart in db.session.execute(
-            query.offset((pagination.page - 1) * pagination.per_page).limit(
-                pagination.per_page
-            )
-        ).scalars()
-    ]
+    cart_items = db.session.scalars(
+        query.offset((pagination.page - 1) * pagination.per_page).limit(
+            pagination.per_page
+        )
+    ).all()
     carts = [
         {
             "group": cart.group,
@@ -169,7 +167,7 @@ def get_all():
 def create():
     form: f.NewCartForm = f.NewCartForm()
     url = request.referrer
-    query = url_parse(url).query
+    query = url_parse(url).query if url else None
     if form.validate_on_submit():
         item = m.Cart(
             product_id=int(form.product_id.data),
@@ -186,7 +184,9 @@ def create():
     else:
         log(log.ERROR, "Item creation errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
-        return redirect(url_for("product.get_all", query=query))
+        if query:
+            return redirect(url_for("product.get_all", events="true"))
+        return redirect(url_for("product.get_all"))
 
 
 @cart_blueprint.route("/edit", methods=["POST"])
