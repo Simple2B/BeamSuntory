@@ -25,7 +25,7 @@ class MasterGroup(db.Model, ModelMixin):
         default=datetime.utcnow,
     )
 
-    groups: orm.Mapped[List[m.Group]] = orm.relationship(back_populates="master_groups")
+    groups: orm.Mapped[List[m.Group]] = orm.relationship(back_populates="master_group")
 
     def __repr__(self):
         return f"<{self.id}: {self.name}>"
@@ -33,6 +33,7 @@ class MasterGroup(db.Model, ModelMixin):
     @property
     def json(self):
         mg = s.MasterGroup.from_orm(self)
+        # TODO pydantic !
         ujs = mg.json()
         mg_dict = json.loads(ujs)
 
@@ -40,12 +41,12 @@ class MasterGroup(db.Model, ModelMixin):
         groups: list[m.Group] = db.session.execute(m.Group.select()).scalars()
 
         for group in groups:
-            if group.master_groups.name not in master_groups_list_groups:
-                master_groups_list_groups[group.master_groups.name] = [
+            if group.master_group.name not in master_groups_list_groups:
+                master_groups_list_groups[group.master_group.name] = [
                     {"group_name": group.name, "group_id": group.id}
                 ]
             else:
-                master_groups_list_groups[group.master_groups.name].append(
+                master_groups_list_groups[group.master_group.name].append(
                     {"group_name": group.name, "group_id": group.id}
                 )
         mg_dict["master_groups_list_groups"] = master_groups_list_groups
