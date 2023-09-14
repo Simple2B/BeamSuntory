@@ -243,6 +243,10 @@ def get_available_quantity_by_date():
     if not group:
         log(log.INFO, "Group not found")
         return "Group not found", 404
+    product: m.Product = db.session.get(m.Product, product_id)
+    if not product:
+        log(log.INFO, "Product not found")
+        return "Product not found", 404
     warehouse: m.Warehouse = db.session.scalar(
         m.Warehouse.select().where(
             m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value
@@ -272,8 +276,14 @@ def get_available_quantity_by_date():
         )
     ).all()
     total_quantity = functools.reduce(lambda a, b: a + b.quantity, events, 0)
-    quantity = warehouse_product.product_quantity - total_quantity - quantity_desired
+    available_quantity = warehouse_product.product_quantity - total_quantity
+    quantity = available_quantity - quantity_desired
     if quantity < 0:
         log(log.INFO, "Not enough quantity: [%s]", quantity)
-        return "Not enough quantity", 400
+        return (
+            jsonify(
+                f"Product: {product.name}, available quantity: {available_quantity}"
+            ),
+            400,
+        )
     return "ok", 200
