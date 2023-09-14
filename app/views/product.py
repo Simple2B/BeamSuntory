@@ -478,35 +478,34 @@ def sort():
             ]
             for pg in product_groups
         }
-        product_ids_to_return = [
-            pid for pid in product_to_group if len(product_to_group[pid]) == len(groups)
-        ]
+        # TODO remove if unused
+        # product_ids_to_return = [
+        #     pid for pid in product_to_group if len(product_to_group[pid]) == len(groups)
+        # ]
 
         q = request.args.get("q", type=str, default=None)
         query = (
             m.Product.select()
-            .where(m.Product.id.in_(product_ids_to_return))
+            .where(m.Product.id.in_(product_to_group))
             .order_by(m.Product.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(m.Product.id.in_(product_ids_to_return))
+            .where(m.Product.id.in_(product_to_group))
             .select_from(m.Product)
         )
         if q:
             query = (
                 m.Product.select()
                 .where(
-                    m.Product.name.ilike(f"%{q}%")
-                    | m.Product.id.in_(product_ids_to_return)
+                    m.Product.name.ilike(f"%{q}%") | m.Product.id.in_(product_to_group)
                 )
                 .order_by(m.Product.id)
             )
             count_query = (
                 sa.select(sa.func.count())
                 .where(
-                    m.Product.name.ilike(f"%{q}%")
-                    | m.Product.id.in_(product_ids_to_return)
+                    m.Product.name.ilike(f"%{q}%") | m.Product.id.in_(product_to_group)
                 )
                 .select_from(m.Product)
             )
