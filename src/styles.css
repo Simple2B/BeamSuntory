@@ -71,3 +71,11 @@ button[disabled]{
 .packageInfoContainer-border{ 
     border-bottom: dashed 1px rgb(107 114 128);
 }
+
+.no-m-l{
+    margin-left: 0px !important;
+}
+
+.w-24-important{
+    width: 96px !important;
+}
