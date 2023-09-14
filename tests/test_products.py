@@ -118,14 +118,13 @@ def test_sort_product(mg_g_populate: FlaskClient):
         "/product/sort",
         data=dict(sort_by='{"Brand": "JB"}'),
     )
-    # TODO: fix test
-    # assert ("populate_test_product" in response.text) is False
+    assert ("populate_test_product" in response.text) is False
     assert ("populate_test_prod2" in response.text) is True
     assert response.status_code == 200
 
     response = mg_g_populate.post(
         "/product/sort",
-        data=dict(sort_by={"Brand": "JB"}),
+        data=dict(sort='{"Brand": "JB"}'),
         follow_redirects=True,
     )
     assert ("populate_test_product" in response.text) is True

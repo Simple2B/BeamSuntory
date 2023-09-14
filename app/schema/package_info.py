@@ -5,7 +5,7 @@ class PackageInfo(BaseModel):
     product_quantity_group_id: int = Field(alias="productQuantityGroupId")
     quantity_per_wrap: int = Field(alias="quantityPerWrap")
     quantity_wrap_carton: int = Field(alias="quantityWrapCarton")
-    quantity_carton_master: int = Field(alias="quantityCartonMaster")
+    quantity_carton_master: int | None = Field(alias="quantityCartonMaster")
     quantity_received: int = Field(alias="quantityReceived")
 
     class Config:
