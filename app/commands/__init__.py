@@ -223,6 +223,20 @@ def init(app: Flask):
             description="Just a Bottle",
             SKU="CV-BOT23-27661",
             image=os.environ.get("DEFAULT_IMAGE", "default"),
+            retail_price=0,
+            regular_price=0,
+            supplier_id=1,
+            currency="CAD",
+            low_stock_level=10,
+            program_year=2023,
+            package_qty=1,
+            numb_of_items_per_case=1,
+            numb_of_cases_per_outer_case=1,
+            comments="no comment",
+            weight=0,
+            length=0,
+            width=0,
+            height=0,
         )
         bottle.save(False)
         cup = m.Product(
@@ -230,6 +244,20 @@ def init(app: Flask):
             description="Just a Cup",
             SKU="CV-CUP23-27662",
             image=os.environ.get("DEFAULT_IMAGE", "default"),
+            retail_price=0,
+            regular_price=0,
+            supplier_id=1,
+            currency="CAD",
+            low_stock_level=10,
+            program_year=2023,
+            package_qty=1,
+            numb_of_items_per_case=1,
+            numb_of_cases_per_outer_case=1,
+            comments="no comment",
+            weight=0,
+            length=0,
+            width=0,
+            height=0,
         )
         cup.save(False)
 
