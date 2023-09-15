@@ -223,7 +223,7 @@ def mg_g_populate(client: FlaskClient):
         active=True,
     ).save(False)
 
-    m.InboundOrder(
+    inbound_order_test = m.InboundOrder(
         active_date=datetime.datetime.strptime("07/20/2023", "%m/%d/%Y"),
         active_time="12:00 AM",
         title="Inbound Order test",
@@ -231,7 +231,7 @@ def mg_g_populate(client: FlaskClient):
         status=s.InboundOrderStatus.delivered,
         supplier_id=1,
         warehouse_id=1,
-    ).save(False)
+    )
 
     m.ShipRequest(
         order_numb=f"Order{datetime.datetime.now().timestamp()}",
@@ -313,7 +313,7 @@ def mg_g_populate(client: FlaskClient):
         warehouse_id=1,
     ).save(False)
 
-    inbound_order = m.InboundOrder(
+    inbound_order_transit = m.InboundOrder(
         active_date=datetime.datetime.strptime("07/20/2023", "%m/%d/%Y"),
         active_time="12:00 AM",
         title="Inbound Order In transit",
@@ -336,7 +336,23 @@ def mg_g_populate(client: FlaskClient):
         warehouse_id=jw.id,
     ).save(False)
 
-    inbound_order.products_allocated.append(
+    inbound_order_test.products_allocated.append(
+        m.ProductAllocated(
+            product=populate_test_product,
+            quantity=200,
+            shelf_life_start=datetime.datetime.now().date(),
+            shelf_life_end=datetime.datetime.now().date(),
+            product_quantity_groups=[
+                m.ProductQuantityGroup(
+                    group_id=1,
+                    quantity=200,
+                )
+            ],
+        )
+    )
+    inbound_order_test.save(False)
+
+    inbound_order_transit.products_allocated.append(
         m.ProductAllocated(
             product=populate_test_product,
             quantity=100,
@@ -350,7 +366,7 @@ def mg_g_populate(client: FlaskClient):
             ],
         )
     )
-    inbound_order.save(False)
+    inbound_order_transit.save(False)
 
     m.Cart(
         product=populate_test_product,
