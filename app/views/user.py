@@ -17,6 +17,7 @@ from app.controllers import create_pagination
 
 from app import models as m, db, mail
 from app import forms as f
+from app import schema as s
 from app.logger import log
 from config import BaseConfig
 
@@ -105,7 +106,6 @@ def save():
             u.password = form.password.data
         u.save()
 
-        # delete old groups from user_group relational table
         # and add new groups to user_group relational table
         g_query = m.Group.select().where(
             m.Group.name.in_(str(form.group.data).split(", "))
@@ -119,14 +119,14 @@ def save():
         user_group_group_ids = [ug.right_id for ug in user_groups_obj]
 
         for user_group_id in user_group_group_ids:
-            if user_group_id not in group_ids:
-                db.session.execute(
-                    sa.delete(m.UserGroup).where(
-                        m.UserGroup.right_id == user_group_id,
-                        m.UserGroup.left_id == u.id,
-                    )
+            if user_group_id not in group_ids and u.role == s.UserRole.ADMIN.value:
+                log(log.ERROR, "Can not remove groups from user: admin")
+                flash(
+                    "Can not remove groups from user: admin",
+                    "danger",
                 )
-                db.session.commit()
+                return redirect(url_for("user.get_all"))
+
         for group_id in group_ids:
             if group_id not in user_group_group_ids:
                 m.UserGroup(left_id=u.id, right_id=group_id).save()
