@@ -119,13 +119,22 @@ def save():
         user_group_group_ids = [ug.right_id for ug in user_groups_obj]
 
         for user_group_id in user_group_group_ids:
-            if user_group_id not in group_ids and u.role == s.UserRole.ADMIN.value:
-                log(log.ERROR, "Can not remove groups from user: admin")
-                flash(
-                    "Can not remove groups from user: admin",
-                    "danger",
-                )
-                return redirect(url_for("user.get_all"))
+            if user_group_id not in group_ids:
+                if u.role == s.UserRole.ADMIN.value:
+                    log(log.ERROR, "Can not remove groups from user: admin")
+                    flash(
+                        "Can not remove groups from user: admin",
+                        "danger",
+                    )
+                    return redirect(url_for("user.get_all"))
+                else:
+                    db.session.execute(
+                        sa.delete(m.UserGroup).where(
+                            m.UserGroup.right_id == user_group_id,
+                            m.UserGroup.left_id == u.id,
+                        )
+                    )
+                    db.session.commit()
 
         for group_id in group_ids:
             if group_id not in user_group_group_ids:
@@ -201,13 +210,21 @@ def create():
         log(log.INFO, "Form submitted. User: [%s]", user)
         flash("User added!", "success")
 
-        g_query = m.Group.select().where(
-            m.Group.name.in_(str(form.group.data).split(", "))
-        )
-        group_obj: m.Group | None = db.session.scalars(g_query)
-        group_ids: List[m.Group] = [g.id for g in group_obj]
-        for group_id in group_ids:
-            m.UserGroup(left_id=user.id, right_id=group_id).save()
+        if user.role == s.UserRole.ADMIN.value:
+            g_query = m.Group.select()
+            group_obj: m.Group | None = db.session.scalars(g_query)
+            group_ids: List[m.Group] = [g.id for g in group_obj]
+            for group_id in group_ids:
+                m.UserGroup(left_id=user.id, right_id=group_id).save()
+        else:
+            g_query = m.Group.select().where(
+                m.Group.name.in_(str(form.group.data).split(", "))
+            )
+            group_obj: m.Group | None = db.session.scalars(g_query)
+            group_ids: List[m.Group] = [g.id for g in group_obj]
+            for group_id in group_ids:
+                m.UserGroup(left_id=user.id, right_id=group_id).save()
+
         # create e-mail message
         msg = Message(
             subject="New password",
