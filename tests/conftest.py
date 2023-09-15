@@ -168,7 +168,7 @@ def mg_g_populate(client: FlaskClient):
         height=11.0,
     )
     populate_test_product.save(False)
-    m.Product(
+    populate_test_prod2 = m.Product(
         name="populate_test_prod2",
         supplier_id=1,
         currency="USD",
@@ -187,7 +187,8 @@ def mg_g_populate(client: FlaskClient):
         length=11.0,
         width=11.0,
         height=11.0,
-    ).save(False)
+    )
+    populate_test_prod2.save(False)
     m.ProductGroup(product_id=1, group_id=1).save(False)
     m.ProductGroup(product_id=2, group_id=2).save(False)
 
@@ -323,6 +324,43 @@ def mg_g_populate(client: FlaskClient):
         warehouse_id=1,
     )
 
+    received_one_product_one_group = m.InboundOrder(
+        active_date=datetime.datetime.strptime("07/20/2023", "%m/%d/%Y"),
+        active_time="12:00 AM",
+        title="received_one_product_one_group",
+        delivery_date=datetime.datetime.strptime("07/19/2023", "%m/%d/%Y"),
+        status=s.InboundOrderStatus.in_transit,
+        supplier_id=1,
+        warehouse_id=1,
+    )
+    received_one_product_two_groups = m.InboundOrder(
+        active_date=datetime.datetime.strptime("07/20/2023", "%m/%d/%Y"),
+        active_time="12:00 AM",
+        title="received_one_product_two_groups",
+        delivery_date=datetime.datetime.strptime("07/19/2023", "%m/%d/%Y"),
+        status=s.InboundOrderStatus.in_transit,
+        supplier_id=1,
+        warehouse_id=1,
+    )
+    received_two_products_one_group = m.InboundOrder(
+        active_date=datetime.datetime.strptime("07/20/2023", "%m/%d/%Y"),
+        active_time="12:00 AM",
+        title="received_two_products_one_group",
+        delivery_date=datetime.datetime.strptime("07/19/2023", "%m/%d/%Y"),
+        status=s.InboundOrderStatus.in_transit,
+        supplier_id=1,
+        warehouse_id=1,
+    )
+    received_two_products_two_groups = m.InboundOrder(
+        active_date=datetime.datetime.strptime("07/20/2023", "%m/%d/%Y"),
+        active_time="12:00 AM",
+        title="received_two_products_two_groups",
+        delivery_date=datetime.datetime.strptime("07/19/2023", "%m/%d/%Y"),
+        status=s.InboundOrderStatus.in_transit,
+        supplier_id=1,
+        warehouse_id=1,
+    )
+
     m.WarehouseProduct(
         product_id=populate_test_product.id,
         group_id=1,
@@ -355,6 +393,55 @@ def mg_g_populate(client: FlaskClient):
     inbound_order_transit.products_allocated.append(
         m.ProductAllocated(
             product=populate_test_product,
+            quantity=200,
+            shelf_life_start=datetime.datetime.now().date(),
+            shelf_life_end=datetime.datetime.now().date(),
+            product_quantity_groups=[
+                m.ProductQuantityGroup(
+                    group_id=1,
+                    quantity=200,
+                )
+            ],
+        )
+    )
+    inbound_order_transit.save(False)
+
+    # received_one_product_one_group
+    received_one_product_one_group.products_allocated.append(
+        m.ProductAllocated(
+            product=populate_test_product,
+            quantity=200,
+            shelf_life_start=datetime.datetime.now().date(),
+            shelf_life_end=datetime.datetime.now().date(),
+            product_quantity_groups=[
+                m.ProductQuantityGroup(
+                    group_id=1,
+                    quantity=200,
+                )
+            ],
+        )
+    )
+    received_one_product_one_group.save(False)
+
+    # received_one_product_two_groups
+    received_one_product_two_groups.products_allocated.append(
+        m.ProductAllocated(
+            product=populate_test_product,
+            quantity=200,
+            shelf_life_start=datetime.datetime.now().date(),
+            shelf_life_end=datetime.datetime.now().date(),
+            product_quantity_groups=[
+                m.ProductQuantityGroup(
+                    group_id=1,
+                    quantity=200,
+                )
+            ],
+        )
+    )
+
+    received_one_product_two_groups.products_allocated.append(
+        m.ProductAllocated(
+            product=populate_test_prod2,
             quantity=100,
             shelf_life_start=datetime.datetime.now().date(),
             shelf_life_end=datetime.datetime.now().date(),
@@ -366,7 +453,71 @@ def mg_g_populate(client: FlaskClient):
             ],
         )
     )
-    inbound_order_transit.save(False)
+    received_one_product_two_groups.save(False)
+
+    # received_two_products_one_group
+    received_two_products_one_group.products_allocated.append(
+        m.ProductAllocated(
+            product=populate_test_product,
+            quantity=200,
+            shelf_life_start=datetime.datetime.now().date(),
+            shelf_life_end=datetime.datetime.now().date(),
+            product_quantity_groups=[
+                m.ProductQuantityGroup(
+                    group_id=1,
+                    quantity=200,
+                )
+            ],
+        )
+    )
+
+    received_two_products_one_group.products_allocated.append(
+        m.ProductAllocated(
+            product=populate_test_product,
+            quantity=100,
+            shelf_life_start=datetime.datetime.now().date(),
+            shelf_life_end=datetime.datetime.now().date(),
+            product_quantity_groups=[
+                m.ProductQuantityGroup(
+                    group_id=2,
+                    quantity=100,
+                )
+            ],
+        )
+    )
+    received_two_products_one_group.save(False)
+
+    # received_two_products_two_groups
+    received_two_products_two_groups.products_allocated.append(
+        m.ProductAllocated(
+            product=populate_test_product,
+            quantity=200,
+            shelf_life_start=datetime.datetime.now().date(),
+            shelf_life_end=datetime.datetime.now().date(),
+            product_quantity_groups=[
+                m.ProductQuantityGroup(
+                    group_id=1,
+                    quantity=200,
+                )
+            ],
+        )
+    )
+
+    received_two_products_two_groups.products_allocated.append(
+        m.ProductAllocated(
+            product=populate_test_prod2,
+            quantity=100,
+            shelf_life_start=datetime.datetime.now().date(),
+            shelf_life_end=datetime.datetime.now().date(),
+            product_quantity_groups=[
+                m.ProductQuantityGroup(
+                    group_id=2,
+                    quantity=100,
+                )
+            ],
+        )
+    )
+    received_two_products_two_groups.save(False)
 
     m.Cart(
         product=populate_test_product,
