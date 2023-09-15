@@ -1,5 +1,6 @@
 from datetime import datetime
 from datetime import date as Date
+from http import HTTPStatus
 import functools
 import calendar
 from flask import (
@@ -222,6 +223,6 @@ def get_available_quantity_by_date():
             jsonify(
                 f"Product: {product.name}, available quantity: {available_quantity}"
             ),
-            400,
+            HTTPStatus.BAD_REQUEST,
         )
-    return "ok", 200
+    return "ok", HTTPStatus.OK

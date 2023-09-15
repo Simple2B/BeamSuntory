@@ -1,6 +1,10 @@
-# from datetime import datetime, timedelta
-# from flask.testing import FlaskClient
-# from app import models as m, db
+import json
+from datetime import datetime, timedelta
+from http import HTTPStatus
+from flask.testing import FlaskClient
+from app import db, models as m
+
+
 from tests.utils import login, register, logout
 
 
@@ -17,41 +21,63 @@ def test_event_pages(client):
     assert response.status_code == 200
 
 
-# def test_create_event(mg_g_populate: FlaskClient):
-#     login(mg_g_populate)
-#     start_date = (datetime.now() + timedelta(days=6)).strftime("%m/%d/%Y")
-#     end_date = (datetime.now() + timedelta(days=11)).strftime("%m/%d/%Y")
+def test_get_available_quantity_event(mg_g_populate: FlaskClient):
+    login(mg_g_populate)
+    month_from = datetime.now().month
+    year_from = datetime.now().year
+    product_id = 1
+    group_name = "Events"
 
-#     response = mg_g_populate.post(
-#         "/event/create",
-#         data=dict(
-#             date_from=start_date,
-#             date_to=end_date,
-#             quantity=200,
-#             product_id=1,
-#             comment="event for product 1",
-#         ),
-#         follow_redirects=True,
-#     )
-#     assert response.status_code == 200
-#     assert "Event added!" in response.text
-#     event_rows_objs = db.session.scalars(m.Event.select()).all()
-#     assert len(event_rows_objs) > 0
+    response = mg_g_populate.get(
+        f"""/event/get_available_quantity?month_from={month_from}&year_from={year_from}&product_id={
+            product_id}&group_name={group_name}""",
+        follow_redirects=True,
+    )
+    quantity_in_warehouse = 200
+    reserve_date = (datetime.now() - timedelta(days=5)).strftime("%Y-%m-%d")
+    today = datetime.now().strftime("%Y-%m-%d")
+    free_date = (datetime.now() + timedelta(days=60)).strftime("%Y-%m-%d")
+    one_reserve_date = (datetime.now() + timedelta(days=20)).strftime("%Y-%m-%d")
+    dates_available_quantity = json.loads(response.data)
 
-#     start_date = (datetime.now() + timedelta(days=1)).strftime("%m/%d/%Y")
+    for date_quantity in dates_available_quantity:
+        if date_quantity["date"] == today:
+            assert date_quantity["quantity"] == 160
+        if date_quantity["date"] == reserve_date:
+            assert date_quantity["quantity"] == 160
+        if date_quantity["date"] == one_reserve_date:
+            assert date_quantity["quantity"] == 190
+        if date_quantity["date"] == free_date:
+            assert date_quantity["quantity"] == quantity_in_warehouse
 
-#     response = mg_g_populate.post(
-#         "/event/create",
-#         data=dict(
-#             date_from=start_date,
-#             date_to=end_date,
-#             quantity=200,
-#             product_id=1,
-#             comment="event for product 1",
-#         ),
-#         follow_redirects=True,
-#     )
-#     assert response.status_code == 200
-#     assert "The event must be created more than 5 days in advance" in response.text
-#     event_rows_objs = db.session.scalars(m.Event.select()).all()
-#     assert len(event_rows_objs) == 1
+
+def test_get_available_quantity_by_date_event(mg_g_populate: FlaskClient):
+    login(mg_g_populate)
+    date_from = datetime.now().strftime("%Y_%m_%d")
+    date_to = (datetime.now() + timedelta(days=5)).strftime("%Y_%m_%d")
+    quantity_desired = 100
+    product_id = 1
+    group_name = "Events"
+    product = db.session.get(m.Product, product_id)
+    available_quantity = 160
+
+    response = mg_g_populate.get(
+        f"""/event/get_available_quantity_by_date?date_from={date_from}&date_to={date_to}&product_id={
+            product_id}&group_name={group_name}&quantity={quantity_desired}""",
+        follow_redirects=True,
+    )
+
+    assert response.status_code == HTTPStatus.OK
+
+    quantity_desired = 200
+    response = mg_g_populate.get(
+        f"""/event/get_available_quantity_by_date?date_from={date_from}&date_to={date_to}&product_id={
+            product_id}&group_name={group_name}&quantity={quantity_desired}""",
+        follow_redirects=True,
+    )
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert (
+        f"Product: {product.name}, available quantity: {available_quantity}"
+        in response.text
+    )

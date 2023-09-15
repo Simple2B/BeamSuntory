@@ -105,7 +105,11 @@ def populate_one_user(client: FlaskClient):
 def mg_g_populate(client: FlaskClient):
     # TODO refactoring
     master_groups = ["Country", "Brand", s.ProductMasterGroupMandatory.events.value]
-    groups = {"Canada": "1", "JB": "2", "Bombay": "2"}
+    groups = {
+        "Canada": "1",
+        "JB": "2",
+        "Bombay": "2",
+    }
     create_default_divisions()
     role = db.session.execute(
         m.Division.select().where(
@@ -146,6 +150,11 @@ def mg_g_populate(client: FlaskClient):
             name=g,
             master_group_id=groups[g],
         ).save(False)
+
+    group_event = m.Group(
+        name=s.ProductMasterGroupMandatory.events.value,
+        master_group_id=3,
+    ).save(False)
 
     populate_test_product = m.Product(
         name="populate_test_product",
@@ -200,6 +209,16 @@ def mg_g_populate(client: FlaskClient):
         manager_id=1,
     )
     jw.save(False)
+
+    warehouse_events = m.Warehouse(
+        name=s.WarehouseMandatory.warehouse_events.value,
+        phone_number="380362470221",
+        city="Bagmom",
+        zip="unzip",
+        address="sserdda",
+        manager_id=1,
+    )
+    warehouse_events.save(False)
 
     m.DeliveryAgent(
         first_name="May",
@@ -336,6 +355,13 @@ def mg_g_populate(client: FlaskClient):
         warehouse_id=jw.id,
     ).save(False)
 
+    m.WarehouseProduct(
+        product_id=populate_test_product.id,
+        group_id=group_event.id,
+        product_quantity=200,
+        warehouse_id=warehouse_events.id,
+    ).save(False)
+
     inbound_order.products_allocated.append(
         m.ProductAllocated(
             product=populate_test_product,
@@ -354,11 +380,47 @@ def mg_g_populate(client: FlaskClient):
 
     m.Cart(
         product=populate_test_product,
-        quantity=11,
+        quantity=15,
         user_id=1,
         group="Canada",
+        warehouse_id=jw.id,
         ship_request_id=sr_atp.id,
     ).save(False)
 
     db.session.commit()
+
+    today = datetime.datetime.now().date()
+    for day in range(1, 17, 5):
+        sr = m.ShipRequest(
+            order_numb=f"Order-12345{day}-Waiting-for-warehouse-manager",
+            status=s.ShipRequestStatus.waiting_for_warehouse,
+            store_category_id=1,
+            order_type="Regular",
+            store_id=1,
+            user_id=3,
+        ).save(False)
+
+        cart = m.Cart(
+            product=populate_test_product,
+            quantity=10,
+            user_id=3,
+            group=s.MasterGroupMandatory.events.value,
+            ship_request_id=sr.id,
+            warehouse_id=warehouse_events.id,
+            status="pending",
+        ).save(False)
+
+        m.Event(
+            date_from=today - datetime.timedelta(days=day),
+            date_to=today + datetime.timedelta(days=day),
+            date_reserve_from=today - datetime.timedelta(days=day + 5),
+            date_reserve_to=today + datetime.timedelta(days=day + 5),
+            quantity=cart.quantity,
+            product_id=populate_test_product.id,
+            comment="event for product 1",
+            user_id=3,
+            cart_id=cart.id,
+        ).save(False)
+        db.session.commit()
+
     yield client
