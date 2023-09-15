@@ -3,9 +3,9 @@ from pydantic import BaseModel
 
 
 class UserRole(Enum):
-    ADMIN = "admin"
-    SALES_REP = "sales_rep"
-    WAREHOUSE_MANAGER = "warehouse_manager"
+    ADMIN = 1
+    SALES_REP = 2
+    WAREHOUSE_MANAGER = 3
 
 
 class User(BaseModel):
