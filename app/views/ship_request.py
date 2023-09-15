@@ -159,6 +159,7 @@ def create():
                 > 0
             )
             if start_date and end_date and is_group_in_master_group:
+                # creation event
                 event = m.Event(
                     date_from=start_date,
                     date_to=end_date,
@@ -168,7 +169,14 @@ def create():
                     comment=form_create.event_comment.data,
                     user=current_user,
                 )
+                report_event = m.ReportEvent(
+                    type=s.ReportEventType.created.value,
+                    event=event,
+                    quantity=cart.quantity,
+                )
+
                 db.session.add(event)
+                db.session.add(report_event)
                 log(log.INFO, "Event added. Event: [%s]", event)
             cart.status = "completed"
             cart.order_numb = ship_request.order_numb

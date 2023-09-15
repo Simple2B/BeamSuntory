@@ -74,55 +74,55 @@
       </tr>
     </thead>
     <tbody>
-      {% for event in events %}
+      {% for report in reports %}
       <!-- prettier-ignore -->
       <tr class="table-event-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
         <td class="w-4 p-4">
           <div class="flex items-center">{{ loop.index + page.skip }}</div>
         </td>
-        <td scope="row" class="product-full-image-anchor p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white" data-target-product-id="{{ event.product.product_id }}">
+        <td scope="row" class="product-full-image-anchor p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white" data-target-product-id="{{ report.event.product.product_id }}">
           <div class="pl-3">
-            {% if event.product.image|length > 100 %}
-            <img src="data:image/png;base64, {{ event.product.image }}" alt="{{ event.product.name }}" class="w-14 object-cover"/>
+            {% if report.event.product.image|length > 100 %}
+            <img src="data:image/png;base64, {{ report.event.product.image }}" alt="{{ report.event.product.name }}" class="w-14 object-cover"/>
             {% else %}
-            <img src="{{ url_for('static', filename='img/default_image_brand.png') }}" class="w-14 object-cover" alt="{{ event.product.name }}"/>
+            <img src="{{ url_for('static', filename='img/default_image_brand.png') }}" class="w-14 object-cover" alt="{{ report.event.product.name }}"/>
             {% endif %}
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ event.product.name }}</div>
+            <div class="text-base font-semibold">{{ report.event.product.name }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ event.product.SKU }}</div>
+            <div class="text-base font-semibold">{{ report.event.product.SKU }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ event.user.username }}</div>
+            <div class="text-base font-semibold">{{ report.event.user.username }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ event.date_from.strftime('%m/%d/%Y') }}</div>
+            <div class="text-base font-semibold">{{ report.event.date_from.strftime('%m/%d/%Y') }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ event.date_to.strftime('%m/%d/%Y') }}</div>
+            <div class="text-base font-semibold">{{ report.event.date_to.strftime('%m/%d/%Y') }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ event.quantity }}</div>
+            <div class="text-base font-semibold">{{ report.event.quantity }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
             <div class="text-base font-semibold">
-              {{ event.comment if event.comment is not none else 'No comment' }}
+              {{ report.event.comment if report.event.comment is not none else 'No comment' }}
             </div>
           </div>
         </td>

@@ -85,14 +85,14 @@ class Product(db.Model, ModelMixin):
             ).scalars()
         ]
         mg_dict["mstr_groups_groups"] = {
-            i.group.name: i.group.master_groups.name for i in whp
+            i.group.name: i.group.master_group.name for i in whp
         }
 
         mg_dict["current_user_groups"] = {
-            grps[0].parent.master_groups.name: [
+            grps[0].parent.master_group.name: [
                 g[0].parent.name
                 for g in current_user_groups_rows
-                if grps[0].parent.master_groups.name == g[0].parent.master_groups.name
+                if grps[0].parent.master_group.name == g[0].parent.master_group.name
             ]
             for grps in current_user_groups_rows
         }
