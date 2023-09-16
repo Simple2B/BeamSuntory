@@ -18,8 +18,14 @@ class Assign(db.Model, ModelMixin):
     quantity: orm.Mapped[int] = orm.mapped_column(sa.Integer)
     product_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("products.id"))
     product: orm.Mapped[Product] = orm.relationship()
+
+    from_group_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("groups.id"))
+    from_group: orm.Mapped[Group] = orm.relationship(
+        "Group", foreign_keys=[from_group_id]
+    )
+
     group_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("groups.id"))
-    group: orm.Mapped[Group] = orm.relationship()
+    group: orm.Mapped[Group] = orm.relationship("Group", foreign_keys=[group_id])
 
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,

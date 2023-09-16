@@ -600,6 +600,7 @@ def assign():
             product_id=p.id,
             group_id=int(form.group.data),
             quantity=form.quantity.data,
+            from_group_id=form.from_group_id.data,
         ).save()
 
         return redirect(url_for("product.get_all"))
@@ -683,7 +684,7 @@ def request_share():
                 )
                 sru.save()
                 # TODO uncomment when ready to notify
-                mail.send(msg)
+                # mail.send(msg)
 
         flash("Share request created!", "success")
         return redirect(url_for("product.get_all"))
