@@ -30,5 +30,4 @@ class ProductCategory(db.Model, ModelMixin):
 
     @property
     def json(self):
-        mg = s.ProductCategory.from_orm(self)
-        return mg.json()
+        return s.ProductCategory.model_validate(self).model_dump_json()

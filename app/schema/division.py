@@ -1,10 +1,9 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class Division(BaseModel):
-    id: int
-    role_name: str
-    activated: bool
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
-    class Config:
-        orm_mode = True
+    id: int
+    role_name: str = Field(alias="roleName")
+    activated: bool

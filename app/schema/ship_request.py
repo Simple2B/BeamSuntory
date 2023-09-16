@@ -1,7 +1,6 @@
 from enum import Enum
 from datetime import datetime
-from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ShipRequestStatus(Enum):
@@ -13,17 +12,15 @@ class ShipRequestStatus(Enum):
 
 
 class ShipRequest(BaseModel):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
     id: int
-    order_numb: str
+    order_numb: str = Field(alias="orderNumb")
     status: ShipRequestStatus
-    order_type: str  # enum??? ask client
-    store_id: int
-    warehouse_id: Optional[int]
+    order_type: str = Field(alias="orderType")  # TODO enum??? ask client
+    store_id: int = Field(alias="storeId")
     comment: str | None
-    wm_notes: Optional[str]
-    da_notes: Optional[str]
+    wm_notes: str | None = Field(alias="wmNotes")
+    da_notes: str | None = Field(alias="daNotes")
 
-    created_at: datetime
-
-    class Config:
-        orm_mode = True
+    created_at: datetime = Field(alias="createdAt")

@@ -32,9 +32,8 @@ class MasterGroup(db.Model, ModelMixin):
 
     @property
     def json(self):
-        mg = s.MasterGroup.from_orm(self)
         # TODO pydantic !
-        ujs = mg.json()
+        ujs = s.MasterGroup.model_validate(self).model_dump_json()
         mg_dict = json.loads(ujs)
 
         master_groups_list_groups = {}

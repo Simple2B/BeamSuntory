@@ -1,3 +1,4 @@
+from typing import TYPE_CHECKING
 from datetime import datetime, date
 
 import sqlalchemy as sa
@@ -6,8 +7,11 @@ from sqlalchemy import orm
 from app.database import db
 from .utils import ModelMixin
 from app import schema as s
-from .product import Product
-from .user import User
+
+if TYPE_CHECKING:
+    from .product import Product
+    from .user import User
+    from .report_event import ReportEvent
 
 
 class Event(db.Model, ModelMixin):
@@ -20,9 +24,14 @@ class Event(db.Model, ModelMixin):
     comment: orm.Mapped[str] = orm.mapped_column(sa.Text(), nullable=True)
     product_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("products.id"))
     cart_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("carts.id"))
-    product: orm.Mapped[Product] = orm.relationship()
+    product: orm.Mapped["Product"] = orm.relationship()
     user_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("users.id"))
-    user: orm.Mapped[User] = orm.relationship()
+    user: orm.Mapped["User"] = orm.relationship()
+
+    report_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("report_events.id"))
+    report: orm.Mapped["ReportEvent"] = orm.relationship(
+        back_populates="events", foreign_keys=[report_id]
+    )
 
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
@@ -34,4 +43,4 @@ class Event(db.Model, ModelMixin):
 
     @property
     def json(self):
-        return s.Event.from_orm(self).json(by_alias=True)
+        return s.Event.model_validate(self).model_dump_json(by_alias=True)

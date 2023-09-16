@@ -135,8 +135,8 @@ def create():
         )
 
         # save delivered product quantity, so this product would be available in warehouse
-        products_data = s.ProductAllocatedList.parse_raw(form.products.data)
-        for product_data in products_data.__root__:
+        products_data = s.ProductAllocatedList.model_validate_json(form.products.data)
+        for product_data in products_data.root:
             product = db.session.get(m.Product, product_data.id)
             # Find product
             if not product:
@@ -221,7 +221,7 @@ def save():
         inbound_order.warehouse = warehouse
 
         try:
-            product_quantity_groups = s.ProductQuantityGroupsCreate.parse_raw(
+            product_quantity_groups = s.ProductQuantityGroupsCreate.model_validate_json(
                 form.product_groups.data
             )
         except ValidationError:
@@ -238,7 +238,7 @@ def save():
                 )
             )
 
-        for product_quantity_group in product_quantity_groups.__root__:
+        for product_quantity_group in product_quantity_groups.root:
             product_allocated = db.session.scalar(
                 m.ProductAllocated.select().where(
                     m.ProductAllocated.id

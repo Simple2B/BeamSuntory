@@ -39,5 +39,4 @@ class Group(db.Model, ModelMixin):
 
     @property
     def json(self):
-        mg = s.Group.from_orm(self)
-        return mg.json()
+        return s.Group.model_validate(self).model_dump_json()

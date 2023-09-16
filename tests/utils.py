@@ -1,5 +1,6 @@
 from app.models import User, Division
 from config import BaseConfig
+from app import schema as s
 from app import db
 
 TEST_ADMIN_NAME = "bob"
@@ -18,7 +19,7 @@ def register(
 
     if not role:
         role = db.session.execute(
-            Division.select().where(Division.role_name == BaseConfig.Config.ADMIN)
+            Division.select().where(Division.role_name == s.UserRole.ADMIN.value)
         ).scalar()
     user = User(
         username=username,
@@ -50,14 +51,16 @@ def logout(client):
 
 
 def create_default_divisions():
-    for role in [
-        BaseConfig.Config.ADMIN,
-        BaseConfig.Config.SALES_REP,
-        BaseConfig.Config.WAREHOUSE_MANAGER,
-        "Manager",
-    ]:
+    # TODO Manager?
+    # for role in [
+    #     BaseConfig.Config.ADMIN,
+    #     BaseConfig.Config.SALES_REP,
+    #     BaseConfig.Config.WAREHOUSE_MANAGER,
+    #     "Manager",
+    # ]:
+    for role in s.UserRole:
         check_role = db.session.execute(
-            Division.select().where(Division.role_name == role)
+            Division.select().where(Division.role_name == role.value)
         ).scalar()
         if not check_role:
-            Division(role_name=role, activated=True).save()
+            Division(role_name=role.value, activated=True).save()

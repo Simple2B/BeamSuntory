@@ -1,7 +1,5 @@
 import { easepick } from '@easepick/bundle'
 
-console.log('carts', JSON.parse(carts))
-
 interface ICart {
     id: number
     product: IProduct

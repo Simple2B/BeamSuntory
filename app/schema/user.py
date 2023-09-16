@@ -1,28 +1,30 @@
 from enum import Enum
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class UserRole(Enum):
-    ADMIN = "admin"
-    SALES_REP = "sales_rep"
-    WAREHOUSE_MANAGER = "warehouse_manager"
+    ADMIN: str = "admin"
+    SALES_REP: str = "sales_rep"
+    WAREHOUSE_MANAGER: str = "warehouse_manager"
+    MANAGER: str = "manager"
 
 
 class User(BaseModel):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
     id: int
     username: str
     email: str
     image: str
     role: int
     activated: bool
-    approval_permission: bool
-    street_address: str
-    phone_number: str | None
+    approval_permission: bool = Field(alias="approvalPermission")
+    street_address: str = Field(alias="streetAddress")
+    phone_number: str | None = Field(
+        alias="phoneNumber"
+    )  # TODO phone_number or phone or phone_numb?
     country: str
     region: str
     city: str
-    zip_code: str
-    sales_rep: bool
-
-    class Config:
-        orm_mode = True
+    zip_code: str = Field(alias="zipCode")
+    sales_rep: bool = Field(alias="salesRep")

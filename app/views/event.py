@@ -77,8 +77,7 @@ def get_events():
 @login_required
 def get_events_json():
     pagination, events = get_events()
-    # TODO rename events -> reports
-    return s.EventsApiOut(pagination=pagination, events=events.all()).json(
+    return s.EventsApiOut(pagination=pagination, events=events.all()).model_dump_json(
         by_alias=True
     )
 

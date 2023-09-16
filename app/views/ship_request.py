@@ -147,6 +147,10 @@ def create():
             )
         ).scalars()
 
+        report_event = m.ReportEvent(
+            type=s.ReportEventType.created.value, user=current_user
+        )
+
         for cart in carts:
             is_group_in_master_group = (
                 db.session.query(m.Group)
@@ -168,15 +172,9 @@ def create():
                     cart_id=cart.id,
                     comment=form_create.event_comment.data,
                     user=current_user,
+                    report=report_event,
                 )
-                report_event = m.ReportEvent(
-                    type=s.ReportEventType.created.value,
-                    event=event,
-                    quantity=cart.quantity,
-                )
-
                 db.session.add(event)
-                db.session.add(report_event)
                 log(log.INFO, "Event added. Event: [%s]", event)
             cart.status = "completed"
             cart.order_numb = ship_request.order_numb

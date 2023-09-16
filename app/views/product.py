@@ -706,13 +706,8 @@ def adjust():
         )
         ai.save()
         groups = json.loads(form.groups_quantity.data)
-        product_name = (
-            db.session.execute(
-                m.Product.select().where(m.Product.id == form.product_id.data)
-            )
-            .scalar()
-            .name
-        )
+        product = db.session.get(m.Product, form.product_id.data)
+        product_name = product.name
 
         for group_name, warehouses in groups.items():
             print(group_name)
@@ -755,6 +750,7 @@ def adjust():
                         warehouse_id=warehouse_id,
                     )
                     db.session.add(adjust_gr_qty)
+
         db.session.commit()
 
         log(

@@ -87,9 +87,9 @@ def accept():
         flash("There is no such inbound order", "danger")
         return redirect(url_for("incoming_stock.get_all"))
 
-    products_info_json = s.IncomingStocks.parse_raw(
+    products_info_json = s.IncomingStocks.model_validate_json(
         form_edit.received_products.data
-    ).__root__
+    ).root
 
     for allocated_product in products_info_json:
         for new_package_info in allocated_product.packages:

@@ -63,14 +63,9 @@
     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
       <tr>
         <th scope="col" class="px-6 py-3">#</th>
-        <th scope="col" class="px-6 py-3">Image</th>
-        <th scope="col" class="px-6 py-3">Product Name</th>
-        <th scope="col" class="px-6 py-3">SKU</th>
-        <th scope="col" class="px-6 py-3">User</th>
-        <th scope="col" class="px-6 py-3">Date Start</th>
-        <th scope="col" class="px-6 py-3">Date End</th>
-        <th scope="col" class="px-6 py-3">Quantity</th>
-        <th scope="col" class="px-6 py-3">Comment</th>
+        <th scope="col" class="px-6 py-3">Action</th>
+        <th scope="col" class="px-6 py-3">Date</th>
+        <th scope="col" class="px-6 py-3">History</th>
       </tr>
     </thead>
     <tbody>
@@ -80,49 +75,28 @@
         <td class="w-4 p-4">
           <div class="flex items-center">{{ loop.index + page.skip }}</div>
         </td>
-        <td scope="row" class="product-full-image-anchor p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white" data-target-product-id="{{ report.event.product.product_id }}">
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            {% if report.event.product.image|length > 100 %}
-            <img src="data:image/png;base64, {{ report.event.product.image }}" alt="{{ report.event.product.name }}" class="w-14 object-cover"/>
-            {% else %}
-            <img src="{{ url_for('static', filename='img/default_image_brand.png') }}" class="w-14 object-cover" alt="{{ report.event.product.name }}"/>
-            {% endif %}
+            <div class="text-base font-semibold">{{ report.type }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.event.product.name }}</div>
+            <div class="text-base font-semibold">{{ report.created_at.strftime('%m/%d/%Y, %H:%M:%S') }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.event.product.SKU }}</div>
-          </div>
-        </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.event.user.username }}</div>
-          </div>
-        </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.event.date_from.strftime('%m/%d/%Y') }}</div>
-          </div>
-        </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.event.date_to.strftime('%m/%d/%Y') }}</div>
-          </div>
-        </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.event.quantity }}</div>
+            <div class="text-base font-semibold">{{ report.history }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
             <div class="text-base font-semibold">
-              {{ report.event.comment if report.event.comment is not none else 'No comment' }}
+              <button type="button" data-target="{{report.json}}" class="report-event-view-btn inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+              {% include "icon/view.html" %}
+                View
+              </button>
             </div>
           </div>
         </td>
@@ -189,5 +163,5 @@
 {% endblock %}
 <!-- prettier-ignore -->
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/event.js') }}" type="text/javascript" defer></script>
+<script src="{{ url_for('static', filename='js/report_event.js') }}" type="text/javascript" defer></script>
 {% endblock %}

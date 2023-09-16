@@ -10,7 +10,7 @@ from app import create_app, db
 from app import models as m
 from app import schema as s
 from tests.utils import register, create_default_divisions
-from config import BaseConfig
+from config import SALES_REP_LOCKER_NAME
 
 
 @pytest.fixture()
@@ -51,7 +51,7 @@ def populate(client: FlaskClient):
 
     create_default_divisions()
     role = db.session.execute(
-        m.Division.select().where(m.Division.role_name == "Manager")
+        m.Division.select().where(m.Division.role_name == "manager")  # TODO ?
     ).scalar()
     for i in range(NUM_TEST_USERS):
         m.User(
@@ -79,7 +79,7 @@ def populate_one_user(client: FlaskClient):
 
     role = db.session.execute(
         m.Division.select().where(
-            m.Division.role_name == BaseConfig.Config.WAREHOUSE_MANAGER
+            m.Division.role_name == s.UserRole.WAREHOUSE_MANAGER.value
         )
     ).scalar()
     m.User(
@@ -109,7 +109,7 @@ def mg_g_populate(client: FlaskClient):
     create_default_divisions()
     role = db.session.execute(
         m.Division.select().where(
-            m.Division.role_name == BaseConfig.Config.WAREHOUSE_MANAGER
+            m.Division.role_name == s.UserRole.WAREHOUSE_MANAGER.value
         )
     ).scalar()
     m.User(
@@ -249,7 +249,7 @@ def mg_g_populate(client: FlaskClient):
     ).save(False)
 
     m.StoreCategory(
-        name=BaseConfig.Config.SALES_REP_LOCKER_NAME,
+        name=SALES_REP_LOCKER_NAME,
         active=True,
         image=os.environ.get("DEFAULT_IMAGE", "default"),
     ).save()

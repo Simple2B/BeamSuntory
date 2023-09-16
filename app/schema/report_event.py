@@ -1,5 +1,5 @@
 from enum import Enum
-from pydantic import BaseModel
+from pydantic import BaseModel, RootModel, ConfigDict
 from .event import Event
 
 
@@ -9,10 +9,11 @@ class ReportEventType(Enum):
 
 
 class ReportEvent(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     type: str
-    quantity: int
-    event: Event
+    history: str
+    events: list[Event]
 
 
-class ReportEventList(BaseModel):
-    __root__: [ReportEvent]
+ReportEventList = RootModel[list[ReportEvent]]

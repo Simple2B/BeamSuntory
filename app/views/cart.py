@@ -16,7 +16,7 @@ from app import models as m, db
 from app import schema as s
 from app import forms as f
 from app.logger import log
-from config import BaseConfig
+from config import SALES_REP_LOCKER_NAME
 
 
 cart_blueprint = Blueprint("cart", __name__, url_prefix="/cart")
@@ -49,7 +49,7 @@ def get_all():
 
     locker_id = db.session.execute(
         m.StoreCategory.select()
-        .where(m.StoreCategory.name == BaseConfig.Config.SALES_REP_LOCKER_NAME)
+        .where(m.StoreCategory.name == SALES_REP_LOCKER_NAME)
         .with_only_columns(m.StoreCategory.id)
     ).scalar()
 
@@ -90,7 +90,7 @@ def get_all():
     ]
     sales_rep_role_id = db.session.execute(
         m.Division.select()
-        .where(m.Division.role_name == BaseConfig.Config.SALES_REP)
+        .where(m.Division.role_name == s.UserRole.SALES_REP.value)
         .with_only_columns(m.Division.id)
     ).scalar()
     locker_store_category_ids = None
@@ -148,7 +148,7 @@ def get_all():
         available_products=available_products,
         store_categories=store_categories,
         current_user_role_name=current_user_role_name,
-        sales_rep_role=BaseConfig.Config.SALES_REP,
+        sales_rep_role=s.UserRole.SALES_REP.value,
         carts=carts,
         locker_store_category_ids=json.dumps(locker_store_category_ids)
         if locker_store_category_ids
