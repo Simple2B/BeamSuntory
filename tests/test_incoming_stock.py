@@ -1,5 +1,4 @@
 # flake8: noqa
-import json
 import pytest
 from flask.testing import FlaskClient
 from app import schema as s
@@ -11,6 +10,7 @@ received_one_product_one_group = '[{"allocatedProductId": 3,"packages":[{"produc
 received_one_product_two_groups = '[{"allocatedProductId": 4,"packages":[{"productQuantityGroupId": 4,"quantityPerWrap":1,"quantityWrapCarton":1,"quantityCartonMaster":1,"quantityReceived":200}]}, {"allocatedProductId": 5,"packages":[{"productQuantityGroupId": 5,"quantityPerWrap":1,"quantityWrapCarton":1,"quantityCartonMaster":1,"quantityReceived":200}]}]'
 received_two_products_one_group = '[{"allocatedProductId": 6,"packages":[{"productQuantityGroupId": 6,"quantityPerWrap":1,"quantityWrapCarton":1,"quantityCartonMaster":1,"quantityReceived":200}]}, {"allocatedProductId": 7,"packages":[{"productQuantityGroupId": 7,"quantityPerWrap":1,"quantityWrapCarton":1,"quantityCartonMaster":1,"quantityReceived":200}]}]'
 received_two_products_two_groups = '[{"allocatedProductId": 8,"packages":[{"productQuantityGroupId": 8,"quantityPerWrap":1,"quantityWrapCarton":1,"quantityCartonMaster":1,"quantityReceived":200}]}, {"allocatedProductId": 9,"packages":[{"productQuantityGroupId": 9,"quantityPerWrap":1,"quantityWrapCarton":1,"quantityCartonMaster":1,"quantityReceived":200}]}]'
+one_pr_one_gr_no_qty_master = '[{"allocatedProductId": 3,"packages":[{"productQuantityGroupId": 3,"quantityPerWrap":1,"quantityWrapCarton":1, "quantityReceived":200}]}]'
 
 
 def test_incoming_stocks_pages(mg_g_populate: FlaskClient):
@@ -98,6 +98,7 @@ def test_sort_incoming_stock(mg_g_populate: FlaskClient):
         ("received_one_product_two_groups", received_one_product_two_groups),
         ("received_two_products_one_group", received_two_products_one_group),
         ("received_two_products_two_groups", received_two_products_two_groups),
+        ("received_one_product_one_group", one_pr_one_gr_no_qty_master),
     ]
 )
 def received_product(request):
@@ -127,13 +128,7 @@ def test_incoming_stock_accept(mg_g_populate: FlaskClient, received_product):
         "/incoming_stock/accept",
         data=dict(
             inbound_order_id=inbound_order_test.id,
-            received_products=order_received_json
-            # received_products=received_products[received_product].format(
-            #     inbound_order_test.products_allocated[0].id,
-            #     inbound_order_test.products_allocated[0]
-            #     .product_quantity_groups[0]
-            #     .id,
-            # ),
+            received_products=order_received_json,
         ),
         follow_redirects=True,
     )
