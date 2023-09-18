@@ -1,7 +1,8 @@
+import sqlalchemy as sa
 from flask.testing import FlaskClient
+from app import schema as s
 from app import models as m, db
 from tests.utils import login, register, logout
-from config import BaseConfig
 
 
 def test_divisions_pages(client):
@@ -33,21 +34,18 @@ def test_create_division(client):
     assert response.status_code == 200
     assert "Role added!" in response.text
     division_rows_objs = db.session.execute(
-        m.Division.select().where(m.Division.role_name == "Sales_Rep")
+        m.Division.select().where(m.Division.role_name == s.UserRole.SALES_REP.value)
     ).all()
     assert len(division_rows_objs) > 0
 
 
 def test_delete_division(mg_g_populate: FlaskClient):
     login(mg_g_populate)
-
-    divisions_rows_objs = db.session.execute(m.Division.select()).all()
-    assert len(divisions_rows_objs) == 4
+    divisions_count = db.session.scalar(sa.func.count(m.Division.id))
     response = mg_g_populate.delete("/division/delete/1")
     assert response.status_code == 200
     assert "ok" in response.text
-    divisions_rows_objs = db.session.execute(m.Division.select()).all()
-    assert len(divisions_rows_objs) == 3
+    assert divisions_count - 1 == db.session.scalar(sa.func.count(m.Division.id))
 
 
 def test_edit_division(mg_g_populate: FlaskClient):
@@ -57,7 +55,7 @@ def test_edit_division(mg_g_populate: FlaskClient):
         "/division/save",
         data=dict(
             division_id=1,
-            role_name=BaseConfig.Config.WAREHOUSE_MANAGER,
+            role_name=s.UserRole.WAREHOUSE_MANAGER.value,
             activated=False,
         ),
     )
@@ -65,7 +63,7 @@ def test_edit_division(mg_g_populate: FlaskClient):
     assert "division" in response.text
     divisions_rows_objs = db.session.execute(
         m.Division.select().where(
-            m.Division.role_name == BaseConfig.Config.WAREHOUSE_MANAGER
+            m.Division.role_name == s.UserRole.WAREHOUSE_MANAGER.value
         )
     ).all()
     assert len(divisions_rows_objs) > 0

@@ -150,5 +150,5 @@ document.addEventListener('DOMContentLoaded', () => {
     })
 
     const buttonDownloadCSV = document.getElementById('button-csv-download')
-    buttonDownloadCSV.addEventListener('click', downloadCSV)
+    buttonDownloadCSV.addEventListener('click', downloadCSV);
 })

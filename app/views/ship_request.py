@@ -148,6 +148,10 @@ def create():
             )
         ).scalars()
 
+        report_event = m.ReportEvent(
+            type=s.ReportEventType.created.value, user=current_user
+        )
+
         for cart in carts:
             is_group_in_master_group = (
                 db.session.query(m.Group)
@@ -160,6 +164,7 @@ def create():
                 > 0
             )
             if start_date and end_date and is_group_in_master_group:
+                # creation event
                 event = m.Event(
                     date_reserve_from=start_date - timedelta(days=5),
                     date_reserve_to=end_date + timedelta(days=5),
@@ -170,6 +175,7 @@ def create():
                     cart_id=cart.id,
                     comment=form_create.event_comment.data,
                     user=current_user,
+                    report=report_event,
                 )
                 db.session.add(event)
                 log(log.INFO, "Event added. Event: [%s]", event)

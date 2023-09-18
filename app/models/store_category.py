@@ -42,8 +42,8 @@ class StoreCategory(db.Model, ModelMixin):
 
     @property
     def json(self):
-        mg = s.StoreCategory.from_orm(self)
-        mg_dict = json.loads(mg.json())
+        # TODO refactor
+        mg_dict = json.loads(s.StoreCategory.model_validate(self).model_dump_json())
         stores = db.session.execute(
             Store.select().where(Store.store_category_id == mg_dict["id"])
         ).scalars()
