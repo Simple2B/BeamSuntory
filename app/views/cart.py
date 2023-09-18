@@ -1,5 +1,5 @@
-import json
 from werkzeug.urls import url_parse
+import json
 from flask import (
     Blueprint,
     render_template,

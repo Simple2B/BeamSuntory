@@ -962,6 +962,10 @@ class DoNothingConflict:
 @product_blueprint.route("/stocks_owned_by_me", methods=["GET"])
 @login_required
 def stocks_owned_by_me():
+    is_events = request.args.get("events", type=bool, default=False)
+    if is_events:
+        log(log.INFO, "Redirect to events product: [%s]", is_events)
+        return redirect(url_for("product.get_all", events=True))
     curr_user_groups_ids = [
         i.right_id
         for i in db.session.execute(
@@ -979,9 +983,16 @@ def stocks_owned_by_me():
         ).scalars()
     ]
     q = request.args.get("q", type=str, default=None)
+    reverse_event_filter = ~m.Product.warehouse_products.any(
+        m.WarehouseProduct.group.has(
+            m.Group.master_group.has(
+                m.MasterGroup.name == s.MasterGroupMandatory.events.value
+            )
+        )
+    )
     query = (
         m.Product.select()
-        .where(m.Product.id.in_(curr_user_products_ids))
+        .where(m.Product.id.in_(curr_user_products_ids), reverse_event_filter)
         .order_by(m.Product.id)
     )
     count_query = sa.select(sa.func.count()).select_from(m.Product)
