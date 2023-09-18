@@ -42,5 +42,4 @@ class Supplier(db.Model, ModelMixin):
 
     @property
     def json(self):
-        mg = s.Supplier.from_orm(self)
-        return mg.json()
+        return s.Supplier.model_validate(self).model_dump_json()

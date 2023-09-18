@@ -1,11 +1,13 @@
 from datetime import date
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, RootModel, ConfigDict
 from .pagination import PaginationOut
 from .product import Product
 from .user import User
 
 
 class Event(BaseModel):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
     id: int
     date_from: date = Field(alias="dateFrom")
     date_to: date = Field(alias="dateTo")
@@ -13,22 +15,16 @@ class Event(BaseModel):
     product: Product
     user: User
 
-    class Config:
-        orm_mode = True
-        allow_population_by_field_name = True
-
 
 class EventCSVOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
     id: int
     date_from: date = Field(alias="dateFrom")
     date_to: date = Field(alias="dateTo")
     comment: str
     product: Product
     user: User
-
-    class Config:
-        orm_mode = True
-        allow_population_by_field_name = True
 
 
 class EventsApiOut(BaseModel):
@@ -37,17 +33,10 @@ class EventsApiOut(BaseModel):
 
 
 class EventsDateQuantity(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     date: str
     quantity: int
 
-    class Config:
-        orm_mode = True
-        allow_population_by_field_name = True
 
-
-class EventsCalendar(BaseModel):
-    __root__: list[EventsDateQuantity]
-
-    class Config:
-        orm_mode = True
-        allow_population_by_field_name = True
+EventsCalendar = RootModel[list[EventsDateQuantity]]

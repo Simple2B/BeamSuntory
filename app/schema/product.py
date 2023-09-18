@@ -1,6 +1,6 @@
-from typing import Optional, Any
 from enum import Enum
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
+from .supplier import Supplier
 
 
 class CustomBase(BaseModel):
@@ -11,7 +11,7 @@ class CustomBase(BaseModel):
         exclude = getattr(self.Config, "exclude", set())
         if len(exclude) == 0:
             exclude = None
-        return super().json(include=include, exclude=exclude, **kwargs)
+        return super().model_dump_json(include=include, exclude=exclude, **kwargs)
 
 
 class Currency(Enum):
@@ -20,32 +20,28 @@ class Currency(Enum):
 
 
 class Product(CustomBase):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
     id: int
     name: str
 
-    supplier: Optional[Any]  # = Field(exclude=True)
-    supplier_id: int | None
+    supplier: Supplier | None
+    supplier_id: int | None = Field(alias="supplierId")
     currency: Currency | None
-    regular_price: float | None
-    retail_price: float | None
+    regular_price: float | None = Field(alias="regularPrice")
+    retail_price: float | None = Field(alias="retailPrice")
     image: str | None
     description: str
     # General Info ->
     SKU: str
-    low_stock_level: int | None
-    program_year: int | None
-    package_qty: int | None
-    numb_of_items_per_case: int | None
-    numb_of_cases_per_outer_case: int | None
+    low_stock_level: int | None = Field(alias="lowStockLevel")
+    program_year: int | None = Field(alias="programYear")
+    package_qty: int | None = Field(alias="packageQty")
+    numb_of_items_per_case: int | None = Field(alias="numbOfItemsPerCase")
+    numb_of_cases_per_outer_case: int | None = Field(alias="numbOfCasesPerOuterCase")
     comments: str | None
     # shipping
     weight: float | None
     length: float | None
     width: float | None
     height: float | None
-    mstr_groups_groups: dict | None
-    current_user_groups: dict | None
-
-    class Config:
-        orm_mode = True
-        exclude = {"brand", "language", "category"}

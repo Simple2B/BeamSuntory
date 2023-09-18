@@ -121,9 +121,8 @@ class User(db.Model, UserMixin, ModelMixin):
 
     @property
     def json(self):
-        u = s.User.from_orm(self)
         # insert group_name to result json
-        ujs = u.json()
+        ujs = s.User.model_validate(self).model_dump_json()
         u_dict = json.loads(ujs)
 
         user_group: List[UserGroup] = [

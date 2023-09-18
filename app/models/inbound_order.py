@@ -64,4 +64,4 @@ class InboundOrder(db.Model, ModelMixin):
 
     @property
     def json(self):
-        return s.InboundOrder.from_orm(self).json(by_alias=True)
+        return s.InboundOrder.model_validate(self).model_dump_json(by_alias=True)

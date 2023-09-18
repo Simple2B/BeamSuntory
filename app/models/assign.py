@@ -28,5 +28,5 @@ class Assign(db.Model, ModelMixin):
 
     @property
     def json(self):
-        mg = s.Assign.from_orm(self)
-        return mg.json()
+        assign = s.Assign.model_validate(self)
+        return assign.model_dump_json()

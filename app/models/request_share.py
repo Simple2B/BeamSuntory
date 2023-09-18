@@ -35,8 +35,7 @@ class RequestShare(db.Model, ModelMixin):
 
     @property
     def json(self):
-        mg = s.RequestShare.from_orm(self)
-        ujs = mg.json()
+        ujs = s.RequestShare.model_validate(self).model_dump_json()
         mg_dict = json.loads(ujs)
 
         mg_dict["product"] = self.product.name

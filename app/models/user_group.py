@@ -10,16 +10,12 @@ if TYPE_CHECKING:
     from .user import User
     from .group import Group
 
-else:
-    User = "User"
-    Group = "Group"
-
 
 class UserGroup(db.Model, ModelMixin):
     __tablename__ = "user_group"
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
     left_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("users.id"))
     right_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("groups.id"))
-    child: orm.Mapped[User] = orm.relationship(overlaps="child")
+    child: orm.Mapped["User"] = orm.relationship(overlaps="child")
     # TODO is overlaps="user_obj" correct decision? remove it to see the warning
-    parent: orm.Mapped[Group] = orm.relationship(overlaps="user_obj")
+    parent: orm.Mapped["Group"] = orm.relationship(overlaps="user_obj")

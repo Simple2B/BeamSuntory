@@ -25,6 +25,7 @@ from .store_category import store_category_blueprint
 from .inventory import inventory_blueprint
 from .adjust import adjust_blueprint
 from .event import event_blueprint
+from .report import report_blueprint
 
 BLUEPRINTS = (
     main_blueprint,
@@ -53,4 +54,5 @@ BLUEPRINTS = (
     inventory_blueprint,
     adjust_blueprint,
     event_blueprint,
+    report_blueprint,
 )
