@@ -836,6 +836,8 @@ function booking(product: IProduct, group: string) {
   input.value = group.replace('_', ' ')
   input = document.querySelector('#product-event-product-id')
   input.value = product.id.toString()
+  input = document.querySelector('#product-event-quantity')
+  input.min = '1'
 
   const currentDate = new Date()
 
