@@ -43,5 +43,4 @@ class Warehouse(db.Model, ModelMixin):
 
     @property
     def json(self):
-        mg = s.Warehouse.from_orm(self)
-        return mg.json()
+        return s.Warehouse.model_validate(self).model_dump_json()

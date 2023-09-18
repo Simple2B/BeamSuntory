@@ -36,7 +36,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     if query is None or count_query is None:
         reverse_event_filter = ~m.Product.warehouse_products.any(
             m.WarehouseProduct.group.has(
-                m.Group.master_groups.has(
+                m.Group.master_group.has(
                     m.MasterGroup.name == s.MasterGroupMandatory.events.value
                 )
             )
@@ -69,7 +69,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     if is_events:
         event_filter = m.Product.warehouse_products.any(
             m.WarehouseProduct.group.has(
-                m.Group.master_groups.has(
+                m.Group.master_group.has(
                     m.MasterGroup.name == s.MasterGroupMandatory.events.value
                 )
             )
@@ -707,13 +707,8 @@ def adjust():
         )
         ai.save()
         groups = json.loads(form.groups_quantity.data)
-        product_name = (
-            db.session.execute(
-                m.Product.select().where(m.Product.id == form.product_id.data)
-            )
-            .scalar()
-            .name
-        )
+        product = db.session.get(m.Product, form.product_id.data)
+        product_name = product.name
 
         for group_name, warehouses in groups.items():
             print(group_name)
@@ -756,6 +751,7 @@ def adjust():
                         warehouse_id=warehouse_id,
                     )
                     db.session.add(adjust_gr_qty)
+
         db.session.commit()
 
         log(

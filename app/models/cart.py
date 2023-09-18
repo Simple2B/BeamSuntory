@@ -48,8 +48,8 @@ class Cart(db.Model, ModelMixin):
 
     @property
     def json(self):
-        mg = s.Cart.from_orm(self)
-        ujs = mg.json()
+        cart = s.Cart.model_validate(self)
+        ujs = cart.model_dump_json()
         mg_dict = json.loads(ujs)
         warehouse_products = db.session.execute(
             WarehouseProduct.select().where(

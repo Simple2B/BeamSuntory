@@ -1,5 +1,5 @@
 from enum import Enum
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class ProductMasterGroupMandatory(Enum):
@@ -7,8 +7,7 @@ class ProductMasterGroupMandatory(Enum):
 
 
 class MasterGroupProduct(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     name: str
-
-    class Config:
-        orm_mode = True

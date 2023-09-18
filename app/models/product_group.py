@@ -19,5 +19,4 @@ class ProductGroup(db.Model, ModelMixin):
 
     @property
     def json(self):
-        mg = s.ProductGroup.from_orm(self)
-        return mg.json()
+        return s.ProductGroup.model_validate(self).model_dump_json()

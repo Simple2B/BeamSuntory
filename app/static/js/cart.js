@@ -73,8 +73,6 @@ var bundle_1 = __webpack_require__(/*! @easepick/bundle */ "./node_modules/@ease
 // variable to set default image to brand dynamically in modal window. Can we get link from the internet?
 var defaultImage = 'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png';
 // --count total quantity and price--
-var priceElements = document.querySelectorAll('.cart-item-retail_price');
-var quantityElements = document.querySelectorAll('.cart-item-quantity');
 var totalPriceElement = document.querySelector('#cart-total-price');
 var totalQuantityElement = document.querySelector('#cart-total-quantity');
 var tableCartItems = document.querySelectorAll('.table-cart-item');

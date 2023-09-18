@@ -10,10 +10,10 @@ from flask_login import login_required
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
+from app import schema as s
 from app import models as m, db
 from app import forms as f
 from app.logger import log
-from config import BaseConfig
 
 
 warehouse_blueprint = Blueprint("warehouse", __name__, url_prefix="/warehouse")
@@ -45,7 +45,7 @@ def get_all():
 
     wh_role = db.session.execute(
         sa.select(m.Division).where(
-            m.Division.role_name == BaseConfig.Config.WAREHOUSE_MANAGER
+            m.Division.role_name == s.UserRole.WAREHOUSE_MANAGER.value
         )
     ).scalar()
 
@@ -95,7 +95,7 @@ def create():
         )
         manager_role: m.Division = db.session.execute(
             m.Division.select().where(
-                m.Division.role_name == BaseConfig.Config.WAREHOUSE_MANAGER
+                m.Division.role_name == s.UserRole.WAREHOUSE_MANAGER.value
             )
         ).scalar()
 
@@ -149,7 +149,7 @@ def save():
         )
         manager_role: m.Division = db.session.execute(
             m.Division.select().where(
-                m.Division.role_name == BaseConfig.Config.WAREHOUSE_MANAGER
+                m.Division.role_name == s.UserRole.WAREHOUSE_MANAGER.value
             )
         ).scalar()
 

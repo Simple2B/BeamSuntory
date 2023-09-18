@@ -53,5 +53,4 @@ class Store(db.Model, ModelMixin):
 
     @property
     def json(self):
-        mg = s.Store.from_orm(self)
-        return mg.json()
+        return s.Store.model_validate(self).model_dump_json()
