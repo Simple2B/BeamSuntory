@@ -1,14 +1,11 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from datetime import date as Date
 import functools
 import calendar
 from flask import (
     Blueprint,
-    flash,
     jsonify,
-    redirect,
     request,
-    url_for,
     render_template,
 )
 from flask_login import login_required
@@ -17,7 +14,6 @@ from app.controllers import create_pagination
 
 from app import schema as s
 from app import models as m, db
-from app import forms as f
 from app.logger import log
 
 
@@ -105,64 +101,6 @@ def get_all():
     )
 
 
-@event_blueprint.route("/create", methods=["POST"])
-@login_required
-def create():
-    form: f.EventFormCreate = f.EventFormCreate()
-    if not form.validate_on_submit():
-        flash("Event must validation failed: {form.errors}", "danger")
-        log(log.INFO, "Event validation failed: [%s]", form.errors)
-        return redirect(url_for("product.get_all"))
-
-    current_date = datetime.now()
-    date_from = form.date_range.data.split(" - ")[0]
-    date_to = form.date_range.data.split(" - ")[1]
-    start_date = datetime.strptime(date_from, "%Y-%m-%d")
-    end_date = datetime.strptime(date_to, "%Y-%m-%d")
-    difference_date = start_date - current_date
-    if difference_date < timedelta(days=5):
-        flash("The event must be created more than 5 days in advance", "danger")
-        log(
-            log.INFO,
-            "The event must be created more than 5 days: [%s]",
-            form.product_id.data,
-        )
-        return redirect(url_for("product.get_all"))
-
-    # check product
-    product = db.session.get(m.Product, form.product_id.data)
-    if not product:
-        flash("Product not found")
-        log(
-            log.INFO,
-            "Product validation failed: cannot find product with id [%s]",
-            form.product_id.data,
-        )
-        return redirect(url_for("product.get_all"))
-
-    # create event
-    event: m.Event = m.Event(
-        date_from=start_date,
-        date_to=end_date,
-        quantity=form.quantity.data,
-        product=product,
-        cart_id=form.cart_id.data,
-        comment=form.comment.data,
-    )
-    db.session.add(event)
-
-    cart: m.Cart = db.session.get(m.Cart, form.cart_id.data)
-    if cart:
-        cart.quantity = form.quantity.data
-        log(log.INFO, "Cart item quantity updated. Cart: [%s]", cart)
-
-    db.session.commit()
-    log(log.INFO, "Item added: [%s]", event)
-    flash("Item added!", "success")
-
-    return redirect(url_for("product.get_all"))
-
-
 @event_blueprint.route("/get_available_quantity", methods=["GET"])
 @login_required
 def get_available_quantity():
@@ -200,8 +138,8 @@ def get_available_quantity():
         current_date = Date(year_from, month_from, day)
         events: list[m.Event] = db.session.scalars(
             m.Event.select().where(
-                m.Event.date_from <= current_date,
-                m.Event.date_to >= current_date,
+                m.Event.date_reserve_from <= current_date,
+                m.Event.date_reserve_to >= current_date,
                 m.Event.product_id == product_id,
             )
         ).all()
@@ -242,6 +180,10 @@ def get_available_quantity_by_date():
     if not group:
         log(log.INFO, "Group not found")
         return "Group not found", 404
+    product: m.Product = db.session.get(m.Product, product_id)
+    if not product:
+        log(log.INFO, "Product not found")
+        return "Product not found", 404
     warehouse: m.Warehouse = db.session.scalar(
         m.Warehouse.select().where(
             m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value
@@ -265,14 +207,20 @@ def get_available_quantity_by_date():
     date_end = datetime.strptime(date_to, "%Y_%m_%d")
     events: list[m.Event] = db.session.scalars(
         m.Event.select().where(
-            m.Event.date_from <= date_start,
-            m.Event.date_to >= date_end,
+            m.Event.date_reserve_from <= date_start,
+            m.Event.date_reserve_to >= date_end,
             m.Event.product_id == product_id,
         )
     ).all()
     total_quantity = functools.reduce(lambda a, b: a + b.quantity, events, 0)
-    quantity = warehouse_product.product_quantity - total_quantity - quantity_desired
+    available_quantity = warehouse_product.product_quantity - total_quantity
+    quantity = available_quantity - quantity_desired
     if quantity < 0:
         log(log.INFO, "Not enough quantity: [%s]", quantity)
-        return "Not enough quantity", 400
+        return (
+            jsonify(
+                f"Product: {product.name}, available quantity: {available_quantity}"
+            ),
+            400,
+        )
     return "ok", 200

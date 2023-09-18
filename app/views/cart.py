@@ -1,4 +1,5 @@
 import json
+from werkzeug.urls import url_parse
 from flask import (
     Blueprint,
     render_template,
@@ -28,6 +29,7 @@ def get_all():
     form = f.CartForm()
 
     q = request.args.get("q", type=str, default=None)
+    # TODO what if couple users make carts simulteniously???
     query = m.Cart.select().where(m.Cart.status == "pending").order_by(m.Cart.id)
     count_query = sa.select(sa.func.count()).select_from(m.Cart)
     if q:
@@ -69,16 +71,23 @@ def get_all():
         else:
             store.favorite = False
 
-    warehouse_products = db.session.execute(
+    warehouse_products = db.session.scalars(
         m.WarehouseProduct.select().where(
             m.WarehouseProduct.product_id.in_(
                 [wp.product_id for wp in db.session.execute(query).scalars()]
             )
         )
-    ).scalars()
+    ).all()
 
     available_products = (
-        {wp.group.name: wp.product_quantity for wp in warehouse_products}
+        {
+            wg.group.name: {
+                wprod.product.SKU: wprod.product_quantity
+                for wprod in warehouse_products
+                if wg.group.name == wprod.group.name
+            }
+            for wg in warehouse_products
+        }
         if warehouse_products
         else {}
     )
@@ -111,14 +120,11 @@ def get_all():
         .role_name
     )
 
-    cart_items = [
-        cart
-        for cart in db.session.execute(
-            query.offset((pagination.page - 1) * pagination.per_page).limit(
-                pagination.per_page
-            )
-        ).scalars()
-    ]
+    cart_items = db.session.scalars(
+        query.offset((pagination.page - 1) * pagination.per_page).limit(
+            pagination.per_page
+        )
+    ).all()
     carts = [
         {
             "group": cart.group,
@@ -160,6 +166,8 @@ def get_all():
 @login_required
 def create():
     form: f.NewCartForm = f.NewCartForm()
+    url = request.referrer
+    query = url_parse(url).query if url else None
     if form.validate_on_submit():
         item = m.Cart(
             product_id=int(form.product_id.data),
@@ -170,10 +178,14 @@ def create():
         log(log.INFO, "Form submitted. Cart: [%s]", item)
         item.save()
         flash("Item added!", "success")
+        if query:
+            return redirect(url_for("product.get_all", events="true"))
         return redirect(url_for("product.get_all"))
     else:
         log(log.ERROR, "Item creation errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
+        if query:
+            return redirect(url_for("product.get_all", events="true"))
         return redirect(url_for("product.get_all"))
 
 

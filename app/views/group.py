@@ -11,6 +11,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import aliased
 from app.controllers import create_pagination
 
+from app import schema as s
 from app import models as m, db
 from app import forms as f
 from app.logger import log
@@ -82,6 +83,14 @@ def create():
         )
         log(log.INFO, "Form submitted. Group: [%s]", group)
         group.save()
+
+        admin_users = db.session.scalars(
+            m.User.select().where(m.User.role == s.UserRole.ADMIN.value)
+        )
+
+        for user in admin_users:
+            m.UserGroup(left_id=user.id, right_id=group.id).save()
+
         flash("Group added!", "success")
         return redirect(url_for("stock_target_group.get_all"))
     else:

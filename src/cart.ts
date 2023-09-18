@@ -21,6 +21,12 @@ interface ICartItem {
     group: string
 }
 
+interface IEventCart {
+    cartId: number
+    error?: string
+    status: boolean
+}
+
 // variable to set default image to brand dynamically in modal window. Can we get link from the internet?
 const defaultImage =
     'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png'
@@ -222,7 +228,6 @@ const bookedDates = [getFirstAndLastDate()].map((d) => {
     return new DateTime(d, 'YYYY-MM-DD')
 })
 
-
 const picker = new easepick.create({
     element: document.getElementById('datepicker'),
     css: [
@@ -259,15 +264,11 @@ const picker = new easepick.create({
             const endDate =
                 evt.detail.end.getFullYear() + '_' + (evt.detail.end.getMonth() + 1) + '_' + evt.detail.end.getDate()
 
-            const isAvailableEventQuantity = await getEventAvailableQuantityByDate(
-                JSON.parse(carts),
-                startDate,
-                endDate
-            )
-            console.log('isAvailableEventQuantity', isAvailableEventQuantity)
+            const availableEventQuantity = await getEventAvailableQuantityByDate(JSON.parse(carts), startDate, endDate)
 
-            if (!isAvailableEventQuantity) {
-                alert('Not enough quantity. Choose another date.')
+            if (availableEventQuantity.length !== 0) {
+                const errorMessages = availableEventQuantity.map((e) => e.error)
+                alert('Maximum quantity exceeded!' + '\n' + errorMessages.join('\n'))
                 return
             } else {
                 submitBtn.removeAttribute('disabled')
@@ -283,13 +284,30 @@ async function getEventAvailableQuantityByDate(carts: ICartItem[], dateFrom: str
         )
 
         if (response.status !== 200) {
-            return false
+            const message = await response.json()
+
+            const data = {
+                cartId: cart.id,
+                error: message,
+                status: false,
+            }
+            return data
         }
-        return true
+        const data = {
+            cartId: cart.id,
+            status: true,
+        }
+
+        return data
     })
+    const resultAllPromises: IEventCart[] = []
 
     const results = await Promise.all(fetchPromises)
-    const isAvailableEventQuantity = results.every((result) => result === true)
+    results.forEach((result) => {
+        if (result.status !== true) {
+            return resultAllPromises.push(result)
+        }
+    })
 
-    return isAvailableEventQuantity
+    return resultAllPromises
 }

@@ -10,6 +10,7 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
+from sqlalchemy import desc
 from pydantic import ValidationError
 
 from app.controllers import create_pagination
@@ -33,7 +34,7 @@ def get_all():
 
     q = request.args.get("q", type=str, default=None)
     current_order_uuid = request.args.get("current_order_uuid", type=str, default=None)
-    query = m.InboundOrder.select().order_by(m.InboundOrder.id)
+    query = m.InboundOrder.select().order_by(desc(m.InboundOrder.id))
 
     if current_order_uuid:
         query = query.where(m.InboundOrder.uuid != current_order_uuid)

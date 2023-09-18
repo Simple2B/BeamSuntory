@@ -8,6 +8,7 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
+from sqlalchemy import desc
 from app.controllers import create_pagination
 
 from app import schema as s
@@ -29,7 +30,7 @@ def get_all():
     form_sort: f.SortByStatusInboundOrderForm = f.SortByStatusInboundOrderForm()
 
     q = request.args.get("q", type=str, default=None)
-    query = m.InboundOrder.select().order_by(m.InboundOrder.id)
+    query = m.InboundOrder.select().order_by(desc(m.InboundOrder.id))
     count_query = sa.select(sa.func.count()).select_from(m.InboundOrder)
     if q:
         query = query.where(
