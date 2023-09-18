@@ -1,5 +1,9 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 import json
+
+if TYPE_CHECKING:
+    from .product import Product
 
 
 import sqlalchemy as sa
@@ -53,6 +57,7 @@ class ShipRequest(db.Model, ModelMixin):
 
     wm_notes: orm.Mapped[str] = orm.mapped_column(sa.Text(), default="", nullable=True)
     da_notes: orm.Mapped[str] = orm.mapped_column(sa.Text(), default="", nullable=True)
+    carts: orm.Mapped[list["Cart"]] = orm.relationship()
 
     def __repr__(self):
         return f"<{self.id}: {self.order_numb}>"
@@ -60,7 +65,8 @@ class ShipRequest(db.Model, ModelMixin):
     @property
     def json(self):
         # TODO refactor !
-        ujs = s.ShipRequest.model_validate(self).model_dump_json()
+        return s.ShipRequest.model_validate(self).model_dump_json(by_alias=True)
+
         mg_dict = json.loads(ujs)
         mg_dict["current_order_carts"] = [
             {

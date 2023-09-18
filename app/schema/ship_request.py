@@ -1,6 +1,7 @@
 from enum import Enum
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
+from .cart import Cart
 
 
 class ShipRequestStatus(Enum):
@@ -22,5 +23,6 @@ class ShipRequest(BaseModel):
     comment: str | None
     wm_notes: str | None = Field(alias="wmNotes")
     da_notes: str | None = Field(alias="daNotes")
+    carts: list[Cart]
 
     created_at: datetime = Field(alias="createdAt")

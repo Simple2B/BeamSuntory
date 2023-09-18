@@ -9,6 +9,7 @@ class Cart(BaseModel):
     id: int
     product_id: int = Field(alias="productId")
     status: str
+    group: str
     quantity: int
     user_id: int = Field(alias="userId")
     product: Product

@@ -3,7 +3,7 @@ from .pagination import Pagination, PaginationOut
 from .user import User, UserRole
 from .master_group import MasterGroup, MasterGroupMandatory
 from .group import Group
-from .warehouse import Warehouse, WarehouseMandatory
+from .warehouse import Warehouse, WarehouseMandatory, WarehouseList
 from .inbound_order import InboundOrder, InboundOrderStatus
 from .product import Product, Currency
 from .product_category import ProductCategory
