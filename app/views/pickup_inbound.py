@@ -122,15 +122,18 @@ def sort():
     filtered = True
     status = form_sort.sort_by.data if request.method == "POST" else "Draft"
 
+    mapped_status = status.split(".")
+    status_str = mapped_status[1]
+
     q = request.args.get("q", type=str, default=None)
     query = (
         m.InboundOrder.select()
-        .where(m.InboundOrder.status == s.InboundOrderStatus(status))
+        .where(m.InboundOrder.status == status_str)
         .order_by(m.InboundOrder.id)
     )
     count_query = (
         sa.select(sa.func.count())
-        .where(m.InboundOrder.status == s.InboundOrderStatus(status))
+        .where(m.InboundOrder.status == status_str)
         .select_from(m.InboundOrder)
     )
     if q:
@@ -151,10 +154,10 @@ def sort():
             pagination.per_page
         )
     ).all()
-    package_info = db.session.scalars(
-        m.PackageInfo.select().order_by(m.PackageInfo.id)
-    ).all()
-    package_info_by_io = {pi.inbound_order_id: pi for pi in package_info}
+    # package_info = db.session.scalars(
+    #     m.PackageInfo.select().order_by(m.PackageInfo.id)
+    # ).all()
+    # package_info_by_io = {pi.inbound_order_id: pi for pi in package_info}
 
     return render_template(
         "pickup_inbound/pickup_inbounds.html",
@@ -169,10 +172,10 @@ def sort():
             m.Warehouse.select().order_by(m.Warehouse.id)
         ).all(),
         products=db.session.scalars(m.Product.select().order_by(m.Product.id)).all(),
-        package_info_by_io=package_info_by_io,  # TODO need's refactor
+        # package_info_by_io=package_info_by_io,  # TODO need's refactor
         form_create=form_create,
         form_edit=form_edit,
         form_sort=form_sort,
         filtered=filtered,
-        inbound_orders_status=s.ShipRequestStatus,
+        inbound_orders_status=s.InboundOrderStatus,
     )

@@ -83,7 +83,7 @@ if (filterData !== null || filterData !== undefined) {
     for (const key in filterData) {
       const productFilterTh = document.createElement('th')
       productFilterTh.setAttribute('id', `product-table-filter-master-group-${key.replace(/ /g, '_')}`)
-      productFilterTh.classList.add('px-6', 'py-3')
+      productFilterTh.classList.add('px-6', 'py-3', 'max-width-100')
       productFilterTh.setAttribute('scope', 'col')
       productFilterTh.innerHTML = key
       referenceTh.parentNode.insertBefore(productFilterTh, referenceTh.nextSibling)
@@ -93,24 +93,27 @@ if (filterData !== null || filterData !== undefined) {
       const referenceTd = product.cells[4]
       const productSKU = product.cells[3].innerText
 
-      for (const key in filterData) {
-        const productFilterName = filterData[key]
-        const productFilterTd = document.createElement('td')
-        productFilterTd.setAttribute(
-          'id',
-          `product-table-filter-${key}-${productFilterName.replace(/ /g, '_')}-${productSKU.replace(/ /g, '_')}`
-        )
-        productFilterTd.classList.add(
-          'p-4',
-          'text-base',
-          'font-normal',
-          'text-gray-900',
-          'whitespace-nowrap',
-          'dark:text-white'
-        )
-        productFilterTd.innerHTML = `
+            for (const key in filterData) {
+                const productFilterName = filterData[key]
+                const productFilterTd = document.createElement('td')
+                productFilterTd.setAttribute(
+                    'id',
+                    `product-table-filter-${key}-${productFilterName.replace(/ /g, '_')}-${productSKU.replace(
+                        / /g,
+                        '_'
+                    )}`
+                )
+                productFilterTd.classList.add(
+                    'text-base',
+                    'font-normal',
+                    'text-gray-900',
+                    'whitespace-nowrap',
+                    'dark:text-white',
+                    'max-width-100',                    
+                )
+                productFilterTd.innerHTML = `
         <div class="pl-3">
-          <div class="text-base font-semibold">${productFilterName}</div>
+          <div class="text-sm">${productFilterName}</div>
         </div>
       `
         referenceTd.parentNode.insertBefore(productFilterTd, referenceTd.nextSibling)
@@ -126,23 +129,25 @@ const globalFilterMasterGroup = JSON.parse(sessionStorage.getItem('globalFilterM
 const productMgGGlobal = JSON.parse(sessionStorage.getItem('productMgG'))
 
 if (globalFilterMasterGroup && globalFilterMasterGroup.length !== 0) {
-  const filterProductMasterGroupCheckboxes = document.querySelectorAll('.products-filter-product-master-group-checkbox')
-  filterProductMasterGroupCheckboxes.forEach((checkbox: HTMLInputElement) => {
-    if (globalFilterMasterGroup.includes(checkbox.value)) {
-      checkbox.checked = true
-    }
-  })
-  for (const masterGroupName of globalFilterMasterGroup) {
-    const referenceTh = document.querySelector('#product-table-th-product-type')
-    const isGroupExist = document.querySelector(`#product-table-filter-master-group-${masterGroupName}`)
-    if (!isGroupExist) {
-      const productFilterTh = document.createElement('th')
-      productFilterTh.setAttribute('id', `product-table-filter-master-group-${masterGroupName}`)
-      const productItemTrs = document.querySelectorAll('.table-product-item-tr')
-      productFilterTh.classList.add('px-6', 'py-3')
-      productFilterTh.setAttribute('scope', 'col')
-      productFilterTh.innerHTML = masterGroupName.replace(/_/g, ' ')
-      referenceTh.parentNode.insertBefore(productFilterTh, referenceTh.nextSibling)
+    const filterProductMasterGroupCheckboxes = document.querySelectorAll(
+        '.products-filter-product-master-group-checkbox'
+    )
+    filterProductMasterGroupCheckboxes.forEach((checkbox: HTMLInputElement) => {
+        if (globalFilterMasterGroup.includes(checkbox.value)) {
+            checkbox.checked = true
+        }
+    })
+    for (const masterGroupName of globalFilterMasterGroup) {
+        const referenceTh = document.querySelector('#product-table-th-product-type')
+        const isGroupExist = document.querySelector(`#product-table-filter-master-group-${masterGroupName}`)
+        if (!isGroupExist) {
+            const productFilterTh = document.createElement('th')
+            productFilterTh.setAttribute('id', `product-table-filter-master-group-${masterGroupName}`)
+            const productItemTrs = document.querySelectorAll('.table-product-item-tr')
+            productFilterTh.classList.add('px-6', 'py-3', 'max-width-100')
+            productFilterTh.setAttribute('scope', 'col')
+            productFilterTh.innerHTML = masterGroupName.replace(/_/g, ' ')
+            referenceTh.parentNode.insertBefore(productFilterTh, referenceTh.nextSibling)
 
       productItemTrs.forEach((productItem: HTMLTableRowElement) => {
         const referenceTd = productItem.cells[4]
@@ -158,7 +163,6 @@ if (globalFilterMasterGroup && globalFilterMasterGroup.length !== 0) {
           )}`
         )
         productFilterTd.classList.add(
-          'p-4',
           'text-base',
           'font-normal',
           'text-gray-900',
@@ -167,7 +171,7 @@ if (globalFilterMasterGroup && globalFilterMasterGroup.length !== 0) {
         )
         productFilterTd.innerHTML = `
             <div class="pl-3">
-              <div class="text-base font-semibold">${productFilterName}</div>
+              <div class="text-sm">${productFilterName}</div>
             </div>
           `
         referenceTd.parentNode.insertBefore(productFilterTd, referenceTd.nextSibling)
@@ -221,7 +225,6 @@ checkboxFilterProductMasterGroups.forEach((checkbox) => {
             )}`
           )
           productFilterTd.classList.add(
-            'p-4',
             'text-base',
             'font-normal',
             'text-gray-900',
@@ -230,7 +233,7 @@ checkboxFilterProductMasterGroups.forEach((checkbox) => {
           )
           productFilterTd.innerHTML = `
             <div class="pl-3">
-              <div class="text-base font-semibold">${productFilterName}</div>
+              <div class="text-sm">${productFilterName}</div>
             </div>
           `
           referenceTd.parentNode.insertBefore(productFilterTd, referenceTd.nextSibling)
