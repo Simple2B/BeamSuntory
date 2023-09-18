@@ -949,8 +949,13 @@ function assign(product: IProduct, group: string) {
     input = document.querySelector('#product-assign-amount')
     input.max = product.available_quantity[group.replace('_', ' ')].toString()
     input.min = '1'
+    const groupName = group.replace('_', ' ')
     input = document.querySelector('#product-assign-from-group')
-    input.value = group.replace('_', ' ')
+    input.value = groupName
+
+    const group_id=product.groups_ids[groupName]  
+    input = document.querySelector('#product-assign-from-group_id')
+    input.value = group_id.toString()
     assignModal.show()
 }
 

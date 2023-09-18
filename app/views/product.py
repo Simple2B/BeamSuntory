@@ -600,6 +600,7 @@ def assign():
             product_id=p.id,
             group_id=int(form.group.data),
             quantity=form.quantity.data,
+            from_group_id=form.from_group_id.data,
         ).save()
 
         return redirect(url_for("product.get_all"))
