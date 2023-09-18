@@ -10,7 +10,7 @@ received_one_product_one_group = '[{"allocatedProductId": 3,"packages":[{"produc
 received_one_product_two_groups = '[{"allocatedProductId": 4,"packages":[{"productQuantityGroupId": 4,"quantityPerWrap":1,"quantityWrapCarton":1,"quantityCartonMaster":1,"quantityReceived":200}]}, {"allocatedProductId": 5,"packages":[{"productQuantityGroupId": 5,"quantityPerWrap":1,"quantityWrapCarton":1,"quantityCartonMaster":1,"quantityReceived":200}]}]'
 received_two_products_one_group = '[{"allocatedProductId": 6,"packages":[{"productQuantityGroupId": 6,"quantityPerWrap":1,"quantityWrapCarton":1,"quantityCartonMaster":1,"quantityReceived":200}]}, {"allocatedProductId": 7,"packages":[{"productQuantityGroupId": 7,"quantityPerWrap":1,"quantityWrapCarton":1,"quantityCartonMaster":1,"quantityReceived":200}]}]'
 received_two_products_two_groups = '[{"allocatedProductId": 8,"packages":[{"productQuantityGroupId": 8,"quantityPerWrap":1,"quantityWrapCarton":1,"quantityCartonMaster":1,"quantityReceived":200}]}, {"allocatedProductId": 9,"packages":[{"productQuantityGroupId": 9,"quantityPerWrap":1,"quantityWrapCarton":1,"quantityCartonMaster":1,"quantityReceived":200}]}]'
-one_pr_one_gr_no_qty_master = '[{"allocatedProductId": 3,"packages":[{"productQuantityGroupId": 3,"quantityPerWrap":1,"quantityWrapCarton":1, "quantityReceived":200}]}]'
+one_pr_one_gr_no_qty_master = '[{"allocatedProductId": 3,"packages":[{"productQuantityGroupId": 3,"quantityPerWrap":1,"quantityWrapCarton":1,"quantityReceived":200}]}]'
 
 
 def test_incoming_stocks_pages(mg_g_populate: FlaskClient):

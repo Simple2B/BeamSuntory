@@ -473,8 +473,6 @@ def mg_g_populate(client: FlaskClient):
 
     # received_one_product_two_groups
     received_one_product_two_groups.products_allocated.append(
-
-    inbound_order.products_allocated.append(
         m.ProductAllocated(
             product=populate_test_product,
             quantity=200,
