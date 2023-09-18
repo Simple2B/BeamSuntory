@@ -93,25 +93,22 @@ if (filterData !== null || filterData !== undefined) {
       const referenceTd = product.cells[4]
       const productSKU = product.cells[3].innerText
 
-            for (const key in filterData) {
-                const productFilterName = filterData[key]
-                const productFilterTd = document.createElement('td')
-                productFilterTd.setAttribute(
-                    'id',
-                    `product-table-filter-${key}-${productFilterName.replace(/ /g, '_')}-${productSKU.replace(
-                        / /g,
-                        '_'
-                    )}`
-                )
-                productFilterTd.classList.add(
-                    'text-base',
-                    'font-normal',
-                    'text-gray-900',
-                    'whitespace-nowrap',
-                    'dark:text-white',
-                    'max-width-100',                    
-                )
-                productFilterTd.innerHTML = `
+      for (const key in filterData) {
+        const productFilterName = filterData[key]
+        const productFilterTd = document.createElement('td')
+        productFilterTd.setAttribute(
+          'id',
+          `product-table-filter-${key}-${productFilterName.replace(/ /g, '_')}-${productSKU.replace(/ /g, '_')}`
+        )
+        productFilterTd.classList.add(
+          'text-base',
+          'font-normal',
+          'text-gray-900',
+          'whitespace-nowrap',
+          'dark:text-white',
+          'max-width-100'
+        )
+        productFilterTd.innerHTML = `
         <div class="pl-3">
           <div class="text-sm">${productFilterName}</div>
         </div>
@@ -129,25 +126,23 @@ const globalFilterMasterGroup = JSON.parse(sessionStorage.getItem('globalFilterM
 const productMgGGlobal = JSON.parse(sessionStorage.getItem('productMgG'))
 
 if (globalFilterMasterGroup && globalFilterMasterGroup.length !== 0) {
-    const filterProductMasterGroupCheckboxes = document.querySelectorAll(
-        '.products-filter-product-master-group-checkbox'
-    )
-    filterProductMasterGroupCheckboxes.forEach((checkbox: HTMLInputElement) => {
-        if (globalFilterMasterGroup.includes(checkbox.value)) {
-            checkbox.checked = true
-        }
-    })
-    for (const masterGroupName of globalFilterMasterGroup) {
-        const referenceTh = document.querySelector('#product-table-th-product-type')
-        const isGroupExist = document.querySelector(`#product-table-filter-master-group-${masterGroupName}`)
-        if (!isGroupExist) {
-            const productFilterTh = document.createElement('th')
-            productFilterTh.setAttribute('id', `product-table-filter-master-group-${masterGroupName}`)
-            const productItemTrs = document.querySelectorAll('.table-product-item-tr')
-            productFilterTh.classList.add('px-6', 'py-3', 'max-width-100')
-            productFilterTh.setAttribute('scope', 'col')
-            productFilterTh.innerHTML = masterGroupName.replace(/_/g, ' ')
-            referenceTh.parentNode.insertBefore(productFilterTh, referenceTh.nextSibling)
+  const filterProductMasterGroupCheckboxes = document.querySelectorAll('.products-filter-product-master-group-checkbox')
+  filterProductMasterGroupCheckboxes.forEach((checkbox: HTMLInputElement) => {
+    if (globalFilterMasterGroup.includes(checkbox.value)) {
+      checkbox.checked = true
+    }
+  })
+  for (const masterGroupName of globalFilterMasterGroup) {
+    const referenceTh = document.querySelector('#product-table-th-product-type')
+    const isGroupExist = document.querySelector(`#product-table-filter-master-group-${masterGroupName}`)
+    if (!isGroupExist) {
+      const productFilterTh = document.createElement('th')
+      productFilterTh.setAttribute('id', `product-table-filter-master-group-${masterGroupName}`)
+      const productItemTrs = document.querySelectorAll('.table-product-item-tr')
+      productFilterTh.classList.add('px-6', 'py-3', 'max-width-100')
+      productFilterTh.setAttribute('scope', 'col')
+      productFilterTh.innerHTML = masterGroupName.replace(/_/g, ' ')
+      referenceTh.parentNode.insertBefore(productFilterTh, referenceTh.nextSibling)
 
       productItemTrs.forEach((productItem: HTMLTableRowElement) => {
         const referenceTd = productItem.cells[4]
@@ -807,15 +802,20 @@ function ship(product: IProduct, group: string) {
 
   // -----count rest quantity in ship request product modal------
   const desiredQuantityInput: HTMLInputElement = document.querySelector('#product-ship-desire-quantity')
+  desiredQuantityInput.setAttribute('max', product.available_quantity[group].toString())
   desiredQuantityInput.addEventListener('change', () => {
     const availableQuantityDiv = document.querySelector('#product-ship-available-quantity')
     availableQuantityDiv.textContent = product.available_quantity[group.replace('_', ' ')].toString()
-    let desiredQuantity = Number(desiredQuantityInput.value)
-    const availableQuantity = Number(availableQuantityDiv.textContent)
-    if (desiredQuantity > availableQuantity) {
-      desiredQuantityInput.value = availableQuantity.toString()
+    let desiredQuantity = parseInt(desiredQuantityInput.value)
+    const availableQuantity = parseInt(availableQuantityDiv.textContent)
+    if (desiredQuantity < 0) {
+      desiredQuantityInput.value = '0'
+    } else if (desiredQuantity > availableQuantity) {
+      desiredQuantityInput.value = product.available_quantity[group].toString()
+      availableQuantityDiv.textContent = '0'
+    } else if (desiredQuantity) {
+      availableQuantityDiv.textContent = (availableQuantity - desiredQuantity).toString()
     }
-    availableQuantityDiv.textContent = (availableQuantity - desiredQuantity).toString()
   })
 }
 
@@ -838,6 +838,7 @@ function booking(product: IProduct, group: string) {
   input.value = product.id.toString()
   input = document.querySelector('#product-event-quantity')
   input.min = '1'
+  input.max = product.available_quantity[group.replace('_', ' ')].toString()
 
   const currentDate = new Date()
 

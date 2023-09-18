@@ -160,7 +160,8 @@
             </svg>
             View
           </button>
-          <button type="button" data-target="{{ ship_request.json }}" data-target-store="{{ ship_request.store.json }}"
+          <!-- TODO: Maybe remove. Ask Done? -->
+          <!-- <button type="button" data-target="{{ ship_request.json }}" data-target-store="{{ ship_request.store.json }}"
             data-target-cart-items="{{ current_order_carts }}" data-target-current-order="{{ ship_request.order_numb }}"
             class="pickup-order-edit-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 sm:w-auto dark:bg-yellow-400 dark:hover:bg-yellow-500">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -170,16 +171,24 @@
                 clip-rule="evenodd"></path>
             </svg>
             Edit
-          </button>
+          </button> -->
           {% if ship_request.status == ship_requests_status.assigned %}
           <button data-pickup-order-id={{ ship_request.id }} type="button"
             class="pickup-order-btn inline-flex items-center px-3 py-2 text-sm font-medium text-center rounded-lg text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
               <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-              <g id="SVGRepo_iconCarrier"> <defs> <style> .cls-1 { fill-rule: evenodd; } </style> </defs> 
-                <path id="accept" class="cls-1" d="M1008,120a12,12,0,1,1,12-12A12,12,0,0,1,1008,120Zm0-22a10,10,0,1,0,10,10A10,10,0,0,0,1008,98Zm-0.08,14.333a0.819,0.819,0,0,1-.22.391,0.892,0.892,0,0,1-.72.259,0.913,0.913,0,0,1-.94-0.655l-2.82-2.818a0.9,0.9,0,0,1,1.27-1.271l2.18,2.184,4.46-7.907a1,1,0,0,1,1.38-.385,1.051,1.051,0,0,1,.36,1.417Z" 
-                  transform="translate(-996 -96)"></path> 
+              <g id="SVGRepo_iconCarrier">
+                <defs>
+                  <style>
+                    .cls-1 {
+                      fill-rule: evenodd;
+                    }
+                  </style>
+                </defs>
+                <path id="accept" class="cls-1"
+                  d="M1008,120a12,12,0,1,1,12-12A12,12,0,0,1,1008,120Zm0-22a10,10,0,1,0,10,10A10,10,0,0,0,1008,98Zm-0.08,14.333a0.819,0.819,0,0,1-.22.391,0.892,0.892,0,0,1-.72.259,0.913,0.913,0,0,1-.94-0.655l-2.82-2.818a0.9,0.9,0,0,1,1.27-1.271l2.18,2.184,4.46-7.907a1,1,0,0,1,1.38-.385,1.051,1.051,0,0,1,.36,1.417Z"
+                  transform="translate(-996 -96)"></path>
               </g>
             </svg>
             Pickup order
@@ -190,9 +199,17 @@
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
               <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-              <g id="SVGRepo_iconCarrier"> <defs> <style> .cls-1 { fill-rule: evenodd; } </style> </defs> 
-                <path id="accept" class="cls-1" d="M1008,120a12,12,0,1,1,12-12A12,12,0,0,1,1008,120Zm0-22a10,10,0,1,0,10,10A10,10,0,0,0,1008,98Zm-0.08,14.333a0.819,0.819,0,0,1-.22.391,0.892,0.892,0,0,1-.72.259,0.913,0.913,0,0,1-.94-0.655l-2.82-2.818a0.9,0.9,0,0,1,1.27-1.271l2.18,2.184,4.46-7.907a1,1,0,0,1,1.38-.385,1.051,1.051,0,0,1,.36,1.417Z" 
-                  transform="translate(-996 -96)"></path> 
+              <g id="SVGRepo_iconCarrier">
+                <defs>
+                  <style>
+                    .cls-1 {
+                      fill-rule: evenodd;
+                    }
+                  </style>
+                </defs>
+                <path id="accept" class="cls-1"
+                  d="M1008,120a12,12,0,1,1,12-12A12,12,0,0,1,1008,120Zm0-22a10,10,0,1,0,10,10A10,10,0,0,0,1008,98Zm-0.08,14.333a0.819,0.819,0,0,1-.22.391,0.892,0.892,0,0,1-.72.259,0.913,0.913,0,0,1-.94-0.655l-2.82-2.818a0.9,0.9,0,0,1,1.27-1.271l2.18,2.184,4.46-7.907a1,1,0,0,1,1.38-.385,1.051,1.051,0,0,1,.36,1.417Z"
+                  transform="translate(-996 -96)"></path>
               </g>
             </svg>
             Confirm delivery

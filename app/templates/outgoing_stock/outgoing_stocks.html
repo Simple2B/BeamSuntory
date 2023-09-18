@@ -6,6 +6,10 @@
 {% else %}
 {% set base_url = url_for('outgoing_stock.get_all') %}
 {% endif %}
+
+<input hidden id="warehouses-json-input" value="{{warehouses_json}}">
+<input hidden id="warehouses-events-json-input" value="{{warehouses_events_json}}">
+
 <div class="relative overflow-visible shadow-md sm:rounded-lg">
   <div class="flex gap-5">
     <form id="outgoing-stock-filter-form" action="{{url_for('outgoing_stock.sort')}}" method="post"

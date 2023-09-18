@@ -82,8 +82,23 @@ def get_all():
         ]
         for spr in ship_requests
     }
-    warehouses_rows = db.session.execute(sa.select(m.Warehouse)).scalars()
-    warehouses = [{"name": w.name, "id": w.id} for w in warehouses_rows]
+    warehouses = db.session.scalars(
+        m.Warehouse.select().where(
+            m.Warehouse.name != s.WarehouseMandatory.warehouse_events.value
+        )
+    ).all()
+    warehouses_events = db.session.scalars(
+        m.Warehouse.select().where(
+            m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value
+        )
+    ).all()
+
+    warehouses_json = s.WarehouseList.model_validate(warehouses).model_dump_json(
+        by_alias=True
+    )
+    warehouses_events_json = s.WarehouseList.model_validate(
+        warehouses_events
+    ).model_dump_json(by_alias=True)
 
     return render_template(
         "outgoing_stock/outgoing_stocks.html",
@@ -95,6 +110,9 @@ def get_all():
         form_edit=form_edit,
         form_sort=form_sort,
         warehouses=warehouses,
+        warehouses_json=warehouses_json,
+        warehouses_events_json=warehouses_events_json,
+        warehouses_events=warehouses_events,
         ship_requests_status=s.ShipRequestStatus,
     )
 
