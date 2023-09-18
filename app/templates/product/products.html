@@ -194,7 +194,7 @@
           </div>
         </td>
         <td scope="row" data-target-product-id="{{ product.id }}"
-          class="product-full-image-anchor p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          class="product-full-image-anchor   text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
             {% if product.image|length > 100 %}
             <img src="data:image/png;base64, {{ product.image }}" alt="{{ product.name }}" class="w-14 object-cover">
@@ -204,43 +204,43 @@
             {% endif %}
           </div>
         </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900   dark:text-white">
+        <td scope="row" class="text-base font-normal text-gray-900   dark:text-white">
           <div class="pl-3">
             <div class="text-sm">{{ product.name }}</div>
           </div>
         </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900   dark:text-white">
+        <td scope="row" class="  text-base font-normal text-gray-900   dark:text-white">
           <div class="pl-3">
             <div class="text-sm">{{ product.SKU }}</div>
           </div>
         </td>
-        <td class="p-4 text-base font-normal text-gray-900 dark:text-white">
+        <td class="text-base font-normal text-gray-900 dark:text-white">
           <div class="pl-3">
             <div class="text-sm">{{ product.description }}</div>
           </div>
         </td>
-        <td class="p-4 text-base font-normal text-gray-900  dark:text-white max-width-100">
+        <td class="text-base font-normal text-gray-900  dark:text-white max-width-100">
           <div class="pl-3">
             <div class="text-sm">{{ product.currency.name }}</div>
           </div>
         </td>
-        <td class="p-4 text-base font-normal text-gray-900  dark:text-white max-width-100">
+        <td class="text-base font-normal text-gray-900  dark:text-white max-width-100">
           <div class="pl-3">
             <div class="text-sm">{{ product.regular_price }}</div>
           </div>
         </td>
-        <td class="p-4 text-base font-normal text-gray-900  dark:text-white max-width-100">
+        <td class=" text-base font-normal text-gray-900  dark:text-white max-width-100">
           <div class="pl-3">
             <div class="text-sm">{{ product.retail_price }}</div>
           </div>
         </td>
-        <td class="p-4 text-base font-normal text-gray-900 dark:text-white max-width-100">
+        <td class=" text-base font-normal text-gray-900 dark:text-white max-width-100">
           <div class="pl-3">
             <div class="text-sm">{{ warehouse_product_qty[product.name] if product.name in
               warehouse_product_qty else 0 }}</div>
           </div>
         </td>
-        <td class="p-4 space-x-2 flex gap-2 flex-wrap justify-center">
+        <td class=" space-x-2 flex gap-2 flex-wrap justify-center py-3">
           <button type="button" data-target="{{product.json}}" class="product-adjust-button inline-flex items-center w-24 px-3 py-2 text-sm font-medium text-center text-white rounded-lgfocus:outline-none bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 rounded-lg dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <g id="SVGRepo_bgCarrier" stroke-width="0"></g>

@@ -104,7 +104,6 @@ if (filterData !== null || filterData !== undefined) {
                     )}`
                 )
                 productFilterTd.classList.add(
-                    'p-4',
                     'text-base',
                     'font-normal',
                     'text-gray-900',
@@ -164,7 +163,6 @@ if (globalFilterMasterGroup && globalFilterMasterGroup.length !== 0) {
           )}`
         )
         productFilterTd.classList.add(
-          'p-4',
           'text-base',
           'font-normal',
           'text-gray-900',
@@ -227,7 +225,6 @@ checkboxFilterProductMasterGroups.forEach((checkbox) => {
             )}`
           )
           productFilterTd.classList.add(
-            'p-4',
             'text-base',
             'font-normal',
             'text-gray-900',
