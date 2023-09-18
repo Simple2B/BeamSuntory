@@ -52,6 +52,16 @@ orderFilterPickupInboundInputs.forEach((input: HTMLInputElement) => {
     })
 })
 
+const pickupInboundSearchButton= document.querySelector('#table-search-pickup-inbound-button')
+pickupInboundSearchButton.addEventListener('click', () => {
+    const searchInput = document.querySelector('#table-search-pickup-inbounds') as HTMLInputElement
+    console.log(searchInput.value)
+    const url = new URL(window.location.href)
+    const params = new URLSearchParams(url.search)
+    params.set('q', searchInput.value)
+    window.location.href = `${url.origin}${url.pathname}?${params.toString()}`    
+})
+
 document.addEventListener('DOMContentLoaded', () => {
     // open view modal
     const buttonsOpenViewModal: NodeListOf<HTMLButtonElement> = document.querySelectorAll('.pickup-inbound-view-button')
