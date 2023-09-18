@@ -79,7 +79,7 @@ if (filterData !== null || filterData !== undefined) {
         for (const key in filterData) {
             const productFilterTh = document.createElement('th')
             productFilterTh.setAttribute('id', `product-table-filter-master-group-${key.replace(/ /g, '_')}`)
-            productFilterTh.classList.add('px-6', 'py-3')
+            productFilterTh.classList.add('px-6', 'py-3', 'max-width-100')
             productFilterTh.setAttribute('scope', 'col')
             productFilterTh.innerHTML = key
             referenceTh.parentNode.insertBefore(productFilterTh, referenceTh.nextSibling)
@@ -105,11 +105,12 @@ if (filterData !== null || filterData !== undefined) {
                     'font-normal',
                     'text-gray-900',
                     'whitespace-nowrap',
-                    'dark:text-white'
+                    'dark:text-white',
+                    'max-width-100'
                 )
                 productFilterTd.innerHTML = `
         <div class="pl-3">
-          <div class="text-base font-semibold">${productFilterName}</div>
+          <div class="text-sm">${productFilterName}</div>
         </div>
       `
                 referenceTd.parentNode.insertBefore(productFilterTd, referenceTd.nextSibling)
@@ -140,7 +141,7 @@ if (globalFilterMasterGroup && globalFilterMasterGroup.length !== 0) {
             const productFilterTh = document.createElement('th')
             productFilterTh.setAttribute('id', `product-table-filter-master-group-${masterGroupName}`)
             const productItemTrs = document.querySelectorAll('.table-product-item-tr')
-            productFilterTh.classList.add('px-6', 'py-3')
+            productFilterTh.classList.add('px-6', 'py-3', 'max-width-100')
             productFilterTh.setAttribute('scope', 'col')
             productFilterTh.innerHTML = masterGroupName.replace(/_/g, ' ')
             referenceTh.parentNode.insertBefore(productFilterTh, referenceTh.nextSibling)
@@ -164,11 +165,12 @@ if (globalFilterMasterGroup && globalFilterMasterGroup.length !== 0) {
                     'font-normal',
                     'text-gray-900',
                     'whitespace-nowrap',
-                    'dark:text-white'
+                    'dark:text-white',
+                    'max-width-100'
                 )
                 productFilterTd.innerHTML = `
             <div class="pl-3">
-              <div class="text-base font-semibold">${productFilterName}</div>
+              <div class="text-sm">${productFilterName}</div>
             </div>
           `
                 referenceTd.parentNode.insertBefore(productFilterTd, referenceTd.nextSibling)
@@ -204,7 +206,7 @@ checkboxFilterProductMasterGroups.forEach((checkbox) => {
             if (!isGroupExist) {
                 const productFilterTh = document.createElement('th')
                 productFilterTh.setAttribute('id', `product-table-filter-master-group-${masterGroupName}`)
-                productFilterTh.classList.add('px-6', 'py-3')
+                productFilterTh.classList.add('px-6', 'py-3', 'max-width-100')
                 productFilterTh.setAttribute('scope', 'col')
                 productFilterTh.innerHTML = masterGroupName.replace(/_/g, ' ')
                 referenceTh.parentNode.insertBefore(productFilterTh, referenceTh.nextSibling)
@@ -227,11 +229,12 @@ checkboxFilterProductMasterGroups.forEach((checkbox) => {
                         'font-normal',
                         'text-gray-900',
                         'whitespace-nowrap',
-                        'dark:text-white'
+                        'dark:text-white',
+                        'max-width-100'
                     )
                     productFilterTd.innerHTML = `
             <div class="pl-3">
-              <div class="text-base font-semibold">${productFilterName}</div>
+              <div class="text-sm">${productFilterName}</div>
             </div>
           `
                     referenceTd.parentNode.insertBefore(productFilterTd, referenceTd.nextSibling)

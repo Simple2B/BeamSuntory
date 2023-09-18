@@ -174,9 +174,9 @@
       <tr>
         <th scope="col" class="px-6 py-3">#</th>
         <th scope="col" class="px-6 py-3">Image</th>
-        <th scope="col" class="px-6 py-3 max-width-100">Name</th>
+        <th scope="col" class="px-6 py-3">Name</th>
         <th scope="col" class="px-6 py-3">SKU</th>
-        <th id="product-table-th-product-type" scope="col" class="px-6 py-3 max-width-100" >Description</th>
+        <th id="product-table-th-product-type" scope="col" class="px-6 py-3" >Description</th>
         <th scope="col" class="px-6 py-3 max-width-100">Currency</th>
         <th scope="col" class="px-6 py-3 max-width-100">Regular price</th>
         <th scope="col" class="px-6 py-3 max-width-100">Retail price</th>
@@ -204,39 +204,39 @@
             {% endif %}
           </div>
         </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900   dark:text-white max-width-100">
+        <td scope="row" class="p-4 text-base font-normal text-gray-900   dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ product.name }}</div>
+            <div class="text-sm">{{ product.name }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900   dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ product.SKU }}</div>
+            <div class="text-sm">{{ product.SKU }}</div>
           </div>
         </td>
-        <td class="p-4 text-base font-normal text-gray-900   dark:text-white max-width-100">
+        <td class="p-4 text-base font-normal text-gray-900 dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ product.description }}</div>
-          </div>
-        </td>
-        <td class="p-4 text-base font-normal text-gray-900  dark:text-white max-width-100">
-          <div class="pl-3">
-            <div class="text-base font-semibold">{{ product.currency.name }}</div>
+            <div class="text-sm">{{ product.description }}</div>
           </div>
         </td>
         <td class="p-4 text-base font-normal text-gray-900  dark:text-white max-width-100">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ product.regular_price }}</div>
+            <div class="text-sm">{{ product.currency.name }}</div>
           </div>
         </td>
         <td class="p-4 text-base font-normal text-gray-900  dark:text-white max-width-100">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ product.retail_price }}</div>
+            <div class="text-sm">{{ product.regular_price }}</div>
+          </div>
+        </td>
+        <td class="p-4 text-base font-normal text-gray-900  dark:text-white max-width-100">
+          <div class="pl-3">
+            <div class="text-sm">{{ product.retail_price }}</div>
           </div>
         </td>
         <td class="p-4 text-base font-normal text-gray-900 dark:text-white max-width-100">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ warehouse_product_qty[product.name] if product.name in
+            <div class="text-sm">{{ warehouse_product_qty[product.name] if product.name in
               warehouse_product_qty else 0 }}</div>
           </div>
         </td>
