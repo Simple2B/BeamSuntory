@@ -34,12 +34,12 @@ def get_all():
     count_query = sa.select(sa.func.count()).select_from(m.InboundOrder)
     if q:
         query = query.where(
-            m.InboundOrder.order_title.ilike(f"%{q}%")
+            m.InboundOrder.title.ilike(f"%{q}%")
             | m.InboundOrder.order_id.ilike(f"%{q}%")
         )
 
         count_query = count_query.where(
-            m.InboundOrder.order_title.ilike(f"%{q}%")
+            m.InboundOrder.title.ilike(f"%{q}%")
             | m.InboundOrder.order_id.ilike(f"%{q}%")
         )
 
