@@ -684,7 +684,7 @@ def request_share():
                 )
                 sru.save()
                 # TODO uncomment when ready to notify
-                # mail.send(msg)
+                mail.send(msg)
 
         flash("Share request created!", "success")
         return redirect(url_for("product.get_all"))
