@@ -138,12 +138,12 @@ def sort():
     )
     if q:
         query = query.where(
-            m.InboundOrder.order_title.ilike(f"%{q}%")
+            m.InboundOrder.title.ilike(f"%{q}%")
             | m.InboundOrder.quantity.ilike(f"%{q}%"),
         )
 
         count_query = count_query.where(
-            m.InboundOrder.order_title.ilike(f"%{q}%")
+            m.InboundOrder.title.ilike(f"%{q}%")
             | m.InboundOrder.quantity.ilike(f"%{q}%"),
         )
 
