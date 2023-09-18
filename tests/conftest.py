@@ -408,6 +408,13 @@ def mg_g_populate(client: FlaskClient):
         ship_request_id=sr_atp.id,
     ).save(False)
 
+    report = m.ReportEvent(
+        type="test_type",
+        user_id=1,
+        history="some history",
+    )
+    report.save(False)
+
     db.session.commit()
 
     today = datetime.datetime.now().date()
@@ -441,6 +448,7 @@ def mg_g_populate(client: FlaskClient):
             comment="event for product 1",
             user_id=3,
             cart_id=cart.id,
+            report_id=report.id,
         ).save(False)
         db.session.commit()
 
