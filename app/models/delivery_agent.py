@@ -50,5 +50,4 @@ class DeliveryAgent(db.Model, ModelMixin):
 
     @property
     def json(self):
-        mg = s.DeliveryAgent.from_orm(self)
-        return mg.json()
+        return s.DeliveryAgent.model_validate(self).model_dump_json()

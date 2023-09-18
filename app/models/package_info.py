@@ -24,5 +24,4 @@ class PackageInfo(db.Model, ModelMixin):
 
     @property
     def json(self):
-        mg = s.PackageInfo.from_orm(self)
-        return mg.json()
+        return s.PackageInfo.model_validate(self).model_dump_json()

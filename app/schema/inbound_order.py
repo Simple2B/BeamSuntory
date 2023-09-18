@@ -1,6 +1,6 @@
 from enum import Enum
 from datetime import datetime, date
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from .supplier import Supplier
 from .warehouse import Warehouse
 from .product_allocated import ProductAllocatedOut
@@ -15,6 +15,8 @@ class InboundOrderStatus(Enum):
 
 
 class InboundOrder(BaseModel):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
     id: int
     uuid: str
     order_id: str = Field(alias="orderId")
@@ -35,8 +37,4 @@ class InboundOrder(BaseModel):
     wm_notes: str | None = Field(alias="wmNotes")
     da_notes: str | None = Field(alias="daNotes")
 
-    created_at: datetime
-
-    class Config:
-        orm_mode = True
-        allow_population_by_field_name = True
+    created_at: datetime = Field(alias="createdAt")

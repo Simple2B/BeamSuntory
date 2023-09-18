@@ -329,6 +329,24 @@ userRoleSelect.addEventListener('change', () => {
     salesRepAddUserCheckbox.checked = false
     const selectedRole = userRoleSelect.options[userRoleSelect.selectedIndex].text
 
+    const selectingGroupsContainer = document.querySelector('#user-add-dropdown-btn')
+    const allGroups = document.querySelector('#user-add-dropdown-options')
+    const listItems = allGroups.querySelectorAll('li');
+    let selectedValues: string[] = [];
+
+    listItems.forEach((item) => {
+        selectedValues.push(item.textContent.trim());
+    });
+
+    const joinedValues = selectedValues.join(', ');
+
+    if (selectedRole == UserRole.Admin) {
+        selectingGroupsContainer.innerHTML = joinedValues        
+        userAddDropdownBtn.removeEventListener('click', handleUserAddDropdownBtnClick);
+    }else{
+        userAddDropdownBtn.addEventListener('click', handleUserAddDropdownBtnClick);
+    }
+
     if (selectedRole !== UserRole.SalesRep) {
         salesAddRepContainer.classList.add('hidden')
         salesRepAddUserContainer.classList.add('hidden')
@@ -346,9 +364,11 @@ const optionItems = document.querySelectorAll('.user-add-dropdown-option')
 const selectedOptions: string[] = []
 const options = document.querySelector('#user-add-dropdown-options')
 
-userAddDropdownBtn.addEventListener('click', () => {
-    options.classList.toggle('hidden')
-})
+function handleUserAddDropdownBtnClick() {
+    options.classList.toggle('hidden');
+}
+
+userAddDropdownBtn.addEventListener('click', handleUserAddDropdownBtnClick);
 
 optionItems.forEach((optionItem: HTMLElement) => {
     optionItem.addEventListener('click', (event) => {

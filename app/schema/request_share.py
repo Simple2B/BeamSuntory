@@ -1,12 +1,11 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class RequestShare(BaseModel):
-    id: int
-    product_id: int
-    group_id: int
-    desire_quantity: int
-    status: str
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
-    class Config:
-        orm_mode = True
+    id: int
+    product_id: int = Field(alias="productId")
+    group_id: int = Field(alias="groupId")
+    desire_quantity: int = Field(alias="desireQuantity")
+    status: str

@@ -10,6 +10,7 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
+from sqlalchemy import desc
 from pydantic import ValidationError
 
 from app.controllers import create_pagination
@@ -33,7 +34,7 @@ def get_all():
 
     q = request.args.get("q", type=str, default=None)
     current_order_uuid = request.args.get("current_order_uuid", type=str, default=None)
-    query = m.InboundOrder.select().order_by(m.InboundOrder.id)
+    query = m.InboundOrder.select().order_by(desc(m.InboundOrder.id))
 
     if current_order_uuid:
         query = query.where(m.InboundOrder.uuid != current_order_uuid)
@@ -135,8 +136,8 @@ def create():
         )
 
         # save delivered product quantity, so this product would be available in warehouse
-        products_data = s.ProductAllocatedList.parse_raw(form.products.data)
-        for product_data in products_data.__root__:
+        products_data = s.ProductAllocatedList.model_validate_json(form.products.data)
+        for product_data in products_data.root:
             product = db.session.get(m.Product, product_data.id)
             # Find product
             if not product:
@@ -221,7 +222,7 @@ def save():
         inbound_order.warehouse = warehouse
 
         try:
-            product_quantity_groups = s.ProductQuantityGroupsCreate.parse_raw(
+            product_quantity_groups = s.ProductQuantityGroupsCreate.model_validate_json(
                 form.product_groups.data
             )
         except ValidationError:
@@ -238,7 +239,7 @@ def save():
                 )
             )
 
-        for product_quantity_group in product_quantity_groups.__root__:
+        for product_quantity_group in product_quantity_groups.root:
             product_allocated = db.session.scalar(
                 m.ProductAllocated.select().where(
                     m.ProductAllocated.id

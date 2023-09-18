@@ -36,8 +36,6 @@ const defaultImage =
     'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png'
 
 // --count total quantity and price--
-const priceElements = document.querySelectorAll('.cart-item-retail_price')
-const quantityElements = document.querySelectorAll('.cart-item-quantity')
 const totalPriceElement = document.querySelector('#cart-total-price')
 const totalQuantityElement = document.querySelector('#cart-total-quantity')
 const tableCartItems = document.querySelectorAll('.table-cart-item')
@@ -61,6 +59,7 @@ tableCartItems.forEach((item) => {
 
     const price = parseFloat(priceElement.textContent)
     const quantity = parseInt(quantityElement.value)
+
     const totalPriceOneElement = price * quantity
     totalPrice += totalPriceOneElement
     totalQuantity += quantity
@@ -184,7 +183,7 @@ if (salesRepLockerCheckbox) {
     })
 }
 
-const eventButtons = document.querySelectorAll('.cart-item-event-button')
+const eventButtons = document.querySelectorAll('.cart-item-event-button');
 eventButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
         const cart = JSON.parse(btn.getAttribute('data-target-cart')) as ICart

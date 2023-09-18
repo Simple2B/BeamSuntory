@@ -9,6 +9,7 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
+from sqlalchemy import desc
 from sqlalchemy.orm import aliased
 from app.controllers import create_pagination
 
@@ -34,7 +35,7 @@ def get_all():
     store_category = aliased(m.StoreCategory)
     store = aliased(m.Store)
     q = request.args.get("q", type=str, default=None)
-    query = m.ShipRequest.select().order_by(m.ShipRequest.id)
+    query = m.ShipRequest.select().order_by(desc(m.ShipRequest.id))
     count_query = sa.select(sa.func.count()).select_from(m.ShipRequest)
     if q:
         query = (

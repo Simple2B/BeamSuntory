@@ -8,6 +8,7 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
+from sqlalchemy import desc
 from app.controllers import create_pagination
 
 from app import schema as s
@@ -30,7 +31,7 @@ def get_all():
     filtered = False
 
     q = request.args.get("q", type=str, default=None)
-    query = m.InboundOrder.select().order_by(m.InboundOrder.id)
+    query = m.InboundOrder.select().order_by(desc(m.InboundOrder.id))
     count_query = sa.select(sa.func.count()).select_from(m.InboundOrder)
     if q:
         query = query.where(
@@ -87,9 +88,9 @@ def accept():
         flash("There is no such inbound order", "danger")
         return redirect(url_for("incoming_stock.get_all"))
 
-    products_info_json = s.IncomingStocks.parse_raw(
+    products_info_json = s.IncomingStocks.model_validate_json(
         form_edit.received_products.data
-    ).__root__
+    ).root
 
     for allocated_product in products_info_json:
         for new_package_info in allocated_product.packages:

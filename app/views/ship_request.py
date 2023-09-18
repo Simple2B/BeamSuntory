@@ -9,6 +9,7 @@ from flask import (
 )
 from flask_login import login_required, current_user
 import sqlalchemy as sa
+from sqlalchemy import desc
 from sqlalchemy.orm import aliased
 from app.controllers import create_pagination
 
@@ -30,7 +31,7 @@ def get_all():
     store_category = aliased(m.StoreCategory)
     store = aliased(m.Store)
     q = request.args.get("q", type=str, default=None)
-    query = m.ShipRequest.select().order_by(m.ShipRequest.id)
+    query = m.ShipRequest.select().order_by(desc(m.ShipRequest.id))
     count_query = sa.select(sa.func.count()).select_from(m.ShipRequest)
     if q:
         query = (
@@ -148,6 +149,10 @@ def create():
             )
         ).scalars()
 
+        report_event = m.ReportEvent(
+            type=s.ReportEventType.created.value, user=current_user
+        )
+
         for cart in carts:
             is_group_in_master_group = (
                 db.session.query(m.Group)
@@ -159,7 +164,8 @@ def create():
                 .count()
                 > 0
             )
-            if event_date_range and is_group_in_master_group:
+            if start_date and end_date and is_group_in_master_group:
+                # creation event
                 event = m.Event(
                     date_reserve_from=start_date - timedelta(days=5),
                     date_reserve_to=end_date + timedelta(days=5),
@@ -170,6 +176,7 @@ def create():
                     cart_id=cart.id,
                     comment=form_create.event_comment.data,
                     user=current_user,
+                    report=report_event,
                 )
                 db.session.add(event)
                 log(log.INFO, "Event added. Event: [%s]", event)

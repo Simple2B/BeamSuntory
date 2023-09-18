@@ -1,7 +1,7 @@
 from flask.testing import FlaskClient
+from app import schema as s
 from app import models as m, db
 from tests.utils import login, register, logout
-from config import BaseConfig
 
 
 def test_warehouses_pages(mg_g_populate: FlaskClient):
@@ -42,7 +42,7 @@ def test_create_warehouse(mg_g_populate: FlaskClient):
     logout(mg_g_populate)
 
     role = db.session.execute(
-        m.Division.select().where(m.Division.role_name == "Manager")
+        m.Division.select().where(m.Division.role_name == "Manager")  # TODO ?
     ).scalar()
     register("samm", "samm@test.com", role=role)
     login(mg_g_populate, "samm")
@@ -77,7 +77,7 @@ def test_delete_warehouse(mg_g_populate: FlaskClient):
 def test_edit_warehouse(mg_g_populate: FlaskClient):
     login(mg_g_populate)
     role_sales = db.session.execute(
-        m.Division.select().where(m.Division.role_name == BaseConfig.Config.SALES_REP)
+        m.Division.select().where(m.Division.role_name == s.UserRole.SALES_REP.value)
     ).scalar()
     register("samm", "samm@test.com", role=role_sales)
     cur_user = db.session.execute(
