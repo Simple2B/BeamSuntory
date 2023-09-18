@@ -1,8 +1,10 @@
 from datetime import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class Supplier(BaseModel):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
     id: int
     name: str
     email: str
@@ -14,7 +16,3 @@ class Supplier(BaseModel):
     zip: str
     active: bool
     created_at: datetime = Field(alias="createdAt")
-
-    class Config:
-        orm_mode = True
-        allow_population_by_field_name = True

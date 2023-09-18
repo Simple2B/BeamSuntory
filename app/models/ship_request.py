@@ -59,8 +59,8 @@ class ShipRequest(db.Model, ModelMixin):
 
     @property
     def json(self):
-        mg = s.ShipRequest.from_orm(self)
-        ujs = mg.json()
+        # TODO refactor !
+        ujs = s.ShipRequest.model_validate(self).model_dump_json()
         mg_dict = json.loads(ujs)
         mg_dict["current_order_carts"] = [
             {
@@ -76,9 +76,9 @@ class ShipRequest(db.Model, ModelMixin):
                 if cart.warehouse_id
                 else None,
             }
-            for cart in db.session.execute(
+            for cart in db.session.scalars(
                 Cart.select().where(Cart.order_numb == mg_dict["order_numb"])
-            ).scalars()
+            )
         ]
         mg_dict["warehouses"] = [
             {"name": w.name, "id": w.id, "products_ids": []}

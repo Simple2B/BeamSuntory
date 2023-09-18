@@ -34,5 +34,4 @@ class Property(db.Model, ModelMixin):
 
     @property
     def json(self):
-        mg = s.Property.from_orm(self)
-        return mg.json()
+        return s.Property.model_validate(self).model_dump_json()

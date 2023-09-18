@@ -25,7 +25,7 @@ class Adjust(db.Model, ModelMixin):
     @property
     def json(self):
         mg = s.Adjust.from_orm(self)
-        ujs = mg.json()
+        ujs = mg.model_dump_json()
         mg_dict = json.loads(ujs)
 
         mg_dict["product"] = {

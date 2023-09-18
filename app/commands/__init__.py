@@ -6,7 +6,7 @@ from sqlalchemy import orm
 from app import models as m
 from app import db, forms
 from app import schema as s
-from config import BaseConfig
+from config import SALES_REP_LOCKER_NAME
 
 
 def init(app: Flask):
@@ -34,18 +34,14 @@ def init(app: Flask):
         if db.session.execute(query).first():
             print(f"User with e-mail: [{app.config['ADMIN_EMAIL']}] already exists")
             return
-        for role in [
-            BaseConfig.Config.ADMIN,
-            BaseConfig.Config.SALES_REP,
-            BaseConfig.Config.WAREHOUSE_MANAGER,
-        ]:
+        for role in s.UserRole:
             check_role = db.session.execute(
-                m.Division.select().where(m.Division.role_name == role)
+                m.Division.select().where(m.Division.role_name == role.value)
             ).scalar()
             if not check_role:
-                m.Division(role_name=role, activated=True).save()
+                m.Division(role_name=role.value, activated=True).save()
         role = db.session.execute(
-            m.Division.select().where(m.Division.role_name == BaseConfig.Config.ADMIN)
+            m.Division.select().where(m.Division.role_name == s.UserRole.ADMIN.value)
         ).scalar()
         m.User(
             username=app.config["ADMIN_USERNAME"],
@@ -127,7 +123,7 @@ def init(app: Flask):
 
         role = db.session.execute(
             m.Division.select().where(
-                m.Division.role_name == BaseConfig.Config.WAREHOUSE_MANAGER
+                m.Division.role_name == s.UserRole.WAREHOUSE_MANAGER.value
             )
         ).scalar()
         if role:
@@ -199,7 +195,7 @@ def init(app: Flask):
         ).save()
 
         m.StoreCategory(
-            name=BaseConfig.Config.SALES_REP_LOCKER_NAME,
+            name=SALES_REP_LOCKER_NAME,
             active=True,
             image=os.environ.get("DEFAULT_IMAGE", "default"),
         ).save()

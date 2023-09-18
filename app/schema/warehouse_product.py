@@ -1,11 +1,10 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class WarehouseProduct(BaseModel):
-    id: int
-    product_id: int
-    warehouse_id: int
-    product_quantity: int
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
-    class Config:
-        orm_mode = True
+    id: int
+    product_id: int = Field(alias="productId")
+    warehouse_id: int = Field(alias="warehouseId")
+    product_quantity: int = Field(alias="productQuantity")

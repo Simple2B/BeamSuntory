@@ -30,3 +30,4 @@ from .request_share import RequestShare
 from .store_category import StoreCategory
 from .adjust import Adjust
 from .event import Event, EventCSVOut, EventsApiOut, EventsDateQuantity, EventsCalendar
+from .report_event import ReportEventType, ReportEvent

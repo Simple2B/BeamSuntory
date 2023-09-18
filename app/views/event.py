@@ -1,5 +1,6 @@
 from datetime import datetime
 from datetime import date as Date
+from http import HTTPStatus
 import functools
 import calendar
 from flask import (
@@ -27,8 +28,7 @@ def get_events():
     end_from = request.args.get("end_from", type=str, default=None)
     end_to = request.args.get("end_to", type=str, default=None)
 
-    query = m.Event.select().order_by(m.Event.id)
-    # product = aliased(m.Product)
+    query = m.Event.select().order_by(m.Event.created_at)
 
     count_query = sa.select(sa.func.count()).select_from(m.Event)
     if q:
@@ -62,19 +62,19 @@ def get_events():
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
-    events = db.session.scalars(
+    reports = db.session.scalars(
         query.offset((pagination.page - 1) * pagination.per_page).limit(
             pagination.per_page
         )
     )
-    return pagination, events
+    return pagination, reports
 
 
 @event_blueprint.route("/api", methods=["GET"])
 @login_required
 def get_events_json():
     pagination, events = get_events()
-    return s.EventsApiOut(pagination=pagination, events=events.all()).json(
+    return s.EventsApiOut(pagination=pagination, events=events.all()).model_dump_json(
         by_alias=True
     )
 
@@ -222,6 +222,6 @@ def get_available_quantity_by_date():
             jsonify(
                 f"Product: {product.name}, available quantity: {available_quantity}"
             ),
-            400,
+            HTTPStatus.BAD_REQUEST,
         )
-    return "ok", 200
+    return "ok", HTTPStatus.OK

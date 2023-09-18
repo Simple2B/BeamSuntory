@@ -110,10 +110,11 @@ def create():
         log(log.ERROR, "Validation failed: [%s]", form_create.errors)
         return redirect(url_for("ship_request.get_all"))
     if form_create.validate_on_submit():
-        if form_create.event_date_range.data:
+        event_date_range = form_create.event_date_range.data
+        if event_date_range:
             current_date = datetime.now()
-            date_from = form_create.event_date_range.data.split(" - ")[0]
-            date_to = form_create.event_date_range.data.split(" - ")[1]
+            date_from = event_date_range.split(" - ")[0]
+            date_to = event_date_range.split(" - ")[1]
             start_date = datetime.strptime(date_from, "%Y-%m-%d")
             end_date = datetime.strptime(date_to, "%Y-%m-%d")
             difference_date = start_date - current_date
@@ -148,6 +149,10 @@ def create():
             )
         ).scalars()
 
+        report_event = m.ReportEvent(
+            type=s.ReportEventType.created.value, user=current_user
+        )
+
         for cart in carts:
             is_group_in_master_group = (
                 db.session.query(m.Group)
@@ -160,6 +165,7 @@ def create():
                 > 0
             )
             if start_date and end_date and is_group_in_master_group:
+                # creation event
                 event = m.Event(
                     date_reserve_from=start_date - timedelta(days=5),
                     date_reserve_to=end_date + timedelta(days=5),
@@ -170,6 +176,7 @@ def create():
                     cart_id=cart.id,
                     comment=form_create.event_comment.data,
                     user=current_user,
+                    report=report_event,
                 )
                 db.session.add(event)
                 log(log.INFO, "Event added. Event: [%s]", event)

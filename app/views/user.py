@@ -15,11 +15,11 @@ import sqlalchemy as sa
 from sqlalchemy.orm import aliased
 from app.controllers import create_pagination
 
+from app import schema as s
 from app import models as m, db, mail
 from app import forms as f
-from app import schema as s
 from app.logger import log
-from config import BaseConfig
+from config import SALES_REP_LOCKER_NAME
 
 
 bp = Blueprint("user", __name__, url_prefix="/user")
@@ -178,7 +178,7 @@ def create():
         sales_rep_role_id = (
             db.session.execute(
                 m.Division.select().where(
-                    m.Division.role_name == BaseConfig.Config.SALES_REP
+                    m.Division.role_name == s.UserRole.SALES_REP.value
                 )
             )
             .scalar()
@@ -187,12 +187,12 @@ def create():
         if user.role == sales_rep_role_id:
             store_category: m.StoreCategory = db.session.execute(
                 m.StoreCategory.select().where(
-                    m.StoreCategory.name == BaseConfig.Config.SALES_REP_LOCKER_NAME
+                    m.StoreCategory.name == SALES_REP_LOCKER_NAME
                 )
             ).scalar()
             store = m.Store(
                 store_category_id=store_category.id,
-                store_name=f"{user.username}_{BaseConfig.Config.SALES_REP_LOCKER_NAME}",
+                store_name=f"{user.username}_{SALES_REP_LOCKER_NAME}",
                 contact_person=user.username,
                 email=user.email,
                 phone_numb=user.phone_number,
@@ -261,7 +261,7 @@ def delete(id: int):
     sales_rep_role_id = (
         db.session.execute(
             m.Division.select().where(
-                m.Division.role_name == BaseConfig.Config.SALES_REP
+                m.Division.role_name == s.UserRole.SALES_REP.value
             )
         )
         .scalar()
