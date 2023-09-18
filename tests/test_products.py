@@ -144,6 +144,7 @@ def test_assign_product(mg_g_populate: FlaskClient):
         group=2,
         quantity=10,
         from_group=group_name,
+        from_group_id=1,
     )
 
     response = mg_g_populate.post(
