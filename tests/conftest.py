@@ -197,6 +197,27 @@ def mg_g_populate(client: FlaskClient):
         width=11.0,
         height=11.0,
     ).save(False)
+    event_test_product = m.Product(
+        name="event_test_product",
+        supplier_id=1,
+        currency="CAD",
+        regular_price=9,
+        retail_price=11,
+        image="imgpngbase64str",
+        description="desc",
+        SKU="322ewd3333rs",
+        low_stock_level=11,
+        program_year=2023,
+        package_qty=12,
+        numb_of_items_per_case=22,
+        numb_of_cases_per_outer_case=22,
+        comments="comments",
+        weight=11.0,
+        length=11.0,
+        width=11.0,
+        height=11.0,
+    )
+    event_test_product.save(False)
     m.ProductGroup(product_id=1, group_id=1).save(False)
     m.ProductGroup(product_id=2, group_id=2).save(False)
 
@@ -356,7 +377,7 @@ def mg_g_populate(client: FlaskClient):
     ).save(False)
 
     m.WarehouseProduct(
-        product_id=populate_test_product.id,
+        product_id=event_test_product.id,
         group_id=group_event.id,
         product_quantity=200,
         warehouse_id=warehouse_events.id,
@@ -401,7 +422,7 @@ def mg_g_populate(client: FlaskClient):
         ).save(False)
 
         cart = m.Cart(
-            product=populate_test_product,
+            product=event_test_product,
             quantity=10,
             user_id=3,
             group=s.MasterGroupMandatory.events.value,
@@ -416,7 +437,7 @@ def mg_g_populate(client: FlaskClient):
             date_reserve_from=today - datetime.timedelta(days=day + 5),
             date_reserve_to=today + datetime.timedelta(days=day + 5),
             quantity=cart.quantity,
-            product_id=populate_test_product.id,
+            product_id=event_test_product.id,
             comment="event for product 1",
             user_id=3,
             cart_id=cart.id,

@@ -23,9 +23,12 @@ def test_event_pages(client):
 
 def test_get_available_quantity_event(mg_g_populate: FlaskClient):
     login(mg_g_populate)
+    product: m.Product = db.session.scalar(
+        m.Product.select().where(m.Product.name == "event_test_product")
+    )
     month_from = datetime.now().month
     year_from = datetime.now().year
-    product_id = 1
+    product_id = product.id
     group_name = "Events"
 
     response = mg_g_populate.get(
@@ -53,10 +56,13 @@ def test_get_available_quantity_event(mg_g_populate: FlaskClient):
 
 def test_get_available_quantity_by_date_event(mg_g_populate: FlaskClient):
     login(mg_g_populate)
+    product: m.Product = db.session.scalar(
+        m.Product.select().where(m.Product.name == "event_test_product")
+    )
     date_from = datetime.now().strftime("%Y_%m_%d")
     date_to = (datetime.now() + timedelta(days=5)).strftime("%Y_%m_%d")
     quantity_desired = 100
-    product_id = 1
+    product_id = product.id
     group_name = "Events"
     product = db.session.get(m.Product, product_id)
     available_quantity = 160

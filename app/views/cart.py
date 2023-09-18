@@ -155,7 +155,7 @@ def get_all():
         store_categories=store_categories,
         current_user_role_name=current_user_role_name,
         sales_rep_role=BaseConfig.Config.SALES_REP,
-        carts=carts,
+        carts=json.dumps(carts),
         locker_store_category_ids=json.dumps(locker_store_category_ids)
         if locker_store_category_ids
         else None,
