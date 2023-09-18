@@ -110,10 +110,11 @@ def create():
         log(log.ERROR, "Validation failed: [%s]", form_create.errors)
         return redirect(url_for("ship_request.get_all"))
     if form_create.validate_on_submit():
-        if form_create.event_date_range.data:
+        event_date_range = form_create.event_date_range.data
+        if event_date_range:
             current_date = datetime.now()
-            date_from = form_create.event_date_range.data.split(" - ")[0]
-            date_to = form_create.event_date_range.data.split(" - ")[1]
+            date_from = event_date_range.split(" - ")[0]
+            date_to = event_date_range.split(" - ")[1]
             start_date = datetime.strptime(date_from, "%Y-%m-%d")
             end_date = datetime.strptime(date_to, "%Y-%m-%d")
             difference_date = start_date - current_date

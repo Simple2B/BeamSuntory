@@ -701,34 +701,46 @@ def adjust():
     form: f.AdjustProductForm = f.AdjustProductForm()
 
     if form.validate_on_submit():
-        ai: m.Adjust = m.Adjust(
+        adjust_item: m.Adjust = m.Adjust(
             product_id=form.product_id.data,
             note=form.note.data,
         )
-        ai.save()
+        db.session.add(adjust_item)
         groups = json.loads(form.groups_quantity.data)
         product = db.session.get(m.Product, form.product_id.data)
-        product_name = product.name
+        warehouse_event: m.Warehouse = db.session.scalar(
+            m.Warehouse.select().where(
+                m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value
+            )
+        )
+        if not product:
+            flash("Cannot save product data", "danger")
+            log(log.ERROR, "Not found product by id : [%s]", form.product_id.data)
+            return redirect(url_for("product.get_all"))
 
         for group_name, warehouses in groups.items():
-            print(group_name)
             group_id = db.session.execute(
                 m.Group.select()
                 .where(m.Group.name == group_name)
                 .with_only_columns(m.Group.id)
             ).scalar()
             for warehouse_id, quantity in warehouses.items():
-                product_warehouse: m.WarehouseProduct = db.session.execute(
+                product_warehouse: m.WarehouseProduct = db.session.scalar(
                     m.WarehouseProduct.select().where(
                         m.WarehouseProduct.product_id == form.product_id.data,
                         m.WarehouseProduct.group_id == group_id,
                         m.WarehouseProduct.warehouse_id == warehouse_id,
                     )
-                ).scalar()
+                )
                 if product_warehouse:
+                    if (
+                        group_name == s.MasterGroupMandatory.events.value
+                        and warehouse_event.id != int(warehouse_id)
+                    ):
+                        continue
                     if product_warehouse.product_quantity != quantity:
                         adjust_gr_qty: m.AdjustGroupQty = m.AdjustGroupQty(
-                            adjust_id=ai.id,
+                            adjust_id=adjust_item.id,
                             quantity=quantity,
                             group_id=group_id,
                             warehouse_id=warehouse_id,
@@ -745,7 +757,7 @@ def adjust():
                     )
                     db.session.add(product_warehouse)
                     adjust_gr_qty: m.AdjustGroupQty = m.AdjustGroupQty(
-                        adjust_id=ai.id,
+                        adjust_id=adjust_item.id,
                         quantity=quantity,
                         group_id=group_id,
                         warehouse_id=warehouse_id,
@@ -760,8 +772,7 @@ def adjust():
             form.product_id.data,
             form.groups_quantity.data,
         )
-        # NOTE: should we notify users about adjust?
-        flash(f"Product {product_name} was adjusted", "success")
+        flash(f"Product {product.name} was adjusted", "success")
         return redirect(url_for("product.get_all"))
 
     log(log.ERROR, "Adjust item save errors: [%s]", form.errors)

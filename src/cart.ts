@@ -27,6 +27,10 @@ interface IEventCart {
     status: boolean
 }
 
+// --get cart items from hidden input for datepicker--
+const cartEventsHiddenInput = document.querySelector('#carts-events-hidden-input') as HTMLInputElement
+const carts = JSON.parse(cartEventsHiddenInput.value) as ICartItem[]
+
 // variable to set default image to brand dynamically in modal window. Can we get link from the internet?
 const defaultImage =
     'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png'
@@ -264,7 +268,7 @@ const picker = new easepick.create({
             const endDate =
                 evt.detail.end.getFullYear() + '_' + (evt.detail.end.getMonth() + 1) + '_' + evt.detail.end.getDate()
 
-            const availableEventQuantity = await getEventAvailableQuantityByDate(JSON.parse(carts), startDate, endDate)
+            const availableEventQuantity = await getEventAvailableQuantityByDate(carts, startDate, endDate)
 
             if (availableEventQuantity.length !== 0) {
                 const errorMessages = availableEventQuantity.map((e) => e.error)

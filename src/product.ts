@@ -59,6 +59,10 @@ interface IMasterGroup {
     master_groups_list_groups: { [index: string]: { group_name: string; group_id: number }[] }
 }
 
+// global variable for mandatory event instance
+const eventCheckbox: HTMLInputElement = document.querySelector('#product-show-events-toggle-btn')
+const isEvent = eventCheckbox.checked
+const eventsWarehouse = 'Warehouse Events'
 const eventMasterGroup = 'Events'
 
 // variable to set default image to brand dynamically in modal window. Can we get link from the internet?
@@ -667,8 +671,6 @@ viewProductButtonElements.forEach((e) =>
         const product = JSON.parse(e.getAttribute('data-target'))
         sessionStorage.setItem('product', JSON.stringify(product))
         const prodGroups = Object.keys(product.mstr_groups_groups)
-        const eventCheckbox: HTMLInputElement = document.querySelector('#product-show-events-toggle-btn')
-        const isEvent = eventCheckbox.checked
 
         prodGroups.forEach((groupName) => {
             let isEqual = false
@@ -919,13 +921,13 @@ function booking(product: IProduct, group: string) {
 
                         jsDate.setHours(0, 0, 0)
 
-                        const dayContainer = document
-                            .querySelector('.easepick-wrapper')
+                        const dayContainer = document.querySelector('.easepick-wrapper')
 
-                        const dayContainerShadow = dayContainer
-                            .shadowRoot.querySelector(`div[data-time='${jsDate.getTime()}']`)
+                        const dayContainerShadow = dayContainer.shadowRoot.querySelector(
+                            `div[data-time='${jsDate.getTime()}']`
+                        )
 
-                        if(!dayContainerShadow) {
+                        if (!dayContainerShadow) {
                             return
                         }
 
@@ -1278,8 +1280,10 @@ function createAdjustAction(isEqual: boolean, masterGroup: string, group: string
     )
 
     for (const warehouse of productParam.all_warehouses) {
+        if (isEvent && warehouse.name !== eventsWarehouse) {
+            continue
+        }
         const option = document.createElement('option')
-
         option.value = warehouse.id.toString()
         option.text = warehouse.name.toString()
         selectWarehouse.appendChild(option)
