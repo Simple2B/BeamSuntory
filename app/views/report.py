@@ -101,7 +101,7 @@ def events():
     pagination, reports = get_events_report()
 
     return render_template(
-        "report/events.html",
+        "report/event/events.html",
         reports=reports,
         page=pagination,
         search_query=q,
