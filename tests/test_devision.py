@@ -3,7 +3,6 @@ from flask.testing import FlaskClient
 from app import schema as s
 from app import models as m, db
 from tests.utils import login, register, logout
-from config import BaseConfig
 
 
 def test_divisions_pages(client):

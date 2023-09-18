@@ -179,7 +179,7 @@ if (salesRepLockerCheckbox) {
     })
 }
 
-const eventButtons = document.querySelectorAll('.cart-item-event-button')
+const eventButtons = document.querySelectorAll('.cart-item-event-button');
 eventButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
         const cart = JSON.parse(btn.getAttribute('data-target-cart')) as ICart

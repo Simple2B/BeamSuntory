@@ -1,5 +1,4 @@
 from app.models import User, Division
-from config import BaseConfig
 from app import schema as s
 from app import db
 

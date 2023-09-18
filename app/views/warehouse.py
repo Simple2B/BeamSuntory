@@ -14,7 +14,6 @@ from app import schema as s
 from app import models as m, db
 from app import forms as f
 from app.logger import log
-from config import BaseConfig
 
 
 warehouse_blueprint = Blueprint("warehouse", __name__, url_prefix="/warehouse")
