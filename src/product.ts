@@ -802,7 +802,7 @@ function ship(product: IProduct, group: string) {
 
   // -----count rest quantity in ship request product modal------
   const desiredQuantityInput: HTMLInputElement = document.querySelector('#product-ship-desire-quantity')
-  desiredQuantityInput.setAttribute('max', product.available_quantity[group].toString())
+  desiredQuantityInput.setAttribute('max', product.available_quantity[group.replace('_', ' ')].toString())
   desiredQuantityInput.addEventListener('change', () => {
     const availableQuantityDiv = document.querySelector('#product-ship-available-quantity')
     availableQuantityDiv.textContent = product.available_quantity[group.replace('_', ' ')].toString()
@@ -811,7 +811,7 @@ function ship(product: IProduct, group: string) {
     if (desiredQuantity < 0) {
       desiredQuantityInput.value = '0'
     } else if (desiredQuantity > availableQuantity) {
-      desiredQuantityInput.value = product.available_quantity[group].toString()
+      desiredQuantityInput.value = product.available_quantity[group.replace('_', ' ')].toString()
       availableQuantityDiv.textContent = '0'
     } else if (desiredQuantity) {
       availableQuantityDiv.textContent = (availableQuantity - desiredQuantity).toString()
