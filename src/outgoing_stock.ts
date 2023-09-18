@@ -3,13 +3,29 @@ import type { ModalOptions, ModalInterface } from 'flowbite'
 
 const EventsGroup = 'Events'
 
+interface IEvent {
+  dateFrom: string
+  dateTo: string
+}
+
+interface IStore {
+  id: number
+  storeName: string
+  address: string
+  phoneNumb: string
+  country: string
+  region: string
+  city: string
+  zip: string
+}
 interface ICart {
   product: IProduct
   group: string
   quantity: number
+  event?: IEvent
 }
 
-interface IShipRequest {
+export interface IShipRequest {
   id: number
   orderNumb: string
   status: string
@@ -21,9 +37,10 @@ interface IShipRequest {
   quantity: number
   current_order_carts: IProduct[]
   comment: string
-  wm_notes: string
-  da_notes: string
+  wmNotes: string
+  daNotes: string
   carts: ICart[]
+  store: IStore
 }
 
 interface IProduct {
@@ -38,17 +55,6 @@ interface IProduct {
   group: string
   warehouse: { id: number; name: string }
   warehouses: IWarehouse[]
-}
-
-interface IStore {
-  id: number
-  store_name: string
-  address: string
-  phone_numb: string
-  country: string
-  region: string
-  city: string
-  zip: string
 }
 
 interface IWarehouse {
@@ -148,7 +154,6 @@ const viewOutgoingStockButtonElements = document.querySelectorAll('.outgoing-sto
 viewOutgoingStockButtonElements.forEach((e) =>
   e.addEventListener('click', () => {
     const shipRequest: IShipRequest = JSON.parse(e.getAttribute('data-target'))
-    const store = JSON.parse(e.getAttribute('data-target-store'))
 
     let div: HTMLDivElement = document.querySelector('#outgoing-stock-view-order-number')
     div.innerHTML = shipRequest.orderNumb
@@ -163,23 +168,23 @@ viewOutgoingStockButtonElements.forEach((e) =>
     div = document.querySelector('#outgoing-stock-view-comment')
     div.innerHTML = shipRequest.comment
     div = document.querySelector('#outgoing-stock-view-wm_notes')
-    shipRequest.wm_notes ? (div.innerHTML = shipRequest.wm_notes) : (div.innerHTML = 'No comments')
+    shipRequest.wmNotes ? (div.innerHTML = shipRequest.wmNotes) : (div.innerHTML = 'No comments')
     div = document.querySelector('#outgoing-stock-view-da_notes')
-    shipRequest.da_notes ? (div.innerHTML = shipRequest.da_notes) : (div.innerHTML = 'No comments')
+    shipRequest.daNotes ? (div.innerHTML = shipRequest.daNotes) : (div.innerHTML = 'No comments')
     div = document.querySelector('#outgoing-stock-view-store')
-    div.innerHTML = store.store_name
+    div.innerHTML = shipRequest.store.storeName
     div = document.querySelector('#outgoing-stock-view-store_address')
-    div.innerHTML = store.address
+    div.innerHTML = shipRequest.store.address
     div = document.querySelector('#outgoing-stock-view-store_phone')
-    div.innerHTML = store.phone_numb
+    div.innerHTML = shipRequest.store.phoneNumb
     div = document.querySelector('#outgoing-stock-view-store_country')
-    div.innerHTML = store.country
+    div.innerHTML = shipRequest.store.country
     div = document.querySelector('#outgoing-stock-view-store_province')
-    div.innerHTML = store.region
+    div.innerHTML = shipRequest.store.region
     div = document.querySelector('#outgoing-stock-view-store_city')
-    div.innerHTML = store.city
+    div.innerHTML = shipRequest.store.city
     div = document.querySelector('#outgoing-stock-view-store_zip_code')
-    div.innerHTML = store.zip
+    div.innerHTML = shipRequest.store.zip
 
     createOutgoingStockItemTable(shipRequest, 'view')
     viewModal.show()
@@ -204,26 +209,24 @@ function editShipRequest(shipRequest: IShipRequest, store: IStore) {
   input = document.querySelector('#outgoing-stock-edit-status')
   input.value = shipRequest.status
   input = document.querySelector('#outgoing-stock-edit-wm_notes')
-  shipRequest.wm_notes ? (input.value = shipRequest.wm_notes) : (input.value = '')
+  shipRequest.wmNotes ? (input.value = shipRequest.wmNotes) : (input.value = '')
   input = document.querySelector('#outgoing-stock-edit-da_notes')
-  shipRequest.da_notes ? (input.value = shipRequest.da_notes) : (input.value = '')
+  shipRequest.daNotes ? (input.value = shipRequest.daNotes) : (input.value = '')
 
   let div: HTMLDivElement = document.querySelector('#outgoing-stock-edit-order-number')
   div.innerHTML = shipRequest.orderNumb
   div = document.querySelector('#outgoing-stock-edit-store')
-  div.innerHTML = store.store_name
+  div.innerHTML = shipRequest.store.storeName
   div = document.querySelector('#outgoing-stock-edit-type')
   div.innerHTML = shipRequest.orderType
   div = document.querySelector('#outgoing-stock-edit-created-date')
   div.innerHTML = shipRequest.createdAt.slice(0, 10)
   div = document.querySelector('#outgoing-stock-edit-comment')
   div.innerHTML = shipRequest.comment
-  div = document.querySelector('#outgoing-stock-edit-store')
-  div.innerHTML = store.store_name
   div = document.querySelector('#outgoing-stock-edit-store_address')
   div.innerHTML = store.address
   div = document.querySelector('#outgoing-stock-edit-store_phone')
-  div.innerHTML = store.phone_numb
+  div.innerHTML = shipRequest.store.phoneNumb
   div = document.querySelector('#outgoing-stock-edit-store_country')
   div.innerHTML = store.country
   div = document.querySelector('#outgoing-stock-edit-store_province')
@@ -304,6 +307,16 @@ function createOutgoingStockItemTable(shipRqst: IShipRequest, typeModal: string)
         <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
             <div class="cart-item-retail-retail_price text-base font-semibold">${cart.product.regularPrice}</div>
+          </div>
+        </td>
+        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="cart-item-start-date text-base font-semibold">${cart.event ? cart.event.dateFrom : '-'}</div>
+          </div>
+        </td>
+        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="cart-item-end-date text-base font-semibold">${cart.event ? cart.event.dateTo : '-'}</div>
           </div>
         </td>
         <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">

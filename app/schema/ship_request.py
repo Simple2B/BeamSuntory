@@ -2,6 +2,7 @@ from enum import Enum
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
 from .cart import Cart
+from .store import Store
 
 
 class ShipRequestStatus(Enum):
@@ -20,6 +21,7 @@ class ShipRequest(BaseModel):
     status: ShipRequestStatus
     order_type: str = Field(alias="orderType")  # TODO enum??? ask client
     store_id: int = Field(alias="storeId")
+    store: Store
     comment: str | None
     wm_notes: str | None = Field(alias="wmNotes")
     da_notes: str | None = Field(alias="daNotes")
