@@ -42,7 +42,6 @@ def get_all():
             .where(
                 m.ShipRequest.order_numb.ilike(f"%{q}%")
                 | m.ShipRequest.order_type.ilike(f"%{q}%")
-                | m.ShipRequest.status.ilike(f"%{q}%")
                 | store_category.name.ilike(f"%{q}%")
                 | store.store_name.ilike(f"%{q}%")
             )
@@ -55,7 +54,6 @@ def get_all():
             .where(
                 m.ShipRequest.order_numb.ilike(f"%{q}%")
                 | m.ShipRequest.order_type.ilike(f"%{q}%")
-                | m.ShipRequest.status.ilike(f"%{q}%")
                 | store_category.name.ilike(f"%{q}%")
                 | store.store_name.ilike(f"%{q}%")
             )

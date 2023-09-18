@@ -111,6 +111,8 @@ def create():
         return redirect(url_for("ship_request.get_all"))
     if form_create.validate_on_submit():
         event_date_range = form_create.event_date_range.data
+        start_date = None
+        end_date = None
         if event_date_range:
             current_date = datetime.now()
             date_from = event_date_range.split(" - ")[0]
@@ -164,7 +166,7 @@ def create():
                 .count()
                 > 0
             )
-            if start_date and end_date and is_group_in_master_group:
+            if event_date_range and is_group_in_master_group:
                 # creation event
                 event = m.Event(
                     date_reserve_from=start_date - timedelta(days=5),
