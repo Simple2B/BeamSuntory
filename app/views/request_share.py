@@ -8,7 +8,7 @@ from flask import (
     url_for,
     current_app as app,
 )
-from flask_login import login_required
+from flask_login import login_required, current_user
 from flask_mail import Message
 import sqlalchemy as sa
 from sqlalchemy.orm import aliased
@@ -73,6 +73,7 @@ def get_all():
         page=pagination,
         search_query=q,
         form_edit=form_edit,
+        user=current_user,
     )
 
 
