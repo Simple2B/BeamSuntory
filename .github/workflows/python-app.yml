@@ -47,7 +47,7 @@ jobs:
         os: [Linux]
     runs-on: ${{ matrix.os }}
     if: github.ref == 'refs/heads/petro/feature/client_server_deploy'
-    # needs: tests
+    needs: tests
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
