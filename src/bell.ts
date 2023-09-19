@@ -14,10 +14,11 @@ async function getNotification() {
     userRequests.forEach((request: any) => {
       const notificationItem = document.createElement('div');
       notificationItem.classList.add('bell-notification-item');
+      const shareRequestLink = `/request_share/?q=${request.order_number}`
       notificationItem.innerHTML = `
-        <a href="#" class="flex px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700">
+        <a href="${shareRequestLink}" class="flex px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700">
           <div class="flex-shrink-0">
-            <img id="bell-notification-product-image" class="rounded-full w-11 h-11" src="/docs/images/people/profile-picture-1.jpg"
+            <img id="bell-notification-product-image" class="rounded-full bell-notification-product-image" src="/docs/images/people/profile-picture-1.jpg"
               alt="J"
             />
           </div>
