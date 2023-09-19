@@ -51,7 +51,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
                     m.Product.name.ilike(f"%{q}%")
                     | m.Product.SKU.ilike(f"%{q}%")
                     | m.Product.description.ilike(f"%{q}%")
-                    | reverse_event_filter
                 )
                 .order_by(m.Product.id)
             )
@@ -61,7 +60,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
                     m.Product.name.ilike(f"%{q}%")
                     | m.Product.SKU.ilike(f"%{q}%")
                     | m.Product.description.ilike(f"%{q}%")
-                    | reverse_event_filter
                 )
                 .select_from(m.Product)
             )
@@ -600,6 +598,7 @@ def assign():
             product_id=p.id,
             group_id=int(form.group.data),
             quantity=form.quantity.data,
+            from_group_id=form.from_group_id.data,
         ).save()
 
         return redirect(url_for("product.get_all"))
@@ -638,6 +637,7 @@ def request_share():
             desire_quantity=form.desire_quantity.data,
             status="pending",
             from_group_id=from_group_id,
+            user_id=current_user.id,
         )
         log(log.INFO, "Form submitted. Share Request: [%s]", rs)
         rs.save()
@@ -700,34 +700,46 @@ def adjust():
     form: f.AdjustProductForm = f.AdjustProductForm()
 
     if form.validate_on_submit():
-        ai: m.Adjust = m.Adjust(
+        adjust_item: m.Adjust = m.Adjust(
             product_id=form.product_id.data,
             note=form.note.data,
         )
-        ai.save()
+        db.session.add(adjust_item)
         groups = json.loads(form.groups_quantity.data)
         product = db.session.get(m.Product, form.product_id.data)
-        product_name = product.name
+        warehouse_event: m.Warehouse = db.session.scalar(
+            m.Warehouse.select().where(
+                m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value
+            )
+        )
+        if not product:
+            flash("Cannot save product data", "danger")
+            log(log.ERROR, "Not found product by id : [%s]", form.product_id.data)
+            return redirect(url_for("product.get_all"))
 
         for group_name, warehouses in groups.items():
-            print(group_name)
             group_id = db.session.execute(
                 m.Group.select()
                 .where(m.Group.name == group_name)
                 .with_only_columns(m.Group.id)
             ).scalar()
             for warehouse_id, quantity in warehouses.items():
-                product_warehouse: m.WarehouseProduct = db.session.execute(
+                product_warehouse: m.WarehouseProduct = db.session.scalar(
                     m.WarehouseProduct.select().where(
                         m.WarehouseProduct.product_id == form.product_id.data,
                         m.WarehouseProduct.group_id == group_id,
                         m.WarehouseProduct.warehouse_id == warehouse_id,
                     )
-                ).scalar()
+                )
                 if product_warehouse:
+                    if (
+                        group_name == s.MasterGroupMandatory.events.value
+                        and warehouse_event.id != int(warehouse_id)
+                    ):
+                        continue
                     if product_warehouse.product_quantity != quantity:
                         adjust_gr_qty: m.AdjustGroupQty = m.AdjustGroupQty(
-                            adjust_id=ai.id,
+                            adjust_id=adjust_item.id,
                             quantity=quantity,
                             group_id=group_id,
                             warehouse_id=warehouse_id,
@@ -744,7 +756,7 @@ def adjust():
                     )
                     db.session.add(product_warehouse)
                     adjust_gr_qty: m.AdjustGroupQty = m.AdjustGroupQty(
-                        adjust_id=ai.id,
+                        adjust_id=adjust_item.id,
                         quantity=quantity,
                         group_id=group_id,
                         warehouse_id=warehouse_id,
@@ -759,8 +771,7 @@ def adjust():
             form.product_id.data,
             form.groups_quantity.data,
         )
-        # NOTE: should we notify users about adjust?
-        flash(f"Product {product_name} was adjusted", "success")
+        flash(f"Product {product.name} was adjusted", "success")
         return redirect(url_for("product.get_all"))
 
     log(log.ERROR, "Adjust item save errors: [%s]", form.errors)
@@ -950,6 +961,10 @@ class DoNothingConflict:
 @product_blueprint.route("/stocks_owned_by_me", methods=["GET"])
 @login_required
 def stocks_owned_by_me():
+    is_events = request.args.get("events", type=bool, default=False)
+    if is_events:
+        log(log.INFO, "Redirect to events product: [%s]", is_events)
+        return redirect(url_for("product.get_all", events=True))
     curr_user_groups_ids = [
         i.right_id
         for i in db.session.execute(
@@ -967,9 +982,16 @@ def stocks_owned_by_me():
         ).scalars()
     ]
     q = request.args.get("q", type=str, default=None)
+    reverse_event_filter = ~m.Product.warehouse_products.any(
+        m.WarehouseProduct.group.has(
+            m.Group.master_group.has(
+                m.MasterGroup.name == s.MasterGroupMandatory.events.value
+            )
+        )
+    )
     query = (
         m.Product.select()
-        .where(m.Product.id.in_(curr_user_products_ids))
+        .where(m.Product.id.in_(curr_user_products_ids), reverse_event_filter)
         .order_by(m.Product.id)
     )
     count_query = sa.select(sa.func.count()).select_from(m.Product)

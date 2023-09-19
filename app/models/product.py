@@ -64,6 +64,9 @@ class Product(db.Model, ModelMixin):
     warehouse_products: orm.Mapped[list[WarehouseProduct]] = orm.relationship(
         viewonly=True
     )
+    warehouses: orm.Mapped[list[Warehouse]] = orm.relationship(
+        secondary=WarehouseProduct.__table__
+    )
 
     # TODO is overlaps="user_obj" correct decision? remove it to see the warning
     product_groups: orm.Mapped[ProductGroup] = orm.relationship(

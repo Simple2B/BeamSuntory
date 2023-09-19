@@ -6,6 +6,10 @@
 {% else %}
 {% set base_url = url_for('outgoing_stock.get_all') %}
 {% endif %}
+
+<input hidden id="warehouses-json-input" value="{{warehouses_json}}">
+<input hidden id="warehouses-events-json-input" value="{{warehouses_events_json}}">
+
 <div class="relative overflow-visible shadow-md sm:rounded-lg">
   <div class="flex gap-5">
     <form id="outgoing-stock-filter-form" action="{{url_for('outgoing_stock.sort')}}" method="post"
@@ -162,7 +166,7 @@
             View
           </button>
           <button type="button" data-target="{{ ship_request.json }}" data-target-store="{{ ship_request.store.json }}"
-            class="outgoing-stock-edit-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+            class="outgoing-stock-edit-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 sm:w-auto dark:bg-yellow-400 dark:hover:bg-yellow-500">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
               <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path>
               <path fill-rule="evenodd"
@@ -173,7 +177,7 @@
           </button>
           {% if ship_request.status == ship_requests_status.waiting_for_warehouse %}
           <button data-outgoing-stock-id={{ ship_request.id }} type="button"
-            class="dispatch-outgoing-stock-btn inline-flex items-center px-3 py-2 text-sm font-medium text-center rounded-lg text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900">
+            class="dispatch-outgoing-stock-btn inline-flex items-center px-3 py-2 text-sm font-medium text-center rounded-lg text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
               <path fill-rule="evenodd"
                 d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"

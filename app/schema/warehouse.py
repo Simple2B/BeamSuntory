@@ -1,5 +1,5 @@
 from enum import Enum
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, RootModel
 
 
 class WarehouseMandatory(Enum):
@@ -16,3 +16,6 @@ class Warehouse(BaseModel):
     zip: str  # TODO zip or zip_code?
     address: str
     manager_id: int = Field(alias="managerId")
+
+
+WarehouseList = RootModel[list[Warehouse]]

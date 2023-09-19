@@ -65,11 +65,13 @@ def test_create_warehouse(mg_g_populate: FlaskClient):
 def test_delete_warehouse(mg_g_populate: FlaskClient):
     login(mg_g_populate)
 
+    warehouses_rows_objs = db.session.execute(m.Warehouse.select()).all()
+    assert len(warehouses_rows_objs) == 2
     response = mg_g_populate.delete("/warehouse/delete/1")
     assert response.status_code == 200
     assert "ok" in response.text
     warehouses_rows_objs = db.session.execute(m.Warehouse.select()).all()
-    assert len(warehouses_rows_objs) == 0
+    assert len(warehouses_rows_objs) == 1
 
 
 def test_edit_warehouse(mg_g_populate: FlaskClient):

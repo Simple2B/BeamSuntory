@@ -37,6 +37,7 @@
         </thead>
         <tbody>
             {% set cart_ids = [] %} {% for item in cart_items %}
+            <input type="text" id="carts-events-hidden-input" hidden value="{{ carts }}">
             <form method="post" action="{{ url_for('cart.save') }}">
                 {{ form.hidden_tag() }}
                 <input type="hidden" name="cart_id" id="cart-edit-id" value="{{ item.id }}" />
@@ -68,7 +69,8 @@
                     </td>
                     <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
                         <div class="pl-3">
-                            <div class="text-base font-semibold">{{ available_products[item.group][item.product.SKU] }}</div>
+                            <div class="text-base font-semibold">{{ available_products[item.group][item.product.SKU] }}
+                            </div>
                         </div>
                     </td>
                     <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
@@ -244,9 +246,6 @@
 {% endblock %}
 <!-- prettier-ignore -->
 {% block scripts %}
-<script>
-    const carts = '{{ carts | tojson }}';
-</script>
 <script src="{{ url_for('static', filename='js/cart.js') }}" type="text/javascript" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.umd.min.js"></script>
 {% endblock %}
