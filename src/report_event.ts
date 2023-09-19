@@ -26,6 +26,10 @@ interface IReportEvent {
   events: IProductEvent[]
 }
 
+const defaultBrandImage =
+    'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png'
+
+
 const downloadCSV = async function () {
     // Filters
     const searchEventInput: HTMLInputElement = document.querySelector('#table-search-event')
@@ -116,11 +120,17 @@ document.addEventListener('DOMContentLoaded', () => {
   reportViewButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const reportEvent: IReportEvent = JSON.parse(btn.getAttribute('data-target'));
-      console.log(reportEvent);
+
+      const createAt =  new Date(reportEvent.createdAt)
+      const year = createAt.getFullYear();
+      const month = String(createAt.getMonth() + 1).padStart(2, '0'); // Month is 0-based
+      const day = String(createAt.getDate()).padStart(2, '0');
+      const hours = String(createAt.getHours()).padStart(2, '0');
+      const minutes = String(createAt.getMinutes()).padStart(2, '0');
 
       reportViewUser.innerHTML = reportEvent.user.username;
       reportViewAction.innerHTML = reportEvent.type;
-      reportViewDate.innerHTML = reportEvent.createdAt;
+      reportViewDate.innerHTML = `${month}/${day}/${year} ${hours}:${minutes}`;
       reportViewHistory.innerHTML = reportEvent.history;
 
       reportEvent.events.forEach((event, i) => {
@@ -128,7 +138,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const newProductItem = productItemTemplate.cloneNode(true) as HTMLElement;
         newProductItem.removeAttribute('id');
         newProductItem.classList.remove('hidden');
-        newProductItem.classList.add('product-item-view');
+        newProductItem.classList.add('product-item-view', 'text-base', 'font-semibold', 'text-gray-900', 'dark:text-white');
+
   
         const productIndex = newProductItem.querySelector('.product-index') as HTMLDivElement;
         // TODO add image
@@ -138,6 +149,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const productRetailPrice = newProductItem.querySelector('.product-retail-price') as HTMLDivElement;
         const productGroup = newProductItem.querySelector('.product-group') as HTMLDivElement;
         const productQuantity = newProductItem.querySelector('.product-quantity') as HTMLDivElement;
+
+        const img: HTMLImageElement = newProductItem.querySelector('.product-image')
+        event.product.image.length > 100 ? (img.src = `data:image/png;base64, ${event.product.image}`) : (img.src = defaultBrandImage)
+
         
         productIndex.innerHTML = (i + 1).toString();
         productName.innerHTML = event.product.name;
