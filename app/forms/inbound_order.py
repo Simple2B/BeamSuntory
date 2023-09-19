@@ -1,5 +1,6 @@
+from datetime import date
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, IntegerField, DateField
+from wtforms import StringField, SubmitField, IntegerField, DateField, ValidationError
 from wtforms.validators import DataRequired, Optional, Regexp, AnyOf
 
 
@@ -24,6 +25,14 @@ class InboundOrderBaseForm(FlaskForm):
 
     supplier_id = IntegerField("Supplier ID", [DataRequired()])
     warehouse_id = IntegerField("Warehouse ID", [DataRequired()])
+
+    def validate_delivery_date(self, field):
+        if field.data < date.today():
+            raise ValidationError("Active date cannot be earlier than today")
+
+    def validate_active_date(self, field):
+        if field.data < date.today():
+            raise ValidationError("Delivery date cannot be earlier than today")
 
 
 class InboundOrderCreateForm(InboundOrderBaseForm):

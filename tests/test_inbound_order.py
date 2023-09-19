@@ -25,11 +25,11 @@ def test_create_inbound_order(mg_g_populate: FlaskClient):
     response = mg_g_populate.post(
         "/inbound_order/create",
         data=dict(
-            active_date="07/19/2023",
+            active_date="08/19/2999",
             active_time="12:00 AM",
             order_title="Inbound Order 1",
             quantity=5,
-            delivery_date="07/19/2023",
+            delivery_date="07/19/2999",
             status=s.InboundOrderStatus.draft.value,
             supplier_id=1,
             warehouse_id=1,
@@ -58,30 +58,30 @@ def test_delete_inbound_order(mg_g_populate: FlaskClient):
 
 
 # TODO rewrite incoming order
-# def test_edit_inbound_order(mg_g_populate: FlaskClient):
-#     login(mg_g_populate)
+def test_edit_inbound_order(mg_g_populate: FlaskClient):
+    login(mg_g_populate)
 
-#     inbound_order = db.session.scalar(m.InboundOrder.select())
+    inbound_order = db.session.scalar(m.InboundOrder.select())
 
-#     response = mg_g_populate.post(
-#         "/inbound_order/save",
-#         data=dict(
-#             inbound_order_uuid=inbound_order.uuid,
-#             active_date="07/24/2023",
-#             active_time="12:00 AM",
-#             order_title="Inbound Order 111",
-#             quantity=5,
-#             delivery_date="07/22/2023",
-#             status=s.InboundOrderStatus.draft.value,
-#             supplier_id=1,
-#             warehouse_id=1,
-#             product_id=1,
-#             product_groups="""[{"productAllocatedId":1, "productAllocatedGroups":[{"groupId":1, "quantity":11}]}]""",
-#         ),
-#     )
-#     assert response.status_code == 302
-#     assert "inbound_order" in response.text
-#     inbound_orders_rows_objs = db.session.execute(
-#         m.InboundOrder.select().where(m.InboundOrder.title == "Inbound Order 111")
-#     ).all()
-#     assert len(inbound_orders_rows_objs) > 0
+    response = mg_g_populate.post(
+        "/inbound_order/save",
+        data=dict(
+            inbound_order_uuid=inbound_order.uuid,
+            active_date="07/24/2998",
+            active_time="12:00 AM",
+            order_title="Inbound Order 111",
+            quantity=5,
+            delivery_date="07/22/2998",
+            status=s.InboundOrderStatus.draft.value,
+            supplier_id=1,
+            warehouse_id=1,
+            product_id=1,
+            product_groups="""[{"productAllocatedId":1, "productAllocatedGroups":[{"groupId":1, "quantity":11}]}]""",
+        ),
+    )
+    assert response.status_code == 302
+    assert "inbound_order" in response.text
+    inbound_orders_rows_objs = db.session.scalar(
+        m.InboundOrder.select().where(m.InboundOrder.title == "Inbound Order 111")
+    )
+    assert inbound_orders_rows_objs
