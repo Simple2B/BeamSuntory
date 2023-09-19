@@ -16,57 +16,63 @@ report_blueprint = Blueprint("report", __name__, url_prefix="/report")
 
 
 def get_events_report():
-    q = request.args.get("q", type=str, default=None)
-    start_from = request.args.get("start_from", type=str, default=None)
-    start_to = request.args.get("start_to", type=str, default=None)
-    end_from = request.args.get("end_from", type=str, default=None)
-    end_to = request.args.get("end_to", type=str, default=None)
-
+    filter_events = s.FilterReportEvents.model_validate(dict(request.args))
     query = m.ReportEvent.select().order_by(m.ReportEvent.created_at)
 
     count_query = sa.select(sa.func.count()).select_from(m.ReportEvent)
-    if q:
+
+    if filter_events.q:
         query = query.where(
-            m.ReportEvent.event.has(m.Event.product.has(m.Product.name.ilike(f"%{q}%")))
-            | m.ReportEvent.event.has(
-                m.Event.product.has(m.Product.SKU.ilike(f"%{q}%"))
+            m.ReportEvent.events.any(
+                m.Event.product.has(m.Product.name.ilike(f"%{filter_events.q}%"))
             )
-            | m.ReportEvent.event.has(m.Event.user.has(m.User.username.ilike(f"%{q}%")))
+            | m.ReportEvent.events.any(
+                m.Event.product.has(m.Product.SKU.ilike(f"%{filter_events.q}%"))
+            )
+            | m.ReportEvent.events.any(
+                m.Event.user.has(m.User.username.ilike(f"%{filter_events.q}%"))
+            )
         )
 
         count_query = count_query.where(
-            m.ReportEvent.event.has(m.Event.product.has(m.Product.name.ilike(f"%{q}%")))
-            | m.ReportEvent.event.has(
-                m.Event.product.has(m.Product.SKU.ilike(f"%{q}%"))
+            m.ReportEvent.events.any(
+                m.Event.product.has(m.Product.name.ilike(f"%{filter_events.q}%"))
             )
-            | m.ReportEvent.event.has(m.Event.user.has(m.User.username.ilike(f"%{q}%")))
-        )
-
-    if start_from:
-        query = query.where(
-            m.ReportEvent.event.has(
-                m.Event.date_from >= datetime.strptime(start_from, "%m/%d/%Y")
+            | m.ReportEvent.events.any(
+                m.Event.product.has(m.Product.SKU.ilike(f"%{filter_events.q}%"))
+            )
+            | m.ReportEvent.events.any(
+                m.Event.user.has(m.User.username.ilike(f"%{filter_events.q}%"))
             )
         )
 
-    if start_to:
+    if filter_events.start_from:
         query = query.where(
-            m.ReportEvent.event.has(
-                m.Event.date_from <= datetime.strptime(start_to, "%m/%d/%Y")
+            m.ReportEvent.events.any(
+                m.Event.date_from
+                >= datetime.strptime(filter_events.start_from, "%m/%d/%Y")
             )
         )
 
-    if end_from:
+    if filter_events.start_to:
         query = query.where(
-            m.ReportEvent.event.has(
-                m.Event.date_to >= datetime.strptime(end_from, "%m/%d/%Y")
+            m.ReportEvent.events.any(
+                m.Event.date_from
+                <= datetime.strptime(filter_events.start_to, "%m/%d/%Y")
             )
         )
 
-    if end_to:
+    if filter_events.end_from:
         query = query.where(
-            m.ReportEvent.event.has(
-                m.Event.date_to <= datetime.strptime(end_to, "%m/%d/%Y")
+            m.ReportEvent.events.any(
+                m.Event.date_to >= datetime.strptime(filter_events.end_from, "%m/%d/%Y")
+            )
+        )
+
+    if filter_events.end_to:
+        query = query.where(
+            m.ReportEvent.events.any(
+                m.Event.date_to <= datetime.strptime(filter_events.end_to, "%m/%d/%Y")
             )
         )
 
@@ -83,10 +89,12 @@ def get_events_report():
 @report_blueprint.route("/event/api", methods=["GET"])
 @login_required
 def get_events_json():
-    pagination, events = get_events_report()
-    return s.EventsApiOut(pagination=pagination, events=events.all()).model_dump_json(
-        by_alias=True
-    )
+    pagination, reports = get_events_report()
+    report_list_schema = s.ReportEventList.model_validate(reports)
+
+    return s.ReportEventResponse(
+        pagination=pagination, report_events=report_list_schema.root
+    ).model_dump_json(by_alias=True)
 
 
 @report_blueprint.route("/event", methods=["GET"])

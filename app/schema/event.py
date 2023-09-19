@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field, RootModel, ConfigDict
 from .pagination import PaginationOut
 from .product import Product
 from .user import User
+from .cart import Cart
 
 
 class Event(BaseModel):
@@ -14,6 +15,7 @@ class Event(BaseModel):
     quantity: int
     product: Product
     user: User
+    cart: Cart
 
 
 class EventCSVOut(BaseModel):
@@ -35,8 +37,10 @@ class EventsApiOut(BaseModel):
 class EventsDateQuantity(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
+    user: User
     date: str
     quantity: int
 
 
 EventsCalendar = RootModel[list[EventsDateQuantity]]
+EventList = RootModel[list[Event]]
