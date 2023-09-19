@@ -15,12 +15,12 @@
       <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Booking product </h3>
         <button id="event-product-modal-close-btn" type="button"
-        class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
-        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-        </svg>
-      </button>
+          class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+          </svg>
+        </button>
       </div>
       <!-- Modal body -->
       <div class="p-6 space-y-6">
@@ -40,23 +40,23 @@
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
           </div>
-          <div class="sm:col-start-2 sm:col-end-6 col-span-6">            
-            <input id="datepicker"
-            class="datepicker invisible" required readonly/>            
+          <div class="sm:col-start-2 sm:col-end-6 col-span-6">
+            <input id="datepicker" class="datepicker invisible" required readonly />
           </div>
-          <div class="col-span-6 sm:col-span-3">
+          <div class="col-span-6 sm:col-span-6">
             <label for="height" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Desired
               Quantity</label>
             <input type="number" name="quantity" id="product-event-quantity"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Desired quantity" min="0"  required />
+              placeholder="Desired quantity" min="0" required />
           </div>
-          <div class="col-span-6 sm:col-span-3">
+          <!-- TODO: remove if it will be accepted by client -->
+          <!-- <div class="col-span-6 sm:col-span-3">
             <label for="comment" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Comments</label>
             <input type="text" name="comment" id="product-event-comment"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Comments" />
-          </div>
+          </div> -->
         </div>
       </div>
       <!-- Modal footer -->

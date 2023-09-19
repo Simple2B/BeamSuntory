@@ -33,7 +33,8 @@ const sortByNamePickupInboundStorage = JSON.parse(sessionStorage.getItem('sortBy
 
 if (sortByNamePickupInboundStorage) {
     const filterDropdownContainer = document.querySelector('#dropdownRadioButton-pickup-inbound-status')
-    filterDropdownContainer.innerHTML = `${sortByNamePickupInboundStorage}
+    const [entityName , filteredStatusValue] = sortByNamePickupInboundStorage.split('.')
+    filterDropdownContainer.innerHTML = `${filteredStatusValue}
           <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
           viewBox="0 0 10 6">
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -49,6 +50,16 @@ orderFilterPickupInboundInputs.forEach((input: HTMLInputElement) => {
             sessionStorage.setItem('sortByNamePickupInbound', JSON.stringify(input.value))
         }
     })
+})
+
+const pickupInboundSearchButton= document.querySelector('#table-search-pickup-inbound-button')
+pickupInboundSearchButton.addEventListener('click', () => {
+    const searchInput = document.querySelector('#table-search-pickup-inbounds') as HTMLInputElement
+    console.log(searchInput.value)
+    const url = new URL(window.location.href)
+    const params = new URLSearchParams(url.search)
+    params.set('q', searchInput.value)
+    window.location.href = `${url.origin}${url.pathname}?${params.toString()}`    
 })
 
 document.addEventListener('DOMContentLoaded', () => {

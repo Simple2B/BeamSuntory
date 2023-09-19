@@ -62,6 +62,9 @@ class Product(db.Model, ModelMixin):
     height: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
 
     warehouse_products: orm.Mapped[WarehouseProduct] = orm.relationship(viewonly=True)
+    warehouses: orm.Mapped[list[Warehouse]] = orm.relationship(
+        secondary=WarehouseProduct.__table__
+    )
 
     # TODO is overlaps="user_obj" correct decision? remove it to see the warning
     product_groups: orm.Mapped[ProductGroup] = orm.relationship(
