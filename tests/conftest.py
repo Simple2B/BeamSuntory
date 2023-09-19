@@ -1,5 +1,6 @@
 import datetime
 import os
+from pathlib import Path
 
 import pytest
 from flask import Flask
@@ -621,3 +622,36 @@ def mg_g_populate(client: FlaskClient):
         db.session.commit()
 
     yield client
+
+
+@pytest.fixture
+def cases_map():
+    with open(
+        Path("tests") / "data" / "dict_received_products.json", "r"
+    ) as received_product_json:
+        received_product_cases = s.IncomingStocksLists.model_validate_json(
+            received_product_json.read()
+        )
+
+        return {
+            case.name: case.incoming_stock_product
+            for case in received_product_cases.root
+        }
+
+
+@pytest.fixture(
+    params=[
+        "received_one_product_one_group",
+        "received_one_product_two_groups",
+        "received_two_products_one_group",
+        "received_two_products_two_groups",
+        "received_one_product_one_group",
+    ]
+)
+def order_name(request):
+    return request.param
+
+
+@pytest.fixture
+def orders_t(order_name, cases_map):
+    return s.IncomingStocks.model_validate(cases_map[order_name]), order_name
