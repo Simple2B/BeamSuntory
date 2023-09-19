@@ -200,7 +200,7 @@ def decline(id: int):
     if not rs:
         log(log.INFO, "There is no request_share with id: [%s]", id)
         flash("There is no such request_share", "danger")
-        return "no request_share", 404
+        return redirect(url_for("request_share.get_all"))
 
     rs.status = "declined"
     rs.finished_date = datetime.now().replace(microsecond=0)
@@ -246,4 +246,4 @@ def decline(id: int):
 
     log(log.INFO, "Request Share declined: [%s]", rs)
     flash("Request Share declined!", "success")
-    return "ok", 200
+    return redirect(url_for("request_share.get_all"))
