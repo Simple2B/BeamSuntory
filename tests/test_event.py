@@ -8,6 +8,16 @@ from app import db, models as m
 from tests.utils import login, register, logout
 
 
+def get_timestamps_for_month(year, month):
+    timestamps = []
+    current_date = datetime(year, month, 1)
+
+    while current_date.month == month:
+        timestamps.append(str(int(current_date.timestamp()) * 1000))
+        current_date += timedelta(days=1)
+    return timestamps
+
+
 def test_event_pages(client):
     logout(client)
     response = client.get("/event/")
@@ -26,14 +36,18 @@ def test_get_available_quantity_event(mg_g_populate: FlaskClient):
     product: m.Product = db.session.scalar(
         m.Product.select().where(m.Product.name == "event_test_product")
     )
-    month_from = datetime.now().month
-    year_from = datetime.now().year
+
+    month = datetime.now().month
+    year = datetime.now().year
+
+    dates = json.dumps(get_timestamps_for_month(year, month))
+
     product_id = product.id
     group_name = "Events"
 
     response = mg_g_populate.get(
-        f"""/event/get_available_quantity?month_from={month_from}&year_from={year_from}&product_id={
-            product_id}&group_name={group_name}""",
+        f"""/event/get_available_quantity?product_id={
+            product_id}&group_name={group_name}&dates={dates}""",
         follow_redirects=True,
     )
     quantity_in_warehouse = 200
