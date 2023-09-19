@@ -20,11 +20,12 @@ class IncomingStockProduct(BaseModel):
     packages: list[PackageInfo]
 
 
+class IncomingStocksTestCases(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    name: str
+    incoming_stock_product: list[IncomingStockProduct]
+
+
 IncomingStocks = RootModel[list[IncomingStockProduct]]
-
-
-# class IncomingStocks(BaseModel):
-#     __root__: list[IncomingStockProduct]
-
-#     class Config:
-#         allow_population_by_field_name = True
+IncomingStocksLists = RootModel[list[IncomingStocksTestCases]]

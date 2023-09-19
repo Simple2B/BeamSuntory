@@ -23,7 +23,12 @@ from .product_group import ProductGroup
 from .delivery_agent import DeliveryAgent
 from .cart import Cart
 from .warehouse_product import WarehouseProduct
-from .package_info import PackageInfo, IncomingStockProduct, IncomingStocks
+from .package_info import (
+    PackageInfo,
+    IncomingStockProduct,
+    IncomingStocks,
+    IncomingStocksLists,
+)
 from .division import Division
 from .assign import Assign
 from .request_share import RequestShare
