@@ -120,15 +120,20 @@ document.addEventListener('DOMContentLoaded', () => {
   reportViewButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const reportEvent: IReportEvent = JSON.parse(btn.getAttribute('data-target'));
-      console.log(reportEvent);
+
+      const createAt =  new Date(reportEvent.createdAt)
+      const year = createAt.getFullYear();
+      const month = String(createAt.getMonth() + 1).padStart(2, '0'); // Month is 0-based
+      const day = String(createAt.getDate()).padStart(2, '0');
+      const hours = String(createAt.getHours()).padStart(2, '0');
+      const minutes = String(createAt.getMinutes()).padStart(2, '0');
 
       reportViewUser.innerHTML = reportEvent.user.username;
       reportViewAction.innerHTML = reportEvent.type;
-      reportViewDate.innerHTML = reportEvent.createdAt;
+      reportViewDate.innerHTML = `${month}/${day}/${year} ${hours}:${minutes}`;
       reportViewHistory.innerHTML = reportEvent.history;
 
       reportEvent.events.forEach((event, i) => {
-        console.log(event.product.image)
         // Render event
         const newProductItem = productItemTemplate.cloneNode(true) as HTMLElement;
         newProductItem.removeAttribute('id');
