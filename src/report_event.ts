@@ -26,6 +26,10 @@ interface IReportEvent {
   events: IProductEvent[]
 }
 
+const defaultBrandImage =
+    'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png'
+
+
 const downloadCSV = async function () {
     // Filters
     const searchEventInput: HTMLInputElement = document.querySelector('#table-search-event')
@@ -124,11 +128,13 @@ document.addEventListener('DOMContentLoaded', () => {
       reportViewHistory.innerHTML = reportEvent.history;
 
       reportEvent.events.forEach((event, i) => {
+        console.log(event.product.image)
         // Render event
         const newProductItem = productItemTemplate.cloneNode(true) as HTMLElement;
         newProductItem.removeAttribute('id');
         newProductItem.classList.remove('hidden');
-        newProductItem.classList.add('product-item-view');
+        newProductItem.classList.add('product-item-view', 'text-base', 'font-semibold', 'text-gray-900', 'dark:text-white');
+
   
         const productIndex = newProductItem.querySelector('.product-index') as HTMLDivElement;
         // TODO add image
@@ -138,6 +144,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const productRetailPrice = newProductItem.querySelector('.product-retail-price') as HTMLDivElement;
         const productGroup = newProductItem.querySelector('.product-group') as HTMLDivElement;
         const productQuantity = newProductItem.querySelector('.product-quantity') as HTMLDivElement;
+
+        const img: HTMLImageElement = newProductItem.querySelector('.product-image')
+        event.product.image.length > 100 ? (img.src = `data:image/png;base64, ${event.product.image}`) : (img.src = defaultBrandImage)
+
         
         productIndex.innerHTML = (i + 1).toString();
         productName.innerHTML = event.product.name;

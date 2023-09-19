@@ -124,3 +124,7 @@ button[disabled]{
 .status-waiting_for_warehouse{
     color:purple;
 }
+
+.text-white{
+    color: white !important;
+}
