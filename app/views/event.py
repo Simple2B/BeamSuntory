@@ -1,8 +1,7 @@
+import json
 from datetime import datetime
-from datetime import date as Date
 from http import HTTPStatus
 import functools
-import calendar
 from flask import (
     Blueprint,
     jsonify,
@@ -105,8 +104,7 @@ def get_all():
 @event_blueprint.route("/get_available_quantity", methods=["GET"])
 @login_required
 def get_available_quantity():
-    month_from = request.args.get("month_from", type=int, default=None)
-    year_from = request.args.get("year_from", type=int, default=None)
+    timestamps: list[str] = json.loads(request.args.get("dates"))
     product_id = request.args.get("product_id", type=int, default=None)
     group_name = request.args.get("group_name", type=str, default=None)
     group = db.session.scalar(m.Group.select().where(m.Group.name == group_name))
@@ -133,21 +131,24 @@ def get_available_quantity():
         log(log.INFO, "Warehouse product not found")
         return "Warehouse product not found", 404
 
-    num_days = calendar.monthrange(year_from, month_from)[1]
     total_available_quantity = []
-    for day in range(1, num_days + 1):
-        current_date = Date(year_from, month_from, day)
+    for timestamp in timestamps:
+        day_filter = datetime.fromtimestamp(int(timestamp) // 1000)
         events: list[m.Event] = db.session.scalars(
             m.Event.select().where(
-                m.Event.date_reserve_from <= current_date,
-                m.Event.date_reserve_to >= current_date,
+                m.Event.date_reserve_from <= day_filter,
+                m.Event.date_reserve_to >= day_filter,
                 m.Event.product_id == product_id,
             )
         ).all()
         total_quantity = functools.reduce(lambda a, b: a + b.quantity, events, 0)
         quantity = warehouse_product.product_quantity - total_quantity
-        date = current_date.strftime("%Y-%m-%d")
-        total_available_quantity.append({"date": date, "quantity": quantity})
+        total_available_quantity.append(
+            {
+                "date": timestamp,
+                "quantity": quantity,
+            }
+        )
 
     log(log.INFO, "Total available quantity: [%s]", quantity)
     return jsonify(total_available_quantity)

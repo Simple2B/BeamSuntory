@@ -450,11 +450,10 @@ const bookedDates = [getFirstAndLastDate()].map((d) => {
 
 let fetchedAmountByDate = [] as { date: string; quantity: number }[]
 
-async function getEventAvailableQuantity(product_id: number, group: string, month: number, year: number) {
+async function getEventAvailableQuantity(product_id: number, group: string, calendarFilter: string[]) {
+
   const response = await fetch(
-    `/event/get_available_quantity?month_from=${
-      month + 1
-    }&year_from=${year}&group_name=${group}&product_id=${product_id}`
+    `/event/get_available_quantity?group_name=${group}&product_id=${product_id}&dates=${JSON.stringify(calendarFilter)}`
   )
   const data = await response.json()
   fetchedAmountByDate = data
@@ -834,6 +833,8 @@ function ship(product: IProduct, group: string) {
 
 let picker: Datepicker
 
+let calendarFilter: string[] = []
+
 // function to booking
 function booking(product: IProduct, group: string) {
   const img: HTMLImageElement = document.querySelector('#product-event-image')
@@ -856,15 +857,6 @@ function booking(product: IProduct, group: string) {
   const currentDate = new Date()
 
   async function createDatepicker() {
-    const fetchedAmountByDate = (await getEventAvailableQuantity(
-      product.id,
-      group,
-      currentDate.getMonth(),
-      currentDate.getFullYear()
-    )) as {
-      date: string
-      quantity: number
-    }[]
     picker = new easepick.create({
       element: document.getElementById('datepicker'),
       css: [
@@ -884,42 +876,35 @@ function booking(product: IProduct, group: string) {
         const randomInt = (min: number, max: number) => {
           return Math.floor(Math.random() * (max - min + 1) + min)
         }
-        const quantities: { [key: string]: string } = {}
-
-        fetchedAmountByDate.forEach(({ date, quantity }) => {
-          quantities[date] = quantity.toString()
-        })
+     
 
         picker.on('view', async (evt: any) => {
           const { view, date, target } = evt.detail
+          if (view === 'CalendarDay') {
+            const day = parseInt(target.innerHTML);
+            if (day === 1) {
+              calendarFilter = [target.getAttribute("data-time")]
+              return;
+            }
+
+            if (!calendarFilter.includes(target.getAttribute('data-time'))) {
+              calendarFilter.push(target.getAttribute('data-time'));
+            }
+          }
 
           if ((view as string).toLowerCase() !== 'main') {
             return
           }
 
-          date.setMonth(date.getMonth() - 1)
-
-          const chosenMonth = date.getMonth()
-          const chosenYear = date.getFullYear()
-
-          const fetchedAmountByDate = (await getEventAvailableQuantity(product.id, group, chosenMonth, chosenYear)) as {
-            date: string
+          const fetchedAmountByDate = (await getEventAvailableQuantity(product.id, group, calendarFilter)) as {
+            date: number
             quantity: number
           }[]
 
-          fetchedAmountByDate.forEach(({ date, quantity }) => {
-            const splittedDate = date.split('-')
-            splittedDate[1] = (parseInt(splittedDate[1]) - 1).toString()
-
-            const jsDateString = splittedDate.join('-')
-
-            const jsDate = new Date(date)
-
-            jsDate.setHours(0, 0, 0)
-
+          fetchedAmountByDate.forEach(({ date, quantity }, i) => {
             const dayContainer = document.querySelector('.easepick-wrapper')
 
-            const dayContainerShadow = dayContainer.shadowRoot.querySelector(`div[data-time='${jsDate.getTime()}']`)
+            const dayContainerShadow = dayContainer.shadowRoot.querySelector(`div[data-time='${date}']`)
 
             if (!dayContainerShadow) {
               return
