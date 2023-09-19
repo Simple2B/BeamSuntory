@@ -49,6 +49,11 @@ const addModal: ModalInterface = new Modal(
   modalOptions,
 );
 
+const closingEditModalButton = document.getElementById('edit-suppler-modal-close-btn')
+closingEditModalButton.addEventListener('click', () => {
+  modal.hide();
+})
+
 const $buttonElements = document.querySelectorAll('.supplier-edit-button');
 $buttonElements.forEach(e =>
   e.addEventListener('click', () => {

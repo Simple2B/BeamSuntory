@@ -1,5 +1,5 @@
+from typing import TYPE_CHECKING
 import json
-
 import sqlalchemy as sa
 from sqlalchemy import orm
 
@@ -15,6 +15,9 @@ from .user_group import UserGroup
 from .warehouse_product import WarehouseProduct
 from .warehouse import Warehouse
 
+if TYPE_CHECKING:
+    from .supplier import Supplier
+
 
 class Product(db.Model, ModelMixin):
     __tablename__ = "products"
@@ -29,6 +32,8 @@ class Product(db.Model, ModelMixin):
     supplier_id: orm.Mapped[str] = orm.mapped_column(
         sa.ForeignKey("suppliers.id"), nullable=True
     )  # NOTE vendor = supplier
+    supplier: orm.Mapped["Supplier"] = orm.relationship()
+
     currency: orm.Mapped[s.Currency] = orm.mapped_column(
         sa.Enum(s.Currency), nullable=True
     )
@@ -56,6 +61,11 @@ class Product(db.Model, ModelMixin):
     width: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
     height: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
 
+    warehouse_products: orm.Mapped[WarehouseProduct] = orm.relationship(viewonly=True)
+    warehouses: orm.Mapped[list[Warehouse]] = orm.relationship(
+        secondary=WarehouseProduct.__table__
+    )
+
     # TODO is overlaps="user_obj" correct decision? remove it to see the warning
     product_groups: orm.Mapped[ProductGroup] = orm.relationship(
         cascade="all, delete-orphan", overlaps="child"
@@ -66,8 +76,8 @@ class Product(db.Model, ModelMixin):
 
     @property
     def json(self):
-        mg = s.Product.from_orm(self)
-        ujs = mg.json()
+        # TODO refactor
+        ujs = s.Product.model_validate(self).model_dump_json()
         mg_dict = json.loads(ujs)
         current_user_groups_rows = db.session.execute(
             UserGroup.select().where(UserGroup.left_id == current_user.id)
@@ -83,14 +93,14 @@ class Product(db.Model, ModelMixin):
             ).scalars()
         ]
         mg_dict["mstr_groups_groups"] = {
-            i.group.name: i.group.master_groups.name for i in whp
+            i.group.name: i.group.master_group.name for i in whp
         }
 
         mg_dict["current_user_groups"] = {
-            grps[0].parent.master_groups.name: [
+            grps[0].parent.master_group.name: [
                 g[0].parent.name
                 for g in current_user_groups_rows
-                if grps[0].parent.master_groups.name == g[0].parent.master_groups.name
+                if grps[0].parent.master_group.name == g[0].parent.master_group.name
             ]
             for grps in current_user_groups_rows
         }
@@ -106,6 +116,8 @@ class Product(db.Model, ModelMixin):
 
         mg_dict["available_quantity"] = {}
 
+        mg_dict["product_in_warehouses"] = {}
+
         for wp in warehouse_products:
             if wp.group.name in mg_dict["available_quantity"]:
                 mg_dict["available_quantity"][wp.group.name] = int(
@@ -113,6 +125,15 @@ class Product(db.Model, ModelMixin):
                 ) + int(wp.product_quantity)
             else:
                 mg_dict["available_quantity"][wp.group.name] = wp.product_quantity
+
+            if wp.group.name in mg_dict["product_in_warehouses"]:
+                mg_dict["product_in_warehouses"][wp.group.name][
+                    f"{wp.warehouse_id}"
+                ] = wp.product_quantity
+            else:
+                mg_dict["product_in_warehouses"][wp.group.name] = {
+                    f"{wp.warehouse_id}": wp.product_quantity
+                }
 
         mg_dict["all_warehouses"] = [
             {

@@ -17,32 +17,7 @@ mail = Mail()
 
 def create_app(environment="development"):
     from config import config
-    from app.views import (
-        main_blueprint,
-        auth_blueprint,
-        user_blueprint,
-        stock_target_group_blueprint,
-        master_group_blueprint,
-        product_blueprint,
-        group_for_product_blueprint,
-        master_group_for_product_blueprint,
-        warehouse_blueprint,
-        delivery_agent_blueprint,
-        ship_request_blueprint,
-        supplier_blueprint,
-        cart_blueprint,
-        inbound_order_blueprint,
-        store_blueprint,
-        incoming_stock_blueprint,
-        outgoing_stock_blueprint,
-        pickup_order_blueprint,
-        pickup_inbound_blueprint,
-        division_blueprint,
-        assign_blueprint,
-        request_share_blueprint,
-        store_category_blueprint,
-        inventory_blueprint,
-    )
+    from app.views import BLUEPRINTS
     from app import models as m, forms
 
     # Instantiate app.
@@ -62,30 +37,8 @@ def create_app(environment="development"):
     mail.init_app(app)
 
     # Register blueprints.
-    app.register_blueprint(auth_blueprint)
-    app.register_blueprint(main_blueprint)
-    app.register_blueprint(user_blueprint)
-    app.register_blueprint(stock_target_group_blueprint)
-    app.register_blueprint(master_group_blueprint)
-    app.register_blueprint(product_blueprint)
-    app.register_blueprint(group_for_product_blueprint)
-    app.register_blueprint(master_group_for_product_blueprint)
-    app.register_blueprint(warehouse_blueprint)
-    app.register_blueprint(delivery_agent_blueprint)
-    app.register_blueprint(ship_request_blueprint)
-    app.register_blueprint(supplier_blueprint)
-    app.register_blueprint(cart_blueprint)
-    app.register_blueprint(inbound_order_blueprint)
-    app.register_blueprint(store_blueprint)
-    app.register_blueprint(incoming_stock_blueprint)
-    app.register_blueprint(outgoing_stock_blueprint)
-    app.register_blueprint(pickup_order_blueprint)
-    app.register_blueprint(pickup_inbound_blueprint)
-    app.register_blueprint(division_blueprint)
-    app.register_blueprint(assign_blueprint)
-    app.register_blueprint(request_share_blueprint)
-    app.register_blueprint(store_category_blueprint)
-    app.register_blueprint(inventory_blueprint)
+    for blueprint in BLUEPRINTS:
+        app.register_blueprint(blueprint)
 
     # Set up flask login.
     @login_manager.user_loader

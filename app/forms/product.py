@@ -101,6 +101,7 @@ class AssignProductForm(FlaskForm):
     group = IntegerField("Group", [DataRequired()])
     quantity = IntegerField("Quantity", [DataRequired()])
     from_group = StringField("From Group", [DataRequired()])
+    from_group_id = IntegerField("From Group ID", [DataRequired()])
 
     submit = SubmitField("Add product")
 
@@ -116,12 +117,10 @@ class RequestShareProductForm(FlaskForm):
     submit = SubmitField("Add product")
 
 
-class DepleteProductForm(FlaskForm):
+class AdjustProductForm(FlaskForm):
     product_id = IntegerField("Product ID", [DataRequired()])
-    warehouse_id = IntegerField("Warehouse ID", [DataRequired()])
-    group_id = IntegerField("Group ID", [DataRequired()])
-    # NOTE: quantity is passed as string because 0 does not validate
-    quantity = StringField("Quantity", [DataRequired()])
+    groups_quantity = StringField("Groups Qty", [DataRequired()])
+    note = StringField("Note")
 
     submit = SubmitField("Submit")
 

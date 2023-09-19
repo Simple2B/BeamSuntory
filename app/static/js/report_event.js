@@ -1,0 +1,1 @@
+(()=>{"use strict";document.addEventListener("DOMContentLoaded",(function(){document.querySelectorAll(".report-event-view-btn").forEach((function(t){t.addEventListener("click",(function(){var e=JSON.parse(t.getAttribute("data-target"));console.log({reportEvent:e})}))}))}))})();

@@ -8,13 +8,13 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
+from sqlalchemy import desc
 from app.controllers import create_pagination
 
+from app import schema as s
 from app import models as m, db
 from app import forms as f
 from app.logger import log
-from config import BaseConfig
-
 
 # NOTE pickup inbound IS inbound order. Meaning goods going from supplier to warehouse
 pickup_inbound_blueprint = Blueprint(
@@ -25,110 +25,87 @@ pickup_inbound_blueprint = Blueprint(
 @pickup_inbound_blueprint.route("/", methods=["GET"])
 @login_required
 def get_all():
-    form_create: f.NewInboundOrderForm = f.NewInboundOrderForm()
-    form_edit: f.InboundOrderForm = f.InboundOrderForm()
+    form_create = f.InboundOrderCreateForm()
+    form_edit = f.InboundOrderUpdateForm()
     form_sort: f.SortByStatusInboundOrderForm = f.SortByStatusInboundOrderForm()
 
     q = request.args.get("q", type=str, default=None)
-    query = m.InboundOrder.select().order_by(m.InboundOrder.id)
+    query = m.InboundOrder.select().order_by(desc(m.InboundOrder.id))
     count_query = sa.select(sa.func.count()).select_from(m.InboundOrder)
     if q:
-        query = (
-            m.InboundOrder.select()
-            .where(
-                m.InboundOrder.order_title.ilike(f"%{q}%")
-                | m.InboundOrder.order_id.ilike(f"%{q}%")
-                | m.InboundOrder.status.ilike(f"%{q}%")
-            )
-            .order_by(m.InboundOrder.id)
+        query = query.where(
+            m.InboundOrder.title.ilike(f"%{q}%")
+            | m.InboundOrder.order_id.ilike(f"%{q}%")
         )
-        count_query = (
-            sa.select(sa.func.count())
-            .where(
-                m.InboundOrder.order_title.ilike(f"%{q}%")
-                | m.InboundOrder.order_id.ilike(f"%{q}%")
-                | m.InboundOrder.status.ilike(f"%{q}%")
-            )
-            .select_from(m.InboundOrder)
+
+        count_query = count_query.where(
+            m.InboundOrder.title.ilike(f"%{q}%")
+            | m.InboundOrder.order_id.ilike(f"%{q}%")
         )
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
-    inbound_orders = [
-        i
-        for i in db.session.execute(
-            query.offset((pagination.page - 1) * pagination.per_page).limit(
-                pagination.per_page
-            )
-        ).scalars()
-    ]
-    package_info = [
-        p
-        for p in db.session.execute(
-            m.PackageInfo.select().order_by(m.PackageInfo.id)
-        ).scalars()
-    ]
-    package_info_by_io = {pi.inbound_order_id: pi for pi in package_info}
+    inbound_orders = db.session.scalars(
+        query.offset((pagination.page - 1) * pagination.per_page).limit(
+            pagination.per_page
+        )
+    )
 
     return render_template(
         "pickup_inbound/pickup_inbounds.html",
         inbound_orders=inbound_orders,
         page=pagination,
         search_query=q,
-        suppliers=[
-            s
-            for s in db.session.execute(
-                m.Supplier.select().order_by(m.Supplier.id)
-            ).scalars()
-        ],
-        delivery_agents=[
-            da
-            for da in db.session.execute(
-                m.DeliveryAgent.select().order_by(m.DeliveryAgent.id)
-            ).scalars()
-        ],
-        warehouses=[
-            w
-            for w in db.session.execute(
-                m.Warehouse.select().order_by(m.Warehouse.id)
-            ).scalars()
-        ],
-        products=[
-            p
-            for p in db.session.execute(
-                m.Product.select().order_by(m.Product.id)
-            ).scalars()
-        ],
-        package_info_by_io=package_info_by_io,
+        suppliers=db.session.scalars(m.Supplier.select().order_by(m.Supplier.id)),
+        delivery_agents=db.session.scalars(
+            m.DeliveryAgent.select().order_by(m.DeliveryAgent.id)
+        ),
+        warehouses=db.session.scalars(m.Warehouse.select().order_by(m.Warehouse.id)),
+        products=db.session.scalars(m.Product.select().order_by(m.Product.id)),
         form_create=form_create,
         form_edit=form_edit,
         form_sort=form_sort,
-        inbound_orders_status=BaseConfig.Config.INBOUND_ORDER_STATUS,
+        inbound_orders_status=s.InboundOrderStatus,
     )
 
 
-@pickup_inbound_blueprint.route("/pickup/<int:id>", methods=["GET"])
+@pickup_inbound_blueprint.route("/pickup", methods=["POST"])
 @login_required
-def pickup(id: int):
-    io: m.InboundOrder = db.session.scalar(
-        m.InboundOrder.select().where(m.InboundOrder.id == id)
+def pickup():
+    form_pickup: f.InboundOrderPickupForm = f.InboundOrderPickupForm()
+
+    if not form_pickup.validate_on_submit():
+        log(log.ERROR, "Pickup inbound form errors: [%s]", form_pickup.errors)
+        flash(f"{form_pickup.errors}", "danger")
+        return redirect(url_for("pickup_inbound.get_all"))
+
+    inbound_order: m.InboundOrder = db.session.get(
+        m.InboundOrder, int(form_pickup.inbound_order_id.data)
     )
-    if not io:
-        log(log.INFO, "There is no inbound order with id: [%s]", id)
+
+    if not inbound_order:
+        log(
+            log.INFO,
+            "There is no inbound order with id: [%s]",
+            form_pickup.inbound_order_id.data,
+        )
         flash("There is no such inbound order", "danger")
-        return "no inbound order", 404
-    io.status = "In transit"
-    io.save()
+        return redirect(url_for("pickup_inbound.get_all"))
 
-    log(log.INFO, "Inbound order pickup done. Inbound order: [%s]", io)
+    inbound_order.status = s.InboundOrderStatus.in_transit
+    inbound_order.da_notes = form_pickup.da_notes.data
+    inbound_order.save()
+
+    log(log.INFO, "Inbound order pickup done. Inbound order: [%s]", inbound_order)
     flash("Inbound order pickup done!", "success")
-    return "ok", 200
+    return redirect(url_for("pickup_inbound.get_all"))
 
 
-@pickup_inbound_blueprint.route("/sort", methods=["GET", "POST"])
+@pickup_inbound_blueprint.route(
+    "/sort", methods=["GET", "POST"]
+)  # TODO move pickup inbound sort to GET with params
 @login_required
 def sort():
-    # TODO: handle GET request without
     if (
         request.method == "GET"
         and request.args.get("page", type=str, default=None) is None
@@ -136,8 +113,8 @@ def sort():
         flash("Sort without any arguments", "danger")
         return redirect(url_for("pickup_inbound.get_all"))
     form_sort: f.SortByStatusInboundOrderForm = f.SortByStatusInboundOrderForm()
-    form_create: f.NewInboundOrderForm = f.NewInboundOrderForm()
-    form_edit: f.InboundOrderForm = f.InboundOrderForm()
+    form_create = f.InboundOrderCreateForm()
+    form_edit = f.InboundOrderUpdateForm()
     if not form_sort.validate_on_submit() and request.method == "POST":
         # NOTE: this is drop filters action
         return redirect(url_for("pickup_inbound.get_all"))
@@ -145,88 +122,60 @@ def sort():
     filtered = True
     status = form_sort.sort_by.data if request.method == "POST" else "Draft"
 
+    mapped_status = status.split(".")
+    status_str = mapped_status[1]
+
     q = request.args.get("q", type=str, default=None)
     query = (
         m.InboundOrder.select()
-        .where(m.InboundOrder.status == status)
+        .where(m.InboundOrder.status == status_str)
         .order_by(m.InboundOrder.id)
     )
     count_query = (
         sa.select(sa.func.count())
-        .where(m.InboundOrder.status == status)
+        .where(m.InboundOrder.status == status_str)
         .select_from(m.InboundOrder)
     )
     if q:
-        query = (
-            m.InboundOrder.select()
-            .where(
-                m.InboundOrder.order_title.ilike(f"%{q}%")
-                | m.InboundOrder.quantity.ilike(f"%{q}%"),
-                m.InboundOrder.status == status,
-            )
-            .order_by(m.InboundOrder.id)
+        query = query.where(
+            m.InboundOrder.title.ilike(f"%{q}%")
+            | m.InboundOrder.quantity.ilike(f"%{q}%"),
         )
-        count_query = (
-            sa.select(sa.func.count())
-            .where(
-                m.InboundOrder.order_title.ilike(f"%{q}%")
-                | m.InboundOrder.quantity.ilike(f"%{q}%"),
-                m.InboundOrder.status == status,
-            )
-            .select_from(m.InboundOrder)
+
+        count_query = count_query.where(
+            m.InboundOrder.title.ilike(f"%{q}%")
+            | m.InboundOrder.quantity.ilike(f"%{q}%"),
         )
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
-    inbound_orders = [
-        i
-        for i in db.session.execute(
-            query.offset((pagination.page - 1) * pagination.per_page).limit(
-                pagination.per_page
-            )
-        ).scalars()
-    ]
-    package_info = [
-        p
-        for p in db.session.execute(
-            m.PackageInfo.select().order_by(m.PackageInfo.id)
-        ).scalars()
-    ]
-    package_info_by_io = {pi.inbound_order_id: pi for pi in package_info}
+    inbound_orders = db.session.scalars(
+        query.offset((pagination.page - 1) * pagination.per_page).limit(
+            pagination.per_page
+        )
+    ).all()
+    # package_info = db.session.scalars(
+    #     m.PackageInfo.select().order_by(m.PackageInfo.id)
+    # ).all()
+    # package_info_by_io = {pi.inbound_order_id: pi for pi in package_info}
 
     return render_template(
         "pickup_inbound/pickup_inbounds.html",
         inbound_orders=inbound_orders,
         page=pagination,
         search_query=q,
-        suppliers=[
-            s
-            for s in db.session.execute(
-                m.Supplier.select().order_by(m.Supplier.id)
-            ).scalars()
-        ],
-        delivery_agents=[
-            da
-            for da in db.session.execute(
-                m.DeliveryAgent.select().order_by(m.DeliveryAgent.id)
-            ).scalars()
-        ],
-        warehouses=[
-            w
-            for w in db.session.execute(
-                m.Warehouse.select().order_by(m.Warehouse.id)
-            ).scalars()
-        ],
-        products=[
-            p
-            for p in db.session.execute(
-                m.Product.select().order_by(m.Product.id)
-            ).scalars()
-        ],
-        package_info_by_io=package_info_by_io,
+        suppliers=db.session.scalars(m.Supplier.select().order_by(m.Supplier.id)).all(),
+        delivery_agents=db.session.scalars(
+            m.DeliveryAgent.select().order_by(m.DeliveryAgent.id)
+        ).all(),
+        warehouses=db.session.scalars(
+            m.Warehouse.select().order_by(m.Warehouse.id)
+        ).all(),
+        products=db.session.scalars(m.Product.select().order_by(m.Product.id)).all(),
+        # package_info_by_io=package_info_by_io,  # TODO need's refactor
         form_create=form_create,
         form_edit=form_edit,
         form_sort=form_sort,
         filtered=filtered,
-        inbound_orders_status=BaseConfig.Config.INBOUND_ORDER_STATUS,
+        inbound_orders_status=s.InboundOrderStatus,
     )

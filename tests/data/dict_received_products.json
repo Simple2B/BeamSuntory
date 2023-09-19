@@ -1,0 +1,117 @@
+[
+  {
+    "name": "received_one_product_one_group",
+    "incoming_stock_product": [
+      {
+        "allocatedProductId": 3,
+        "packages": [
+          {
+            "productQuantityGroupId": 3,
+            "quantityPerWrap": 1,
+            "quantityWrapCarton": 1,
+            "quantityCartonMaster": 1,
+            "quantityReceived": 200
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "received_one_product_two_groups",
+    "incoming_stock_product": [
+      {
+        "allocatedProductId": 4,
+        "packages": [
+          {
+            "productQuantityGroupId": 4,
+            "quantityPerWrap": 1,
+            "quantityWrapCarton": 1,
+            "quantityCartonMaster": 1,
+            "quantityReceived": 200
+          }
+        ]
+      },
+      {
+        "allocatedProductId": 5,
+        "packages": [
+          {
+            "productQuantityGroupId": 5,
+            "quantityPerWrap": 1,
+            "quantityWrapCarton": 1,
+            "quantityCartonMaster": 1,
+            "quantityReceived": 200
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "received_two_products_one_group",
+    "incoming_stock_product": [
+      {
+        "allocatedProductId": 6,
+        "packages": [
+          {
+            "productQuantityGroupId": 6,
+            "quantityPerWrap": 1,
+            "quantityWrapCarton": 1,
+            "quantityCartonMaster": 1,
+            "quantityReceived": 200
+          }
+        ]
+      },
+      {
+        "allocatedProductId": 7,
+        "packages": [
+          {
+            "productQuantityGroupId": 7,
+            "quantityPerWrap": 1,
+            "quantityWrapCarton": 1,
+            "quantityCartonMaster": 1,
+            "quantityReceived": 200
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "received_two_products_two_groups",
+    "incoming_stock_product": [
+      {
+        "allocatedProductId": 8,
+        "packages": [
+          {
+            "productQuantityGroupId": 8,
+            "quantityPerWrap": 1,
+            "quantityWrapCarton": 1,
+            "quantityCartonMaster": 1,
+            "quantityReceived": 200
+          }
+        ]
+      },
+      {
+        "allocatedProductId": 9,
+        "packages": [
+          {
+            "productQuantityGroupId": 9,
+            "quantityPerWrap": 1,
+            "quantityWrapCarton": 1,
+            "quantityCartonMaster": 1,
+            "quantityReceived": 200
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "one_pr_one_gr_no_qty_master",
+    "incoming_stock_product": [
+      {
+        "allocatedProductId": 3,
+        "packages": [
+          { "productQuantityGroupId": 3, "quantityPerWrap": 1, "quantityWrapCarton": 1, "quantityReceived": 200 }
+        ]
+      }
+    ]
+  }
+]

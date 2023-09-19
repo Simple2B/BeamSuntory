@@ -33,10 +33,9 @@
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Status" required>
               <option selected="selected" value="" disabled>Choose Status</option>
-              <option value="Waiting for warehouse manager">Waiting for warehouse manager</option>
-              <option value="Assigned to pickup">Assigned to pickup</option>
-              <option value="Delivered">Delivered</option>
-              <option value="In transit">In transit</option>
+              {% for status in ship_requests_status %}
+              <option value="{{ status.value }}">{{ status.value }}</option>
+              {% endfor %}
             </select>
           </div>
           <div class="col-span-6 sm:col-span-3">
@@ -153,6 +152,8 @@
             <th scope="col" class="px-6 py-3">Expiry Date</th>
             <th scope="col" class="px-6 py-3">Regular price</th>
             <th scope="col" class="px-6 py-3">Retail price</th>
+            <th scope="col" class="px-6 py-3">Start Date</th>
+            <th scope="col" class="px-6 py-3">End Date</th>
             <th scope="col" class="px-6 py-3">Group</th>
             <th scope="col" class="px-6 py-3">Quantity</th>
             <th scope="col" class="px-6 py-3">Warehouse</th>

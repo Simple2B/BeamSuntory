@@ -1,3 +1,4 @@
+from werkzeug.urls import url_parse
 import json
 from flask import (
     Blueprint,
@@ -12,9 +13,11 @@ import sqlalchemy as sa
 from app.controllers import create_pagination
 
 from app import models as m, db
+
+from app import schema as s
 from app import forms as f
 from app.logger import log
-from config import BaseConfig
+from config import SALES_REP_LOCKER_NAME
 
 
 cart_blueprint = Blueprint("cart", __name__, url_prefix="/cart")
@@ -26,6 +29,7 @@ def get_all():
     form = f.CartForm()
 
     q = request.args.get("q", type=str, default=None)
+    # TODO what if couple users make carts simulteniously???
     query = m.Cart.select().where(m.Cart.status == "pending").order_by(m.Cart.id)
     count_query = sa.select(sa.func.count()).select_from(m.Cart)
     if q:
@@ -45,15 +49,11 @@ def get_all():
     warehouses_rows = db.session.execute(sa.select(m.Warehouse)).all()
     warehouses = [row[0] for row in warehouses_rows]
 
-    locker_id = (
-        db.session.execute(
-            m.StoreCategory.select().where(
-                m.StoreCategory.name == BaseConfig.Config.SALES_REP_LOCKER_NAME
-            )
-        )
-        .scalar()
-        .id
-    )
+    locker_id = db.session.execute(
+        m.StoreCategory.select()
+        .where(m.StoreCategory.name == SALES_REP_LOCKER_NAME)
+        .with_only_columns(m.StoreCategory.id)
+    ).scalar()
 
     stores_rows = db.session.execute(
         m.Store.select().where(m.Store.store_category_id != locker_id)
@@ -71,16 +71,23 @@ def get_all():
         else:
             store.favorite = False
 
-    warehouse_products = db.session.execute(
+    warehouse_products = db.session.scalars(
         m.WarehouseProduct.select().where(
             m.WarehouseProduct.product_id.in_(
                 [wp.product_id for wp in db.session.execute(query).scalars()]
             )
         )
-    ).scalars()
+    ).all()
 
     available_products = (
-        {wp.group.name: wp.product_quantity for wp in warehouse_products}
+        {
+            wg.group.name: {
+                wprod.product.SKU: wprod.product_quantity
+                for wprod in warehouse_products
+                if wg.group.name == wprod.group.name
+            }
+            for wg in warehouse_products
+        }
         if warehouse_products
         else {}
     )
@@ -90,17 +97,13 @@ def get_all():
             m.StoreCategory.select().where(m.StoreCategory.id != locker_id)
         ).scalars()
     ]
-    sales_rep_role_id = (
-        db.session.execute(
-            m.Division.select().where(
-                m.Division.role_name == BaseConfig.Config.SALES_REP
-            )
-        )
-        .scalar()
-        .id
-    )
+    sales_rep_role_id = db.session.execute(
+        m.Division.select()
+        .where(m.Division.role_name == s.UserRole.SALES_REP.value)
+        .with_only_columns(m.Division.id)
+    ).scalar()
     locker_store_category_ids = None
-    # TODO: decide behavior when edit user role to sales rep. Currently it errors out.
+
     if current_user.role == sales_rep_role_id:
         sales_rep_locker = db.session.execute(
             m.Store.select().where(m.Store.user_id == current_user.id)
@@ -117,13 +120,31 @@ def get_all():
         .role_name
     )
 
+    cart_items = db.session.scalars(
+        query.offset((pagination.page - 1) * pagination.per_page).limit(
+            pagination.per_page
+        )
+    ).all()
+    carts = [
+        {
+            "group": cart.group,
+            "id": cart.id,
+            "quantity": cart.quantity,
+            "product_id": cart.product_id,
+        }
+        for cart in cart_items
+        if db.session.query(m.Group)
+        .join(m.MasterGroup)
+        .filter(
+            m.MasterGroup.name == s.MasterGroupMandatory.events.value,
+            m.Group.name == cart.group,
+        )
+        .count()
+        > 0
+    ]
     return render_template(
         "cart.html",
-        cart_items=db.session.execute(
-            query.offset((pagination.page - 1) * pagination.per_page).limit(
-                pagination.per_page
-            )
-        ).scalars(),
+        cart_items=cart_items,
         page=pagination,
         search_query=q,
         form=form,
@@ -133,7 +154,8 @@ def get_all():
         available_products=available_products,
         store_categories=store_categories,
         current_user_role_name=current_user_role_name,
-        sales_rep_role=BaseConfig.Config.SALES_REP,
+        sales_rep_role=s.UserRole.SALES_REP.value,
+        carts=json.dumps(carts),
         locker_store_category_ids=json.dumps(locker_store_category_ids)
         if locker_store_category_ids
         else None,
@@ -144,6 +166,8 @@ def get_all():
 @login_required
 def create():
     form: f.NewCartForm = f.NewCartForm()
+    url = request.referrer
+    query = url_parse(url).query if url else None
     if form.validate_on_submit():
         item = m.Cart(
             product_id=int(form.product_id.data),
@@ -154,10 +178,14 @@ def create():
         log(log.INFO, "Form submitted. Cart: [%s]", item)
         item.save()
         flash("Item added!", "success")
+        if query:
+            return redirect(url_for("product.get_all", events="true"))
         return redirect(url_for("product.get_all"))
     else:
         log(log.ERROR, "Item creation errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
+        if query:
+            return redirect(url_for("product.get_all", events="true"))
         return redirect(url_for("product.get_all"))
 
 
@@ -190,8 +218,8 @@ def delete(id: int):
         flash("There is no such item", "danger")
         return "no item", 404
 
-    delete_c = sa.delete(m.Cart).where(m.Cart.id == id)
-    db.session.execute(delete_c)
+    db.session.execute(m.Event.delete().where(m.Event.cart_id == id))
+    db.session.delete(c)
     db.session.commit()
     log(log.INFO, "Cart item deleted. Group: [%s]", c)
     flash("Item deleted!", "success")

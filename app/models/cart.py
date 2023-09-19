@@ -1,3 +1,4 @@
+from typing import TYPE_CHECKING
 from datetime import datetime
 import json
 
@@ -12,7 +13,8 @@ from .product import Product
 from .warehouse_product import WarehouseProduct
 from .warehouse import Warehouse
 
-# from .ship_request import ShipRequest
+if TYPE_CHECKING:
+    from .event import Event
 
 
 class Cart(db.Model, ModelMixin):
@@ -41,6 +43,9 @@ class Cart(db.Model, ModelMixin):
     ship_request_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("ship_requests.id"), nullable=True
     )
+
+    event: orm.Mapped["Event"] = orm.relationship()
+
     # ship_request: orm.Mapped[ShipRequest] = orm.relationship()
 
     def __repr__(self):
@@ -48,8 +53,8 @@ class Cart(db.Model, ModelMixin):
 
     @property
     def json(self):
-        mg = s.Cart.from_orm(self)
-        ujs = mg.json()
+        cart = s.Cart.model_validate(self)
+        ujs = cart.model_dump_json()
         mg_dict = json.loads(ujs)
         warehouse_products = db.session.execute(
             WarehouseProduct.select().where(

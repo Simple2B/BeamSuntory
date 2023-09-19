@@ -15,6 +15,8 @@ class NewShipRequestForm(FlaskForm):
     order_type = StringField("Order Type")
     store = StringField("Store", [DataRequired()])
     comment = StringField("Comment")
+    event_date_range = StringField("Event Date Range")
+    event_comment = StringField("Event Comment")
 
     submit = SubmitField("Save")
 
@@ -32,7 +34,7 @@ class ShipRequestForm(FlaskForm):
     order_type = StringField("Order Type")
     store = StringField("Store")
     status = StringField("Status")
-    products = StringField("Products", [DataRequired()])
+    products = StringField("Products")
     wm_notes = StringField("Warehouse Manager Notes")
     da_notes = StringField("Delivery Agent Notes")
 

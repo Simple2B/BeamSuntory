@@ -1,53 +1,60 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, IntegerField, ValidationError
-from wtforms.validators import DataRequired
-
-from app import models as m, db
+from wtforms import StringField, SubmitField, IntegerField, DateField
+from wtforms.validators import DataRequired, Optional, Regexp, AnyOf
 
 
-class InboundOrderForm(FlaskForm):
+from app import schema as s
+
+
+class InboundOrderBaseForm(FlaskForm):
     next_url = StringField("next_url")
-    inbound_order_id = StringField("inbound_order_id", [DataRequired()])
-    active_date = StringField("Active date", [DataRequired()])  # datetime
-    active_time = StringField("Active time", [DataRequired()])  # datetime
     order_title = StringField("Order title", [DataRequired()])
-    delivery_date = StringField("Delivery date", [DataRequired()])  # datetime
-    status = StringField("Status", [DataRequired()])
+    delivery_date = DateField("Delivery date", [DataRequired()], format="%m/%d/%Y")
+    active_date = DateField("Active date", [DataRequired()], format="%m/%d/%Y")
+    active_time = StringField(
+        "Active time",
+        [
+            DataRequired(),
+            Regexp(
+                r"((1[0-2]|0?[1-9]):([0-5][0-9]) ?([AaPp][Mm]))",
+                message="Wrong time format",
+            ),
+        ],
+    )
+
     supplier_id = IntegerField("Supplier ID", [DataRequired()])
     warehouse_id = IntegerField("Warehouse ID", [DataRequired()])
+
+
+class InboundOrderCreateForm(InboundOrderBaseForm):
     products = StringField("Products", [DataRequired()])
 
-    submit = SubmitField("Save")
 
-    def validate_order_id(self, field):
-        query = (
-            m.InboundOrder.select()
-            .where(m.InboundOrder.order_id == field.data)
-            .where(m.InboundOrder.id != int(self.inbound_order_id.data))
-        )
-        if db.session.scalar(query) is not None:
-            raise ValidationError("This order_id is taken.")
-
-
-class NewInboundOrderForm(FlaskForm):
-    inbound_order_id = StringField("inbound_order_id", [DataRequired()])
-    active_date = StringField("Active date", [DataRequired()])  # datetime
-    active_time = StringField("Active time", [DataRequired()])  # datetime
-    order_title = StringField("Order title", [DataRequired()])
-    delivery_date = StringField("Delivery date", [DataRequired()])  # datetime
-    status = StringField("Status", [DataRequired()])
-    supplier_id = IntegerField("Supplier ID", [DataRequired()])
-    warehouse_id = IntegerField("Warehouse ID", [DataRequired()])
-    products = StringField("Products", [DataRequired()])
-
-    submit = SubmitField("Save")
-
-    def validate_order_id(self, field):
-        query = m.InboundOrder.select().where(m.InboundOrder.order_id == field.data)
-        if db.session.scalar(query) is not None:
-            raise ValidationError("This order_id is taken.")
+class InboundOrderUpdateForm(InboundOrderBaseForm):
+    inbound_order_uuid = StringField("inbound_order_uuid", [DataRequired()])
+    status = StringField(
+        "status",
+        [
+            Optional(),
+            AnyOf(
+                [
+                    s.InboundOrderStatus.draft.value,
+                    s.InboundOrderStatus.assigned.value,
+                ],
+                "Wrong status",
+            ),
+        ],
+    )
+    product_groups = StringField("Product Groups", [DataRequired()])
 
 
 class SortByStatusInboundOrderForm(FlaskForm):
     sort_by = StringField("Sort by", [DataRequired()])
+    submit = SubmitField("Submit")
+
+
+class InboundOrderPickupForm(FlaskForm):
+    inbound_order_id = StringField("Inbound order id", [DataRequired()])
+    wm_notes = StringField("Warehouse manager notes")
+    da_notes = StringField("Delivery agent notes")
     submit = SubmitField("Submit")

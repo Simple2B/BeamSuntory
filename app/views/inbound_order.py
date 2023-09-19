@@ -1,4 +1,3 @@
-import datetime
 import json
 
 from flask import (
@@ -11,9 +10,13 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
+from sqlalchemy import desc
+from pydantic import ValidationError
+
 from app.controllers import create_pagination
 
 from app import models as m, db
+from app import schema as s
 from app import forms as f
 from app.logger import log
 
@@ -26,165 +29,292 @@ inbound_order_blueprint = Blueprint(
 @inbound_order_blueprint.route("/", methods=["GET"])
 @login_required
 def get_all():
-    form_create: f.NewInboundOrderForm = f.NewInboundOrderForm()
-    form_edit: f.InboundOrderForm = f.InboundOrderForm()
+    form_create = f.InboundOrderUpdateForm()
+    form_edit = f.InboundOrderUpdateForm()
 
     q = request.args.get("q", type=str, default=None)
-    query = m.InboundOrder.select().order_by(m.InboundOrder.id)
+    current_order_uuid = request.args.get("current_order_uuid", type=str, default=None)
+    query = m.InboundOrder.select().order_by(desc(m.InboundOrder.id))
+
+    if current_order_uuid:
+        query = query.where(m.InboundOrder.uuid != current_order_uuid)
+
     count_query = sa.select(sa.func.count()).select_from(m.InboundOrder)
     if q:
-        query = (
-            m.InboundOrder.select()
-            .where(
-                m.InboundOrder.order_title.ilike(f"%{q}%")
-                | m.InboundOrder.order_id.ilike(f"%{q}%")
-                | m.InboundOrder.status.ilike(f"%{q}%")
-            )
-            .order_by(m.InboundOrder.id)
+        query = query.where(
+            m.InboundOrder.title.ilike(f"%{q}%")
+            | m.InboundOrder.order_id.ilike(f"%{q}%")
         )
-        count_query = (
-            sa.select(sa.func.count())
-            .where(
-                m.InboundOrder.order_title.ilike(f"%{q}%")
-                | m.InboundOrder.order_id.ilike(f"%{q}%")
-                | m.InboundOrder.status.ilike(f"%{q}%")
-            )
-            .select_from(m.InboundOrder)
+
+        count_query = count_query.where(
+            m.InboundOrder.title.ilike(f"%{q}%")
+            | m.InboundOrder.order_id.ilike(f"%{q}%")
         )
 
     pagination = create_pagination(total=db.session.scalar(count_query))
+
+    # TODO pydantic!!
     inbound_orders_json = json.dumps(
         [
             json.loads(io.json)
-            for io in db.session.execute(
+            for io in db.session.scalars(
                 m.InboundOrder.select().order_by(m.InboundOrder.id)
-            ).scalars()
+            )
         ]
+    )
+
+    current_inbound_order = (
+        db.session.scalar(
+            m.InboundOrder.select().where(m.InboundOrder.uuid == current_order_uuid)
+        )
+        if current_order_uuid
+        else None
     )
 
     return render_template(
         "inbound_order/inbound_orders.html",
-        inbound_orders=db.session.execute(
+        current_inbound_order=current_inbound_order,
+        inbound_orders=db.session.scalars(
             query.offset((pagination.page - 1) * pagination.per_page).limit(
                 pagination.per_page
             )
-        ).scalars(),
+        ).all(),
         inbound_orders_json=inbound_orders_json,
         page=pagination,
         search_query=q,
-        suppliers=[
-            s
-            for s in db.session.execute(
-                m.Supplier.select().order_by(m.Supplier.id)
-            ).scalars()
-        ],
-        warehouses=[
-            w
-            for w in db.session.execute(
-                m.Warehouse.select().order_by(m.Warehouse.id)
-            ).scalars()
-        ],
-        products=[
-            p
-            for p in db.session.execute(
-                m.Product.select().order_by(m.Product.id)
-            ).scalars()
-        ],
-        groups=[
-            g
-            for g in db.session.execute(m.Group.select().order_by(m.Group.id)).scalars()
-        ],
+        suppliers=db.session.scalars(m.Supplier.select().order_by(m.Supplier.id)).all(),
+        warehouses=db.session.scalars(
+            m.Warehouse.select().order_by(m.Warehouse.id)
+        ).all(),
+        products=db.session.scalars(m.Product.select().order_by(m.Product.id)).all(),
+        groups=db.session.scalars(m.Group.select().order_by(m.Group.id)).all(),
         form_create=form_create,
         form_edit=form_edit,
+        inbound_order_statuses=s.InboundOrderStatus,
     )
+
+
+@inbound_order_blueprint.route("/create", methods=["POST"])
+@login_required
+def create():
+    form = f.InboundOrderCreateForm()
+    if not form.validate_on_submit():
+        flash(f"Inbound order validation failed: {form.errors}", "danger")
+        log(log.INFO, "Inbound order validation failed: [%s]", form.errors)
+        return redirect(url_for("inbound_order.get_all"))
+    if form.validate_on_submit():
+        # Get supplier
+        supplier = db.session.get(m.Supplier, form.supplier_id.data)
+        if not supplier:
+            flash(f"Supplier with id: {form.supplier_id.data} not found")
+            log(
+                log.INFO,
+                "Inbound order validation failed: cannot find supplier with id [%s]",
+                form.supplier_id.data,
+            )
+            return redirect(url_for("inbound_order.get_all"))
+
+        # Get warehouse
+        warehouse = db.session.get(m.Warehouse, form.warehouse_id.data)
+        if not warehouse:
+            flash(f"Warehouse with id: {form.warehouse_id.data} not found")
+            log(
+                log.INFO,
+                "Inbound order validation failed: cannot find warehouse with id [%s]",
+                form.warehouse_id.data,
+            )
+            return redirect(url_for("inbound_order.get_all"))
+
+        # Create order
+        inbound_order = m.InboundOrder(
+            active_date=form.active_date.data,
+            active_time=form.active_time.data,
+            title=form.order_title.data,
+            delivery_date=form.delivery_date.data,
+            supplier=supplier,
+            warehouse=warehouse,
+        )
+
+        # save delivered product quantity, so this product would be available in warehouse
+        products_data = s.ProductAllocatedList.model_validate_json(form.products.data)
+        for product_data in products_data.root:
+            product = db.session.get(m.Product, product_data.id)
+            # Find product
+            if not product:
+                flash(f"Product with id: {product_data.id} not found")
+                log(
+                    log.INFO,
+                    "Inbound order validation failed: cannot find product with id [%s]",
+                    product_data.id,
+                )
+                return redirect(url_for("inbound_order.get_all"))
+            # Allocate product with all data
+            inbound_order.products_allocated.append(
+                m.ProductAllocated(
+                    product=product,
+                    quantity=product_data.quantity,
+                    shelf_life_start=product_data.shelf_life_start,
+                    shelf_life_end=product_data.shelf_life_end,
+                )
+            )
+
+        log(log.INFO, "Form submitted. Inbound order: [%s]", inbound_order)
+        inbound_order.save()
+        flash("Inbound order added!", "success")
+
+        return redirect(
+            url_for("inbound_order.get_all", current_order_uuid=inbound_order.uuid)
+        )
+
+    flash("Something went wrong!", "danger")
+    return redirect(url_for("inbound_order.get_all"))
 
 
 @inbound_order_blueprint.route("/save", methods=["POST"])
 @login_required
 def save():
-    form: f.InboundOrderForm = f.InboundOrderForm()
+    form = f.InboundOrderUpdateForm()
     if form.validate_on_submit():
-        query = m.InboundOrder.select().where(
-            m.InboundOrder.id == int(form.inbound_order_id.data)
+        inbound_order: m.InboundOrder = db.session.scalar(
+            m.InboundOrder.select().where(
+                m.InboundOrder.uuid == form.inbound_order_uuid.data
+            )
         )
-        io: m.InboundOrder | None = db.session.scalar(query)
-        if not io:
+        # Check if inbound order exists
+        if not inbound_order:
             log(
                 log.ERROR,
-                "Not found inbound_order by id : [%s]",
-                form.inbound_order_id.data,
+                "Not found inbound_order by uuid : [%s]",
+                form.inbound_order_uuid.data,
             )
             flash("Cannot save inbound order data", "danger")
+            return redirect(url_for("inbound_order.get_all"))
 
-        io.active_date = datetime.datetime.strptime(form.active_date.data, "%m/%d/%Y")
-        io.active_time = form.active_time.data
-        io.order_title = form.order_title.data
-        io.delivery_date = datetime.datetime.strptime(
-            form.delivery_date.data, "%m/%d/%Y"
-        )
-        io.status = form.status.data
-        io.supplier_id = form.supplier_id.data
-        io.warehouse_id = form.warehouse_id.data
-        io.save()
-
-        # save delivered product quantity, so this product would be available in warehouse
-        products = json.loads(form.products.data)
-
-        for product in products:
-            shelf_life_str_start = product["shelf_life_start"]
-            shelf_life_str_end = product["shelf_life_end"]
-            shelf_life_stamp_start = datetime.datetime.strptime(
-                shelf_life_str_start, "%m/%d/%Y"
+        # check supplier
+        supplier = db.session.get(m.Supplier, form.supplier_id.data)
+        if not supplier:
+            log(
+                log.ERROR,
+                "Not found supplier with id : [%s]",
+                form.supplier_id.data,
             )
-            shelf_life_stamp_end = datetime.datetime.strptime(
-                shelf_life_str_end, "%m/%d/%Y"
-            )
-            product_quantity_group: m.ProductQuantityGroup = db.session.execute(
-                m.ProductQuantityGroup.select().where(
-                    m.ProductQuantityGroup.product_id == product["product_id"],
-                    m.ProductQuantityGroup.group_id == product["group_id"],
-                    m.ProductQuantityGroup.warehouse_id == io.warehouse_id,
-                    m.ProductQuantityGroup.inbound_order_id == io.id,
-                )
-            ).scalar()
-            if product_quantity_group:
-                product_quantity_group.quantity = int(product["quantity"])
-                product_quantity_group.group_id = product["group_id"]
-                product_quantity_group.shelf_life_start = shelf_life_stamp_start
-                product_quantity_group.shelf_life_end = shelf_life_stamp_end
-                product_quantity_group.save()
-            else:
-                product_quantity_group = m.ProductQuantityGroup(
-                    product_id=product["product_id"],
-                    warehouse_id=io.warehouse_id,
-                    group_id=product["group_id"],
-                    quantity=int(product["quantity"]),
-                    inbound_order_id=io.id,
-                    shelf_life_start=shelf_life_stamp_start,
-                    shelf_life_end=shelf_life_stamp_end,
-                )
-                product_quantity_group.save()
-        # NOTE remove product quantity group if it is not in products
-        product_quantity_group_rm: list[m.ProductQuantityGroup] = db.session.execute(
-            m.ProductQuantityGroup.select().where(
-                m.ProductQuantityGroup.warehouse_id == io.warehouse_id,
-                m.ProductQuantityGroup.inbound_order_id == io.id,
-            )
-        ).scalars()
-        product_ids = [p["product_id"] for p in products]
-        group_ids = [p["group_id"] for p in products]
+            flash("Cannot save inbound order data", "danger")
+            return redirect(url_for("inbound_order.get_all"))
 
-        for product in product_quantity_group_rm:
-            if (
-                str(product.product_id) not in product_ids
-                and str(product.group_id) not in group_ids
-            ):
-                delete_p = sa.delete(m.ProductQuantityGroup).where(
-                    m.ProductQuantityGroup.id == product.id,
-                )
-                db.session.execute(delete_p)
-                db.session.commit()
+        # check warehouse
+        warehouse = db.session.get(m.Warehouse, form.warehouse_id.data)
+        if not warehouse:
+            log(
+                log.ERROR,
+                "Not found warehouse with id : [%s]",
+                form.warehouse_id.data,
+            )
+            flash("Cannot save inbound order data", "danger")
+            return redirect(url_for("inbound_order.get_all"))
 
+        inbound_order.active_date = form.active_date.data
+        inbound_order.active_time = form.active_time.data
+        inbound_order.title = form.order_title.data
+        inbound_order.delivery_date = form.delivery_date.data
+        inbound_order.status = s.InboundOrderStatus(form.status.data)
+
+        inbound_order.supplier = supplier
+        inbound_order.warehouse = warehouse
+
+        try:
+            product_quantity_groups = s.ProductQuantityGroupsCreate.model_validate_json(
+                form.product_groups.data
+            )
+        except ValidationError:
+            log(
+                log.ERROR,
+                "Wrong quantity groups json format: [%s]",
+                form.product_groups.data,
+            )
+            flash("Cannot save inbound order data", "danger")
+            return redirect(
+                url_for(
+                    "inbound_order.get_all",
+                    current_order_uuid=inbound_order.uuid,
+                )
+            )
+
+        for product_quantity_group in product_quantity_groups.root:
+            product_allocated = db.session.scalar(
+                m.ProductAllocated.select().where(
+                    m.ProductAllocated.id
+                    == product_quantity_group.product_allocated_id,
+                    m.ProductAllocated.inbound_order_id == inbound_order.id,
+                )
+            )
+
+            if not product_allocated:
+                log(
+                    log.ERROR,
+                    "Inbound order's allocated product not found: [%s] [%s]",
+                    inbound_order.id,
+                    product_quantity_group.product_allocated_id,
+                )
+                flash("Cannot save inbound order data", "danger")
+                return redirect(url_for("inbound_order.get_all"))
+
+            db.session.execute(
+                m.ProductQuantityGroup.delete().where(
+                    m.ProductQuantityGroup.product_allocated_id == product_allocated.id
+                )
+            )
+            for quantity_group in product_quantity_group.product_allocated_groups:
+                # Search for group by id
+                group = db.session.get(m.Group, quantity_group.group_id)
+                if not group:
+                    log(
+                        log.ERROR,
+                        "Group not found: [%s]",
+                        quantity_group.group_id,
+                    )
+                    flash("Cannot save inbound order data", "danger")
+                    return redirect(
+                        url_for(
+                            "inbound_order.get_all",
+                            current_order_uuid=inbound_order.uuid,
+                        )
+                    )
+
+                db.session.add(
+                    m.ProductQuantityGroup(
+                        group=group,
+                        quantity=quantity_group.quantity,
+                        product_allocated_id=product_allocated.id,
+                    )
+                )
+
+        if inbound_order.status == s.InboundOrderStatus.assigned:
+            for allocated_product in inbound_order.products_allocated:
+                sumAllocatedQuantityGroups = sum(
+                    [
+                        group.quantity
+                        for group in allocated_product.product_quantity_groups
+                    ]
+                )
+                if allocated_product.quantity != sumAllocatedQuantityGroups:
+                    log(
+                        log.ERROR,
+                        "Invalid quantity groups sum: [%s] needs: [%s]",
+                        sumAllocatedQuantityGroups,
+                        allocated_product.quantity,
+                    )
+                    flash(
+                        "Allocated product quantity doesn't match groups total quantity",
+                        "danger",
+                    )
+                    return redirect(
+                        url_for(
+                            "inbound_order.get_all",
+                            current_order_uuid=inbound_order.uuid,
+                        )
+                    )
+
+        db.session.commit()
         if form.next_url.data:
             return redirect(form.next_url.data)
         return redirect(url_for("inbound_order.get_all"))
@@ -195,103 +325,42 @@ def save():
         return redirect(url_for("inbound_order.get_all"))
 
 
-@inbound_order_blueprint.route("/create", methods=["POST"])
-@login_required
-def create():
-    form: f.NewInboundOrderForm = f.NewInboundOrderForm()
-    if not form.validate_on_submit():
-        flash(f"Inbound order validation failed: {form.errors}", "danger")
-        log(log.INFO, "Inbound order validation failed: [%s]", form.errors)
-        return redirect(url_for("inbound_order.get_all"))
-    if form.validate_on_submit():
-        inbound_order = m.InboundOrder(
-            order_id=form.inbound_order_id.data,
-            active_date=datetime.datetime.strptime(form.active_date.data, "%m/%d/%Y"),
-            active_time=form.active_time.data,
-            order_title=form.order_title.data,
-            delivery_date=datetime.datetime.strptime(
-                form.delivery_date.data, "%m/%d/%Y"
-            ),
-            status=form.status.data,
-            supplier_id=form.supplier_id.data,
-            warehouse_id=form.warehouse_id.data,
-        )
-        inbound_order.save()
-        log(log.INFO, "Form submitted. Inbound order: [%s]", inbound_order)
-        # NOTE: don't rename message, it is used in frontend to connect create and edit
-        flash("Inbound order added!", "success")
-
-        # save delivered product quantity, so this product would be available in warehouse
-        products = json.loads(form.products.data)
-        for product in products:
-            shelf_life_str_start = (
-                product["shelf_life_start"]
-                if product["shelf_life_start"]
-                else "01/01/2023"
-            )
-            shelf_life_str_end = (
-                product["shelf_life_end"] if product["shelf_life_end"] else "01/01/2023"
-            )
-            shelf_life_stamp_start = datetime.datetime.strptime(
-                shelf_life_str_start, "%m/%d/%Y"
-            )
-            shelf_life_stamp_end = datetime.datetime.strptime(
-                shelf_life_str_end, "%m/%d/%Y"
-            )
-            io_allocate_product: m.IOAllocateProduct = db.session.execute(
-                m.IOAllocateProduct.select().where(
-                    m.IOAllocateProduct.product_id == int(product["product_id"]),
-                    m.IOAllocateProduct.inbound_order_id == int(inbound_order.id),
-                )
-            ).scalar()
-            if io_allocate_product:
-                io_allocate_product.quantity = int(product["quantity"])
-                io_allocate_product.shelf_life_start = shelf_life_stamp_start
-                io_allocate_product.shelf_life_end = shelf_life_stamp_end
-                io_allocate_product.save()
-            else:
-                m.IOAllocateProduct(
-                    product_id=int(product["product_id"]),
-                    quantity=int(product["quantity"]),
-                    inbound_order_id=inbound_order.id,
-                    shelf_life_start=shelf_life_stamp_start,  # calendar
-                    shelf_life_end=shelf_life_stamp_end,  # calendar
-                ).save()
-
-        return redirect(url_for("inbound_order.get_all"))
-
-    flash("Something went wrong!", "danger")
-    return redirect(url_for("inbound_order.get_all"))
-
-
 @inbound_order_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
 def delete(id: int):
-    io: m.InboundOrder = db.session.scalar(
+    # TODO needs to check for allocated products
+    inbound_order: m.InboundOrder = db.session.scalar(
         m.InboundOrder.select().where(m.InboundOrder.id == id)
     )
-    if not io:
+    if not inbound_order:
         log(log.INFO, "There is no inbound order with id: [%s]", id)
         flash("There is no such inbound order", "danger")
         return "no inbound order", 404
 
-    product_package = db.session.execute(
-        m.PackageInfo.select().where(m.PackageInfo.inbound_order_id == io.id)
-    ).scalars()
-
-    product_q_g = db.session.execute(
-        m.ProductQuantityGroup.select().where(
-            m.ProductQuantityGroup.inbound_order_id == io.id
+    db.session.execute(
+        m.ProductQuantityGroup.delete().where(
+            m.ProductAllocated.product_quantity_groups.any(
+                m.ProductAllocated.inbound_order_id == inbound_order.id
+            )
         )
-    ).scalars()
+    )
 
-    for prod_conn in [product_package, product_q_g]:
-        for pw in prod_conn:
-            db.session.delete(pw)
-
-    delete_io = sa.delete(m.InboundOrder).where(m.InboundOrder.id == id)
-    db.session.execute(delete_io)
+    db.session.execute(
+        m.PackageInfo.delete().where(
+            m.PackageInfo.product_quantity_group.has(
+                m.ProductQuantityGroup.product_allocated.has(
+                    m.ProductAllocated.inbound_order_id == inbound_order.id
+                )
+            )
+        )
+    )
+    db.session.execute(
+        m.ProductAllocated.delete().where(
+            m.ProductAllocated.inbound_order_id == inbound_order.id
+        )
+    )
+    db.session.delete(inbound_order)
     db.session.commit()
-    log(log.INFO, "Inbound order deleted. Inbound order: [%s]", io)
+    log(log.INFO, "Inbound order deleted. Inbound order: [%s]", inbound_order)
     flash("Inbound order deleted!", "success")
     return "ok", 200

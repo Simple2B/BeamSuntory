@@ -15,10 +15,11 @@ import sqlalchemy as sa
 from sqlalchemy.orm import aliased
 from app.controllers import create_pagination
 
+from app import schema as s
 from app import models as m, db, mail
 from app import forms as f
 from app.logger import log
-from config import BaseConfig
+from config import SALES_REP_LOCKER_NAME
 
 
 bp = Blueprint("user", __name__, url_prefix="/user")
@@ -105,7 +106,6 @@ def save():
             u.password = form.password.data
         u.save()
 
-        # delete old groups from user_group relational table
         # and add new groups to user_group relational table
         g_query = m.Group.select().where(
             m.Group.name.in_(str(form.group.data).split(", "))
@@ -120,13 +120,22 @@ def save():
 
         for user_group_id in user_group_group_ids:
             if user_group_id not in group_ids:
-                db.session.execute(
-                    sa.delete(m.UserGroup).where(
-                        m.UserGroup.right_id == user_group_id,
-                        m.UserGroup.left_id == u.id,
+                if u.role_obj.role_name == s.UserRole.ADMIN.value:
+                    log(log.ERROR, "Can not remove groups from user: admin")
+                    flash(
+                        "Can not remove groups from user: admin",
+                        "danger",
                     )
-                )
-                db.session.commit()
+                    return redirect(url_for("user.get_all"))
+                else:
+                    db.session.execute(
+                        sa.delete(m.UserGroup).where(
+                            m.UserGroup.right_id == user_group_id,
+                            m.UserGroup.left_id == u.id,
+                        )
+                    )
+                    db.session.commit()
+
         for group_id in group_ids:
             if group_id not in user_group_group_ids:
                 m.UserGroup(left_id=u.id, right_id=group_id).save()
@@ -169,7 +178,7 @@ def create():
         sales_rep_role_id = (
             db.session.execute(
                 m.Division.select().where(
-                    m.Division.role_name == BaseConfig.Config.SALES_REP
+                    m.Division.role_name == s.UserRole.SALES_REP.value
                 )
             )
             .scalar()
@@ -178,12 +187,12 @@ def create():
         if user.role == sales_rep_role_id:
             store_category: m.StoreCategory = db.session.execute(
                 m.StoreCategory.select().where(
-                    m.StoreCategory.name == BaseConfig.Config.SALES_REP_LOCKER_NAME
+                    m.StoreCategory.name == SALES_REP_LOCKER_NAME
                 )
             ).scalar()
             store = m.Store(
                 store_category_id=store_category.id,
-                store_name=f"{user.username}_{BaseConfig.Config.SALES_REP_LOCKER_NAME}",
+                store_name=f"{user.username}_{SALES_REP_LOCKER_NAME}",
                 contact_person=user.username,
                 email=user.email,
                 phone_numb=user.phone_number,
@@ -201,13 +210,21 @@ def create():
         log(log.INFO, "Form submitted. User: [%s]", user)
         flash("User added!", "success")
 
-        g_query = m.Group.select().where(
-            m.Group.name.in_(str(form.group.data).split(", "))
-        )
-        group_obj: m.Group | None = db.session.scalars(g_query)
-        group_ids: List[m.Group] = [g.id for g in group_obj]
-        for group_id in group_ids:
-            m.UserGroup(left_id=user.id, right_id=group_id).save()
+        if user.role == s.UserRole.ADMIN.value:
+            g_query = m.Group.select()
+            group_obj: m.Group | None = db.session.scalars(g_query)
+            group_ids: List[m.Group] = [g.id for g in group_obj]
+            for group_id in group_ids:
+                m.UserGroup(left_id=user.id, right_id=group_id).save()
+        else:
+            g_query = m.Group.select().where(
+                m.Group.name.in_(str(form.group.data).split(", "))
+            )
+            group_obj: m.Group | None = db.session.scalars(g_query)
+            group_ids: List[m.Group] = [g.id for g in group_obj]
+            for group_id in group_ids:
+                m.UserGroup(left_id=user.id, right_id=group_id).save()
+
         # create e-mail message
         msg = Message(
             subject="New password",
@@ -244,7 +261,7 @@ def delete(id: int):
     sales_rep_role_id = (
         db.session.execute(
             m.Division.select().where(
-                m.Division.role_name == BaseConfig.Config.SALES_REP
+                m.Division.role_name == s.UserRole.SALES_REP.value
             )
         )
         .scalar()
@@ -289,6 +306,7 @@ def notification():
             "target_group": request_share.group.name,
             "created_at": request_share.created_at.isoformat(),
             "request_share_id": request_share.id,
+            "order_number": request_share.order_numb,
         }
         user_requests.append(data)
 

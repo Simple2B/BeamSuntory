@@ -54,6 +54,11 @@ $buttonElements.forEach(e =>
   }),
 );
 
+const closingEditModalButton = document.querySelector('#edit-store-modal-close-btn')
+closingEditModalButton.addEventListener('click', () => {
+  modal.hide();
+});
+
 // search flow
 const searchInput: HTMLInputElement = document.querySelector(
   '#table-search-stores',

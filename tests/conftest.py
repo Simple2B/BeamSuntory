@@ -1,14 +1,17 @@
 import datetime
 import os
+from pathlib import Path
 
 import pytest
 from flask import Flask
 from flask.testing import FlaskClient
 
+
 from app import create_app, db
 from app import models as m
+from app import schema as s
 from tests.utils import register, create_default_divisions
-from config import BaseConfig
+from config import SALES_REP_LOCKER_NAME
 
 
 @pytest.fixture()
@@ -27,17 +30,11 @@ def app():
 @pytest.fixture()
 def client(app: Flask):
     with app.test_client() as client:
-        app_ctx = app.app_context()
-        app_ctx.push()
-
-        db.drop_all()
-        db.create_all()
-        register()
-
-        yield client
-        db.session.close_all()
-        db.drop_all()
-        app_ctx.pop()
+        with app.app_context():
+            db.drop_all()
+            db.create_all()
+            register()
+            yield client
 
 
 @pytest.fixture()
@@ -55,7 +52,7 @@ def populate(client: FlaskClient):
 
     create_default_divisions()
     role = db.session.execute(
-        m.Division.select().where(m.Division.role_name == "Manager")
+        m.Division.select().where(m.Division.role_name == "manager")  # TODO ?
     ).scalar()
     for i in range(NUM_TEST_USERS):
         m.User(
@@ -83,7 +80,7 @@ def populate_one_user(client: FlaskClient):
 
     role = db.session.execute(
         m.Division.select().where(
-            m.Division.role_name == BaseConfig.Config.WAREHOUSE_MANAGER
+            m.Division.role_name == s.UserRole.WAREHOUSE_MANAGER.value
         )
     ).scalar()
     m.User(
@@ -107,12 +104,17 @@ def populate_one_user(client: FlaskClient):
 
 @pytest.fixture
 def mg_g_populate(client: FlaskClient):
-    master_groups = ["Country", "Brand"]
-    groups = {"Canada": "1", "JB": "2", "Bombay": "2"}
+    # TODO refactoring
+    master_groups = ["Country", "Brand", s.ProductMasterGroupMandatory.events.value]
+    groups = {
+        "Canada": "1",
+        "JB": "2",
+        "Bombay": "2",
+    }
     create_default_divisions()
     role = db.session.execute(
         m.Division.select().where(
-            m.Division.role_name == BaseConfig.Config.WAREHOUSE_MANAGER
+            m.Division.role_name == s.UserRole.WAREHOUSE_MANAGER.value
         )
     ).scalar()
     m.User(
@@ -150,6 +152,11 @@ def mg_g_populate(client: FlaskClient):
             master_group_id=groups[g],
         ).save(False)
 
+    group_event = m.Group(
+        name=s.ProductMasterGroupMandatory.events.value,
+        master_group_id=3,
+    ).save(False)
+
     populate_test_product = m.Product(
         name="populate_test_product",
         supplier_id=1,
@@ -158,7 +165,7 @@ def mg_g_populate(client: FlaskClient):
         retail_price=11,
         image="imgpngbase64str",
         description="desc",
-        SKU="322ewd3333rf",
+        SKU="322ewd3333rs",
         low_stock_level=11,
         program_year=2023,
         package_qty=12,
@@ -171,7 +178,7 @@ def mg_g_populate(client: FlaskClient):
         height=11.0,
     )
     populate_test_product.save(False)
-    m.Product(
+    populate_test_prod2 = m.Product(
         name="populate_test_prod2",
         supplier_id=1,
         currency="USD",
@@ -179,7 +186,7 @@ def mg_g_populate(client: FlaskClient):
         retail_price=11,
         image="imgpngbase64str",
         description="desc",
-        SKU="322ewd3333rf",
+        SKU="322ewd2222rs",
         low_stock_level=11,
         program_year=2023,
         package_qty=12,
@@ -190,7 +197,31 @@ def mg_g_populate(client: FlaskClient):
         length=11.0,
         width=11.0,
         height=11.0,
-    ).save(False)
+    )
+    populate_test_prod2.save(False)
+
+    event_test_product = m.Product(
+        name="event_test_product",
+        supplier_id=1,
+        currency="CAD",
+        regular_price=9,
+        retail_price=11,
+        image="imgpngbase64str",
+        description="desc",
+        SKU="322ewd3333rs",
+        low_stock_level=11,
+        program_year=2023,
+        package_qty=12,
+        numb_of_items_per_case=22,
+        numb_of_cases_per_outer_case=22,
+        comments="comments",
+        weight=11.0,
+        length=11.0,
+        width=11.0,
+        height=11.0,
+    )
+    event_test_product.save(False)
+
     m.ProductGroup(product_id=1, group_id=1).save(False)
     m.ProductGroup(product_id=2, group_id=2).save(False)
 
@@ -203,6 +234,16 @@ def mg_g_populate(client: FlaskClient):
         manager_id=1,
     )
     jw.save(False)
+
+    warehouse_events = m.Warehouse(
+        name=s.WarehouseMandatory.warehouse_events.value,
+        phone_number="380362470221",
+        city="Bagmom",
+        zip="unzip",
+        address="sserdda",
+        manager_id=1,
+    )
+    warehouse_events.save(False)
 
     m.DeliveryAgent(
         first_name="May",
@@ -226,20 +267,19 @@ def mg_g_populate(client: FlaskClient):
         active=True,
     ).save(False)
 
-    m.InboundOrder(
-        order_id=f"IO-BEAM-{int(datetime.datetime.now().timestamp())}",
+    inbound_order_test = m.InboundOrder(
         active_date=datetime.datetime.strptime("07/20/2023", "%m/%d/%Y"),
         active_time="12:00 AM",
-        order_title="Inbound Order test",
+        title="Inbound Order test",
         delivery_date=datetime.datetime.strptime("07/19/2023", "%m/%d/%Y"),
-        status="Delivered",
+        status=s.InboundOrderStatus.delivered,
         supplier_id=1,
         warehouse_id=1,
-    ).save(False)
+    )
 
     m.ShipRequest(
         order_numb=f"Order{datetime.datetime.now().timestamp()}",
-        status="In Progress",
+        status=s.ShipRequestStatus.in_transit.name,
         store_category_id=1,
         order_type="Regular",
         store_id=1,
@@ -253,7 +293,7 @@ def mg_g_populate(client: FlaskClient):
     ).save(False)
 
     m.StoreCategory(
-        name=BaseConfig.Config.SALES_REP_LOCKER_NAME,
+        name=SALES_REP_LOCKER_NAME,
         active=True,
         image=os.environ.get("DEFAULT_IMAGE", "default"),
     ).save()
@@ -281,7 +321,7 @@ def mg_g_populate(client: FlaskClient):
 
     sr_atp = m.ShipRequest(
         order_numb="Order-12345-Assigned-to-pickup",
-        status="Assigned to pickup",
+        status=s.ShipRequestStatus.assigned,
         store_category_id=1,
         order_type="Regular",
         store_id=1,
@@ -291,7 +331,7 @@ def mg_g_populate(client: FlaskClient):
 
     m.ShipRequest(
         order_numb="Order-12345-In-transit",
-        status="In transit",
+        status=s.ShipRequestStatus.in_transit,
         store_category_id=1,
         order_type="Regular",
         store_id=1,
@@ -300,7 +340,7 @@ def mg_g_populate(client: FlaskClient):
 
     m.ShipRequest(
         order_numb="Order-12345-Waiting-for-warehouse-manager",
-        status="Waiting for warehouse manager",
+        status=s.ShipRequestStatus.waiting_for_warehouse,
         store_category_id=1,
         order_type="Regular",
         store_id=1,
@@ -308,54 +348,310 @@ def mg_g_populate(client: FlaskClient):
     ).save(False)
 
     m.InboundOrder(
-        order_id="IO-BEAM-A-t-p",
         active_date=datetime.datetime.strptime("07/20/2023", "%m/%d/%Y"),
         active_time="12:00 AM",
-        order_title="Inbound Order Assigned to pickup",
+        title="Inbound Order Assigned to pickup",
         delivery_date=datetime.datetime.strptime("07/19/2023", "%m/%d/%Y"),
-        status="Assigned to pickup",
+        status=s.InboundOrderStatus.assigned,
         supplier_id=1,
         warehouse_id=1,
     ).save(False)
 
-    io_it = m.InboundOrder(
-        order_id="IO-BEAM-I-t",
+    inbound_order_transit = m.InboundOrder(
         active_date=datetime.datetime.strptime("07/20/2023", "%m/%d/%Y"),
         active_time="12:00 AM",
-        order_title="Inbound Order In transit",
+        title="Inbound Order In transit",
         delivery_date=datetime.datetime.strptime("07/19/2023", "%m/%d/%Y"),
-        status="In transit",
+        status=s.InboundOrderStatus.in_transit,
         supplier_id=1,
         warehouse_id=1,
     )
-    io_it.save(False)
 
-    # NOTE actually save everything above
-    db.session.commit()
+    received_one_product_one_group = m.InboundOrder(
+        active_date=datetime.datetime.strptime("07/20/2023", "%m/%d/%Y"),
+        active_time="12:00 AM",
+        title="received_one_product_one_group",
+        delivery_date=datetime.datetime.strptime("07/19/2023", "%m/%d/%Y"),
+        status=s.InboundOrderStatus.in_transit,
+        supplier_id=1,
+        warehouse_id=1,
+    )
+    received_one_product_two_groups = m.InboundOrder(
+        active_date=datetime.datetime.strptime("07/20/2023", "%m/%d/%Y"),
+        active_time="12:00 AM",
+        title="received_one_product_two_groups",
+        delivery_date=datetime.datetime.strptime("07/19/2023", "%m/%d/%Y"),
+        status=s.InboundOrderStatus.in_transit,
+        supplier_id=1,
+        warehouse_id=1,
+    )
+    received_two_products_one_group = m.InboundOrder(
+        active_date=datetime.datetime.strptime("07/20/2023", "%m/%d/%Y"),
+        active_time="12:00 AM",
+        title="received_two_products_one_group",
+        delivery_date=datetime.datetime.strptime("07/19/2023", "%m/%d/%Y"),
+        status=s.InboundOrderStatus.in_transit,
+        supplier_id=1,
+        warehouse_id=1,
+    )
+    received_two_products_two_groups = m.InboundOrder(
+        active_date=datetime.datetime.strptime("07/20/2023", "%m/%d/%Y"),
+        active_time="12:00 AM",
+        title="received_two_products_two_groups",
+        delivery_date=datetime.datetime.strptime("07/19/2023", "%m/%d/%Y"),
+        status=s.InboundOrderStatus.in_transit,
+        supplier_id=1,
+        warehouse_id=1,
+    )
 
     m.WarehouseProduct(
         product_id=populate_test_product.id,
         group_id=1,
         product_quantity=100,
         warehouse_id=jw.id,
-    ).save()
-
-    m.ProductQuantityGroup(
+    ).save(False)
+    m.WarehouseProduct(
         product_id=populate_test_product.id,
+        group_id=2,
+        product_quantity=200,
         warehouse_id=jw.id,
-        group_id=1,
-        quantity=100,
-        inbound_order_id=io_it.id,
-        shelf_life_start=datetime.datetime.now(),
-        shelf_life_end=datetime.datetime.now(),
-    ).save()
+    ).save(False)
+    m.WarehouseProduct(
+        product_id=event_test_product.id,
+        group_id=group_event.id,
+        product_quantity=200,
+        warehouse_id=warehouse_events.id,
+    ).save(False)
+
+    inbound_order_test.products_allocated.append(
+        m.ProductAllocated(
+            product=populate_test_product,
+            quantity=200,
+            shelf_life_start=datetime.datetime.now().date(),
+            shelf_life_end=datetime.datetime.now().date(),
+            product_quantity_groups=[
+                m.ProductQuantityGroup(
+                    group_id=1,
+                    quantity=200,
+                )
+            ],
+        )
+    )
+    inbound_order_test.save(False)
+
+    inbound_order_transit.products_allocated.append(
+        m.ProductAllocated(
+            product=populate_test_product,
+            quantity=200,
+            shelf_life_start=datetime.datetime.now().date(),
+            shelf_life_end=datetime.datetime.now().date(),
+            product_quantity_groups=[
+                m.ProductQuantityGroup(
+                    group_id=1,
+                    quantity=200,
+                )
+            ],
+        )
+    )
+    inbound_order_transit.save(False)
+
+    # received_one_product_one_group
+    received_one_product_one_group.products_allocated.append(
+        m.ProductAllocated(
+            product=populate_test_product,
+            quantity=200,
+            shelf_life_start=datetime.datetime.now().date(),
+            shelf_life_end=datetime.datetime.now().date(),
+            product_quantity_groups=[
+                m.ProductQuantityGroup(
+                    group_id=1,
+                    quantity=200,
+                )
+            ],
+        )
+    )
+    received_one_product_one_group.save(False)
+
+    # received_one_product_two_groups
+    received_one_product_two_groups.products_allocated.append(
+        m.ProductAllocated(
+            product=populate_test_product,
+            quantity=200,
+            shelf_life_start=datetime.datetime.now().date(),
+            shelf_life_end=datetime.datetime.now().date(),
+            product_quantity_groups=[
+                m.ProductQuantityGroup(
+                    group_id=1,
+                    quantity=200,
+                )
+            ],
+        )
+    )
+
+    received_one_product_two_groups.products_allocated.append(
+        m.ProductAllocated(
+            product=populate_test_prod2,
+            quantity=100,
+            shelf_life_start=datetime.datetime.now().date(),
+            shelf_life_end=datetime.datetime.now().date(),
+            product_quantity_groups=[
+                m.ProductQuantityGroup(
+                    group_id=1,
+                    quantity=100,
+                )
+            ],
+        )
+    )
+    received_one_product_two_groups.save(False)
+
+    # received_two_products_one_group
+    received_two_products_one_group.products_allocated.append(
+        m.ProductAllocated(
+            product=populate_test_product,
+            quantity=200,
+            shelf_life_start=datetime.datetime.now().date(),
+            shelf_life_end=datetime.datetime.now().date(),
+            product_quantity_groups=[
+                m.ProductQuantityGroup(
+                    group_id=1,
+                    quantity=200,
+                )
+            ],
+        )
+    )
+
+    received_two_products_one_group.products_allocated.append(
+        m.ProductAllocated(
+            product=populate_test_product,
+            quantity=100,
+            shelf_life_start=datetime.datetime.now().date(),
+            shelf_life_end=datetime.datetime.now().date(),
+            product_quantity_groups=[
+                m.ProductQuantityGroup(
+                    group_id=2,
+                    quantity=100,
+                )
+            ],
+        )
+    )
+    received_two_products_one_group.save(False)
+
+    # received_two_products_two_groups
+    received_two_products_two_groups.products_allocated.append(
+        m.ProductAllocated(
+            product=populate_test_product,
+            quantity=200,
+            shelf_life_start=datetime.datetime.now().date(),
+            shelf_life_end=datetime.datetime.now().date(),
+            product_quantity_groups=[
+                m.ProductQuantityGroup(
+                    group_id=1,
+                    quantity=200,
+                )
+            ],
+        )
+    )
+
+    received_two_products_two_groups.products_allocated.append(
+        m.ProductAllocated(
+            product=populate_test_prod2,
+            quantity=100,
+            shelf_life_start=datetime.datetime.now().date(),
+            shelf_life_end=datetime.datetime.now().date(),
+            product_quantity_groups=[
+                m.ProductQuantityGroup(
+                    group_id=2,
+                    quantity=100,
+                )
+            ],
+        )
+    )
+    received_two_products_two_groups.save(False)
 
     m.Cart(
-        product_id=populate_test_product.id,
-        quantity=11,
+        product=populate_test_product,
+        quantity=15,
         user_id=1,
         group="Canada",
+        warehouse_id=jw.id,
         ship_request_id=sr_atp.id,
-    ).save()
+    ).save(False)
+
+    report = m.ReportEvent(
+        type="test_type",
+        user_id=1,
+        history="some history",
+    )
+    report.save(False)
+
+    db.session.commit()
+
+    today = datetime.datetime.now().date()
+    for day in range(1, 17, 5):
+        sr = m.ShipRequest(
+            order_numb=f"Order-12345{day}-Waiting-for-warehouse-manager",
+            status=s.ShipRequestStatus.waiting_for_warehouse,
+            store_category_id=1,
+            order_type="Regular",
+            store_id=1,
+            user_id=3,
+        ).save(False)
+
+        cart = m.Cart(
+            product=event_test_product,
+            quantity=10,
+            user_id=3,
+            group=s.MasterGroupMandatory.events.value,
+            ship_request_id=sr.id,
+            warehouse_id=warehouse_events.id,
+            status="pending",
+        ).save(False)
+
+        m.Event(
+            date_from=today - datetime.timedelta(days=day),
+            date_to=today + datetime.timedelta(days=day),
+            date_reserve_from=today - datetime.timedelta(days=day + 5),
+            date_reserve_to=today + datetime.timedelta(days=day + 5),
+            quantity=cart.quantity,
+            product_id=event_test_product.id,
+            comment="event for product 1",
+            user_id=3,
+            cart_id=cart.id,
+            report_id=report.id,
+        ).save(False)
+        db.session.commit()
 
     yield client
+
+
+@pytest.fixture
+def cases_map():
+    with open(
+        Path("tests") / "data" / "dict_received_products.json", "r"
+    ) as received_product_json:
+        received_product_cases = s.IncomingStocksLists.model_validate_json(
+            received_product_json.read()
+        )
+
+        return {
+            case.name: case.incoming_stock_product
+            for case in received_product_cases.root
+        }
+
+
+@pytest.fixture(
+    params=[
+        "received_one_product_one_group",
+        "received_one_product_two_groups",
+        "received_two_products_one_group",
+        "received_two_products_two_groups",
+        "received_one_product_one_group",
+    ]
+)
+def order_name(request):
+    return request.param
+
+
+@pytest.fixture
+def orders_t(order_name, cases_map):
+    return s.IncomingStocks.model_validate(cases_map[order_name]), order_name

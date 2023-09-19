@@ -2,7 +2,6 @@ import base64
 import json
 from datetime import datetime
 from io import BytesIO
-import os
 import pandas
 from flask import (
     Blueprint,
@@ -21,6 +20,7 @@ import sqlalchemy as sa
 from app.controllers import create_pagination
 
 from app import models as m, db, mail
+from app import schema as s
 from app import forms as f
 from app.logger import log
 
@@ -28,10 +28,21 @@ from app.logger import log
 product_blueprint = Blueprint("product", __name__, url_prefix="/product")
 
 
+# TODO: needs refactor FIRST!!
 def get_all_products(request, query=None, count_query=None, my_stocks=False):
     q = request.args.get("q", type=str, default=None)
+    is_events = request.args.get("events", type=bool, default=False)
+
     if query is None or count_query is None:
-        query = m.Product.select().order_by(m.Product.id)
+        reverse_event_filter = ~m.Product.warehouse_products.any(
+            m.WarehouseProduct.group.has(
+                m.Group.master_group.has(
+                    m.MasterGroup.name == s.MasterGroupMandatory.events.value
+                )
+            )
+        )
+        query = m.Product.select().where(reverse_event_filter).order_by(m.Product.id)
+
         count_query = sa.select(sa.func.count()).select_from(m.Product)
         if q:
             query = (
@@ -53,13 +64,25 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
                 .select_from(m.Product)
             )
 
+    if is_events:
+        event_filter = m.Product.warehouse_products.any(
+            m.WarehouseProduct.group.has(
+                m.Group.master_group.has(
+                    m.MasterGroup.name == s.MasterGroupMandatory.events.value
+                )
+            )
+        )
+
+        query = m.Product.select().where(event_filter).order_by(m.Product.id)
+
+    groups_for_products_obj = db.session.execute(m.GroupProduct.select()).all()
+
     pagination = create_pagination(total=db.session.scalar(count_query))
 
     master_groups = [
         row for row in db.session.execute(m.MasterGroup.select()).scalars()
     ]
 
-    groups_for_products_obj = db.session.execute(m.GroupProduct.select()).all()
     mastr_for_prods_groups_for_prods = {}
     mstr_prod_grps_prod_grps_names = {}
     for group in groups_for_products_obj:
@@ -86,16 +109,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         row for row in db.session.execute(m.ProductGroup.select()).scalars()
     ]
 
-    product_groups: list[m.ProductGroup] = [
-        row
-        for row in db.session.execute(
-            m.ProductGroup.select()
-            .order_by(m.ProductGroup.id)
-            .offset((pagination.page - 1) * pagination.per_page * 4)
-            .limit(pagination.per_page)
-        ).scalars()
-    ]
-
     # TODO: consider using a join instead of two queries <- Copilot
     # get all groups ids for current user to compare with product groups ids in view.html
     current_user_groups_rows = db.session.execute(
@@ -116,7 +129,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     # NOTE: Create json object for "show-all-groups" button in products.html
     product_mg_g = (
         {
-            p.child.name: {
+            p.child.SKU: {
                 mg.parent.master_groups_for_product.name: "".join(
                     [
                         g.parent.name
@@ -143,7 +156,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     master_group_product_name = [
         mgp[0].name for mgp in db.session.execute(m.MasterGroupProduct.select()).all()
     ]
-    product_mg_g["master_group_product_name"] = master_group_product_name
 
     suppliers = [i for i in db.session.execute(m.Supplier.select()).scalars()]
 
@@ -183,6 +195,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         "query": query,
         "pagination": pagination,
         "q": q,
+        "is_events": is_events,
         "master_groups": master_groups,
         "product_groups": product_groups,
         "current_user_groups_rows": current_user_groups_rows,
@@ -222,6 +235,7 @@ def get_all():
         ).scalars(),
         page=products_object["pagination"],
         search_query=products_object["q"],
+        is_events=products_object["is_events"],
         main_master_groups=products_object["master_groups"],
         product_groups=products_object["product_groups"],
         all_product_groups=products_object["all_product_groups"],
@@ -399,42 +413,40 @@ def save():
         return redirect(url_for("product.get_all"))
 
 
+# TODO brainstorm
 @product_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
 def delete(id: int):
-    prod: m.Product = db.session.scalar(m.Product.select().where(m.Product.id == id))
-    if not prod:
+    product: m.Product = db.session.get(m.Product, id)
+    if not product:
         log(log.INFO, "There is no product with id: [%s]", id)
         flash("There is no such product", "danger")
         return "no product", 404
-
-    # NOTE should we allow to delete product if it is in product_group, warehouse_product, carts, product_quantity_group
-    product_warehouses = db.session.execute(
-        m.WarehouseProduct.select().where(m.WarehouseProduct.product_id == prod.id)
-    ).scalars()
-    product_carts = db.session.execute(
-        m.Cart.select().where(m.Cart.product_id == prod.id)
-    ).scalars()
-    product_groups = db.session.execute(
-        m.ProductGroup.select().where(m.ProductGroup.product_id == prod.id)
-    ).scalars()
-    product_io = db.session.execute(
-        m.ProductQuantityGroup.select().where(
-            m.ProductQuantityGroup.product_id == prod.id
+    db.session.execute(
+        m.WarehouseProduct.delete().where(m.WarehouseProduct.product == product)
+    )
+    db.session.execute(m.Cart.delete().where(m.Cart.product == product))
+    db.session.execute(
+        m.ProductGroup.delete().where(m.ProductGroup.product_id == product.id)
+    )
+    db.session.execute(
+        m.ProductQuantityGroup.delete().where(
+            m.ProductAllocated.product_quantity_groups.any(
+                m.ProductAllocated.product == product
+            )
         )
-    ).scalars()
-
-    for prod_conn in [product_warehouses, product_carts, product_groups, product_io]:
-        for pw in prod_conn:
-            db.session.delete(pw)
-
-    db.session.delete(prod)
+    )
+    db.session.execute(
+        m.ProductAllocated.delete().where(m.ProductAllocated.product == product)
+    )
+    db.session.delete(product)
     db.session.commit()
-    log(log.INFO, "Product deleted. Product: [%s]", prod)
+    log(log.INFO, "Product deleted. Product: [%s]", product)
     flash("Product deleted!", "success")
     return "ok", 200
 
 
+# TODO refactor
 @product_blueprint.route("/sort", methods=["GET", "POST"])
 @login_required
 def sort():
@@ -464,35 +476,34 @@ def sort():
             ]
             for pg in product_groups
         }
-        product_ids_to_return = [
-            pid for pid in product_to_group if len(product_to_group[pid]) == len(groups)
-        ]
+        # TODO remove if unused
+        # product_ids_to_return = [
+        #     pid for pid in product_to_group if len(product_to_group[pid]) == len(groups)
+        # ]
 
         q = request.args.get("q", type=str, default=None)
         query = (
             m.Product.select()
-            .where(m.Product.id.in_(product_ids_to_return))
+            .where(m.Product.id.in_(product_to_group))
             .order_by(m.Product.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .where(m.Product.id.in_(product_ids_to_return))
+            .where(m.Product.id.in_(product_to_group))
             .select_from(m.Product)
         )
         if q:
             query = (
                 m.Product.select()
                 .where(
-                    m.Product.name.ilike(f"%{q}%")
-                    | m.Product.id.in_(product_ids_to_return)
+                    m.Product.name.ilike(f"%{q}%") | m.Product.id.in_(product_to_group)
                 )
                 .order_by(m.Product.id)
             )
             count_query = (
                 sa.select(sa.func.count())
                 .where(
-                    m.Product.name.ilike(f"%{q}%")
-                    | m.Product.id.in_(product_ids_to_return)
+                    m.Product.name.ilike(f"%{q}%") | m.Product.id.in_(product_to_group)
                 )
                 .select_from(m.Product)
             )
@@ -510,6 +521,7 @@ def sort():
             ).scalars(),
             page=products_object["pagination"],
             search_query=products_object["q"],
+            is_events=products_object["is_events"],
             main_master_groups=products_object["master_groups"],
             product_groups=products_object["product_groups"],
             all_product_groups=products_object["all_product_groups"],
@@ -586,6 +598,7 @@ def assign():
             product_id=p.id,
             group_id=int(form.group.data),
             quantity=form.quantity.data,
+            from_group_id=form.from_group_id.data,
         ).save()
 
         return redirect(url_for("product.get_all"))
@@ -624,6 +637,7 @@ def request_share():
             desire_quantity=form.desire_quantity.data,
             status="pending",
             from_group_id=from_group_id,
+            user_id=current_user.id,
         )
         log(log.INFO, "Form submitted. Share Request: [%s]", rs)
         rs.save()
@@ -683,76 +697,86 @@ def request_share():
 @product_blueprint.route("/adjust", methods=["POST"])
 @login_required
 def adjust():
-    form: f.DepleteProductForm = f.DepleteProductForm()
-    product_desire_quantity = int(form.quantity.data)
+    form: f.AdjustProductForm = f.AdjustProductForm()
 
     if form.validate_on_submit():
-        warehouse_product: m.WarehouseProduct = db.session.execute(
-            m.WarehouseProduct.select().where(
-                m.WarehouseProduct.warehouse_id == form.warehouse_id.data,
-                m.WarehouseProduct.product_id == form.product_id.data,
-                m.WarehouseProduct.group_id == form.group_id.data,
+        adjust_item: m.Adjust = m.Adjust(
+            product_id=form.product_id.data,
+            note=form.note.data,
+        )
+        db.session.add(adjust_item)
+        groups = json.loads(form.groups_quantity.data)
+        product = db.session.get(m.Product, form.product_id.data)
+        warehouse_event: m.Warehouse = db.session.scalar(
+            m.Warehouse.select().where(
+                m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value
             )
-        ).scalar()
-
-    product_name = (
-        db.session.execute(
-            m.Product.select().where(m.Product.id == form.product_id.data)
         )
-        .scalar()
-        .name
-    )
-    warehouse_name = (
-        db.session.execute(
-            m.Warehouse.select().where(m.Warehouse.id == form.warehouse_id.data)
-        )
-        .scalar()
-        .name
-    )
+        if not product:
+            flash("Cannot save product data", "danger")
+            log(log.ERROR, "Not found product by id : [%s]", form.product_id.data)
+            return redirect(url_for("product.get_all"))
 
-    if not warehouse_product:
+        for group_name, warehouses in groups.items():
+            group_id = db.session.execute(
+                m.Group.select()
+                .where(m.Group.name == group_name)
+                .with_only_columns(m.Group.id)
+            ).scalar()
+            for warehouse_id, quantity in warehouses.items():
+                product_warehouse: m.WarehouseProduct = db.session.scalar(
+                    m.WarehouseProduct.select().where(
+                        m.WarehouseProduct.product_id == form.product_id.data,
+                        m.WarehouseProduct.group_id == group_id,
+                        m.WarehouseProduct.warehouse_id == warehouse_id,
+                    )
+                )
+                if product_warehouse:
+                    if (
+                        group_name == s.MasterGroupMandatory.events.value
+                        and warehouse_event.id != int(warehouse_id)
+                    ):
+                        continue
+                    if product_warehouse.product_quantity != quantity:
+                        adjust_gr_qty: m.AdjustGroupQty = m.AdjustGroupQty(
+                            adjust_id=adjust_item.id,
+                            quantity=quantity,
+                            group_id=group_id,
+                            warehouse_id=warehouse_id,
+                        )
+                        db.session.add(adjust_gr_qty)
+                    product_warehouse.product_quantity = quantity
+                    db.session.add(product_warehouse)
+                else:
+                    product_warehouse = m.WarehouseProduct(
+                        product_id=form.product_id.data,
+                        group_id=group_id,
+                        product_quantity=quantity,
+                        warehouse_id=warehouse_id,
+                    )
+                    db.session.add(product_warehouse)
+                    adjust_gr_qty: m.AdjustGroupQty = m.AdjustGroupQty(
+                        adjust_id=adjust_item.id,
+                        quantity=quantity,
+                        group_id=group_id,
+                        warehouse_id=warehouse_id,
+                    )
+                    db.session.add(adjust_gr_qty)
+
+        db.session.commit()
+
         log(
             log.INFO,
-            "These product is not in warehouse. Product id: [%s]",
+            "Adjust products: [%s][%s",
             form.product_id.data,
+            form.groups_quantity.data,
         )
-        return (
-            jsonify(
-                message=f"""Product "{product_name}" is out of warehouse "{warehouse_name}".""",
-            ),
-            200,
-        )
+        flash(f"Product {product.name} was adjusted", "success")
+        return redirect(url_for("product.get_all"))
 
-    if warehouse_product.product_quantity == product_desire_quantity:
-        log(
-            log.INFO,
-            "Quantity of product is the same. Product id: [%s]",
-            form.product_id.data,
-        )
-        return (
-            jsonify(
-                message=f"""Quantity of product "{product_name}" in warehouse "{warehouse_name}"
-                    is the same as you want to change.""",
-            ),
-            200,
-        )
-
-    warehouse_product.product_quantity = product_desire_quantity
-    warehouse_product.save()
-
-    log(
-        log.INFO,
-        "Adjust product: [%s][%s",
-        form.product_id.data,
-        form.warehouse_id.data,
-    )
-    return (
-        jsonify(
-            message=f"""Quantity of Product "{product_name}" in warehouse "{warehouse_name}"
-                was changed to {product_desire_quantity}""",
-        ),
-        201,
-    )
+    log(log.ERROR, "Adjust item save errors: [%s]", form.errors)
+    flash(f"{form.errors}", "danger")
+    return redirect(url_for("outgoing_stock.get_all"))
 
 
 @product_blueprint.route("/upload", methods=["POST"])
@@ -937,6 +961,10 @@ class DoNothingConflict:
 @product_blueprint.route("/stocks_owned_by_me", methods=["GET"])
 @login_required
 def stocks_owned_by_me():
+    is_events = request.args.get("events", type=bool, default=False)
+    if is_events:
+        log(log.INFO, "Redirect to events product: [%s]", is_events)
+        return redirect(url_for("product.get_all", events=True))
     curr_user_groups_ids = [
         i.right_id
         for i in db.session.execute(
@@ -954,9 +982,16 @@ def stocks_owned_by_me():
         ).scalars()
     ]
     q = request.args.get("q", type=str, default=None)
+    reverse_event_filter = ~m.Product.warehouse_products.any(
+        m.WarehouseProduct.group.has(
+            m.Group.master_group.has(
+                m.MasterGroup.name == s.MasterGroupMandatory.events.value
+            )
+        )
+    )
     query = (
         m.Product.select()
-        .where(m.Product.id.in_(curr_user_products_ids))
+        .where(m.Product.id.in_(curr_user_products_ids), reverse_event_filter)
         .order_by(m.Product.id)
     )
     count_query = sa.select(sa.func.count()).select_from(m.Product)
@@ -995,6 +1030,7 @@ def stocks_owned_by_me():
         ).scalars(),
         page=products_object["pagination"],
         search_query=products_object["q"],
+        # search_query=products_object["is_events"],
         main_master_groups=products_object["master_groups"],
         product_groups=products_object["product_groups"],
         all_product_groups=products_object["all_product_groups"],
@@ -1028,8 +1064,6 @@ def full_image(id: int):
 
     data = {
         "name": product.name,
-        "image": product.image if product.image else os.environ.get("DEFAULT_IMAGE"),
+        "image": product.image if product.image else app.config["DEFAULT_IMAGE"],
     }
-    response = jsonify(data)
-    response.status_code = 200
-    return response
+    return jsonify(data)

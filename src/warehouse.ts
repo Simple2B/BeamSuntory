@@ -55,6 +55,11 @@ $buttonElements.forEach(e =>
   }),
 );
 
+const closingEditModalButton = document.getElementById('edit-warehouse-modal-close-btn')
+closingEditModalButton.addEventListener('click', () => {
+  modal.hide()
+})
+
 // closing add edit modal
 const $buttonClose = document.querySelector('#modalCloseButton');
 if ($buttonClose) {

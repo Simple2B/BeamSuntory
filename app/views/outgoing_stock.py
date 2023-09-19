@@ -9,13 +9,14 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
+from sqlalchemy import desc
 from sqlalchemy.orm import aliased
 from app.controllers import create_pagination
 
+from app import schema as s
 from app import models as m, db
 from app import forms as f
 from app.logger import log
-from config import BaseConfig
 
 
 # NOTE outgoing stock IS ship request. Meaning good going from warehouse to store
@@ -34,7 +35,7 @@ def get_all():
     store_category = aliased(m.StoreCategory)
     store = aliased(m.Store)
     q = request.args.get("q", type=str, default=None)
-    query = m.ShipRequest.select().order_by(m.ShipRequest.id)
+    query = m.ShipRequest.select().order_by(desc(m.ShipRequest.id))
     count_query = sa.select(sa.func.count()).select_from(m.ShipRequest)
     if q:
         query = (
@@ -44,7 +45,6 @@ def get_all():
             .where(
                 m.ShipRequest.order_numb.ilike(f"%{q}%")
                 | m.ShipRequest.order_type.ilike(f"%{q}%")
-                | m.ShipRequest.status.ilike(f"%{q}%")
                 | store_category.name.ilike(f"%{q}%")
                 | store.store_name.ilike(f"%{q}%")
             )
@@ -57,7 +57,6 @@ def get_all():
             .where(
                 m.ShipRequest.order_numb.ilike(f"%{q}%")
                 | m.ShipRequest.order_type.ilike(f"%{q}%")
-                | m.ShipRequest.status.ilike(f"%{q}%")
                 | store_category.name.ilike(f"%{q}%")
                 | store.store_name.ilike(f"%{q}%")
             )
@@ -83,8 +82,23 @@ def get_all():
         ]
         for spr in ship_requests
     }
-    warehouses_rows = db.session.execute(sa.select(m.Warehouse)).scalars()
-    warehouses = [{"name": w.name, "id": w.id} for w in warehouses_rows]
+    warehouses = db.session.scalars(
+        m.Warehouse.select().where(
+            m.Warehouse.name != s.WarehouseMandatory.warehouse_events.value
+        )
+    ).all()
+    warehouses_events = db.session.scalars(
+        m.Warehouse.select().where(
+            m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value
+        )
+    ).all()
+
+    warehouses_json = s.WarehouseList.model_validate(warehouses).model_dump_json(
+        by_alias=True
+    )
+    warehouses_events_json = s.WarehouseList.model_validate(
+        warehouses_events
+    ).model_dump_json(by_alias=True)
 
     return render_template(
         "outgoing_stock/outgoing_stocks.html",
@@ -96,19 +110,20 @@ def get_all():
         form_edit=form_edit,
         form_sort=form_sort,
         warehouses=warehouses,
-        ship_requests_status=BaseConfig.Config.SHIP_REQUEST_STATUS,
+        warehouses_json=warehouses_json,
+        warehouses_events_json=warehouses_events_json,
+        warehouses_events=warehouses_events,
+        ship_requests_status=s.ShipRequestStatus,
     )
 
 
+# TODO needs refactor
 @outgoing_stock_blueprint.route("/edit", methods=["POST"])
 @login_required
 def save():
     form_edit: f.ShipRequestForm = f.ShipRequestForm()
     if form_edit.validate_on_submit():
-        query = m.ShipRequest.select().where(
-            m.ShipRequest.id == int(form_edit.ship_request_id.data)
-        )
-        sr: m.ShipRequest | None = db.session.scalar(query)
+        sr = db.session.get(m.ShipRequest, form_edit.ship_request_id.data)
         if not sr:
             log(
                 log.ERROR,
@@ -116,24 +131,28 @@ def save():
                 form_edit.ship_request_id.data,
             )
             flash("Cannot save item data", "danger")
-        sr.status = form_edit.status.data
+            return redirect(url_for("outgoing_stock.get_all"))
+
+        sr.status = s.ShipRequestStatus(form_edit.status.data)
         sr.wm_notes = form_edit.wm_notes.data
         sr.save()
 
         products = json.loads(form_edit.products.data)
 
         for product in products:
-            cart: m.Cart = db.session.execute(
+            cart: m.Cart = db.session.scalar(
                 m.Cart.select().where(
                     m.Cart.product_id == int(product["product_id"]),
                     m.Cart.group == product["group_name"],
                     m.Cart.ship_request_id == sr.id,
                     m.Cart.quantity == int(product["quantity"]),
                 )
-            ).scalar()
+            )
             if cart:
                 cart.warehouse_id = product["warehouse_id"]
-                cart.save()
+                cart.save(False)
+
+        db.session.commit()
 
         if form_edit.next_url.data:
             return redirect(form_edit.next_url.data)
@@ -148,18 +167,16 @@ def save():
 @outgoing_stock_blueprint.route("/dispatch/<int:id>", methods=["GET"])
 @login_required
 def dispatch(id: int):
-    sr: m.ShipRequest = db.session.scalar(
-        m.ShipRequest.select().where(m.ShipRequest.id == id)
-    )
-    if not sr:
+    ship_request: m.ShipRequest = db.session.get(m.ShipRequest, id)
+    if not ship_request:
         log(log.INFO, "There is no ship request with id: [%s]", id)
         flash("There is no such ship request", "danger")
         return "no ship request", 404
 
-    sr.status = "Assigned to pickup"
-    sr.save()
+    ship_request.status = s.ShipRequestStatus.assigned
+    ship_request.save()
 
-    log(log.INFO, "Ship Request dispatched. Ship Request: [%s]", sr)
+    log(log.INFO, "Ship Request dispatched. Ship Request: [%s]", ship_request)
     flash("Ship Request dispatched!", "success")
     return "ok", 200
 
@@ -167,16 +184,15 @@ def dispatch(id: int):
 @outgoing_stock_blueprint.route("/cancel/<int:id>", methods=["GET"])
 @login_required
 def cancel(id: int):
-    sr: m.ShipRequest = db.session.scalar(
-        m.ShipRequest.select().where(m.ShipRequest.id == id)
-    )
-    if not sr:
+    # TODO: needs refactor
+    ship_request: m.ShipRequest = db.session.get(m.ShipRequest, id)
+    if not ship_request:
         log(log.INFO, "There is no ship request with id: [%s]", id)
         flash("There is no such ship request", "danger")
         return "no ship request", 404
 
     carts: list[m.Cart] = db.session.execute(
-        m.Cart.select().where(m.Cart.ship_request_id == sr.id)
+        m.Cart.select().where(m.Cart.ship_request_id == ship_request.id)
     ).scalars()
     for cart in carts:
         cart_user_group: m.Group = db.session.execute(
@@ -194,10 +210,10 @@ def cancel(id: int):
             warehouse_product.product_quantity += cart.quantity
             warehouse_product.save()
 
-    sr.status = "Cancelled"
-    sr.save()
+    ship_request.status = s.ShipRequestStatus.cancelled
+    ship_request.save()
 
-    log(log.INFO, "Ship Request cancelled. Ship Request: [%s]", sr)
+    log(log.INFO, "Ship Request cancelled. Ship Request: [%s]", ship_request)
     flash("Ship Request cancelled!", "success")
     return "ok", 200
 
@@ -205,7 +221,8 @@ def cancel(id: int):
 @outgoing_stock_blueprint.route("/sort", methods=["GET", "POST"])
 @login_required
 def sort():
-    # TODO: handle GET request without
+    # TODO: Move to outgoing stock GET
+    # TODO: need refactor
     if (
         request.method == "GET"
         and request.args.get("page", type=str, default=None) is None
@@ -225,55 +242,39 @@ def sort():
     q = request.args.get("q", type=str, default=None)
     query = (
         m.ShipRequest.select()
-        .where(m.ShipRequest.status == status)
+        .where(m.ShipRequest.status == s.ShipRequestStatus(status))
         .order_by(m.ShipRequest.id)
     )
     count_query = (
         sa.select(sa.func.count())
-        .where(m.ShipRequest.status == status)
+        .where(m.ShipRequest.status == s.ShipRequestStatus(status))
         .select_from(m.ShipRequest)
     )
     if q:
-        query = (
-            m.ShipRequest.select()
-            .where(
-                m.ShipRequest.order_numb.ilike(f"%{q}%")
-                | m.ShipRequest.store_category.ilike(f"%{q}%")
-                | m.ShipRequest.order_type.ilike(f"%{q}%")
-                | m.ShipRequest.status.ilike(f"%{q}%"),
-                m.ShipRequest.status == status,
-            )
-            .order_by(m.ShipRequest.id)
+        query = query.where(
+            m.ShipRequest.order_numb.ilike(f"%{q}%")
+            | m.ShipRequest.store_category.ilike(f"%{q}%")
+            | m.ShipRequest.order_type.ilike(f"%{q}%")
         )
-        count_query = (
-            sa.select(sa.func.count())
-            .where(
-                m.ShipRequest.order_numb.ilike(f"%{q}%")
-                | m.ShipRequest.store_category.ilike(f"%{q}%")
-                | m.ShipRequest.order_type.ilike(f"%{q}%")
-                | m.ShipRequest.status.ilike(f"%{q}%"),
-                m.ShipRequest.status == status,
-            )
-            .select_from(m.ShipRequest)
+
+        count_query = count_query.where(
+            m.ShipRequest.order_numb.ilike(f"%{q}%")
+            | m.ShipRequest.store_category.ilike(f"%{q}%")
+            | m.ShipRequest.order_type.ilike(f"%{q}%")
         )
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
-    ship_requests = [
-        i
-        for i in db.session.execute(
-            query.offset((pagination.page - 1) * pagination.per_page).limit(
-                pagination.per_page
-            )
-        ).scalars()
-    ]
+    ship_requests = db.session.scalars(
+        query.offset((pagination.page - 1) * pagination.per_page).limit(
+            pagination.per_page
+        )
+    ).all()
+
     current_order_carts = {
-        spr.order_numb: [
-            cart
-            for cart in db.session.execute(
-                m.Cart.select().where(m.Cart.order_numb == spr.order_numb)
-            ).scalars()
-        ]
+        spr.order_numb: db.session.scalars(
+            m.Cart.select().where(m.Cart.order_numb == spr.order_numb)
+        ).all()
         for spr in ship_requests
     }
     warehouses_rows = db.session.execute(sa.select(m.Warehouse)).scalars()
@@ -290,5 +291,5 @@ def sort():
         form_sort=form_sort,
         warehouses=warehouses,
         filtered=filtered,
-        ship_requests_status=BaseConfig.Config.SHIP_REQUEST_STATUS,
+        ship_requests_status=s.ShipRequestStatus,
     )

@@ -13,6 +13,7 @@ ENV PYTHONUNBUFFERED 1
 ENV PYTHONHASHSEED random
 ENV PIP_NO_CACHE_DIR off
 ENV PIP_DISABLE_PIP_VERSION_CHECK on
+ENV APP_ENV production
 
 # install poetry
 RUN pip install --user poetry

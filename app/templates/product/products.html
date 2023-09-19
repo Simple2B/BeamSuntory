@@ -17,11 +17,6 @@
           data-target="{{master_group_search_no_space}}"
           class="product-filter-radio-button inline-flex items-center w-48 text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
           type="button">
-          <!-- <svg class="w-3 h-3 text-gray-500 dark:text-gray-400 mr-2.5" aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 512 512">
-            <path
-              d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/>
-          </svg> -->
           {{ master_group_search }}
           <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
             viewBox="0 0 10 6">
@@ -67,6 +62,17 @@
       </div>
       {% endfor %}
     </div>
+    <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800">
+      {% for master_group_search in master_groups_search %}
+      <select id="countries"
+        class="product-search-master-group- mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+        <option selected>{{ master_group_search }}</option>
+        {% for group in master_groups_search[master_group_search] %}
+        <option value="US">{{ group }}</option>
+        {% endfor %}
+      </select>
+      {% endfor %}
+    </div>
     <div class="flex items-center space-x-2 sm:space-x-3">
       <button type="submit" id="product-filter-button" name="submit"
         class="inline-flex items-center justify-center w-1/2 px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-blue-300 sm:w-auto dark:bg-yellow-400 dark:hover:bg-yellow-500 dark:focus:ring-blue-800">
@@ -84,6 +90,14 @@
           class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-400">
         </div>
         <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Stocks Own By Me</span>
+      </label>
+      <label class="ml-13 relative inline-flex items-center cursor-pointer">
+        <input id="product-show-events-toggle-btn" {% if is_events %}checked{% endif %} type="checkbox" value=""
+          class="sr-only peer">
+        <div
+          class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-400">
+        </div>
+        <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Events</span>
       </label>
     </div>
   </form>
@@ -162,11 +176,11 @@
         <th scope="col" class="px-6 py-3">Image</th>
         <th scope="col" class="px-6 py-3">Name</th>
         <th scope="col" class="px-6 py-3">SKU</th>
-        <th id="product-table-th-product-type" scope="col" class="px-6 py-3">Description</th>
-        <th scope="col" class="px-6 py-3">Currency</th>
-        <th scope="col" class="px-6 py-3">Regular price</th>
-        <th scope="col" class="px-6 py-3">Retail price</th>
-        <th scope="col" class="px-6 py-3">Available Qty</th>
+        <th id="product-table-th-product-type" scope="col" class="px-6 py-3" >Description</th>
+        <th scope="col" class="px-6 py-3 max-width-100">Currency</th>
+        <th scope="col" class="px-6 py-3 max-width-100">Regular price</th>
+        <th scope="col" class="px-6 py-3 max-width-100">Retail price</th>
+        <th scope="col" class="px-6 py-3 max-width-100">Available Qty</th>
         <th scope="col" class="px-6 py-3">Actions</th>
       </tr>
     </thead>
@@ -180,7 +194,7 @@
           </div>
         </td>
         <td scope="row" data-target-product-id="{{ product.id }}"
-          class="product-full-image-anchor p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          class="product-full-image-anchor   text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
             {% if product.image|length > 100 %}
             <img src="data:image/png;base64, {{ product.image }}" alt="{{ product.name }}" class="w-14 object-cover">
@@ -190,65 +204,73 @@
             {% endif %}
           </div>
         </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+        <td scope="row" class="text-base font-normal text-gray-900   dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ product.name }}</div>
+            <div class="text-sm">{{ product.name }}</div>
           </div>
         </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+        <td scope="row" class="  text-base font-normal text-gray-900   dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ product.SKU }}</div>
+            <div class="text-sm">{{ product.SKU }}</div>
           </div>
         </td>
-        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+        <td class="text-base font-normal text-gray-900 dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ product.description }}</div>
+            <div class="text-sm">{{ product.description }}</div>
           </div>
         </td>
-        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+        <td class="text-base font-normal text-gray-900  dark:text-white max-width-100">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ product.currency.name }}</div>
+            <div class="text-sm">{{ product.currency.name }}</div>
           </div>
         </td>
-        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+        <td class="text-base font-normal text-gray-900  dark:text-white max-width-100">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ product.regular_price }}</div>
+            <div class="text-sm">{{ product.regular_price }}</div>
           </div>
         </td>
-        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+        <td class=" text-base font-normal text-gray-900  dark:text-white max-width-100">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ product.retail_price }}</div>
+            <div class="text-sm">{{ product.retail_price }}</div>
           </div>
         </td>
-        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+        <td class=" text-base font-normal text-gray-900 dark:text-white max-width-100">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ warehouse_product_qty[product.name] if product.name in
+            <div class="text-sm">{{ warehouse_product_qty[product.name] if product.name in
               warehouse_product_qty else 0 }}</div>
           </div>
         </td>
-        <td class="p-4 space-x-2 whitespace-nowrap">
-          <button type="button" data-target="{{product.json}}"
-            class="product-adjust-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-blue-300 sm:w-auto dark:bg-yellow-400 dark:hover:bg-yellow-500 dark:focus:ring-blue-800">
-            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-              <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path>
-              <path fill-rule="evenodd"
-                d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
-                clip-rule="evenodd"></path>
+        <td class=" space-x-2 flex gap-2 flex-wrap justify-center py-3">
+          <button type="button" data-target="{{product.json}}" class="product-adjust-button inline-flex items-center w-24 px-3 py-2 text-sm font-medium text-center text-white rounded-lgfocus:outline-none bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 rounded-lg dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+              <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+              <g id="SVGRepo_iconCarrier">
+                <defs>
+                  <style>
+                    .cls-1 {
+                      fill-rule: evenodd;
+                    }
+                  </style>
+                </defs>
+                <path id="accept" class="cls-1"
+                  d="M1008,120a12,12,0,1,1,12-12A12,12,0,0,1,1008,120Zm0-22a10,10,0,1,0,10,10A10,10,0,0,0,1008,98Zm-0.08,14.333a0.819,0.819,0,0,1-.22.391,0.892,0.892,0,0,1-.72.259,0.913,0.913,0,0,1-.94-0.655l-2.82-2.818a0.9,0.9,0,0,1,1.27-1.271l2.18,2.184,4.46-7.907a1,1,0,0,1,1.38-.385,1.051,1.051,0,0,1,.36,1.417Z"
+                  transform="translate(-996 -96)"></path>
+              </g>
             </svg>
             Adjust
           </button>
           <button type="button" data-target="{{product.json}}"
-            class="product-view-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-              <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path>
-              <path fill-rule="evenodd"
-                d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
+            class="product-view-button inline-flex items-center px-3 no-m-l w-24 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 576 512" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35.3-28.7 64-64 64c-7.1 0-13.9-1.2-20.3-3.3c-5.5-1.8-11.9 1.6-11.7 7.4c.3 6.9 1.3 13.8 3.2 20.7c13.7 51.2 66.4 81.6 117.6 67.9s81.6-66.4 67.9-117.6c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3z"
                 clip-rule="evenodd"></path>
             </svg>
             View
           </button>
           <button type="button" data-target="{{product.json}}"
-            class="product-edit-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-blue-300 sm:w-auto dark:bg-yellow-400 dark:hover:bg-yellow-500 dark:focus:ring-blue-800">
+            class="product-edit-button inline-flex items-center px-3 w-24-important py-2 text-sm no-m-l font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-blue-300 sm:w-auto dark:bg-yellow-400 dark:hover:bg-yellow-500 dark:focus:ring-blue-800">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
               <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path>
               <path fill-rule="evenodd"
@@ -258,7 +280,7 @@
             Edit
           </button>
           <button data-product-id={{ product.id }} type="button"
-            class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900 delete-product-btn">
+            class="inline-flex items-center px-3 py-2 text-sm no-m-l w-24 font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900 delete-product-btn">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
               <path fill-rule="evenodd"
                 d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
@@ -380,6 +402,7 @@
 {% include 'product/ship.html' %}
 {% include 'product/assign.html' %}
 {% include 'product/adjust.html' %}
+{% include 'product/event.html' %}
 <!-- prettier-ignore -->
 {% endblock %}
 <!-- prettier-ignore -->
@@ -389,4 +412,5 @@
   sessionStorage.setItem('productMgG', productMgG);
 </script>
 <script src="{{ url_for('static', filename='js/product.js') }}" type="text/javascript" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.umd.min.js"></script>
 {% endblock %}

@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import (
     Blueprint,
     render_template,
@@ -7,7 +8,7 @@ from flask import (
     url_for,
     current_app as app,
 )
-from flask_login import login_required
+from flask_login import login_required, current_user
 from flask_mail import Message
 import sqlalchemy as sa
 from sqlalchemy.orm import aliased
@@ -72,6 +73,7 @@ def get_all():
         page=pagination,
         search_query=q,
         form_edit=form_edit,
+        user=current_user,
     )
 
 
@@ -184,6 +186,7 @@ def share(id: int):
     warehouse_from_prod.save()
 
     rs.status = "shared"
+    rs.finished_date = datetime.now().replace(microsecond=0)
     rs.save()
     log(log.INFO, "Request Share share: [%s]", rs)
     flash("Request Share shared!", "success")
@@ -193,15 +196,14 @@ def share(id: int):
 @request_share_blueprint.route("/decline/<int:id>", methods=["GET"])
 @login_required
 def decline(id: int):
-    rs: m.RequestShare = db.session.scalar(
-        m.RequestShare.select().where(m.RequestShare.id == id)
-    )
+    rs: m.RequestShare = db.session.get(m.RequestShare, id)
     if not rs:
         log(log.INFO, "There is no request_share with id: [%s]", id)
         flash("There is no such request_share", "danger")
-        return "no request_share", 404
+        return redirect(url_for("request_share.get_all"))
 
     rs.status = "declined"
+    rs.finished_date = datetime.now().replace(microsecond=0)
     rs.save()
 
     product_group: m.Group = db.session.execute(
@@ -244,4 +246,4 @@ def decline(id: int):
 
     log(log.INFO, "Request Share declined: [%s]", rs)
     flash("Request Share declined!", "success")
-    return "ok", 200
+    return redirect(url_for("request_share.get_all"))

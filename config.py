@@ -1,29 +1,39 @@
 import os
+from typing import ClassVar
+from abc import ABC, abstractclassmethod
 from functools import lru_cache
-from pydantic import BaseSettings
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from flask import Flask
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 APP_ENV = os.environ.get("APP_ENV", "development")
 
+SALES_REP_LOCKER_NAME = "Locker"
 
-class BaseConfig(BaseSettings):
+
+class BaseConfig(BaseSettings, ABC):
     """Base configuration."""
 
-    ENV: str = "base"
+    @property
+    @abstractclassmethod
+    def ENV():
+        ...
+
     APP_NAME: str = "Beam Suntory"
     SECRET_KEY: str
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
     WTF_CSRF_ENABLED: bool = True
 
     # Mail config
-    MAIL_SERVER: str = os.environ.get("MAIL_SERVER")
-    MAIL_PORT: int = os.environ.get("MAIL_PORT")
+    MAIL_SERVER: str
+    MAIL_PORT: int
     MAIL_USE_TLS: bool = True
     MAIL_USE_SSL: bool = False
-    MAIL_USERNAME: str = os.environ.get("MAIL_USERNAME")
-    MAIL_PASSWORD: str = os.environ.get("MAIL_PASSWORD")
-    MAIL_DEFAULT_SENDER: str = os.environ.get("MAIL_DEFAULT_SENDER")
+    MAIL_USERNAME: str
+    MAIL_PASSWORD: str
+    MAIL_DEFAULT_SENDER: str
+    DEFAULT_IMAGE: str
 
     # Super admin
     ADMIN_USERNAME: str
@@ -31,7 +41,7 @@ class BaseConfig(BaseSettings):
     ADMIN_PASSWORD: str
 
     # Default user password
-    DEFAULT_USER_PASSWORD: str = os.environ.get("DEFAULT_USER_PASSWORD")
+    DEFAULT_USER_PASSWORD: str
 
     # Pagination
     DEFAULT_PAGE_SIZE: int
@@ -42,56 +52,27 @@ class BaseConfig(BaseSettings):
         # Implement this method to do further configuration on your app.
         pass
 
-    class Config:
-        # `.env` takes priority over `project.env`
-        env_file = "project.env", ".env"
-
-        # Inbound order status
-        INBOUND_ORDER_STATUS: list[str] = [
-            "Draft",
-            "Assigned to pickup",
-            "Delivered",
-            "In transit",
-            "Cancelled",
-        ]
-
-        # Ship request status
-        SHIP_REQUEST_STATUS: list[str] = [
-            "Waiting for warehouse manager",
-            "Assigned to pickup",
-            "Delivered",
-            "In transit",
-            "Cancelled",
-        ]
-
-        # Locker name for sales rep
-        SALES_REP_LOCKER_NAME: str = "Locker"
-
-        # Main User Role
-        ADMIN: str = "Admin"
-        SALES_REP: str = "Sales Rep"
-        WAREHOUSE_MANAGER: str = "Warehouse Manager"
+    model_config = SettingsConfigDict(
+        env_file=(
+            ".env",
+            "project.env",
+        ),
+        extra="ignore",
+    )
 
 
 class DevelopmentConfig(BaseConfig):
     """Development configuration."""
 
+    ENV: ClassVar[str] = "development"
     DEBUG: bool = True
-    ALCHEMICAL_DATABASE_URL: str = "sqlite:///" + os.path.join(
-        BASE_DIR, "database-dev.sqlite3"
-    )
-
-    class Config:
-        fields = {
-            "ALCHEMICAL_DATABASE_URL": {
-                "env": "DEVEL_DATABASE_URL",
-            }
-        }
+    ALCHEMICAL_DATABASE_URL: str = Field(alias="DB_URL_DEV")
 
 
 class TestingConfig(BaseConfig):
     """Testing configuration."""
 
+    ENV: ClassVar[str] = "testing"
     WTF_CSRF_ENABLED: bool = False
     TESTING: bool = True
     PRESERVE_CONTEXT_ON_EXCEPTION: bool = False
@@ -99,37 +80,21 @@ class TestingConfig(BaseConfig):
         BASE_DIR, "database-test.sqlite3"
     )
 
-    class Config:
-        fields = {
-            "ALCHEMICAL_DATABASE_URL": {
-                "env": "TEST_DATABASE_URL",
-            }
-        }
-
 
 class ProductionConfig(BaseConfig):
     """Production configuration."""
 
-    ALCHEMICAL_DATABASE_URL: str = os.environ.get(
-        "DATABASE_URL", "sqlite:///" + os.path.join(BASE_DIR, "database.sqlite3")
-    )
-    WTF_CSRF_ENABLED = True
-
-    class Config:
-        fields = {
-            "ALCHEMICAL_DATABASE_URL": {
-                "env": "DATABASE_URL",
-            }
-        }
+    ENV: ClassVar[str] = "production"
+    ALCHEMICAL_DATABASE_URL: str = Field(alias="DB_URL_PROD")
 
 
 @lru_cache
-def config(name=APP_ENV) -> DevelopmentConfig | TestingConfig | ProductionConfig:
-    CONF_MAP = dict(
-        development=DevelopmentConfig(),
-        testing=TestingConfig(),
-        production=ProductionConfig(),
-    )
-    configuration = CONF_MAP[name]
-    configuration.ENV = name
-    return configuration
+def config(
+    name=DevelopmentConfig.ENV,
+) -> DevelopmentConfig | TestingConfig | ProductionConfig:
+    CONF_MAP = {}
+
+    for conf in (TestingConfig, DevelopmentConfig, ProductionConfig):
+        CONF_MAP[conf.ENV] = conf
+
+    return CONF_MAP[name]()

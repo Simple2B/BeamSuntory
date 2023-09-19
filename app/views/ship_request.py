@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta
 from flask import (
     Blueprint,
     render_template,
@@ -9,9 +9,11 @@ from flask import (
 )
 from flask_login import login_required, current_user
 import sqlalchemy as sa
+from sqlalchemy import desc
 from sqlalchemy.orm import aliased
 from app.controllers import create_pagination
 
+from app import schema as s
 from app import models as m, db
 from app import forms as f
 from app.logger import log
@@ -22,13 +24,14 @@ ship_request_blueprint = Blueprint("ship_request", __name__, url_prefix="/ship_r
 @ship_request_blueprint.route("/", methods=["GET"])
 @login_required
 def get_all():
+    # TODO: refactor or delete comments in queries
     form_create: f.NewShipRequestForm = f.NewShipRequestForm()
     form_edit: f.ShipRequestForm = f.ShipRequestForm()
 
     store_category = aliased(m.StoreCategory)
     store = aliased(m.Store)
     q = request.args.get("q", type=str, default=None)
-    query = m.ShipRequest.select().order_by(m.ShipRequest.id)
+    query = m.ShipRequest.select().order_by(desc(m.ShipRequest.id))
     count_query = sa.select(sa.func.count()).select_from(m.ShipRequest)
     if q:
         query = (
@@ -41,7 +44,6 @@ def get_all():
             .where(
                 m.ShipRequest.order_numb.ilike(f"%{q}%")
                 | m.ShipRequest.order_type.ilike(f"%{q}%")
-                | m.ShipRequest.status.ilike(f"%{q}%")
                 | store_category.name.ilike(f"%{q}%")
                 | store.store_name.ilike(f"%{q}%")
             )
@@ -57,7 +59,6 @@ def get_all():
             .where(
                 m.ShipRequest.order_numb.ilike(f"%{q}%")
                 | m.ShipRequest.order_type.ilike(f"%{q}%")
-                | m.ShipRequest.status.ilike(f"%{q}%")
                 | store_category.name.ilike(f"%{q}%")
                 | store.store_name.ilike(f"%{q}%")
             )
@@ -66,14 +67,12 @@ def get_all():
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
-    ship_requests = [
-        i
-        for i in db.session.execute(
-            query.offset((pagination.page - 1) * pagination.per_page).limit(
-                pagination.per_page
-            )
-        ).scalars()
-    ]
+    ship_requests = db.session.scalars(
+        query.offset((pagination.page - 1) * pagination.per_page).limit(
+            pagination.per_page
+        )
+    ).all()
+
     current_order_carts = {
         spr.order_numb: [
             cart
@@ -111,10 +110,30 @@ def create():
         log(log.ERROR, "Validation failed: [%s]", form_create.errors)
         return redirect(url_for("ship_request.get_all"))
     if form_create.validate_on_submit():
+        event_date_range = form_create.event_date_range.data
+        start_date = None
+        end_date = None
+        if event_date_range:
+            current_date = datetime.now()
+            date_from = event_date_range.split(" - ")[0]
+            date_to = event_date_range.split(" - ")[1]
+            start_date = datetime.strptime(date_from, "%Y-%m-%d")
+            end_date = datetime.strptime(date_to, "%Y-%m-%d")
+            difference_date = start_date - current_date
+
+            if difference_date < timedelta(days=5):
+                flash("The event must be created more than 5 days in advance", "danger")
+                log(
+                    log.INFO,
+                    "The event must be created more than 5 days: [%s]",
+                    start_date,
+                )
+                return redirect(url_for("product.get_all"))
+
         ship_request = m.ShipRequest(
-            order_numb=f"BEAM-DO{int(datetime.datetime.now().timestamp())}",
+            order_numb=f"BEAM-DO{int(datetime.now().timestamp())}",
             # NOTE: what status is default?
-            status="Waiting for warehouse manager",
+            status=s.ShipRequestStatus.waiting_for_warehouse,
             store_id=form_create.store.data,
             store_category_id=int(form_create.store_category.data),
             comment=form_create.comment.data,
@@ -124,7 +143,7 @@ def create():
         )
         log(log.INFO, "Form submitted. Ship Request: [%s]", ship_request)
         flash("Ship request added!", "success")
-        ship_request.save()
+        ship_request.save(False)
 
         carts: list[m.Cart] = db.session.execute(
             m.Cart.select().where(
@@ -132,7 +151,37 @@ def create():
             )
         ).scalars()
 
+        report_event = m.ReportEvent(
+            type=s.ReportEventType.created.value, user=current_user
+        )
+
         for cart in carts:
+            is_group_in_master_group = (
+                db.session.query(m.Group)
+                .join(m.MasterGroup)
+                .filter(
+                    m.MasterGroup.name == s.MasterGroupMandatory.events.value,
+                    m.Group.name == cart.group,
+                )
+                .count()
+                > 0
+            )
+            if event_date_range and is_group_in_master_group:
+                # creation event
+                event = m.Event(
+                    date_reserve_from=start_date - timedelta(days=5),
+                    date_reserve_to=end_date + timedelta(days=5),
+                    date_from=start_date,
+                    date_to=end_date,
+                    quantity=cart.quantity,
+                    product_id=cart.product_id,
+                    cart_id=cart.id,
+                    comment=form_create.event_comment.data,
+                    user=current_user,
+                    report=report_event,
+                )
+                db.session.add(event)
+                log(log.INFO, "Event added. Event: [%s]", event)
             cart.status = "completed"
             cart.order_numb = ship_request.order_numb
             cart.ship_request_id = ship_request.id
@@ -147,7 +196,7 @@ def create():
                     m.WarehouseProduct.group_id == cart_user_group.id,
                 )
             ).scalar()
-            if warehouse_product:
+            if warehouse_product and not is_group_in_master_group:
                 warehouse_product.product_quantity -= cart.quantity
                 warehouse_product.save()
 

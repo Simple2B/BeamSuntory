@@ -2,7 +2,7 @@
 <!-- prettier-ignore-->
 <div id="edit-outgoing-stock-modal" tabindex="-1" aria-hidden="true"
   class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
-  <div class="relative w-full max-w-6xl max-h-full">
+  <div class="relative w-full max-w-screen-2xl max-h-full">
     <!-- Modal content -->
     <!-- TODO change action for view form -->
     <form action="{{url_for('outgoing_stock.save')}}" method="post"
@@ -32,10 +32,9 @@
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Status" required>
               <option selected="selected" value="" disabled>Choose Status</option>
-              <option value="Waiting for warehouse manager">Waiting for warehouse manager</option>
-              <option value="Assigned to pickup">Assigned to pickup</option>
-              <option value="Delivered">Delivered</option>
-              <option value="In transit">In transit</option>
+              {% for status in ship_requests_status %}
+              <option value="{{ status.value }}">{{ status.value }}</option>
+              {% endfor %}
             </select>
           </div>
           <div class="col-span-6 sm:col-span-3">
@@ -152,6 +151,8 @@
             <th scope="col" class="px-6 py-3">Expiry Date</th>
             <th scope="col" class="px-6 py-3">Regular price</th>
             <th scope="col" class="px-6 py-3">Retail price</th>
+            <th scope="col" class="px-6 py-3">Start Date</th>
+            <th scope="col" class="px-6 py-3">End Date</th>
             <th scope="col" class="px-6 py-3">Group</th>
             <th scope="col" class="px-6 py-3">Quantity</th>
             <th scope="col" class="px-6 py-3">Warehouse</th>

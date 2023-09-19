@@ -1,5 +1,4 @@
 from datetime import datetime
-import json
 
 import sqlalchemy as sa
 from sqlalchemy import orm
@@ -30,8 +29,4 @@ class Division(db.Model, ModelMixin):
 
     @property
     def json(self):
-        mg = s.Division.from_orm(self)
-        ujs = mg.json()
-        mg_dict = json.loads(ujs)
-
-        return json.dumps(mg_dict)
+        return s.Division.model_validate(self).model_dump_json()

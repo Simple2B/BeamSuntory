@@ -11,12 +11,17 @@
     "**/.venv/*/**": true
   },
   "cSpell.words": [
+    "Bareware",
+    "Brugal",
     "flowbite",
     "jsonify",
+    "Mixit",
+    "NLVA",
     "pydantic",
     "pytest",
     "sqlalchemy",
     "tailwindcss",
+    "viewonly",
     "werkzeug",
     "wsgi",
     "wtforms"

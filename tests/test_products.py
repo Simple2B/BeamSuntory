@@ -4,18 +4,18 @@ from app import models as m, db
 from tests.utils import login, register, logout
 
 
-def test_products_pages(client):
-    logout(client)
-    response = client.get("/product/")
+def test_products_pages(mg_g_populate: FlaskClient):
+    logout(mg_g_populate)
+    response = mg_g_populate.get("/product/")
     assert response.status_code == 302
 
     register("samg", "samg@test.com")
-    response = login(client, "samg")
+    response = login(mg_g_populate, "samg")
     assert b"Login successful." in response.data
 
-    response = client.get("/product/")
+    response = mg_g_populate.get("/product/")
     assert response.status_code == 200
-    response = client.get("/product/create")
+    response = mg_g_populate.get("/product/create")
     assert response.status_code == 405
 
 
@@ -118,14 +118,13 @@ def test_sort_product(mg_g_populate: FlaskClient):
         "/product/sort",
         data=dict(sort_by='{"Brand": "JB"}'),
     )
-    # TODO: fix test
-    # assert ("populate_test_product" in response.text) is False
+    assert ("populate_test_product" in response.text) is False
     assert ("populate_test_prod2" in response.text) is True
     assert response.status_code == 200
 
     response = mg_g_populate.post(
         "/product/sort",
-        data=dict(sort_by={"Brand": "JB"}),
+        data=dict(sort='{"Brand": "JB"}'),
         follow_redirects=True,
     )
     assert ("populate_test_product" in response.text) is True
@@ -145,6 +144,7 @@ def test_assign_product(mg_g_populate: FlaskClient):
         group=2,
         quantity=10,
         from_group=group_name,
+        from_group_id=1,
     )
 
     response = mg_g_populate.post(

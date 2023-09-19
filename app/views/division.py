@@ -118,17 +118,14 @@ def create():
 @division_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
 def delete(id: int):
-    d = db.session.scalar(m.Division.select().where(m.Division.id == id))
-    if not d:
+    division = db.session.get(m.Division, id)
+    if not division:
         log(log.INFO, "There is no role with id: [%s]", id)
         flash("There is no such role", "danger")
         return "no role", 404
 
-    delete_d = sa.delete(m.Division).where(m.Division.id == id)
-    db.session.execute(delete_d)
-
-    db.session.delete(d)
+    db.session.delete(division)
     db.session.commit()
-    log(log.INFO, "Role deleted. Role: [%s]", d)
+    log(log.INFO, "Role deleted. Role: [%s]", division)
     flash("Role deleted!", "success")
     return "ok", 200

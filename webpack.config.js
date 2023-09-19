@@ -138,7 +138,7 @@ const cartConfig = {
 
 const inboundOrderConfig = {
     entry: {
-        main: './src/inbound_order.ts',
+        main: './src/inbound_order/inbound_order.ts',
     },
     output: {
         path: path.resolve(__dirname, './app/static'),
@@ -253,6 +253,34 @@ const inventoryConfig = {
         filename: 'js/inventory.js', // <--- Will be compiled to this single file
     },
 }
+const adjustConfig = {
+    entry: {
+        main: './src/adjust.ts',
+    },
+    output: {
+        path: path.resolve(__dirname, './app/static'),
+        filename: 'js/adjust.js', // <--- Will be compiled to this single file
+    },
+}
+const eventConfig = {
+    entry: {
+        main: './src/event.ts',
+    },
+    output: {
+        path: path.resolve(__dirname, './app/static'),
+        filename: 'js/event.js', // <--- Will be compiled to this single file
+    },
+}
+
+const reportEventConfig = {
+    entry: {
+        main: './src/report_event.ts',
+    },
+    output: {
+        path: path.resolve(__dirname, './app/static'),
+        filename: 'js/report_event.js', // <--- Will be compiled to this single file
+    },
+}
 
 const configs = [
     baseConfig,
@@ -279,6 +307,9 @@ const configs = [
     storeCategoryConfig,
     assignConfig,
     inventoryConfig,
+    adjustConfig,
+    eventConfig,
+    reportEventConfig,
 ].map((conf) => merge(defaultConfig, conf))
 
 module.exports = configs

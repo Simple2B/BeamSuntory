@@ -6,7 +6,7 @@ from sqlalchemy import orm
 from app import models as m
 from app import db, forms
 from app import schema as s
-from config import BaseConfig
+from config import SALES_REP_LOCKER_NAME
 
 
 def init(app: Flask):
@@ -34,18 +34,14 @@ def init(app: Flask):
         if db.session.execute(query).first():
             print(f"User with e-mail: [{app.config['ADMIN_EMAIL']}] already exists")
             return
-        for role in [
-            BaseConfig.Config.ADMIN,
-            BaseConfig.Config.SALES_REP,
-            BaseConfig.Config.WAREHOUSE_MANAGER,
-        ]:
+        for role in s.UserRole:
             check_role = db.session.execute(
-                m.Division.select().where(m.Division.role_name == role)
+                m.Division.select().where(m.Division.role_name == role.value)
             ).scalar()
             if not check_role:
-                m.Division(role_name=role, activated=True).save()
+                m.Division(role_name=role.value, activated=True).save()
         role = db.session.execute(
-            m.Division.select().where(m.Division.role_name == BaseConfig.Config.ADMIN)
+            m.Division.select().where(m.Division.role_name == s.UserRole.ADMIN.value)
         ).scalar()
         m.User(
             username=app.config["ADMIN_USERNAME"],
@@ -72,12 +68,16 @@ def init(app: Flask):
             "Mixit": ["Mixit"],
             "Key Accounts": ["Key Accounts"],
             "Sales Manager": ["Sales Manager"],
+            s.MasterGroupMandatory.events.value: [s.MasterGroupMandatory.events.value],
         }
         product_master_groups = {
             "Brand": ["Brugal", "Banff Ice", "Alberta Springs"],
             "Language": ["English", "French"],
             "Premises": ["On Premises", "Off Premises"],
             "Category": ["NLVA", "GWP", "Kit", "Bareware", "Signage"],
+            s.ProductMasterGroupMandatory.events.value: [
+                s.ProductMasterGroupMandatory.events.value
+            ],
         }
 
         for mg in stock_master_groups:
@@ -123,7 +123,7 @@ def init(app: Flask):
 
         role = db.session.execute(
             m.Division.select().where(
-                m.Division.role_name == BaseConfig.Config.WAREHOUSE_MANAGER
+                m.Division.role_name == s.UserRole.WAREHOUSE_MANAGER.value
             )
         ).scalar()
         if role:
@@ -157,6 +157,15 @@ def init(app: Flask):
                 manager_id=wh_manager.id,
             ).save(False)
 
+            m.Warehouse(
+                name=s.WarehouseMandatory.warehouse_events.value,
+                phone_number="380362470344",
+                city="Kv",
+                zip="unzip",
+                address="street",
+                manager_id=wh_manager.id,
+            ).save(False)
+
         m.DeliveryAgent(
             first_name="May",
             last_name="Wood",
@@ -186,7 +195,7 @@ def init(app: Flask):
         ).save()
 
         m.StoreCategory(
-            name=BaseConfig.Config.SALES_REP_LOCKER_NAME,
+            name=SALES_REP_LOCKER_NAME,
             active=True,
             image=os.environ.get("DEFAULT_IMAGE", "default"),
         ).save()
@@ -204,6 +213,54 @@ def init(app: Flask):
             zip="45778",
             active=True,
         ).save(False)
+
+        bottle = m.Product(
+            name="Bottle",
+            description="Just a Bottle",
+            SKU="CV-BOT23-27661",
+            image=os.environ.get("DEFAULT_IMAGE", "default"),
+            retail_price=0,
+            regular_price=0,
+            supplier_id=1,
+            currency="CAD",
+            low_stock_level=10,
+            program_year=2023,
+            package_qty=1,
+            numb_of_items_per_case=1,
+            numb_of_cases_per_outer_case=1,
+            comments="no comment",
+            weight=0,
+            length=0,
+            width=0,
+            height=0,
+        )
+        bottle.save(False)
+        cup = m.Product(
+            name="Cup",
+            description="Just a Cup",
+            SKU="CV-CUP23-27662",
+            image=os.environ.get("DEFAULT_IMAGE", "default"),
+            retail_price=0,
+            regular_price=0,
+            supplier_id=1,
+            currency="CAD",
+            low_stock_level=10,
+            program_year=2023,
+            package_qty=1,
+            numb_of_items_per_case=1,
+            numb_of_cases_per_outer_case=1,
+            comments="no comment",
+            weight=0,
+            length=0,
+            width=0,
+            height=0,
+        )
+        cup.save(False)
+
+        db.session.commit()
+
+        m.ProductGroup(product_id=bottle.id, group_id=1).save(False)
+        m.ProductGroup(product_id=cup.id, group_id=1).save(False)
 
         db.session.commit()
         print("database filled")

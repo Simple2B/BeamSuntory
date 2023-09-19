@@ -8,8 +8,8 @@ from .product import (
     SortByGroupProductForm,
     AssignProductForm,
     RequestShareProductForm,
-    DepleteProductForm,
     UploadProductForm,
+    AdjustProductForm,
 )
 from .group_for_product import (
     GroupProductForm,
@@ -27,12 +27,14 @@ from .ship_request import (
 from .supplier import SupplierForm, NewSupplierForm
 from .cart import CartForm, NewCartForm
 from .inbound_order import (
-    InboundOrderForm,
-    NewInboundOrderForm,
+    InboundOrderCreateForm,
+    InboundOrderUpdateForm,
     SortByStatusInboundOrderForm,
+    InboundOrderPickupForm,
 )
 from .store import StoreForm, NewStoreForm
 from .package_info import PackageInfoForm
 from .division import DivisionForm, NewDivisionForm
 from .request_share import RequestShareForm
 from .store_category import StoreCategoryForm, NewStoreCategoryForm
+from .event import EventFormCreate

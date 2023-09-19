@@ -11,6 +11,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import aliased
 from app.controllers import create_pagination
 
+from app import schema as s
 from app import models as m, db
 from app import forms as f
 from app.logger import log
@@ -82,6 +83,14 @@ def create():
         )
         log(log.INFO, "Form submitted. Group: [%s]", group)
         group.save()
+
+        admin_users = db.session.scalars(
+            m.User.select().where(m.User.role == s.UserRole.ADMIN.value)
+        )
+
+        for user in admin_users:
+            m.UserGroup(left_id=user.id, right_id=group.id).save()
+
         flash("Group added!", "success")
         return redirect(url_for("stock_target_group.get_all"))
     else:
@@ -116,15 +125,14 @@ def save():
 @stock_target_group_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
 def delete(id: int):
-    u = db.session.scalar(m.Group.select().where(m.Group.id == id))
-    if not u:
+    group = db.session.get(m.Group, id)
+    if not group:
         log(log.INFO, "There is no group with id: [%s]", id)
         flash("There is no such group", "danger")
         return "no group", 404
 
-    delete_u = sa.delete(m.Group).where(m.Group.id == id)
-    db.session.execute(delete_u)
+    db.session.delete(group)
     db.session.commit()
-    log(log.INFO, "Group deleted. Group: [%s]", u)
+    log(log.INFO, "Group deleted. Group: [%s]", group)
     flash("Group deleted!", "success")
     return "ok", 200
