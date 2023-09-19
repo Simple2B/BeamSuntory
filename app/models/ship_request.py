@@ -10,6 +10,7 @@ from .utils import ModelMixin
 from .cart import Cart
 from .store import Store
 from .store_category import StoreCategory
+from .event import Event
 
 
 class ShipRequest(db.Model, ModelMixin):
@@ -31,7 +32,7 @@ class ShipRequest(db.Model, ModelMixin):
     order_type: orm.Mapped[str] = orm.mapped_column(
         sa.String(128),
         nullable=False,
-    )  # TODO enum??? ask client
+    )
     user_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
@@ -49,6 +50,7 @@ class ShipRequest(db.Model, ModelMixin):
 
     wm_notes: orm.Mapped[str] = orm.mapped_column(sa.Text(), default="", nullable=True)
     da_notes: orm.Mapped[str] = orm.mapped_column(sa.Text(), default="", nullable=True)
+
     carts: orm.Mapped[list["Cart"]] = orm.relationship()
 
     def __repr__(self):
@@ -56,4 +58,10 @@ class ShipRequest(db.Model, ModelMixin):
 
     @property
     def json(self):
-        return s.ShipRequest.model_validate(self).model_dump_json(by_alias=True)
+        ship_request = s.ShipRequest.model_validate(self).model_dump()
+        for cart in ship_request["carts"]:
+            event = db.session.scalar(Event.select().where(Event.cart_id == cart["id"]))
+            if event:
+                cart["event"] = s.Event.model_validate(event).model_dump(by_alias=True)
+
+        return s.ShipRequest.model_validate(ship_request).model_dump_json(by_alias=True)

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class Pagination(BaseModel):
@@ -14,6 +14,8 @@ class Pagination(BaseModel):
 
 
 class PaginationOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     page: int
     pages: int
     per_page: int

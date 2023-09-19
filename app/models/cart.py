@@ -1,4 +1,3 @@
-from typing import TYPE_CHECKING
 from datetime import datetime
 import json
 
@@ -12,9 +11,7 @@ from .utils import ModelMixin
 from .product import Product
 from .warehouse_product import WarehouseProduct
 from .warehouse import Warehouse
-
-if TYPE_CHECKING:
-    from .event import Event
+from .event import Event
 
 
 class Cart(db.Model, ModelMixin):
@@ -35,6 +32,7 @@ class Cart(db.Model, ModelMixin):
     )
     warehouse: orm.Mapped[Warehouse] = orm.relationship()
     order_numb: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=True)
+    # TODO replace with group_id
     group: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=True)
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
@@ -43,8 +41,6 @@ class Cart(db.Model, ModelMixin):
     ship_request_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("ship_requests.id"), nullable=True
     )
-
-    event: orm.Mapped["Event"] = orm.relationship()
 
     # ship_request: orm.Mapped[ShipRequest] = orm.relationship()
 
@@ -67,4 +63,7 @@ class Cart(db.Model, ModelMixin):
             if warehouse_products
             else {}
         )
+
+        events = db.session.scalars(Event.select().where(Event.cart == self)).all()
+        mg_dict["events"] = s.EventList.model_validate(events).model_dump()
         return json.dumps(mg_dict)

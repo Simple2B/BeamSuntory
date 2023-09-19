@@ -46,7 +46,8 @@ jobs:
         poetry-version: [1.5.1]
         os: [Linux]
     runs-on: ${{ matrix.os }}
-    if: github.ref == 'refs/heads/petro/feature/client_server_deploy'
+
+    if: github.ref == 'refs/heads/develop'
     needs: tests
     steps:
       - name: Set up QEMU
@@ -64,7 +65,8 @@ jobs:
           push: true
           tags: simple2b/beam-suntory-app:latest
 
-  deploy:
+  deploy-staging:
+    name: Deploy to staging
     runs-on: Linux
     needs: build
     steps:
@@ -78,6 +80,7 @@ jobs:
           script: |
             cd BeamSuntory
             ./up.sh
+
   deploy-prod:
     name: Deploy to prod
     runs-on: Linux

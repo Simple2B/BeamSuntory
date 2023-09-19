@@ -104,3 +104,27 @@ button[disabled]{
 .underlined{
     text-decoration: underline;
 }
+
+.status-delivered{
+    color:green;
+}
+
+.status-assigned{
+    color:orange;
+}
+
+.status-in_transit, .status-pending{
+    color:blue;
+}
+
+.status-cancelled{
+    color:red;
+}
+
+.status-waiting_for_warehouse{
+    color:purple;
+}
+
+.text-white{
+    color: white !important;
+}

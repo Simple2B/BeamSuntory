@@ -61,7 +61,9 @@ class Product(db.Model, ModelMixin):
     width: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
     height: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
 
-    warehouse_products: orm.Mapped[WarehouseProduct] = orm.relationship(viewonly=True)
+    warehouse_products: orm.Mapped[list[WarehouseProduct]] = orm.relationship(
+        viewonly=True
+    )
     warehouses: orm.Mapped[list[Warehouse]] = orm.relationship(
         secondary=WarehouseProduct.__table__
     )
