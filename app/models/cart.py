@@ -1,4 +1,3 @@
-from typing import TYPE_CHECKING
 from datetime import datetime
 import json
 
@@ -12,9 +11,7 @@ from .utils import ModelMixin
 from .product import Product
 from .warehouse_product import WarehouseProduct
 from .warehouse import Warehouse
-
-if TYPE_CHECKING:
-    from .event import Event
+from .event import Event
 
 
 class Cart(db.Model, ModelMixin):
@@ -45,8 +42,6 @@ class Cart(db.Model, ModelMixin):
         sa.ForeignKey("ship_requests.id"), nullable=True
     )
 
-    event: orm.Mapped["Event"] = orm.relationship()
-
     # ship_request: orm.Mapped[ShipRequest] = orm.relationship()
 
     def __repr__(self):
@@ -68,4 +63,7 @@ class Cart(db.Model, ModelMixin):
             if warehouse_products
             else {}
         )
+
+        events = db.session.scalars(Event.select().where(Event.cart == self)).all()
+        mg_dict["events"] = s.EventList.model_validate(events).model_dump()
         return json.dumps(mg_dict)

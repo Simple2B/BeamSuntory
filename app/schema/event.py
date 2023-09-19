@@ -43,3 +43,4 @@ class EventsDateQuantity(BaseModel):
 
 
 EventsCalendar = RootModel[list[EventsDateQuantity]]
+EventList = RootModel[list[Event]]

@@ -26,6 +26,67 @@ interface IReportEvent {
   events: IProductEvent[]
 }
 
+const downloadCSV = async function () {
+    // Filters
+    const searchEventInput: HTMLInputElement = document.querySelector('#table-search-event')
+    const dateEventStartFromInput: HTMLInputElement = document.querySelector(
+        '#product-event-sort-start-from-datepicker'
+    )
+    const dateEventStartToInput: HTMLInputElement = document.querySelector('#product-event-sort-start-to-datepicker')
+    const dateEventEndFromInput: HTMLInputElement = document.querySelector('#product-event-sort-end-from-datepicker')
+    const dateEventEndToInput: HTMLInputElement = document.querySelector('#product-event-sort-end-to-datepicker')
+
+    const filtersMap = {
+        q: searchEventInput,
+        start_from: dateEventStartFromInput,
+        start_to: dateEventStartToInput,
+        end_from: dateEventEndFromInput,
+        end_to: dateEventEndToInput,
+    }
+
+    const filterQuery = []
+    for (const [queryKey, queryInput] of Object.entries(filtersMap)) {
+        filterQuery.push(`${queryKey}=${queryInput.value}`)
+    }
+
+    // CSV Headers
+    const csvData = ['created_at,history,type,username,date_from,date_to,sku,product_name',]
+    let pages = 1
+    // const queryTail = filterQuery.join('&')
+    // TODO add filters
+    const queryTail = ''
+
+    for (let page = 1; page <= pages; page++) {
+        const url = [`api?page={page}`, queryTail].join('&')
+        const res = await fetch(`${location.href}/${url}`)
+        const data: IEventsResponse = await res.json()
+        console.log(data);
+        data.report_events[0].events.forEach((event) => {
+            csvData.push(
+                [
+                    data.report_events[0].createdAt,
+                    data.report_events[0].history,
+                    data.report_events[0].type,
+                    data.report_events[0].user.username,
+                    event.dateFrom,
+                    event.dateTo,
+                    event.product.SKU,
+                    event.product.name,
+                ].join(',')
+            )
+        })
+        pages = data.pagination.pages
+    }
+
+    const blob = new Blob([csvData.join('\n')], { type: 'text/csv' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.setAttribute('href', url)
+    a.setAttribute('download', 'events.csv')
+    a.click()
+    a.remove()
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // initialize modal
   const viewReportEventsModal = document.getElementById('view-report-events-modal') as HTMLDivElement;
@@ -103,4 +164,8 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     })
   })
+
+  // Download csv
+  const downloadCsvButton = document.getElementById('button-csv-download') as HTMLButtonElement;
+  downloadCsvButton.addEventListener('click', downloadCSV);
 });
