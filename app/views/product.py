@@ -51,7 +51,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
                     m.Product.name.ilike(f"%{q}%")
                     | m.Product.SKU.ilike(f"%{q}%")
                     | m.Product.description.ilike(f"%{q}%")
-                    | reverse_event_filter
                 )
                 .order_by(m.Product.id)
             )
@@ -61,7 +60,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
                     m.Product.name.ilike(f"%{q}%")
                     | m.Product.SKU.ilike(f"%{q}%")
                     | m.Product.description.ilike(f"%{q}%")
-                    | reverse_event_filter
                 )
                 .select_from(m.Product)
             )

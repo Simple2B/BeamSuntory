@@ -120,7 +120,7 @@ def save():
 
         for user_group_id in user_group_group_ids:
             if user_group_id not in group_ids:
-                if u.role == s.UserRole.ADMIN.value:
+                if u.role_obj.role_name == s.UserRole.ADMIN.value:
                     log(log.ERROR, "Can not remove groups from user: admin")
                     flash(
                         "Can not remove groups from user: admin",
@@ -306,6 +306,7 @@ def notification():
             "target_group": request_share.group.name,
             "created_at": request_share.created_at.isoformat(),
             "request_share_id": request_share.id,
+            "order_number": request_share.order_numb,
         }
         user_requests.append(data)
 
