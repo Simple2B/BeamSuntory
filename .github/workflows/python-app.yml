@@ -46,7 +46,7 @@ jobs:
         poetry-version: [1.5.1]
         os: [Linux]
     runs-on: ${{ matrix.os }}
-    if: github.ref == 'refs/heads/petro/feature/client_server_deploy'
+    if: github.ref == 'refs/heads/develop'
     needs: tests
     steps:
       - name: Set up QEMU
