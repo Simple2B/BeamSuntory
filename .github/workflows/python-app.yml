@@ -64,7 +64,8 @@ jobs:
           push: true
           tags: simple2b/beam-suntory-app:latest
 
-  deploy:
+  deploy-staging:
+    name: Deploy to staging
     runs-on: Linux
     needs: build
     steps:
