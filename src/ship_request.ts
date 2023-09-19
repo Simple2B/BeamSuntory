@@ -123,7 +123,7 @@ viewShipRequestButtonElements.forEach((e) =>
 // -----create ship request item table-----
 function createShipRequestItemTable(shipRequest: IShipRequest, typeModal: string) {
   const tableShipRequestBody = document.querySelector(`#table-ship-request-body-${typeModal}`)
-
+  console.log(shipRequest);
   shipRequest.carts.forEach((cart, index) => {
     const tableShipRequestItem = document.createElement('tr')
 

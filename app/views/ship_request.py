@@ -144,12 +144,17 @@ def create():
         log(log.INFO, "Form submitted. Ship Request: [%s]", ship_request)
         flash("Ship request added!", "success")
         ship_request.save(False)
+        warehouse_event = db.session.scalar(
+            m.Warehouse.select().where(
+                m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value,
+            )
+        )
 
-        carts: list[m.Cart] = db.session.execute(
+        carts: list[m.Cart] = db.session.scalars(
             m.Cart.select().where(
                 m.Cart.user_id == current_user.id, m.Cart.status == "pending"
             )
-        ).scalars()
+        )
 
         report_event = m.ReportEvent(
             type=s.ReportEventType.created.value, user=current_user
@@ -182,6 +187,9 @@ def create():
                 )
                 db.session.add(event)
                 log(log.INFO, "Event added. Event: [%s]", event)
+
+                cart.warehouse = warehouse_event
+
             cart.status = "completed"
             cart.order_numb = ship_request.order_numb
             cart.ship_request_id = ship_request.id
@@ -192,7 +200,7 @@ def create():
             warehouse_product: m.WarehouseProduct = db.session.execute(
                 m.WarehouseProduct.select().where(
                     m.WarehouseProduct.product_id == cart.product_id,
-                    # m.WarehouseProduct.warehouse_id == cart.warehouse_id,
+                    m.WarehouseProduct.warehouse_id == cart.warehouse_id,
                     m.WarehouseProduct.group_id == cart_user_group.id,
                 )
             ).scalar()

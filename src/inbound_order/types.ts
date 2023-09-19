@@ -24,6 +24,8 @@ export interface IProduct {
     name: string
     image: string
     SKU: string
+    regularPrice?: number
+    retailPrice?: number
 }
 
 export interface IGroup {
