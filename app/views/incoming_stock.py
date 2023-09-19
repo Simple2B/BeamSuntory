@@ -30,17 +30,27 @@ def get_all():
     form_edit = f.InboundOrderUpdateForm()
     filtered = False
 
-    q = request.args.get("q", type=str, default=None)
+    filter_incoming_stock = s.FilterIncomingStock.model_validate(dict(request.args))
+
     query = m.InboundOrder.select().order_by(desc(m.InboundOrder.id))
     count_query = sa.select(sa.func.count()).select_from(m.InboundOrder)
-    if q:
+    if filter_incoming_stock.q:
         query = query.where(
-            m.InboundOrder.title.ilike(f"%{q}%")
-            | m.InboundOrder.order_id.ilike(f"%{q}%")
+            m.InboundOrder.title.ilike(f"%{filter_incoming_stock.q}%")
+            | m.InboundOrder.order_id.ilike(f"%{filter_incoming_stock.q}%")
         )
         count_query = count_query.where(
-            m.InboundOrder.title.ilike(f"%{q}%")
-            | m.InboundOrder.order_id.ilike(f"%{q}%")
+            m.InboundOrder.title.ilike(f"%{filter_incoming_stock.q}%")
+            | m.InboundOrder.order_id.ilike(f"%{filter_incoming_stock.q}%")
+        )
+
+    # Filter by statuses
+    if filter_incoming_stock.checked_statuses:
+        query = query.where(
+            m.InboundOrder.status.in_(filter_incoming_stock.checked_statuses)
+        )
+        count_query = count_query.where(
+            m.InboundOrder.status.in_(filter_incoming_stock.checked_statuses)
         )
 
     pagination = create_pagination(total=db.session.scalar(count_query))
@@ -54,7 +64,7 @@ def get_all():
         "incoming_stock/incoming_stocks.html",
         inbound_orders=inbound_orders,
         page=pagination,
-        search_query=q,
+        search_query=filter_incoming_stock.q,
         suppliers=db.session.scalars(m.Supplier.select().order_by(m.Supplier.id)),
         warehouses=db.session.scalars(m.Warehouse.select().order_by(m.Warehouse.id)),
         products=db.session.scalars(m.Product.select().order_by(m.Product.id)),
@@ -63,6 +73,7 @@ def get_all():
         form_sort=form_sort,
         filtered=filtered,
         inbound_orders_status=s.InboundOrderStatus,
+        filter_incoming_stock=filter_incoming_stock,
     )
 
 

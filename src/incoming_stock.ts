@@ -2,6 +2,8 @@ import { Modal } from 'flowbite'
 import type { ModalOptions, ModalInterface } from 'flowbite'
 import { getFullImage } from './base'
 import { IInboundOrderOut, IAllocatedProductOut } from './inbound_order/types'
+import urlJoin from 'url-join';
+
 
 interface SupDAWhProd {
     supplier: string
@@ -374,6 +376,29 @@ document.addEventListener('DOMContentLoaded', () => {
         inputReceivedProducts.value = JSON.stringify(products)
 
         inboundOrderSubmitButton.click()
+    })
+
+    // checkbox click
+    const checkboxes = document.querySelectorAll('.incoming-stock-filter-input') as NodeListOf<HTMLInputElement>;
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            const checkedStatuses: string[] = []
+            checkboxes.forEach(checkbox => {
+                if(checkbox.checked) {
+                    checkedStatuses.push(checkbox.value);
+                }
+            })
+
+            const queryParams = new URLSearchParams()
+            if(checkedStatuses.length) {
+                queryParams.append('checked_statuses', JSON.stringify(checkedStatuses));
+            }
+
+
+            console.log(queryParams);
+            const url = urlJoin(location.origin, location.pathname, `?${queryParams.toString()}`)
+            location.replace(url);
+        })
     })
 })
 
