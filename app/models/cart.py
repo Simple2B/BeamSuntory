@@ -33,6 +33,7 @@ class Cart(db.Model, ModelMixin):
     )
     warehouse: orm.Mapped[Warehouse] = orm.relationship()
     order_numb: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=True)
+    # TODO replace with group_id
     group: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=True)
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,

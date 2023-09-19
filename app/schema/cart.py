@@ -1,6 +1,7 @@
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
 from .product import Product
+from .warehouse import Warehouse
 
 
 class Cart(BaseModel):
@@ -11,6 +12,8 @@ class Cart(BaseModel):
     status: str
     quantity: int
     user_id: int = Field(alias="userId")
+    group: str
     product: Product
+    warehouse: Warehouse
 
     created_at: datetime

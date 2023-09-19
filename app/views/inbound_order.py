@@ -328,14 +328,22 @@ def save():
 @inbound_order_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
 def delete(id: int):
-    # TODO needs to check for allocated products
-    inbound_order: m.InboundOrder = db.session.scalar(
-        m.InboundOrder.select().where(m.InboundOrder.id == id)
-    )
+    inbound_order: m.InboundOrder = db.session.get(m.InboundOrder, id)
+
     if not inbound_order:
         log(log.INFO, "There is no inbound order with id: [%s]", id)
         flash("There is no such inbound order", "danger")
         return "no inbound order", 404
+
+    db.session.execute(
+        m.PackageInfo.delete().where(
+            m.PackageInfo.product_quantity_group.has(
+                m.ProductQuantityGroup.product_allocated.has(
+                    m.ProductAllocated.inbound_order_id == inbound_order.id,
+                )
+            )
+        )
+    )
 
     db.session.execute(
         m.ProductQuantityGroup.delete().where(

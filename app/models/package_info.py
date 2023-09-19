@@ -19,7 +19,7 @@ class PackageInfo(db.Model, ModelMixin):
         ForeignKey("product_quantity_group.id")
     )
     product_quantity_group: orm.Mapped["ProductQuantityGroup"] = orm.relationship(
-        foreign_keys=[product_quantity_group_id]
+        foreign_keys=[product_quantity_group_id],
     )
 
     @property

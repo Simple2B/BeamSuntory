@@ -189,7 +189,7 @@ def create():
             warehouse_product: m.WarehouseProduct = db.session.execute(
                 m.WarehouseProduct.select().where(
                     m.WarehouseProduct.product_id == cart.product_id,
-                    # m.WarehouseProduct.warehouse_id == cart.warehouse_id,
+                    m.WarehouseProduct.warehouse_id == cart.warehouse_id,
                     m.WarehouseProduct.group_id == cart_user_group.id,
                 )
             ).scalar()
