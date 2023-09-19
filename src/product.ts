@@ -262,6 +262,19 @@ checkboxFilterProductMasterGroups.forEach((checkbox) => {
   })
 })
 
+const productRequestShareBrandSelector = document.querySelector('#product-request-share-define-brand')
+const productRequestShareBrandSelectorOptions = productRequestShareBrandSelector.querySelectorAll('option')
+const productRequestShareBrandSelectorOptionsAmount = productRequestShareBrandSelectorOptions.length
+if (!productRequestShareBrandSelectorOptionsAmount) {
+  productRequestShareBrandSelector.classList.add('border-error-red')
+  
+  const messageParagraph = document.createElement('p');
+  messageParagraph.classList.add('text-sm', 'text-red')
+  messageParagraph.innerHTML = "You have no group! Please, define your group <a href='/user/' class='underlined'>here</a>";
+  productRequestShareBrandSelector.parentNode.appendChild(messageParagraph);
+}
+
+
 const $requestShareModalElement: HTMLElement = document.querySelector('#request-share-product-modal')
 const $shipModalElement: HTMLElement = document.querySelector('#ship-product-modal')
 const $assignModalElement: HTMLElement = document.querySelector('#assign-product-modal')

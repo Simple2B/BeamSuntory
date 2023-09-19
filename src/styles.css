@@ -93,3 +93,14 @@ button[disabled]{
     height: 50px;
     object-fit: cover;
 }
+
+.border-error-red{
+    border: 1px solid red !important;
+}
+
+.text-red{
+    color: #ef4444 !important;
+}
+.underlined{
+    text-decoration: underline;
+}
