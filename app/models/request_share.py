@@ -9,6 +9,7 @@ from .utils import ModelMixin
 
 from .product import Product
 from .group import Group
+from .user import User
 
 
 class RequestShare(db.Model, ModelMixin):
@@ -27,6 +28,8 @@ class RequestShare(db.Model, ModelMixin):
     product: orm.Mapped[Product] = orm.relationship()
     group: orm.Mapped[Group] = orm.relationship(foreign_keys=[group_id])
     from_group: orm.Mapped[Group] = orm.relationship(foreign_keys=[from_group_id])
+    user_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("users.id"))
+    user: orm.Mapped["User"] = orm.relationship()
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
         default=datetime.now(),

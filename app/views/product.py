@@ -637,6 +637,7 @@ def request_share():
             desire_quantity=form.desire_quantity.data,
             status="pending",
             from_group_id=from_group_id,
+            user_id=current_user.id,
         )
         log(log.INFO, "Form submitted. Share Request: [%s]", rs)
         rs.save()

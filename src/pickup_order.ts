@@ -96,8 +96,6 @@ viewPickupOrderButtonElements.forEach((e) =>
     div.innerHTML = shipRequest.comment
     div = document.querySelector('#pickup-order-view-wm_notes')
     shipRequest.wmNotes ? (div.innerHTML = shipRequest.wmNotes) : (div.innerHTML = 'No comments')
-    div = document.querySelector('#pickup-order-view-da_notes')
-    shipRequest.daNotes ? (div.innerHTML = shipRequest.daNotes) : (div.innerHTML = 'No comments')
     div = document.querySelector('#pickup-order-view-store')
     div.innerHTML = shipRequest.store.storeName
     div = document.querySelector('#pickup-order-view-store_address')
@@ -112,6 +110,11 @@ viewPickupOrderButtonElements.forEach((e) =>
     div.innerHTML = shipRequest.store.city
     div = document.querySelector('#pickup-order-view-store_zip_code')
     div.innerHTML = shipRequest.store.zip
+
+    let input: HTMLInputElement = document.querySelector('#pickup-order-edit-id')
+    input.value = shipRequest.id.toString()
+    input = document.querySelector('#pickup-order-view-da_notes')
+    input.value = shipRequest.daNotes
 
     createPickupOrderItemTable(shipRequest, 'view')
     viewModal.show()

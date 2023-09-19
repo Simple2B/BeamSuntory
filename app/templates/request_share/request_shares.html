@@ -35,6 +35,7 @@
         <th scope="col" class="px-6 py-3">#</th>
         <th scope="col" class="px-6 py-3">Order NO</th>
         <th scope="col" class="px-6 py-3">Product name</th>
+        <th scope="col" class="px-6 py-3">Username</th>
         <th scope="col" class="px-6 py-3">Quantity</th>
         <th scope="col" class="px-6 py-3">Group name</th>
         <th scope="col" class="px-6 py-3">Status</th>
@@ -62,6 +63,11 @@
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
+            <div class="text-base font-semibold">{{ request_share.user.username }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
             <div class="text-base font-semibold">{{ request_share.desire_quantity }}</div>
           </div>
         </td>
@@ -77,12 +83,15 @@
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ request_share.finished_date }}</div>
+            <div class="text-base font-semibold">{{ request_share.finished_date if request_share.finished_date else "in
+              progress"
+              }}</div>
           </div>
         </td>
         {% if request_share.status != "declined" %}
         <td class="p-4 space-x-2 whitespace-nowrap">
           {% if request_share.status != 'shared' %}
+          {% if user.id != request_share.user_id %}
           <button type="button" data-request-share-id={{ request_share.id }}
             class="request-share-share-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -93,6 +102,7 @@
             </svg>
             Share
           </button>
+          {% endif %}
           <button type="button" data-target="{{request_share.json}}"
             class="request-share-edit-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 sm:w-auto dark:bg-yellow-400 dark:hover:bg-yellow-500">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
