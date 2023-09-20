@@ -222,56 +222,56 @@ function createPickupOrderItemTable(shipRequest: IShipRequest, typeModal: string
             ${index + 1}
           </div>
         </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+        <td scope="row" class="p-4 text-base font-normal text-gray-900  dark:text-white">
           <div class="pl-3">
             ${
               cart.product.image.length > 100
-                ? `<img src="data:image/png;base64, ${cart.product.image}" alt="${cart.product.name}" class="w-14 h-14">`
-                : `<img src="/static/img/default_image_brand.png" alt="${cart.product.name}" class="w-14 h-14">`
+                ? `<img src="data:image/png;base64, ${cart.product.image}" alt="${cart.product.name}" class="w-14 h-14 object-cover">`
+                : `<img src="/static/img/default_image_brand.png" alt="${cart.product.name}" class="w-14 h-14 object-cover">`
             }
           </div>
         </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 dark:text-white width-250px">
           <div class="pl-3">
             <div class="text-base font-semibold">${cart.product.name}</div>
           </div>
         </td>
-        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+        <td class="p-4 text-base font-normal text-gray-900  dark:text-white">
           <div class="pl-3">
             <div class="text-base font-semibold">${cart.product.SKU}</div>
           </div>
         </td>
-        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+        <td class="p-4 text-base font-normal text-gray-900 dark:text-white">
           <div class="pl-3">
             <div class="text-base font-semibold">some date</div>
           </div>
         </td>
-        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+        <td class="p-4 text-base font-normal text-gray-900  dark:text-white">
           <div class="pl-3">
             <div class="cart-item-retail-regular_price text-base font-semibold">${cart.product.regularPrice}</div>
           </div>
         </td>
-        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+        <td class="p-4 text-base font-normal text-gray-900 dark:text-white">
           <div class="pl-3">
             <div class="cart-item-retail-retail_price text-base font-semibold">${cart.product.retailPrice}</div>
           </div>
         </td>
-        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+        <td class="p-4 text-base font-normal text-gray-900 dark:text-white">
           <div class="pl-3">
             <div class="cart-item-start-date text-base font-semibold">${cart.event ? cart.event.dateFrom : '-'}</div>
           </div>
         </td>
-        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+        <td class="p-4 text-base font-normal text-gray-900 dark:text-white">
           <div class="pl-3">
             <div class="cart-item-end-date text-base font-semibold">${cart.event ? cart.event.dateTo : '-'}</div>
           </div>
         </td>
-        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+        <td class="p-4 text-base font-normal text-gray-900 dark:text-white">
           <div class="pl-3">
             <div class="cart-item-group text-base font-semibold">${cart.group}</div>
           </div>
         </td>
-        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+        <td class="p-4 text-base font-normal text-gray-900 dark:text-white">
           <div class="pl-3">
             <div
               class="shadow-sm h-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
@@ -282,9 +282,9 @@ function createPickupOrderItemTable(shipRequest: IShipRequest, typeModal: string
       `
 
     const warehouseEditElement = document.createElement('td')
-    warehouseEditElement.classList.add('p-4', 'space-x-2', 'whitespace-nowrap')
+    warehouseEditElement.classList.add('p-4', 'space-x-2')
     warehouseEditElement.innerHTML = `
-      <td class="p-4 space-x-2 whitespace-nowrap">
+      <td class="p-4 space-x-2">
             <select type="text" name="store" id="pickup-order-${typeModal}-warehouse-name"
               class="pickup-order-${typeModal}-warehouse-name shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               required>
@@ -298,7 +298,7 @@ function createPickupOrderItemTable(shipRequest: IShipRequest, typeModal: string
     let warehouseNameView
     cart.warehouse ? (warehouseNameView = cart.warehouse.name) : (warehouseNameView = 'No warehouse')
     warehouseViewElement.innerHTML = `
-      <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+      <td class="p-4 text-base font-normal text-gray-900 dark:text-white">
         <div class="pl-3">
           <div class="text-base text-gray-900 dark:text-white font-semibold">${warehouseNameView}</div>
         </div>

@@ -338,14 +338,15 @@ def mg_g_populate(client: FlaskClient):
         user_id=1,
     ).save(False)
 
-    m.ShipRequest(
+    waiting_ship = m.ShipRequest(
         order_numb="Order-12345-Waiting-for-warehouse-manager",
         status=s.ShipRequestStatus.waiting_for_warehouse,
         store_category_id=1,
         order_type="Regular",
         store_id=1,
         user_id=1,
-    ).save(False)
+    )
+    waiting_ship.save(False)
 
     m.InboundOrder(
         active_date=datetime.datetime.strptime("07/20/2023", "%m/%d/%Y"),
@@ -585,6 +586,16 @@ def mg_g_populate(client: FlaskClient):
     report.save(False)
 
     db.session.commit()
+
+    m.Cart(
+        product=populate_test_product,
+        quantity=100,
+        user_id=1,
+        group="Canada",
+        warehouse_id=jw.id,
+        ship_request_id=waiting_ship.id,
+        status="submitted",
+    ).save(False)
 
     today = datetime.datetime.now().date()
     for day in range(1, 17, 5):

@@ -95,7 +95,45 @@ const downloadCSV = async function () {
   a.remove()
 }
 
+function getFilterValues() {
+  const url = new URL(window.location.href)
+  const searchEventInput: HTMLInputElement = document.querySelector('#table-search-event')
+  const dateEventStartFromInput: HTMLInputElement = document.querySelector(
+      '#product-event-sort-start-from-datepicker'
+  )
+  const usernameSelect: HTMLInputElement = document.querySelector('#events-filter-status')
+  const dateEventStartToInput: HTMLInputElement = document.querySelector('#product-event-sort-start-to-datepicker')
+  const dateEventEndFromInput: HTMLInputElement = document.querySelector('#product-event-sort-end-from-datepicker')
+  const dateEventEndToInput: HTMLInputElement = document.querySelector('#product-event-sort-end-to-datepicker')
+
+  url.searchParams.set('q', searchEventInput.value)
+  url.searchParams.set('start_from', dateEventStartFromInput.value)
+  url.searchParams.set('start_to', dateEventStartToInput.value)
+  url.searchParams.set('end_from', dateEventEndFromInput.value)
+  url.searchParams.set('end_to', dateEventEndToInput.value)
+  url.searchParams.set('username', usernameSelect.value)
+  window.location.href = `${url.href}`
+}
+
+
 document.addEventListener('DOMContentLoaded', () => {
+  const eventFilterButton = document.querySelector('#event-filter-button')
+  eventFilterButton.addEventListener('click', () => {
+    getFilterValues()
+  })
+  
+  const clearFilterButton = document.querySelector('#product-event-clear-button')
+  clearFilterButton.addEventListener('click', () => {
+    const url = new URL(window.location.href)
+    url.searchParams.delete('q')
+    url.searchParams.delete('start_from')
+    url.searchParams.delete('start_to')
+    url.searchParams.delete('end_from')
+    url.searchParams.delete('end_to')
+    url.searchParams.delete('username')
+    window.location.href = `${url.href}`
+  })
+
   // initialize modal
   const viewReportEventsModal = document.getElementById('view-report-events-modal') as HTMLDivElement
   const viewModalOptions: ModalOptions = {
