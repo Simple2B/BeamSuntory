@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from .product import Product
     from .user import User
     from .report_event import ReportEvent
+    from .cart import Cart
 
 
 class Event(db.Model, ModelMixin):
@@ -25,7 +26,10 @@ class Event(db.Model, ModelMixin):
     quantity: orm.Mapped[int] = orm.mapped_column()
     comment: orm.Mapped[str] = orm.mapped_column(sa.Text(), nullable=True)
     product_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("products.id"))
+
     cart_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("carts.id"))
+    cart: orm.Mapped["Cart"] = orm.relationship()
+
     product: orm.Mapped["Product"] = orm.relationship()
     user_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("users.id"))
     user: orm.Mapped["User"] = orm.relationship()

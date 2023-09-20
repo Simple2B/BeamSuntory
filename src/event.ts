@@ -96,7 +96,7 @@ const downloadCSV = async function () {
     }
 
     // CSV Headers
-    const csvData = ['id,product_name,sku,username,date_start,date_end,comment']
+    const csvData = ['id,product_name,sku,username,date_start,date_end,comment',]
     let pages = 1
     const queryTail = filterQuery.join('&')
 
