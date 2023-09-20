@@ -17,48 +17,6 @@ def test_outgoing_stocks_pages(client):
     assert response.status_code == 200
 
 
-def test_dispatch_outgoing_stock(mg_g_populate: FlaskClient):
-    login(mg_g_populate)
-
-    order_to_dispatch: m.ShipRequest = db.session.execute(
-        m.ShipRequest.select().where(
-            m.ShipRequest.order_numb == "Order-12345-Waiting-for-warehouse-manager"
-        )
-    ).scalar()
-
-    carts: list[m.Cart] = db.session.scalars(
-        m.Cart.select().where(
-            m.Cart.user_id == 1,
-            m.Cart.status == "submitted",
-            m.Cart.ship_request_id == order_to_dispatch.id,
-        )
-    )
-
-    assert order_to_dispatch
-    assert order_to_dispatch.status == s.ShipRequestStatus.waiting_for_warehouse
-    assert carts
-
-    mg_g_populate.get(f"/outgoing_stock/dispatch/{order_to_dispatch.id}")
-
-    order_to_dispatch: m.ShipRequest = db.session.execute(
-        m.ShipRequest.select().where(
-            m.ShipRequest.order_numb == "Order-12345-Waiting-for-warehouse-manager"
-        )
-    ).scalar()
-
-    carts: list[m.Cart] = db.session.scalars(
-        m.Cart.select().where(
-            m.Cart.user_id == 1,
-            m.Cart.status == "completed",
-            m.Cart.ship_request_id == order_to_dispatch.id,
-        )
-    )
-
-    assert order_to_dispatch
-    assert order_to_dispatch.status == s.ShipRequestStatus.assigned
-    assert carts
-
-
 def test_cancel_outgoing_stock(mg_g_populate: FlaskClient):
     login(mg_g_populate)
 
@@ -123,10 +81,28 @@ def test_edit_outgoing_stock(mg_g_populate: FlaskClient):
     register("samg", "samg@test.com")
     login(mg_g_populate, "samg")
 
+    order_to_dispatch: m.ShipRequest = db.session.execute(
+        m.ShipRequest.select().where(
+            m.ShipRequest.order_numb == "Order-12345-Waiting-for-warehouse-manager"
+        )
+    ).scalar()
+
+    carts: list[m.Cart] = db.session.scalars(
+        m.Cart.select().where(
+            m.Cart.user_id == 1,
+            m.Cart.status == "submitted",
+            m.Cart.ship_request_id == order_to_dispatch.id,
+        )
+    )
+
+    assert order_to_dispatch
+    assert order_to_dispatch.status == s.ShipRequestStatus.waiting_for_warehouse
+    assert carts
+
     response = mg_g_populate.post(
         "/outgoing_stock/edit",
         data=dict(
-            ship_request_id=1,
+            ship_request_id=order_to_dispatch.id,
             status=s.ShipRequestStatus.assigned.value,
             store_category=1,
             order_type="test type",
@@ -137,9 +113,21 @@ def test_edit_outgoing_stock(mg_g_populate: FlaskClient):
     )
     assert response.status_code == 302
     assert "outgoing_stock" in response.text
-    ship_request: m.ShipRequest = db.session.execute(
+
+    order_to_dispatch: m.ShipRequest = db.session.execute(
         m.ShipRequest.select().where(
-            m.ShipRequest.status == s.ShipRequestStatus.assigned
+            m.ShipRequest.order_numb == "Order-12345-Waiting-for-warehouse-manager"
         )
     ).scalar()
-    assert ship_request
+
+    carts: list[m.Cart] = db.session.scalars(
+        m.Cart.select().where(
+            m.Cart.user_id == 1,
+            m.Cart.status == "completed",
+            m.Cart.ship_request_id == order_to_dispatch.id,
+        )
+    )
+
+    assert order_to_dispatch
+    assert order_to_dispatch.status == s.ShipRequestStatus.assigned
+    assert carts

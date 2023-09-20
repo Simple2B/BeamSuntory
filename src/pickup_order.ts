@@ -25,10 +25,12 @@ interface IStore {
   zip: string
 }
 
-interface IWarehouse {
-  id: number
-  name: string
-  products_ids: number[]
+enum OrderStatus {
+  assigned = 'Assigned to pickup',
+  inTransit = 'In transit',
+  delivered = 'Delivered',
+  cancelled = 'Cancelled',
+  waitingForWarehouse = 'Waiting for warehouse manager',
 }
 
 const $modalViewElement: HTMLElement = document.querySelector('#view-pickup-order-modal')
@@ -46,6 +48,11 @@ const modalViewOptions: ModalOptions = {
     while (tableShipRequestBody.firstChild) {
       tableShipRequestBody.removeChild(tableShipRequestBody.firstChild)
     }
+    const orderActionsButtons = document.querySelectorAll('.pickup-order-actions-btn')
+    orderActionsButtons.forEach((btn) => {
+      btn.classList.remove('inline-flex')
+      btn.classList.add('hidden')
+    })
   },
   onShow: () => {},
   onToggle: () => {
@@ -115,6 +122,25 @@ viewPickupOrderButtonElements.forEach((e) =>
     input.value = shipRequest.id.toString()
     input = document.querySelector('#pickup-order-view-da_notes')
     input.value = shipRequest.daNotes
+
+    switch (shipRequest.status) {
+      case OrderStatus.assigned:
+        const pickupOrderButton = document.querySelector('.pickup-order-view-pickup-order-btn')
+
+        pickupOrderButton.classList.remove('hidden')
+        pickupOrderButton.classList.add('inline-flex')
+        break
+      case OrderStatus.inTransit:
+        console.log('in transit')
+
+        const deliverButton = document.querySelector('.pickup-order-view-confirm-delivery-btn')
+
+        deliverButton.classList.remove('hidden')
+        deliverButton.classList.add('inline-flex')
+        break
+      default:
+        break
+    }
 
     createPickupOrderItemTable(shipRequest, 'view')
     viewModal.show()
@@ -267,8 +293,10 @@ function createPickupOrderItemTable(shipRequest: IShipRequest, typeModal: string
     `
 
     const warehouseViewElement = document.createElement('td')
-    warehouseViewElement.classList.add('p-4', 'space-x-2')
-    const warehouseNameView = shipRequest.warehouseName || 'No warehouse'
+    warehouseViewElement.classList.add('p-4', 'space-x-2', 'whitespace-nowrap')
+
+    let warehouseNameView
+    cart.warehouse ? (warehouseNameView = cart.warehouse.name) : (warehouseNameView = 'No warehouse')
     warehouseViewElement.innerHTML = `
       <td class="p-4 text-base font-normal text-gray-900 dark:text-white">
         <div class="pl-3">
@@ -306,34 +334,43 @@ if (searchPickupInputButton && searchPickupInput) {
     window.location.href = `${url.href}`
   })
 }
-const pickupButtons = document.querySelectorAll('.pickup-order-btn')
+const updateNotesButtons = document.querySelectorAll('.pickup-order-view-notes-btn')
 
-pickupButtons.forEach((e) => {
+updateNotesButtons.forEach((e) => {
   e.addEventListener('click', async () => {
-    if (confirm('Are sure?')) {
-      let id = e.getAttribute('data-pickup-order-id')
-      const response = await fetch(`/pickup_order/pickup/${id}`, {
-        method: 'GET',
-      })
-      if (response.status == 200) {
-        location.reload()
-      }
+    const shipRequestId = document.querySelector('#pickup-order-edit-id').getAttribute('value')
+    const daNotes: HTMLInputElement = document.querySelector('#pickup-order-view-da_notes')
+    const csrfTokenInput = document.querySelector<HTMLInputElement>('#csrf_token')
+
+    const data = {
+      csrf_token: csrfTokenInput.value,
+      da_notes: daNotes.value,
+      ship_request_id: shipRequestId,
+    }
+    const response = await fetch(`/pickup_order/update_notes`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+    if (response.status == 200) {
+      location.reload()
     }
   })
 })
 
-const deliverButtons = document.querySelectorAll('.deliver-order-btn')
+const deliverButtons = document.querySelectorAll('.pickup-order-view-confirm-delivery-btn')
 
 deliverButtons.forEach((e) => {
   e.addEventListener('click', async () => {
-    if (confirm('Are sure?')) {
-      let id = e.getAttribute('data-deliver-order-id')
-      const response = await fetch(`/pickup_order/deliver/${id}`, {
-        method: 'GET',
-      })
-      if (response.status == 200) {
-        location.reload()
-      }
+    const shipRequestId = document.querySelector('#pickup-order-edit-id').getAttribute('value')
+
+    const response = await fetch(`/pickup_order/deliver/${shipRequestId}`, {
+      method: 'GET',
+    })
+    if (response.status == 200) {
+      location.reload()
     }
   })
 })
