@@ -15,7 +15,7 @@ class Cart(BaseModel):
     user_id: int = Field(alias="userId")
     group: str
     product: Product
-    warehouse: Warehouse
+    warehouse: Warehouse | None = None
     event: dict | None = None
 
     created_at: datetime
