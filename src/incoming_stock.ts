@@ -265,6 +265,31 @@ cancelOrderButtons.forEach((e) => {
 //     inputReceivedProducts.value = JSON.stringify(products)
 // }
 
+// filter orders
+const filterOrders = () => {
+  const checkboxes = document.querySelectorAll('.incoming-stock-filter-input') as NodeListOf<HTMLInputElement>;
+  const checkedStatuses: string[] = [];
+  const searchQueryInput = document.getElementById('table-search-incoming-stocks') as HTMLInputElement;
+
+  checkboxes.forEach(checkbox => {
+    if(checkbox.checked) {
+      checkedStatuses.push(checkbox.value);
+    }
+  })
+
+  const queryParams = new URLSearchParams()
+  if(checkedStatuses.length) {
+    queryParams.append('checked_statuses', JSON.stringify(checkedStatuses));
+  }
+
+  if (searchQueryInput.value){
+    queryParams.append('q', searchQueryInput.value);
+  }
+
+  const url = urlJoin(location.origin, location.pathname, `?${queryParams.toString()}`)
+  location.replace(url);
+}
+
 // ----submit form through hidden submit button----
 const inboundOrderSubmitButton: HTMLButtonElement = document.querySelector('#incoming-stock-submit-btn')
 
@@ -382,22 +407,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkboxes = document.querySelectorAll('.incoming-stock-filter-input') as NodeListOf<HTMLInputElement>;
     checkboxes.forEach(checkbox => {
         checkbox.addEventListener('change', () => {
-            const checkedStatuses: string[] = []
-            checkboxes.forEach(checkbox => {
-                if(checkbox.checked) {
-                    checkedStatuses.push(checkbox.value);
-                }
-            })
-
-            const queryParams = new URLSearchParams()
-            if(checkedStatuses.length) {
-                queryParams.append('checked_statuses', JSON.stringify(checkedStatuses));
-            }
-
-
-            console.log(queryParams);
-            const url = urlJoin(location.origin, location.pathname, `?${queryParams.toString()}`)
-            location.replace(url);
+           filterOrders();
         })
     })
 })

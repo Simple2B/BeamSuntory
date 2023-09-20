@@ -57,7 +57,7 @@
         </div>
       </div>
       <div class="flex items-center space-x-2 sm:space-x-3">
-        <button type="submit" id="incoming-stock-filter-button" name="submit"
+        <!-- <button type="submit" id="incoming-stock-filter-button" name="submit"
           class="inline-flex items-center justify-center w-1/2 px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-blue-300 sm:w-auto dark:bg-yellow-400 dark:hover:bg-yellow-500 dark:focus:ring-blue-800">
           <svg class="w-3 h-3 mr-2 -ml-1" fill="currentColor" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
             <path fill-rule="evenodd"
@@ -66,7 +66,7 @@
             </path>
           </svg>
           Filter
-        </button>
+        </button> -->
       </div>
     </form>
     <div class="flex items-center justify-center py-4 bg-white dark:bg-gray-800">
@@ -82,7 +82,7 @@
           </svg>
         </div>
         <!-- prettier-ignore -->
-        <input {% if search_query %}value={{ search_query }}{% endif %} type="text" id="table-search-incoming-stocks"
+        <input {% if filter_incoming_stock.q %}value="{{filter_incoming_stock.q}}" {% endif %} type="text" id="table-search-incoming-stocks"
           class="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           placeholder="Search for inbound orders" />
       </div>

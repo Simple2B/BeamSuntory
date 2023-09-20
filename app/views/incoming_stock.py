@@ -64,7 +64,6 @@ def get_all():
         "incoming_stock/incoming_stocks.html",
         inbound_orders=inbound_orders,
         page=pagination,
-        search_query=filter_incoming_stock.q,
         suppliers=db.session.scalars(m.Supplier.select().order_by(m.Supplier.id)),
         warehouses=db.session.scalars(m.Warehouse.select().order_by(m.Warehouse.id)),
         products=db.session.scalars(m.Product.select().order_by(m.Product.id)),
