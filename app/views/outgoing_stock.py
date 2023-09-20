@@ -7,7 +7,7 @@ from flask import (
     redirect,
     url_for,
 )
-from flask_login import login_required
+from flask_login import login_required, current_user
 import sqlalchemy as sa
 from sqlalchemy import desc
 from sqlalchemy.orm import aliased
@@ -172,6 +172,45 @@ def dispatch(id: int):
         log(log.INFO, "There is no ship request with id: [%s]", id)
         flash("There is no such ship request", "danger")
         return "no ship request", 404
+
+    carts: list[m.Cart] = db.session.scalars(
+        m.Cart.select().where(
+            m.Cart.user_id == current_user.id,
+            m.Cart.status == "submitted",
+            m.Cart.ship_request_id == ship_request.id,
+        )
+    )
+
+    for cart in carts:
+        is_group_in_master_group = (
+            db.session.query(m.Group)
+            .join(m.MasterGroup)
+            .filter(
+                m.MasterGroup.name == s.MasterGroupMandatory.events.value,
+                m.Group.name == cart.group,
+            )
+            .count()
+            > 0
+        )
+
+        cart_user_group: m.Group = db.session.execute(
+            m.Group.select().where(m.Group.name == cart.group)
+        ).scalar()
+        warehouse_product: m.WarehouseProduct = db.session.execute(
+            m.WarehouseProduct.select().where(
+                m.WarehouseProduct.product_id == cart.product_id,
+                m.WarehouseProduct.warehouse_id == cart.warehouse_id,
+                m.WarehouseProduct.group_id == cart_user_group.id,
+            )
+        ).scalar()
+        if warehouse_product and not is_group_in_master_group:
+            warehouse_product.product_quantity -= cart.quantity
+            warehouse_product.save()
+
+        cart.status = "completed"
+        cart.save()
+
+        db.session.commit()
 
     ship_request.status = s.ShipRequestStatus.assigned
     ship_request.save()
