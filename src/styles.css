@@ -128,3 +128,7 @@ button[disabled]{
 .text-white{
     color: white !important;
 }
+
+.width-250px{
+    width: 250px;
+}
