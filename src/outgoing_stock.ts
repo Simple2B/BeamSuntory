@@ -23,6 +23,7 @@ interface ICart {
   group: string
   quantity: number
   event?: IEvent
+  warehouse?: IWarehouse
 }
 
 export interface IShipRequest {
@@ -253,11 +254,7 @@ function createOutgoingStockItemTable(shipRqst: IShipRequest, typeModal: string)
   const warehouses: IWarehouse[] = JSON.parse(warehousesJSONInput.value)
   const warehousesEvents: IWarehouse[] = JSON.parse(warehousesEventsJSONInput.value)
 
-  console.log(warehouses, warehousesEvents)
-
   const tableShipRequestBody = document.querySelector(`#table-outgoing-stock-body-${typeModal}`)
-  console.log(shipRqst)
-
   shipRqst.carts.forEach((cart, index) => {
     const tableShipRequestItem = document.createElement('tr')
 
@@ -360,7 +357,7 @@ function createOutgoingStockItemTable(shipRqst: IShipRequest, typeModal: string)
 
     if (typeModal === 'edit') {
       tableShipRequestItem.appendChild(warehouseEditElement)
-      const selectWarehouse: HTMLInputElement = tableShipRequestItem.querySelector(
+      const selectWarehouse: HTMLSelectElement = tableShipRequestItem.querySelector(
         `#outgoing-stock-${typeModal}-warehouse-name`
       )
 
@@ -380,6 +377,9 @@ function createOutgoingStockItemTable(shipRqst: IShipRequest, typeModal: string)
           selectWarehouse.appendChild(option)
         }
       })
+      if (selectWarehouse.options.length === 2) {
+        selectWarehouse.options[1].selected = true
+      }
 
       if (cart.product.warehouse) {
         selectWarehouse.value = cart.product.warehouse.id.toString()
