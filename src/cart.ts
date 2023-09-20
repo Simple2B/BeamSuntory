@@ -279,7 +279,19 @@ const picker = new easepick.create({
 })
 
 async function getEventAvailableQuantityByDate(carts: ICartItem[], dateFrom: string, dateTo: string) {
-  const fetchPromises = carts.map(async (cart) => {
+  const uniqCarts = carts.reduce((accCartItem, cart) => {
+    const foundedCart = accCartItem.find(
+      (cartItem) => cartItem.product_id === cart.product_id && cartItem.group === cart.group
+    )
+    if (foundedCart) {
+      foundedCart.quantity += cart.quantity
+    } else {
+      accCartItem.push(cart)
+    }
+    return accCartItem
+  }, [] as ICartItem[])
+
+  const fetchPromises = uniqCarts.map(async (cart) => {
     const response = await fetch(
       `/event/get_available_quantity_by_date?date_from=${dateFrom}&date_to=${dateTo}&group_name=${cart.group}&product_id=${cart.product_id}&quantity=${cart.quantity}`
     )
