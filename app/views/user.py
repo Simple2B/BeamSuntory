@@ -16,7 +16,7 @@ from sqlalchemy.orm import aliased
 from app.controllers import create_pagination
 
 from app import schema as s
-from app import models as m, db, mail
+from app import models as m, db  # , mail
 from app import forms as f
 from app.logger import log
 from config import SALES_REP_LOCKER_NAME
@@ -242,7 +242,7 @@ def create():
             user=user,
             url=url,
         )
-        mail.send(msg)
+        # mail.send(msg)
 
         return redirect(url_for("user.get_all"))
 

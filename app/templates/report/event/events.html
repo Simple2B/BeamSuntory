@@ -2,7 +2,7 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-  <div class="flex gap-4 items-center justify-start py-4 bg-white dark:bg-gray-800">
+  <div class="flex gap-4 items-center justify-start py-4 bg-white dark:bg-gray-800 px-4">
     <label for="table-search" class="sr-only">Search</label>
     <div class="relative">
       <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -11,53 +11,64 @@
       <!-- prettier-ignore -->
       <input {% if search_query %} value="{{ search_query }}" {% endif %} type="text" id="table-search-event" placeholder="Search" class="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
     </div>
+    <!-- prettier-ignore -->    
+    <!-- prettier-ignore -->    
+    <button type="button" id="product-event-clear-button" class=" px-3 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 w-[180px]">{% include "icon/mop.html" %}Clear filters</button>
     <!-- prettier-ignore -->
-    <button type="button" id="table-search-event-button" class="px-3 py-2 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 ml-2 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-        {% include "icon/eyeglass_2.html" %}
-        Search
-    </button>
-    <div class="flex mr-6 items-center">
-      <div class="relative">
-        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-          {% include "icon/calendar.html" %}
-        </div>
-        <!-- prettier-ignore -->
-        <input datepicker {% if start_from %} value="{{ start_from }}"{% endif %} name="sort-start-from" type="text" id="product-event-sort-start-from-datepicker" placeholder="Sort by start date: from" class="product-event-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
-      </div>
-      <span class="mx-4 text-gray-500">to</span>
-      <div class="relative">
-        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-          <!-- prettier-ignore -->
-          {% include "icon/calendar.html" %}
-        </div>
-        <!-- prettier-ignore -->
-        <input datepicker {% if start_to %} value="{{ start_to }}" {% endif %} name="sort-start-to" type="text" placeholder="Sort by start date: to" id="product-event-sort-start-to-datepicker" class="product-event-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
-      </div>
-    </div>
-    <div class="flex items-center">
-      <div class="relative">
-        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-          {% include "icon/calendar.html" %}
-        </div>
-        <!-- prettier-ignore -->
-        <input datepicker {% if end_from %} value="{{ end_from }}" {% endif %} name="sort-end-from" type="text" id="product-event-sort-end-from-datepicker" placeholder="Sort by end date: from" class="product-event-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
-      </div>
-      <span class="mx-4 text-gray-500">to</span>
-      <div class="relative">
-        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-          {% include "icon/calendar.html" %}
-        </div>
-        <!-- prettier-ignore -->
-        <input datepicker {% if end_to %} value="{{ end_to }}" {% endif %} name="sort-end-to" type="text" id="product-event-sort-end-to-datepicker" class="product-event-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Sort by end date: to"/>
-      </div>
-      <!-- prettier-ignore -->
-      <button type="button" id="product-event-clear-button" class="px-3 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">{% include "icon/mop.html" %}Clear</button>
-      <!-- prettier-ignore -->
-      <button type="button" id="button-csv-download" class="px-3 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+    <div class="flex w-full justify-end">
+      <button type="button" id="button-csv-download" class=" px-3 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
         {% include "icon/download.html" %}
         &nbsp Download CSV
-      </button>
+      </button>  
     </div>
+  </div>
+
+  <div class="flex items-center gap-3 p-3">    
+    <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800">     
+      <select id="events-filter-status"
+        class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value="{{ username }}">
+          <option selected disabled value="">Select user</option>
+        {% for user in users %}
+        <option value="{{ user.username }}">{{ user.username }}</option>
+        {% endfor %}
+      </select>     
+    </div>
+    <div class="relative">
+      <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+        {% include "icon/calendar.html" %}
+      </div>
+      <!-- prettier-ignore -->
+      <input datepicker {% if start_from %} value="{{ start_from }}"{% endif %} name="sort-start-from" type="text" id="product-event-sort-start-from-datepicker" placeholder="Start date: from" class="product-event-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+    </div>
+    <span class="text-gray-500">to</span>
+    <div class="relative">
+      <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+        <!-- prettier-ignore -->
+        {% include "icon/calendar.html" %}
+      </div>
+      <!-- prettier-ignore -->
+      <input datepicker {% if start_to %} value="{{ start_to }}" {% endif %} name="sort-start-to" type="text" placeholder="Start date: to" id="product-event-sort-start-to-datepicker" class="product-event-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+    </div>
+  
+    <div class="relative">
+      <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+        {% include "icon/calendar.html" %}
+      </div>
+      <!-- prettier-ignore -->
+      <input datepicker {% if end_from %} value="{{ end_from }}" {% endif %} name="sort-end-from" type="text" id="product-event-sort-end-from-datepicker" placeholder="End date: from" class="product-event-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+    </div>
+    <span class="text-gray-500">to</span>
+    <div class="relative">
+      <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+        {% include "icon/calendar.html" %}
+      </div>
+      <!-- prettier-ignore -->
+      <input datepicker {% if end_to %} value="{{ end_to }}" {% endif %} name="sort-end-to" type="text" id="product-event-sort-end-to-datepicker" class="product-event-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="End date: to"/>
+    </div>
+
+    <button id="event-filter-button" class="px-3 py-2 text-base text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 ml-2 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+      Search
+    </button>
   </div>
   <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -66,7 +77,7 @@
         <th scope="col" class="px-6 py-3">Action</th>
         <th scope="col" class="px-6 py-3">User</th>
         <th scope="col" class="px-6 py-3">Date</th>
-        <th scope="col" class="px-6 py-3">History</th>
+        <th scope="col" class="px-6 py-3">Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -91,11 +102,7 @@
             <div class="text-base font-semibold">{{ report.created_at.strftime('%m/%d/%Y, %H:%M:%S') }}</div>
           </div>
         </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.history }}</div>
-          </div>
-        </td>
+        
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
             <div class="text-base font-semibold">
