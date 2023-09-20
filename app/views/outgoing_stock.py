@@ -123,7 +123,9 @@ def get_all():
 def save():
     form_edit: f.ShipRequestForm = f.ShipRequestForm()
     if form_edit.validate_on_submit():
-        sr = db.session.get(m.ShipRequest, form_edit.ship_request_id.data)
+        sr: m.ShipRequest = db.session.get(
+            m.ShipRequest, form_edit.ship_request_id.data
+        )
         if not sr:
             log(
                 log.ERROR,
@@ -133,11 +135,12 @@ def save():
             flash("Cannot save item data", "danger")
             return redirect(url_for("outgoing_stock.get_all"))
 
-        sr.status = s.ShipRequestStatus(form_edit.status.data)
-        sr.wm_notes = form_edit.wm_notes.data
-        sr.save()
-
         products = json.loads(form_edit.products.data)
+
+        if not products:
+            log(log.ERROR, "No products in ship request: [%s]", form_edit.products.data)
+            flash("Cannot save item data", "danger")
+            return redirect(url_for("outgoing_stock.get_all"))
 
         for product in products:
             cart: m.Cart = db.session.scalar(
@@ -151,10 +154,19 @@ def save():
             if cart:
                 cart.warehouse_id = product["warehouse_id"]
                 cart.save(False)
+                log(log.INFO, "Cart warehouse_id updated. Cart item: [%s]", cart)
+
+        sr.wm_notes = form_edit.wm_notes.data
+        sr.status = s.ShipRequestStatus.assigned
+        sr.save(False)
 
         db.session.commit()
 
+        log(log.INFO, "Ship Request saved and dispatched. Ship Request: [%s]", sr)
+        flash("Ship Request dispatched!", "success")
+
         if form_edit.next_url.data:
+            log(log.INFO, "Redirecting to: [%s]", form_edit.next_url.data)
             return redirect(form_edit.next_url.data)
         return redirect(url_for("outgoing_stock.get_all"))
 
@@ -164,21 +176,37 @@ def save():
         return redirect(url_for("outgoing_stock.get_all"))
 
 
-@outgoing_stock_blueprint.route("/dispatch/<int:id>", methods=["GET"])
+@outgoing_stock_blueprint.route("/update_notes", methods=["POST"])
 @login_required
-def dispatch(id: int):
-    ship_request: m.ShipRequest = db.session.get(m.ShipRequest, id)
-    if not ship_request:
-        log(log.INFO, "There is no ship request with id: [%s]", id)
-        flash("There is no such ship request", "danger")
-        return "no ship request", 404
+def update_notes():
+    form_edit: f.ShipRequestForm = f.ShipRequestForm()
+    if form_edit.validate_on_submit():
+        ship_request = db.session.get(m.ShipRequest, form_edit.ship_request_id.data)
+        if not ship_request:
+            log(
+                log.ERROR,
+                "Not found ship request item by id : [%s]",
+                form_edit.ship_request_id.data,
+            )
+            flash("Cannot save item data", "danger")
+            return redirect(url_for("outgoing_stock.get_all"))
 
-    ship_request.status = s.ShipRequestStatus.assigned
-    ship_request.save()
+        if form_edit.wm_notes.data:
+            ship_request.wm_notes = form_edit.wm_notes.data
+            ship_request.save()
+            log(log.INFO, "Ship Request note updated. Ship Request: [%s]", ship_request)
+            flash("Note has been updated!", "success")
+            return redirect(url_for("outgoing_stock.get_all"))
 
-    log(log.INFO, "Ship Request dispatched. Ship Request: [%s]", ship_request)
-    flash("Ship Request dispatched!", "success")
-    return "ok", 200
+        if form_edit.next_url.data:
+            log(log.INFO, "Redirecting to: [%s]", form_edit.next_url.data)
+            return redirect(form_edit.next_url.data)
+        return redirect(url_for("outgoing_stock.get_all"))
+
+    else:
+        log(log.ERROR, "Ship request item save errors: [%s]", form_edit.wm_notes.data)
+        flash("Note for warehouse manager has not been updated", "danger")
+        return redirect(url_for("outgoing_stock.get_all"))
 
 
 @outgoing_stock_blueprint.route("/cancel/<int:id>", methods=["GET"])

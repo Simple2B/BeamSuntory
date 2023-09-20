@@ -167,10 +167,8 @@ viewOutgoingStockButtonElements.forEach((e) =>
     div.innerHTML = shipRequest.warehouseName || 'No Warehouse'
     div = document.querySelector('#outgoing-stock-view-comment')
     div.innerHTML = shipRequest.comment
-    div = document.querySelector('#outgoing-stock-view-wm_notes')
-    shipRequest.wmNotes ? (div.innerHTML = shipRequest.wmNotes) : (div.innerHTML = 'No comments')
     div = document.querySelector('#outgoing-stock-view-da_notes')
-    shipRequest.daNotes ? (div.innerHTML = shipRequest.daNotes) : (div.innerHTML = 'No comments')
+    shipRequest.daNotes ? (div.innerHTML = shipRequest.daNotes) : (div.innerHTML = 'No notes')
     div = document.querySelector('#outgoing-stock-view-store')
     div.innerHTML = shipRequest.store.storeName
     div = document.querySelector('#outgoing-stock-view-store_address')
@@ -185,6 +183,11 @@ viewOutgoingStockButtonElements.forEach((e) =>
     div.innerHTML = shipRequest.store.city
     div = document.querySelector('#outgoing-stock-view-store_zip_code')
     div.innerHTML = shipRequest.store.zip
+
+    let input: HTMLInputElement = document.querySelector('#outgoing-stock-view-id')
+    input.value = shipRequest.id.toString()
+    input = document.querySelector('#outgoing-stock-view-wm_notes')
+    input.value = shipRequest.wmNotes
 
     createOutgoingStockItemTable(shipRequest, 'view')
     viewModal.show()
