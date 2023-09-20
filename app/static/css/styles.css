@@ -1777,6 +1777,10 @@ input:checked + .toggle-bg {
   width: 160px;
 }
 
+.w-\[180px\] {
+  width: 180px;
+}
+
 .w-\[260px\] {
   width: 260px;
 }
@@ -1827,6 +1831,14 @@ input:checked + .toggle-bg {
 
 .w-screen {
   width: 100vw;
+}
+
+.w-\[250px\] {
+  width: 250px;
+}
+
+.w-\[220px\] {
+  width: 220px;
 }
 
 .min-w-0 {

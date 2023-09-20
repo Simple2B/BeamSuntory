@@ -76,6 +76,8 @@ def get_events_report():
             )
         )
 
+    users = db.session.scalars(sa.select(m.User))
+
     pagination = create_pagination(total=db.session.scalar(count_query))
 
     reports = db.session.scalars(
@@ -83,7 +85,7 @@ def get_events_report():
             pagination.per_page
         )
     )
-    return pagination, reports
+    return pagination, reports, users
 
 
 @report_blueprint.route("/event/api", methods=["GET"])
@@ -105,8 +107,45 @@ def events():
     start_to = request.args.get("start_to", type=str, default=None)
     end_from = request.args.get("end_from", type=str, default=None)
     end_to = request.args.get("end_to", type=str, default=None)
+    username = request.args.get("username", type=str, default=None)
 
-    pagination, reports = get_events_report()
+    pagination, reports, users = get_events_report()
+
+    if username:
+        reports = [
+            report for report in reports if report.events[0].user.username == username
+        ]
+    if q:
+        reports = [
+            report
+            for report in reports
+            if q.lower() in report.events[0].product.name.lower()
+            or q.lower() in report.events[0].product.SKU.lower()
+        ]
+    if start_from:
+        reports = [
+            report
+            for report in reports
+            if report.events[0].date_from >= datetime.strptime(start_from, "%m/%d/%Y")
+        ]
+    if start_to:
+        reports = [
+            report
+            for report in reports
+            if report.events[0].date_from <= datetime.strptime(start_to, "%m/%d/%Y")
+        ]
+    if end_from:
+        reports = [
+            report
+            for report in reports
+            if report.events[0].date_to >= datetime.strptime(end_from, "%m/%d/%Y")
+        ]
+    if end_to:
+        reports = [
+            report
+            for report in reports
+            if report.events[0].date_to <= datetime.strptime(end_to, "%m/%d/%Y")
+        ]
 
     return render_template(
         "report/event/events.html",
@@ -117,4 +156,6 @@ def events():
         start_to=start_to,
         end_from=end_from,
         end_to=end_to,
+        username=username,
+        users=users,
     )
