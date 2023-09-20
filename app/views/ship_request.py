@@ -157,7 +157,9 @@ def create():
         )
 
         report_event = m.ReportEvent(
-            type=s.ReportEventType.created.value, user=current_user
+            type=s.ReportEventType.created.value,
+            user=current_user,
+            store_id=form_create.store.data,
         )
 
         for cart in carts:

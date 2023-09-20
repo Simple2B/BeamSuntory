@@ -154,7 +154,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const reportViewUser = document.getElementById('report-event-user') as HTMLDivElement
   const reportViewAction = document.getElementById('report-event-action') as HTMLDivElement
   const reportViewDate = document.getElementById('report-event-date') as HTMLDivElement
-  const reportViewHistory = document.getElementById('report-event-history') as HTMLDivElement
 
   const reportViewProductTbody = document.getElementById('table-products') as HTMLTableElement
   const productItemTemplate = document.getElementById('view-product-item-template') as HTMLTableRowElement
@@ -173,7 +172,6 @@ document.addEventListener('DOMContentLoaded', () => {
       reportViewUser.innerHTML = reportEvent.user.username
       reportViewAction.innerHTML = reportEvent.type
       reportViewDate.innerHTML = `${month}/${day}/${year} ${hours}:${minutes}`
-      reportViewHistory.innerHTML = reportEvent.history
 
       reportEvent.events.forEach((event, i) => {
         // Render event

@@ -10,6 +10,7 @@ from app import schema as s
 if TYPE_CHECKING:
     from .event import Event
     from .user import User
+    from .store import Store
 
 
 class ReportEvent(db.Model, ModelMixin):
@@ -23,6 +24,9 @@ class ReportEvent(db.Model, ModelMixin):
 
     events: orm.Mapped[list["Event"]] = orm.relationship()
     history: orm.Mapped[str] = orm.mapped_column(sa.String(128), default="")
+
+    store_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("stores.id"))
+    store: orm.Mapped["Store"] = orm.relationship()
 
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
