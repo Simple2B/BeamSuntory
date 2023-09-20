@@ -76,6 +76,11 @@ def get_events_report():
             )
         )
 
+    if filter_events.username:
+        query = query.where(
+            m.ReportEvent.user.has(m.User.username == filter_events.username)
+        )
+
     users = db.session.scalars(sa.select(m.User))
 
     pagination = create_pagination(total=db.session.scalar(count_query))
@@ -110,42 +115,6 @@ def events():
     username = request.args.get("username", type=str, default=None)
 
     pagination, reports, users = get_events_report()
-
-    if username:
-        reports = [
-            report for report in reports if report.events[0].user.username == username
-        ]
-    if q:
-        reports = [
-            report
-            for report in reports
-            if q.lower() in report.events[0].product.name.lower()
-            or q.lower() in report.events[0].product.SKU.lower()
-        ]
-    if start_from:
-        reports = [
-            report
-            for report in reports
-            if report.events[0].date_from >= datetime.strptime(start_from, "%m/%d/%Y")
-        ]
-    if start_to:
-        reports = [
-            report
-            for report in reports
-            if report.events[0].date_from <= datetime.strptime(start_to, "%m/%d/%Y")
-        ]
-    if end_from:
-        reports = [
-            report
-            for report in reports
-            if report.events[0].date_to >= datetime.strptime(end_from, "%m/%d/%Y")
-        ]
-    if end_to:
-        reports = [
-            report
-            for report in reports
-            if report.events[0].date_to <= datetime.strptime(end_to, "%m/%d/%Y")
-        ]
 
     return render_template(
         "report/event/events.html",
