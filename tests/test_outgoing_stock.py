@@ -26,8 +26,17 @@ def test_dispatch_outgoing_stock(mg_g_populate: FlaskClient):
         )
     ).scalar()
 
+    carts: list[m.Cart] = db.session.scalars(
+        m.Cart.select().where(
+            m.Cart.user_id == 1,
+            m.Cart.status == "submitted",
+            m.Cart.ship_request_id == order_to_dispatch.id,
+        )
+    )
+
     assert order_to_dispatch
     assert order_to_dispatch.status == s.ShipRequestStatus.waiting_for_warehouse
+    assert carts
 
     mg_g_populate.get(f"/outgoing_stock/dispatch/{order_to_dispatch.id}")
 
@@ -36,8 +45,18 @@ def test_dispatch_outgoing_stock(mg_g_populate: FlaskClient):
             m.ShipRequest.order_numb == "Order-12345-Waiting-for-warehouse-manager"
         )
     ).scalar()
+
+    carts: list[m.Cart] = db.session.scalars(
+        m.Cart.select().where(
+            m.Cart.user_id == 1,
+            m.Cart.status == "completed",
+            m.Cart.ship_request_id == order_to_dispatch.id,
+        )
+    )
+
     assert order_to_dispatch
     assert order_to_dispatch.status == s.ShipRequestStatus.assigned
+    assert carts
 
 
 def test_cancel_outgoing_stock(mg_g_populate: FlaskClient):

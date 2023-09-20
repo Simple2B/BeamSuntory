@@ -48,12 +48,12 @@ def test_delete_cart(mg_g_populate: FlaskClient):
     login(mg_g_populate)
 
     carts_rows_objs = db.session.execute(m.Cart.select()).all()
-    assert len(carts_rows_objs) == 6
+    assert len(carts_rows_objs) == 7
     response = mg_g_populate.delete("/cart/delete/1")
     assert response.status_code == 200
     assert "ok" in response.text
     carts_rows_objs = db.session.execute(m.Cart.select()).all()
-    assert len(carts_rows_objs) == 5
+    assert len(carts_rows_objs) == 6
 
 
 def test_edit_cart(mg_g_populate: FlaskClient):
