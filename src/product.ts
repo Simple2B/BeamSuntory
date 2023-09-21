@@ -20,6 +20,7 @@ interface IProduct {
   numb_of_items_per_case: number
   numb_of_cases_per_outer_case: number
   comments: string
+  notes_location: string
   // shipping
   weight: number
   length: number
@@ -267,13 +268,13 @@ const productRequestShareBrandSelectorOptions = productRequestShareBrandSelector
 const productRequestShareBrandSelectorOptionsAmount = productRequestShareBrandSelectorOptions.length
 if (!productRequestShareBrandSelectorOptionsAmount) {
   productRequestShareBrandSelector.classList.add('border-error-red')
-  
-  const messageParagraph = document.createElement('p');
-  messageParagraph.classList.add('text-sm', 'text-red')
-  messageParagraph.innerHTML = "You have no group! Please, define your group <a href='/user/' class='underlined'>here</a>";
-  productRequestShareBrandSelector.parentNode.appendChild(messageParagraph);
-}
 
+  const messageParagraph = document.createElement('p')
+  messageParagraph.classList.add('text-sm', 'text-red')
+  messageParagraph.innerHTML =
+    "You have no group! Please, define your group <a href='/user/' class='underlined'>here</a>"
+  productRequestShareBrandSelector.parentNode.appendChild(messageParagraph)
+}
 
 const $requestShareModalElement: HTMLElement = document.querySelector('#request-share-product-modal')
 const $shipModalElement: HTMLElement = document.querySelector('#ship-product-modal')
@@ -451,7 +452,6 @@ const bookedDates = [getFirstAndLastDate()].map((d) => {
 let fetchedAmountByDate = [] as { date: string; quantity: number }[]
 
 async function getEventAvailableQuantity(product_id: number, group: string, calendarFilter: string[]) {
-
   const response = await fetch(
     `/event/get_available_quantity?group_name=${group}&product_id=${product_id}&dates=${JSON.stringify(calendarFilter)}`
   )
@@ -553,6 +553,8 @@ function editProduct(product: IProduct) {
     : (input.value = '0')
   input = document.querySelector('#product-edit-comments')
   product.comments ? (input.value = product.comments) : (input.value = 'No comments')
+  input = document.querySelector('#product-edit-notes-location')
+  input.value = product.notes_location
   // shipping
   input = document.querySelector('#product-edit-weight')
   product.weight ? (input.value = product.weight.toString()) : (input.value = '0')
@@ -712,6 +714,8 @@ viewProductButtonElements.forEach((e) =>
       : (div.innerHTML = '0')
     div = document.querySelector('#product-view-comments')
     product.comments ? (div.innerHTML = product.comments.toString()) : (div.innerHTML = 'No comments')
+    div = document.querySelector('#product-view-notes-location')
+    product.notes_location ? (div.innerHTML = product.notes_location) : (div.innerHTML = 'No notes')
     div = document.querySelector('#product-view-next_url')
     div.innerHTML = window.location.href
     viewModal.show()
@@ -876,19 +880,18 @@ function booking(product: IProduct, group: string) {
         const randomInt = (min: number, max: number) => {
           return Math.floor(Math.random() * (max - min + 1) + min)
         }
-     
 
         picker.on('view', async (evt: any) => {
           const { view, date, target } = evt.detail
           if (view === 'CalendarDay') {
-            const day = parseInt(target.innerHTML);
+            const day = parseInt(target.innerHTML)
             if (day === 1) {
-              calendarFilter = [target.getAttribute("data-time")]
-              return;
+              calendarFilter = [target.getAttribute('data-time')]
+              return
             }
 
             if (!calendarFilter.includes(target.getAttribute('data-time'))) {
-              calendarFilter.push(target.getAttribute('data-time'));
+              calendarFilter.push(target.getAttribute('data-time'))
             }
           }
 

@@ -42,6 +42,7 @@ class Product(CustomBase):
     numb_of_cases_per_outer_case: int | None = Field(alias="numbOfCasesPerOuterCase")
     warehouses: list[Warehouse]
     comments: str | None
+    notes_location: str | None
     # shipping
     weight: float | None
     length: float | None

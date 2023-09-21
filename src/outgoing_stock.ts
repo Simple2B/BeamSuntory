@@ -53,6 +53,7 @@ interface IProduct {
   image: string
   SKU: string
   comment: string
+  notes_location: string
   group: string
   warehouse: { id: number; name: string }
   warehouses: IWarehouse[]
@@ -317,6 +318,13 @@ function createOutgoingStockItemTable(shipRqst: IShipRequest, typeModal: string)
         <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
             <div class="cart-item-end-date text-base font-semibold">${cart.event ? cart.event.dateTo : '-'}</div>
+          </div>
+        </td>
+        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="cart-item-location-notes text-base font-semibold">${
+              cart.product.notes_location ? cart.product.notes_location : '-'
+            }</div>
           </div>
         </td>
         <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">

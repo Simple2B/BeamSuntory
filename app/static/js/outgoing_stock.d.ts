@@ -45,6 +45,7 @@ interface IProduct {
     image: string;
     SKU: string;
     comment: string;
+    notes_location: string;
     group: string;
     warehouse: {
         id: number;
