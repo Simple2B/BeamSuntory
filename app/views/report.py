@@ -17,62 +17,86 @@ report_blueprint = Blueprint("report", __name__, url_prefix="/report")
 
 def get_events_report():
     filter_events = s.FilterReportEvents.model_validate(dict(request.args))
-    query = m.ReportEvent.select().order_by(m.ReportEvent.created_at)
+    query = m.ReportEvent.select().order_by(m.ReportEvent.id)
 
     count_query = sa.select(sa.func.count()).select_from(m.ReportEvent)
 
     if filter_events.q:
         query = query.where(
-            m.ReportEvent.events.any(
-                m.Event.product.has(m.Product.name.ilike(f"%{filter_events.q}%"))
+            m.ReportEvent.ship_request.has(
+                m.ShipRequest.carts.any(
+                    m.Cart.event.has(
+                        m.Event.product.has(
+                            m.Product.name.ilike(f"%{filter_events.q}%")
+                        )
+                    )
+                )
             )
-            | m.ReportEvent.events.any(
-                m.Event.product.has(m.Product.SKU.ilike(f"%{filter_events.q}%"))
+            | m.ReportEvent.ship_request.has(
+                m.ShipRequest.carts.any(
+                    m.Cart.event.has(
+                        m.Event.product.has(m.Product.SKU.ilike(f"%{filter_events.q}%"))
+                    )
+                )
             )
-            | m.ReportEvent.events.any(
-                m.Event.user.has(m.User.username.ilike(f"%{filter_events.q}%"))
-            )
+            | m.ReportEvent.user.has(m.User.username.ilike(f"%{filter_events.q}%"))
         )
 
         count_query = count_query.where(
-            m.ReportEvent.events.any(
-                m.Event.product.has(m.Product.name.ilike(f"%{filter_events.q}%"))
-            )
-            | m.ReportEvent.events.any(
-                m.Event.product.has(m.Product.SKU.ilike(f"%{filter_events.q}%"))
-            )
-            | m.ReportEvent.events.any(
-                m.Event.user.has(m.User.username.ilike(f"%{filter_events.q}%"))
+            m.ReportEvent.ship_request.has(
+                m.ShipRequest.carts.any(
+                    m.Cart.event.has(
+                        m.Event.product.has(
+                            m.Product.name.ilike(f"%{filter_events.q}%")
+                        )
+                    )
+                )
             )
         )
 
     if filter_events.start_from:
         query = query.where(
-            m.ReportEvent.events.any(
-                m.Event.date_from
-                >= datetime.strptime(filter_events.start_from, "%m/%d/%Y")
+            m.ReportEvent.ship_request.has(
+                m.ShipRequest.carts.any(
+                    m.Cart.event.has(
+                        m.Event.date_from
+                        >= datetime.strptime(filter_events.start_from, "%m/%d/%Y")
+                    )
+                )
             )
         )
 
     if filter_events.start_to:
         query = query.where(
-            m.ReportEvent.events.any(
-                m.Event.date_from
-                <= datetime.strptime(filter_events.start_to, "%m/%d/%Y")
+            m.ReportEvent.ship_request.has(
+                m.ShipRequest.carts.any(
+                    m.Cart.event.has(
+                        m.Event.date_from
+                        <= datetime.strptime(filter_events.start_to, "%m/%d/%Y")
+                    )
+                )
             )
         )
 
     if filter_events.end_from:
         query = query.where(
-            m.ReportEvent.events.any(
-                m.Event.date_to >= datetime.strptime(filter_events.end_from, "%m/%d/%Y")
+            m.ReportEvent.ship_request.has(
+                m.ShipRequest.carts.any(
+                    m.Cart.event.has(
+                        m.Event.date_from
+                        >= datetime.strptime(filter_events.end_from, "%m/%d/%Y")
+                    )
+                )
             )
         )
 
     if filter_events.end_to:
-        query = query.where(
-            m.ReportEvent.events.any(
-                m.Event.date_to <= datetime.strptime(filter_events.end_to, "%m/%d/%Y")
+        m.ReportEvent.ship_request.has(
+            m.ShipRequest.carts.any(
+                m.Cart.event.has(
+                    m.Event.date_from
+                    <= datetime.strptime(filter_events.end_to, "%m/%d/%Y")
+                )
             )
         )
 

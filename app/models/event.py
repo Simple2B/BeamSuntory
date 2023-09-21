@@ -11,7 +11,6 @@ from app import schema as s
 if TYPE_CHECKING:
     from .product import Product
     from .user import User
-    from .report_event import ReportEvent
     from .cart import Cart
 
 

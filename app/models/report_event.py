@@ -25,7 +25,7 @@ class ReportEvent(db.Model, ModelMixin):
     history: orm.Mapped[str] = orm.mapped_column(sa.String(128), default="")
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
-        default=datetime.utcnow,
+        default=datetime.now,
     )
 
     # Relationships
