@@ -23,7 +23,36 @@ interface IReportEvent {
   type: string
   createdAt: string
   history: string
-  events: IProductEvent[]
+  ship_request: IShipRequest
+}
+
+interface IShipRequest {
+  id: number
+  carts: IProductEvent[]
+  comment: string
+  createdAt: string
+  daNotes: string
+  orderNumb: string
+  orderStatus: string
+  store: IStore
+  storeId: number
+  wmNotes: string
+}
+
+interface IStore{
+  active: boolean
+  address: string
+  city: string
+  contactPerson: string
+  country: string
+  createdAt: string
+  email: string
+  id: number
+  phoneNumb: string
+  region: string
+  storeCategoryId: number
+  storeName: string
+  zip: string
 }
 
 interface IEventsReportResponse {
@@ -68,7 +97,6 @@ const downloadCSV = async function () {
     const res = await fetch(`${location.href}/${url}`)
     const data: IEventsReportResponse = await res.json()
     const reportEvents = data.report_events[0] as IReportEvent
-    console.log(data)
     reportEvents.events.forEach((event: IProductEvent) => {
       csvData.push(
         [
@@ -117,6 +145,15 @@ function getFilterValues() {
 
 
 document.addEventListener('DOMContentLoaded', () => {
+  const tableRow = document.querySelectorAll('.table-event-item-tr')
+  tableRow.forEach((row: HTMLDivElement) => {    
+    const viewReportEventsModal = row.querySelector('.report-event-view-btn')
+    const data = JSON.parse(viewReportEventsModal.getAttribute('data-target'))
+    const reportStore = data.ship_request.store.storeName    
+    const reportEventStoreDiv = row.querySelector('.report-event-store') as HTMLDivElement
+    reportEventStoreDiv.innerHTML = reportStore
+  })
+
   const eventFilterButton = document.querySelector('#event-filter-button')
   eventFilterButton.addEventListener('click', () => {
     getFilterValues()
@@ -173,7 +210,8 @@ document.addEventListener('DOMContentLoaded', () => {
       reportViewAction.innerHTML = reportEvent.type
       reportViewDate.innerHTML = `${month}/${day}/${year} ${hours}:${minutes}`
 
-      reportEvent.events.forEach((event, i) => {
+
+      reportEvent.ship_request.carts.forEach((event, i) => {
         // Render event
         const newProductItem = productItemTemplate.cloneNode(true) as HTMLElement
         newProductItem.removeAttribute('id')
@@ -216,8 +254,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           productRetailPrice.innerHTML = 'No price'
         }
-
-        productGroup.innerHTML = event.cart.group
+        
+        productGroup.innerHTML = event.group
 
         reportViewProductTbody.appendChild(newProductItem)
 

@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
 from .product import Product
 from .warehouse import Warehouse
+from .event import Event
 
 
 class Cart(BaseModel):
@@ -16,6 +19,7 @@ class Cart(BaseModel):
     group: str
     product: Product
     warehouse: Warehouse | None = None
-    event: dict | None = None
+    # event: dict | None = None
+    event: Event
 
     created_at: datetime

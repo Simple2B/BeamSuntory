@@ -8,31 +8,31 @@ from .utils import ModelMixin
 from app import schema as s
 
 if TYPE_CHECKING:
-    from .event import Event
     from .user import User
-    from .store import Store
+    from .ship_request import ShipRequest
 
 
 class ReportEvent(db.Model, ModelMixin):
     __tablename__ = "report_events"
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
-    type: orm.Mapped[str] = orm.mapped_column(sa.String(64))
 
+    # Foreign keys
     user_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("users.id"))
-    user: orm.Mapped["User"] = orm.relationship()
 
-    events: orm.Mapped[list["Event"]] = orm.relationship()
+    # Columns
+    type: orm.Mapped[str] = orm.mapped_column(sa.String(64))
     history: orm.Mapped[str] = orm.mapped_column(sa.String(128), default="")
-
-    store_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("stores.id"))
-    store: orm.Mapped["Store"] = orm.relationship()
-
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
         default=datetime.utcnow,
     )
 
+    # Relationships
+    ship_request: orm.Mapped["ShipRequest"] = orm.relationship()
+    user: orm.Mapped["User"] = orm.relationship()
+
     @property
     def json(self):
+        # s.ReportEvent.model_rebuild()
         return s.ReportEvent.model_validate(self).model_dump_json(by_alias=True)

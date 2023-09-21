@@ -1,7 +1,7 @@
 from enum import Enum
 from datetime import datetime
 from pydantic import BaseModel, RootModel, ConfigDict, Field
-from .event import Event
+from .ship_request import ShipRequest
 from .user import User
 from .pagination import PaginationOut
 
@@ -17,12 +17,13 @@ class ReportEvent(BaseModel):
     history: str
     user: User
     created_at: datetime = Field(alias="createdAt")
-    events: list[Event]
+    ship_request: ShipRequest
 
 
 class ReportEventResponse(BaseModel):
     pagination: PaginationOut
-    report_events: list[ReportEvent]
+    # report_events: list[ReportEvent]
+    ship_requests: ShipRequest
 
 
 ReportEventList = RootModel[list[ReportEvent]]
