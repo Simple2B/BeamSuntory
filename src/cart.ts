@@ -27,6 +27,10 @@ interface IEventCart {
   status: boolean
 }
 
+//global variables for datepicker
+const currentDate = new Date()
+const fiveDays = 5 * 24 * 60 * 60 * 1000
+
 // --get cart items from hidden input for datepicker--
 const cartEventsHiddenInput = document.querySelector('#carts-events-hidden-input') as HTMLInputElement
 const carts = JSON.parse(cartEventsHiddenInput.value) as ICartItem[]
@@ -249,12 +253,12 @@ const picker = new easepick.create({
     minDate: new Date(),
     minDays: 1,
     inseparable: true,
-    filter(date: any, picked: any) {
-      if (picked.length === 1) {
-        const incl = date.isBefore(picked[0]) ? '[)' : '(]'
-        return !picked[0].isSame(date, 'day') && date.inArray(bookedDates, incl)
+    filter(date: any) {
+      if (date - +currentDate > fiveDays) {
+        return false
+      } else {
+        return true
       }
-      return date.inArray(bookedDates, '[)')
     },
   },
   setup(picker: any) {
@@ -279,7 +283,19 @@ const picker = new easepick.create({
 })
 
 async function getEventAvailableQuantityByDate(carts: ICartItem[], dateFrom: string, dateTo: string) {
-  const fetchPromises = carts.map(async (cart) => {
+  const uniqCarts = carts.reduce((accCartItem, cart) => {
+    const foundedCart = accCartItem.find(
+      (cartItem) => cartItem.product_id === cart.product_id && cartItem.group === cart.group
+    )
+    if (foundedCart) {
+      foundedCart.quantity += cart.quantity
+    } else {
+      accCartItem.push(cart)
+    }
+    return accCartItem
+  }, [] as ICartItem[])
+
+  const fetchPromises = uniqCarts.map(async (cart) => {
     const response = await fetch(
       `/event/get_available_quantity_by_date?date_from=${dateFrom}&date_to=${dateTo}&group_name=${cart.group}&product_id=${cart.product_id}&quantity=${cart.quantity}`
     )

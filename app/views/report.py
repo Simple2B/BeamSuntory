@@ -76,6 +76,13 @@ def get_events_report():
             )
         )
 
+    if filter_events.username:
+        query = query.where(
+            m.ReportEvent.user.has(m.User.username == filter_events.username)
+        )
+
+    users = db.session.scalars(sa.select(m.User))
+
     pagination = create_pagination(total=db.session.scalar(count_query))
 
     reports = db.session.scalars(
@@ -83,7 +90,7 @@ def get_events_report():
             pagination.per_page
         )
     )
-    return pagination, reports
+    return pagination, reports, users
 
 
 @report_blueprint.route("/event/api", methods=["GET"])
@@ -105,8 +112,9 @@ def events():
     start_to = request.args.get("start_to", type=str, default=None)
     end_from = request.args.get("end_from", type=str, default=None)
     end_to = request.args.get("end_to", type=str, default=None)
+    username = request.args.get("username", type=str, default=None)
 
-    pagination, reports = get_events_report()
+    pagination, reports, users = get_events_report()
 
     return render_template(
         "report/event/events.html",
@@ -117,4 +125,6 @@ def events():
         start_to=start_to,
         end_from=end_from,
         end_to=end_to,
+        username=username,
+        users=users,
     )

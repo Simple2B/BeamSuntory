@@ -17,6 +17,7 @@ interface ICart {
     group: string;
     quantity: number;
     event?: IEvent;
+    warehouse?: IWarehouse;
 }
 export interface IShipRequest {
     id: number;
@@ -44,6 +45,7 @@ interface IProduct {
     image: string;
     SKU: string;
     comment: string;
+    notes_location: string;
     group: string;
     warehouse: {
         id: number;

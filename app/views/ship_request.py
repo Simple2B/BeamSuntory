@@ -190,23 +190,10 @@ def create():
 
                 cart.warehouse = warehouse_event
 
-            cart.status = "completed"
+            cart.status = "submitted"
             cart.order_numb = ship_request.order_numb
             cart.ship_request_id = ship_request.id
             cart.save()
-            cart_user_group: m.Group = db.session.execute(
-                m.Group.select().where(m.Group.name == cart.group)
-            ).scalar()
-            warehouse_product: m.WarehouseProduct = db.session.execute(
-                m.WarehouseProduct.select().where(
-                    m.WarehouseProduct.product_id == cart.product_id,
-                    m.WarehouseProduct.warehouse_id == cart.warehouse_id,
-                    m.WarehouseProduct.group_id == cart_user_group.id,
-                )
-            ).scalar()
-            if warehouse_product and not is_group_in_master_group:
-                warehouse_product.product_quantity -= cart.quantity
-                warehouse_product.save()
 
         db.session.commit()
 

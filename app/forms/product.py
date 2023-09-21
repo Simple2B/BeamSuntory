@@ -37,6 +37,7 @@ class ProductForm(FlaskForm):
         "Number of cases per outer case", validators=[Optional()]
     )
     comments = StringField("Comments", validators=[Optional()])
+    notes_location = StringField("Notes Location", validators=[Optional()])
     # shipping
     weight = FloatField("Weight", validators=[Optional()])
     length = FloatField("Length", validators=[Optional()])
