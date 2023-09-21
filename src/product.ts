@@ -312,6 +312,8 @@ const modalOptions: ModalOptions = {
       deleteShipAssignButton(value.replace(/\s/g, '_'), key)
     })
     clearProductGroupContainer()
+    const productViewContainer = document.querySelector('#product-view-grid-container')
+    productViewContainer.innerHTML = ''
   },
   onShow: () => {},
   onToggle: () => {
