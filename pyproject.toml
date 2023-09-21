@@ -19,6 +19,7 @@ pydantic = "^2.3.0"
 alchemical = "^0.7.1"
 pandas = "^2.0.3"
 pydantic-settings = "^2.0.3"
+pillow = "^10.0.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.1"
