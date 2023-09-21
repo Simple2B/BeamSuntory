@@ -93,8 +93,11 @@ const downloadCSV = async function () {
   const queryTail = ''
 
   for (let page = 1; page <= pages; page++) {
+    const currentURL = window.location.href;
+    const urlWithoutQueryParams = currentURL.split('?')[0];
+
     const url = [`api?page={page}`, queryTail].join('&')
-    const res = await fetch(`${location.href}/${url}`)
+    const res = await fetch(`${urlWithoutQueryParams}/${url}`)
     const data: IEventsReportResponse = await res.json()
     const reportEvents = data.report_events[0] as IReportEvent
 
