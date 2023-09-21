@@ -582,6 +582,7 @@ def mg_g_populate(client: FlaskClient):
         type="test_type",
         user_id=1,
         history="some history",
+        ship_request_id=sr_atp.id,
     )
     report.save(False)
 
@@ -628,7 +629,6 @@ def mg_g_populate(client: FlaskClient):
             comment="event for product 1",
             user_id=3,
             cart_id=cart.id,
-            report_id=report.id,
         ).save(False)
         db.session.commit()
 
