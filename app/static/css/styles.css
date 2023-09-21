@@ -1833,14 +1833,6 @@ input:checked + .toggle-bg {
   width: 100vw;
 }
 
-.w-\[250px\] {
-  width: 250px;
-}
-
-.w-\[220px\] {
-  width: 220px;
-}
-
 .min-w-0 {
   min-width: 0px;
 }
@@ -3076,6 +3068,22 @@ input:checked + .toggle-bg {
 
 .pt-\[0\.37rem\] {
   padding-top: 0.37rem;
+}
+
+.pb-5 {
+  padding-bottom: 1.25rem;
+}
+
+.pb-72 {
+  padding-bottom: 18rem;
+}
+
+.pt-7 {
+  padding-top: 1.75rem;
+}
+
+.pt-5 {
+  padding-top: 1.25rem;
 }
 
 .text-left {

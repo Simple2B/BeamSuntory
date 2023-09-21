@@ -20,6 +20,7 @@ interface IProduct {
   numb_of_items_per_case: number
   numb_of_cases_per_outer_case: number
   comments: string
+  notes_location: string
   // shipping
   weight: number
   length: number
@@ -45,6 +46,7 @@ interface IProduct {
   mstr_grps_grps_names_in_prod: { [index: string]: { group_name: string; group_id: number }[] }
   warehouse_product_qty: number
   product_in_warehouses: { [index: string]: { [index: string]: number } }
+  warehouse_products: IWarehouseProduct[]
 }
 interface FilterJsonData {
   [key: string]: string
@@ -57,6 +59,19 @@ interface IProductMasterGroupGroup {
 interface IMasterGroup {
   name: string
   master_groups_list_groups: { [index: string]: { group_name: string; group_id: number }[] }
+}
+
+interface IWarehouseProduct {
+  id: number
+  product_id: number
+  warehouse_id: number
+  product_quantity: number
+  warehouse: IWarehouse
+}
+
+interface IWarehouse {
+  id: number
+  name: string
 }
 
 // global variable for mandatory event instance
@@ -267,13 +282,13 @@ const productRequestShareBrandSelectorOptions = productRequestShareBrandSelector
 const productRequestShareBrandSelectorOptionsAmount = productRequestShareBrandSelectorOptions.length
 if (!productRequestShareBrandSelectorOptionsAmount) {
   productRequestShareBrandSelector.classList.add('border-error-red')
-  
-  const messageParagraph = document.createElement('p');
-  messageParagraph.classList.add('text-sm', 'text-red')
-  messageParagraph.innerHTML = "You have no group! Please, define your group <a href='/user/' class='underlined'>here</a>";
-  productRequestShareBrandSelector.parentNode.appendChild(messageParagraph);
-}
 
+  const messageParagraph = document.createElement('p')
+  messageParagraph.classList.add('text-sm', 'text-red')
+  messageParagraph.innerHTML =
+    "You have no group! Please, define your group <a href='/user/' class='underlined'>here</a>"
+  productRequestShareBrandSelector.parentNode.appendChild(messageParagraph)
+}
 
 const $requestShareModalElement: HTMLElement = document.querySelector('#request-share-product-modal')
 const $shipModalElement: HTMLElement = document.querySelector('#ship-product-modal')
@@ -451,7 +466,6 @@ const bookedDates = [getFirstAndLastDate()].map((d) => {
 let fetchedAmountByDate = [] as { date: string; quantity: number }[]
 
 async function getEventAvailableQuantity(product_id: number, group: string, calendarFilter: string[]) {
-
   const response = await fetch(
     `/event/get_available_quantity?group_name=${group}&product_id=${product_id}&dates=${JSON.stringify(calendarFilter)}`
   )
@@ -553,6 +567,8 @@ function editProduct(product: IProduct) {
     : (input.value = '0')
   input = document.querySelector('#product-edit-comments')
   product.comments ? (input.value = product.comments) : (input.value = 'No comments')
+  input = document.querySelector('#product-edit-notes-location')
+  input.value = product.notes_location
   // shipping
   input = document.querySelector('#product-edit-weight')
   product.weight ? (input.value = product.weight.toString()) : (input.value = '0')
@@ -712,8 +728,34 @@ viewProductButtonElements.forEach((e) =>
       : (div.innerHTML = '0')
     div = document.querySelector('#product-view-comments')
     product.comments ? (div.innerHTML = product.comments.toString()) : (div.innerHTML = 'No comments')
+    div = document.querySelector('#product-view-notes-location')
+    product.notes_location ? (div.innerHTML = product.notes_location) : (div.innerHTML = 'No notes')
     div = document.querySelector('#product-view-next_url')
     div.innerHTML = window.location.href
+
+    product.warehouse_products.forEach((warehouseProduct: IWarehouseProduct) => {
+      const productViewContainer = document.querySelector('#product-view-grid-container')
+      const warehouseTemplate = document.querySelector('#product-view-warehouse-template')
+      const availableQuantityTemplate = document.querySelector('#product-view-available-quantity-template')
+
+      const warehouseDiv = warehouseTemplate.cloneNode(true) as HTMLDivElement
+      const availableQuantityDiv = availableQuantityTemplate.cloneNode(true) as HTMLDivElement
+
+      warehouseDiv.classList.remove('hidden')
+      availableQuantityDiv.classList.remove('hidden')
+
+      const warehouseName = warehouseDiv.querySelector('.product-view-warehouse-name')
+      const warehouseAvailableQuantity = availableQuantityDiv.querySelector(
+        '.product-view-warehouse-available-quantity'
+      )
+
+      warehouseName.innerHTML = warehouseProduct.warehouse.name
+      warehouseAvailableQuantity.innerHTML = warehouseProduct.product_quantity.toString()
+
+      productViewContainer.appendChild(warehouseDiv)
+      productViewContainer.appendChild(availableQuantityDiv)
+    })
+
     viewModal.show()
   })
 )
@@ -876,19 +918,18 @@ function booking(product: IProduct, group: string) {
         const randomInt = (min: number, max: number) => {
           return Math.floor(Math.random() * (max - min + 1) + min)
         }
-     
 
         picker.on('view', async (evt: any) => {
           const { view, date, target } = evt.detail
           if (view === 'CalendarDay') {
-            const day = parseInt(target.innerHTML);
+            const day = parseInt(target.innerHTML)
             if (day === 1) {
-              calendarFilter = [target.getAttribute("data-time")]
-              return;
+              calendarFilter = [target.getAttribute('data-time')]
+              return
             }
 
             if (!calendarFilter.includes(target.getAttribute('data-time'))) {
-              calendarFilter.push(target.getAttribute('data-time'));
+              calendarFilter.push(target.getAttribute('data-time'))
             }
           }
 

@@ -364,6 +364,7 @@ def save():
             else 0
         )
         u.comments = form.comments.data if form.comments.data else "no comment"
+        u.notes_location = form.notes_location.data if form.notes_location.data else ""
         # shipping
         u.weight = form.weight.data if form.weight.data else 0
         u.length = form.length.data if form.length.data else 0

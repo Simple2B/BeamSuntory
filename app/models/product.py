@@ -55,6 +55,7 @@ class Product(db.Model, ModelMixin):
         sa.Integer(), nullable=True
     )
     comments: orm.Mapped[str] = orm.mapped_column(sa.String(256), nullable=True)
+    notes_location: orm.Mapped[str] = orm.mapped_column(sa.Text, nullable=True)
     # shipping
     weight: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
     length: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
