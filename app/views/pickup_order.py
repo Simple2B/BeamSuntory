@@ -113,6 +113,7 @@ def save():
             )
             flash("Cannot save item data", "danger")
         sr.da_notes = form_edit.da_notes.data
+        sr.status = s.ShipRequestStatus.in_transit
         sr.save()
 
         if form_edit.next_url.data:
@@ -125,22 +126,37 @@ def save():
         return redirect(url_for("pickup_order.get_all"))
 
 
-@pickup_order_blueprint.route("/pickup/<int:id>", methods=["GET"])
+@pickup_order_blueprint.route("/update_notes", methods=["POST"])
 @login_required
-def pickup(id: int):
-    sr: m.ShipRequest = db.session.get(m.ShipRequest, id)
+def update_notes():
+    form_edit: f.ShipRequestForm = f.ShipRequestForm()
+    if form_edit.validate_on_submit():
+        ship_request = db.session.get(m.ShipRequest, form_edit.ship_request_id.data)
+        if not ship_request:
+            log(
+                log.ERROR,
+                "Not found ship request item by id : [%s]",
+                form_edit.ship_request_id.data,
+            )
+            flash("Cannot save item data", "danger")
+            return redirect(url_for("outgoing_stock.get_all"))
 
-    if not sr:
-        log(log.INFO, "There is no ship request with id: [%s]", id)
-        flash("There is no such ship request", "danger")
-        return "no ship request", 404
+        if form_edit.da_notes.data:
+            ship_request.da_notes = form_edit.da_notes.data
+            ship_request.save()
+            log(log.INFO, "Ship Request note updated. Ship Request: [%s]", ship_request)
+            flash("Note has been updated!", "success")
+            return redirect(url_for("outgoing_stock.get_all"))
 
-    sr.status = s.ShipRequestStatus.in_transit
-    sr.save()
+        if form_edit.next_url.data:
+            log(log.INFO, "Redirecting to: [%s]", form_edit.next_url.data)
+            return redirect(form_edit.next_url.data)
+        return redirect(url_for("outgoing_stock.get_all"))
 
-    log(log.INFO, "Ship Request pickup done. Ship Request: [%s]", sr)
-    flash("Ship Request pickup done!", "success")
-    return "ok", 200
+    else:
+        log(log.ERROR, "Ship request item save errors: [%s]", form_edit.da_notes.data)
+        flash("Note for warehouse manager has not been updated", "danger")
+        return redirect(url_for("outgoing_stock.get_all"))
 
 
 @pickup_order_blueprint.route("/deliver/<int:id>", methods=["GET"])
