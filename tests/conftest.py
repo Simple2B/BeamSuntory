@@ -582,7 +582,6 @@ def mg_g_populate(client: FlaskClient):
         type="test_type",
         user_id=1,
         history="some history",
-        ship_request_id=sr_atp.id,
     )
     report.save(False)
 
