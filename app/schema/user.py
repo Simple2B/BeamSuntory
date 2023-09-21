@@ -3,9 +3,9 @@ from pydantic import BaseModel, Field, ConfigDict
 
 
 class UserRole(Enum):
-    ADMIN: str = "admin"
-    SALES_REP: str = "sales_rep"
-    WAREHOUSE_MANAGER: str = "warehouse_manager"
+    ADMIN: str = "Admin"
+    SALES_REP: str = "Sales Rep"
+    WAREHOUSE_MANAGER: str = "Warehouse Manager"
     MANAGER: str = "manager"
 
 

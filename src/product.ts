@@ -46,6 +46,7 @@ interface IProduct {
   mstr_grps_grps_names_in_prod: { [index: string]: { group_name: string; group_id: number }[] }
   warehouse_product_qty: number
   product_in_warehouses: { [index: string]: { [index: string]: number } }
+  warehouse_products: IWarehouseProduct[]
 }
 interface FilterJsonData {
   [key: string]: string
@@ -58,6 +59,19 @@ interface IProductMasterGroupGroup {
 interface IMasterGroup {
   name: string
   master_groups_list_groups: { [index: string]: { group_name: string; group_id: number }[] }
+}
+
+interface IWarehouseProduct {
+  id: number
+  product_id: number
+  warehouse_id: number
+  product_quantity: number
+  warehouse: IWarehouse
+}
+
+interface IWarehouse {
+  id: number
+  name: string
 }
 
 // global variable for mandatory event instance
@@ -718,6 +732,30 @@ viewProductButtonElements.forEach((e) =>
     product.notes_location ? (div.innerHTML = product.notes_location) : (div.innerHTML = 'No notes')
     div = document.querySelector('#product-view-next_url')
     div.innerHTML = window.location.href
+
+    product.warehouse_products.forEach((warehouseProduct: IWarehouseProduct) => {
+      const productViewContainer = document.querySelector('#product-view-grid-container')
+      const warehouseTemplate = document.querySelector('#product-view-warehouse-template')
+      const availableQuantityTemplate = document.querySelector('#product-view-available-quantity-template')
+
+      const warehouseDiv = warehouseTemplate.cloneNode(true) as HTMLDivElement
+      const availableQuantityDiv = availableQuantityTemplate.cloneNode(true) as HTMLDivElement
+
+      warehouseDiv.classList.remove('hidden')
+      availableQuantityDiv.classList.remove('hidden')
+
+      const warehouseName = warehouseDiv.querySelector('.product-view-warehouse-name')
+      const warehouseAvailableQuantity = availableQuantityDiv.querySelector(
+        '.product-view-warehouse-available-quantity'
+      )
+
+      warehouseName.innerHTML = warehouseProduct.warehouse.name
+      warehouseAvailableQuantity.innerHTML = warehouseProduct.product_quantity.toString()
+
+      productViewContainer.appendChild(warehouseDiv)
+      productViewContainer.appendChild(availableQuantityDiv)
+    })
+
     viewModal.show()
   })
 )
