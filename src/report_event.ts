@@ -14,7 +14,14 @@ interface IProductEvent {
   dateTo: string
   product: IProduct
   quantity: number
-  cart: ICart
+  event: IEvent
+  group: string
+}
+
+interface IEvent{
+  dateFrom: string
+  dateTo: string
+
 }
 
 interface IReportEvent {
@@ -101,17 +108,17 @@ const downloadCSV = async function () {
     const data: IEventsReportResponse = await res.json()
     const reportEvents = data.report_events[0] as IReportEvent
 
-    reportEvents.ship_request.carts.forEach((event: IProductEvent) => {
+    reportEvents.ship_request.carts.forEach((cart: IProductEvent) => {     
       csvData.push(
         [
           reportEvents.createdAt,
           reportEvents.history,
           reportEvents.type,
           reportEvents.user.username,
-          event.dateFrom,
-          event.dateTo,
-          event.product.SKU,
-          event.product.name,
+          cart.event.dateFrom,
+          cart.event.dateTo,
+          cart.product.SKU,
+          cart.product.name,
         ].join(',')
       )
     })
