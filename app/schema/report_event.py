@@ -22,8 +22,7 @@ class ReportEvent(BaseModel):
 
 class ReportEventResponse(BaseModel):
     pagination: PaginationOut
-    # report_events: list[ReportEvent]
-    ship_requests: ShipRequest
+    report_events: list[ReportEvent]
 
 
 ReportEventList = RootModel[list[ReportEvent]]

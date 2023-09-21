@@ -97,7 +97,8 @@ const downloadCSV = async function () {
     const res = await fetch(`${location.href}/${url}`)
     const data: IEventsReportResponse = await res.json()
     const reportEvents = data.report_events[0] as IReportEvent
-    reportEvents.events.forEach((event: IProductEvent) => {
+
+    reportEvents.ship_request.carts.forEach((event: IProductEvent) => {
       csvData.push(
         [
           reportEvents.createdAt,
