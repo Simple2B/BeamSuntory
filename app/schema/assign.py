@@ -1,4 +1,8 @@
+from datetime import datetime
 from pydantic import BaseModel, ConfigDict
+from .product import Product
+from .group import Group
+from .user import User
 
 
 class Assign(BaseModel):
@@ -8,3 +12,9 @@ class Assign(BaseModel):
     quantity: int
     product_id: int
     group_id: int
+    product: Product
+    group: Group
+    from_group: Group
+    created_at: datetime
+    user: User
+    type: str
