@@ -1,5 +1,6 @@
 import { ModalOptions, Modal } from 'flowbite'
 import { IProduct } from './inbound_order/types'
+import HTMXDispatcher from './htmx'
 
 interface IUser {
   username: string
@@ -95,44 +96,20 @@ const downloadCSV = async function () {
   a.remove()
 }
 
-function getFilterValues() {
-  const url = new URL(window.location.href)
-  const searchEventInput: HTMLInputElement = document.querySelector('#table-search-event')
-  const dateEventStartFromInput: HTMLInputElement = document.querySelector(
-      '#product-event-sort-start-from-datepicker'
-  )
-  const usernameSelect: HTMLInputElement = document.querySelector('#events-filter-status')
-  const dateEventStartToInput: HTMLInputElement = document.querySelector('#product-event-sort-start-to-datepicker')
-  const dateEventEndFromInput: HTMLInputElement = document.querySelector('#product-event-sort-end-from-datepicker')
-  const dateEventEndToInput: HTMLInputElement = document.querySelector('#product-event-sort-end-to-datepicker')
 
-  url.searchParams.set('q', searchEventInput.value)
-  url.searchParams.set('start_from', dateEventStartFromInput.value)
-  url.searchParams.set('start_to', dateEventStartToInput.value)
-  url.searchParams.set('end_from', dateEventEndFromInput.value)
-  url.searchParams.set('end_to', dateEventEndToInput.value)
-  url.searchParams.set('username', usernameSelect.value)
-  window.location.href = `${url.href}`
-}
+document.addEventListener('DOMContentLoaded', () => {  
+  const clearFilterButton = document.querySelector('#product-event-clear-button');
+  const filtersHTML = document.querySelectorAll("[name='q'], [name='username'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from'], [name='sort-end-from']");
+  const buttonLoadEventsTable = document.querySelector('#table-report-loader') as HTMLButtonElement;
 
-
-document.addEventListener('DOMContentLoaded', () => {
-  const eventFilterButton = document.querySelector('#event-filter-button')
-  eventFilterButton.addEventListener('click', () => {
-    getFilterValues()
-  })
-  
-  const clearFilterButton = document.querySelector('#product-event-clear-button')
   clearFilterButton.addEventListener('click', () => {
-    const url = new URL(window.location.href)
-    url.searchParams.delete('q')
-    url.searchParams.delete('start_from')
-    url.searchParams.delete('start_to')
-    url.searchParams.delete('end_from')
-    url.searchParams.delete('end_to')
-    url.searchParams.delete('username')
-    window.location.href = `${url.href}`
+    filtersHTML.forEach(filter => {
+      (filter as HTMLInputElement).value = "";
+    })
+    buttonLoadEventsTable.click();
   })
+  // load table
+  buttonLoadEventsTable.click();
 
   // initialize modal
   const viewReportEventsModal = document.getElementById('view-report-events-modal') as HTMLDivElement
@@ -143,90 +120,90 @@ document.addEventListener('DOMContentLoaded', () => {
     closable: true,
     onHide: () => {
       const productItems = document.querySelectorAll('.product-item-view') as NodeListOf<HTMLTableColElement>
-      productItems.forEach((productItem) => productItem.remove())
+      productItems.forEach((productItem) => productItem.remove());
     },
   }
 
-  const viewModal = new Modal(viewReportEventsModal, viewModalOptions)
+  const viewModal = new Modal(viewReportEventsModal, viewModalOptions);
+  const reportViewUser = document.querySelector('#report-event-user') as HTMLDivElement;
+  const reportViewAction = document.querySelector('#report-event-action') as HTMLDivElement;
+  const reportViewDate = document.querySelector('#report-event-date') as HTMLDivElement;
+  const reportViewHistory = document.querySelector('#report-event-history') as HTMLDivElement;
+  const reportViewProductTbody = document.querySelector('#table-products') as HTMLTableElement;
+  const productItemTemplate = document.querySelector('#view-product-item-template') as HTMLTableRowElement;
 
-  // view buttons click
-  const reportViewButtons: NodeListOf<HTMLButtonElement> = document.querySelectorAll('.report-event-view-btn')
-  const reportViewUser = document.getElementById('report-event-user') as HTMLDivElement
-  const reportViewAction = document.getElementById('report-event-action') as HTMLDivElement
-  const reportViewDate = document.getElementById('report-event-date') as HTMLDivElement
-  const reportViewHistory = document.getElementById('report-event-history') as HTMLDivElement
+  // initialize htmx listener
+  const htmxDispatcher = new HTMXDispatcher();
 
-  const reportViewProductTbody = document.getElementById('table-products') as HTMLTableElement
-  const productItemTemplate = document.getElementById('view-product-item-template') as HTMLTableRowElement
+  // onload element with events-table id
+  htmxDispatcher.onLoad('events-table', (target) => {
+    const reportViewButtons: NodeListOf<HTMLButtonElement> = target.querySelectorAll('.report-event-view-btn');
 
-  reportViewButtons.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const reportEvent: IReportEvent = JSON.parse(btn.getAttribute('data-target'))
+    reportViewButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const reportEvent: IReportEvent = JSON.parse(btn.getAttribute('data-target'));
+        const createAt = new Date(reportEvent.createdAt)
+        const year = createAt.getFullYear()
+        const month = String(createAt.getMonth() + 1).padStart(2, '0') // Month is 0-based
+        const day = String(createAt.getDate()).padStart(2, '0')
+        const hours = String(createAt.getHours()).padStart(2, '0')
+        const minutes = String(createAt.getMinutes()).padStart(2, '0')
 
-      const createAt = new Date(reportEvent.createdAt)
-      const year = createAt.getFullYear()
-      const month = String(createAt.getMonth() + 1).padStart(2, '0') // Month is 0-based
-      const day = String(createAt.getDate()).padStart(2, '0')
-      const hours = String(createAt.getHours()).padStart(2, '0')
-      const minutes = String(createAt.getMinutes()).padStart(2, '0')
+        reportViewUser.innerHTML = reportEvent.user.username
+        reportViewAction.innerHTML = reportEvent.type
+        reportViewDate.innerHTML = `${month}/${day}/${year} ${hours}:${minutes}`
+        reportViewHistory.innerHTML = reportEvent.history
 
-      reportViewUser.innerHTML = reportEvent.user.username
-      reportViewAction.innerHTML = reportEvent.type
-      reportViewDate.innerHTML = `${month}/${day}/${year} ${hours}:${minutes}`
-      reportViewHistory.innerHTML = reportEvent.history
+        reportEvent.events.forEach((event, i) => {
+          // Render event
+          const newProductItem = productItemTemplate.cloneNode(true) as HTMLElement
+          newProductItem.removeAttribute('id')
+          newProductItem.classList.remove('hidden')
+          newProductItem.classList.add(
+            'product-item-view',
+            'text-base',
+            'font-semibold',
+            'text-gray-900',
+            'dark:text-white'
+          )
 
-      reportEvent.events.forEach((event, i) => {
-        // Render event
-        const newProductItem = productItemTemplate.cloneNode(true) as HTMLElement
-        newProductItem.removeAttribute('id')
-        newProductItem.classList.remove('hidden')
-        newProductItem.classList.add(
-          'product-item-view',
-          'text-base',
-          'font-semibold',
-          'text-gray-900',
-          'dark:text-white'
-        )
+          const productIndex = newProductItem.querySelector('.product-index') as HTMLDivElement
+          // TODO add image
+          const productName = newProductItem.querySelector('.product-name') as HTMLDivElement
+          const productSku = newProductItem.querySelector('.product-sku') as HTMLDivElement
+          const productRegularPrice = newProductItem.querySelector('.product-regular-price') as HTMLDivElement
+          const productRetailPrice = newProductItem.querySelector('.product-retail-price') as HTMLDivElement
+          const productGroup = newProductItem.querySelector('.product-group') as HTMLDivElement
+          const productQuantity = newProductItem.querySelector('.product-quantity') as HTMLDivElement
 
-        const productIndex = newProductItem.querySelector('.product-index') as HTMLDivElement
-        // TODO add image
-        const productName = newProductItem.querySelector('.product-name') as HTMLDivElement
-        const productSku = newProductItem.querySelector('.product-sku') as HTMLDivElement
-        const productRegularPrice = newProductItem.querySelector('.product-regular-price') as HTMLDivElement
-        const productRetailPrice = newProductItem.querySelector('.product-retail-price') as HTMLDivElement
-        const productGroup = newProductItem.querySelector('.product-group') as HTMLDivElement
-        const productQuantity = newProductItem.querySelector('.product-quantity') as HTMLDivElement
+          const img: HTMLImageElement = newProductItem.querySelector('.product-image')
+          event.product.image.length > 100
+            ? (img.src = `data:image/png;base64, ${event.product.image}`)
+            : (img.src = defaultBrandImage)
 
-        const img: HTMLImageElement = newProductItem.querySelector('.product-image')
-        event.product.image.length > 100
-          ? (img.src = `data:image/png;base64, ${event.product.image}`)
-          : (img.src = defaultBrandImage)
+          productIndex.innerHTML = (i + 1).toString()
+          productName.innerHTML = event.product.name
+          productSku.innerHTML = event.product.SKU
+          productQuantity.innerHTML = event.quantity.toString()
 
-        productIndex.innerHTML = (i + 1).toString()
-        productName.innerHTML = event.product.name
-        productSku.innerHTML = event.product.SKU
-        productQuantity.innerHTML = event.quantity.toString()
+          if (event.product.regularPrice) {
+            productRegularPrice.innerHTML = event.product.regularPrice.toString()
+          } else {
+            productRegularPrice.innerHTML = 'No price'
+          }
 
-        if (event.product.regularPrice) {
-          productRegularPrice.innerHTML = event.product.regularPrice.toString()
-        } else {
-          productRegularPrice.innerHTML = 'No price'
-        }
-
-        if (event.product.retailPrice) {
-          productRetailPrice.innerHTML = event.product.retailPrice.toString()
-        } else {
-          productRetailPrice.innerHTML = 'No price'
-        }
-
-        productGroup.innerHTML = event.cart.group
-
-        reportViewProductTbody.appendChild(newProductItem)
-
-        viewModal.show()
+          if (event.product.retailPrice) {
+            productRetailPrice.innerHTML = event.product.retailPrice.toString()
+          } else {
+            productRetailPrice.innerHTML = 'No price'
+          }
+          productGroup.innerHTML = event.cart.group
+          reportViewProductTbody.appendChild(newProductItem)
+          viewModal.show()
+        });
       })
     })
-  })
+  });
 
   // Download csv
   const downloadCsvButton = document.getElementById('button-csv-download') as HTMLButtonElement

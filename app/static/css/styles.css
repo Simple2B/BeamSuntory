@@ -1777,6 +1777,10 @@ input:checked + .toggle-bg {
   width: 160px;
 }
 
+.w-\[180px\] {
+  width: 180px;
+}
+
 .w-\[260px\] {
   width: 260px;
 }
@@ -1865,13 +1869,6 @@ input:checked + .toggle-bg {
   max-width: 72rem;
 }
 
-<<<<<<< HEAD
-.max-w-7xl {
-  max-width: 80rem;
-}
-
-=======
->>>>>>> develop
 .max-w-\[200px\] {
   max-width: 200px;
 }
@@ -3065,6 +3062,10 @@ input:checked + .toggle-bg {
   padding-top: 5rem;
 }
 
+.pt-5 {
+  padding-top: 1.25rem;
+}
+
 .pt-6 {
   padding-top: 1.5rem;
 }
@@ -3073,25 +3074,6 @@ input:checked + .toggle-bg {
   padding-top: 0.37rem;
 }
 
-<<<<<<< HEAD
-=======
-.pb-5 {
-  padding-bottom: 1.25rem;
-}
-
-.pb-72 {
-  padding-bottom: 18rem;
-}
-
-.pt-7 {
-  padding-top: 1.75rem;
-}
-
-.pt-5 {
-  padding-top: 1.25rem;
-}
-
->>>>>>> develop
 .text-left {
   text-align: left;
 }
@@ -3866,13 +3848,10 @@ button[disabled]{
   color: white !important;
 }
 
-<<<<<<< HEAD
-=======
 .width-250px{
   width: 250px;
 }
 
->>>>>>> develop
 .selection\:bg-transparent *::-moz-selection {
   background-color: transparent;
 }
@@ -5895,8 +5874,4 @@ button[disabled]{
 
 :is(.dark .dark\:\[\&\>svg\]\:fill-white>svg) {
   fill: #ffffff;
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> develop

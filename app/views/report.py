@@ -81,8 +81,6 @@ def get_events_report():
             m.ReportEvent.user.has(m.User.username == filter_events.username)
         )
 
-    users = db.session.scalars(sa.select(m.User))
-
     pagination = create_pagination(total=db.session.scalar(count_query))
 
     reports = db.session.scalars(
@@ -90,7 +88,7 @@ def get_events_report():
             pagination.per_page
         )
     )
-    return pagination, reports, users
+    return pagination, reports
 
 
 @report_blueprint.route("/event/api", methods=["GET"])
@@ -107,24 +105,18 @@ def get_events_json():
 @report_blueprint.route("/event", methods=["GET"])
 @login_required
 def events():
-    q = request.args.get("q", type=str, default=None)
-    start_from = request.args.get("start_from", type=str, default=None)
-    start_to = request.args.get("start_to", type=str, default=None)
-    end_from = request.args.get("end_from", type=str, default=None)
-    end_to = request.args.get("end_to", type=str, default=None)
-    username = request.args.get("username", type=str, default=None)
-
-    pagination, reports, users = get_events_report()
-
+    users = db.session.scalars(sa.select(m.User))
     return render_template(
         "report/event/events.html",
-        reports=reports,
-        page=pagination,
-        search_query=q,
-        start_from=start_from,
-        start_to=start_to,
-        end_from=end_from,
-        end_to=end_to,
-        username=username,
         users=users,
+    )
+
+
+@report_blueprint.route("event/search")
+@login_required
+def search_report_events():
+    pagination, reports = get_events_report()
+
+    return render_template(
+        "report/event/reports_table.html", page=pagination, reports=reports
     )
