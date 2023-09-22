@@ -27,7 +27,7 @@ class Event(db.Model, ModelMixin):
     product_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("products.id"))
 
     cart_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("carts.id"))
-    cart: orm.Mapped["Cart"] = orm.relationship()
+    cart: orm.Mapped["Cart"] = orm.relationship(viewonly=True)
 
     product: orm.Mapped["Product"] = orm.relationship()
     user_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("users.id"))

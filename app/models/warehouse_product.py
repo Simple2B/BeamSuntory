@@ -20,13 +20,17 @@ else:
 class WarehouseProduct(db.Model, ModelMixin):
     __tablename__ = "warehouse_product"
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
+    # Foreign keys
     product_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("products.id"))
     warehouse_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("warehouses.id"))
     group_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("groups.id"))
+    # Columns
+    product_quantity: orm.Mapped[int] = orm.mapped_column(nullable=False)
+    # Relations
+    # TODO remove all relations
     group: orm.Mapped[Group] = orm.relationship()
     product: orm.Mapped[Product] = orm.relationship()
     warehouse: orm.Mapped[Warehouse] = orm.relationship()
-    product_quantity: orm.Mapped[int] = orm.mapped_column(nullable=False)
 
     @property
     def json(self):
