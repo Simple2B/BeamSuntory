@@ -54,10 +54,12 @@ class ShipRequest(db.Model, ModelMixin):
     da_notes: orm.Mapped[str] = orm.mapped_column(sa.Text(), default="", nullable=True)
 
     # Relationships
-    carts: orm.Mapped[list["Cart"]] = orm.relationship()
+    carts: orm.Mapped[list["Cart"]] = orm.relationship(back_populates="ship_request")
     store: orm.Mapped[Store] = orm.relationship()
     store_category: orm.Mapped[StoreCategory] = orm.relationship()
-    report_event: orm.Mapped["ReportEvent"] = orm.relationship()
+    report_event: orm.Mapped["ReportEvent"] = orm.relationship(
+        back_populates="ship_request"
+    )
 
     def __repr__(self):
         return f"<{self.id}: {self.order_numb}>"

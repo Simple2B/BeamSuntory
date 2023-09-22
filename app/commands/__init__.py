@@ -59,7 +59,7 @@ def init(app: Flask):
         ).save()
         print("admin created")
 
-    @app.cli.command("fill-db")
+    @app.cli.command()
     def fill_db():
         """Populate DB with basic data."""
         stock_master_groups = {
@@ -264,3 +264,8 @@ def init(app: Flask):
 
         db.session.commit()
         print("database filled")
+
+    @app.cli.command()
+    def clear_report_events():
+        db.session.execute(m.ReportEvent.delete())
+        db.session.commit()
