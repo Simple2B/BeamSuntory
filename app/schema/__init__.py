@@ -48,3 +48,9 @@ from .report_event import (
     ReportEventResponse,
 )
 from .filter_report_events import FilterReportEvents
+from .report_inventory import (
+    ReportInventoryType,
+    ReportInventory,
+    ReportInventoryList,
+    ReportInventoryResponse,
+)
