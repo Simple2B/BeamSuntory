@@ -105,8 +105,6 @@ def get_events_report():
             m.ReportEvent.user.has(m.User.username == filter_events.username)
         )
 
-    users = db.session.scalars(sa.select(m.User))
-
     pagination = create_pagination(total=db.session.scalar(count_query))
 
     reports = db.session.scalars(
@@ -114,13 +112,13 @@ def get_events_report():
             pagination.per_page
         )
     )
-    return pagination, reports, users
+    return pagination, reports
 
 
 @report_blueprint.route("/event/api", methods=["GET"])
 @login_required
 def get_events_json():
-    pagination, reports, users = get_events_report()
+    pagination, reports = get_events_report()
     report_list_schema = s.ReportEventList.model_validate(reports)
 
     return s.ReportEventResponse(

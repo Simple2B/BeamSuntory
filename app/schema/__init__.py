@@ -48,3 +48,4 @@ from .report_event import (
     ReportEventResponse,
 )
 from .filter_report_events import FilterReportEvents
+from .report_request_share import ReportRequestShareType
