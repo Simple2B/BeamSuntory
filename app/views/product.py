@@ -704,8 +704,10 @@ def adjust():
         adjust_item: m.Adjust = m.Adjust(
             product_id=form.product_id.data,
             note=form.note.data,
+            user_id=current_user.id,
         )
         db.session.add(adjust_item)
+        is_adjust_products = False
         groups = json.loads(form.groups_quantity.data)
         product = db.session.get(m.Product, form.product_id.data)
         warehouse_event: m.Warehouse = db.session.scalar(
@@ -746,6 +748,7 @@ def adjust():
                             warehouse_id=warehouse_id,
                         )
                         db.session.add(adjust_gr_qty)
+                        is_adjust_products = True
                     product_warehouse.product_quantity = quantity
                     db.session.add(product_warehouse)
                 else:
@@ -763,6 +766,12 @@ def adjust():
                         warehouse_id=warehouse_id,
                     )
                     db.session.add(adjust_gr_qty)
+
+        if not is_adjust_products:
+            db.session.delete(adjust_item)
+            log(log.INFO, "Nothing to adjust: [%s]", form.product_id.data)
+            flash("Nothing to adjust", "danger")
+            return redirect(url_for("product.get_all"))
 
         db.session.commit()
 

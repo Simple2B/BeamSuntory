@@ -9,18 +9,26 @@ from .utils import ModelMixin
 
 from .product import Product
 from .adjusts_group_qty import AdjustGroupQty
+from .user import User
 
 
 class Adjust(db.Model, ModelMixin):
     __tablename__ = "adjusts"
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
+    # Foreign keys
     product_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("products.id"))
+    user_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("users.id"))
+    # Columns
     note: orm.Mapped[str] = orm.mapped_column(sa.Text(), default="", nullable=True)
-    product: orm.Mapped[Product] = orm.relationship()
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
         default=datetime.utcnow,
     )
+    # Relationships
+    product: orm.Mapped[Product] = orm.relationship()
+    user: orm.Mapped[User] = orm.relationship()
+    # TODO: should be added back_populates="adjusts"?
+    adjust_group_qty: orm.Mapped[AdjustGroupQty] = orm.relationship("AdjustGroupQty")
 
     @property
     def json(self):
