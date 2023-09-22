@@ -859,6 +859,8 @@ def upload():
         df = pandas.merge(df, df_img, on="SKU", how="inner")
         for image_name in df["Image"]:
             try:
+                if not isinstance(image_name, str):
+                    raise FileNotFoundError
                 original_image = Image.open(
                     Path("app") / "static" / "img" / "product" / image_name
                 ).resize((400, 400))
