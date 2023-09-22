@@ -14,7 +14,14 @@ interface IProductEvent {
   dateTo: string
   product: IProduct
   quantity: number
-  cart: ICart
+  event: IEvent
+  group: string
+}
+
+interface IEvent{
+  dateFrom: string
+  dateTo: string
+
 }
 
 interface IReportEvent {
@@ -23,7 +30,36 @@ interface IReportEvent {
   type: string
   createdAt: string
   history: string
-  events: IProductEvent[]
+  ship_request: IShipRequest
+}
+
+interface IShipRequest {
+  id: number
+  carts: IProductEvent[]
+  comment: string
+  createdAt: string
+  daNotes: string
+  orderNumb: string
+  orderStatus: string
+  store: IStore
+  storeId: number
+  wmNotes: string
+}
+
+interface IStore{
+  active: boolean
+  address: string
+  city: string
+  contactPerson: string
+  country: string
+  createdAt: string
+  email: string
+  id: number
+  phoneNumb: string
+  region: string
+  storeCategoryId: number
+  storeName: string
+  zip: string
 }
 
 interface IEventsReportResponse {
@@ -64,22 +100,25 @@ const downloadCSV = async function () {
   const queryTail = ''
 
   for (let page = 1; page <= pages; page++) {
+    const currentURL = window.location.href;
+    const urlWithoutQueryParams = currentURL.split('?')[0];
+
     const url = [`api?page={page}`, queryTail].join('&')
-    const res = await fetch(`${location.href}/${url}`)
+    const res = await fetch(`${urlWithoutQueryParams}/${url}`)
     const data: IEventsReportResponse = await res.json()
     const reportEvents = data.report_events[0] as IReportEvent
-    console.log(data)
-    reportEvents.events.forEach((event: IProductEvent) => {
+
+    reportEvents.ship_request.carts.forEach((cart: IProductEvent) => {     
       csvData.push(
         [
           reportEvents.createdAt,
           reportEvents.history,
           reportEvents.type,
           reportEvents.user.username,
-          event.dateFrom,
-          event.dateTo,
-          event.product.SKU,
-          event.product.name,
+          cart.event.dateFrom,
+          cart.event.dateTo,
+          cart.product.SKU,
+          cart.product.name,
         ].join(',')
       )
     })
@@ -117,6 +156,15 @@ function getFilterValues() {
 
 
 document.addEventListener('DOMContentLoaded', () => {
+  const tableRow = document.querySelectorAll('.table-event-item-tr')
+  tableRow.forEach((row: HTMLDivElement) => {    
+    const viewReportEventsModal = row.querySelector('.report-event-view-btn')
+    const data = JSON.parse(viewReportEventsModal.getAttribute('data-target'))
+    const reportStore = data.ship_request.store.storeName    
+    const reportEventStoreDiv = row.querySelector('.report-event-store') as HTMLDivElement
+    reportEventStoreDiv.innerHTML = reportStore
+  })
+
   const eventFilterButton = document.querySelector('#event-filter-button')
   eventFilterButton.addEventListener('click', () => {
     getFilterValues()
@@ -154,7 +202,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const reportViewUser = document.getElementById('report-event-user') as HTMLDivElement
   const reportViewAction = document.getElementById('report-event-action') as HTMLDivElement
   const reportViewDate = document.getElementById('report-event-date') as HTMLDivElement
-  const reportViewHistory = document.getElementById('report-event-history') as HTMLDivElement
 
   const reportViewProductTbody = document.getElementById('table-products') as HTMLTableElement
   const productItemTemplate = document.getElementById('view-product-item-template') as HTMLTableRowElement
@@ -173,9 +220,9 @@ document.addEventListener('DOMContentLoaded', () => {
       reportViewUser.innerHTML = reportEvent.user.username
       reportViewAction.innerHTML = reportEvent.type
       reportViewDate.innerHTML = `${month}/${day}/${year} ${hours}:${minutes}`
-      reportViewHistory.innerHTML = reportEvent.history
 
-      reportEvent.events.forEach((event, i) => {
+
+      reportEvent.ship_request.carts.forEach((event, i) => {
         // Render event
         const newProductItem = productItemTemplate.cloneNode(true) as HTMLElement
         newProductItem.removeAttribute('id')
@@ -218,8 +265,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           productRetailPrice.innerHTML = 'No price'
         }
-
-        productGroup.innerHTML = event.cart.group
+        
+        productGroup.innerHTML = event.group
 
         reportViewProductTbody.appendChild(newProductItem)
 

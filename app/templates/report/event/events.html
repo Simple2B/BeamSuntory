@@ -77,6 +77,7 @@
         <th scope="col" class="px-6 py-3">Action</th>
         <th scope="col" class="px-6 py-3">User</th>
         <th scope="col" class="px-6 py-3">Date</th>
+        <th scope="col" class="px-6 py-3">Store</th>
         <th scope="col" class="px-6 py-3">Actions</th>
       </tr>
     </thead>
@@ -100,6 +101,11 @@
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
             <div class="text-base font-semibold">{{ report.created_at.strftime('%m/%d/%Y, %H:%M:%S') }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold report-event-store"> report.store.store_name</div>
           </div>
         </td>
         

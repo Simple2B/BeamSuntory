@@ -628,7 +628,6 @@ def mg_g_populate(client: FlaskClient):
             comment="event for product 1",
             user_id=3,
             cart_id=cart.id,
-            report_id=report.id,
         ).save(False)
         db.session.commit()
 

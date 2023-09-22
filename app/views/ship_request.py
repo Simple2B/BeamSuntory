@@ -130,6 +130,11 @@ def create():
                 )
                 return redirect(url_for("product.get_all"))
 
+        report_event = m.ReportEvent(
+            type=s.ReportEventType.created.value,
+            user=current_user,
+        )
+
         ship_request = m.ShipRequest(
             order_numb=f"BEAM-DO{int(datetime.now().timestamp())}",
             # NOTE: what status is default?
@@ -140,10 +145,10 @@ def create():
             # TODO: ask client about store_delivery
             order_type="store_delivery",
             user_id=current_user.id,
+            report_event=report_event,
         )
-        log(log.INFO, "Form submitted. Ship Request: [%s]", ship_request)
-        flash("Ship request added!", "success")
         ship_request.save(False)
+
         warehouse_event = db.session.scalar(
             m.Warehouse.select().where(
                 m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value,
@@ -154,10 +159,6 @@ def create():
             m.Cart.select().where(
                 m.Cart.user_id == current_user.id, m.Cart.status == "pending"
             )
-        )
-
-        report_event = m.ReportEvent(
-            type=s.ReportEventType.created.value, user=current_user
         )
 
         for cart in carts:
@@ -183,7 +184,6 @@ def create():
                     cart_id=cart.id,
                     comment=form_create.event_comment.data,
                     user=current_user,
-                    report=report_event,
                 )
                 db.session.add(event)
                 log(log.INFO, "Event added. Event: [%s]", event)
@@ -194,6 +194,10 @@ def create():
             cart.order_numb = ship_request.order_numb
             cart.ship_request_id = ship_request.id
             cart.save()
+
+        log(log.INFO, "Form submitted. Ship Request: [%s]", ship_request)
+        flash("Ship request added!", "success")
+        ship_request.save(False)
 
         db.session.commit()
 

@@ -11,7 +11,6 @@ from app import schema as s
 if TYPE_CHECKING:
     from .product import Product
     from .user import User
-    from .report_event import ReportEvent
     from .cart import Cart
 
 
@@ -33,11 +32,6 @@ class Event(db.Model, ModelMixin):
     product: orm.Mapped["Product"] = orm.relationship()
     user_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("users.id"))
     user: orm.Mapped["User"] = orm.relationship()
-
-    report_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("report_events.id"))
-    report: orm.Mapped["ReportEvent"] = orm.relationship(
-        back_populates="events", foreign_keys=[report_id]
-    )
 
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
