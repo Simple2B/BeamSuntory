@@ -20,6 +20,23 @@
         </button>
       </div>
       <!-- Modal body -->
+      <!-- ------template warehouse available quantity----- -->
+      <div id="product-view-warehouse-template" class="hidden col-span-6 sm:col-span-3">
+        <label for="notes-location"
+          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Warehouse</label>
+        <div
+          class="product-view-warehouse-name shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+        </div>
+      </div>
+      <div id="product-view-available-quantity-template" class="hidden col-span-6 sm:col-span-3">
+        <label for="notes-location" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available
+          Quantity</label>
+        <div
+          class="product-view-warehouse-available-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+        </div>
+      </div>
+      <!-- ----end template----- -->
+
 
       <div class="p-6 space-y-6">
         <div class="grid grid-cols-6 gap-6">
@@ -34,7 +51,8 @@
           </div>
           <div class="col-span-6 sm:col-span-3" id="product-view-product-name-container">
             <label for="warehouse_qty" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Total Qty in
-              warehouse</label>
+              all
+              warehouses</label>
             <div id="product-view-warehouse-qty"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
@@ -86,6 +104,16 @@
             <div id="product-view-comments"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
+          </div>
+          <div class="col-span-6 sm:col-span-3 border-b border-gray-200 rounded-b dark:border-gray-600">
+            <label for="notes-location" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Notes
+              Location</label>
+            <div id="product-view-notes-location"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
+          </div>
+          <div id="product-view-grid-container"
+            class="grid grid-cols-6 gap-6 col-span-6 sm:col-span-6 pt-5 border-t border-gray-200 rounded-b dark:border-gray-600">
           </div>
         </div>
       </div>

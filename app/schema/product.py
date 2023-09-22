@@ -2,6 +2,7 @@ from enum import Enum
 from pydantic import BaseModel, ConfigDict, Field
 from .supplier import Supplier
 from .warehouse import Warehouse
+from .warehouse_product import WarehouseProduct
 
 
 class CustomBase(BaseModel):
@@ -41,7 +42,9 @@ class Product(CustomBase):
     numb_of_items_per_case: int | None = Field(alias="numbOfItemsPerCase")
     numb_of_cases_per_outer_case: int | None = Field(alias="numbOfCasesPerOuterCase")
     warehouses: list[Warehouse]
+    warehouse_products: list[WarehouseProduct]
     comments: str | None
+    notes_location: str | None
     # shipping
     weight: float | None
     length: float | None
