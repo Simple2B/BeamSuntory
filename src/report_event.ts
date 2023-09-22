@@ -99,36 +99,34 @@ const downloadCSV = async function () {
   // CSV Headers
   const csvData = ['created_at,store_name,type,username,date_from,date_to,sku,product_name']
   let pages = 1
-  // const queryTail = filterQuery.join('&')
-  // TODO add filters
   const queryTail = ''
 
   for (let page = 1; page <= pages; page++) {
     const currentURL = window.location.href;
     const urlWithoutQueryParams = currentURL.split('?')[0];
-
-    const url = [`api?page={page}`, queryTail].join('&')
+    const url = [`api?page=${page}`, queryTail].join('&')
     const res = await fetch(`${urlWithoutQueryParams}/${url}`)
     const data: IEventsReportResponse = await res.json()
-    const reportEvents = data.report_events[0] as IReportEvent
 
-    reportEvents.shipRequest.carts.forEach((cart: IProductEvent) => {     
+    data.report_events.forEach(reportEvent => {
+      reportEvent.shipRequest.carts.forEach((cart: IProductEvent) => {     
       csvData.push(
         [
-          reportEvents.createdAt,
-          reportEvents.shipRequest.store.storeName,
-          reportEvents.type,
-          reportEvents.user.username,
+          reportEvent.createdAt,
+          reportEvent.shipRequest.store.storeName,
+          reportEvent.type,
+          reportEvent.user.username,
           cart.event.dateFrom,
           cart.event.dateTo,
           cart.product.SKU,
           cart.product.name,
         ].join(',')
       )
-    })
+      })
+    });
+    
     pages = data.pagination.pages
   }
-
   const blob = new Blob([csvData.join('\n')], { type: 'text/csv' })
   const url = window.URL.createObjectURL(blob)
   const a = document.createElement('a')
