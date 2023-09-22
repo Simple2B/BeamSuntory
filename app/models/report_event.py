@@ -29,7 +29,9 @@ class ReportEvent(db.Model, ModelMixin):
     )
 
     # Relationships
-    ship_request: orm.Mapped["ShipRequest"] = orm.relationship()
+    ship_request: orm.Mapped["ShipRequest"] = orm.relationship(
+        back_populates="report_event"
+    )
     user: orm.Mapped["User"] = orm.relationship()
 
     @property

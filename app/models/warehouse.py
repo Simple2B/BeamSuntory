@@ -13,6 +13,12 @@ class Warehouse(db.Model, ModelMixin):
     __tablename__ = "warehouses"
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
+
+    # Foreign keys
+    manager_id: orm.Mapped[int] = orm.mapped_column(
+        sa.ForeignKey("users.id"), nullable=True
+    )
+
     name: orm.Mapped[str] = orm.mapped_column(
         sa.String(64),
         unique=True,
@@ -27,9 +33,6 @@ class Warehouse(db.Model, ModelMixin):
         default=datetime.utcnow,
     )
 
-    manager_id: orm.Mapped[int] = orm.mapped_column(
-        sa.ForeignKey("users.id"), nullable=True
-    )
     manager: orm.Mapped[User] = orm.relationship()
     # TODO decide where we select country and region. From some fixed list or from groups?
     # from .group import Group

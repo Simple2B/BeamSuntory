@@ -31,7 +31,7 @@ interface IReportEvent {
   type: string
   createdAt: string
   history: string
-  ship_request: IShipRequest
+  shipRequest: IShipRequest
 }
 
 interface IShipRequest {
@@ -69,6 +69,9 @@ interface IEventsReportResponse {
   report_events: IReportEvent[]
 }
 
+// initialize htmx listener
+const htmxDispatcher = new HTMXDispatcher();
+
 const defaultBrandImage =
   'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png'
 
@@ -94,7 +97,7 @@ const downloadCSV = async function () {
   }
 
   // CSV Headers
-  const csvData = ['created_at,history,type,username,date_from,date_to,sku,product_name']
+  const csvData = ['created_at,store_name,type,username,date_from,date_to,sku,product_name']
   let pages = 1
   // const queryTail = filterQuery.join('&')
   // TODO add filters
@@ -109,11 +112,11 @@ const downloadCSV = async function () {
     const data: IEventsReportResponse = await res.json()
     const reportEvents = data.report_events[0] as IReportEvent
 
-    reportEvents.ship_request.carts.forEach((cart: IProductEvent) => {     
+    reportEvents.shipRequest.carts.forEach((cart: IProductEvent) => {     
       csvData.push(
         [
           reportEvents.createdAt,
-          reportEvents.history,
+          reportEvents.shipRequest.store.storeName,
           reportEvents.type,
           reportEvents.user.username,
           cart.event.dateFrom,
@@ -136,26 +139,18 @@ const downloadCSV = async function () {
 }
 
 
-document.addEventListener('DOMContentLoaded', () => {  
-  const clearFilterButton = document.querySelector('#product-event-clear-button');
+document.addEventListener('DOMContentLoaded', () => {
   const filtersHTML = document.querySelectorAll("[name='q'], [name='username'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from'], [name='sort-end-from']");
   const buttonLoadEventsTable = document.querySelector('#table-report-loader') as HTMLButtonElement;
 
-
-document.addEventListener('DOMContentLoaded', () => {
   const tableRow = document.querySelectorAll('.table-event-item-tr')
   tableRow.forEach((row: HTMLDivElement) => {    
     const viewReportEventsModal = row.querySelector('.report-event-view-btn')
     const data = JSON.parse(viewReportEventsModal.getAttribute('data-target'))
-    const reportStore = data.ship_request.store.storeName    
+    const reportStore = data.shipRequest.store.storeName    
     const reportEventStoreDiv = row.querySelector('.report-event-store') as HTMLDivElement
     reportEventStoreDiv.innerHTML = reportStore
-  })
-
-  const eventFilterButton = document.querySelector('#event-filter-button')
-  eventFilterButton.addEventListener('click', () => {
-    getFilterValues()
-  })
+  });
   
   const clearFilterButton = document.querySelector('#product-event-clear-button')
   clearFilterButton.addEventListener('click', () => {
@@ -181,21 +176,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const viewModal = new Modal(viewReportEventsModal, viewModalOptions);
-  const reportViewHistory = document.querySelector('#report-event-history') as HTMLDivElement;
   const reportViewProductTbody = document.querySelector('#table-products') as HTMLTableElement;
   const productItemTemplate = document.querySelector('#view-product-item-template') as HTMLTableRowElement;
-
-  // initialize htmx listener
-  const htmxDispatcher = new HTMXDispatcher();
   // view buttons click
   const reportViewUser = document.getElementById('report-event-user') as HTMLDivElement
   const reportViewAction = document.getElementById('report-event-action') as HTMLDivElement
   const reportViewDate = document.getElementById('report-event-date') as HTMLDivElement
+  const reportStoreName = document.getElementById('report-store-name') as HTMLDivElement
 
   // onload element with events-table id
   htmxDispatcher.onLoad('events-table', (target) => {
     const reportViewButtons: NodeListOf<HTMLButtonElement> = target.querySelectorAll('.report-event-view-btn');
-
     reportViewButtons.forEach((btn) => {
       btn.addEventListener('click', () => {
         const reportEvent: IReportEvent = JSON.parse(btn.getAttribute('data-target'));
@@ -209,41 +200,47 @@ document.addEventListener('DOMContentLoaded', () => {
         reportViewUser.innerHTML = reportEvent.user.username
         reportViewAction.innerHTML = reportEvent.type
         reportViewDate.innerHTML = `${month}/${day}/${year} ${hours}:${minutes}`
-        reportViewHistory.innerHTML = reportEvent.history
+        reportStoreName.innerHTML = reportEvent.shipRequest.store.storeName;
 
-      reportViewUser.innerHTML = reportEvent.user.username
-      reportViewAction.innerHTML = reportEvent.type
-      reportViewDate.innerHTML = `${month}/${day}/${year} ${hours}:${minutes}`
-
-
-      reportEvent.ship_request.carts.forEach((event, i) => {
-        // Render event
-        const newProductItem = productItemTemplate.cloneNode(true) as HTMLElement
-        newProductItem.removeAttribute('id')
-        newProductItem.classList.remove('hidden')
-        newProductItem.classList.add(
-          'product-item-view',
-          'text-base',
-          'font-semibold',
-          'text-gray-900',
-          'dark:text-white'
-        )
-
+        reportViewUser.innerHTML = reportEvent.user.username
+        reportViewAction.innerHTML = reportEvent.type
+        reportViewDate.innerHTML = `${month}/${day}/${year} ${hours}:${minutes}`
+        reportEvent.shipRequest.carts.forEach((event, i) => {
+          // Render event
+          const newProductItem = productItemTemplate.cloneNode(true) as HTMLElement
+          newProductItem.removeAttribute('id')
+          newProductItem.classList.remove('hidden')
+          newProductItem.classList.add(
+            'product-item-view',
+            'text-base',
+            'font-semibold',
+            'text-gray-900',
+            'dark:text-white'
+          )
+          const productIndex = newProductItem.querySelector('.product-index') as HTMLDivElement
+          const productName = newProductItem.querySelector('.product-name') as HTMLDivElement
+          const productSku = newProductItem.querySelector('.product-sku') as HTMLDivElement
+          const productRegularPrice = newProductItem.querySelector('.product-regular-price') as HTMLDivElement
+          const productRetailPrice = newProductItem.querySelector('.product-retail-price') as HTMLDivElement
+          const productGroup = newProductItem.querySelector('.product-group') as HTMLDivElement
+          const productQuantity = newProductItem.querySelector('.product-quantity') as HTMLDivElement
           const img: HTMLImageElement = newProductItem.querySelector('.product-image')
-          event.product.image.length > 100
-            ? (img.src = `data:image/png;base64, ${event.product.image}`)
-            : (img.src = defaultBrandImage)
 
-          productIndex.innerHTML = (i + 1).toString()
-          productName.innerHTML = event.product.name
-          productSku.innerHTML = event.product.SKU
-          productQuantity.innerHTML = event.quantity.toString()
 
-          if (event.product.regularPrice) {
-            productRegularPrice.innerHTML = event.product.regularPrice.toString()
-          } else {
-            productRegularPrice.innerHTML = 'No price'
-          }
+        event.product.image.length > 100
+          ? (img.src = `data:image/png;base64, ${event.product.image}`)
+          : (img.src = defaultBrandImage)
+
+        productIndex.innerHTML = (i + 1).toString()
+        productName.innerHTML = event.product.name
+        productSku.innerHTML = event.product.SKU
+        productQuantity.innerHTML = event.quantity.toString()
+
+        if (event.product.regularPrice) {
+          productRegularPrice.innerHTML = event.product.regularPrice.toString()
+        } else {
+          productRegularPrice.innerHTML = 'No price'
+        }
 
         if (event.product.regularPrice) {
           productRegularPrice.innerHTML = event.product.regularPrice.toString()
@@ -256,17 +253,15 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           productRetailPrice.innerHTML = 'No price'
         }
-        
-        productGroup.innerHTML = event.group
 
-        reportViewProductTbody.appendChild(newProductItem)
-
-        viewModal.show()
+        productGroup.innerHTML = event.group;
+        reportViewProductTbody.appendChild(newProductItem);
+        viewModal.show();
+      });
       })
-    })
+    });
   });
-
-  // Download csv
-  const downloadCsvButton = document.getElementById('button-csv-download') as HTMLButtonElement
-  downloadCsvButton.addEventListener('click', downloadCSV)
 })
+// Download csv
+const downloadCsvButton = document.getElementById('button-csv-download') as HTMLButtonElement
+downloadCsvButton.addEventListener('click', downloadCSV)

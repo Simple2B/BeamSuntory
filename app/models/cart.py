@@ -45,7 +45,7 @@ class Cart(db.Model, ModelMixin):
         sa.ForeignKey("ship_requests.id"), nullable=True
     )
 
-    ship_request: orm.Mapped["ShipRequest"] = orm.relationship()
+    ship_request: orm.Mapped["ShipRequest"] = orm.relationship(back_populates="carts")
     event: orm.Mapped["Event"] = orm.relationship()
 
     def __repr__(self):
