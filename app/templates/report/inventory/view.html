@@ -1,0 +1,102 @@
+<!-- View outgoing stock modal -->
+<!-- prettier-ignore-->
+
+<div
+  id="view-report-inventories-modal"
+  tabindex="-1"
+  aria-hidden="true"
+  class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full"
+>
+  <div class="relative w-full max-w-screen-2xl max-h-full">
+    <!-- Modal content -->
+    <form action="#" method="get" class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+      <!-- Modal header -->
+      <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Report inventory</h3>
+      </div>
+      <!-- Modal body -->
+      <div class="p-6 space-y-6">
+        <div class="grid grid-cols-6 gap-6">
+          <div class="col-span-3 sm:col-span-3">
+            <label for="report-inventory-user" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              >User</label
+            >
+            <div
+              id="report-inventory-user"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            ></div>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="report-inventory-action" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Action</label>
+            <div
+              id="report-inventory-action"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            ></div>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="report-inventory-date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              >Date</label
+            >
+            <div
+              id="report-inventory-date"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            ></div>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="report-store-name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store name</label>
+            <div id="report-store-name" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>
+          </div>
+        </div>
+      </div>
+      <!-- Modal footer -->
+      <table class="w-full mb-1 text-sm text-left text-gray-500 dark:text-gray-400">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+          <tr>
+            <th scope="col" class="px-4 py-3">#</th>
+            <th scope="col" class="px-4 py-3">Image</th>
+            <th scope="col" class="px-4 py-3">Name</th>
+            <th scope="col" class="px-4 py-3">SKU</th>
+            <th scope="col" class="px-4 py-3">Regular price</th>
+            <th scope="col" class="px-4 py-3">Retail price</th>
+            <th scope="col" class="px-4 py-3">Group</th>
+            <th scope="col" class="px-4 py-3">Quantity</th>
+            <th scope="col" class="px-4 py-3">Warehouse</th>
+          </tr>
+        </thead>
+        <tbody id="table-products">
+
+<tr id="view-product-item-template" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 hidden">
+  <td class="w-4 p-4">
+    <div class="product-index">0</div>
+  </td>
+  <td class="w-4 p-4">
+     <img src="" class="product-image">
+  </td>
+  <td class="w-4 p-4">
+    <div class="product-name">Name</div>
+  </td>
+  <td class="w-4 p-4">
+    <div class="product-sku">SKU</div>
+  </td>
+  <td class="w-4 p-4">
+    <div class="product-regular-price">Regular price</div>
+  </td>
+  <td class="w-4 p-4">
+    <div class="product-retail-price">Retail price</div>
+  </td>
+  
+  <td class="w-4 p-4">
+    <div class="product-group">Group</div>
+  </td>
+  <td class="w-4 p-4">
+    <div class="product-quantity">15</div>
+  </td>
+  <td class="w-4 p-4">
+    <div class="product-warehouse">Warehouse</div>
+  </td>
+</tr>
+        </tbody>
+      </table>
+    </form>
+  </div>
+</div>

@@ -54,3 +54,4 @@ from .report_inventory import (
     ReportInventoryList,
     ReportInventoryResponse,
 )
+from .filter_report_inventories import FilterReportInventories

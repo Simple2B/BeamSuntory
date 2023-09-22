@@ -26,22 +26,10 @@ def get_inventory_reports():
     if filter_inventories.q:
         query = query.where(
             m.ReportInventory.ship_request.has(
-                m.ShipRequest.carts.any(
-                    m.Cart.inventory.has(
-                        m.Inventory.product.has(
-                            m.Product.name.ilike(f"%{filter_inventories.q}%")
-                        )
-                    )
-                )
+                m.ShipRequest.order_numb.ilike(f"%{filter_inventories.q}%")
             )
             | m.ReportInventory.ship_request.has(
-                m.ShipRequest.carts.any(
-                    m.Cart.inventory.has(
-                        m.Inventory.product.has(
-                            m.Product.SKU.ilike(f"%{filter_inventories.q}%")
-                        )
-                    )
-                )
+                m.ShipRequest.status.ilike(f"%{filter_inventories.q}%")
             )
             | m.ReportInventory.user.has(
                 m.User.username.ilike(f"%{filter_inventories.q}%")
@@ -50,13 +38,13 @@ def get_inventory_reports():
 
         count_query = count_query.where(
             m.ReportInventory.ship_request.has(
-                m.ShipRequest.carts.any(
-                    m.Cart.inventory.has(
-                        m.Inventory.product.has(
-                            m.Product.name.ilike(f"%{filter_inventories.q}%")
-                        )
-                    )
-                )
+                m.ShipRequest.order_numb.ilike(f"%{filter_inventories.q}%")
+            )
+            | m.ReportInventory.ship_request.has(
+                m.ShipRequest.status.ilike(f"%{filter_inventories.q}%")
+            )
+            | m.ReportInventory.user.has(
+                m.User.username.ilike(f"%{filter_inventories.q}%")
             )
         )
 
@@ -138,7 +126,7 @@ def inventories():
     users = db.session.scalars(sa.select(m.User))
 
     return render_template(
-        "report_inventory/inventory/inventories.html",
+        "report/inventory/inventories.html",
         users=users,
     )
 
@@ -149,7 +137,7 @@ def search_inventory_reports():
     pagination, inventory_reports = get_inventory_reports()
 
     return render_template(
-        "report_inventory/inventory/reports_table.html",
+        "report/inventory/reports_table.html",
         page=pagination,
         inventory_reports=inventory_reports,
     )

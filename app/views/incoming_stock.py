@@ -6,7 +6,7 @@ from flask import (
     redirect,
     url_for,
 )
-from flask_login import login_required
+from flask_login import login_required, current_user
 import sqlalchemy as sa
 from sqlalchemy import desc
 from app.controllers import create_pagination
@@ -161,7 +161,21 @@ def accept():
                     m.WarehouseProduct.group_id == product_quantity_group.group_id,
                 )
             )
+            report_inventory_type = "Inbound order Accept"
             if warehouse_product:
+                # NOTE create report for inventory
+                report_inventory = m.ReportInventory(
+                    type=report_inventory_type,
+                    qty_before=warehouse_product.product_quantity,
+                    qty_after=new_package_info.quantity_received,
+                    # TODO who sholud be responsible for change?
+                    # one who created inbound order?
+                    # or one who accepted it?
+                    user_id=current_user.id,
+                    warehouse_id=warehouse_product.warehouse_id,
+                    inbound_order=inbound_order,
+                )
+                report_inventory.save(False)
                 warehouse_product.product_quantity += new_package_info.quantity_received
             else:
                 warehouse_product = m.WarehouseProduct(
@@ -171,6 +185,19 @@ def accept():
                     group_id=product_quantity_group.group_id,
                 )
                 warehouse_product.save(False)
+                # NOTE create report for inventory
+                report_inventory = m.ReportInventory(
+                    type=report_inventory_type,
+                    qty_before=0,
+                    qty_after=warehouse_product.product_quantity,
+                    # TODO who sholud be responsible for change?
+                    # one who created inbound order?
+                    # or one who accepted it?
+                    user_id=current_user.id,
+                    warehouse_id=inbound_order.warehouse_id,
+                    inbound_order=inbound_order,
+                )
+                report_inventory.save(False)
 
     inbound_order.status = s.InboundOrderStatus.delivered
     log(log.INFO, "Inbound order accepted. Inbound order: [%s]", inbound_order)
