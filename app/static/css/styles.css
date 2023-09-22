@@ -3062,28 +3062,16 @@ input:checked + .toggle-bg {
   padding-top: 5rem;
 }
 
+.pt-5 {
+  padding-top: 1.25rem;
+}
+
 .pt-6 {
   padding-top: 1.5rem;
 }
 
 .pt-\[0\.37rem\] {
   padding-top: 0.37rem;
-}
-
-.pb-5 {
-  padding-bottom: 1.25rem;
-}
-
-.pb-72 {
-  padding-bottom: 18rem;
-}
-
-.pt-7 {
-  padding-top: 1.75rem;
-}
-
-.pt-5 {
-  padding-top: 1.25rem;
 }
 
 .text-left {
@@ -3862,6 +3850,14 @@ button[disabled]{
 
 .width-250px{
   width: 250px;
+}
+
+.max-w-screen{
+  max-width: 100vw;
+}
+
+.first-line\:items-center::first-line {
+  align-items: center;
 }
 
 .selection\:bg-transparent *::-moz-selection {
@@ -5652,6 +5648,14 @@ button[disabled]{
     display: none;
   }
 
+  .md\:items-center {
+    align-items: center;
+  }
+
+  .md\:items-baseline {
+    align-items: baseline;
+  }
+
   .md\:p-8 {
     padding: 2rem;
   }
@@ -5664,6 +5668,10 @@ button[disabled]{
 
   .lg\:max-w-xl {
     max-width: 36rem;
+  }
+
+  .lg\:items-center {
+    align-items: center;
   }
 
   .lg\:px-5 {
