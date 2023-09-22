@@ -40,7 +40,6 @@ from .event import (
     EventsApiOut,
     EventsDateQuantity,
     EventsCalendar,
-    EventList,
 )
 from .report_event import (
     ReportEventType,

@@ -1,3 +1,4 @@
+from typing import TYPE_CHECKING
 from datetime import datetime
 import json
 
@@ -8,10 +9,12 @@ from app.database import db
 from app import schema as s
 from .utils import ModelMixin
 
-from .product import Product
-from .warehouse_product import WarehouseProduct
-from .warehouse import Warehouse
-from .event import Event
+if TYPE_CHECKING:
+    from .product import Product
+    from .warehouse_product import WarehouseProduct
+    from .warehouse import Warehouse
+    from .event import Event
+    from .ship_request import ShipRequest
 
 
 class Cart(db.Model, ModelMixin):
@@ -19,7 +22,7 @@ class Cart(db.Model, ModelMixin):
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
     product_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("products.id"))
-    product: orm.Mapped[Product] = orm.relationship()
+    product: orm.Mapped["Product"] = orm.relationship()
     quantity: orm.Mapped[int] = orm.mapped_column(sa.Integer)
     status: orm.Mapped[str] = orm.mapped_column(
         sa.String(64), default="pending"
@@ -30,7 +33,7 @@ class Cart(db.Model, ModelMixin):
     warehouse_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("warehouses.id"), nullable=True
     )
-    warehouse: orm.Mapped[Warehouse] = orm.relationship()
+    warehouse: orm.Mapped["Warehouse"] = orm.relationship()
     order_numb: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=True)
     # TODO replace with group_id
     group: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=True)
@@ -42,7 +45,8 @@ class Cart(db.Model, ModelMixin):
         sa.ForeignKey("ship_requests.id"), nullable=True
     )
 
-    # ship_request: orm.Mapped[ShipRequest] = orm.relationship()
+    ship_request: orm.Mapped["ShipRequest"] = orm.relationship()
+    event: orm.Mapped["Event"] = orm.relationship()
 
     def __repr__(self):
         return f"<{self.id}: {self.product_id}>"
@@ -63,7 +67,4 @@ class Cart(db.Model, ModelMixin):
             if warehouse_products
             else {}
         )
-
-        events = db.session.scalars(Event.select().where(Event.cart == self)).all()
-        mg_dict["events"] = s.EventList.model_validate(events).model_dump()
         return json.dumps(mg_dict)

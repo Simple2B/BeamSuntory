@@ -15,7 +15,14 @@ interface IProductEvent {
   dateTo: string
   product: IProduct
   quantity: number
-  cart: ICart
+  event: IEvent
+  group: string
+}
+
+interface IEvent{
+  dateFrom: string
+  dateTo: string
+
 }
 
 interface IReportEvent {
@@ -24,7 +31,36 @@ interface IReportEvent {
   type: string
   createdAt: string
   history: string
-  events: IProductEvent[]
+  ship_request: IShipRequest
+}
+
+interface IShipRequest {
+  id: number
+  carts: IProductEvent[]
+  comment: string
+  createdAt: string
+  daNotes: string
+  orderNumb: string
+  orderStatus: string
+  store: IStore
+  storeId: number
+  wmNotes: string
+}
+
+interface IStore{
+  active: boolean
+  address: string
+  city: string
+  contactPerson: string
+  country: string
+  createdAt: string
+  email: string
+  id: number
+  phoneNumb: string
+  region: string
+  storeCategoryId: number
+  storeName: string
+  zip: string
 }
 
 interface IEventsReportResponse {
@@ -65,22 +101,25 @@ const downloadCSV = async function () {
   const queryTail = ''
 
   for (let page = 1; page <= pages; page++) {
+    const currentURL = window.location.href;
+    const urlWithoutQueryParams = currentURL.split('?')[0];
+
     const url = [`api?page={page}`, queryTail].join('&')
-    const res = await fetch(`${location.href}/${url}`)
+    const res = await fetch(`${urlWithoutQueryParams}/${url}`)
     const data: IEventsReportResponse = await res.json()
     const reportEvents = data.report_events[0] as IReportEvent
-    console.log(data)
-    reportEvents.events.forEach((event: IProductEvent) => {
+
+    reportEvents.ship_request.carts.forEach((cart: IProductEvent) => {     
       csvData.push(
         [
           reportEvents.createdAt,
           reportEvents.history,
           reportEvents.type,
           reportEvents.user.username,
-          event.dateFrom,
-          event.dateTo,
-          event.product.SKU,
-          event.product.name,
+          cart.event.dateFrom,
+          cart.event.dateTo,
+          cart.product.SKU,
+          cart.product.name,
         ].join(',')
       )
     })
@@ -102,6 +141,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const filtersHTML = document.querySelectorAll("[name='q'], [name='username'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from'], [name='sort-end-from']");
   const buttonLoadEventsTable = document.querySelector('#table-report-loader') as HTMLButtonElement;
 
+
+document.addEventListener('DOMContentLoaded', () => {
+  const tableRow = document.querySelectorAll('.table-event-item-tr')
+  tableRow.forEach((row: HTMLDivElement) => {    
+    const viewReportEventsModal = row.querySelector('.report-event-view-btn')
+    const data = JSON.parse(viewReportEventsModal.getAttribute('data-target'))
+    const reportStore = data.ship_request.store.storeName    
+    const reportEventStoreDiv = row.querySelector('.report-event-store') as HTMLDivElement
+    reportEventStoreDiv.innerHTML = reportStore
+  })
+
+  const eventFilterButton = document.querySelector('#event-filter-button')
+  eventFilterButton.addEventListener('click', () => {
+    getFilterValues()
+  })
+  
+  const clearFilterButton = document.querySelector('#product-event-clear-button')
   clearFilterButton.addEventListener('click', () => {
     filtersHTML.forEach(filter => {
       (filter as HTMLInputElement).value = "";
@@ -125,15 +181,16 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const viewModal = new Modal(viewReportEventsModal, viewModalOptions);
-  const reportViewUser = document.querySelector('#report-event-user') as HTMLDivElement;
-  const reportViewAction = document.querySelector('#report-event-action') as HTMLDivElement;
-  const reportViewDate = document.querySelector('#report-event-date') as HTMLDivElement;
   const reportViewHistory = document.querySelector('#report-event-history') as HTMLDivElement;
   const reportViewProductTbody = document.querySelector('#table-products') as HTMLTableElement;
   const productItemTemplate = document.querySelector('#view-product-item-template') as HTMLTableRowElement;
 
   // initialize htmx listener
   const htmxDispatcher = new HTMXDispatcher();
+  // view buttons click
+  const reportViewUser = document.getElementById('report-event-user') as HTMLDivElement
+  const reportViewAction = document.getElementById('report-event-action') as HTMLDivElement
+  const reportViewDate = document.getElementById('report-event-date') as HTMLDivElement
 
   // onload element with events-table id
   htmxDispatcher.onLoad('events-table', (target) => {
@@ -154,27 +211,23 @@ document.addEventListener('DOMContentLoaded', () => {
         reportViewDate.innerHTML = `${month}/${day}/${year} ${hours}:${minutes}`
         reportViewHistory.innerHTML = reportEvent.history
 
-        reportEvent.events.forEach((event, i) => {
-          // Render event
-          const newProductItem = productItemTemplate.cloneNode(true) as HTMLElement
-          newProductItem.removeAttribute('id')
-          newProductItem.classList.remove('hidden')
-          newProductItem.classList.add(
-            'product-item-view',
-            'text-base',
-            'font-semibold',
-            'text-gray-900',
-            'dark:text-white'
-          )
+      reportViewUser.innerHTML = reportEvent.user.username
+      reportViewAction.innerHTML = reportEvent.type
+      reportViewDate.innerHTML = `${month}/${day}/${year} ${hours}:${minutes}`
 
-          const productIndex = newProductItem.querySelector('.product-index') as HTMLDivElement
-          // TODO add image
-          const productName = newProductItem.querySelector('.product-name') as HTMLDivElement
-          const productSku = newProductItem.querySelector('.product-sku') as HTMLDivElement
-          const productRegularPrice = newProductItem.querySelector('.product-regular-price') as HTMLDivElement
-          const productRetailPrice = newProductItem.querySelector('.product-retail-price') as HTMLDivElement
-          const productGroup = newProductItem.querySelector('.product-group') as HTMLDivElement
-          const productQuantity = newProductItem.querySelector('.product-quantity') as HTMLDivElement
+
+      reportEvent.ship_request.carts.forEach((event, i) => {
+        // Render event
+        const newProductItem = productItemTemplate.cloneNode(true) as HTMLElement
+        newProductItem.removeAttribute('id')
+        newProductItem.classList.remove('hidden')
+        newProductItem.classList.add(
+          'product-item-view',
+          'text-base',
+          'font-semibold',
+          'text-gray-900',
+          'dark:text-white'
+        )
 
           const img: HTMLImageElement = newProductItem.querySelector('.product-image')
           event.product.image.length > 100
@@ -192,15 +245,23 @@ document.addEventListener('DOMContentLoaded', () => {
             productRegularPrice.innerHTML = 'No price'
           }
 
-          if (event.product.retailPrice) {
-            productRetailPrice.innerHTML = event.product.retailPrice.toString()
-          } else {
-            productRetailPrice.innerHTML = 'No price'
-          }
-          productGroup.innerHTML = event.cart.group
-          reportViewProductTbody.appendChild(newProductItem)
-          viewModal.show()
-        });
+        if (event.product.regularPrice) {
+          productRegularPrice.innerHTML = event.product.regularPrice.toString()
+        } else {
+          productRegularPrice.innerHTML = 'No price'
+        }
+
+        if (event.product.retailPrice) {
+          productRetailPrice.innerHTML = event.product.retailPrice.toString()
+        } else {
+          productRetailPrice.innerHTML = 'No price'
+        }
+        
+        productGroup.innerHTML = event.group
+
+        reportViewProductTbody.appendChild(newProductItem)
+
+        viewModal.show()
       })
     })
   });
