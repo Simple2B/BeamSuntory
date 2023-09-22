@@ -65,7 +65,7 @@ class InboundOrder(db.Model, ModelMixin):
         cascade="all, delete-orphan"
     )
     report_inventory: orm.Mapped["ReportInventory"] = orm.relationship(
-        back_populates="ship_request"
+        back_populates="inbound_order"
     )
 
     def __repr__(self):
