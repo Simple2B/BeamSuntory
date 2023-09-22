@@ -130,6 +130,7 @@ def get_events_json():
 @login_required
 def events():
     users = db.session.scalars(sa.select(m.User))
+
     return render_template(
         "report/event/events.html",
         users=users,
