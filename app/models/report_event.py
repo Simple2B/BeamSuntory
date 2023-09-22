@@ -34,5 +34,4 @@ class ReportEvent(db.Model, ModelMixin):
 
     @property
     def json(self):
-        # s.ReportEvent.model_rebuild()
         return s.ReportEvent.model_validate(self).model_dump_json(by_alias=True)

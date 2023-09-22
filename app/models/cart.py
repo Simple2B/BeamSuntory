@@ -67,7 +67,4 @@ class Cart(db.Model, ModelMixin):
             if warehouse_products
             else {}
         )
-
-        # events = db.session.scalars(Event.select().where(Event.cart == self)).all()
-        # mg_dict["events"] = s.EventList.model_validate(events).model_dump()
         return json.dumps(mg_dict)

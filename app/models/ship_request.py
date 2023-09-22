@@ -65,9 +65,5 @@ class ShipRequest(db.Model, ModelMixin):
     @property
     def json(self):
         ship_request = s.ShipRequest.model_validate(self).model_dump()
-        # for cart in ship_request["carts"]:
-        #     event = db.session.scalar(Event.select().where(Event.cart_id == cart["id"]))
-        #     if event:
-        #         cart["event"] = s.Event.model_validate(event).model_dump(by_alias=True)
 
         return s.ShipRequest.model_validate(ship_request).model_dump_json(by_alias=True)

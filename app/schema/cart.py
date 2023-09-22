@@ -19,7 +19,6 @@ class Cart(BaseModel):
     group: str
     product: Product
     warehouse: Warehouse | None = None
-    # event: dict | None = None
     event: Event | None = None
 
     created_at: datetime
