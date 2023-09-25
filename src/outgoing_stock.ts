@@ -108,8 +108,16 @@ cancelButtons.forEach((e) => {
 })
 
 const $modalViewElement: HTMLElement = document.querySelector('#view-outgoing-stock-modal')
-
 const $modalEditElement: HTMLElement = document.querySelector('#edit-outgoing-stock-modal')
+const editModalClosingButton = document.querySelector('#buttonClosingEditOutgoingStockModal')
+const viewModalClosingButton = document.querySelector('#buttonClosingEditOutgoingStockModal')
+editModalClosingButton.addEventListener('click', () => {
+  editModal.hide()
+})
+viewModalClosingButton.addEventListener('click', () => {
+  viewModal.hide()
+})
+
 
 const modalViewOptions: ModalOptions = {
   placement: 'bottom-right',

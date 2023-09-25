@@ -37,6 +37,16 @@ const $modalViewElement: HTMLElement = document.querySelector('#view-pickup-orde
 
 const $modalEditElement: HTMLElement = document.querySelector('#edit-pickup-order-modal')
 
+const viewModalClosingButton: HTMLElement = document.querySelector('#buttonClosingViewPickupOrderModal')
+viewModalClosingButton.addEventListener('click', () => {
+  viewModal.hide()
+})
+const editModalClosingButton: HTMLElement = document.querySelector('#buttonClosingEditPickupOrderModal')
+editModalClosingButton.addEventListener('click', () => {
+  editModal.hide()
+})
+
+
 const modalViewOptions: ModalOptions = {
   placement: 'bottom-right',
   backdrop: 'dynamic',

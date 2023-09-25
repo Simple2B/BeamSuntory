@@ -53,6 +53,11 @@ const modalViewOptions: ModalOptions = {
 
 const viewModal: ModalInterface = new Modal($modalViewElement, modalViewOptions)
 
+const modalCloserButton = document.querySelector('#button-close-view-ship-request-modal')
+modalCloserButton.addEventListener('click', () => {
+  viewModal.hide()
+})
+
 // search flow
 const searchInput: HTMLInputElement = document.querySelector('#table-search-ship-request')
 const searchInputButton = document.querySelector('#table-search-ship-request-button')
