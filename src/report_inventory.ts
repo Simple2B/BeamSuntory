@@ -69,68 +69,88 @@ const htmxDispatcher = new HTMXDispatcher()
 const defaultBrandImage =
   'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png'
 
-// const downloadCSV = async function () {
-//   // Filters
-//   const searchInventoryInput: HTMLInputElement = document.querySelector('#table-search-inventory')
-//   const dateInventoryStartFromInput: HTMLInputElement = document.querySelector(
-//     '#product-inventory-sort-start-from-datepicker'
-//   )
-//   const dateInventoryStartToInput: HTMLInputElement = document.querySelector('#product-inventory-sort-start-to-datepicker')
-//   const dateInventoryEndFromInput: HTMLInputElement = document.querySelector('#product-inventory-sort-end-from-datepicker')
-//   const dateInventoryEndToInput: HTMLInputElement = document.querySelector('#product-inventory-sort-end-to-datepicker')
+const downloadCSV = async function () {
+  // Filters
+  const searchInventoryInput: HTMLInputElement = document.querySelector('#table-search-inventory')
+  const dateInventoryStartFromInput: HTMLInputElement = document.querySelector(
+    '#product-inventory-sort-start-from-datepicker'
+  )
+  const dateInventoryStartToInput: HTMLInputElement = document.querySelector(
+    '#product-inventory-sort-start-to-datepicker'
+  )
+  const dateInventoryEndFromInput: HTMLInputElement = document.querySelector(
+    '#product-inventory-sort-end-from-datepicker'
+  )
+  const dateInventoryEndToInput: HTMLInputElement = document.querySelector('#product-inventory-sort-end-to-datepicker')
 
-//   const filtersMap = {
-//     q: searchInventoryInput,
-//     start_from: dateInventoryStartFromInput,
-//     start_to: dateInventoryStartToInput,
-//     end_from: dateInventoryEndFromInput,
-//     end_to: dateInventoryEndToInput,
-//   }
+  const filtersMap = {
+    q: searchInventoryInput,
+    start_from: dateInventoryStartFromInput,
+    start_to: dateInventoryStartToInput,
+    end_from: dateInventoryEndFromInput,
+    end_to: dateInventoryEndToInput,
+  }
 
-//   const filterQuery = []
-//   for (const [queryKey, queryInput] of Object.entries(filtersMap)) {
-//     filterQuery.push(`${queryKey}=${queryInput.value}`)
-//   }
+  const filterQuery = []
+  for (const [queryKey, queryInput] of Object.entries(filtersMap)) {
+    filterQuery.push(`${queryKey}=${queryInput.value}`)
+  }
 
-//   // CSV Headers
-//   const csvData = ['created_at,store_name,type,username,date_from,date_to,sku,product_name']
-//   let pages = 1
-//   const queryTail = ''
+  // CSV Headers
+  const csvData = ['created_at,store_name,type,username,qty_before,qty_after,sku,product_name']
+  let pages = 1
+  const queryTail = ''
 
-//   for (let page = 1; page <= pages; page++) {
-//     const currentURL = window.location.href
-//     const urlWithoutQueryParams = currentURL.split('?')[0]
-//     const url = [`api?page=${page}`, queryTail].join('&')
-//     const res = await fetch(`${urlWithoutQueryParams}/${url}`)
-//     const data: IInventoriesReportResponse = await res.json()
+  for (let page = 1; page <= pages; page++) {
+    const currentURL = window.location.href
+    const urlWithoutQueryParams = currentURL.split('?')[0]
+    const url = [`api?page=${page}`, queryTail].join('&')
+    const res = await fetch(`${urlWithoutQueryParams}/${url}`)
+    const data: IInventoriesReportResponse = await res.json()
 
-//     data.reportInventory.forEach((reportInventory) => {
-//       reportInventory.shipRequest.carts.forEach((cart: IProductInventory) => {
-//         csvData.push(
-//           [
-//             reportInventory.createdAt,
-//             reportInventory.shipRequest.store.storeName,
-//             reportInventory.type,
-//             reportInventory.user.username,
-//             cart.event.dateFrom,
-//             cart.event.dateTo,
-//             cart.product.SKU,
-//             cart.product.name,
-//           ].join(',')
-//         )
-//       })
-//     })
+    data.reportInventoryList.forEach((reportInventories) => {
+      console.log('CSV data', reportInventories)
+      reportInventories.reportInventories.forEach((report: IReportInventory) => {
+        let reportTarget
+        if (reportInventories.store) {
+          reportTarget = reportInventories.store.storeName
+        } else {
+          reportTarget = reportInventories.warehouse.name
+        }
+        const createAt = new Date(report.createdAt)
+        const year = createAt.getFullYear()
+        const month = String(createAt.getMonth() + 1).padStart(2, '0') // Month is 0-based
+        const day = String(createAt.getDate()).padStart(2, '0')
+        const hours = String(createAt.getHours()).padStart(2, '0')
+        const minutes = String(createAt.getMinutes()).padStart(2, '0')
 
-//     pages = data.pagination.pages
-//   }
-//   const blob = new Blob([csvData.join('\n')], { type: 'text/csv' })
-//   const url = window.URL.createObjectURL(blob)
-//   const a = document.createElement('a')
-//   a.setAttribute('href', url)
-//   a.setAttribute('download', 'inventories.csv')
-//   a.click()
-//   a.remove()
-// }
+        csvData.push(
+          [
+            `${month}/${day}/${year} ${hours}:${minutes}`,
+            reportTarget,
+            reportInventories.type,
+            reportInventories.user.username,
+            report.qtyBefore.toString(),
+            report.qtyAfter.toString(),
+            // report.warehouseProduct.product.SKU,
+            // report.warehouseProduct.product.name,
+            'SKU',
+            'name',
+          ].join(',')
+        )
+      })
+    })
+
+    pages = data.pagination.pages
+  }
+  const blob = new Blob([csvData.join('\n')], { type: 'text/csv' })
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.setAttribute('href', url)
+  a.setAttribute('download', 'inventories.csv')
+  a.click()
+  a.remove()
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   const filtersHTML = document.querySelectorAll(
@@ -271,4 +291,4 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 // Download csv
 const downloadCsvButton = document.getElementById('button-csv-download') as HTMLButtonElement
-// downloadCsvButton.addEventListener('click', downloadCSV)
+downloadCsvButton.addEventListener('click', downloadCSV)

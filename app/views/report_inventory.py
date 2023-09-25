@@ -117,8 +117,8 @@ def get_inventories_json():
     pagination, inventory_reports = get_inventory_reports()
     report_list_schema = s.ReportInventoryListArray.model_validate(inventory_reports)
 
-    return s.ReportInventoryListArray(
-        pagination=pagination, inventory_reports=report_list_schema.root
+    return s.ReportInventoryListResponse(
+        pagination=pagination, report_inventory_list=report_list_schema.root
     ).model_dump_json(by_alias=True)
 
 

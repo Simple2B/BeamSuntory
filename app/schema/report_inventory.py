@@ -36,8 +36,11 @@ class ReportInventoryList(BaseModel):
 
 
 class ReportInventoryListResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
     pagination: PaginationOut
-    report_inventories: list[ReportInventoryList]
+    report_inventory_list: list[ReportInventoryList] = Field(
+        alias="reportInventoryList"
+    )
 
 
 ReportInventoryListArray = RootModel[list[ReportInventoryList]]
