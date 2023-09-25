@@ -134,8 +134,8 @@ const downloadCSV = async function () {
             report.qtyAfter.toString(),
             // report.warehouseProduct.product.SKU,
             // report.warehouseProduct.product.name,
-            'SKU',
-            'name',
+            report.product.SKU,
+            report.product.name,
           ].join(',')
         )
       })
@@ -279,9 +279,12 @@ document.addEventListener('DOMContentLoaded', () => {
           } else {
             productRetailPrice.innerHTML = '0'
           }
-
-          productGroup.innerHTML = inventory.warehouseProduct.group.name
-          productWarehouse.innerHTML = inventory.warehouseProduct.warehouse.name
+          inventory.product.warehouse_products.forEach((warehouseProduct) => {
+            if (warehouseProduct.id === inventory.warehouseProductId) {
+              productGroup.innerHTML = warehouseProduct.group.name
+              productWarehouse.innerHTML = warehouseProduct.warehouse.name
+            }
+          })
           reportViewProductTbody.appendChild(newProductItem)
           viewModal.show()
         })

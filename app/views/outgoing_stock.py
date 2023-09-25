@@ -207,8 +207,9 @@ def save():
                 report_inventory = m.ReportInventory(
                     qty_before=warehouse_product.product_quantity + cart.quantity,
                     qty_after=warehouse_product.product_quantity,
-                    report_inventory_list=report_inventory_list,
-                    warehouse_product=warehouse_product,
+                    report_inventory_list_id=report_inventory_list.id,
+                    product_id=warehouse_product.product_id,
+                    warehouse_product_id=warehouse_product.id,
                 )
                 report_inventory.save(False)
 

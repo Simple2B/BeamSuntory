@@ -1,6 +1,5 @@
 from typing import TYPE_CHECKING
 from datetime import datetime
-import json
 import sqlalchemy as sa
 from sqlalchemy import orm
 
@@ -15,7 +14,6 @@ if TYPE_CHECKING:
     from .inbound_order import InboundOrder
     from .warehouse import Warehouse
     from .store import Store
-    from .warehouse_product import WarehouseProduct
 
 
 class ReportInventory(db.Model, ModelMixin):
@@ -27,6 +25,7 @@ class ReportInventory(db.Model, ModelMixin):
     report_inventory_list_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("report_inventory_lists.id")
     )
+    product_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("products.id"))
     warehouse_product_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("warehouse_product.id")
     )
@@ -40,7 +39,7 @@ class ReportInventory(db.Model, ModelMixin):
     )
 
     # Relationships
-    warehouse_product: orm.Mapped["WarehouseProduct"] = orm.relationship()
+    product: orm.Mapped["Product"] = orm.relationship()
 
     @property
     def json(self):
@@ -82,15 +81,17 @@ class ReportInventoryList(db.Model, ModelMixin):
 
     @property
     def json(self):
-        report_inventory_list_json = s.ReportInventoryList.model_validate(
-            self
-        ).model_dump_json(by_alias=True)
-        report_inventory_list = json.loads(report_inventory_list_json)
-        for rep_inv in report_inventory_list["reportInventories"]:
-            product = db.session.get(Product, rep_inv["warehouseProduct"]["productId"])
-            # TODO USE some lazyload to avoid loading products relationship
-            product = s.Product.model_validate(product).model_dump()
-            product.pop("warehouse_products")
-            product.pop("warehouses")
-            rep_inv["product"] = product
-        return json.dumps(report_inventory_list)
+        # import json
+        # report_inventory_list_json = s.ReportInventoryList.model_validate(
+        #     self
+        # ).model_dump_json(by_alias=True)
+        # report_inventory_list = json.loads(report_inventory_list_json)
+        # for rep_inv in report_inventory_list["reportInventories"]:
+        #     product = db.session.get(Product, rep_inv["warehouseProduct"]["productId"])
+        #     # TODO USE some lazyload to avoid loading products relationship
+        #     product = s.Product.model_validate(product).model_dump()
+        #     product.pop("warehouse_products")
+        #     product.pop("warehouses")
+        #     rep_inv["product"] = product
+        # return json.dumps(report_inventory_list)
+        return s.ReportInventoryList.model_validate(self).model_dump_json(by_alias=True)

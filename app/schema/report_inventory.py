@@ -7,7 +7,7 @@ from .warehouse import Warehouse
 from .store import Store
 from .user import User
 from .pagination import PaginationOut
-from .warehouse_product import WarehouseProduct
+from .product import Product
 
 
 class ReportInventoryType(Enum):
@@ -20,7 +20,8 @@ class ReportInventory(BaseModel):
     qty_before: int = Field(alias="qtyBefore")
     qty_after: int = Field(alias="qtyAfter")
     created_at: datetime = Field(alias="createdAt")
-    warehouse_product: WarehouseProduct = Field(alias="warehouseProduct")
+    product: Product
+    warehouse_product_id: int = Field(alias="warehouseProductId")
 
 
 class ReportInventoryList(BaseModel):

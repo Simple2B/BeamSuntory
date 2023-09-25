@@ -182,16 +182,17 @@ def accept():
                     product_quantity=new_package_info.quantity_received,
                     group_id=product_quantity_group.group_id,
                 )
-
                 qty_before = 0
-            warehouse_product.save(False)
+
+            warehouse_product.save()
 
             # NOTE create report for inventory
             report_inventory = m.ReportInventory(
                 qty_before=qty_before,
                 qty_after=new_package_info.quantity_received,
                 report_inventory_list_id=report_inventory_list.id,
-                warehouse_product=warehouse_product,
+                product_id=warehouse_product.product_id,
+                warehouse_product_id=warehouse_product.id,
             )
             report_inventory.save(False)
 
