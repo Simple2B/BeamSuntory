@@ -1,8 +1,8 @@
-"""Add Report request share
+"""report request share
 
-Revision ID: 6b6fd5ff00f2
-Revises: 479bf4cc0532
-Create Date: 2023-09-22 17:01:34.757341
+Revision ID: cd4f28bfe83f
+Revises: 5724781621b3
+Create Date: 2023-09-25 22:01:14.842459
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '6b6fd5ff00f2'
-down_revision = '479bf4cc0532'
+revision = 'cd4f28bfe83f'
+down_revision = '5724781621b3'
 branch_labels = None
 depends_on = None
 
@@ -31,6 +31,12 @@ def upgrade():
     )
     with op.batch_alter_table('assigns', schema=None) as batch_op:
         batch_op.alter_column('from_group_id',
+               existing_type=sa.INTEGER(),
+               nullable=False)
+        batch_op.alter_column('type',
+               existing_type=sa.VARCHAR(length=64),
+               nullable=False)
+        batch_op.alter_column('user_id',
                existing_type=sa.INTEGER(),
                nullable=False)
 
@@ -58,6 +64,12 @@ def downgrade():
                nullable=True)
 
     with op.batch_alter_table('assigns', schema=None) as batch_op:
+        batch_op.alter_column('user_id',
+               existing_type=sa.INTEGER(),
+               nullable=True)
+        batch_op.alter_column('type',
+               existing_type=sa.VARCHAR(length=64),
+               nullable=True)
         batch_op.alter_column('from_group_id',
                existing_type=sa.INTEGER(),
                nullable=True)
