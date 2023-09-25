@@ -114,8 +114,6 @@ def get_events_report():
     )
     return pagination, reports
 
-
-def get_assigns_report():
     filter_assign = s.FilterReportAssign.model_validate(dict(request.args))
 
     query = m.Assign.select().order_by(m.Assign.id)
@@ -197,30 +195,4 @@ def search_report_events():
 
     return render_template(
         "report/event/reports_table.html", page=pagination, reports=reports
-    )
-
-
-@report_blueprint.route("/assign")
-@login_required
-def assigns():
-    users = db.session.scalars(sa.select(m.User))
-
-    product_master_groups = db.session.scalars(
-        sa.select(m.MasterGroupProduct).order_by(m.MasterGroupProduct.id)
-    ).all()
-
-    return render_template(
-        "report/assign/assigns.html",
-        users=users,
-        product_master_groups=product_master_groups,
-    )
-
-
-@report_blueprint.route("assign/search")
-@login_required
-def search_report_assigns():
-    pagination, reports = get_assigns_report()
-
-    return render_template(
-        "report/assign/reports_assign_table.html", page=pagination, reports=reports
     )
