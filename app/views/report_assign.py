@@ -39,25 +39,30 @@ def get_assigns_report():
             m.Assign.user.has(m.User.username == filter_assign.username)
         )
 
-    if filter_assign.master_group:
-        query = query.where(
-            m.Assign.product.has(
-                m.Product.product_groups.any(
-                    m.ProductGroup.parent.has(
-                        m.GroupProduct.name.ilike(f"%{filter_assign.master_group}%")
+    master_groups = [
+        filter_assign.brand,
+        filter_assign.category,
+        filter_assign.language,
+        filter_assign.premises,
+    ]
+
+    if master_groups.count(None) != len(master_groups):
+        for group in master_groups:
+            query = query.where(
+                m.Assign.product.has(
+                    m.Product.product_groups.any(
+                        m.ProductGroup.parent.has(
+                            m.GroupProduct.name.ilike(f"%{group}%")
+                        )
                     )
                 )
             )
-        )
 
     if filter_assign.start_date:
-        print(filter_assign.start_date)
         query = query.where(m.Assign.created_at >= filter_assign.start_date)
 
     if filter_assign.end_date:
         query = query.where(m.Assign.created_at <= filter_assign.end_date)
-
-    print(query)
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
@@ -74,14 +79,37 @@ def get_assigns_report():
 def assigns():
     users = db.session.scalars(sa.select(m.User))
 
-    product_master_groups = db.session.scalars(
-        sa.select(m.MasterGroupProduct).order_by(m.MasterGroupProduct.id)
+    product_master_group_brand = db.session.scalars(
+        sa.select(m.MasterGroupProduct)
+        .where(m.MasterGroupProduct.name == "Brand")
+        .order_by(m.MasterGroupProduct.id)
+    ).all()
+
+    product_master_group_language = db.session.scalars(
+        sa.select(m.MasterGroupProduct)
+        .where(m.MasterGroupProduct.name == "Language")
+        .order_by(m.MasterGroupProduct.id)
+    ).all()
+
+    product_master_group_category = db.session.scalars(
+        sa.select(m.MasterGroupProduct)
+        .where(m.MasterGroupProduct.name == "Category")
+        .order_by(m.MasterGroupProduct.id)
+    ).all()
+
+    product_master_group_premises = db.session.scalars(
+        sa.select(m.MasterGroupProduct)
+        .where(m.MasterGroupProduct.name == "Premises")
+        .order_by(m.MasterGroupProduct.id)
     ).all()
 
     return render_template(
         "report/assign/assigns.html",
         users=users,
-        product_master_groups=product_master_groups,
+        product_master_group_brand=product_master_group_brand,
+        product_master_group_language=product_master_group_language,
+        product_master_group_category=product_master_group_category,
+        product_master_group_premises=product_master_group_premises,
     )
 
 
@@ -93,3 +121,14 @@ def search_report_assigns():
     return render_template(
         "report/assign/reports_assign_table.html", page=pagination, reports=reports
     )
+
+
+@report_assign_blueprint.route("/assign/api", methods=["GET"])
+@login_required
+def get_assigns_json():
+    pagination, reports = get_assigns_report()
+    report_list_schema = s.ReportAssignList.model_validate(reports)
+
+    return s.ReportAssignsResponse(
+        pagination=pagination, report_events=report_list_schema.root
+    ).model_dump_json(by_alias=True)

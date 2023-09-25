@@ -26,71 +26,77 @@ const htmxDispatcher = new HTMXDispatcher();
 const defaultBrandImage =
   'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png'
 
-// const downloadCSV = async function () {
-//   // Filters
-//   const searchEventInput: HTMLInputElement = document.querySelector('#table-search-event')
-//   const dateEventStartFromInput: HTMLInputElement = document.querySelector('#product-event-sort-start-from-datepicker')
-//   const dateEventStartToInput: HTMLInputElement = document.querySelector('#product-event-sort-start-to-datepicker')
-//   const dateEventEndFromInput: HTMLInputElement = document.querySelector('#product-event-sort-end-from-datepicker')
-//   const dateEventEndToInput: HTMLInputElement = document.querySelector('#product-event-sort-end-to-datepicker')
+const downloadCSV = async function () {
+  // Filters
+  const searchInput: HTMLInputElement = document.querySelector('#table-search-assign')
+  
+  const filterBrand: HTMLInputElement = document.querySelector('#report-assigns-brand')
+  const filterCategory: HTMLInputElement = document.querySelector('#report-assigns-category')
+  const filterLanguage: HTMLInputElement = document.querySelector('#report-assigns-language')
+  const filterPremises: HTMLInputElement = document.querySelector('#report-assigns-premises')
 
-//   const filtersMap = {
-//     q: searchEventInput,
-//     start_from: dateEventStartFromInput,
-//     start_to: dateEventStartToInput,
-//     end_from: dateEventEndFromInput,
-//     end_to: dateEventEndToInput,
-//   }
+  const filterDateStartInput: HTMLInputElement = document.querySelector('#report-assigns-start-date')
+  const filterDateEndInput: HTMLInputElement = document.querySelector('#report-assigns-end-date')
+  const filterUsernameInput: HTMLInputElement = document.querySelector('#report-assigns-filter-user')
 
-//   const filterQuery = []
-//   for (const [queryKey, queryInput] of Object.entries(filtersMap)) {
-//     filterQuery.push(`${queryKey}=${queryInput.value}`)
-//   }
+  const filtersMap = {
+    q: searchInput,
+    brand: filterBrand,
+    category: filterCategory,
+    language: filterLanguage,
+    premises: filterPremises,
+    username: filterUsernameInput,
+    start_date: filterDateStartInput,
+    end_date: filterDateEndInput,
+  }
+
+  const filterQuery = []
+  for (const [queryKey, queryInput] of Object.entries(filtersMap)) {
+    filterQuery.push(`${queryKey}=${queryInput.value}`)
+  }
 
   // CSV Headers
 
-//   const csvData = ['created_at,store_name,type,username,date_from,date_to,sku,product_name']
-//   let pages = 1
-//   const queryTail = ''
+  const csvData = ['created_at,username,type,from_group,to_group,sku,product_name']
+  let pages = 1
+  const queryTail = ''
 
-//   for (let page = 1; page <= pages; page++) {
-//     const currentURL = window.location.href;
-//     const urlWithoutQueryParams = currentURL.split('?')[0];
-//     const url = [`api?page=${page}`, queryTail].join('&')
-//     const res = await fetch(`${urlWithoutQueryParams}/${url}`)
-//     const data = await res.json()
+  for (let page = 1; page <= pages; page++) {
+    const currentURL = window.location.href;
+    const urlWithoutQueryParams = currentURL.split('?')[0];
+    const url = [`api?page=${page}`, queryTail].join('&')
+    const res = await fetch(`${urlWithoutQueryParams}/${url}`)
+    const data = await res.json()    
 
-//     data.report_events.forEach(reportEvent => {
-//       reportEvent.shipRequest.carts.forEach((cart: IProductEvent) => {     
-//       csvData.push(
-//         [
-//           reportEvent.createdAt,
-//           reportEvent.shipRequest.store.storeName,
-//           reportEvent.type,
-//           reportEvent.user.username,
-//           cart.event.dateFrom,
-//           cart.event.dateTo,
-//           cart.product.SKU,
-//           cart.product.name,
-//         ].join(',')
-//       )
-//       })
-//     });
+    data.report_events.forEach((report: IReportAssign) => {
+      csvData.push(
+        [
+          report.created_at,
+          report.user.username,
+          report.type,          
+          report.from_group.name,
+          report.group.name,
+          report.product.SKU,
+          report.product.name,
+        ].join(',')
+      )
+    });
+
     
-//     pages = data.pagination.pages
-//   }
-//   const blob = new Blob([csvData.join('\n')], { type: 'text/csv' })
-//   const url = window.URL.createObjectURL(blob)
-//   const a = document.createElement('a')
-//   a.setAttribute('href', url)
-//   a.setAttribute('download', 'events.csv')
-//   a.click()
-//   a.remove()
-// }
+    pages = data.pagination.pages
+  }
+  const blob = new Blob([csvData.join('\n')], { type: 'text/csv' })
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.setAttribute('href', url)
+  a.setAttribute('download', 'assigns.csv')
+  a.click()
+  a.remove()
+}
 
 
 document.addEventListener('DOMContentLoaded', () => {
-  const filtersHTML = document.querySelectorAll("[name='q'], [name='username'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from'], [name='sort-end-from']");
+  const filtersHTML = document.querySelectorAll("[name='q'], [name='start_date'], [name='end_date'], [name='username'], [name='language'], [name='category'], [name='premises'], [name='brand'");
   const buttonLoadEventsTable = document.querySelector('#table-report-loader') as HTMLButtonElement;
 
   

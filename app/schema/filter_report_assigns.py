@@ -8,4 +8,7 @@ class FilterReportAssign(BaseModel):
     username: str | None = None
     start_date: str | None = None
     end_date: str | None = None
-    master_group: str | None = None
+    brand: str | None = None
+    category: str | None = None
+    language: str | None = None
+    premises: str | None = None
