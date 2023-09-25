@@ -48,3 +48,5 @@ from .report_event import (
     ReportEventResponse,
 )
 from .filter_report_events import FilterReportEvents
+from .filter_report_assigns import FilterReportAssign
+from .report_assign import ReportAssignsResponse, ReportAssignList
