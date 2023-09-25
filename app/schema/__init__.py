@@ -55,3 +55,5 @@ from .report_request_share import (
     ReportRequestShareList,
     ReportRequestShareResponse,
 )
+from .filter_report_assigns import FilterReportAssign
+from .report_assign import ReportAssignsResponse, ReportAssignList
