@@ -1,11 +1,13 @@
 from typing import TYPE_CHECKING
 from datetime import datetime
+import json
 import sqlalchemy as sa
 from sqlalchemy import orm
 
 from app import db
 from .utils import ModelMixin
 from app import schema as s
+from .product import Product
 
 if TYPE_CHECKING:
     from .user import User
@@ -13,10 +15,40 @@ if TYPE_CHECKING:
     from .inbound_order import InboundOrder
     from .warehouse import Warehouse
     from .store import Store
+    from .warehouse_product import WarehouseProduct
 
 
 class ReportInventory(db.Model, ModelMixin):
     __tablename__ = "report_inventories"
+
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
+
+    # Foreign keys
+    report_inventory_list_id: orm.Mapped[int] = orm.mapped_column(
+        sa.ForeignKey("report_inventory_lists.id")
+    )
+    warehouse_product_id: orm.Mapped[int] = orm.mapped_column(
+        sa.ForeignKey("warehouse_product.id")
+    )
+
+    # Columns
+    qty_before: orm.Mapped[int] = orm.mapped_column(sa.Integer)
+    qty_after: orm.Mapped[int] = orm.mapped_column(sa.Integer)
+    created_at: orm.Mapped[datetime] = orm.mapped_column(
+        sa.DateTime,
+        default=datetime.now,
+    )
+
+    # Relationships
+    warehouse_product: orm.Mapped["WarehouseProduct"] = orm.relationship()
+
+    @property
+    def json(self):
+        return s.ReportInventory.model_validate(self).model_dump_json(by_alias=True)
+
+
+class ReportInventoryList(db.Model, ModelMixin):
+    __tablename__ = "report_inventory_lists"
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
 
@@ -31,8 +63,6 @@ class ReportInventory(db.Model, ModelMixin):
 
     # Columns
     type: orm.Mapped[str] = orm.mapped_column(sa.String(64))
-    qty_before: orm.Mapped[int] = orm.mapped_column(sa.Integer)
-    qty_after: orm.Mapped[int] = orm.mapped_column(sa.Integer)
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
         default=datetime.now,
@@ -40,15 +70,27 @@ class ReportInventory(db.Model, ModelMixin):
 
     # Relationships
     ship_request: orm.Mapped["ShipRequest"] = orm.relationship(
-        back_populates="report_inventory"
+        back_populates="report_inventory_list"
     )
     inbound_order: orm.Mapped["InboundOrder"] = orm.relationship(
-        back_populates="report_inventory"
+        back_populates="report_inventory_list"
     )
     warehouse: orm.Mapped["Warehouse"] = orm.relationship()
     store: orm.Mapped["Store"] = orm.relationship()
     user: orm.Mapped["User"] = orm.relationship()
+    report_inventories: orm.Mapped[list["ReportInventory"]] = orm.relationship()
 
     @property
     def json(self):
-        return s.ReportInventory.model_validate(self).model_dump_json(by_alias=True)
+        report_inventory_list_json = s.ReportInventoryList.model_validate(
+            self
+        ).model_dump_json(by_alias=True)
+        report_inventory_list = json.loads(report_inventory_list_json)
+        for rep_inv in report_inventory_list["reportInventories"]:
+            product = db.session.get(Product, rep_inv["warehouseProduct"]["productId"])
+            # TODO USE some lazyload to avoid loading products relationship
+            product = s.Product.model_validate(product).model_dump()
+            product.pop("warehouse_products")
+            product.pop("warehouses")
+            rep_inv["product"] = product
+        return json.dumps(report_inventory_list)

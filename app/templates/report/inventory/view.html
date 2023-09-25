@@ -27,7 +27,7 @@
             ></div>
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="report-inventory-action" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Action</label>
+            <label for="report-inventory-action" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Report Type</label>
             <div
               id="report-inventory-action"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -43,7 +43,7 @@
             ></div>
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="report-store-name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store name</label>
+            <label for="report-store-name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store/Warehouse name</label>
             <div id="report-store-name" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>
           </div>
         </div>
@@ -56,46 +56,47 @@
             <th scope="col" class="px-4 py-3">Image</th>
             <th scope="col" class="px-4 py-3">Name</th>
             <th scope="col" class="px-4 py-3">SKU</th>
-            <th scope="col" class="px-4 py-3">Regular price</th>
-            <th scope="col" class="px-4 py-3">Retail price</th>
+            <th scope="col" class="px-4 py-3">Qty Before</th>
+            <th scope="col" class="px-4 py-3">Qty After</th>
             <th scope="col" class="px-4 py-3">Group</th>
             <th scope="col" class="px-4 py-3">Quantity</th>
             <th scope="col" class="px-4 py-3">Warehouse</th>
           </tr>
         </thead>
-        <tbody id="table-products">
 
-<tr id="view-product-item-template" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 hidden">
-  <td class="w-4 p-4">
-    <div class="product-index">0</div>
-  </td>
-  <td class="w-4 p-4">
-     <img src="" class="product-image">
-  </td>
-  <td class="w-4 p-4">
-    <div class="product-name">Name</div>
-  </td>
-  <td class="w-4 p-4">
-    <div class="product-sku">SKU</div>
-  </td>
-  <td class="w-4 p-4">
-    <div class="product-regular-price">Regular price</div>
-  </td>
-  <td class="w-4 p-4">
-    <div class="product-retail-price">Retail price</div>
-  </td>
-  
-  <td class="w-4 p-4">
-    <div class="product-group">Group</div>
-  </td>
-  <td class="w-4 p-4">
-    <div class="product-quantity">15</div>
-  </td>
-  <td class="w-4 p-4">
-    <div class="product-warehouse">Warehouse</div>
-  </td>
-</tr>
+        <tbody id="table-products">
+          <tr id="view-product-item-template" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 hidden">
+            <td class="w-4 p-4">
+              <div class="product-index">0</div>
+            </td>
+            <td class="w-4 p-4">
+              <img src="" class="product-image">
+            </td>
+            <td class="w-4 p-4">
+              <div class="product-name">Name</div>
+            </td>
+            <td class="w-4 p-4">
+              <div class="product-sku">SKU</div>
+            </td>
+            <td class="w-4 p-4">
+              <div class="product-regular-price">Qty Before</div>
+            </td>
+            <td class="w-4 p-4">
+              <div class="product-retail-price">Qty After</div>
+            </td>
+            
+            <td class="w-4 p-4">
+              <div class="product-group">Group</div>
+            </td>
+            <td class="w-4 p-4">
+              <div class="product-quantity">15</div>
+            </td>
+            <td class="w-4 p-4">
+              <div class="product-warehouse">Warehouse</div>
+            </td>
+          </tr>
         </tbody>
+
       </table>
     </form>
   </div>

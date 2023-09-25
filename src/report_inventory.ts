@@ -12,15 +12,20 @@ interface ICart {
 }
 
 interface IReportInventory {
-  type: string
   qty_before: number
   qty_after: number
+  createdAt: string
+}
+
+interface IReportInventoryList {
+  type: string
   user: IUser
   createdAt: string
   shipRequest: IShipRequest
   inbound_order: IInboundOrderBase
   warehouse: IWarehouse
   store: IStore
+  reportInventories: IReportInventory[]
 }
 
 interface IShipRequest {
@@ -52,10 +57,10 @@ interface IStore {
   zip: string
 }
 
-interface IEventsReportResponse {
+interface IInventoriesReportResponse {
   pagination: IPagination
-  events: IEvents[]
-  report_events: IReportInventory[]
+  // events: IInventories[]
+  reportInventoryList: IReportInventoryList[]
 }
 
 // initialize htmx listener
@@ -64,82 +69,84 @@ const htmxDispatcher = new HTMXDispatcher()
 const defaultBrandImage =
   'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png'
 
-const downloadCSV = async function () {
-  // Filters
-  const searchEventInput: HTMLInputElement = document.querySelector('#table-search-inventory')
-  const dateEventStartFromInput: HTMLInputElement = document.querySelector(
-    '#product-inventory-sort-start-from-datepicker'
-  )
-  const dateEventStartToInput: HTMLInputElement = document.querySelector('#product-inventory-sort-start-to-datepicker')
-  const dateEventEndFromInput: HTMLInputElement = document.querySelector('#product-inventory-sort-end-from-datepicker')
-  const dateEventEndToInput: HTMLInputElement = document.querySelector('#product-inventory-sort-end-to-datepicker')
+// const downloadCSV = async function () {
+//   // Filters
+//   const searchInventoryInput: HTMLInputElement = document.querySelector('#table-search-inventory')
+//   const dateInventoryStartFromInput: HTMLInputElement = document.querySelector(
+//     '#product-inventory-sort-start-from-datepicker'
+//   )
+//   const dateInventoryStartToInput: HTMLInputElement = document.querySelector('#product-inventory-sort-start-to-datepicker')
+//   const dateInventoryEndFromInput: HTMLInputElement = document.querySelector('#product-inventory-sort-end-from-datepicker')
+//   const dateInventoryEndToInput: HTMLInputElement = document.querySelector('#product-inventory-sort-end-to-datepicker')
 
-  const filtersMap = {
-    q: searchEventInput,
-    start_from: dateEventStartFromInput,
-    start_to: dateEventStartToInput,
-    end_from: dateEventEndFromInput,
-    end_to: dateEventEndToInput,
-  }
+//   const filtersMap = {
+//     q: searchInventoryInput,
+//     start_from: dateInventoryStartFromInput,
+//     start_to: dateInventoryStartToInput,
+//     end_from: dateInventoryEndFromInput,
+//     end_to: dateInventoryEndToInput,
+//   }
 
-  const filterQuery = []
-  for (const [queryKey, queryInput] of Object.entries(filtersMap)) {
-    filterQuery.push(`${queryKey}=${queryInput.value}`)
-  }
+//   const filterQuery = []
+//   for (const [queryKey, queryInput] of Object.entries(filtersMap)) {
+//     filterQuery.push(`${queryKey}=${queryInput.value}`)
+//   }
 
-  // CSV Headers
-  const csvData = ['created_at,store_name,type,username,date_from,date_to,sku,product_name']
-  let pages = 1
-  const queryTail = ''
+//   // CSV Headers
+//   const csvData = ['created_at,store_name,type,username,date_from,date_to,sku,product_name']
+//   let pages = 1
+//   const queryTail = ''
 
-  for (let page = 1; page <= pages; page++) {
-    const currentURL = window.location.href
-    const urlWithoutQueryParams = currentURL.split('?')[0]
-    const url = [`api?page=${page}`, queryTail].join('&')
-    const res = await fetch(`${urlWithoutQueryParams}/${url}`)
-    const data: IEventsReportResponse = await res.json()
+//   for (let page = 1; page <= pages; page++) {
+//     const currentURL = window.location.href
+//     const urlWithoutQueryParams = currentURL.split('?')[0]
+//     const url = [`api?page=${page}`, queryTail].join('&')
+//     const res = await fetch(`${urlWithoutQueryParams}/${url}`)
+//     const data: IInventoriesReportResponse = await res.json()
 
-    data.report_events.forEach((reportEvent) => {
-      reportEvent.shipRequest.carts.forEach((cart: IProductEvent) => {
-        csvData.push(
-          [
-            reportEvent.createdAt,
-            reportEvent.shipRequest.store.storeName,
-            reportEvent.type,
-            reportEvent.user.username,
-            cart.event.dateFrom,
-            cart.event.dateTo,
-            cart.product.SKU,
-            cart.product.name,
-          ].join(',')
-        )
-      })
-    })
+//     data.reportInventory.forEach((reportInventory) => {
+//       reportInventory.shipRequest.carts.forEach((cart: IProductInventory) => {
+//         csvData.push(
+//           [
+//             reportInventory.createdAt,
+//             reportInventory.shipRequest.store.storeName,
+//             reportInventory.type,
+//             reportInventory.user.username,
+//             cart.event.dateFrom,
+//             cart.event.dateTo,
+//             cart.product.SKU,
+//             cart.product.name,
+//           ].join(',')
+//         )
+//       })
+//     })
 
-    pages = data.pagination.pages
-  }
-  const blob = new Blob([csvData.join('\n')], { type: 'text/csv' })
-  const url = window.URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.setAttribute('href', url)
-  a.setAttribute('download', 'inventories.csv')
-  a.click()
-  a.remove()
-}
+//     pages = data.pagination.pages
+//   }
+//   const blob = new Blob([csvData.join('\n')], { type: 'text/csv' })
+//   const url = window.URL.createObjectURL(blob)
+//   const a = document.createElement('a')
+//   a.setAttribute('href', url)
+//   a.setAttribute('download', 'inventories.csv')
+//   a.click()
+//   a.remove()
+// }
 
 document.addEventListener('DOMContentLoaded', () => {
   const filtersHTML = document.querySelectorAll(
     "[name='q'], [name='username'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from'], [name='sort-end-from']"
   )
-  const buttonLoadEventsTable = document.querySelector('#table-report-loader') as HTMLButtonElement
+  const buttonLoadInventoriesTable = document.querySelector('#table-report-loader') as HTMLButtonElement
 
   const tableRow = document.querySelectorAll('.table-inventory-item-tr')
   tableRow.forEach((row: HTMLDivElement) => {
-    const viewReportEventsModal = row.querySelector('.report-inventory-view-btn')
-    const data = JSON.parse(viewReportEventsModal.getAttribute('data-target'))
+    const viewReportInventoriesModal = row.querySelector('.report-inventory-view-btn')
+    const data = JSON.parse(viewReportInventoriesModal.getAttribute('data-target'))
+    console.log('tableRow data', data)
+
     const reportStore = data.shipRequest.store.storeName
-    const reportEventStoreDiv = row.querySelector('.report-inventory-store') as HTMLDivElement
-    reportEventStoreDiv.innerHTML = reportStore
+    const reportInventoryStoreDiv = row.querySelector('.report-inventory-store') as HTMLDivElement
+    reportInventoryStoreDiv.innerHTML = reportStore
   })
 
   const clearFilterButton = document.querySelector('#product-inventory-clear-button')
@@ -147,13 +154,13 @@ document.addEventListener('DOMContentLoaded', () => {
     filtersHTML.forEach((filter) => {
       ;(filter as HTMLInputElement).value = ''
     })
-    buttonLoadEventsTable.click()
+    buttonLoadInventoriesTable.click()
   })
   // load table
-  buttonLoadEventsTable.click()
+  buttonLoadInventoriesTable.click()
 
   // initialize modal
-  const viewReportEventsModal = document.getElementById('view-report-inventories-modal') as HTMLDivElement
+  const viewReportInventoriesModal = document.getElementById('view-report-inventories-modal') as HTMLDivElement
   const viewModalOptions: ModalOptions = {
     placement: 'bottom-right',
     backdrop: 'dynamic',
@@ -165,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
     },
   }
 
-  const viewModal = new Modal(viewReportEventsModal, viewModalOptions)
+  const viewModal = new Modal(viewReportInventoriesModal, viewModalOptions)
   const reportViewProductTbody = document.querySelector('#table-products') as HTMLTableElement
   const productItemTemplate = document.querySelector('#view-product-item-template') as HTMLTableRowElement
   // view buttons click
@@ -179,23 +186,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const reportViewButtons: NodeListOf<HTMLButtonElement> = target.querySelectorAll('.report-inventory-view-btn')
     reportViewButtons.forEach((btn) => {
       btn.addEventListener('click', () => {
-        const reportEvent: IReportInventory = JSON.parse(btn.getAttribute('data-target'))
-        const createAt = new Date(reportEvent.createdAt)
+        const reportInventory: IReportInventoryList = JSON.parse(btn.getAttribute('data-target'))
+        console.log('reportInventory json', reportInventory)
+
+        const createAt = new Date(reportInventory.createdAt)
         const year = createAt.getFullYear()
         const month = String(createAt.getMonth() + 1).padStart(2, '0') // Month is 0-based
         const day = String(createAt.getDate()).padStart(2, '0')
         const hours = String(createAt.getHours()).padStart(2, '0')
         const minutes = String(createAt.getMinutes()).padStart(2, '0')
 
-        reportViewUser.innerHTML = reportEvent.user.username
-        reportViewAction.innerHTML = reportEvent.type
+        reportViewUser.innerHTML = reportInventory.user.username
+        reportViewAction.innerHTML = reportInventory.type
         reportViewDate.innerHTML = `${month}/${day}/${year} ${hours}:${minutes}`
-        reportStoreName.innerHTML = reportEvent.shipRequest.store.storeName
+        if (reportInventory.store) {
+          reportStoreName.innerHTML = reportInventory.store.storeName
+        } else {
+          reportStoreName.innerHTML = reportInventory.warehouse.name
+        }
 
-        reportViewUser.innerHTML = reportEvent.user.username
-        reportViewAction.innerHTML = reportEvent.type
-        reportViewDate.innerHTML = `${month}/${day}/${year} ${hours}:${minutes}`
-        reportEvent.shipRequest.carts.forEach((event, i) => {
+        reportInventory.reportInventories.forEach((inventory, i) => {
           // Render inventory
           const newProductItem = productItemTemplate.cloneNode(true) as HTMLElement
           newProductItem.removeAttribute('id')
@@ -214,36 +224,44 @@ document.addEventListener('DOMContentLoaded', () => {
           const productRetailPrice = newProductItem.querySelector('.product-retail-price') as HTMLDivElement
           const productGroup = newProductItem.querySelector('.product-group') as HTMLDivElement
           const productQuantity = newProductItem.querySelector('.product-quantity') as HTMLDivElement
+          const productWarehouse = newProductItem.querySelector('.product-warehouse') as HTMLDivElement
           const img: HTMLImageElement = newProductItem.querySelector('.product-image')
 
-          event.product.image.length > 100
-            ? (img.src = `data:image/png;base64, ${event.product.image}`)
+          inventory.product.image.length > 100
+            ? (img.src = `data:image/png;base64, ${inventory.product.image}`)
             : (img.src = defaultBrandImage)
 
           productIndex.innerHTML = (i + 1).toString()
-          productName.innerHTML = event.product.name
-          productSku.innerHTML = event.product.SKU
-          productQuantity.innerHTML = event.quantity.toString()
+          productName.innerHTML = inventory.product.name
+          productSku.innerHTML = inventory.product.SKU
+          productQuantity.innerHTML = inventory.qtyBefore.toString()
 
-          if (event.product.regularPrice) {
-            productRegularPrice.innerHTML = event.product.regularPrice.toString()
+          // if (inventory.product.regularPrice) {
+          //   productRegularPrice.innerHTML = inventory.product.regularPrice.toString()
+          // } else {
+          //   productRegularPrice.innerHTML = 'No price'
+          // }
+
+          // if (inventory.product.retailPrice) {
+          //   productRetailPrice.innerHTML = inventory.product.retailPrice.toString()
+          // } else {
+          //   productRetailPrice.innerHTML = 'No price'
+          // }
+
+          if (inventory.qtyBefore) {
+            productRegularPrice.innerHTML = inventory.qtyBefore.toString()
           } else {
-            productRegularPrice.innerHTML = 'No price'
+            productRegularPrice.innerHTML = '0'
           }
 
-          if (event.product.regularPrice) {
-            productRegularPrice.innerHTML = event.product.regularPrice.toString()
+          if (inventory.qtyAfter) {
+            productRetailPrice.innerHTML = inventory.qtyAfter.toString()
           } else {
-            productRegularPrice.innerHTML = 'No price'
+            productRetailPrice.innerHTML = '0'
           }
 
-          if (event.product.retailPrice) {
-            productRetailPrice.innerHTML = event.product.retailPrice.toString()
-          } else {
-            productRetailPrice.innerHTML = 'No price'
-          }
-
-          productGroup.innerHTML = event.group
+          productGroup.innerHTML = inventory.warehouseProduct.group.name
+          productWarehouse.innerHTML = inventory.warehouseProduct.warehouse.name
           reportViewProductTbody.appendChild(newProductItem)
           viewModal.show()
         })
@@ -253,4 +271,4 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 // Download csv
 const downloadCsvButton = document.getElementById('button-csv-download') as HTMLButtonElement
-downloadCsvButton.addEventListener('click', downloadCSV)
+// downloadCsvButton.addEventListener('click', downloadCSV)

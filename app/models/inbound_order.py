@@ -9,7 +9,7 @@ from app import schema as s
 from .supplier import Supplier
 from .warehouse import Warehouse
 from .product_allocated import ProductAllocated
-from .report_inventory import ReportInventory
+from .report_inventory import ReportInventoryList
 
 
 def generate_order_id_timestamp():
@@ -24,8 +24,8 @@ class InboundOrder(db.Model, ModelMixin):
     # Foreign keys
     supplier_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("suppliers.id"))
     warehouse_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("warehouses.id"))
-    report_inventory_id: orm.Mapped[int] = orm.mapped_column(
-        sa.ForeignKey("report_inventories.id"), nullable=True
+    report_inventory_list_id: orm.Mapped[int] = orm.mapped_column(
+        sa.ForeignKey("report_inventory_lists.id"), nullable=True
     )
 
     # Columns
@@ -64,7 +64,7 @@ class InboundOrder(db.Model, ModelMixin):
     products_allocated: orm.Mapped[list[ProductAllocated]] = orm.relationship(
         cascade="all, delete-orphan"
     )
-    report_inventory: orm.Mapped["ReportInventory"] = orm.relationship(
+    report_inventory_list: orm.Mapped["ReportInventoryList"] = orm.relationship(
         back_populates="inbound_order"
     )
 

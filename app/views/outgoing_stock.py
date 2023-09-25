@@ -137,6 +137,17 @@ def save():
 
         products = json.loads(form_edit.products.data)
 
+        report_inventory_list = m.ReportInventoryList(
+            type="Ship Request Dispatched",
+            # TODO who sholud be responsible for change?
+            # one who created inbound order?
+            # or one who accepted it?
+            user_id=current_user.id,
+            ship_request=sr,
+            store=sr.store,
+        )
+        report_inventory_list.save(False)
+
         if not products:
             log(log.ERROR, "No products in ship request: [%s]", form_edit.products.data)
             flash("Cannot save item data", "danger")
@@ -189,15 +200,24 @@ def save():
                 )
             ).scalar()
             if warehouse_product and not is_group_in_master_group:
+                # TODO what if warehouse product not found?
+
                 warehouse_product.product_quantity -= cart.quantity
-                warehouse_product.save()
+                warehouse_product.save(False)
+                report_inventory = m.ReportInventory(
+                    qty_before=warehouse_product.product_quantity + cart.quantity,
+                    qty_after=warehouse_product.product_quantity,
+                    report_inventory_list=report_inventory_list,
+                    warehouse_product=warehouse_product,
+                )
+                report_inventory.save(False)
 
             cart.status = "completed"
-            cart.save()
+            cart.save(False)
+            db.session.commit()
 
         sr.status = s.ShipRequestStatus.assigned
-        sr.save(False)
-        db.session.commit()
+        sr.save()
 
         log(log.INFO, "Ship Request saved and dispatched. Ship Request: [%s]", sr)
         flash("Ship Request dispatched!", "success")

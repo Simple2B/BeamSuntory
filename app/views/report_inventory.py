@@ -19,38 +19,38 @@ report_inventory_blueprint = Blueprint(
 
 def get_inventory_reports():
     filter_inventories = s.FilterReportInventories.model_validate(dict(request.args))
-    query = m.ReportInventory.select().order_by(m.ReportInventory.id)
+    query = m.ReportInventoryList.select().order_by(m.ReportInventoryList.id)
 
-    count_query = sa.select(sa.func.count()).select_from(m.ReportInventory)
+    count_query = sa.select(sa.func.count()).select_from(m.ReportInventoryList)
 
     if filter_inventories.q:
         query = query.where(
-            m.ReportInventory.ship_request.has(
+            m.ReportInventoryList.ship_request.has(
                 m.ShipRequest.order_numb.ilike(f"%{filter_inventories.q}%")
             )
-            | m.ReportInventory.ship_request.has(
+            | m.ReportInventoryList.ship_request.has(
                 m.ShipRequest.status.ilike(f"%{filter_inventories.q}%")
             )
-            | m.ReportInventory.user.has(
+            | m.ReportInventoryList.user.has(
                 m.User.username.ilike(f"%{filter_inventories.q}%")
             )
         )
 
         count_query = count_query.where(
-            m.ReportInventory.ship_request.has(
+            m.ReportInventoryList.ship_request.has(
                 m.ShipRequest.order_numb.ilike(f"%{filter_inventories.q}%")
             )
-            | m.ReportInventory.ship_request.has(
+            | m.ReportInventoryList.ship_request.has(
                 m.ShipRequest.status.ilike(f"%{filter_inventories.q}%")
             )
-            | m.ReportInventory.user.has(
+            | m.ReportInventoryList.user.has(
                 m.User.username.ilike(f"%{filter_inventories.q}%")
             )
         )
 
     if filter_inventories.start_from:
         query = query.where(
-            m.ReportInventory.ship_request.has(
+            m.ReportInventoryList.ship_request.has(
                 m.ShipRequest.carts.any(
                     m.Cart.inventory.has(
                         m.Inventory.date_from
@@ -62,7 +62,7 @@ def get_inventory_reports():
 
     if filter_inventories.start_to:
         query = query.where(
-            m.ReportInventory.ship_request.has(
+            m.ReportInventoryList.ship_request.has(
                 m.ShipRequest.carts.any(
                     m.Cart.inventory.has(
                         m.Inventory.date_from
@@ -74,7 +74,7 @@ def get_inventory_reports():
 
     if filter_inventories.end_from:
         query = query.where(
-            m.ReportInventory.ship_request.has(
+            m.ReportInventoryList.ship_request.has(
                 m.ShipRequest.carts.any(
                     m.Cart.inventory.has(
                         m.Inventory.date_from
@@ -85,7 +85,7 @@ def get_inventory_reports():
         )
 
     if filter_inventories.end_to:
-        m.ReportInventory.ship_request.has(
+        m.ReportInventoryList.ship_request.has(
             m.ShipRequest.carts.any(
                 m.Cart.inventory.has(
                     m.Inventory.date_from
@@ -96,7 +96,9 @@ def get_inventory_reports():
 
     if filter_inventories.username:
         query = query.where(
-            m.ReportInventory.user.has(m.User.username == filter_inventories.username)
+            m.ReportInventoryList.user.has(
+                m.User.username == filter_inventories.username
+            )
         )
 
     pagination = create_pagination(total=db.session.scalar(count_query))
@@ -113,9 +115,9 @@ def get_inventory_reports():
 @login_required
 def get_inventories_json():
     pagination, inventory_reports = get_inventory_reports()
-    report_list_schema = s.ReportInventoryList.model_validate(inventory_reports)
+    report_list_schema = s.ReportInventoryListArray.model_validate(inventory_reports)
 
-    return s.ReportInventoryResponse(
+    return s.ReportInventoryListArray(
         pagination=pagination, inventory_reports=report_list_schema.root
     ).model_dump_json(by_alias=True)
 

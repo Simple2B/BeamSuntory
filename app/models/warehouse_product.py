@@ -34,4 +34,7 @@ class WarehouseProduct(db.Model, ModelMixin):
 
     @property
     def json(self):
+        # warehouse_product = s.WarehouseProduct.model_validate(self).model_dump
+        # product = db.session.get(Product, warehouse_product["product_id"])
+        # warehouse_product["product"] = s.Product.model_validate(product).model_dump
         return s.WarehouseProduct.model_validate(self).model_dump_json()
