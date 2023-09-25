@@ -17,7 +17,7 @@ class ReportEvent(BaseModel):
     history: str
     user: User
     created_at: datetime = Field(alias="createdAt")
-    ship_request: ShipRequest
+    ship_request: ShipRequest = Field(alias="shipRequest")
 
 
 class ReportEventResponse(BaseModel):
