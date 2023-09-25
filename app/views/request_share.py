@@ -14,7 +14,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import aliased
 from app.controllers import create_pagination
 
-from app import models as m, db, mail
+from app import models as m, db
 from app import schema as s
 from app import forms as f
 from app.logger import log
@@ -198,11 +198,13 @@ def share(id: int):
         type=s.ReportRequestShareType.SHARED.value,
         user=current_user,
         request_share=request_share,
-        history=[
-            f"from: {warehouse_from_prod.warehouse.name} ->",
-            f"to: {warehouse_to_prod.warehouse.name} -",
-            f"quantity: {request_share.desire_quantity}",
-        ].join(" "),
+        history=" ".join(
+            [
+                f"from: {warehouse_from_prod.warehouse.name} ->",
+                f"to: {warehouse_to_prod.warehouse.name} -",
+                f"quantity: {request_share.desire_quantity}",
+            ]
+        ),
     )
     request_share.status = "shared"
     request_share.finished_date = datetime.now().replace(microsecond=0)
@@ -225,7 +227,7 @@ def decline(id: int):
     request_share.status = "declined"
     request_share.finished_date = datetime.now().replace(microsecond=0)
     report_request_share = m.ReportRequestShare(
-        type=s.ReportRequestShareType.DECLINED,
+        type=s.ReportRequestShareType.DECLINED.value,
         user=current_user,
         request_share=request_share,
     )

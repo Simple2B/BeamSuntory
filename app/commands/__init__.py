@@ -6,6 +6,7 @@ from sqlalchemy import orm
 from app import models as m
 from app import db, forms
 from app import schema as s
+from app import controllers as c
 from config import SALES_REP_LOCKER_NAME
 
 
@@ -40,23 +41,37 @@ def init(app: Flask):
             ).scalar()
             if not check_role:
                 m.Division(role_name=role.value, activated=True).save()
-        role = db.session.execute(
-            m.Division.select().where(m.Division.role_name == s.UserRole.ADMIN.value)
-        ).scalar()
-        m.User(
-            username=app.config["ADMIN_USERNAME"],
-            email=app.config["ADMIN_EMAIL"],
-            password=app.config["ADMIN_PASSWORD"],
-            role=role.id,
-            country="Ukraine",
-            region="Kyiv",
-            city="Kyiv",
-            zip_code="11111",
-            street_address="Address 1",
-            activated=True,
-            approval_permission=True,
-            sales_rep=False,
-        ).save()
+
+        c.create_admin(
+            s.AdminCreate(
+                username=app.config["ADMIN_USERNAME"],
+                email=app.config["ADMIN_EMAIL"],
+                password=app.config["ADMIN_PASSWORD"],
+                country="Ukraine",
+                region="Kyiv",
+                city="Kyiv",
+                zip_code="11111",
+                street_address="Address 1",
+            )
+        )
+
+        # role = db.session.execute(
+        #     m.Division.select().where(m.Division.role_name == s.UserRole.ADMIN.value)
+        # ).scalar()
+        # m.User(
+        #     username=app.config["ADMIN_USERNAME"],
+        #     email=app.config["ADMIN_EMAIL"],
+        #     password=app.config["ADMIN_PASSWORD"],
+        #     role=role.id,
+        #     country="Ukraine",
+        #     region="Kyiv",
+        #     city="Kyiv",
+        #     zip_code="11111",
+        #     street_address="Address 1",
+        #     activated=True,
+        #     approval_permission=True,
+        #     sales_rep=False,
+        # ).save()
         print("admin created")
 
     @app.cli.command()

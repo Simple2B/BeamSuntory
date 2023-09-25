@@ -4,9 +4,10 @@ import sqlalchemy as sa
 from sqlalchemy import orm
 
 from app import db
+from app import schema as s
+
 from .utils import ModelMixin
 
-# from app import schema as s
 
 if TYPE_CHECKING:
     from .user import User
@@ -36,6 +37,6 @@ class ReportRequestShare(db.Model, ModelMixin):
     request_share: orm.Mapped["RequestShare"] = orm.relationship()
     user: orm.Mapped["User"] = orm.relationship()
 
-    # @property
-    # def json(self):
-    #     return s.ReportEvent.model_validate(self).model_dump_json(by_alias=True)
+    @property
+    def json(self):
+        return s.ReportRequestShare.model_validate(self).model_dump_json(by_alias=True)

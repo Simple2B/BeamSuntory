@@ -46,7 +46,9 @@ def test_report_share_request_on_create(mg_g_populate: FlaskClient):
 
     # Get report share request
     # HTML
-    mg_g_populate.post("/report_request_share/event")
-    # API for csv
-
+    # Get dashboard
+    response = mg_g_populate.get("/report_request_share", follow_redirects=True)
     assert response.status_code == HTTPStatus.OK
+    # Get tables with pagination
+    response = mg_g_populate.get("/report_request_share/", follow_redirects=True)
+    # API for csv

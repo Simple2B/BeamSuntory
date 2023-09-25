@@ -619,7 +619,7 @@ def request_share():
         warehouse_product = db.session.scalar(
             m.WarehouseProduct.select().where(
                 m.WarehouseProduct.product.has(m.Product.SKU == form.sku.data),
-                m.WarehouseProduct.group.has(m.Group.name == form.from_group.data),
+                m.WarehouseProduct.group.has(m.Group.id == form.from_group_id.data),
             )
         )
 
@@ -628,7 +628,7 @@ def request_share():
                 log.ERROR,
                 "Not found product by SKU and group: [%s], [%s]",
                 form.sku.data,
-                form.from_group.data,
+                form.from_group_id.data,
             )
             flash("Cannot save product data", "danger")
             return redirect(url_for("product.get_all"))
