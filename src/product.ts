@@ -1273,7 +1273,7 @@ function createAdjustAction(isEqual: boolean, masterGroup: string, group: string
 
   masterGroupWarehouseContainer.innerHTML = `
   <div class="flex gap-4">
-    <div class="w-1/2">
+    <div class="">
       <label for="for-group-${groupUnderScore}"
         class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">${masterGroup}</label>
       <select type="text" name="group-${groupUnderScore}" id="master-group-adjust-${groupUnderScore}"
@@ -1283,7 +1283,7 @@ function createAdjustAction(isEqual: boolean, masterGroup: string, group: string
         <option value="${groupProductIds[group]}">${group}</option>
       </select>
     </div>
-    <div class="w-1/2">
+    <div class="">
       <label for="for-warehouse-${groupUnderScore}"
         class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Warehouse</label>
       <select type="text" name="group-${groupUnderScore}" id="warehouse-adjust-${groupUnderScore}" data-target-group="${group}"
