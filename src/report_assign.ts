@@ -9,9 +9,9 @@ interface IUser {
 interface IReportAssign {
   product: IProduct
   quantity: number
-  created_at: string
+  createdAt: string
   group: IGroup
-  from_group: IGroup
+  fromGroup: IGroup
   type: string
   user: IUser
 }
@@ -71,10 +71,10 @@ const downloadCSV = async function () {
     data.report_events.forEach((report: IReportAssign) => {
       csvData.push(
         [
-          report.created_at,
+          formatDate(report.createdAt),
           report.user.username,
           report.type,          
-          report.from_group.name,
+          report.fromGroup.name,
           report.group.name,
           report.product.SKU,
           report.product.name,
@@ -94,6 +94,16 @@ const downloadCSV = async function () {
   a.remove()
 }
 
+
+const formatDate = (date: string) => {
+  const createAt = new Date(date)
+  const year = createAt.getFullYear()
+  const month = String(createAt.getMonth() + 1).padStart(2, '0') 
+  const day = String(createAt.getDate()).padStart(2, '0')
+  const hours = String(createAt.getHours()).padStart(2, '0')
+  const minutes = String(createAt.getMinutes()).padStart(2, '0')
+  return `${month}/${day}/${year} ${hours}:${minutes}`
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   const filtersHTML = document.querySelectorAll("[name='q'], [name='start_date'], [name='end_date'], [name='username'], [name='language'], [name='category'], [name='premises'], [name='from_group'], [name='to_group']");
@@ -139,19 +149,11 @@ document.addEventListener('DOMContentLoaded', () => {
     reportViewButtons.forEach((btn) => {
       btn.addEventListener('click', () => {
         const reportAssign: IReportAssign = JSON.parse(btn.getAttribute('data-target'));
-        const createAt = new Date(reportAssign.created_at)
-        const year = createAt.getFullYear()
-        const month = String(createAt.getMonth() + 1).padStart(2, '0') // Month is 0-based
-        const day = String(createAt.getDate()).padStart(2, '0')
-        const hours = String(createAt.getHours()).padStart(2, '0')
-        const minutes = String(createAt.getMinutes()).padStart(2, '0')
-
+        
         reportViewUser.innerHTML = reportAssign.user.username
         reportViewAction.innerHTML = reportAssign.type
 
-
-
-        reportViewDate.innerHTML = `${month}/${day}/${year} ${hours}:${minutes}`
+        reportViewDate.innerHTML = formatDate(reportAssign.createdAt) 
 
         const newProductItem = productItemTemplate
         newProductItem.removeAttribute('id')
@@ -200,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         productGroup.innerHTML = reportAssign.group.name;
-        productGroupFrom.innerHTML = reportAssign.from_group.name;
+        productGroupFrom.innerHTML = reportAssign.fromGroup.name;
         reportViewProductTbody.appendChild(newProductItem);
         viewModal.show();
 
