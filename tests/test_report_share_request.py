@@ -1,8 +1,12 @@
+import sqlalchemy as sa
+
 from flask.testing import FlaskClient
 from http import HTTPStatus
+from bs4 import BeautifulSoup
 
 from app import db
 from app import models as m
+from app import schema as s
 
 from tests.utils import login
 
@@ -29,7 +33,7 @@ def test_report_share_request_on_create(mg_g_populate: FlaskClient):
             to_group_id=group.id,
             available_quantity=5,
             desire_quantity=3,
-            from_group=warehouse_product.group.name,
+            from_group_id=warehouse_product.group.id,
         ),
         follow_redirects=True,
     )
@@ -50,5 +54,18 @@ def test_report_share_request_on_create(mg_g_populate: FlaskClient):
     response = mg_g_populate.get("/report_request_share", follow_redirects=True)
     assert response.status_code == HTTPStatus.OK
     # Get tables with pagination
-    response = mg_g_populate.get("/report_request_share/", follow_redirects=True)
+    response = mg_g_populate.get("/report_request_share/search", follow_redirects=True)
+    assert response.status_code == HTTPStatus.OK
+    # parse html
+    soup = BeautifulSoup(response.data, "html.parser")
+    reports_tr = soup.find_all("tr", class_="table-event-item-tr")
+    assert reports_tr
+    assert db.session.scalar(sa.func.count(m.ReportRequestShare.id)) == len(reports_tr)
     # API for csv
+    response = mg_g_populate.get("/report_request_share/api", follow_redirects=True)
+    assert response.status_code == HTTPStatus.OK
+    report_data = s.ReportRequestShareResponse.model_validate_json(response.json)
+    assert report_data.reports.root
+    assert report_data.pagination.total == db.session.scalar(
+        sa.func.count(m.ReportRequestShare.id)
+    )

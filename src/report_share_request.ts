@@ -2,7 +2,7 @@ import { Modal, ModalOptions } from "flowbite";
 import HTMXDispatcher from "./htmx";
 import { IGroup } from "./inbound_order/types";
 
-interface IRequestShare {
+export interface IRequestShare {
   status: string;
   desireQuantity: number;
 

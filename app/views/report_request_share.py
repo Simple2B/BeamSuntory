@@ -3,6 +3,7 @@ from flask import (
     Blueprint,
     request,
     render_template,
+    jsonify,
 )
 from flask_login import login_required
 import sqlalchemy as sa
@@ -87,9 +88,11 @@ def report_json():
     pagination, reports = get_request_share_report()
     report_list_schema = s.ReportRequestShareList.model_validate(reports)
 
-    return s.ReportRequestShareResponse(
-        pagination=pagination, reports=report_list_schema.root
-    ).model_dump_json(by_alias=True)
+    return jsonify(
+        s.ReportRequestShareResponse(
+            pagination=pagination, reports=report_list_schema.root
+        ).model_dump_json(by_alias=True)
+    )
 
 
 @report_request_share_blueprint.route("search")

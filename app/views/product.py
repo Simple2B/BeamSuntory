@@ -2,7 +2,6 @@ from io import BytesIO
 import base64
 import json
 from datetime import datetime
-from uuid import uuid4
 import pandas
 from flask import (
     Blueprint,
