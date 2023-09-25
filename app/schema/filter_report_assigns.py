@@ -12,3 +12,5 @@ class FilterReportAssign(BaseModel):
     category: str | None = None
     language: str | None = None
     premises: str | None = None
+    from_group: str | None = None
+    to_group: str | None = None

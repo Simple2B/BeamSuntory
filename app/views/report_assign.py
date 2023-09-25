@@ -33,9 +33,17 @@ def get_assigns_report():
             | m.Assign.product.has(m.Product.SKU.ilike(f"%{filter_assign.q}%"))
             | m.Assign.user.has(m.User.username.ilike(f"%{filter_assign.q}%"))
         )
+        count_query = count_query.where(
+            m.Assign.product.has(m.Product.name.ilike(f"%{filter_assign.q}%"))
+            | m.Assign.product.has(m.Product.SKU.ilike(f"%{filter_assign.q}%"))
+            | m.Assign.user.has(m.User.username.ilike(f"%{filter_assign.q}%"))
+        )
 
     if filter_assign.username:
         query = query.where(
+            m.Assign.user.has(m.User.username == filter_assign.username)
+        )
+        count_query = count_query.where(
             m.Assign.user.has(m.User.username == filter_assign.username)
         )
 
@@ -57,12 +65,40 @@ def get_assigns_report():
                     )
                 )
             )
+            count_query = count_query.where(
+                m.Assign.product.has(
+                    m.Product.product_groups.any(
+                        m.ProductGroup.parent.has(
+                            m.GroupProduct.name.ilike(f"%{group}%")
+                        )
+                    )
+                )
+            )
 
     if filter_assign.start_date:
         query = query.where(m.Assign.created_at >= filter_assign.start_date)
+        count_query = count_query.where(m.Assign.created_at >= filter_assign.start_date)
 
     if filter_assign.end_date:
         query = query.where(m.Assign.created_at <= filter_assign.end_date)
+        count_query = count_query.where(m.Assign.created_at <= filter_assign.end_date)
+
+    if filter_assign.from_group:
+        query = query.where(
+            m.Assign.from_group.has(m.Group.name == filter_assign.from_group)
+        )
+
+        count_query = count_query.where(
+            m.Assign.from_group.has(m.Group.name == filter_assign.from_group)
+        )
+
+    if filter_assign.to_group:
+        query = query.where(
+            m.Assign.group.has(m.Group.name.ilike(f"%{filter_assign.to_group}%"))
+        )
+        count_query = count_query.where(
+            m.Assign.group.has(m.Group.name.ilike(f"%{filter_assign.to_group}%"))
+        )
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
@@ -103,6 +139,8 @@ def assigns():
         .order_by(m.MasterGroupProduct.id)
     ).all()
 
+    product_groups = db.session.scalars(sa.select(m.Group)).all()
+
     return render_template(
         "report/assign/assigns.html",
         users=users,
@@ -110,6 +148,7 @@ def assigns():
         product_master_group_language=product_master_group_language,
         product_master_group_category=product_master_group_category,
         product_master_group_premises=product_master_group_premises,
+        product_groups=product_groups,
     )
 
 

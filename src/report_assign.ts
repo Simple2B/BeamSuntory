@@ -96,7 +96,7 @@ const downloadCSV = async function () {
 
 
 document.addEventListener('DOMContentLoaded', () => {
-  const filtersHTML = document.querySelectorAll("[name='q'], [name='start_date'], [name='end_date'], [name='username'], [name='language'], [name='category'], [name='premises'], [name='brand'");
+  const filtersHTML = document.querySelectorAll("[name='q'], [name='start_date'], [name='end_date'], [name='username'], [name='language'], [name='category'], [name='premises'], [name='from_group'], [name='to_group']");
   const buttonLoadEventsTable = document.querySelector('#table-report-loader') as HTMLButtonElement;
 
   
