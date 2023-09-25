@@ -182,13 +182,6 @@ document.addEventListener('DOMContentLoaded', () => {
         productName.innerHTML = reportAssign.product.name
         productSku.innerHTML = reportAssign.product.SKU
         productQuantity.innerHTML = reportAssign.quantity.toString()
-
-        if (reportAssign.product.regularPrice) {
-          productRegularPrice.innerHTML = reportAssign.product.regularPrice.toString()
-        } else {
-          productRegularPrice.innerHTML = 'No price'
-        }
-
         if (reportAssign.product.regularPrice) {
           productRegularPrice.innerHTML = reportAssign.product.regularPrice.toString()
         } else {
