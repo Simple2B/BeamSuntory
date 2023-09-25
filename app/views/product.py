@@ -744,6 +744,7 @@ def adjust():
                         adjust_gr_qty: m.AdjustGroupQty = m.AdjustGroupQty(
                             adjust_id=adjust_item.id,
                             quantity=quantity,
+                            quantity_before=product_warehouse.product_quantity,
                             group_id=group_id,
                             warehouse_id=warehouse_id,
                         )

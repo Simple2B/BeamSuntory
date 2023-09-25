@@ -1,5 +1,5 @@
 import { ModalOptions, Modal } from 'flowbite';
-import { IProduct } from './inbound_order/types';
+import { IProduct, IWarehouse } from './inbound_order/types';
 import HTMXDispatcher from './htmx';
 
 interface IUser {
@@ -26,6 +26,31 @@ interface IAdjust {
   note: string;
   user: IUser;
   createdAt: string;
+  adjustGroupQty: IAdjustGroupQty[];
+}
+
+interface IAdjustGroupQty {
+  id: number;
+  group: IGroup;
+  warehouse: IWarehouse;
+  quantity: number;
+  quantityBefore: number;
+}
+
+interface IGroup {
+  id: number;
+  name: string;
+  masterGroup: IMasterGroup;
+}
+
+interface IMasterGroup {
+  id: number;
+  name: string;
+}
+
+interface IWarehouse {
+  id: number;
+  name: string;
 }
 
 // initialize htmx listener
@@ -144,9 +169,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const productItemTemplate = document.querySelector('#view-product-item-template') as HTMLTableRowElement;
   // view buttons click
   const reportViewUser = document.getElementById('report-adjustment-user') as HTMLDivElement;
-  const reportViewAction = document.getElementById('report-adjustment-action') as HTMLDivElement;
+  const reportProductName = document.getElementById('report-adjustment-product-name') as HTMLDivElement;
+  const reportProductSKU = document.getElementById('report-adjustment-product-sku') as HTMLDivElement;
+  const reportProductImage = document.getElementById('report-adjustment-product-image') as HTMLImageElement;
   const reportViewDate = document.getElementById('report-adjustment-date') as HTMLDivElement;
-  const reportStoreName = document.getElementById('report-store-name') as HTMLDivElement;
+  const reportAdjustNote = document.getElementById('report-adjustment-note') as HTMLDivElement;
 
   // onload element with adjustment-table id
   htmxDispatcher.onLoad('adjustment-table', (target) => {
@@ -161,65 +188,50 @@ document.addEventListener('DOMContentLoaded', () => {
         const day = String(createAt.getDate()).padStart(2, '0');
         const hours = String(createAt.getHours()).padStart(2, '0');
         const minutes = String(createAt.getMinutes()).padStart(2, '0');
+        console.log(reportAdjust);
+        // Render event
 
         reportViewUser.innerHTML = reportAdjust.user.username;
-        reportViewAction.innerHTML = reportAdjust.type;
+        reportProductName.innerHTML = reportAdjust.product.name;
         reportViewDate.innerHTML = `${month}/${day}/${year} ${hours}:${minutes}`;
-        // reportStoreName.innerHTML = reportAdjust.shipRequest.store.storeName;
+        reportProductSKU.innerHTML = reportAdjust.product.SKU;
+        reportAdjustNote.innerHTML = reportAdjust.note ? reportAdjust.note : 'No notes';
+
+        reportAdjust.product.image.length > 100
+          ? (reportProductImage.src = `data:image/png;base64, ${reportAdjust.product.image}`)
+          : (reportProductImage.src = defaultBrandImage);
 
         reportViewUser.innerHTML = reportAdjust.user.username;
-        reportViewAction.innerHTML = reportAdjust.type;
         reportViewDate.innerHTML = `${month}/${day}/${year} ${hours}:${minutes}`;
-        reportAdjust.shipRequest.carts.forEach((event, i) => {
+        reportAdjust.adjustGroupQty.forEach((adjust, i) => {
+          console.log(adjust);
+
           // Render event
-          const newProductItem = productItemTemplate.cloneNode(true) as HTMLElement;
-          newProductItem.removeAttribute('id');
-          newProductItem.classList.remove('hidden');
-          newProductItem.classList.add(
+          const newAdjustItem = productItemTemplate.cloneNode(true) as HTMLElement;
+          newAdjustItem.removeAttribute('id');
+          newAdjustItem.classList.remove('hidden');
+          newAdjustItem.classList.add(
             'product-item-view',
             'text-base',
             'font-semibold',
             'text-gray-900',
             'dark:text-white'
           );
-          const productIndex = newProductItem.querySelector('.product-index') as HTMLDivElement;
-          const productName = newProductItem.querySelector('.product-name') as HTMLDivElement;
-          const productSku = newProductItem.querySelector('.product-sku') as HTMLDivElement;
-          const productRegularPrice = newProductItem.querySelector('.product-regular-price') as HTMLDivElement;
-          const productRetailPrice = newProductItem.querySelector('.product-retail-price') as HTMLDivElement;
-          const productGroup = newProductItem.querySelector('.product-group') as HTMLDivElement;
-          const productQuantity = newProductItem.querySelector('.product-quantity') as HTMLDivElement;
-          const img: HTMLImageElement = newProductItem.querySelector('.product-image');
-
-          event.product.image.length > 100
-            ? (img.src = `data:image/png;base64, ${event.product.image}`)
-            : (img.src = defaultBrandImage);
+          const productIndex = newAdjustItem.querySelector('.product-index') as HTMLDivElement;
+          const productMasterGroup = newAdjustItem.querySelector('.product-master-group') as HTMLDivElement;
+          const productGroup = newAdjustItem.querySelector('.product-group') as HTMLDivElement;
+          const productQuantityBefore = newAdjustItem.querySelector('.product-quantity-before') as HTMLDivElement;
+          const productQuantityAfter = newAdjustItem.querySelector('.product-quantity-after') as HTMLDivElement;
+          const productWarehouse = newAdjustItem.querySelector('.product-warehouse') as HTMLDivElement;
 
           productIndex.innerHTML = (i + 1).toString();
-          productName.innerHTML = event.product.name;
-          productSku.innerHTML = event.product.SKU;
-          productQuantity.innerHTML = event.quantity.toString();
+          productMasterGroup.innerHTML = adjust.group.masterGroup.name;
+          productGroup.innerHTML = adjust.group.name;
+          productWarehouse.innerHTML = adjust.warehouse.name;
+          productQuantityBefore.innerHTML = adjust.quantityBefore.toString();
+          productQuantityAfter.innerHTML = adjust.quantity.toString();
 
-          if (event.product.regularPrice) {
-            productRegularPrice.innerHTML = event.product.regularPrice.toString();
-          } else {
-            productRegularPrice.innerHTML = 'No price';
-          }
-
-          if (event.product.regularPrice) {
-            productRegularPrice.innerHTML = event.product.regularPrice.toString();
-          } else {
-            productRegularPrice.innerHTML = 'No price';
-          }
-
-          if (event.product.retailPrice) {
-            productRetailPrice.innerHTML = event.product.retailPrice.toString();
-          } else {
-            productRetailPrice.innerHTML = 'No price';
-          }
-
-          productGroup.innerHTML = event.group;
-          reportViewProductTbody.appendChild(newProductItem);
+          reportViewProductTbody.appendChild(newAdjustItem);
           viewModal.show();
         });
       });

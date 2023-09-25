@@ -1,5 +1,4 @@
 from datetime import datetime
-import json
 
 import sqlalchemy as sa
 from sqlalchemy import ForeignKey, orm
@@ -27,29 +26,8 @@ class Adjust(db.Model, ModelMixin):
     # Relationships
     product: orm.Mapped[Product] = orm.relationship()
     user: orm.Mapped[User] = orm.relationship()
-    # TODO: should be added back_populates="adjusts"?
-    adjust_group_qty: orm.Mapped[AdjustGroupQty] = orm.relationship("AdjustGroupQty")
+    adjust_group_qty: orm.Mapped[AdjustGroupQty] = orm.relationship()
 
     @property
     def json(self):
-        mg = s.Adjust.from_orm(self)
-        ujs = mg.model_dump_json()
-        mg_dict = json.loads(ujs)
-
-        mg_dict["product"] = {
-            "name": self.product.name,
-            "image": self.product.image,
-            "SKU": self.product.SKU,
-        }
-        mg_dict["groups_qty"] = [
-            {
-                "group": ag.group.name,
-                "quantity": ag.quantity,
-                "warehouse": ag.warehouse.name,
-            }
-            for ag in db.session.execute(
-                AdjustGroupQty.select().where(AdjustGroupQty.adjust_id == self.id)
-            ).scalars()
-        ]
-
-        return json.dumps(mg_dict)
+        return s.Adjust.model_validate(self).model_dump_json(by_alias=True)

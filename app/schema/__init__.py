@@ -34,6 +34,7 @@ from .assign import Assign
 from .request_share import RequestShare
 from .store_category import StoreCategory
 from .adjust import Adjust, AdjustResponse, AdjustList
+from .adjust_group_quantity import AdjustGroupQty
 from .event import (
     Event,
     EventCSVOut,
