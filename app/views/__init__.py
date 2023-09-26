@@ -27,6 +27,7 @@ from .adjust import adjust_blueprint
 from .event import event_blueprint
 from .report_event import report_blueprint
 from .report_assign import report_assign_blueprint
+from .report_inbound_orders import report_inbound_orders_blueprint
 
 BLUEPRINTS = (
     main_blueprint,
@@ -57,4 +58,5 @@ BLUEPRINTS = (
     event_blueprint,
     report_blueprint,
     report_assign_blueprint,
+    report_inbound_orders_blueprint,
 )

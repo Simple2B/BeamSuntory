@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 from flask import (
     Blueprint,
@@ -8,7 +9,8 @@ from flask import (
     redirect,
     url_for,
 )
-from flask_login import login_required
+
+from flask_login import login_required, current_user
 import sqlalchemy as sa
 from sqlalchemy import desc
 from pydantic import ValidationError
@@ -158,8 +160,19 @@ def create():
                 )
             )
 
-        log(log.INFO, "Form submitted. Inbound order: [%s]", inbound_order)
         inbound_order.save()
+
+        report_inbound_order = m.ReportInboundOrder(
+            type=s.ReportEventType.created.value,
+            history="",
+            inbound_order_id=inbound_order.id,
+            user_id=current_user.id,
+            created_at=inbound_order.created_at,
+        )
+
+        log(log.INFO, "Form submitted. Inbound order: [%s]", inbound_order)
+
+        report_inbound_order.save()
         flash("Inbound order added!", "success")
 
         return redirect(
@@ -313,6 +326,15 @@ def save():
                             current_order_uuid=inbound_order.uuid,
                         )
                     )
+
+        report_inbound_order: m.ReportInboundOrder = db.session.scalar(
+            m.ReportInboundOrder.select().where(
+                m.ReportInboundOrder.inbound_order_id == inbound_order.id
+            )
+        )
+
+        report_inbound_order.type = s.ReportEventType.updated.value
+        report_inbound_order.created_at = datetime.now()
 
         db.session.commit()
         if form.next_url.data:

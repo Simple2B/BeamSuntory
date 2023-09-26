@@ -50,3 +50,9 @@ from .report_event import (
 from .filter_report_events import FilterReportEvents
 from .filter_report_assigns import FilterReportAssign
 from .report_assign import ReportAssignsResponse, ReportAssignList
+from .filter_report_inbound_orders import FilterReportInboundOrder
+from .report_inbound_order import (
+    ReportInboundOrder,
+    ReportInboundOrderList,
+    ReportInboundOrderResponse,
+)
