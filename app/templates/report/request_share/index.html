@@ -23,7 +23,6 @@
         hx-trigger="change"
         hx-target="#reports-table"
         hx-include="[name='created_from'], [name='created_to'], [name='q']"
-        hx-target="#reports-table"
         hx-get="{{ url_for('report_request_share.search') }}"
         hx-indicator="#report-table-spinner"
       >
