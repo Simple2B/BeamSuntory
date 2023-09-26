@@ -119,8 +119,10 @@ const downloadCSV = async function () {
         let reportTarget
         if (reportInventories.store) {
           reportTarget = reportInventories.store.storeName
-        } else {
+        } else if (reportInventories.warehouse) {
           reportTarget = reportInventories.warehouse.name
+        } else {
+          reportTarget = 'Internal action'
         }
 
         csvData.push(
@@ -209,8 +211,10 @@ document.addEventListener('DOMContentLoaded', () => {
         reportViewDate.innerHTML = formatDate(reportInventory.createdAt)
         if (reportInventory.store) {
           reportStoreName.innerHTML = reportInventory.store.storeName
-        } else {
+        } else if (reportInventory.warehouse) {
           reportStoreName.innerHTML = reportInventory.warehouse.name
+        } else {
+          reportStoreName.innerHTML = 'Internal action'
         }
 
         reportInventory.reportInventories.forEach((inventory, i) => {
@@ -231,7 +235,6 @@ document.addEventListener('DOMContentLoaded', () => {
           const productRegularPrice = newProductItem.querySelector('.product-regular-price') as HTMLDivElement
           const productRetailPrice = newProductItem.querySelector('.product-retail-price') as HTMLDivElement
           const productGroup = newProductItem.querySelector('.product-group') as HTMLDivElement
-          const productQuantity = newProductItem.querySelector('.product-quantity') as HTMLDivElement
           const productWarehouse = newProductItem.querySelector('.product-warehouse') as HTMLDivElement
           const img: HTMLImageElement = newProductItem.querySelector('.product-image')
 
@@ -242,7 +245,6 @@ document.addEventListener('DOMContentLoaded', () => {
           productIndex.innerHTML = (i + 1).toString()
           productName.innerHTML = inventory.product.name
           productSku.innerHTML = inventory.product.SKU
-          productQuantity.innerHTML = inventory.qtyBefore.toString()
 
           // TODO do we need to show price or qty or both?
           // if (inventory.product.regularPrice) {

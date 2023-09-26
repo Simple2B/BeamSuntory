@@ -567,6 +567,11 @@ def assign():
                 m.Group.name == form.from_group.data,
             )
         ).scalar()
+        report_inventory_list = m.ReportInventoryList(
+            type="Product Assigned",
+            user_id=current_user.id,
+        )
+        report_inventory_list.save()
 
         # TODO sort also by warehouse_id
         product_warehouse: m.WarehouseProduct = db.session.execute(
@@ -575,8 +580,17 @@ def assign():
                 m.WarehouseProduct.group_id == product_from_group.id,
             )
         ).scalar()
+        # NOTE create report for inventory
+        report_inventory = m.ReportInventory(
+            qty_before=product_warehouse.product_quantity,
+            qty_after=product_warehouse.product_quantity - form.quantity.data,
+            report_inventory_list_id=report_inventory_list.id,
+            product_id=product_warehouse.product_id,
+            warehouse_product_id=product_warehouse.id,
+        )
+        report_inventory.save(False)
         product_warehouse.product_quantity -= form.quantity.data
-        product_warehouse.save()
+        product_warehouse.save(False)
 
         new_product_warehouse: m.WarehouseProduct = db.session.execute(
             m.WarehouseProduct.select().where(
@@ -585,15 +599,27 @@ def assign():
             )
         ).scalar()
         if new_product_warehouse:
+            qty_before = new_product_warehouse.product_quantity
             new_product_warehouse.product_quantity += form.quantity.data
-            new_product_warehouse.save()
+            new_product_warehouse.save(False)
         else:
-            m.WarehouseProduct(
+            qty_before = 0
+            new_product_warehouse = m.WarehouseProduct(
                 product_id=p.id,
                 group_id=int(form.group.data),
                 product_quantity=form.quantity.data,
                 warehouse_id=product_warehouse.warehouse_id,
-            ).save()
+            )
+            new_product_warehouse.save()
+
+        report_inventory = m.ReportInventory(
+            qty_before=qty_before,
+            qty_after=new_product_warehouse.product_quantity,
+            report_inventory_list_id=report_inventory_list.id,
+            product_id=new_product_warehouse.product_id,
+            warehouse_product_id=new_product_warehouse.id,
+        )
+        report_inventory.save(False)
 
         m.Assign(
             product_id=p.id,
@@ -602,7 +628,9 @@ def assign():
             from_group_id=form.from_group_id.data,
             user_id=current_user.id,
             type=s.ReportEventType.created.value,
-        ).save()
+        ).save(False)
+
+        db.session.commit()
 
         return redirect(url_for("product.get_all"))
 
