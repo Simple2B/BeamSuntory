@@ -749,6 +749,7 @@ def adjust():
                             quantity_before=product_warehouse.product_quantity,
                             group_id=group_id,
                             warehouse_id=warehouse_id,
+                            product_id=form.product_id.data,
                         )
                         db.session.add(adjust_gr_qty)
                         is_adjust_products = True
@@ -768,6 +769,7 @@ def adjust():
                         quantity_before=0,
                         group_id=group_id,
                         warehouse_id=warehouse_id,
+                        product_id=form.product_id.data,
                     )
                     db.session.add(adjust_gr_qty)
 

@@ -32,7 +32,7 @@ interface IAdjustGroupQty {
   id: number;
   group: IGroup;
   warehouse: IWarehouse;
-  quantity: number;
+  quantityAfter: number;
   quantityBefore: number;
 }
 
@@ -73,7 +73,17 @@ const downloadCSV = async function () {
   const dateEventEndToInput: HTMLInputElement = document.querySelector('#product-adjustment-sort-end-to-datepicker');
   const masterGroupSelect: HTMLInputElement = document.querySelector('#adjustment-filter-master-group');
   const groupSelect: HTMLInputElement = document.querySelector('#adjustment-filter-group');
-  const sortProductGroup: HTMLInputElement = document.querySelector('#product-adjustment-sort-end-to-datepicker');
+  const productGroupBrand: HTMLInputElement = document.querySelector('#adjustment-filter-product-master-group-brand"');
+  const productGroupCategory: HTMLInputElement = document.querySelector(
+    '#adjustment-filter-product-master-group-category'
+  );
+  const productGroupPremises: HTMLInputElement = document.querySelector(
+    '#adjustment-filter-product-master-group-premises'
+  );
+  const productGroupLanguage: HTMLInputElement = document.querySelector(
+    '#adjustment-filter-product-master-group-language'
+  );
+  const productGroupEvent: HTMLInputElement = document.querySelector('#adjustment-filter-product-master-group-event');
 
   const filtersMap = {
     q: searchEventInput,
@@ -114,7 +124,7 @@ const downloadCSV = async function () {
             reportAdjust.group.name,
             reportAdjust.warehouse.name,
             reportAdjust.quantityBefore,
-            reportAdjust.quantity,
+            reportAdjust.quantityAfter,
           ].join(',')
         );
       });
@@ -133,7 +143,7 @@ const downloadCSV = async function () {
 
 document.addEventListener('DOMContentLoaded', () => {
   const filtersHTML = document.querySelectorAll(
-    "[name='q'], [name='username'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from'], [name='sort-end-to'], [name='master_group'], [name='group'], [name='product_sort_group']"
+    "[name='q'], [name='username'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from'], [name='sort-end-to'], [name='master_group'], [name='group'], [name='group_brand'], [name='group_category'], [name='group_premises'], [name='group_language'], [name='group_event']"
   );
   const buttonLoadEventsTable = document.querySelector('#table-report-loader') as HTMLButtonElement;
 
@@ -237,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
           productGroup.innerHTML = adjust.group.name;
           productWarehouse.innerHTML = adjust.warehouse.name;
           productQuantityBefore.innerHTML = adjust.quantityBefore.toString();
-          productQuantityAfter.innerHTML = adjust.quantity.toString();
+          productQuantityAfter.innerHTML = adjust.quantityAfter.toString();
 
           reportViewProductTbody.appendChild(newAdjustItem);
           viewModal.show();

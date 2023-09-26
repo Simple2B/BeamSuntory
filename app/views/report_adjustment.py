@@ -44,26 +44,14 @@ def get_adjustment_report():
 
     if filter_adjustments.start_from:
         query = query.where(
-            m.ReportEvent.ship_request.has(
-                m.ShipRequest.carts.any(
-                    m.Cart.event.has(
-                        m.Event.date_from
-                        >= datetime.strptime(filter_adjustments.start_from, "%m/%d/%Y")
-                    )
-                )
-            )
+            m.Adjust.created_at
+            >= datetime.strptime(filter_adjustments.start_from, "%m/%d/%Y")
         )
 
     if filter_adjustments.start_to:
         query = query.where(
-            m.ReportEvent.ship_request.has(
-                m.ShipRequest.carts.any(
-                    m.Cart.event.has(
-                        m.Event.date_from
-                        <= datetime.strptime(filter_adjustments.start_to, "%m/%d/%Y")
-                    )
-                )
-            )
+            m.Adjust.created_at
+            <= datetime.strptime(filter_adjustments.start_from, "%m/%d/%Y")
         )
 
     if filter_adjustments.end_from:
@@ -113,6 +101,36 @@ def get_adjustment_report():
             )
         )
 
+    master_groups = [
+        filter_adjustments.group_brand,
+        filter_adjustments.group_language,
+        filter_adjustments.group_category,
+        filter_adjustments.group_premises,
+        filter_adjustments.group_event,
+    ]
+
+    if master_groups.count(None) != len(master_groups):
+        for group in master_groups:
+            if group != "":
+                query = query.where(
+                    m.Adjust.adjust_group_qty.any(
+                        m.AdjustGroupQty.product.has(
+                            m.Product.product_groups.any(
+                                m.ProductGroup.parent.has(m.GroupProduct.name == group)
+                            )
+                        )
+                    )
+                )
+                count_query = count_query.where(
+                    m.Adjust.adjust_group_qty.any(
+                        m.AdjustGroupQty.product.has(
+                            m.Product.product_groups.any(
+                                m.ProductGroup.parent.has(m.GroupProduct.name == group)
+                            )
+                        )
+                    )
+                )
+
     pagination = create_pagination(total=db.session.scalar(count_query))
 
     reports = db.session.scalars(
@@ -138,14 +156,33 @@ def get_adjustments_json():
 @login_required
 def adjustments():
     users = db.session.scalars(sa.select(m.User))
-    product_master_groups = db.session.scalars(m.MasterGroupProduct.select())
+    # TODO: Needs refactor to change it to dynamic
+    product_master_group_brand = db.session.scalar(
+        m.MasterGroupProduct.select().where(m.MasterGroupProduct.name == "Brand")
+    )
+    product_master_group_language = db.session.scalar(
+        m.MasterGroupProduct.select().where(m.MasterGroupProduct.name == "Language")
+    )
+    product_master_group_category = db.session.scalar(
+        m.MasterGroupProduct.select().where(m.MasterGroupProduct.name == "Category")
+    )
+    product_master_group_premises = db.session.scalar(
+        m.MasterGroupProduct.select().where(m.MasterGroupProduct.name == "Premises")
+    )
+    product_master_group_event = db.session.scalar(
+        m.MasterGroupProduct.select().where(m.MasterGroupProduct.name == "Events")
+    )
     master_groups = db.session.scalars(m.MasterGroup.select())
     groups = db.session.scalars(m.Group.select())
 
     return render_template(
         "report/adjustment/adjustments.html",
         users=users,
-        product_master_groups=product_master_groups,
+        product_master_group_brand=product_master_group_brand,
+        product_master_group_category=product_master_group_category,
+        product_master_group_language=product_master_group_language,
+        product_master_group_premises=product_master_group_premises,
+        product_master_group_event=product_master_group_event,
         master_groups=master_groups,
         groups=groups,
     )

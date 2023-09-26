@@ -17,7 +17,7 @@ from .ship_request import ShipRequest, ShipRequestStatus
 from .store import Store
 from .supplier import Supplier
 from .property import Property
-from .group_for_product import GroupProduct
+from .group_for_product import GroupProduct, GroupProductList
 from .master_group_for_product import MasterGroupProduct, ProductMasterGroupMandatory
 from .product_group import ProductGroup
 from .delivery_agent import DeliveryAgent
