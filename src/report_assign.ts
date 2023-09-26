@@ -6,12 +6,21 @@ interface IUser {
   username: string
 }
 
-interface IReportAssign {
+interface IReportAssignCSV {
   product: IProduct
-  quantity: number
   createdAt: string
   group: IGroup
   fromGroup: IGroup
+  type: string
+  user: IUser
+}
+
+interface IReportAssign {
+  product: IProduct
+  quantity: number
+  created_at: string
+  group: IGroup
+  from_group: IGroup
   type: string
   user: IUser
 }
@@ -68,7 +77,7 @@ const downloadCSV = async function () {
     const res = await fetch(`${urlWithoutQueryParams}/${url}`)
     const data = await res.json()    
 
-    data.report_events.forEach((report: IReportAssign) => {
+    data.report_events.forEach((report: IReportAssignCSV) => {
       csvData.push(
         [
           formatDate(report.createdAt),
@@ -153,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
         reportViewUser.innerHTML = reportAssign.user.username
         reportViewAction.innerHTML = reportAssign.type
 
-        reportViewDate.innerHTML = formatDate(reportAssign.createdAt) 
+        reportViewDate.innerHTML = formatDate(reportAssign.created_at) 
 
         const newProductItem = productItemTemplate
         newProductItem.removeAttribute('id')
@@ -195,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         productGroup.innerHTML = reportAssign.group.name;
-        productGroupFrom.innerHTML = reportAssign.fromGroup.name;
+        productGroupFrom.innerHTML = reportAssign.from_group.name;
         reportViewProductTbody.appendChild(newProductItem);
         viewModal.show();
 
