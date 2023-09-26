@@ -226,6 +226,29 @@ def save():
             flash("Cannot save inbound order data", "danger")
             return redirect(url_for("inbound_order.get_all"))
 
+        history = []
+
+        # add history to report
+        if inbound_order.status != s.InboundOrderStatus(form.status.data):
+            history.append(
+                f"Status: {s.InboundOrderStatus(inbound_order.status).value} => {form.status.data}"
+            )
+
+        if inbound_order.active_date != form.active_date.data:
+            history.append(
+                f"Active date: {inbound_order.active_date} => {form.active_date.data}"
+            )
+        if inbound_order.active_time != form.active_time.data:
+            history.append(
+                f"Active time: {inbound_order.active_time} => {form.active_time.data}"
+            )
+        if inbound_order.title != form.order_title.data:
+            history.append(f"Title: {inbound_order.title} => {form.order_title.data}")
+        if inbound_order.delivery_date != form.delivery_date.data:
+            history.append(
+                f"Delivery date:{inbound_order.delivery_date}=>{form.delivery_date.data}"
+            )
+
         inbound_order.active_date = form.active_date.data
         inbound_order.active_time = form.active_time.data
         inbound_order.title = form.order_title.data
@@ -327,15 +350,13 @@ def save():
                             current_order_uuid=inbound_order.uuid,
                         )
                     )
-
-        report_inbound_order: m.ReportInboundOrder = db.session.scalar(
-            m.ReportInboundOrder.select().where(
-                m.ReportInboundOrder.inbound_order_id == inbound_order.id
-            )
-        )
-
-        report_inbound_order.type = s.ReportEventType.updated.value
-        report_inbound_order.created_at = datetime.now()
+        m.ReportInboundOrder(
+            type=s.ReportEventType.updated.value,
+            history=", ".join(history),
+            inbound_order_id=inbound_order.id,
+            user_id=current_user.id,
+            created_at=datetime.now(),
+        ).save(False)
 
         db.session.commit()
         if form.next_url.data:

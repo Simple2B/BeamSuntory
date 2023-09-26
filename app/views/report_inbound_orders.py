@@ -4,6 +4,7 @@ from flask import (
     render_template,
 )
 from flask_login import login_required
+from sqlalchemy import desc
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
@@ -19,7 +20,7 @@ report_inbound_orders_blueprint = Blueprint(
 def get_inbound_order_report():
     filter_inbound_order = s.FilterReportInboundOrder.model_validate(dict(request.args))
 
-    query = m.ReportInboundOrder.select().order_by(m.ReportInboundOrder.id)
+    query = m.ReportInboundOrder.select().order_by(desc(m.ReportInboundOrder.id))
     count_query = sa.select(sa.func.count()).select_from(m.ReportInboundOrder)
 
     if filter_inbound_order.q:

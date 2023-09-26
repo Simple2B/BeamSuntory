@@ -70,7 +70,7 @@ const downloadCSV = async function () {
 
   // CSV Headers
 
-  const csvData = ['created_at,username,type,order_title']
+  const csvData = ['created_at,username,type,order_title,history']
   let pages = 1
   const queryTail = ''
 
@@ -87,7 +87,8 @@ const downloadCSV = async function () {
           formatDate(report.createdAt),
           report.user.username,
           report.type,     
-          report.inboundOrder.title,            
+          report.inboundOrder.title,    
+          report.history        
         ].join(',')
       )
     });
