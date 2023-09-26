@@ -1,7 +1,7 @@
+from io import BytesIO
 import base64
 import json
 from datetime import datetime
-from io import BytesIO
 import pandas
 from flask import (
     Blueprint,
@@ -19,7 +19,7 @@ from sqlalchemy.dialects.postgresql import insert
 import sqlalchemy as sa
 from app.controllers import create_pagination
 
-from app import models as m, db, mail
+from app import models as m, db
 from app import schema as s
 from app import forms as f
 from app.logger import log
@@ -617,44 +617,56 @@ def assign():
 def request_share():
     form: f.RequestShareProductForm = f.RequestShareProductForm()
     if form.validate_on_submit():
-        query = m.Product.select().where(m.Product.name == form.name.data)
-        p: m.Product | None = db.session.scalar(query)
-        if not p:
-            log(log.ERROR, "Not found product by name : [%s]", form.name.data)
-            flash("Cannot save product data", "danger")
-
-        from_group_id = (
-            db.session.execute(
-                m.Group.select().where(
-                    m.Group.name == form.from_group.data,
-                )
+        warehouse_product = db.session.scalar(
+            m.WarehouseProduct.select().where(
+                m.WarehouseProduct.product.has(m.Product.SKU == form.sku.data),
+                m.WarehouseProduct.group.has(m.Group.id == form.from_group_id.data),
             )
-            .scalar()
-            .id
         )
 
-        rs: m.RequestShare = m.RequestShare(
-            order_numb=f"BEAM-RS{int(datetime.now().timestamp())}",
-            product_id=p.id,
-            group_id=form.group_id.data,
+        if not warehouse_product:
+            log(
+                log.ERROR,
+                "Not found product by SKU and group: [%s], [%s]",
+                form.sku.data,
+                form.from_group_id.data,
+            )
+            flash("Cannot save product data", "danger")
+            return redirect(url_for("product.get_all"))
+
+        to_group: m.Group = db.session.get(m.Group, form.to_group_id.data)
+        if not to_group:
+            log(
+                log.ERROR,
+                "From to not found: [%s]",
+                form.to_group_id.data,
+            )
+            flash("Cannot save product data", "danger")
+            return redirect(url_for("product.get_all"))
+
+        request_share: m.RequestShare = m.RequestShare(
+            product_id=warehouse_product.product.id,
+            group_id=form.to_group_id.data,
             desire_quantity=form.desire_quantity.data,
             status="pending",
-            from_group_id=from_group_id,
+            from_group_id=warehouse_product.group.id,
             user_id=current_user.id,
         )
-        log(log.INFO, "Form submitted. Share Request: [%s]", rs)
-        rs.save()
+        log(log.INFO, "Form submitted. Share Request: [%s]", request_share)
 
-        product_group: m.Group = db.session.execute(
-            m.Group.select().where(m.Group.id == form.group_id.data)
-        ).scalar()
+        report_request_share = m.ReportRequestShare(
+            user=current_user,
+            type=s.ReportRequestShareType.CREATED.value,
+            request_share=request_share,
+        )
 
-        users: list[m.UserGroup] = [
-            u
-            for u in db.session.execute(
-                m.UserGroup.select().where(m.UserGroup.right_id == product_group.id)
-            ).scalars()
-        ]
+        db.session.add(request_share)
+        db.session.add(report_request_share)
+
+        users: list[m.UserGroup] = db.session.scalars(
+            m.UserGroup.select().where(m.UserGroup.right_id == to_group.id)
+        ).all()
+
         if len(users) != 0:
             for u in users:
                 # TODO: ask client about users notification without approval permission
@@ -670,23 +682,25 @@ def request_share():
                         "request_share.get_all",
                         _external=True,
                     )
-                    + f"?q={rs.order_numb}"
+                    + f"?q={request_share.order_numb}"
                 )
 
                 msg.html = render_template(
                     "email/request_share.html",
                     user=u.child,
-                    request_share=rs,
+                    request_share=request_share,
                     url=url,
                     action="created",
                 )
-                sru = m.RequestShareUser(
+                request_share_user = m.RequestShareUser(
                     user_id=u.child.id,
-                    request_share_id=rs.id,
+                    request_share=request_share,
                 )
-                sru.save()
+                db.session.add(request_share_user)
                 # TODO uncomment when ready to notify
-                mail.send(msg)
+                # mail.send(msg)
+
+        db.session.commit()
 
         flash("Share request created!", "success")
         return redirect(url_for("product.get_all"))

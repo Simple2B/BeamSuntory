@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from .group import Group
 
 
+# TODO Refactor!!!
 class UserGroup(db.Model, ModelMixin):
     __tablename__ = "user_group"
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)

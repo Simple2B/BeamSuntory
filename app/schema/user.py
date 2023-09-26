@@ -28,3 +28,16 @@ class User(BaseModel):
     city: str
     zip_code: str = Field(alias="zipCode")
     sales_rep: bool = Field(alias="salesRep")
+
+
+class AdminCreate(BaseModel):
+    username: str
+    email: str
+    password: str
+    image: str | None = None
+    street_address: str | None = None
+    phone_number: str | None = None
+    country: str
+    region: str
+    city: str
+    zip_code: str

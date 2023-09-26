@@ -98,6 +98,7 @@ def get_all():
 @login_required
 def create():
     form = f.InboundOrderCreateForm()
+
     if not form.validate_on_submit():
         flash(f"Inbound order validation failed: {form.errors}", "danger")
         log(log.INFO, "Inbound order validation failed: [%s]", form.errors)

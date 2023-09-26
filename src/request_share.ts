@@ -1,19 +1,15 @@
 import { Modal } from 'flowbite'
 import type { ModalOptions, ModalInterface } from 'flowbite'
-
+import { IRequestShare } from './report_share_request'
 // /*
 //  * $editRequestShareModal: required
 //  * options: optional
 //  */
 
-interface IRequestShare {
+// TODO need refactoring
+interface IRequestShareDepricated extends IRequestShare{
     id: number
-    product_id: number
-    product: string
-    group_id: number
-    group: string
     desire_quantity: number
-    status: string
 }
 
 // search flow
@@ -102,7 +98,7 @@ const $modalEditElement: HTMLElement = document.querySelector('#editRequestShare
 
 const editModal: ModalInterface = new Modal($modalEditElement, modalEditOptions)
 
-function editShareRequest(requestShare: IRequestShare) {
+function editShareRequest(requestShare: IRequestShareDepricated) {
     let input: HTMLInputElement = document.querySelector('#request-share-edit-quantity')
     input.value = requestShare.desire_quantity.toString()
     input = document.querySelector('#request-share-edit-id')
@@ -111,9 +107,9 @@ function editShareRequest(requestShare: IRequestShare) {
     let div: HTMLDivElement = document.querySelector('#request-share-edit-status')
     div.innerHTML = requestShare.status
     div = document.querySelector('#request-share-edit-group')
-    div.innerHTML = requestShare.group
+    div.innerHTML = requestShare.group.name
     div = document.querySelector('#request-share-edit-product')
-    div.innerHTML = requestShare.product
+    div.innerHTML = requestShare.product.name
 
     input = document.querySelector('#request-share-edit-next_url')
     input.value = window.location.href

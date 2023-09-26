@@ -282,6 +282,16 @@ const reportEventConfig = {
     },
 }
 
+const reportRequestShareConfig = {
+    entry: {
+        main: './src/report_share_request.ts',
+    },
+    output: {
+        path: path.resolve(__dirname, './app/static'),
+        filename: 'js/report_share_request.js', // <--- Will be compiled to this single file
+    },
+}
+
 const reportAssignConfig = {
     entry: {
         main: './src/report_assign.ts',
@@ -320,6 +330,7 @@ const configs = [
     adjustConfig,
     eventConfig,
     reportEventConfig,
+    reportRequestShareConfig,
     reportAssignConfig,
 ].map((conf) => merge(defaultConfig, conf))
 
