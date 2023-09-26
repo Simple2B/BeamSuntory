@@ -55,23 +55,6 @@ def init(app: Flask):
             )
         )
 
-        # role = db.session.execute(
-        #     m.Division.select().where(m.Division.role_name == s.UserRole.ADMIN.value)
-        # ).scalar()
-        # m.User(
-        #     username=app.config["ADMIN_USERNAME"],
-        #     email=app.config["ADMIN_EMAIL"],
-        #     password=app.config["ADMIN_PASSWORD"],
-        #     role=role.id,
-        #     country="Ukraine",
-        #     region="Kyiv",
-        #     city="Kyiv",
-        #     zip_code="11111",
-        #     street_address="Address 1",
-        #     activated=True,
-        #     approval_permission=True,
-        #     sales_rep=False,
-        # ).save()
         print("admin created")
 
     @app.cli.command()
