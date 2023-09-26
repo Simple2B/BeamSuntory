@@ -25,25 +25,9 @@ def get_adjustment_report():
 
     if filter_adjustments.q:
         query = query.where(
-            m.ReportEvent.ship_request.has(
-                m.ShipRequest.carts.any(
-                    m.Cart.event.has(
-                        m.Event.product.has(
-                            m.Product.name.ilike(f"%{filter_adjustments.q}%")
-                        )
-                    )
-                )
-            )
-            | m.ReportEvent.ship_request.has(
-                m.ShipRequest.carts.any(
-                    m.Cart.event.has(
-                        m.Event.product.has(
-                            m.Product.SKU.ilike(f"%{filter_adjustments.q}%")
-                        )
-                    )
-                )
-            )
-            | m.ReportEvent.user.has(m.User.username.ilike(f"%{filter_adjustments.q}%"))
+            m.Adjust.product.has(m.Product.name.ilike(f"%{filter_adjustments.q}%"))
+            | m.Adjust.product.has(m.Product.SKU.ilike(f"%{filter_adjustments.q}%"))
+            | m.Adjust.user.has(m.User.username.ilike(f"%{filter_adjustments.q}%"))
         )
 
         count_query = count_query.where(
@@ -106,7 +90,27 @@ def get_adjustment_report():
 
     if filter_adjustments.username:
         query = query.where(
-            m.ReportEvent.user.has(m.User.username == filter_adjustments.username)
+            m.Adjust.user.has(m.User.username == filter_adjustments.username)
+        )
+
+    if filter_adjustments.master_group:
+        query = query.where(
+            m.Adjust.adjust_group_qty.any(
+                m.AdjustGroupQty.group.has(
+                    m.Group.master_group.has(
+                        m.MasterGroup.name.ilike(f"%{filter_adjustments.master_group}%")
+                    )
+                )
+            )
+        )
+
+    if filter_adjustments.group:
+        query = query.where(
+            m.Adjust.adjust_group_qty.any(
+                m.AdjustGroupQty.group.has(
+                    m.Group.name.ilike(f"%{filter_adjustments.group}%")
+                )
+            )
         )
 
     pagination = create_pagination(total=db.session.scalar(count_query))
@@ -126,7 +130,7 @@ def get_adjustments_json():
     report_list_schema = s.AdjustList.model_validate(reports)
 
     return s.AdjustResponse(
-        pagination=pagination, report_adjustments=report_list_schema.root
+        pagination=pagination, adjusts=report_list_schema.root
     ).model_dump_json(by_alias=True)
 
 
@@ -134,10 +138,16 @@ def get_adjustments_json():
 @login_required
 def adjustments():
     users = db.session.scalars(sa.select(m.User))
+    product_master_groups = db.session.scalars(m.MasterGroupProduct.select())
+    master_groups = db.session.scalars(m.MasterGroup.select())
+    groups = db.session.scalars(m.Group.select())
 
     return render_template(
         "report/adjustment/adjustments.html",
         users=users,
+        product_master_groups=product_master_groups,
+        master_groups=master_groups,
+        groups=groups,
     )
 
 

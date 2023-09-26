@@ -600,6 +600,8 @@ def assign():
             group_id=int(form.group.data),
             quantity=form.quantity.data,
             from_group_id=form.from_group_id.data,
+            user_id=current_user.id,
+            type=s.ReportEventType.created.value,
         ).save()
 
         return redirect(url_for("product.get_all"))
@@ -743,7 +745,7 @@ def adjust():
                     if product_warehouse.product_quantity != quantity:
                         adjust_gr_qty: m.AdjustGroupQty = m.AdjustGroupQty(
                             adjust_id=adjust_item.id,
-                            quantity=quantity,
+                            quantity_after=quantity,
                             quantity_before=product_warehouse.product_quantity,
                             group_id=group_id,
                             warehouse_id=warehouse_id,
@@ -762,7 +764,8 @@ def adjust():
                     db.session.add(product_warehouse)
                     adjust_gr_qty: m.AdjustGroupQty = m.AdjustGroupQty(
                         adjust_id=adjust_item.id,
-                        quantity=quantity,
+                        quantity_after=quantity,
+                        quantity_before=0,
                         group_id=group_id,
                         warehouse_id=warehouse_id,
                     )

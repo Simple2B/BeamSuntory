@@ -11,6 +11,3 @@ class AdjustGroupQty(BaseModel):
     quantity_before: int = Field(alias="quantityBefore")
     group: Group
     warehouse: Warehouse
-
-
-AdjustGroupQtyList = RootModel[list[AdjustGroupQty]]

@@ -18,6 +18,7 @@ class Adjust(BaseModel):
 
 
 class AdjustResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
     pagination: PaginationOut
     adjusts: list[Adjust]
 

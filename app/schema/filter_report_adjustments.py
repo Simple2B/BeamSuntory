@@ -10,3 +10,5 @@ class FilterReportAdjustments(BaseModel):
     start_to: str | None = None
     end_from: str | None = None
     end_to: str | None = None
+    master_group: str | None = None
+    group: str | None = None

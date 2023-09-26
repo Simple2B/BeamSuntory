@@ -1,5 +1,5 @@
 import { ModalOptions, Modal } from 'flowbite';
-import { IProduct, IWarehouse } from './inbound_order/types';
+import { IProduct } from './inbound_order/types';
 import HTMXDispatcher from './htmx';
 
 interface IUser {
@@ -16,7 +16,6 @@ interface IProductEvent {
 
 interface IAdjustResponse {
   pagination: IPagination;
-  events: IEvents[];
   adjusts: IAdjust[];
 }
 
@@ -72,6 +71,9 @@ const downloadCSV = async function () {
     '#product-adjustment-sort-end-from-datepicker'
   );
   const dateEventEndToInput: HTMLInputElement = document.querySelector('#product-adjustment-sort-end-to-datepicker');
+  const masterGroupSelect: HTMLInputElement = document.querySelector('#adjustment-filter-master-group');
+  const groupSelect: HTMLInputElement = document.querySelector('#adjustment-filter-group');
+  const sortProductGroup: HTMLInputElement = document.querySelector('#product-adjustment-sort-end-to-datepicker');
 
   const filtersMap = {
     q: searchEventInput,
@@ -79,6 +81,8 @@ const downloadCSV = async function () {
     start_to: dateEventStartToInput,
     end_from: dateEventEndFromInput,
     end_to: dateEventEndToInput,
+    master_group: masterGroupSelect,
+    group: groupSelect,
   };
 
   const filterQuery = [];
@@ -87,7 +91,7 @@ const downloadCSV = async function () {
   }
 
   // CSV Headers
-  const csvData = ['created_at,store_name,type,username,date_from,date_to,sku,product_name'];
+  const csvData = ['created_at,product_name,sku,username,master_group,group,warehouse,quantity_before,quantity_after'];
   let pages = 1;
   const queryTail = '';
 
@@ -96,20 +100,21 @@ const downloadCSV = async function () {
     const urlWithoutQueryParams = currentURL.split('?')[0];
     const url = [`api?page=${page}`, queryTail].join('&');
     const res = await fetch(`${urlWithoutQueryParams}/${url}`);
-    const data: IEventsReportResponse = await res.json();
+    const data: IAdjustResponse = await res.json();
 
-    data.report_events.forEach((reportEvent) => {
-      reportEvent.shipRequest.carts.forEach((cart: IProductEvent) => {
+    data.adjusts.forEach((adjust) => {
+      adjust.adjustGroupQty.forEach((reportAdjust) => {
         csvData.push(
           [
-            reportEvent.createdAt,
-            reportEvent.shipRequest.store.storeName,
-            reportEvent.type,
-            reportEvent.user.username,
-            cart.event.dateFrom,
-            cart.event.dateTo,
-            cart.product.SKU,
-            cart.product.name,
+            adjust.createdAt,
+            adjust.product.name,
+            adjust.product.SKU,
+            adjust.user.username,
+            reportAdjust.group.masterGroup.name,
+            reportAdjust.group.name,
+            reportAdjust.warehouse.name,
+            reportAdjust.quantityBefore,
+            reportAdjust.quantity,
           ].join(',')
         );
       });
@@ -121,14 +126,14 @@ const downloadCSV = async function () {
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.setAttribute('href', url);
-  a.setAttribute('download', 'adjustment.csv');
+  a.setAttribute('download', 'report_adjustment.csv');
   a.click();
   a.remove();
 };
 
 document.addEventListener('DOMContentLoaded', () => {
   const filtersHTML = document.querySelectorAll(
-    "[name='q'], [name='username'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from'], [name='sort-end-from']"
+    "[name='q'], [name='username'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from'], [name='sort-end-to'], [name='master_group'], [name='group'], [name='product_sort_group']"
   );
   const buttonLoadEventsTable = document.querySelector('#table-report-loader') as HTMLButtonElement;
 
@@ -150,6 +155,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   // load table
   buttonLoadEventsTable.click();
+
+  const masterGroupHidden = document.querySelector('#adjustment-master-group-hidden') as HTMLInputElement;
+  console.log(masterGroupHidden.value);
 
   // initialize modal
   const viewReportEventsModal = document.getElementById('view-report-adjustment-modal') as HTMLDivElement;

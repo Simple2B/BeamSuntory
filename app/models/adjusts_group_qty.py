@@ -1,4 +1,3 @@
-from typing import TYPE_CHECKING
 from sqlalchemy import ForeignKey, orm
 
 from app import db
@@ -15,7 +14,7 @@ class AdjustGroupQty(db.Model, ModelMixin):
     adjust_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("adjusts.id"))
     warehouse_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("warehouses.id"))
     # Columns
-    quantity: orm.Mapped[int] = orm.mapped_column()
+    quantity_after: orm.Mapped[int] = orm.mapped_column()
     quantity_before: orm.Mapped[int] = orm.mapped_column()
     # Relationships
     group: orm.Mapped[Group] = orm.relationship()
