@@ -51,7 +51,9 @@ const downloadCSV = async function () {
   for (let page = 1; page <= pages; page++) {
     const url = [`api?page=${page}`, filterQuery.join('&')].join('&');
     const res = await fetch(`${urlWithoutQueryParams}${url}`);
-    const data: IReportRequestShareResponse = await res.json();
+    const data: IReportRequestShareResponse = JSON.parse(await res.json());
+
+    console.log(data);
 
     data.reports.forEach(report => {
       csvData.push(
