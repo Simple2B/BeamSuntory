@@ -239,12 +239,6 @@ document.addEventListener('DOMContentLoaded', () => {
             productRegularPrice.innerHTML = 'No price';
           }
 
-          if (event.product.regularPrice) {
-            productRegularPrice.innerHTML = event.product.regularPrice.toString();
-          } else {
-            productRegularPrice.innerHTML = 'No price';
-          }
-
           if (event.product.retailPrice) {
             productRetailPrice.innerHTML = event.product.retailPrice.toString();
           } else {
