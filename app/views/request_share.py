@@ -14,8 +14,8 @@ import sqlalchemy as sa
 from sqlalchemy.orm import aliased
 from app.controllers import create_pagination
 
-from app import models as m, db, mail
-
+from app import models as m, db
+from app import schema as s
 from app import forms as f
 from app.logger import log
 
@@ -85,8 +85,8 @@ def save():
         query = m.RequestShare.select().where(
             m.RequestShare.id == int(form.request_share_id.data)
         )
-        rs: m.RequestShare | None = db.session.scalar(query)
-        if not rs:
+        request_share: m.RequestShare | None = db.session.scalar(query)
+        if not request_share:
             log(
                 log.ERROR,
                 "Not found request_share by id : [%s]",
@@ -95,8 +95,17 @@ def save():
             flash("Cannot save request_share data", "danger")
             return redirect(url_for("request_share.get_all"))
 
-        rs.desire_quantity = form.desire_quantity.data
-        rs.save()
+        report_request_share = m.ReportRequestShare(
+            type=s.ReportRequestShareType.UPDATED_QUANTITY.value,
+            history=f"{request_share.desire_quantity} => {form.desire_quantity.data}",
+            user=current_user,
+            request_share=request_share,
+        )
+
+        request_share.desire_quantity = form.desire_quantity.data
+        db.session.add(report_request_share)
+        db.session.commit()
+
         if form.next_url.data:
             return redirect(form.next_url.data)
         return redirect(url_for("request_share.get_all"))
@@ -130,65 +139,78 @@ def delete(id: int):
 @request_share_blueprint.route("/share/<int:id>", methods=["GET"])
 @login_required
 def share(id: int):
-    rs: m.RequestShare = db.session.scalar(
+    request_share: m.RequestShare = db.session.scalar(
         m.RequestShare.select().where(m.RequestShare.id == id)
     )
-    if not rs:
+    if not request_share:
         log(log.INFO, "There is no request_share with id: [%s]", id)
         flash("There is no such request_share", "danger")
         return redirect(url_for("request_share.get_all"))
 
     # TODO Filter by warehouse id also
-    warehouse_to_prod: m.WarehouseProduct = db.session.execute(
+    warehouse_to_prod: m.WarehouseProduct = db.session.scalar(
         m.WarehouseProduct.select().where(
-            m.WarehouseProduct.product_id == rs.product_id,
-            m.WarehouseProduct.group_id == rs.group_id,
+            m.WarehouseProduct.product_id == request_share.product_id,
+            m.WarehouseProduct.group_id == request_share.group_id,
         )
-    ).scalar()
+    )
 
-    warehouse_from_prod: m.WarehouseProduct = db.session.execute(
+    warehouse_from_prod: m.WarehouseProduct = db.session.scalar(
         m.WarehouseProduct.select().where(
-            m.WarehouseProduct.product_id == rs.product_id,
-            m.WarehouseProduct.group_id == rs.from_group_id,
+            m.WarehouseProduct.product_id == request_share.product_id,
+            m.WarehouseProduct.group_id == request_share.from_group_id,
         )
-    ).scalar()
+    )
 
     if not warehouse_from_prod:
         log(
             log.INFO,
             "These product is not in warehouse. Product id: [%s]",
-            rs.from_group_id,
+            request_share.from_group_id,
         )
         flash("These product was depleted", "danger")
         return redirect(url_for("request_share.get_all"))
 
-    if warehouse_from_prod.product_quantity < rs.desire_quantity:
+    if warehouse_from_prod.product_quantity < request_share.desire_quantity:
         log(
             log.INFO,
             "Not enough products in warehouse. Product id: [%s]",
-            rs.from_group_id,
+            request_share.from_group_id,
         )
         flash("Not enough products in warehouse", "danger")
         return redirect(url_for("request_share.get_all"))
 
     if not warehouse_to_prod:
         m.WarehouseProduct(
-            product_id=rs.product_id,
-            group_id=rs.group_id,
-            product_quantity=rs.desire_quantity,
+            product_id=request_share.product_id,
+            group_id=request_share.group_id,
+            product_quantity=request_share.desire_quantity,
             warehouse_id=warehouse_from_prod.warehouse_id,
         ).save()
     else:
-        warehouse_to_prod.product_quantity += rs.desire_quantity
+        warehouse_to_prod.product_quantity += request_share.desire_quantity
         warehouse_to_prod.save()
 
-    warehouse_from_prod.product_quantity -= rs.desire_quantity
+    warehouse_from_prod.product_quantity -= request_share.desire_quantity
     warehouse_from_prod.save()
 
-    rs.status = "shared"
-    rs.finished_date = datetime.now().replace(microsecond=0)
-    rs.save()
-    log(log.INFO, "Request Share share: [%s]", rs)
+    report_request_share = m.ReportRequestShare(
+        type=s.ReportRequestShareType.SHARED.value,
+        user=current_user,
+        request_share=request_share,
+        history=" ".join(
+            [
+                f"from: {warehouse_from_prod.warehouse.name} ->",
+                f"to: {warehouse_to_prod.warehouse.name} -",
+                f"quantity: {request_share.desire_quantity}",
+            ]
+        ),
+    )
+    request_share.status = "shared"
+    request_share.finished_date = datetime.now().replace(microsecond=0)
+    db.session.add(report_request_share)
+    db.session.commit()
+    log(log.INFO, "Request Share share: [%s]", request_share)
     flash("Request Share shared!", "success")
     return redirect(url_for("request_share.get_all"))
 
@@ -196,18 +218,22 @@ def share(id: int):
 @request_share_blueprint.route("/decline/<int:id>", methods=["GET"])
 @login_required
 def decline(id: int):
-    rs: m.RequestShare = db.session.get(m.RequestShare, id)
-    if not rs:
+    request_share: m.RequestShare = db.session.get(m.RequestShare, id)
+    if not request_share:
         log(log.INFO, "There is no request_share with id: [%s]", id)
         flash("There is no such request_share", "danger")
         return redirect(url_for("request_share.get_all"))
 
-    rs.status = "declined"
-    rs.finished_date = datetime.now().replace(microsecond=0)
-    rs.save()
+    request_share.status = "declined"
+    request_share.finished_date = datetime.now().replace(microsecond=0)
+    report_request_share = m.ReportRequestShare(
+        type=s.ReportRequestShareType.DECLINED.value,
+        user=current_user,
+        request_share=request_share,
+    )
 
     product_group: m.Group = db.session.execute(
-        m.Group.select().where(m.Group.id == rs.group_id)
+        m.Group.select().where(m.Group.id == request_share.group_id)
     ).scalar()
 
     users: list[m.UserGroup] = [
@@ -231,19 +257,21 @@ def decline(id: int):
                     "request_share.get_all",
                     _external=True,
                 )
-                + f"?q={rs.order_numb}"
+                + f"?q={request_share.order_numb}"
             )
 
             msg.html = render_template(
                 "email/request_share.html",
                 user=u.child,
                 action="declined",
-                request_share=rs,
+                request_share=request_share,
                 url=url,
             )
             # TODO uncomment when ready to notify
-            mail.send(msg)
+            # mail.send(msg)
 
-    log(log.INFO, "Request Share declined: [%s]", rs)
+    db.session.add(report_request_share)
+    db.session.commit()
+    log(log.INFO, "Request Share declined: [%s]", request_share)
     flash("Request Share declined!", "success")
     return redirect(url_for("request_share.get_all"))

@@ -1,4 +1,6 @@
 from pydantic import BaseModel, ConfigDict, Field
+from .product import Product
+from .group import Group
 
 
 class RequestShare(BaseModel):
@@ -9,3 +11,5 @@ class RequestShare(BaseModel):
     group_id: int = Field(alias="groupId")
     desire_quantity: int = Field(alias="desireQuantity")
     status: str
+    product: Product
+    group: Group
