@@ -42,38 +42,16 @@ def get_adjustment_report():
             )
         )
 
-    if filter_adjustments.start_from:
+    if filter_adjustments.created_from:
         query = query.where(
             m.Adjust.created_at
-            >= datetime.strptime(filter_adjustments.start_from, "%m/%d/%Y")
+            >= datetime.strptime(filter_adjustments.created_from, "%m/%d/%Y")
         )
 
-    if filter_adjustments.start_to:
+    if filter_adjustments.created_to:
         query = query.where(
             m.Adjust.created_at
-            <= datetime.strptime(filter_adjustments.start_from, "%m/%d/%Y")
-        )
-
-    if filter_adjustments.end_from:
-        query = query.where(
-            m.ReportEvent.ship_request.has(
-                m.ShipRequest.carts.any(
-                    m.Cart.event.has(
-                        m.Event.date_from
-                        >= datetime.strptime(filter_adjustments.end_from, "%m/%d/%Y")
-                    )
-                )
-            )
-        )
-
-    if filter_adjustments.end_to:
-        m.ReportEvent.ship_request.has(
-            m.ShipRequest.carts.any(
-                m.Cart.event.has(
-                    m.Event.date_from
-                    <= datetime.strptime(filter_adjustments.end_to, "%m/%d/%Y")
-                )
-            )
+            <= datetime.strptime(filter_adjustments.created_to, "%m/%d/%Y")
         )
 
     if filter_adjustments.username:

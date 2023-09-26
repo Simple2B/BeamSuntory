@@ -16,7 +16,7 @@
             {% include "icon/eyeglass_1.html" %}
           </div>
           <input name="q" hx-trigger="keyup changed delay:500ms" hx-target="#reports-table" hx-swap="innerHTML"
-            hx-include="[name='username'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from'], [name='sort-end-to'], [name='master_group'] , [name='group'], [name='product_sort_group']"
+            hx-include="[name='username'], [name='created-from'], [name='created-to'],  [name='master_group'] , [name='group'], [name='product_sort_group']"
             hx-get="{{ url_for('report_adjustment.search_report_adjustments') }}" hx-indicator="#report-table-spinner"
             type="search" id="table-search-adjustment" placeholder="Search"
             class="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
@@ -26,7 +26,7 @@
         <!-- prettier-ignore -->
         <select id="events-filter-status" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"
           name="username"
-          hx-include="[name='q'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from'], [name='sort-end-to'], [name='master_group'] , [name='group'], [name='product_sort_group']"
+          hx-include="[name='q'], [name='created-from'], [name='created-to'],  [name='master_group'] , [name='group'], [name='product_sort_group']"
           hx-get="{{ url_for('report_adjustment.search_report_adjustments') }}" hx-indicator="#report-table-spinner"
           class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
           <option selected disabled value="">Select user</option>
@@ -39,10 +39,10 @@
         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
           {% include "icon/calendar.html" %}
         </div>
-        <input datepicker name="sort-start-from" hx-trigger="changeDate"
-          hx-include="[name='q'], [name='username'], [name='sort-start-to'], [name='sort-end-from'], [name='sort-end-to'], [name='master_group'] , [name='group'], [name='product_sort_group']"
+        <input datepicker name="created_from" hx-trigger="changeDate"
+          hx-include="[name='q'], [name='username'], [name='created-to'],  [name='master_group'] , [name='group'], [name='product_sort_group']"
           hx-get="{{ url_for('report_adjustment.search_report_adjustments') }}" type="text"
-          id="product-adjustment-sort-start-from-datepicker" placeholder="Start date: from"
+          id="product-adjustment-created-from-datepicker" placeholder="Created date: from"
           hx-indicator="#report-table-spinner"
           class="product-adjustment-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
       </div>
@@ -52,32 +52,11 @@
           <!-- prettier-ignore -->
           {% include "icon/calendar.html" %}
         </div>
-        <input datepicker name="sort-start-to" hx-trigger="changeDate"
-          hx-include="[name='q'], [name='username'], [name='sort-start-from'], [name='sort-end-from'], [name='sort-end-to'], [name='master_group'] , [name='group'], [name='product_sort_group']"
-          hx-get="{{ url_for('report_adjustment.search_report_adjustments') }}" type="text" placeholder="Start date: to"
-          id="product-adjustment-sort-start-to-datepicker" hx-indicator="#report-table-spinner"
-          class="product-adjustment-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-      </div>
-      <div class="relative">
-        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-          {% include "icon/calendar.html" %}
-        </div>
-        <input datepicker name="sort-end-from" hx-trigger="changeDate"
-          hx-include="[name='q'], [name='username'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from'], [name='master_group'] , [name='group'], [name='product_sort_group']"
+        <input datepicker name="created_to" hx-trigger="changeDate"
+          hx-include="[name='q'], [name='username'], [name='created-from'],  [name='master_group'] , [name='group'], [name='product_sort_group']"
           hx-get="{{ url_for('report_adjustment.search_report_adjustments') }}" type="text"
-          id="product-adjustment-sort-end-from-datepicker" placeholder="End date: from"
+          placeholder="Created date: to" id="product-adjustment-created-to-datepicker"
           hx-indicator="#report-table-spinner"
-          class="product-adjustment-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-      </div>
-      <span class="text-gray-500">to</span>
-      <div class="relative">
-        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-          {% include "icon/calendar.html" %}
-        </div>
-        <input datepicker name="sort-end-to" hx-trigger="changeDate"
-          hx-include="[name='q'], [name='username'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from'], [name='master_group'] , [name='group'], [name='product_sort_group']"
-          hx-get="{{ url_for('report_adjustment.search_report_adjustments') }}" type="text"
-          id="product-adjustment-sort-end-to-datepicker" placeholder="End date: to" hx-indicator="#report-table-spinner"
           class="product-adjustment-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
       </div>
       <div class="flex gap-4 items-center justify-start py-1 bg-white dark:bg-gray-800 px-4">
@@ -102,7 +81,7 @@
         <!-- prettier-ignore -->
         <select id="adjustment-filter-master-group" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"
           name="master_group"
-          hx-include="[name='q'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from'], [name='sort-end-to'], [name='group'], [name='product_sort_group']"
+          hx-include="[name='q'], [name='created-from'], [name='created-to'],  [name='group'], [name='product_sort_group']"
           hx-get="{{ url_for('report_adjustment.search_report_adjustments') }}" hx-indicator="#report-table-spinner"
           class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
           <option selected disabled value="">Master group</option>
@@ -115,7 +94,7 @@
         <!-- prettier-ignore -->
         <select id="adjustment-filter-group" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"
           name="group"
-          hx-include="[name='q'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from'], [name='sort-end-to'], [name='master_group'], [name='product_sort_group']"
+          hx-include="[name='q'], [name='created-from'], [name='created-to'],  [name='master_group'], [name='product_sort_group']"
           hx-get="{{ url_for('report_adjustment.search_report_adjustments') }}" hx-indicator="#report-table-spinner"
           class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
           <option selected disabled value="">Target group</option>
@@ -129,7 +108,7 @@
         <!-- prettier-ignore -->
         <select id="adjustment-filter-product-master-group-brand" hx-trigger="change" hx-swap="innerHTML"
           hx-target="#reports-table" name="group_brand"
-          hx-include="[name='q'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from'], [name='sort-end-to'], [name='master_group'], [name='group'], [name='group_category'], [name='group_language'], [name='group_premises'], [name='group_event']"
+          hx-include="[name='q'], [name='created-from'], [name='created-to'],  [name='master_group'], [name='group'], [name='group_category'], [name='group_language'], [name='group_premises'], [name='group_event']"
           hx-get="{{ url_for('report_adjustment.search_report_adjustments') }}" hx-indicator="#report-table-spinner"
           class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
           <option selected disabled value="">{{ product_master_group_brand.name }}</option>
@@ -142,7 +121,7 @@
         <!-- prettier-ignore -->
         <select id="adjustment-filter-product-master-group-category" hx-trigger="change" hx-swap="innerHTML"
           hx-target="#reports-table" name="group_category"
-          hx-include="[name='q'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from'], [name='sort-end-to'], [name='master_group'], [name='group'], [name='group_brand'], [name='group_language'], [name='group_premises'], [name='group_event']"
+          hx-include="[name='q'], [name='created-from'], [name='created-to'],  [name='master_group'], [name='group'], [name='group_brand'], [name='group_language'], [name='group_premises'], [name='group_event']"
           hx-get="{{ url_for('report_adjustment.search_report_adjustments') }}" hx-indicator="#report-table-spinner"
           class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
           <option selected disabled value="">{{ product_master_group_category.name }}</option>
@@ -155,7 +134,7 @@
         <!-- prettier-ignore -->
         <select id="adjustment-filter-product-master-group-language" hx-trigger="change" hx-swap="innerHTML"
           hx-target="#reports-table" name="group_language"
-          hx-include="[name='q'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from'], [name='sort-end-to'], [name='master_group'], [name='group'],  [name='group_brand'], [name='group_category'], [name='group_premises'], [name='group_event']"
+          hx-include="[name='q'], [name='created-from'], [name='created-to'],  [name='master_group'], [name='group'],  [name='group_brand'], [name='group_category'], [name='group_premises'], [name='group_event']"
           hx-get="{{ url_for('report_adjustment.search_report_adjustments') }}" hx-indicator="#report-table-spinner"
           class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
           <option selected disabled value="">{{ product_master_group_language.name }}</option>
@@ -168,7 +147,7 @@
         <!-- prettier-ignore -->
         <select id="adjustment-filter-product-master-group-premises" hx-trigger="change" hx-swap="innerHTML"
           hx-target="#reports-table" name="group_premises"
-          hx-include="[name='q'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from'], [name='sort-end-to'], [name='master_group'], [name='group'], [name='group_brand'], [name='group_category'], [name='group_language'], [name='group_event']"
+          hx-include="[name='q'], [name='created-from'], [name='created-to'],  [name='master_group'], [name='group'], [name='group_brand'], [name='group_category'], [name='group_language'], [name='group_event']"
           hx-get="{{ url_for('report_adjustment.search_report_adjustments') }}" hx-indicator="#report-table-spinner"
           class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
           <option selected disabled value="">{{ product_master_group_premises.name }}</option>
@@ -180,7 +159,7 @@
       <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800">
         <!-- prettier-ignore -->
         <select id="adjustment-filter-product-master-group-event" hx-trigger="change" hx-swap="innerHTML"
-          hx-target="#reports-table" name="group_event" hx-include=" [name='q' ], [name='sort-start-from' ], [name='sort-start-to' ], [name='sort-end-from' ],
+          hx-target="#reports-table" name="group_event" hx-include=" [name='q' ], [name='created-from' ], [name='created-to' ], [name='sort-end-from' ],
           [name='sort-end-to' ], [name='master_group' ], [name='group' ], [name='group_brand' ], [name='group_category'
           ], [name='group_language' ], [name='group_premises' ]"
           hx-get="{{ url_for('report_adjustment.search_report_adjustments') }}" hx-indicator="#report-table-spinner"

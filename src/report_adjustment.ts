@@ -143,7 +143,7 @@ const downloadCSV = async function () {
 
 document.addEventListener('DOMContentLoaded', () => {
   const filtersHTML = document.querySelectorAll(
-    "[name='q'], [name='username'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from'], [name='sort-end-to'], [name='master_group'], [name='group'], [name='group_brand'], [name='group_category'], [name='group_premises'], [name='group_language'], [name='group_event']"
+    "[name='q'], [name='username'], [name='created-from'], [name='created-to'], [name='master_group'], [name='group'], [name='group_brand'], [name='group_category'], [name='group_premises'], [name='group_language'], [name='group_event']"
   );
   const buttonLoadEventsTable = document.querySelector('#table-report-loader') as HTMLButtonElement;
 
