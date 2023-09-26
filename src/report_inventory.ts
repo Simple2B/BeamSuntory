@@ -83,23 +83,17 @@ const formatDate = (date: string) => {
 const downloadCSV = async function () {
   // Filters
   const searchInventoryInput: HTMLInputElement = document.querySelector('#table-search-inventory')
-  const dateInventoryStartFromInput: HTMLInputElement = document.querySelector(
-    '#product-inventory-sort-start-from-datepicker'
+  const dateInventoryCreatedFromInput: HTMLInputElement = document.querySelector(
+    '#product-inventory-sort-created-from-datepicker'
   )
-  const dateInventoryStartToInput: HTMLInputElement = document.querySelector(
-    '#product-inventory-sort-start-to-datepicker'
+  const dateInventoryCreatedToInput: HTMLInputElement = document.querySelector(
+    '#product-inventory-sort-created-to-datepicker'
   )
-  const dateInventoryEndFromInput: HTMLInputElement = document.querySelector(
-    '#product-inventory-sort-end-from-datepicker'
-  )
-  const dateInventoryEndToInput: HTMLInputElement = document.querySelector('#product-inventory-sort-end-to-datepicker')
 
   const filtersMap = {
     q: searchInventoryInput,
-    start_from: dateInventoryStartFromInput,
-    start_to: dateInventoryStartToInput,
-    end_from: dateInventoryEndFromInput,
-    end_to: dateInventoryEndToInput,
+    created_from: dateInventoryCreatedFromInput,
+    created_to: dateInventoryCreatedToInput,
   }
 
   const filterQuery = []
@@ -157,7 +151,7 @@ const downloadCSV = async function () {
 
 document.addEventListener('DOMContentLoaded', () => {
   const filtersHTML = document.querySelectorAll(
-    "[name='q'], [name='username'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from'], [name='sort-end-from']"
+    "[name='q'], [name='username'], [name='created_from'], [name='created_to']"
   )
   const buttonLoadInventoriesTable = document.querySelector('#table-report-loader') as HTMLButtonElement
 
@@ -165,8 +159,6 @@ document.addEventListener('DOMContentLoaded', () => {
   tableRow.forEach((row: HTMLDivElement) => {
     const viewReportInventoriesModal = row.querySelector('.report-inventory-view-btn')
     const data = JSON.parse(viewReportInventoriesModal.getAttribute('data-target'))
-    console.log('tableRow data', data)
-
     const reportStore = data.shipRequest.store.storeName
     const reportInventoryStoreDiv = row.querySelector('.report-inventory-store') as HTMLDivElement
     reportInventoryStoreDiv.innerHTML = reportStore

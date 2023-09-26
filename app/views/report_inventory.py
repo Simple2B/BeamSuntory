@@ -34,6 +34,22 @@ def get_inventory_reports():
             | m.ReportInventoryList.user.has(
                 m.User.username.ilike(f"%{filter_inventories.q}%")
             )
+            | m.ReportInventoryList.inbound_order.has(
+                m.InboundOrder.order_id.ilike(f"%{filter_inventories.q}%")
+            )
+            | m.ReportInventoryList.inbound_order.has(
+                m.InboundOrder.status.ilike(f"%{filter_inventories.q}%")
+            )
+            | m.ReportInventoryList.report_inventories.any(
+                m.ReportInventory.product.has(
+                    m.Product.name.ilike(f"%{filter_inventories.q}%")
+                )
+            )
+            | m.ReportInventoryList.report_inventories.any(
+                m.ReportInventory.product.has(
+                    m.Product.SKU.ilike(f"%{filter_inventories.q}%")
+                )
+            )
         )
 
         count_query = count_query.where(
@@ -46,52 +62,34 @@ def get_inventory_reports():
             | m.ReportInventoryList.user.has(
                 m.User.username.ilike(f"%{filter_inventories.q}%")
             )
+            | m.ReportInventoryList.inbound_order.has(
+                m.InboundOrder.order_id.ilike(f"%{filter_inventories.q}%")
+            )
+            | m.ReportInventoryList.inbound_order.has(
+                m.InboundOrder.status.ilike(f"%{filter_inventories.q}%")
+            )
+            | m.ReportInventoryList.report_inventories.any(
+                m.ReportInventory.product.has(
+                    m.Product.name.ilike(f"%{filter_inventories.q}%")
+                )
+            )
+            | m.ReportInventoryList.report_inventories.any(
+                m.ReportInventory.product.has(
+                    m.Product.SKU.ilike(f"%{filter_inventories.q}%")
+                )
+            )
         )
 
-    if filter_inventories.start_from:
+    if filter_inventories.created_from:
         query = query.where(
-            m.ReportInventoryList.ship_request.has(
-                m.ShipRequest.carts.any(
-                    m.Cart.inventory.has(
-                        m.Inventory.date_from
-                        >= datetime.strptime(filter_inventories.start_from, "%m/%d/%Y")
-                    )
-                )
-            )
+            m.ReportInventoryList.created_at
+            >= datetime.strptime(filter_inventories.created_from, "%m/%d/%Y")
         )
 
-    if filter_inventories.start_to:
+    if filter_inventories.created_to:
         query = query.where(
-            m.ReportInventoryList.ship_request.has(
-                m.ShipRequest.carts.any(
-                    m.Cart.inventory.has(
-                        m.Inventory.date_from
-                        <= datetime.strptime(filter_inventories.start_to, "%m/%d/%Y")
-                    )
-                )
-            )
-        )
-
-    if filter_inventories.end_from:
-        query = query.where(
-            m.ReportInventoryList.ship_request.has(
-                m.ShipRequest.carts.any(
-                    m.Cart.inventory.has(
-                        m.Inventory.date_from
-                        >= datetime.strptime(filter_inventories.end_from, "%m/%d/%Y")
-                    )
-                )
-            )
-        )
-
-    if filter_inventories.end_to:
-        m.ReportInventoryList.ship_request.has(
-            m.ShipRequest.carts.any(
-                m.Cart.inventory.has(
-                    m.Inventory.date_from
-                    <= datetime.strptime(filter_inventories.end_to, "%m/%d/%Y")
-                )
-            )
+            m.ReportInventoryList.created_at
+            <= datetime.strptime(filter_inventories.created_to, "%m/%d/%Y")
         )
 
     if filter_inventories.username:

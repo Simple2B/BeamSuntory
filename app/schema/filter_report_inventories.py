@@ -6,7 +6,5 @@ class FilterReportInventories(BaseModel):
 
     q: str | None = None
     username: str | None = None
-    start_from: str | None = None
-    start_to: str | None = None
-    end_from: str | None = None
-    end_to: str | None = None
+    created_from: str | None = None
+    created_to: str | None = None

@@ -23,7 +23,7 @@
           hx-trigger="keyup changed delay:500ms"
           hx-target="#reports-table"
           hx-swap="innerHTML"
-          hx-include="[name='username'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from'], [name='sort-end-to']"
+          hx-include="[name='username'], [name='created_from'], [name='created_to`']"
           hx-get="{{ url_for('report_inventory.search_inventory_reports') }}"
           hx-indicator="#report-table-spinner"
           type="search"
@@ -41,7 +41,7 @@
         hx-swap="innerHTML"
         hx-target="#reports-table"
         name="username"
-        hx-include="[name='q'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from'], [name='sort-end-to']"
+        hx-include="[name='q'], [name='created_from'], [name='created_to']"
         hx-get="{{ url_for('report_inventory.search_inventory_reports') }}"
         hx-indicator="#report-table-spinner"
         class="inventories-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -59,13 +59,15 @@
       </div>
       <input
         datepicker
-        name="sort-start-from"
+        name="created_from"
         hx-trigger="changeDate"
-        hx-include="[name='q'], [name='username'], [name='sort-start-to'], [name='sort-end-from'], [name='sort-end-to']"
+        hx-include="[name='q'], [name='username'], [name='created_to']"
         hx-get="{{ url_for('report_inventory.search_inventory_reports') }}"
+        hx-target="#reports-table"
+        hx-swap="innerHTML"
         type="text"
-        id="product-inventory-sort-start-from-datepicker"
-        placeholder="Start date: from"
+        id="product-inventory-sort-created-from-datepicker"
+        placeholder="Created date: from"
         hx-indicator="#report-table-spinner"
         class="product-inventory-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
       />
@@ -78,48 +80,15 @@
       </div>
       <input
         datepicker
-        name="sort-start-to"
+        name="created_to"
         hx-trigger="changeDate"
-        hx-include="[name='q'], [name='username'], [name='sort-start-from'], [name='sort-end-from'], [name='sort-end-to']"
+        hx-include="[name='q'], [name='username'], [name='created_from']"
         hx-get="{{ url_for('report_inventory.search_inventory_reports') }}"
+        hx-target="#reports-table"
+        hx-swap="innerHTML"
         type="text"
-        placeholder="Start date: to"
-        id="product-inventory-sort-start-to-datepicker"
-        hx-indicator="#report-table-spinner"
-        class="product-inventory-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-      />
-    </div>
-    <div class="relative">
-      <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-inventories-none">
-        {% include "icon/calendar.html" %}
-      </div>
-      <input
-        datepicker
-        name="sort-end-from"
-        hx-trigger="changeDate"
-        hx-include="[name='q'], [name='username'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from']"
-        hx-get="{{ url_for('report_inventory.search_inventory_reports') }}"
-        type="text"
-        id="product-inventory-sort-end-from-datepicker"
-        placeholder="End date: from"
-        hx-indicator="#report-table-spinner"
-        class="product-inventory-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-      />
-    </div>
-    <span class="text-gray-500">to</span>
-    <div class="relative">
-      <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-inventories-none">
-        {% include "icon/calendar.html" %}
-      </div>
-      <input
-        datepicker
-        name="sort-end-to"
-        hx-trigger="changeDate"
-        hx-include="[name='q'], [name='username'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from']"
-        hx-get="{{ url_for('report_inventory.search_inventory_reports') }}"
-        type="text"
-        id="product-inventory-sort-end-to-datepicker"
-        placeholder="End date: to"
+        placeholder="Created date: to"
+        id="product-inventory-sort-created-to-datepicker"
         hx-indicator="#report-table-spinner"
         class="product-inventory-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
       />
