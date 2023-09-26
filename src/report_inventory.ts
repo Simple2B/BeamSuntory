@@ -12,8 +12,10 @@ interface ICart {
 }
 
 interface IReportInventory {
-  qty_before: number
-  qty_after: number
+  qtyBefore: number
+  qtyAfter: number
+  product: IProduct
+  warehouseProductId: number
   createdAt: string
 }
 
@@ -59,7 +61,6 @@ interface IStore {
 
 interface IInventoriesReportResponse {
   pagination: IPagination
-  // events: IInventories[]
   reportInventoryList: IReportInventoryList[]
 }
 
@@ -68,6 +69,16 @@ const htmxDispatcher = new HTMXDispatcher()
 
 const defaultBrandImage =
   'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png'
+
+const formatDate = (date: string) => {
+  const createAt = new Date(date)
+  const year = createAt.getFullYear()
+  const month = String(createAt.getMonth() + 1).padStart(2, '0') // Month is 0-based
+  const day = String(createAt.getDate()).padStart(2, '0')
+  const hours = String(createAt.getHours()).padStart(2, '0')
+  const minutes = String(createAt.getMinutes()).padStart(2, '0')
+  return `${month}/${day}/${year} ${hours}:${minutes}`
+}
 
 const downloadCSV = async function () {
   // Filters
@@ -117,23 +128,15 @@ const downloadCSV = async function () {
         } else {
           reportTarget = reportInventories.warehouse.name
         }
-        const createAt = new Date(report.createdAt)
-        const year = createAt.getFullYear()
-        const month = String(createAt.getMonth() + 1).padStart(2, '0') // Month is 0-based
-        const day = String(createAt.getDate()).padStart(2, '0')
-        const hours = String(createAt.getHours()).padStart(2, '0')
-        const minutes = String(createAt.getMinutes()).padStart(2, '0')
 
         csvData.push(
           [
-            `${month}/${day}/${year} ${hours}:${minutes}`,
+            formatDate(report.createdAt),
             reportTarget,
             reportInventories.type,
             reportInventories.user.username,
             report.qtyBefore.toString(),
             report.qtyAfter.toString(),
-            // report.warehouseProduct.product.SKU,
-            // report.warehouseProduct.product.name,
             report.product.SKU,
             report.product.name,
           ].join(',')
@@ -209,16 +212,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const reportInventory: IReportInventoryList = JSON.parse(btn.getAttribute('data-target'))
         console.log('reportInventory json', reportInventory)
 
-        const createAt = new Date(reportInventory.createdAt)
-        const year = createAt.getFullYear()
-        const month = String(createAt.getMonth() + 1).padStart(2, '0') // Month is 0-based
-        const day = String(createAt.getDate()).padStart(2, '0')
-        const hours = String(createAt.getHours()).padStart(2, '0')
-        const minutes = String(createAt.getMinutes()).padStart(2, '0')
-
         reportViewUser.innerHTML = reportInventory.user.username
         reportViewAction.innerHTML = reportInventory.type
-        reportViewDate.innerHTML = `${month}/${day}/${year} ${hours}:${minutes}`
+        reportViewDate.innerHTML = formatDate(reportInventory.createdAt)
         if (reportInventory.store) {
           reportStoreName.innerHTML = reportInventory.store.storeName
         } else {
@@ -256,6 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
           productSku.innerHTML = inventory.product.SKU
           productQuantity.innerHTML = inventory.qtyBefore.toString()
 
+          // TODO do we need to show price or qty or both?
           // if (inventory.product.regularPrice) {
           //   productRegularPrice.innerHTML = inventory.product.regularPrice.toString()
           // } else {
@@ -279,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
           } else {
             productRetailPrice.innerHTML = '0'
           }
-          inventory.product.warehouse_products.forEach((warehouseProduct) => {
+          inventory.product.warehouseProducts.forEach((warehouseProduct) => {
             if (warehouseProduct.id === inventory.warehouseProductId) {
               productGroup.innerHTML = warehouseProduct.group.name
               productWarehouse.innerHTML = warehouseProduct.warehouse.name
