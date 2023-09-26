@@ -8,6 +8,7 @@ from .utils import ModelMixin
 from app import schema as s
 from .product import Product
 from .group import Group
+from .user import User
 
 
 class Assign(db.Model, ModelMixin):
@@ -31,6 +32,10 @@ class Assign(db.Model, ModelMixin):
         sa.DateTime,
         default=datetime.utcnow,
     )
+
+    type: orm.Mapped[str] = orm.mapped_column(sa.String(64))
+    user_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("users.id"))
+    user: orm.Mapped[User] = orm.relationship("User")
 
     @property
     def json(self):

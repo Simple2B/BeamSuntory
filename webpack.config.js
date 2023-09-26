@@ -292,6 +292,26 @@ const reportInventoryConfig = {
   },
 }
 
+const reportRequestShareConfig = {
+  entry: {
+    main: './src/report_share_request.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/report_share_request.js', // <--- Will be compiled to this single file
+  },
+}
+
+const reportAssignConfig = {
+  entry: {
+    main: './src/report_assign.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/report_assign.js', // <--- Will be compiled to this single file
+  },
+}
+
 const configs = [
   baseConfig,
   userConfig,
@@ -321,6 +341,8 @@ const configs = [
   eventConfig,
   reportEventConfig,
   reportInventoryConfig,
+  reportRequestShareConfig,
+  reportAssignConfig,
 ].map((conf) => merge(defaultConfig, conf))
 
 module.exports = configs

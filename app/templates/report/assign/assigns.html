@@ -1,0 +1,258 @@
+<!-- prettier-ignore -->
+{% extends 'base.html' %}
+{% block content %}
+<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+  <button
+    id="table-report-loader"
+    hx-trigger="click"
+    hx-get="{{ url_for('report_assign.search_report_assigns') }}"
+    hx-target="#reports-table"
+    hx-indicator="#report-table-spinner"
+    class="hidden"
+  ></button>
+
+  <div class="flex items-center gap-3 p-3 flex-wrap">
+    <div class="flex gap-4 items-center justify-start py-4 bg-white dark:bg-gray-800 px-4">
+      <label for="table-search" class="sr-only">Search</label>
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          {% include "icon/eyeglass_1.html" %}
+        </div>
+        <input
+          name="q"
+          hx-trigger="keyup changed delay:500ms"
+          hx-target="#reports-table"
+          hx-swap="innerHTML"
+          hx-include="[name='start_date'], [name='end_date'], [name='username'], [name='language'], [name='category'], [name='premises'], [name='brand'], [name='from_group'], [name='to_group']"
+          hx-get="{{ url_for('report_assign.search_report_assigns') }}"
+          hx-indicator="#report-table-spinner"
+          type="search"
+          id="table-search-assign"
+          placeholder="Search"
+          class="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        />
+      </div>
+    </div>
+
+    <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800">
+      <!-- prettier-ignore -->
+      <select
+        id="report-assigns-group_from
+        hx-trigger="change"
+        hx-swap="innerHTML"
+        hx-target="#reports-table"
+        name="from_group"
+        hx-include="[name='q'], [name='start_date'], [name='end_date'], [name='username'], [name='language'], [name='category'], [name='premises'], [name='to_group'], [name='brand']"
+        hx-get="{{ url_for('report_assign.search_report_assigns') }}"
+        hx-indicator="#report-table-spinner"
+        class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+      >
+      <option value="" disabled selected>Group from</option>
+      {% for group in product_groups %}
+        <option value="{{ group.name }}">{{ group.name }}</option>
+      {% endfor %}
+      </select>
+    </div> 
+
+    <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800">
+      <!-- prettier-ignore -->
+      <select
+        id="report-assigns-group_to"
+        hx-trigger="change"
+        hx-swap="innerHTML"
+        hx-target="#reports-table"
+        name="to_group"
+        hx-include="[name='q'], [name='start_date'], [name='end_date'], [name='username'], [name='language'], [name='category'], [name='premises'], [name='from_group'], [name='brand']"
+        hx-get="{{ url_for('report_assign.search_report_assigns') }}"
+        hx-indicator="#report-table-spinner"
+        class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+      >
+      <option value="" disabled selected>Group to</option>
+      {% for group in product_groups %}
+        <option value="{{ group.name }}">{{ group.name }}</option>
+      {% endfor %}
+      </select>
+    </div> 
+
+    {% for brands in product_master_group_brand %}
+      <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800">
+        <!-- prettier-ignore -->
+        <select
+          id="report-assigns-brand"
+          hx-trigger="change"
+          hx-swap="innerHTML"
+          hx-target="#reports-table"
+          name="brand"
+          hx-include="[name='q'], [name='start_date'], [name='end_date'], [name='username'], [name='language'], [name='category'], [name='premises'], [name='from_group'], [name='to_group']"
+          hx-get="{{ url_for('report_assign.search_report_assigns') }}"
+          hx-indicator="#report-table-spinner"
+          class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        >
+          <option selected disabled value="">{{ brands.name }}</option>
+          {% for brand in brands.groups_for_product %}
+            <option value="{{ brand.name }}">{{ brand.name }}</option>
+          {% endfor %}
+        </select>
+      </div> 
+    {% endfor %}
+
+    {% for languages in product_master_group_language %}
+      <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800">
+        <!-- prettier-ignore -->
+        <select
+          id="report-assigns-language"
+          hx-trigger="change"
+          hx-swap="innerHTML"
+          hx-target="#reports-table"
+          name="language"
+          hx-include="[name='q'], [name='start_date'], [name='end_date'], [name='username'], [name='brand'], [name='category'], [name='premises'], [name='from_group'], [name='to_group']"
+          hx-get="{{ url_for('report_assign.search_report_assigns') }}"
+          hx-indicator="#report-table-spinner"
+          class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        >
+          <option selected disabled value="">{{ languages.name }}</option>
+          {% for language in languages.groups_for_product %}
+            <option value="{{ language.name }}">{{ language.name }}</option>
+          {% endfor %}
+        </select>
+      </div> 
+    {% endfor %}
+
+    {% for categories in product_master_group_category %}
+      <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800">
+        <!-- prettier-ignore -->
+        <select
+          id="report-assigns-category"
+          hx-trigger="change"
+          hx-swap="innerHTML"
+          hx-target="#reports-table"
+          name="category"
+          hx-include="[name='q'], [name='start_date'], [name='end_date'], [name='username'], [name='language'], [name='brand'], [name='premises'], [name='from_group'], [name='to_group']"
+          hx-get="{{ url_for('report_assign.search_report_assigns') }}"
+          hx-indicator="#report-table-spinner"
+          class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        >
+          <option selected disabled value="">{{ categories.name }}</option>
+          {% for category in categories.groups_for_product %}
+            <option value="{{ category.name }}">{{ category.name }}</option>
+          {% endfor %}
+        </select>
+      </div> 
+    {% endfor %}
+
+    {% for premises in product_master_group_premises %}
+      <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800">
+        <!-- prettier-ignore -->
+        <select
+          id="report-assigns-premises"
+          hx-trigger="change"
+          hx-swap="innerHTML"
+          hx-target="#reports-table"
+          name="premises"
+          hx-include="[name='q'], [name='start_date'], [name='end_date'], [name='username'], [name='language'], [name='category'], [name='brand'], [name='from_group'], [name='to_group']"
+          hx-get="{{ url_for('report_assign.search_report_assigns') }}"
+          hx-indicator="#report-table-spinner"
+          class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        >
+          <option selected disabled value="">{{ premises.name }}</option>
+          {% for premise in premises.groups_for_product %}
+            <option value="{{ premise.name }}">{{ premise.name }}</option>
+          {% endfor %}
+        </select>
+      </div> 
+    {% endfor %}
+    
+    <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800">
+      <!-- prettier-ignore -->
+      <select
+        id="report-assigns-filter-user"
+        hx-trigger="change"
+        hx-swap="innerHTML"
+        hx-target="#reports-table"
+        name="username"
+        hx-include="[name='q'], [name='start_date'], [name='end_date'], [name='brand'], [name='language'], [name='category'], [name='premises'], [name='from_group'], [name='to_group']"
+        hx-get="{{ url_for('report_assign.search_report_assigns') }}"
+        hx-indicator="#report-table-spinner"
+        class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+      >
+        <option selected disabled value="">Select user</option>
+
+        {% for user in users %}
+        <option value="{{ user.username }}">{{ user.username }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="relative">
+      <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+        {% include "icon/calendar.html" %}
+      </div>
+      <input
+        datepicker
+        name="start_date"
+        hx-swap="innerHTML"
+        hx-trigger="changeDate"
+        hx-target="#reports-table"
+        hx-include="[name='q'], [name='brand'], [name='end_date'], [name='username'], [name='language'], [name='category'], [name='premises'], [name='from_group'], [name='to_group']"
+        hx-get="{{ url_for('report_assign.search_report_assigns') }}"
+        type="text"
+        id="report-assigns-start-date"
+        placeholder="Start date"        
+        hx-indicator="#report-table-spinner"
+        class="product-event-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+      />
+    </div>
+
+    <div class="relative">
+      <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+        <!-- prettier-ignore -->
+        {% include "icon/calendar.html" %}
+      </div>
+      <input
+        datepicker
+        name="end_date"
+        hx-trigger="changeDate"       
+        hx-include="[name='q'], [name='start_date'], [name='brand'], [name='username'], [name='language'], [name='category'], [name='premises'], [name='from_group'], [name='to_group']"
+        hx-get="{{ url_for('report_assign.search_report_assigns') }}"
+        type="text"
+        placeholder="End date"
+        id="report-assigns-end-date"
+        hx-indicator="#report-table-spinner"
+        hx-target="#reports-table"
+        hx-swap="innerHTML"
+        class="product-event-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+      />
+    </div>
+    
+
+
+    <div class="flex gap-4 items-center justify-start py-4 bg-white dark:bg-gray-800 px-4">
+      <!-- prettier-ignore -->
+      <button type="button" id="product-event-clear-button" class=" px-3 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">{% include "icon/mop.html" %}Clear filters</button>
+    </div>
+    <div class="flex gap-4 items-center justify-start py-4 bg-white dark:bg-gray-800 px-4">
+      <!-- prettier-ignore -->
+      <div class="flex w-full justify-end">
+      <button type="button" id="button-csv-download" class=" px-3 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+        {% include "icon/download.html" %}
+        &nbsp Download CSV
+      </button>  
+    </div>
+    </div>
+  </div>
+
+  <div id="reports-table"></div>
+  <div class="htmx-indicator flex justify-center items-center" id="report-table-spinner">
+    {% include "icon/spinner.html" %}
+  </div>
+</div>
+
+<!-- modals -->
+{% include 'report/assign/view.html' %}
+
+<!-- prettier-ignore -->
+{% endblock %}
+<!-- prettier-ignore -->
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/report_assign.js') }}" type="text/javascript" defer></script>
+{% endblock %}
