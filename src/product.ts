@@ -799,6 +799,7 @@ adjustProductButtonElements.forEach((e) =>
 )
 
 // function to request share
+// TODO refactor !!!
 function requestShare(product: IProduct, group: string) {
   const img: HTMLImageElement = document.querySelector('#product-request-share-image')
   const fullImageAnchor = img.closest('.product-full-image-anchor')
@@ -808,6 +809,10 @@ function requestShare(product: IProduct, group: string) {
   div.innerHTML = product.name
   div = document.querySelector('#product-request-share-sku')
   div.innerHTML = product.SKU
+
+  const productSKUInput = document.querySelector('#product-sku') as HTMLInputElement;
+  productSKUInput.value = product.SKU;
+
   div = document.querySelector('#product-request-share-available-quantity')
   div.innerHTML = product.available_quantity[group.replace('_', ' ')].toString()
   div = document.querySelector('#product-request-share-owner')
@@ -824,11 +829,16 @@ function requestShare(product: IProduct, group: string) {
   input.value = product.name
   input = document.querySelector('#product-request-share-SKU-hidden-input')
   input.value = product.SKU
-  input = document.querySelector('#product-request-share-available-quantity-hidden-input')
-  input.value = product.available_quantity[group.replace('_', ' ')].toString()
-  input = document.querySelector('#product-request-share-from-group')
-  input.value = group.replace('_', ' ')
-  requestShareModal.show()
+  input = document.querySelector('#product-request-share-available-quantity-hidden-input');
+  input.value = product.available_quantity[group.replace('_', ' ')].toString();
+
+  const groupNameView = document.querySelector('#product-request-share-from-group');
+  groupNameView.innerHTML = group.replace('_', ' ');
+  
+  const fromGroupId = document.querySelector('#from-group-id') as HTMLInputElement;
+  fromGroupId.value = product.groups_ids[group.replace('_', ' ')].toString();
+
+  requestShareModal.show();
 }
 
 // function to ship
@@ -1123,6 +1133,7 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
       editModal.hide()
       let shareGroup = e.getAttribute('share-group-data')
       const product = JSON.parse(sessionStorage.product)
+
       requestShare(product, shareGroup)
     })
   )

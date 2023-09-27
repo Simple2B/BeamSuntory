@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block content %}
+{% set all_includes = "[name='q'], [name='created_from'], [name='created_to'], [name='master_group'], [name='group'],
+[name='group_category'], [name='group_category'], [name='group_language'], [name='group_premises'],
+[name='group_event']" %}
+<input type="text" hidden id="adjustment-master-group-hidden" value="{{ product_master_groups_json }}">
+<input type="text" hidden id="adjustment-group-hidden">
+<input type="text" hidden id="adjustment-product-sort-group-hidden">
+<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+  <div>
+    <button id="table-report-loader" hx-trigger="click"
+      hx-get="{{ url_for('report_adjustment.search_report_adjustments') }}" hx-target="#reports-table"
+      hx-indicator="#report-table-spinner" class="hidden"></button>
+    <div class="flex items-center gap-3 p-3">
+      <div class="flex gap-4 items-center justify-start py-1 bg-white dark:bg-gray-800 px-4">
+        <label for="table-search" class="sr-only">Search</label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            {% include "icon/eyeglass_1.html" %}
+          </div>
+          <input name="q" hx-trigger="keyup changed delay:500ms" hx-target="#reports-table" hx-swap="innerHTML"
+            hx-include="{{ all_includes }}" hx-get="{{ url_for('report_adjustment.search_report_adjustments') }}"
+            hx-indicator="#report-table-spinner" type="search" id="table-search-adjustment" placeholder="Search"
+            class="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+        </div>
+      </div>
+      <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800">
+        <!-- prettier-ignore -->
+        <select id="events-filter-status" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"
+          name="username" hx-include="{{ all_includes }}"
+          hx-get="{{ url_for('report_adjustment.search_report_adjustments') }}" hx-indicator="#report-table-spinner"
+          class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+          <option selected disabled value="">Select user</option>
+          {% for user in users %}
+          <option value="{{ user.username }}">{{ user.username }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          {% include "icon/calendar.html" %}
+        </div>
+        <input datepicker name="created_from" hx-trigger="changeDate" hx-target="#reports-table" hx-swap="innerHTML"
+          hx-include="{{ all_includes }}" hx-get="{{ url_for('report_adjustment.search_report_adjustments') }}"
+          type="text" id="product-adjustment-created-from-datepicker" placeholder="Created date: from"
+          hx-indicator="#report-table-spinner"
+          class="product-adjustment-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+      </div>
+      <span class="text-gray-500">to</span>
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <!-- prettier-ignore -->
+          {% include "icon/calendar.html" %}
+        </div>
+        <input datepicker name="created_to" hx-trigger="changeDate" hx-target="#reports-table" hx-swap="innerHTML"
+          hx-include="{{ all_includes }}" hx-get="{{ url_for('report_adjustment.search_report_adjustments') }}"
+          type="text" placeholder="Created date: to" id="product-adjustment-created-to-datepicker"
+          hx-indicator="#report-table-spinner"
+          class="product-adjustment-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+      </div>
+      <div class="flex gap-4 items-center justify-start py-1 bg-white dark:bg-gray-800 px-4">
+        <!-- prettier-ignore -->
+        <button type="button" id="product-adjustment-clear-button"
+          class=" px-3 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 w-[180px]">{%
+          include "icon/mop.html" %}Clear filters</button>
+      </div>
+      <div class="flex gap-4 items-center justify-start py-1 bg-white dark:bg-gray-800 px-4">
+        <!-- prettier-ignore -->
+        <div class="flex w-full justify-end">
+          <button type="button" id="button-csv-download"
+            class=" px-3 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+            {% include "icon/download.html" %}
+            &nbsp Download CSV
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-5 mb-5">
+      <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800">
+        <!-- prettier-ignore -->
+        <select id="adjustment-filter-master-group" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"
+          name="master_group" hx-include="{{ all_includes }}"
+          hx-get="{{ url_for('report_adjustment.search_report_adjustments') }}" hx-indicator="#report-table-spinner"
+          class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+          <option selected disabled value="">Master group</option>
+          {% for master_group in master_groups %}
+          <option value="{{ master_group.name }}">{{ master_group.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800">
+        <!-- prettier-ignore -->
+        <select id="adjustment-filter-group" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"
+          name="group" hx-include="{{ all_includes }}"
+          hx-get="{{ url_for('report_adjustment.search_report_adjustments') }}" hx-indicator="#report-table-spinner"
+          class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+          <option selected disabled value="">Target group</option>
+          {% for group in groups %}
+          <option value="{{ group.name }}">{{ group.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% for prod_master_group in product_master_groups %}
+      <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800">
+        <!-- prettier-ignore -->
+        <select id="inventory-filter-product-master-group-{{prod_master_group.name}}" hx-trigger="change"
+          hx-swap="innerHTML" hx-target="#reports-table" name="group_{{prod_master_group.name.lower()}}"
+          hx-include="{{all_includes}}" hx-get="{{ url_for('report_adjustment.search_report_adjustments') }}"
+          hx-indicator="#report-table-spinner"
+          class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+          <option selected value="">{{ prod_master_group.name }}</option>
+          {% for group in prod_master_group.groups_for_product %}
+          <option value="{{ group.name }}">{{ group.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div id="reports-table"></div>
+  <div class="htmx-indicator flex justify-center items-center" id="report-table-spinner">
+    {% include "icon/spinner.html" %}
+  </div>
+</div>
+
+<!-- modals -->
+{% include 'report/adjustment/view.html' %}
+
+<!-- prettier-ignore -->
+{% endblock %}
+<!-- prettier-ignore -->
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/report_adjustment.js') }}" type="text/javascript" defer></script>
+{% endblock %}

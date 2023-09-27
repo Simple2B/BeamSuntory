@@ -60,9 +60,11 @@
       <input
         datepicker
         name="sort-start-from"
-        hx-trigger="changeDate"
+        hx-trigger="changeDate"        
         hx-include="[name='q'], [name='username'], [name='sort-start-to'], [name='sort-end-from'], [name='sort-end-to']"
         hx-get="{{ url_for('report.search_report_events') }}"
+        hx-target="#reports-table"
+        hx-swap="innerHTML"
         type="text"
         id="product-event-sort-start-from-datepicker"
         placeholder="Start date: from"
@@ -82,6 +84,8 @@
         hx-trigger="changeDate"
         hx-include="[name='q'], [name='username'], [name='sort-start-from'], [name='sort-end-from'], [name='sort-end-to']"
         hx-get="{{ url_for('report.search_report_events') }}"
+        hx-target="#reports-table"
+        hx-swap="innerHTML"
         type="text"
         placeholder="Start date: to"
         id="product-event-sort-start-to-datepicker"
@@ -99,6 +103,8 @@
         hx-trigger="changeDate"
         hx-include="[name='q'], [name='username'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from']"
         hx-get="{{ url_for('report.search_report_events') }}"
+        hx-target="#reports-table"
+        hx-swap="innerHTML"
         type="text"
         id="product-event-sort-end-from-datepicker"
         placeholder="End date: from"
@@ -117,6 +123,8 @@
         hx-trigger="changeDate"
         hx-include="[name='q'], [name='username'], [name='sort-start-from'], [name='sort-start-to'], [name='sort-end-from']"
         hx-get="{{ url_for('report.search_report_events') }}"
+        hx-target="#reports-table"
+        hx-swap="innerHTML"
         type="text"
         id="product-event-sort-end-to-datepicker"
         placeholder="End date: to"
@@ -126,7 +134,7 @@
     </div>
     <div class="flex gap-4 items-center justify-start py-4 bg-white dark:bg-gray-800 px-4">
       <!-- prettier-ignore -->
-      <button type="button" id="product-event-clear-button" class=" px-3 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 w-[180px]">{% include "icon/mop.html" %}Clear filters</button>
+      <button type="button" id="product-event-clear-button" class=" px-3 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">{% include "icon/mop.html" %}Clear filters</button>
     </div>
     <div class="flex gap-4 items-center justify-start py-4 bg-white dark:bg-gray-800 px-4">
       <!-- prettier-ignore -->
