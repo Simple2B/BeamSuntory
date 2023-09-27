@@ -157,7 +157,13 @@ def adjustments():
 @login_required
 def search_report_adjustments():
     pagination, reports = get_adjustment_report()
+    filter_adjustments = s.FilterReportAdjustments.model_validate(dict(request.args))
 
     return render_template(
-        "report/adjustment/reports_table.html", page=pagination, reports=reports
+        "report/adjustment/reports_table.html",
+        page=pagination,
+        reports=reports,
+        filter_adjustments=s.FilterReportAdjustments.model_dump_json(
+            filter_adjustments
+        ),
     )

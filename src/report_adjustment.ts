@@ -6,14 +6,6 @@ interface IUser {
   username: string;
 }
 
-interface IProductEvent {
-  dateFrom: string;
-  dateTo: string;
-  product: IProduct;
-  quantity: number;
-  group: string;
-}
-
 interface IAdjustResponse {
   pagination: IPagination;
   adjusts: IAdjust[];
@@ -60,50 +52,20 @@ const defaultBrandImage =
 
 const downloadCSV = async function () {
   // Filters
-  const searchEventInput: HTMLInputElement = document.querySelector('#table-search-adjustment');
-  const dateEventStartFromInput: HTMLInputElement = document.querySelector(
-    '#product-adjustment-sort-start-from-datepicker'
-  );
-  const dateEventStartToInput: HTMLInputElement = document.querySelector(
-    '#product-adjustment-sort-start-to-datepicker'
-  );
-  const dateEventEndFromInput: HTMLInputElement = document.querySelector(
-    '#product-adjustment-sort-end-from-datepicker'
-  );
-  const dateEventEndToInput: HTMLInputElement = document.querySelector('#product-adjustment-sort-end-to-datepicker');
-  const masterGroupSelect: HTMLInputElement = document.querySelector('#adjustment-filter-master-group');
-  const groupSelect: HTMLInputElement = document.querySelector('#adjustment-filter-group');
-  const productGroupBrand: HTMLInputElement = document.querySelector('#adjustment-filter-product-master-group-brand"');
-  const productGroupCategory: HTMLInputElement = document.querySelector(
-    '#adjustment-filter-product-master-group-category'
-  );
-  const productGroupPremises: HTMLInputElement = document.querySelector(
-    '#adjustment-filter-product-master-group-premises'
-  );
-  const productGroupLanguage: HTMLInputElement = document.querySelector(
-    '#adjustment-filter-product-master-group-language'
-  );
-  const productGroupEvent: HTMLInputElement = document.querySelector('#adjustment-filter-product-master-group-event');
-
-  const filtersMap = {
-    q: searchEventInput,
-    start_from: dateEventStartFromInput,
-    start_to: dateEventStartToInput,
-    end_from: dateEventEndFromInput,
-    end_to: dateEventEndToInput,
-    master_group: masterGroupSelect,
-    group: groupSelect,
-  };
-
+  const filterParamsInput = document.querySelector('#adjustment-filter-params-input') as HTMLInputElement;
+  const filterParams = JSON.parse(filterParamsInput.value);
   const filterQuery = [];
-  for (const [queryKey, queryInput] of Object.entries(filtersMap)) {
-    filterQuery.push(`${queryKey}=${queryInput.value}`);
+
+  for (const [queryKey, queryValue] of Object.entries(filterParams)) {
+    if (queryValue) {
+      filterQuery.push(`${queryKey}=${queryValue}`);
+    }
   }
 
   // CSV Headers
   const csvData = ['created_at,product_name,sku,username,master_group,group,warehouse,quantity_before,quantity_after'];
   let pages = 1;
-  const queryTail = '';
+  const queryTail = filterQuery.join('&');
 
   for (let page = 1; page <= pages; page++) {
     const currentURL = window.location.href;
@@ -116,7 +78,7 @@ const downloadCSV = async function () {
       adjust.adjustGroupQty.forEach((reportAdjust) => {
         csvData.push(
           [
-            adjust.createdAt,
+            formatDate(adjust.createdAt),
             adjust.product.name,
             adjust.product.SKU,
             adjust.user.username,
@@ -139,6 +101,16 @@ const downloadCSV = async function () {
   a.setAttribute('download', 'report_adjustment.csv');
   a.click();
   a.remove();
+};
+
+const formatDate = (date: string) => {
+  const createAt = new Date(date);
+  const year = createAt.getFullYear();
+  const month = String(createAt.getMonth() + 1).padStart(2, '0');
+  const day = String(createAt.getDate()).padStart(2, '0');
+  const hours = String(createAt.getHours()).padStart(2, '0');
+  const minutes = String(createAt.getMinutes()).padStart(2, '0');
+  return `${month}/${day}/${year} ${hours}:${minutes}`;
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -200,18 +172,11 @@ document.addEventListener('DOMContentLoaded', () => {
     reportViewButtons.forEach((btn) => {
       btn.addEventListener('click', () => {
         const reportAdjust: IAdjust = JSON.parse(btn.getAttribute('data-target'));
-        const createAt = new Date(reportAdjust.createdAt);
-        const year = createAt.getFullYear();
-        const month = String(createAt.getMonth() + 1).padStart(2, '0'); // Month is 0-based
-        const day = String(createAt.getDate()).padStart(2, '0');
-        const hours = String(createAt.getHours()).padStart(2, '0');
-        const minutes = String(createAt.getMinutes()).padStart(2, '0');
-        console.log(reportAdjust);
-        // Render event
 
+        // Render event
         reportViewUser.innerHTML = reportAdjust.user.username;
         reportProductName.innerHTML = reportAdjust.product.name;
-        reportViewDate.innerHTML = `${month}/${day}/${year} ${hours}:${minutes}`;
+        reportViewDate.innerHTML = formatDate(reportAdjust.createdAt);
         reportProductSKU.innerHTML = reportAdjust.product.SKU;
         reportAdjustNote.innerHTML = reportAdjust.note ? reportAdjust.note : 'No notes';
 
@@ -219,11 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
           ? (reportProductImage.src = `data:image/png;base64, ${reportAdjust.product.image}`)
           : (reportProductImage.src = defaultBrandImage);
 
-        reportViewUser.innerHTML = reportAdjust.user.username;
-        reportViewDate.innerHTML = `${month}/${day}/${year} ${hours}:${minutes}`;
         reportAdjust.adjustGroupQty.forEach((adjust, i) => {
-          console.log(adjust);
-
           // Render event
           const newAdjustItem = productItemTemplate.cloneNode(true) as HTMLElement;
           newAdjustItem.removeAttribute('id');
