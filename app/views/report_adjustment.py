@@ -89,7 +89,7 @@ def get_adjustment_report():
 
     if master_groups.count(None) != len(master_groups):
         for group in master_groups:
-            if group != "":
+            if group:
                 query = query.where(
                     m.Adjust.adjust_group_qty.any(
                         m.AdjustGroupQty.product.has(
@@ -134,21 +134,12 @@ def get_adjustments_json():
 @login_required
 def adjustments():
     users = db.session.scalars(sa.select(m.User))
-    # TODO: Needs refactor to change it to dynamic
-    product_master_group_brand = db.session.scalar(
-        m.MasterGroupProduct.select().where(m.MasterGroupProduct.name == "Brand")
-    )
-    product_master_group_language = db.session.scalar(
-        m.MasterGroupProduct.select().where(m.MasterGroupProduct.name == "Language")
-    )
-    product_master_group_category = db.session.scalar(
-        m.MasterGroupProduct.select().where(m.MasterGroupProduct.name == "Category")
-    )
-    product_master_group_premises = db.session.scalar(
-        m.MasterGroupProduct.select().where(m.MasterGroupProduct.name == "Premises")
-    )
-    product_master_group_event = db.session.scalar(
-        m.MasterGroupProduct.select().where(m.MasterGroupProduct.name == "Events")
+    product_master_groups = db.session.scalars(
+        m.MasterGroupProduct.select().where(
+            m.MasterGroupProduct.name.in_(
+                ["Brand", "Language", "Category", "Premises", "Events"]
+            )
+        )
     )
     master_groups = db.session.scalars(m.MasterGroup.select())
     groups = db.session.scalars(m.Group.select())
@@ -156,11 +147,7 @@ def adjustments():
     return render_template(
         "report/adjustment/adjustments.html",
         users=users,
-        product_master_group_brand=product_master_group_brand,
-        product_master_group_category=product_master_group_category,
-        product_master_group_language=product_master_group_language,
-        product_master_group_premises=product_master_group_premises,
-        product_master_group_event=product_master_group_event,
+        product_master_groups=product_master_groups,
         master_groups=master_groups,
         groups=groups,
     )
