@@ -74,7 +74,7 @@ class Product(db.Model, ModelMixin):
     )
 
     # TODO is overlaps="user_obj" correct decision? remove it to see the warning
-    product_groups: orm.Mapped[ProductGroup] = orm.relationship(
+    product_groups: orm.Mapped[list[ProductGroup]] = orm.relationship(
         cascade="all, delete-orphan", overlaps="child"
     )
 
