@@ -1,5 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, Field, ConfigDict
+from .master_group import MasterGroup
 
 
 class Group(BaseModel):
@@ -9,3 +10,4 @@ class Group(BaseModel):
     name: str
     master_group_id: int = Field(alias="masterGroupId")
     created_at: datetime = Field(alias="createdAt")
+    master_group: MasterGroup = Field(alias="masterGroup")
