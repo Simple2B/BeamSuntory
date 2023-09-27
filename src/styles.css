@@ -132,3 +132,7 @@ button[disabled]{
 .width-250px{
     width: 250px;
 }
+
+.max-w-screen{
+    max-width: 100vw;
+}

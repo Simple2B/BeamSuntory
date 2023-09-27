@@ -146,6 +146,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const viewModal = new Modal(viewReportEventsModal, viewModalOptions);
   const reportViewProductTbody = document.querySelector('#table-products') as HTMLTableElement;
   const productItemTemplate = document.querySelector('#view-product-item-template') as HTMLTableRowElement;
+  const closingViewModalButton = document.querySelector('#button-closing-report-inbound-order-modal') as HTMLButtonElement; 
+  closingViewModalButton.addEventListener('click', () => {
+    viewModal.hide()
+  })
 
 
   // view buttons click
