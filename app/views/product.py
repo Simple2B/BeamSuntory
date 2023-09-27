@@ -571,7 +571,7 @@ def assign():
             type="Product Assigned",
             user_id=current_user.id,
         )
-        report_inventory_list.save()
+        report_inventory_list.save(False)
 
         # TODO sort also by warehouse_id
         product_warehouse: m.WarehouseProduct = db.session.execute(
@@ -586,7 +586,7 @@ def assign():
             qty_after=product_warehouse.product_quantity - form.quantity.data,
             report_inventory_list_id=report_inventory_list.id,
             product_id=product_warehouse.product_id,
-            warehouse_product_id=product_warehouse.id,
+            warehouse_product=product_warehouse,
         )
         report_inventory.save(False)
         product_warehouse.product_quantity -= form.quantity.data
@@ -610,14 +610,14 @@ def assign():
                 product_quantity=form.quantity.data,
                 warehouse_id=product_warehouse.warehouse_id,
             )
-            new_product_warehouse.save()
+            new_product_warehouse.save(False)
 
         report_inventory = m.ReportInventory(
             qty_before=qty_before,
             qty_after=new_product_warehouse.product_quantity,
             report_inventory_list_id=report_inventory_list.id,
             product_id=new_product_warehouse.product_id,
-            warehouse_product_id=new_product_warehouse.id,
+            warehouse_product=new_product_warehouse,
         )
         report_inventory.save(False)
 
@@ -766,7 +766,7 @@ def adjust():
             type="Products Adjusted",
             user_id=current_user.id,
         )
-        report_inventory_list.save()
+        report_inventory_list.save(False)
 
         for group_name, warehouses in groups.items():
             group_id = db.session.execute(
@@ -802,7 +802,7 @@ def adjust():
                             qty_after=quantity,
                             report_inventory_list_id=report_inventory_list.id,
                             product_id=product_warehouse.product_id,
-                            warehouse_product_id=product_warehouse.id,
+                            warehouse_product=product_warehouse,
                         ).save(False)
 
                     product_warehouse.product_quantity = quantity
@@ -821,7 +821,7 @@ def adjust():
                         qty_after=product_warehouse.product_quantity,
                         report_inventory_list_id=report_inventory_list.id,
                         product_id=product_warehouse.product_id,
-                        warehouse_product_id=product_warehouse.id,
+                        warehouse_product=product_warehouse,
                     ).save(False)
 
                     adjust_gr_qty: m.AdjustGroupQty = m.AdjustGroupQty(

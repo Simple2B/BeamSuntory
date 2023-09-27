@@ -83,17 +83,4 @@ class ReportInventoryList(db.Model, ModelMixin):
 
     @property
     def json(self):
-        # import json
-        # report_inventory_list_json = s.ReportInventoryList.model_validate(
-        #     self
-        # ).model_dump_json(by_alias=True)
-        # report_inventory_list = json.loads(report_inventory_list_json)
-        # for rep_inv in report_inventory_list["reportInventories"]:
-        #     product = db.session.get(Product, rep_inv["warehouseProduct"]["productId"])
-        #     # TODO USE some lazyload to avoid loading products relationship
-        #     product = s.Product.model_validate(product).model_dump()
-        #     product.pop("warehouse_products")
-        #     product.pop("warehouses")
-        #     rep_inv["product"] = product
-        # return json.dumps(report_inventory_list)
         return s.ReportInventoryList.model_validate(self).model_dump_json(by_alias=True)

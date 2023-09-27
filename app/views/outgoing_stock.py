@@ -171,7 +171,9 @@ def save():
 
         carts: list[m.Cart] = db.session.scalars(
             m.Cart.select().where(
-                m.Cart.user_id == current_user.id,
+                # TODO do we need this check? Because current_user here is warehouse manager
+                # BUT current_user at Cart creation is user who created cart
+                # m.Cart.user_id == current_user.id,
                 m.Cart.status == "submitted",
                 m.Cart.ship_request_id == sr.id,
             )
@@ -209,16 +211,16 @@ def save():
                     qty_after=warehouse_product.product_quantity,
                     report_inventory_list_id=report_inventory_list.id,
                     product_id=warehouse_product.product_id,
-                    warehouse_product_id=warehouse_product.id,
+                    warehouse_product=warehouse_product,
                 )
                 report_inventory.save(False)
 
             cart.status = "completed"
             cart.save(False)
-            db.session.commit()
 
         sr.status = s.ShipRequestStatus.assigned
-        sr.save()
+        sr.save(False)
+        db.session.commit()
 
         log(log.INFO, "Ship Request saved and dispatched. Ship Request: [%s]", sr)
         flash("Ship Request dispatched!", "success")

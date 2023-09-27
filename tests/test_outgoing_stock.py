@@ -126,8 +126,11 @@ def test_edit_outgoing_stock(mg_g_populate: FlaskClient):
             m.Cart.status == "completed",
             m.Cart.ship_request_id == order_to_dispatch.id,
         )
-    )
+    ).all()
 
     assert order_to_dispatch
     assert order_to_dispatch.status == s.ShipRequestStatus.assigned
     assert carts
+    assert order_to_dispatch.report_inventory_list is not None
+    assert len(order_to_dispatch.report_inventory_list.report_inventories) > 0
+    assert len(order_to_dispatch.report_inventory_list.report_inventories) == len(carts)
