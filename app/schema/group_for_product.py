@@ -10,7 +10,7 @@ class GroupProduct(BaseModel):
     name: str
     master_group_id: int = Field(alias="masterGroupId")
     created_at: datetime = Field(alias="createdAt")
-    master_group: MasterGroupProduct = Field(alias="masterGroup")
+    master_groups_for_product: MasterGroupProduct = Field(alias="masterGroup")
 
 
 class GroupProductList(BaseModel):
