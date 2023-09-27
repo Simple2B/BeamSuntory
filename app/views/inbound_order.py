@@ -226,26 +226,29 @@ def save():
             flash("Cannot save inbound order data", "danger")
             return redirect(url_for("inbound_order.get_all"))
 
-        history = []
+        history_pure = []
+        history_modified = []
 
         # add history to report
         if inbound_order.status != s.InboundOrderStatus(form.status.data):
-            history.append(
+            history_modified.append(
                 f"Status: {s.InboundOrderStatus(inbound_order.status).value} => {form.status.data}"
             )
 
         if inbound_order.active_date != form.active_date.data:
-            history.append(
+            history_modified.append(
                 f"Active date: {inbound_order.active_date} => {form.active_date.data}"
             )
         if inbound_order.active_time != form.active_time.data:
-            history.append(
+            history_modified.append(
                 f"Active time: {inbound_order.active_time} => {form.active_time.data}"
             )
         if inbound_order.title != form.order_title.data:
-            history.append(f"Title: {inbound_order.title} => {form.order_title.data}")
+            history_modified.append(
+                f"Title: {inbound_order.title} => {form.order_title.data}"
+            )
         if inbound_order.delivery_date != form.delivery_date.data:
-            history.append(
+            history_modified.append(
                 f"Delivery date:{inbound_order.delivery_date}=>{form.delivery_date.data}"
             )
 
@@ -276,6 +279,12 @@ def save():
                 )
             )
 
+        for product_allocated in inbound_order.products_allocated:
+            for quantity_groups in product_allocated.product_quantity_groups:
+                history_pure.append(
+                    f"""Group: {quantity_groups.group.name} to product: {product_allocated.product.name.upper()}"""
+                )
+
         for product_quantity_group in product_quantity_groups.root:
             product_allocated = db.session.scalar(
                 m.ProductAllocated.select().where(
@@ -300,6 +309,13 @@ def save():
                     m.ProductQuantityGroup.product_allocated_id == product_allocated.id
                 )
             )
+
+            for product_group in product_quantity_group.product_allocated_groups:
+                group = db.session.get(m.Group, product_group.group_id)
+                history_modified.append(
+                    f"""Group: {group.name} to product: {product_allocated.product.name.upper()}"""
+                )
+
             for quantity_group in product_quantity_group.product_allocated_groups:
                 # Search for group by id
                 group = db.session.get(m.Group, quantity_group.group_id)
@@ -350,6 +366,9 @@ def save():
                             current_order_uuid=inbound_order.uuid,
                         )
                     )
+
+        history = set(history_modified).symmetric_difference(set(history_pure))
+
         m.ReportInboundOrder(
             type=s.ReportEventType.updated.value,
             history=", ".join(history),

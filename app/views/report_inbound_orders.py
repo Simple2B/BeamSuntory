@@ -42,6 +42,9 @@ def get_inbound_order_report():
             | m.ReportInboundOrder.user.has(
                 m.User.username.ilike(f"%{filter_inbound_order.q}%")
             )
+            | m.ReportInboundOrder.inbound_order.has(
+                m.InboundOrder.title.ilike(f"%{filter_inbound_order.q}%")
+            )
         )
         count_query = count_query.where(
             m.ReportInboundOrder.inbound_order.has(
@@ -60,6 +63,9 @@ def get_inbound_order_report():
             )
             | m.ReportInboundOrder.user.has(
                 m.User.username.ilike(f"%{filter_inbound_order.q}%")
+            )
+            | m.ReportInboundOrder.inbound_order.has(
+                m.InboundOrder.title.ilike(f"%{filter_inbound_order.q}%")
             )
         )
 
