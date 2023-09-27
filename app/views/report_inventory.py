@@ -28,17 +28,11 @@ def get_inventory_reports():
             m.ReportInventoryList.ship_request.has(
                 m.ShipRequest.order_numb.ilike(f"%{filter_inventories.q}%")
             )
-            | m.ReportInventoryList.ship_request.has(
-                m.ShipRequest.status.ilike(f"%{filter_inventories.q}%")
-            )
             | m.ReportInventoryList.user.has(
                 m.User.username.ilike(f"%{filter_inventories.q}%")
             )
             | m.ReportInventoryList.inbound_order.has(
                 m.InboundOrder.order_id.ilike(f"%{filter_inventories.q}%")
-            )
-            | m.ReportInventoryList.inbound_order.has(
-                m.InboundOrder.status.ilike(f"%{filter_inventories.q}%")
             )
             | m.ReportInventoryList.report_inventories.any(
                 m.ReportInventory.product.has(
@@ -56,17 +50,11 @@ def get_inventory_reports():
             m.ReportInventoryList.ship_request.has(
                 m.ShipRequest.order_numb.ilike(f"%{filter_inventories.q}%")
             )
-            | m.ReportInventoryList.ship_request.has(
-                m.ShipRequest.status.ilike(f"%{filter_inventories.q}%")
-            )
             | m.ReportInventoryList.user.has(
                 m.User.username.ilike(f"%{filter_inventories.q}%")
             )
             | m.ReportInventoryList.inbound_order.has(
                 m.InboundOrder.order_id.ilike(f"%{filter_inventories.q}%")
-            )
-            | m.ReportInventoryList.inbound_order.has(
-                m.InboundOrder.status.ilike(f"%{filter_inventories.q}%")
             )
             | m.ReportInventoryList.report_inventories.any(
                 m.ReportInventory.product.has(
