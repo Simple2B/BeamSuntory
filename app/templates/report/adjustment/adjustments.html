@@ -39,7 +39,7 @@
         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
           {% include "icon/calendar.html" %}
         </div>
-        <input datepicker name="created_from" hx-trigger="changeDate"
+        <input datepicker name="created_from" hx-trigger="changeDate" hx-target="#reports-table" hx-swap="innerHTML"
           hx-include="[name='q'], [name='username'], [name='created_to'],  [name='master_group'] , [name='group'], [name='product_sort_group']"
           hx-get="{{ url_for('report_adjustment.search_report_adjustments') }}" type="text"
           id="product-adjustment-created_from-datepicker" placeholder="Created date: from"
@@ -52,7 +52,7 @@
           <!-- prettier-ignore -->
           {% include "icon/calendar.html" %}
         </div>
-        <input datepicker name="created_to" hx-trigger="changeDate"
+        <input datepicker name="created_to" hx-trigger="changeDate" hx-target="#reports-table" hx-swap="innerHTML"
           hx-include="[name='q'], [name='username'], [name='created_from'],  [name='master_group'] , [name='group'], [name='product_sort_group']"
           hx-get="{{ url_for('report_adjustment.search_report_adjustments') }}" type="text"
           placeholder="Created date: to" id="product-adjustment-created_to-datepicker"
