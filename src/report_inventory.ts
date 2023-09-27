@@ -109,7 +109,11 @@ const downloadCSV = async function () {
   for (let page = 1; page <= pages; page++) {
     const currentURL = window.location.href
     const urlWithoutQueryParams = currentURL.split('?')[0]
-    const url = [`api?page=${page}`, queryTail].join('&')
+    // TODO do we need to loads only one page csv???
+    // const url = [`api?page=${page}`, queryTail].join('&')
+    const url = ['api', queryTail].join('&')
+    console.log('url', `${urlWithoutQueryParams}/${url}`)
+
     const res = await fetch(`${urlWithoutQueryParams}/${url}`)
     const data: IInventoriesReportResponse = await res.json()
 
@@ -153,7 +157,7 @@ const downloadCSV = async function () {
 
 document.addEventListener('DOMContentLoaded', () => {
   const filtersHTML = document.querySelectorAll(
-    "[name='q'], [name='username'], [name='created_from'], [name='created_to']"
+    "[name='q'], [name='username'], [name='created_from'], [name='created_to'], [name='master_group'], [name='group'], [name='group_brand'],  [name='group_category'], [name='group_language'], [name='group_premises'], [name='group_event']"
   )
   const buttonLoadInventoriesTable = document.querySelector('#table-report-loader') as HTMLButtonElement
 

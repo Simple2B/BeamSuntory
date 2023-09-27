@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from .inbound_order import InboundOrder
     from .warehouse import Warehouse
     from .store import Store
+    from .warehouse_product import WarehouseProduct
 
 
 class ReportInventory(db.Model, ModelMixin):
@@ -40,6 +41,7 @@ class ReportInventory(db.Model, ModelMixin):
 
     # Relationships
     product: orm.Mapped["Product"] = orm.relationship()
+    warehouse_product: orm.Mapped["WarehouseProduct"] = orm.relationship()
 
     @property
     def json(self):

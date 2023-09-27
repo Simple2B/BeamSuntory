@@ -99,6 +99,61 @@ def get_inventory_reports():
             )
         )
 
+    if filter_inventories.master_group:
+        query = query.where(
+            m.ReportInventoryList.report_inventories.any(
+                m.ReportInventory.warehouse_product.has(
+                    m.WarehouseProduct.group.has(
+                        m.Group.master_group.has(
+                            m.MasterGroup.name == filter_inventories.master_group
+                        )
+                    )
+                )
+            )
+        )
+
+    if filter_inventories.group:
+        query = query.where(
+            m.ReportInventoryList.report_inventories.any(
+                m.ReportInventory.warehouse_product.has(
+                    m.WarehouseProduct.group.has(
+                        m.Group.name == filter_inventories.group
+                    )
+                )
+            )
+        )
+
+    master_groups = [
+        filter_inventories.group_brand,
+        filter_inventories.group_language,
+        filter_inventories.group_category,
+        filter_inventories.group_premises,
+        filter_inventories.group_event,
+    ]
+
+    if master_groups.count(None) != len(master_groups):
+        for group in master_groups:
+            # TODO consider better validation for master_groups values
+            if group:
+                query = query.where(
+                    m.ReportInventoryList.report_inventories.any(
+                        m.ReportInventory.product.has(
+                            m.Product.product_groups.any(
+                                m.ProductGroup.parent.has(m.GroupProduct.name == group)
+                            )
+                        )
+                    )
+                )
+                count_query = count_query.where(
+                    m.ReportInventoryList.report_inventories.any(
+                        m.ReportInventory.product.has(
+                            m.Product.product_groups.any(
+                                m.ProductGroup.parent.has(m.GroupProduct.name == group)
+                            )
+                        )
+                    )
+                )
+
     pagination = create_pagination(total=db.session.scalar(count_query))
 
     inventory_reports = db.session.scalars(
@@ -125,9 +180,23 @@ def get_inventories_json():
 def inventories():
     users = db.session.scalars(sa.select(m.User))
 
+    # TODO maybe move default master product groups to config
+    product_master_groups = db.session.scalars(
+        m.MasterGroupProduct.select().where(
+            m.MasterGroupProduct.name.in_(
+                ["Brand", "Language", "Category", "Premises", "Events"]
+            )
+        )
+    )
+    master_groups = db.session.scalars(m.MasterGroup.select())
+    groups = db.session.scalars(m.Group.select())
+
     return render_template(
         "report/inventory/inventories.html",
         users=users,
+        master_groups=master_groups,
+        groups=groups,
+        product_master_groups=product_master_groups,
     )
 
 

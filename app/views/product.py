@@ -762,6 +762,12 @@ def adjust():
             log(log.ERROR, "Not found product by id : [%s]", form.product_id.data)
             return redirect(url_for("product.get_all"))
 
+        report_inventory_list = m.ReportInventoryList(
+            type="Products Adjusted",
+            user_id=current_user.id,
+        )
+        report_inventory_list.save()
+
         for group_name, warehouses in groups.items():
             group_id = db.session.execute(
                 m.Group.select()
@@ -790,6 +796,15 @@ def adjust():
                             warehouse_id=warehouse_id,
                         )
                         db.session.add(adjust_gr_qty)
+
+                        m.ReportInventory(
+                            qty_before=product_warehouse.product_quantity,
+                            qty_after=quantity,
+                            report_inventory_list_id=report_inventory_list.id,
+                            product_id=product_warehouse.product_id,
+                            warehouse_product_id=product_warehouse.id,
+                        ).save(False)
+
                     product_warehouse.product_quantity = quantity
                     db.session.add(product_warehouse)
                 else:
@@ -800,6 +815,15 @@ def adjust():
                         warehouse_id=warehouse_id,
                     )
                     db.session.add(product_warehouse)
+
+                    m.ReportInventory(
+                        qty_before=0,
+                        qty_after=product_warehouse.product_quantity,
+                        report_inventory_list_id=report_inventory_list.id,
+                        product_id=product_warehouse.product_id,
+                        warehouse_product_id=product_warehouse.id,
+                    ).save(False)
+
                     adjust_gr_qty: m.AdjustGroupQty = m.AdjustGroupQty(
                         adjust_id=adjust_item.id,
                         quantity=quantity,

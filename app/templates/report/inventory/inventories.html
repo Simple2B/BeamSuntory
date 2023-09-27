@@ -1,6 +1,7 @@
 <!-- prettier-ignore -->
 {% extends 'base.html' %}
 {% block content %}
+{% set all_includes = "[name='q'], [name='username'], [name='created_from'], [name='created_to'], [name='master_group'], [name='group'], [name='group_brand'],  [name='group_category'], [name='group_language'], [name='group_premises'], [name='group_event']" %}
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
   <button
     id="table-report-loader"
@@ -23,7 +24,7 @@
           hx-trigger="keyup changed delay:500ms"
           hx-target="#reports-table"
           hx-swap="innerHTML"
-          hx-include="[name='username'], [name='created_from'], [name='created_to`']"
+          hx-include="{{all_includes}}"
           hx-get="{{ url_for('report_inventory.search_inventory_reports') }}"
           hx-indicator="#report-table-spinner"
           type="search"
@@ -41,7 +42,7 @@
         hx-swap="innerHTML"
         hx-target="#reports-table"
         name="username"
-        hx-include="[name='q'], [name='created_from'], [name='created_to']"
+        hx-include="{{all_includes}}"
         hx-get="{{ url_for('report_inventory.search_inventory_reports') }}"
         hx-indicator="#report-table-spinner"
         class="inventories-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -61,7 +62,7 @@
         datepicker
         name="created_from"
         hx-trigger="changeDate"
-        hx-include="[name='q'], [name='username'], [name='created_to']"
+        hx-include="{{all_includes}}"
         hx-get="{{ url_for('report_inventory.search_inventory_reports') }}"
         hx-target="#reports-table"
         hx-swap="innerHTML"
@@ -82,7 +83,7 @@
         datepicker
         name="created_to"
         hx-trigger="changeDate"
-        hx-include="[name='q'], [name='username'], [name='created_from']"
+        hx-include="{{all_includes}}"
         hx-get="{{ url_for('report_inventory.search_inventory_reports') }}"
         hx-target="#reports-table"
         hx-swap="innerHTML"
@@ -106,6 +107,49 @@
       </button>  
     </div>
     </div>
+  </div>
+  <div class="flex gap-5 mb-5">
+    <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800">
+      <!-- prettier-ignore -->
+      <select id="inventory-filter-master-group" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"
+        name="master_group"
+        hx-include="{{all_includes}}"
+        hx-get="{{ url_for('report_inventory.search_inventory_reports') }}" hx-indicator="#report-table-spinner"
+        class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+        <option selected value="">Master group</option>
+        {% for master_group in master_groups %}
+        <option value="{{ master_group.name }}">{{ master_group.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800">
+      <!-- prettier-ignore -->
+      <select id="inventory-filter-group" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"
+        name="group"
+        hx-include="{{all_includes}}"
+        hx-get="{{ url_for('report_inventory.search_inventory_reports') }}" hx-indicator="#report-table-spinner"
+        class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+        <option selected value="">Target group</option>
+        {% for group in groups %}
+        <option value="{{ group.name }}">{{ group.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% for prod_master_group in product_master_groups %}
+    <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800">
+      <!-- prettier-ignore -->
+      <select id="inventory-filter-product-master-group-{{prod_master_group.name}}" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"
+        name="group_{{prod_master_group.name.lower()}}"
+        hx-include="{{all_includes}}"
+        hx-get="{{ url_for('report_inventory.search_inventory_reports') }}" hx-indicator="#report-table-spinner"
+        class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+        <option selected value="">{{ prod_master_group.name }}</option>
+        {% for group in prod_master_group.groups_for_product %}
+        <option value="{{ group.name }}">{{ group.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% endfor %}
   </div>
 
   <div id="reports-table"></div>
