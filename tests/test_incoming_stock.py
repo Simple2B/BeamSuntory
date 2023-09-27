@@ -127,3 +127,9 @@ def test_incoming_stock_accept(
     assert order_name in response.text
     assert inbound_order_test.status == s.InboundOrderStatus.delivered
     assert inbound_order_test_package_info is not None
+
+    assert inbound_order_test.report_inventory_list is not None
+    assert len(inbound_order_test.report_inventory_list.report_inventories) > 0
+    assert len(inbound_order_test.report_inventory_list.report_inventories) == len(
+        inbound_order_test.products_allocated
+    )

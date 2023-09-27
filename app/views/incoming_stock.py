@@ -6,7 +6,7 @@ from flask import (
     redirect,
     url_for,
 )
-from flask_login import login_required
+from flask_login import login_required, current_user
 import sqlalchemy as sa
 from sqlalchemy import desc
 from app.controllers import create_pagination
@@ -92,6 +92,17 @@ def accept():
         form_edit.received_products.data
     ).root
 
+    report_inventory_list = m.ReportInventoryList(
+        type="Inbound Order Accepted",
+        # TODO who sholud be responsible for change?
+        # one who created inbound order?
+        # or one who accepted it?
+        user_id=current_user.id,
+        inbound_order=inbound_order,
+        warehouse=inbound_order.warehouse,
+    )
+    report_inventory_list.save(False)
+
     for allocated_product in products_info_json:
         for new_package_info in allocated_product.packages:
             product_quantity_group: m.ProductQuantityGroup = db.session.scalar(
@@ -162,6 +173,7 @@ def accept():
                 )
             )
             if warehouse_product:
+                qty_before = warehouse_product.product_quantity
                 warehouse_product.product_quantity += new_package_info.quantity_received
             else:
                 warehouse_product = m.WarehouseProduct(
@@ -170,7 +182,19 @@ def accept():
                     product_quantity=new_package_info.quantity_received,
                     group_id=product_quantity_group.group_id,
                 )
-                warehouse_product.save(False)
+                qty_before = 0
+
+            warehouse_product.save(False)
+
+            # NOTE create report for inventory
+            report_inventory = m.ReportInventory(
+                qty_before=qty_before,
+                qty_after=new_package_info.quantity_received,
+                report_inventory_list_id=report_inventory_list.id,
+                product_id=warehouse_product.product_id,
+                warehouse_product=warehouse_product,
+            )
+            report_inventory.save(False)
 
     inbound_order.status = s.InboundOrderStatus.delivered
     log(log.INFO, "Inbound order accepted. Inbound order: [%s]", inbound_order)

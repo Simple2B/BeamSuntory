@@ -3,9 +3,11 @@
     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
       <tr>
         <th scope="col" class="px-6 py-3">#</th>
+        <th scope="col" class="px-6 py-3">Order title</th>
         <th scope="col" class="px-6 py-3">Action</th>
         <th scope="col" class="px-6 py-3">User</th>
         <th scope="col" class="px-6 py-3">Date</th>
+        <th scope="col" class="px-6 py-3">History</th>
         <th scope="col" class="px-6 py-3">Actions</th>
       </tr>
     </thead>
@@ -18,7 +20,12 @@
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.type }}</div>
+          <div class="text-base font-semibold">{{ report.inbound_order.title }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+          <div class="text-base font-semibold">{{ report.type }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
@@ -28,14 +35,19 @@
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold"> {{report.created_at.strftime('%m/%d/%Y, %H:%M:%S')}} </div>
+            <div class="text-base font-semibold">{{ report.created_at.strftime('%m/%d/%Y, %H:%M:%S') }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.history }}</div>
           </div>
         </td>
         
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
             <div class="text-base font-semibold">
-              <button type="button" data-target="{{report.json}}" class="report-event-view-btn inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+              <button type="button" data-target="{{report.json}}" class="report-inbound-order-view-btn inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
               {% include "icon/view.html" %}
                 View
               </button>
@@ -46,13 +58,16 @@
       {% endfor %}
     </tbody>
   </table>
+
+
+  
   {% if page.pages > 1 %}
   <div class="container content-center mt-3 flex bg-white dark:bg-gray-800">
     <nav aria-label="Page navigation example" class="mx-auto">
       <ul class="inline-flex items-center -space-x-px">
         <li>
           <button
-            hx-get="{{ url_for('report_assign.search_report_assigns') }}?page=1&q={{page.query}}"
+            hx-get="{{ url_for('report_inbound_orders.search_report_inbound_orders') }}?page=1&q={{page.query}}"
             hx-trigger="click"
             hx-target="#reports-table"
             hx-indicator="#report-table-spinner"
@@ -64,7 +79,7 @@
         </li>
         <li>
           <button
-            hx-get="{{ url_for('report_assign.search_report_assigns') }}?page={{page.page-1 if page.page > 1 else 1}}&q={{page.query}}"
+            hx-get="{{ url_for('report_inbound_orders.search_report_inbound_orders') }}?page={{page.page-1 if page.page > 1 else 1}}&q={{page.query}}"
             hx-trigger="click"
             hx-target="#reports-table"
             hx-indicator="#report-table-spinner"
@@ -81,7 +96,7 @@
           <!-- prettier-ignore -->
           {% if p == page.page %}
           <button
-            hx-get="{{ url_for('report_assign.search_report_assigns') }}?page={{p}}&q={{page.query}}"
+            hx-get="{{ url_for('report_inbound_orders.search_report_inbound_orders') }}?page={{p}}&q={{page.query}}"
             hx-trigger="click"
             hx-target="#reports-table"
             hx-indicator="#report-table-spinner"
@@ -92,7 +107,7 @@
           </button>
           {% else %}
           <button
-            hx-get="{{ url_for('report_assign.search_report_assigns') }}?page={{p}}&q={{page.query}}"
+            hx-get="{{ url_for('report_inbound_orders.search_report_inbound_orders') }}?page={{p}}&q={{page.query}}"
             hx-trigger="click"
             hx-target="#reports-table"
             hx-indicator="#report-table-spinner"
@@ -105,7 +120,7 @@
         {% endfor %}
         <li>
           <button
-            hx-get="{{ url_for('report_assign.search_report_assigns') }}?page={{page.page+1 if page.page < page.pages else page.pages}}&q={{page.query}}"
+            hx-get="{{ url_for('report_inbound_orders.search_report_inbound_orders') }}?page={{page.page+1 if page.page < page.pages else page.pages}}&q={{page.query}}"
             hx-trigger="click"
             hx-target="#reports-table"
             hx-indicator="#report-table-spinner"
@@ -118,7 +133,7 @@
         </li>
         <li>
           <button
-            hx-get="{{ url_for('report_assign.search_report_assigns') }}?page={{page.pages}}&q={{page.query}}"
+            hx-get="{{ url_for('report_inbound_orders.search_report_inbound_orders') }}?page={{page.pages}}&q={{page.query}}"
             hx-trigger="click"
             hx-target="#reports-table"
             hx-indicator="#report-table-spinner"

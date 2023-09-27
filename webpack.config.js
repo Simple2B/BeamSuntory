@@ -282,6 +282,26 @@ const reportEventConfig = {
   },
 };
 
+const reportInventoryConfig = {
+  entry: {
+    main: './src/report_inventory.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/report_inventory.js', // <--- Will be compiled to this single file
+  },
+};
+
+const reportRequestShareConfig = {
+  entry: {
+    main: './src/report_share_request.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/report_share_request.js', // <--- Will be compiled to this single file
+  },
+};
+
 const reportAdjustmentConfig = {
   entry: {
     main: './src/report_adjustment.ts',
@@ -302,13 +322,13 @@ const reportAssignConfig = {
   },
 };
 
-const reportRequestShareConfig = {
+const reportInboundOrderConfig = {
   entry: {
-    main: './src/report_share_request.ts',
+    main: './src/report_inbound_orders.ts',
   },
   output: {
     path: path.resolve(__dirname, './app/static'),
-    filename: 'js/report_share_request.js', // <--- Will be compiled to this single file
+    filename: 'js/report_inbound_orders.js', // <--- Will be compiled to this single file
   },
 };
 
@@ -342,7 +362,9 @@ const configs = [
   reportEventConfig,
   reportRequestShareConfig,
   reportAssignConfig,
+  reportInventoryConfig,
   reportAdjustmentConfig,
+  reportInboundOrderConfig,
 ].map((conf) => merge(defaultConfig, conf));
 
 module.exports = configs;

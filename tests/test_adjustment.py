@@ -8,7 +8,7 @@ from app import schema as s
 from tests.utils import login
 
 
-def test_report_adjustment_create(mg_g_populate: FlaskClient):
+def test_adjustment_create(mg_g_populate: FlaskClient):
     login(mg_g_populate)
 
     event_product: m.Product = db.session.scalar(
