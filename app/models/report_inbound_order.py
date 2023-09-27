@@ -25,7 +25,7 @@ class ReportInboundOrder(db.Model, ModelMixin):
 
     # Columns
     type: orm.Mapped[str] = orm.mapped_column(sa.String(64))
-    history: orm.Mapped[str] = orm.mapped_column(sa.String(128), default="")
+    history: orm.Mapped[str] = orm.mapped_column(sa.String(256), default="")
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
         default=datetime.now,
