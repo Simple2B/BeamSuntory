@@ -79,6 +79,8 @@ const eventCheckbox: HTMLInputElement = document.querySelector('#product-show-ev
 const isEvent = eventCheckbox.checked
 const eventsWarehouse = 'Warehouse Events'
 const eventMasterGroup = 'Events'
+const fiveDays = 5 * 24 * 60 * 60 * 1000
+
 
 // variable to set default image to brand dynamically in modal window. Can we get link from the internet?
 const defaultBrandImage =
@@ -916,20 +918,22 @@ function booking(product: IProduct, group: string) {
       css: [
         'https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.css',
         'https://easepick.com/css/demo_prices.css',
+        'https://easepick.com/css/demo_hotelcal.css',
       ],
       autoApply: true,
       inline: true,
       plugins: ['LockPlugin'],
       LockPlugin: {
         filter(date: any) {
-          return date.inArray(bookedDates, '[)')
+          if (date - +currentDate > fiveDays) {
+            return false
+          } else {
+            return true
+          }
         },
       },
 
       setup(picker: any) {
-        const randomInt = (min: number, max: number) => {
-          return Math.floor(Math.random() * (max - min + 1) + min)
-        }
 
         picker.on('view', async (evt: any) => {
           const { view, date, target } = evt.detail
