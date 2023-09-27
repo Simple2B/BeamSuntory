@@ -322,6 +322,16 @@ const reportAssignConfig = {
   },
 };
 
+const reportInboundOrderConfig = {
+  entry: {
+    main: './src/report_inbound_orders.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/report_inbound_orders.js', // <--- Will be compiled to this single file
+  },
+};
+
 const configs = [
   baseConfig,
   userConfig,
@@ -350,10 +360,11 @@ const configs = [
   adjustConfig,
   eventConfig,
   reportEventConfig,
-  reportInventoryConfig,
   reportRequestShareConfig,
   reportAssignConfig,
+  reportInventoryConfig,
   reportAdjustmentConfig,
+  reportInboundOrderConfig,
 ].map((conf) => merge(defaultConfig, conf));
 
 module.exports = configs;

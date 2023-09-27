@@ -1,17 +1,16 @@
 """report inventory
 
-Revision ID: f2e01b4adfdd
-Revises: a919bd570a83
-Create Date: 2023-09-27 15:47:09.614315
+Revision ID: 9f27cfb15648
+Revises: da43a9878d8e
+Create Date: 2023-09-27 17:00:46.948146
 
 """
 from alembic import op
 import sqlalchemy as sa
 
-
 # revision identifiers, used by Alembic.
-revision = "f2e01b4adfdd"
-down_revision = "a919bd570a83"
+revision = "9f27cfb15648"
+down_revision = "da43a9878d8e"
 branch_labels = None
 depends_on = None
 

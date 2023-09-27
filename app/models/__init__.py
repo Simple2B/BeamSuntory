@@ -35,4 +35,5 @@ from .adjusts_group_qty import AdjustGroupQty
 from .event import Event
 from .report_event import ReportEvent
 from .report_inventory import ReportInventory, ReportInventoryList
+from .report_inbound_order import ReportInboundOrder
 from .report_request_share import ReportRequestShare
