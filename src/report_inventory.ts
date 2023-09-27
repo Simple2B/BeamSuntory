@@ -196,6 +196,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const viewModal = new Modal(viewReportInventoriesModal, viewModalOptions);
   const reportViewProductTbody = document.querySelector('#table-products') as HTMLTableElement;
   const productItemTemplate = document.querySelector('#view-product-item-template') as HTMLTableRowElement;
+  const closingViewModalButton = document.querySelector('#button-closing-report-inventory-modal') as HTMLButtonElement;
+  closingViewModalButton.addEventListener('click', () => {
+    viewModal.hide();
+  });
+
+
   // view buttons click
   const reportViewUser = document.getElementById('report-inventory-user') as HTMLDivElement;
   const reportViewAction = document.getElementById('report-inventory-action') as HTMLDivElement;

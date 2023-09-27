@@ -29,6 +29,11 @@ const $acceptModalElement: HTMLElement = document.querySelector('#editIncomingSt
 const $viewModalElement: HTMLElement = document.querySelector('#viewIncomingStockModal')
 const inputReceivedProducts: HTMLInputElement = document.querySelector('#incoming-stock-edit-received-products')
 
+const modalClosingButton = document.querySelector('#buttonClosingViewIncomingStockModal')
+modalClosingButton.addEventListener('click', () => {
+    viewModal.hide()
+})
+
 const acceptModalOptions: ModalOptions = {
     placement: 'bottom-right',
     backdrop: 'dynamic',

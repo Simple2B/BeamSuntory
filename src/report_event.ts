@@ -183,6 +183,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const reportViewDate = document.getElementById('report-event-date') as HTMLDivElement;
   const reportStoreName = document.getElementById('report-store-name') as HTMLDivElement;
 
+  const viewReportEventsModalCloseButton = document.querySelector('#buttonClosingReportEventModal') as HTMLButtonElement
+  viewReportEventsModalCloseButton.addEventListener('click', () => {
+    viewModal.hide();
+  })
+
   // onload element with events-table id
   htmxDispatcher.onLoad('events-table', (target) => {
     const reportViewButtons: NodeListOf<HTMLButtonElement> = target.querySelectorAll('.report-event-view-btn');
