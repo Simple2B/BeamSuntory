@@ -189,6 +189,7 @@ const viewOutgoingStockButtonElements = document.querySelectorAll('.outgoing-sto
 viewOutgoingStockButtonElements.forEach((e) =>
   e.addEventListener('click', () => {
     const shipRequest: IShipRequest = JSON.parse(e.getAttribute('data-target'));
+    console.log('shipRequest: ', shipRequest);
 
     let div: HTMLDivElement = document.querySelector('#outgoing-stock-view-order-number');
     div.innerHTML = shipRequest.orderNumb;
@@ -385,7 +386,7 @@ function createOutgoingStockItemTable(shipRqst: IShipRequest, typeModal: string)
       </td>
     `;
 
-    const warehouseName = cart.product.warehouse ? cart.product.warehouse.name : 'No Warehouse';
+    const warehouseName = cart.warehouse ? cart.warehouse.name : 'No Warehouse';
     const warehouseViewElement = document.createElement('td');
     warehouseViewElement.classList.add('p-4', 'space-x-2', 'whitespace-nowrap');
     warehouseViewElement.innerHTML = `
