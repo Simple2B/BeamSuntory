@@ -22,6 +22,15 @@ export interface IProduct {
     SKU: string;
     regularPrice?: number;
     retailPrice?: number;
+    warehouseProducts?: IWarehouseProduct[];
+}
+export interface IWarehouseProduct {
+    id: number;
+    product_id: number;
+    warehouse_id: number;
+    product_quantity: number;
+    warehouse: IWarehouse;
+    group: IGroup;
 }
 export interface IGroup {
     id: number;

@@ -26,6 +26,7 @@ from .inventory import inventory_blueprint
 from .adjust import adjust_blueprint
 from .event import event_blueprint
 from .report_event import report_blueprint
+from .report_inventory import report_inventory_blueprint
 from .report_adjustment import report_adjustment_blueprint
 from .report_request_share import report_request_share_blueprint
 from .report_assign import report_assign_blueprint
@@ -59,6 +60,7 @@ BLUEPRINTS = (
     adjust_blueprint,
     event_blueprint,
     report_blueprint,
+    report_inventory_blueprint,
     report_adjustment_blueprint,
     report_request_share_blueprint,
     report_assign_blueprint,

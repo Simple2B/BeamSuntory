@@ -49,6 +49,14 @@ from .report_event import (
     ReportEventResponse,
 )
 from .filter_report_events import FilterReportEvents
+from .report_inventory import (
+    ReportInventoryType,
+    ReportInventory,
+    ReportInventoryList,
+    ReportInventoryListArray,
+    ReportInventoryListResponse,
+)
+from .filter_report_inventories import FilterReportInventories
 from .filter_report_adjustments import FilterReportAdjustments
 from .filter_report_request_share import FilterRequestShare
 from .report_request_share import (

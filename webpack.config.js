@@ -282,6 +282,26 @@ const reportEventConfig = {
   },
 };
 
+const reportInventoryConfig = {
+  entry: {
+    main: './src/report_inventory.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/report_inventory.js', // <--- Will be compiled to this single file
+  },
+};
+
+const reportRequestShareConfig = {
+  entry: {
+    main: './src/report_share_request.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/report_share_request.js', // <--- Will be compiled to this single file
+  },
+};
+
 const reportAdjustmentConfig = {
   entry: {
     main: './src/report_adjustment.ts',
@@ -302,58 +322,49 @@ const reportAssignConfig = {
   },
 };
 
-const reportRequestShareConfig = {
+const reportInboundOrderConfig = {
   entry: {
-    main: './src/report_share_request.ts',
+    main: './src/report_inbound_orders.ts',
   },
   output: {
     path: path.resolve(__dirname, './app/static'),
-    filename: 'js/report_share_request.js', // <--- Will be compiled to this single file
+    filename: 'js/report_inbound_orders.js', // <--- Will be compiled to this single file
   },
 };
 
-const reportInboundOrderConfig = {
-    entry: {
-        main: './src/report_inbound_orders.ts',
-    },
-    output: {
-        path: path.resolve(__dirname, './app/static'),
-        filename: 'js/report_inbound_orders.js', // <--- Will be compiled to this single file
-    },
-}
-
 const configs = [
-    baseConfig,
-    userConfig,
-    groupConfig,
-    masterGroupConfig,
-    productConfig,
-    groupProductConfig,
-    masterGroupProductConfig,
-    warehouseConfig,
-    deliveryAgentConfig,
-    shipRequestConfig,
-    supplierConfig,
-    cartConfig,
-    inboundOrderConfig,
-    storeConfig,
-    incomingStockConfig,
-    outgoingStockConfig,
-    pickupOrderConfig,
-    pickupInboundConfig,
-    divisionConfig,
-    bellConfig,
-    requestShareConfig,
-    storeCategoryConfig,
-    assignConfig,
-    inventoryConfig,
-    adjustConfig,
-    eventConfig,
-    reportEventConfig,
-    reportRequestShareConfig,
-    reportAssignConfig,
-    reportInboundOrderConfig,
-    reportAdjustmentConfig
-].map((conf) => merge(defaultConfig, conf))
+  baseConfig,
+  userConfig,
+  groupConfig,
+  masterGroupConfig,
+  productConfig,
+  groupProductConfig,
+  masterGroupProductConfig,
+  warehouseConfig,
+  deliveryAgentConfig,
+  shipRequestConfig,
+  supplierConfig,
+  cartConfig,
+  inboundOrderConfig,
+  storeConfig,
+  incomingStockConfig,
+  outgoingStockConfig,
+  pickupOrderConfig,
+  pickupInboundConfig,
+  divisionConfig,
+  bellConfig,
+  requestShareConfig,
+  storeCategoryConfig,
+  assignConfig,
+  inventoryConfig,
+  adjustConfig,
+  eventConfig,
+  reportEventConfig,
+  reportRequestShareConfig,
+  reportAssignConfig,
+  reportInventoryConfig,
+  reportAdjustmentConfig,
+  reportInboundOrderConfig,
+].map((conf) => merge(defaultConfig, conf));
 
 module.exports = configs;

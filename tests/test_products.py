@@ -137,9 +137,10 @@ def test_assign_product(mg_g_populate: FlaskClient):
     login(mg_g_populate)
 
     group_name = "Canada"
+    prod_name = "populate_test_product"
 
     data = dict(
-        name="populate_test_product",
+        name=prod_name,
         master_group=2,
         group=2,
         quantity=10,
@@ -161,6 +162,21 @@ def test_assign_product(mg_g_populate: FlaskClient):
     ).scalar()
     assert products_at_warehouse.product_quantity
 
+    assign_objs: m.Assign = db.session.scalars(
+        m.Assign.select().where(
+            m.Assign.group_id == 2,
+            m.Assign.product.has(m.Product.name == prod_name),
+        )
+    ).all()
+    report_assign_objs: m.ReportInventoryList = db.session.scalars(
+        m.ReportInventoryList.select().where(
+            m.ReportInventoryList.type == "Product Assigned",
+        )
+    ).all()
+
+    assert len(assign_objs) == 1
+    assert len(report_assign_objs) == 1
+
     response = mg_g_populate.post(
         "/product/assign",
         data=data,
@@ -173,3 +189,18 @@ def test_assign_product(mg_g_populate: FlaskClient):
         )
     ).scalar()
     assert products_at_warehouse.product_quantity
+
+    assign_objs: m.Assign = db.session.scalars(
+        m.Assign.select().where(
+            m.Assign.group_id == 2,
+            m.Assign.product.has(m.Product.name == prod_name),
+        )
+    ).all()
+    report_assign_objs: m.ReportInventoryList = db.session.scalars(
+        m.ReportInventoryList.select().where(
+            m.ReportInventoryList.type == "Product Assigned",
+        )
+    ).all()
+
+    assert len(assign_objs) == 2
+    assert len(report_assign_objs) == 2

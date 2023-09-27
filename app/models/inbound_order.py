@@ -9,6 +9,7 @@ from app import schema as s
 from .supplier import Supplier
 from .warehouse import Warehouse
 from .product_allocated import ProductAllocated
+from .report_inventory import ReportInventoryList
 
 
 def generate_order_id_timestamp():
@@ -19,6 +20,15 @@ class InboundOrder(db.Model, ModelMixin):
     __tablename__ = "inbound_orders"
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
+
+    # Foreign keys
+    supplier_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("suppliers.id"))
+    warehouse_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("warehouses.id"))
+    report_inventory_list_id: orm.Mapped[int] = orm.mapped_column(
+        sa.ForeignKey("report_inventory_lists.id"), nullable=True
+    )
+
+    # Columns
     uuid: orm.Mapped[str] = orm.mapped_column(
         sa.String(36),
         default=generate_uuid,
@@ -28,13 +38,11 @@ class InboundOrder(db.Model, ModelMixin):
         sa.String(64),
         nullable=False,
     )
-
     order_id: orm.Mapped[str] = orm.mapped_column(
         sa.String(64),
         nullable=False,
         default=generate_order_id_timestamp,
     )
-
     active_date: orm.Mapped[date] = orm.mapped_column(sa.Date)
     active_time: orm.Mapped[str] = orm.mapped_column(sa.String(64))
     delivery_date: orm.Mapped[date] = orm.mapped_column(sa.Date)
@@ -42,22 +50,23 @@ class InboundOrder(db.Model, ModelMixin):
         sa.Enum(s.InboundOrderStatus),
         default=s.InboundOrderStatus.draft,
     )
+    wm_notes: orm.Mapped[str] = orm.mapped_column(sa.Text(), default="", nullable=True)
+    da_notes: orm.Mapped[str] = orm.mapped_column(sa.Text(), default="", nullable=True)
 
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
         default=datetime.utcnow,
     )
 
-    supplier_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("suppliers.id"))
+    # Relationships
     supplier: orm.Mapped[Supplier] = orm.relationship()
-    warehouse_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("warehouses.id"))
     warehouse: orm.Mapped[Warehouse] = orm.relationship()
     products_allocated: orm.Mapped[list[ProductAllocated]] = orm.relationship(
         cascade="all, delete-orphan"
     )
-
-    wm_notes: orm.Mapped[str] = orm.mapped_column(sa.Text(), default="", nullable=True)
-    da_notes: orm.Mapped[str] = orm.mapped_column(sa.Text(), default="", nullable=True)
+    report_inventory_list: orm.Mapped["ReportInventoryList"] = orm.relationship(
+        back_populates="inbound_order"
+    )
 
     def __repr__(self):
         return f"<{self.id}: {self.order_id}>"

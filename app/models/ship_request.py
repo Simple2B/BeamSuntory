@@ -11,6 +11,7 @@ from .cart import Cart
 from .store import Store
 from .store_category import StoreCategory
 from .report_event import ReportEvent
+from .report_inventory import ReportInventoryList
 
 
 class ShipRequest(db.Model, ModelMixin):
@@ -30,6 +31,9 @@ class ShipRequest(db.Model, ModelMixin):
     )
     report_event_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("report_events.id", ondelete="SET NULL"), nullable=True
+    )
+    report_inventory_list_id: orm.Mapped[int] = orm.mapped_column(
+        sa.ForeignKey("report_inventory_lists.id"), nullable=True
     )
 
     # Columns
@@ -58,6 +62,9 @@ class ShipRequest(db.Model, ModelMixin):
     store: orm.Mapped[Store] = orm.relationship()
     store_category: orm.Mapped[StoreCategory] = orm.relationship()
     report_event: orm.Mapped["ReportEvent"] = orm.relationship(
+        back_populates="ship_request"
+    )
+    report_inventory_list: orm.Mapped["ReportInventoryList"] = orm.relationship(
         back_populates="ship_request"
     )
 

@@ -180,19 +180,44 @@ def share(id: int):
         flash("Not enough products in warehouse", "danger")
         return redirect(url_for("request_share.get_all"))
 
+    report_inventory_list = m.ReportInventoryList(
+        type="Product Shared",
+        user_id=current_user.id,
+    )
+    report_inventory_list.save(False)
+
     if not warehouse_to_prod:
-        m.WarehouseProduct(
+        qty_before = 0
+        warehouse_to_prod = m.WarehouseProduct(
             product_id=request_share.product_id,
             group_id=request_share.group_id,
             product_quantity=request_share.desire_quantity,
             warehouse_id=warehouse_from_prod.warehouse_id,
-        ).save()
+        )
+        warehouse_to_prod.save(False)
     else:
+        qty_before = warehouse_to_prod.product_quantity
         warehouse_to_prod.product_quantity += request_share.desire_quantity
-        warehouse_to_prod.save()
+        warehouse_to_prod.save(False)
 
     warehouse_from_prod.product_quantity -= request_share.desire_quantity
-    warehouse_from_prod.save()
+    warehouse_from_prod.save(False)
+
+    m.ReportInventory(
+        qty_before=warehouse_from_prod.product_quantity + request_share.desire_quantity,
+        qty_after=warehouse_from_prod.product_quantity,
+        report_inventory_list_id=report_inventory_list.id,
+        product_id=warehouse_from_prod.product_id,
+        warehouse_product=warehouse_from_prod,
+    ).save(False)
+
+    m.ReportInventory(
+        qty_before=qty_before,
+        qty_after=warehouse_to_prod.product_quantity,
+        report_inventory_list_id=report_inventory_list.id,
+        product_id=warehouse_to_prod.product_id,
+        warehouse_product=warehouse_to_prod,
+    ).save(False)
 
     report_request_share = m.ReportRequestShare(
         type=s.ReportRequestShareType.SHARED.value,
