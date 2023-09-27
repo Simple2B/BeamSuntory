@@ -748,8 +748,10 @@ def adjust():
         adjust_item: m.Adjust = m.Adjust(
             product_id=form.product_id.data,
             note=form.note.data,
+            user_id=current_user.id,
         )
         db.session.add(adjust_item)
+        is_adjust_products = False
         groups = json.loads(form.groups_quantity.data)
         product = db.session.get(m.Product, form.product_id.data)
         warehouse_event: m.Warehouse = db.session.scalar(
@@ -791,9 +793,11 @@ def adjust():
                     if product_warehouse.product_quantity != quantity:
                         adjust_gr_qty: m.AdjustGroupQty = m.AdjustGroupQty(
                             adjust_id=adjust_item.id,
-                            quantity=quantity,
+                            quantity_after=quantity,
+                            quantity_before=product_warehouse.product_quantity,
                             group_id=group_id,
                             warehouse_id=warehouse_id,
+                            product_id=form.product_id.data,
                         )
                         db.session.add(adjust_gr_qty)
 
@@ -805,6 +809,7 @@ def adjust():
                             warehouse_product=product_warehouse,
                         ).save(False)
 
+                        is_adjust_products = True
                     product_warehouse.product_quantity = quantity
                     db.session.add(product_warehouse)
                 else:
@@ -826,11 +831,19 @@ def adjust():
 
                     adjust_gr_qty: m.AdjustGroupQty = m.AdjustGroupQty(
                         adjust_id=adjust_item.id,
-                        quantity=quantity,
+                        quantity_after=quantity,
+                        quantity_before=0,
                         group_id=group_id,
                         warehouse_id=warehouse_id,
+                        product_id=form.product_id.data,
                     )
                     db.session.add(adjust_gr_qty)
+
+        if not is_adjust_products:
+            db.session.delete(adjust_item)
+            log(log.INFO, "Nothing to adjust: [%s]", form.product_id.data)
+            flash("Nothing to adjust", "danger")
+            return redirect(url_for("product.get_all"))
 
         db.session.commit()
 

@@ -1,6 +1,6 @@
 //webpack.config.js
-const path = require('path')
-const { merge } = require('webpack-merge')
+const path = require('path');
+const { merge } = require('webpack-merge');
 
 const defaultConfig = {
   resolve: {
@@ -14,7 +14,7 @@ const defaultConfig = {
       },
     ],
   },
-}
+};
 
 const baseConfig = {
   entry: {
@@ -24,7 +24,7 @@ const baseConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/base.js', // <--- Will be compiled to this single file
   },
-}
+};
 
 const userConfig = {
   entry: {
@@ -34,7 +34,7 @@ const userConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/user.js', // <--- Will be compiled to this single file
   },
-}
+};
 
 const groupConfig = {
   entry: {
@@ -44,7 +44,7 @@ const groupConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/group.js', // <--- Will be compiled to this single file
   },
-}
+};
 
 const masterGroupConfig = {
   entry: {
@@ -54,7 +54,7 @@ const masterGroupConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/master_group.js', // <--- Will be compiled to this single file
   },
-}
+};
 
 const productConfig = {
   entry: {
@@ -64,7 +64,7 @@ const productConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/product.js', // <--- Will be compiled to this single file
   },
-}
+};
 
 const groupProductConfig = {
   entry: {
@@ -74,7 +74,7 @@ const groupProductConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/group_for_product.js', // <--- Will be compiled to this single file
   },
-}
+};
 
 const masterGroupProductConfig = {
   entry: {
@@ -84,7 +84,7 @@ const masterGroupProductConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/master_group_for_product.js', // <--- Will be compiled to this single file
   },
-}
+};
 
 const warehouseConfig = {
   entry: {
@@ -94,7 +94,7 @@ const warehouseConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/warehouse.js', // <--- Will be compiled to this single file
   },
-}
+};
 
 const deliveryAgentConfig = {
   entry: {
@@ -104,7 +104,7 @@ const deliveryAgentConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/delivery_agent.js', // <--- Will be compiled to this single file
   },
-}
+};
 
 const shipRequestConfig = {
   entry: {
@@ -114,7 +114,7 @@ const shipRequestConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/ship_request.js', // <--- Will be compiled to this single file
   },
-}
+};
 
 const supplierConfig = {
   entry: {
@@ -124,7 +124,7 @@ const supplierConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/supplier.js', // <--- Will be compiled to this single file
   },
-}
+};
 
 const cartConfig = {
   entry: {
@@ -134,7 +134,7 @@ const cartConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/cart.js', // <--- Will be compiled to this single file
   },
-}
+};
 
 const inboundOrderConfig = {
   entry: {
@@ -144,7 +144,7 @@ const inboundOrderConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/inbound_order.js', // <--- Will be compiled to this single file
   },
-}
+};
 
 const storeConfig = {
   entry: {
@@ -154,7 +154,7 @@ const storeConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/store.js', // <--- Will be compiled to this single file
   },
-}
+};
 
 const incomingStockConfig = {
   entry: {
@@ -164,7 +164,7 @@ const incomingStockConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/incoming_stock.js', // <--- Will be compiled to this single file
   },
-}
+};
 
 const outgoingStockConfig = {
   entry: {
@@ -174,7 +174,7 @@ const outgoingStockConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/outgoing_stock.js', // <--- Will be compiled to this single file
   },
-}
+};
 
 const pickupOrderConfig = {
   entry: {
@@ -184,7 +184,7 @@ const pickupOrderConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/pickup_order.js', // <--- Will be compiled to this single file
   },
-}
+};
 
 const pickupInboundConfig = {
   entry: {
@@ -194,7 +194,7 @@ const pickupInboundConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/pickup_inbound.js', // <--- Will be compiled to this single file
   },
-}
+};
 
 const divisionConfig = {
   entry: {
@@ -204,7 +204,7 @@ const divisionConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/division.js', // <--- Will be compiled to this single file
   },
-}
+};
 
 const bellConfig = {
   entry: {
@@ -214,7 +214,7 @@ const bellConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/bell.js', // <--- Will be compiled to this single file
   },
-}
+};
 
 const requestShareConfig = {
   entry: {
@@ -224,7 +224,7 @@ const requestShareConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/request_share.js', // <--- Will be compiled to this single file
   },
-}
+};
 
 const storeCategoryConfig = {
   entry: {
@@ -234,7 +234,7 @@ const storeCategoryConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/store_category.js', // <--- Will be compiled to this single file
   },
-}
+};
 const assignConfig = {
   entry: {
     main: './src/assign.ts',
@@ -243,7 +243,7 @@ const assignConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/assign.js', // <--- Will be compiled to this single file
   },
-}
+};
 const inventoryConfig = {
   entry: {
     main: './src/inventory.ts',
@@ -252,7 +252,7 @@ const inventoryConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/inventory.js', // <--- Will be compiled to this single file
   },
-}
+};
 const adjustConfig = {
   entry: {
     main: './src/adjust.ts',
@@ -261,7 +261,7 @@ const adjustConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/adjust.js', // <--- Will be compiled to this single file
   },
-}
+};
 const eventConfig = {
   entry: {
     main: './src/event.ts',
@@ -270,7 +270,7 @@ const eventConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/event.js', // <--- Will be compiled to this single file
   },
-}
+};
 
 const reportEventConfig = {
   entry: {
@@ -280,7 +280,7 @@ const reportEventConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/report_event.js', // <--- Will be compiled to this single file
   },
-}
+};
 
 const reportInventoryConfig = {
   entry: {
@@ -290,7 +290,7 @@ const reportInventoryConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/report_inventory.js', // <--- Will be compiled to this single file
   },
-}
+};
 
 const reportRequestShareConfig = {
   entry: {
@@ -300,7 +300,17 @@ const reportRequestShareConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/report_share_request.js', // <--- Will be compiled to this single file
   },
-}
+};
+
+const reportAdjustmentConfig = {
+  entry: {
+    main: './src/report_adjustment.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/report_adjustment.js', // <--- Will be compiled to this single file
+  },
+};
 
 const reportAssignConfig = {
   entry: {
@@ -310,7 +320,7 @@ const reportAssignConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/report_assign.js', // <--- Will be compiled to this single file
   },
-}
+};
 
 const configs = [
   baseConfig,
@@ -343,6 +353,7 @@ const configs = [
   reportInventoryConfig,
   reportRequestShareConfig,
   reportAssignConfig,
-].map((conf) => merge(defaultConfig, conf))
+  reportAdjustmentConfig,
+].map((conf) => merge(defaultConfig, conf));
 
-module.exports = configs
+module.exports = configs;
