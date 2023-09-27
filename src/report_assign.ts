@@ -38,7 +38,9 @@ const defaultBrandImage =
 const downloadCSV = async function () {
   // Filters
   const searchInput: HTMLInputElement = document.querySelector('#table-search-assign')
-  
+
+  const filterFromGroup: HTMLInputElement = document.querySelector('#report-assigns-group-from')
+  const filterToGroup: HTMLInputElement = document.querySelector('#report-assigns-group-to')  
   const filterBrand: HTMLInputElement = document.querySelector('#report-assigns-brand')
   const filterCategory: HTMLInputElement = document.querySelector('#report-assigns-category')
   const filterLanguage: HTMLInputElement = document.querySelector('#report-assigns-language')
@@ -50,6 +52,8 @@ const downloadCSV = async function () {
 
   const filtersMap = {
     q: searchInput,
+    to_group: filterToGroup,
+    from_group: filterFromGroup,
     brand: filterBrand,
     category: filterCategory,
     language: filterLanguage,
@@ -65,16 +69,14 @@ const downloadCSV = async function () {
   }
 
   // CSV Headers
-
   const csvData = ['created_at,username,type,from_group,to_group,sku,product_name']
   let pages = 1
-  const queryTail = ''
+  const queryTail = filterQuery ? filterQuery.join('&') : ''
 
   for (let page = 1; page <= pages; page++) {
     const currentURL = window.location.href;
-    const urlWithoutQueryParams = currentURL.split('?')[0];
     const url = [`api?page=${page}`, queryTail].join('&')
-    const res = await fetch(`${urlWithoutQueryParams}/${url}`)
+    const res = await fetch(`${currentURL}/${url}`)
     const data = await res.json()    
 
     data.report_events.forEach((report: IReportAssignCSV) => {
@@ -115,7 +117,7 @@ const formatDate = (date: string) => {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const filtersHTML = document.querySelectorAll("[name='q'], [name='start_date'], [name='end_date'], [name='username'], [name='language'], [name='category'], [name='premises'], [name='from_group'], [name='to_group']");
+  const filtersHTML = document.querySelectorAll("[name='q'], [name='start_date'], [name='end_date'], [name='username'], [name='language'], [name='category'], [name='premises'], [name='from_group'], [name='to_group'], [name='brand']");
   const buttonLoadEventsTable = document.querySelector('#table-report-loader') as HTMLButtonElement;
 
   

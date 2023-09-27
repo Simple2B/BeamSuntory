@@ -72,14 +72,13 @@ const downloadCSV = async function () {
 
   const csvData = ['created_at,username,type,order_title,history']
   let pages = 1
-  const queryTail = ''
+  const queryTail = filterQuery ? filterQuery.join('&') : ''
 
   for (let page = 1; page <= pages; page++) {
     const currentURL = window.location.href;
-    const urlWithoutQueryParams = currentURL.split('?')[0];
     const url = [`api?page=${page}`, queryTail].join('&')
-    const res = await fetch(`${urlWithoutQueryParams}/${url}`)
-    const data = await res.json()    
+    const res = await fetch(`${currentURL}/${url}`)
+    const data = await res.json()
 
     data.report_inbound_orders.forEach((report: IReportInboundOrder) => {
       csvData.push(

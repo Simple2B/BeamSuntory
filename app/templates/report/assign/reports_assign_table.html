@@ -52,7 +52,7 @@
       <ul class="inline-flex items-center -space-x-px">
         <li>
           <button
-            hx-get="{{ url_for('report_assign.search_report_events') }}?page=1&q={{page.query}}"
+            hx-get="{{ url_for('report_assign.search_report_assigns') }}?page=1&q={{page.query}}"
             hx-trigger="click"
             hx-target="#reports-table"
             hx-indicator="#report-table-spinner"
@@ -64,7 +64,7 @@
         </li>
         <li>
           <button
-            hx-get="{{ url_for('report_assign.search_report_events') }}?page={{page.page-1 if page.page > 1 else 1}}&q={{page.query}}"
+            hx-get="{{ url_for('report_assign.search_report_assigns') }}?page={{page.page-1 if page.page > 1 else 1}}&q={{page.query}}"
             hx-trigger="click"
             hx-target="#reports-table"
             hx-indicator="#report-table-spinner"
@@ -81,7 +81,7 @@
           <!-- prettier-ignore -->
           {% if p == page.page %}
           <button
-            hx-get="{{ url_for('report_assign.search_report_events') }}?page={{p}}&q={{page.query}}"
+            hx-get="{{ url_for('report_assign.search_report_assigns') }}?page={{p}}&q={{page.query}}"
             hx-trigger="click"
             hx-target="#reports-table"
             hx-indicator="#report-table-spinner"
@@ -92,7 +92,7 @@
           </button>
           {% else %}
           <button
-            hx-get="{{ url_for('report_assign.search_report_events') }}?page={{p}}&q={{page.query}}"
+            hx-get="{{ url_for('report_assign.search_report_assigns') }}?page={{p}}&q={{page.query}}"
             hx-trigger="click"
             hx-target="#reports-table"
             hx-indicator="#report-table-spinner"
@@ -105,7 +105,7 @@
         {% endfor %}
         <li>
           <button
-            hx-get="{{ url_for('report_assign.search_report_events') }}?page={{page.page+1 if page.page < page.pages else page.pages}}&q={{page.query}}"
+            hx-get="{{ url_for('report_assign.search_report_assigns') }}?page={{page.page+1 if page.page < page.pages else page.pages}}&q={{page.query}}"
             hx-trigger="click"
             hx-target="#reports-table"
             hx-indicator="#report-table-spinner"
@@ -118,7 +118,7 @@
         </li>
         <li>
           <button
-            hx-get="{{ url_for('report_assign.search_report_events') }}?page={{page.pages}}&q={{page.query}}"
+            hx-get="{{ url_for('report_assign.search_report_assigns') }}?page={{page.pages}}&q={{page.query}}"
             hx-trigger="click"
             hx-target="#reports-table"
             hx-indicator="#report-table-spinner"

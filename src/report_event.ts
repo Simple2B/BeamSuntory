@@ -82,6 +82,7 @@ const downloadCSV = async function () {
   const dateEventStartToInput: HTMLInputElement = document.querySelector('#product-event-sort-start-to-datepicker')
   const dateEventEndFromInput: HTMLInputElement = document.querySelector('#product-event-sort-end-from-datepicker')
   const dateEventEndToInput: HTMLInputElement = document.querySelector('#product-event-sort-end-to-datepicker')
+  const usernameInput: HTMLInputElement = document.querySelector('#product-event-filter-user')
 
   const filtersMap = {
     q: searchEventInput,
@@ -89,6 +90,7 @@ const downloadCSV = async function () {
     start_to: dateEventStartToInput,
     end_from: dateEventEndFromInput,
     end_to: dateEventEndToInput,
+    username: usernameInput,
   }
 
   const filterQuery = []
@@ -99,13 +101,12 @@ const downloadCSV = async function () {
   // CSV Headers
   const csvData = ['created_at,store_name,type,username,date_from,date_to,sku,product_name']
   let pages = 1
-  const queryTail = ''
+  const queryTail = filterQuery ? filterQuery.join('&') : ''
 
   for (let page = 1; page <= pages; page++) {
-    const currentURL = window.location.href;
-    const urlWithoutQueryParams = currentURL.split('?')[0];
+    const currentURL = window.location.href;;
     const url = [`api?page=${page}`, queryTail].join('&')
-    const res = await fetch(`${urlWithoutQueryParams}/${url}`)
+    const res = await fetch(`${currentURL}/${url}`)
     const data: IEventsReportResponse = await res.json()
 
     data.report_events.forEach(reportEvent => {
