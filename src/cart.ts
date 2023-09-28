@@ -261,6 +261,7 @@ const picker = new easepick.create({
       }
     },
   },
+  zIndex: 4,
   setup(picker: any) {
     picker.on('select', async (evt: any) => {
       const { view, date, target } = evt.detail
