@@ -6,7 +6,7 @@ from flask import (
     redirect,
     url_for,
 )
-from flask_login import login_required
+from flask_login import login_required, current_user
 import sqlalchemy as sa
 from sqlalchemy import desc
 from sqlalchemy.orm import aliased
@@ -25,6 +25,7 @@ pickup_order_blueprint = Blueprint("pickup_order", __name__, url_prefix="/pickup
 @pickup_order_blueprint.route("/", methods=["GET"])
 @login_required
 def get_all():
+    # TODO needs to refactor
     form_create: f.NewShipRequestForm = f.NewShipRequestForm()
     form_edit: f.ShipRequestForm = f.ShipRequestForm()
     form_sort: f.SortByStatusShipRequestForm = f.SortByStatusShipRequestForm()
@@ -104,17 +105,24 @@ def save():
         query = m.ShipRequest.select().where(
             m.ShipRequest.id == int(form_edit.ship_request_id.data)
         )
-        sr: m.ShipRequest | None = db.session.scalar(query)
-        if not sr:
+        ship_request: m.ShipRequest | None = db.session.scalar(query)
+        if not ship_request:
             log(
                 log.ERROR,
                 "Not found ship request item by id : [%s]",
                 form_edit.ship_request_id.data,
             )
             flash("Cannot save item data", "danger")
-        sr.da_notes = form_edit.da_notes.data
-        sr.status = s.ShipRequestStatus.in_transit
-        sr.save()
+        ship_request.da_notes = form_edit.da_notes.data
+        ship_request.status = s.ShipRequestStatus.in_transit
+
+        report_shipping = m.ReportShipping(
+            type=s.ReportShipRequestType.PICKED_UP.value,
+            ship_request=ship_request,
+            user=current_user,
+        )
+        db.session.add(report_shipping)
+        ship_request.save()
 
         if form_edit.next_url.data:
             return redirect(form_edit.next_url.data)
@@ -162,18 +170,24 @@ def update_notes():
 @pickup_order_blueprint.route("/deliver/<int:id>", methods=["GET"])
 @login_required
 def deliver(id: int):
-    sr: m.ShipRequest = db.session.scalar(
+    ship_request: m.ShipRequest = db.session.scalar(
         m.ShipRequest.select().where(m.ShipRequest.id == id)
     )
-    if not sr:
+    if not ship_request:
         log(log.INFO, "There is no ship request with id: [%s]", id)
         flash("There is no such ship request", "danger")
         return "no ship request", 404
 
-    sr.status = s.ShipRequestStatus.delivered
-    sr.save()
+    ship_request.status = s.ShipRequestStatus.delivered
+    report_shipping = m.ReportShipping(
+        type=s.ReportShipRequestType.DELIVERED.value,
+        user=current_user,
+        ship_request=ship_request,
+    )
+    db.session.add(report_shipping)
+    db.session.commit()
 
-    log(log.INFO, "Ship Request delivered. Ship Request: [%s]", sr)
+    log(log.INFO, "Ship Request delivered. Ship Request: [%s]", ship_request)
     flash("Ship Request delivered!", "success")
     return "ok", 200
 

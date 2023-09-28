@@ -1,6 +1,11 @@
-<aside aria-label="Sidebar" id="logo-sidebar"
-  class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700">
-  <div class="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
+<aside
+  aria-label="Sidebar"
+  id="logo-sidebar"
+  class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
+>
+  <div
+    class="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800"
+  >
     <ul class="space-y-2 font-medium">
       <li>
         <!-- prettier-ignore -->
@@ -10,7 +15,9 @@
           <span class="flex-1 ml-3 whitespace-nowrap">WareHouse</span>
           <div class="dropdown-arrow">{% include "icon/right_arrow.html" %}</div>
         </a>
-        <div class="dropdown-container dropdown-close">
+        <div
+          class="dropdown-container dropdown-close"
+        >
           <ul class="text-white">
             <li>
               <!-- prettier-ignore -->
@@ -63,8 +70,12 @@
           <span class="flex-1 ml-3 whitespace-nowrap">Products</span>
           <div class="dropdown-arrow">{% include "icon/right_arrow.html" %}</div>
         </a>
-        <div class="dropdown-container dropdown-close">
-          <ul class="text-white flex flex-col">
+        <div
+          class="dropdown-container dropdown-close"
+        >
+          <ul
+            class="text-white flex flex-col"
+          >
             <li>
               <!-- prettier-ignore -->
               <a href="{{ url_for('product.get_all') }}"
@@ -116,8 +127,12 @@
           <span class="flex-1 ml-3 whitespace-nowrap">Stores</span>
           <div class="dropdown-arrow">{% include "icon/right_arrow.html" %}</div>
         </a>
-        <div class="dropdown-container dropdown-close">
-          <ul class="text-white flex flex-col">
+        <div
+          class="dropdown-container dropdown-close"
+        >
+          <ul
+            class="text-white flex flex-col"
+          >
             <li>
               <!-- prettier-ignore -->
               <a href="{{ url_for('store.get_all') }}"
@@ -147,8 +162,12 @@
             {% include "icon/right_arrow.html" %}
           </div>
         </a>
-        <div class="dropdown-container dropdown-close">
-          <ul class="text-white flex flex-col">
+        <div
+          class="dropdown-container dropdown-close"
+        >
+          <ul
+            class="text-white flex flex-col"
+          >
             <li>
               <!-- prettier-ignore -->
               <a href="{{ url_for('assign.get_all') }}"
@@ -185,8 +204,12 @@
           <span class="flex-1 ml-3 whitespace-nowrap">Supplier</span>
           <div class="dropdown-arrow">{% include "icon/right_arrow.html" %}</div>
         </a>
-        <div class="dropdown-container dropdown-close">
-          <ul class="text-white flex flex-col">
+        <div
+          class="dropdown-container dropdown-close"
+        >
+          <ul
+            class="text-white flex flex-col"
+          >
             <li>
               <!-- prettier-ignore -->
               <a href="{{ url_for('supplier.get_all') }}"
@@ -208,8 +231,12 @@
             {% include "icon/right_arrow.html" %}
           </div>
         </a>
-        <div class="dropdown-container dropdown-close">
-          <ul class="text-white flex flex-col">
+        <div
+          class="dropdown-container dropdown-close"
+        >
+          <ul
+            class="text-white flex flex-col"
+          >
             <li>
               <!-- prettier-ignore -->
               <a href="{{ url_for('master_group.get_all') }}"
@@ -253,8 +280,12 @@
           <span class="flex-1 ml-3 whitespace-nowrap">Roles/Division</span>
           <div class="dropdown-arrow">{% include "icon/right_arrow.html" %}</div>
         </a>
-        <div class="dropdown-container dropdown-close">
-          <ul class="text-white flex flex-col">
+        <div
+          class="dropdown-container dropdown-close"
+        >
+          <ul
+            class="text-white flex flex-col"
+          >
             <li>
               <!-- prettier-ignore -->
               <a href="{{ url_for('division.get_all') }}"
@@ -282,8 +313,12 @@
           <span class="flex-1 ml-3 whitespace-nowrap">Delivery Agent</span>
           <div class="dropdown-arrow">{% include "icon/right_arrow.html" %}</div>
         </a>
-        <div class="dropdown-container dropdown-close">
-          <ul class="text-white flex flex-col">
+        <div
+          class="dropdown-container dropdown-close"
+        >
+          <ul
+            class="text-white flex flex-col"
+          >
             <li>
               <!-- prettier-ignore -->
               <a href="{{ url_for('delivery_agent.get_all') }}"
@@ -336,8 +371,12 @@
           <span class="flex-1 ml-3 whitespace-nowrap">Reports</span>
           <div class="dropdown-arrow">{% include "icon/right_arrow.html" %}</div>
         </a>
-        <div class="dropdown-container dropdown-close">
-          <ul class="text-white flex flex-col">
+        <div
+          class="dropdown-container dropdown-close"
+        >
+          <ul
+            class="text-white flex flex-col"
+          >
             <li>
               <!-- prettier-ignore -->
               <a href="{{ url_for('report.events') }}"
@@ -350,27 +389,65 @@
               <!-- prettier-ignore -->
               <a href="{{ url_for('report_inventory.inventories') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700" >
                 {% include "icon/circle.html" %}
-                <span class="flex-1 ml-4 whitespace-nowrap">Inventories</span>              
-              <a href="{{ url_for('report_adjustment.adjustments') }}"
-                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
-                {% include "icon/circle.html" %}
-                <span class="flex-1 ml-4 whitespace-nowrap">Adjustments</span>
-                <a href="{{ url_for('report_assign.assigns') }}"
-                  class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
-                  {% include "icon/circle.html" %}
-                  <span class="flex-1 ml-4 whitespace-nowrap">Assigns</span>
-                </a>
-                <a href="{{ url_for('report_request_share.index') }}"
-                  class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
-                  {% include "icon/circle.html" %}
-                  <span class="flex-1 ml-4 whitespace-nowrap">Request share</span>
-                </a>
+                <span class="flex-1 ml-4 whitespace-nowrap">Request share</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="{{ url_for('report_assign.assigns') }}"
+                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span
+                  class="flex-1 ml-4 whitespace-nowrap"
+                  >Inventories</span
+                >
+              </a>
+              <a
+                href="{{ url_for('report_adjustment.adjustments') }}"
+                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                {% include
+                "icon/circle.html" %}
+                <span
+                  class="flex-1 ml-4 whitespace-nowrap"
+                  >Adjustments</span
+                >
+              </a>
+              <a
+                href="{{ url_for('report_assign.assigns') }}"
+                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                {% include
+                "icon/circle.html" %}
+                <span
+                  class="flex-1 ml-4 whitespace-nowrap"
+                  >Assigns</span
+                >
+              </a>
+              <a
+                href="{{ url_for('report_request_share.index') }}"
+                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                {% include
+                "icon/circle.html" %}
+                <span
+                  class="flex-1 ml-4 whitespace-nowrap"
+                  >Request share</span
+                >
+              </a>
             </li>
             <li>
               <!-- prettier-ignore -->
               <a href="{{ url_for('report_inbound_orders.inbound_orders') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700" >
                 {% include "icon/circle.html" %}
                 <span class="flex-1 ml-4 whitespace-nowrap">Inbound orders</span>
+              </a>
+            </li>
+            <li>
+              <!-- prettier-ignore -->
+              <a href="{{ url_for('report_shipping.index') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700" >
+                {% include "icon/circle.html" %}
+                <span class="flex-1 ml-4 whitespace-nowrap">Shipping</span>
               </a>
             </li>
           </ul>
@@ -380,6 +457,11 @@
   </div>
 </aside>
 
-{% include 'product/upload.html' %} {% block scripts %}
-<script src="{{ url_for('static', filename='js/dropdown.js') }}" type="text/javascript" defer></script>
+{% include 'product/upload.html' %} {%
+block scripts %}
+<script
+  src="{{ url_for('static', filename='js/dropdown.js') }}"
+  type="text/javascript"
+  defer
+></script>
 {% endblock %}

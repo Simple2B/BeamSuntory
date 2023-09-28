@@ -51,6 +51,7 @@ def test_report_share_request_on_create(mg_g_populate: FlaskClient):
     # Get report share request
     # HTML
     # Get dashboard
+
     response = mg_g_populate.get("/report_request_share", follow_redirects=True)
     assert response.status_code == HTTPStatus.OK
     # Get tables with pagination
@@ -61,6 +62,24 @@ def test_report_share_request_on_create(mg_g_populate: FlaskClient):
     reports_tr = soup.find_all("tr", class_="table-event-item-tr")
     assert reports_tr
     assert db.session.scalar(sa.func.count(m.ReportRequestShare.id)) == len(reports_tr)
+
+    # Created
+    response = mg_g_populate.get(
+        f"/report_request_share/search?report_type={s.ReportRequestShareType.CREATED.value}",
+        follow_redirects=True,
+    )
+
+    soup = BeautifulSoup(response.data, "html.parser")
+    reports_tr = soup.find_all("tr", class_="table-event-item-tr")
+    assert reports_tr
+    assert len(
+        db.session.scalars(
+            m.ReportRequestShare.select().where(
+                m.ReportRequestShare.type == s.ReportRequestShareType.CREATED.value
+            )
+        ).all()
+    ) == len(reports_tr)
+
     # API for csv
     response = mg_g_populate.get("/report_request_share/api", follow_redirects=True)
     assert response.status_code == HTTPStatus.OK

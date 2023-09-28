@@ -30,6 +30,7 @@ from .report_inventory import report_inventory_blueprint
 from .report_adjustment import report_adjustment_blueprint
 from .report_request_share import report_request_share_blueprint
 from .report_assign import report_assign_blueprint
+from .report_shipping import report_shipping_blueprint
 from .report_inbound_orders import report_inbound_orders_blueprint
 
 BLUEPRINTS = (
@@ -64,5 +65,6 @@ BLUEPRINTS = (
     report_adjustment_blueprint,
     report_request_share_blueprint,
     report_assign_blueprint,
+    report_shipping_blueprint,
     report_inbound_orders_blueprint,
 )

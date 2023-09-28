@@ -11,6 +11,7 @@ from .cart import Cart
 from .store import Store
 from .store_category import StoreCategory
 from .report_event import ReportEvent
+from .utils import generate_uuid
 from .report_inventory import ReportInventoryList
 
 
@@ -38,8 +39,8 @@ class ShipRequest(db.Model, ModelMixin):
 
     # Columns
     order_numb: orm.Mapped[str] = orm.mapped_column(
-        sa.String(64),
-        unique=True,
+        sa.String(36),
+        default=generate_uuid,
         nullable=False,
     )
     order_type: orm.Mapped[str] = orm.mapped_column(
