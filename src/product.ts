@@ -143,8 +143,6 @@ if (filterData !== null || filterData !== undefined) {
 
 // function to add column by filter
 function createCustomizeViewColumn(productsGroups: IProductGroupMasterGroup, groupName: string) {
-  console.log('productsGroups', productsGroups);
-
   const positionInTable = 5;
   const productTableHeader = document.querySelector('#product-table-header-tr');
   const productItemTrs = document.querySelectorAll('.table-product-item-tr');
@@ -152,7 +150,7 @@ function createCustomizeViewColumn(productsGroups: IProductGroupMasterGroup, gro
   const productItemHeaderReference = productTableHeader.children[positionInTable];
   const productItemHeader = productItemHeaderReference.cloneNode(true) as HTMLElement;
   productItemHeader.setAttribute('id', `product-table-filter-master-group-${groupName}`);
-  productItemHeader.innerHTML = groupName;
+  productItemHeader.innerHTML = groupName.replace(/_/g, ' ');
   productTableHeader.insertBefore(productItemHeader, productItemHeaderReference.nextSibling);
 
   productItemTrs.forEach((productItem: HTMLTableRowElement) => {
@@ -161,7 +159,7 @@ function createCustomizeViewColumn(productsGroups: IProductGroupMasterGroup, gro
 
     const productItemTd = productItemReference.cloneNode(true) as HTMLElement;
     productItemTd.classList.add(`product-table-item-td-${groupName}`);
-    productItemTd.innerHTML = productsGroups[productSKU][groupName] || '-';
+    productItemTd.innerHTML = productsGroups[productSKU][groupName.replace(/_/g, ' ')] || '-';
     productItem.insertBefore(productItemTd, productItemReference.nextSibling);
   });
 }
@@ -169,6 +167,10 @@ function createCustomizeViewColumn(productsGroups: IProductGroupMasterGroup, gro
 //function to display filter by master group on load page
 const globalFilterMasterGroup = JSON.parse(sessionStorage.getItem('globalFilterMasterGroup'));
 const productMgGGlobal = JSON.parse(sessionStorage.getItem('productMgG'));
+// add brand to default global filter
+if (!globalFilterMasterGroup.includes('Brand')) {
+  globalFilterMasterGroup.push('Brand');
+}
 
 if (globalFilterMasterGroup && globalFilterMasterGroup.length !== 0) {
   const filterProductMasterGroupCheckboxes = document.querySelectorAll(
@@ -201,16 +203,10 @@ checkboxFilterProductMasterGroups.forEach((checkbox) => {
     let isActive = (e.target as HTMLInputElement).checked;
 
     if (isActive) {
-      const filterMasterGroup: string[] = [];
-      filterMasterGroup.push(masterGroupName);
-      if (globalFilterMasterGroup) {
-        globalFilterMasterGroup.forEach((element: string) => {
-          if (!filterMasterGroup.includes(element)) {
-            filterMasterGroup.push(element);
-          }
-        });
+      if (!globalFilterMasterGroup.includes(masterGroupName)) {
+        globalFilterMasterGroup.push(masterGroupName);
       }
-      sessionStorage.setItem('globalFilterMasterGroup', JSON.stringify(filterMasterGroup));
+      sessionStorage.setItem('globalFilterMasterGroup', JSON.stringify(globalFilterMasterGroup));
       const isGroupExist = document.querySelector(`#product-table-filter-master-group-${masterGroupName}`);
 
       if (!isGroupExist) {
@@ -219,6 +215,7 @@ checkboxFilterProductMasterGroups.forEach((checkbox) => {
     }
     if (!isActive) {
       const index = globalFilterMasterGroup.indexOf(masterGroupName);
+
       if (index !== -1) {
         globalFilterMasterGroup.splice(index, 1);
       }
