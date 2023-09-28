@@ -143,7 +143,8 @@ if (filterData !== null || filterData !== undefined) {
 
 // function to add column by filter
 function createCustomizeViewColumn(productsGroups: IProductGroupMasterGroup, groupName: string) {
-  const positionInTable = 5;
+  //choose position in table
+  const positionInTable = 4;
   const productTableHeader = document.querySelector('#product-table-header-tr');
   const productItemTrs = document.querySelectorAll('.table-product-item-tr');
 
@@ -165,11 +166,18 @@ function createCustomizeViewColumn(productsGroups: IProductGroupMasterGroup, gro
 }
 
 //function to display filter by master group on load page
-const globalFilterMasterGroup = JSON.parse(sessionStorage.getItem('globalFilterMasterGroup'));
+const groupBrand = 'Brand';
+let globalFilterMasterGroup = JSON.parse(sessionStorage.getItem('globalFilterMasterGroup'));
+
+if (!globalFilterMasterGroup) {
+  globalFilterMasterGroup = [groupBrand];
+  sessionStorage.setItem('globalFilterMasterGroup', JSON.stringify(globalFilterMasterGroup));
+}
 const productMgGGlobal = JSON.parse(sessionStorage.getItem('productMgG'));
+
 // add brand to default global filter
-if (!globalFilterMasterGroup.includes('Brand')) {
-  globalFilterMasterGroup.push('Brand');
+if (!globalFilterMasterGroup.includes(groupBrand)) {
+  globalFilterMasterGroup.push(groupBrand);
 }
 
 if (globalFilterMasterGroup && globalFilterMasterGroup.length !== 0) {
