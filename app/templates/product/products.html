@@ -1,7 +1,7 @@
 <!-- prettier-ignore -->
 {% extends 'base.html' %}
 {% block content %}
-<div class="relative overflow-visible shadow-md sm:rounded-lg">
+<div class="relative overflow-visible shadow-md sm:rounded-lg overflow-x-auto">
 
   <form id="product-filter-form" action="{{url_for('product.sort')}}" method="post"
     class="flex flex-wrap py-4 gap-5 bg-white dark:bg-gray-800">
