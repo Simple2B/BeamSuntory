@@ -1,7 +1,7 @@
 <!-- prettier-ignore -->
 {% extends 'base.html' %}
 {% block content %}
-<div class="relative overflow-visible shadow-md sm:rounded-lg">
+<div class="relative overflow-visible shadow-md sm:rounded-lg overflow-x-auto">
 
   <form id="product-filter-form" action="{{url_for('product.sort')}}" method="post"
     class="flex flex-wrap py-4 gap-5 bg-white dark:bg-gray-800">
@@ -62,7 +62,8 @@
       </div>
       {% endfor %}
     </div>
-    <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800">
+    <!-- TODO: uncomment when product master group filter will be changed to query filter params  -->
+    <!-- <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800">
       {% for master_group_search in master_groups_search %}
       <select id="countries"
         class="product-search-master-group- mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
@@ -72,10 +73,10 @@
         {% endfor %}
       </select>
       {% endfor %}
-    </div>
-    <div class="flex items-center space-x-2 sm:space-x-3">
+    </div> -->
+    <div class="flex items-center space-x-2 sm:space-x-3 flex-wrap">
       <button type="submit" id="product-filter-button" name="submit"
-        class="inline-flex items-center justify-center w-1/2 px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-blue-300 sm:w-auto dark:bg-yellow-400 dark:hover:bg-yellow-500 dark:focus:ring-blue-800">
+        class="inline-flex items-center justify-center  px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-blue-300 sm:w-auto dark:bg-yellow-400 dark:hover:bg-yellow-500 dark:focus:ring-blue-800">
         <svg class="w-3 h-3 mr-2 -ml-1" fill="currentColor" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
           <path fill-rule="evenodd"
             d="M137.4 41.4c12.5-12.5 32.8-12.5 45.3 0l128 128c9.2 9.2 11.9 22.9 6.9 34.9s-16.6 19.8-29.6 19.8H32c-12.9 0-24.6-7.8-29.6-19.8s-2.2-25.7 6.9-34.9l128-128zm0 429.3l-128-128c-9.2-9.2-11.9-22.9-6.9-34.9s16.6-19.8 29.6-19.8H288c12.9 0 24.6 7.8 29.6 19.8s2.2 25.7-6.9 34.9l-128 128c-12.5 12.5-32.8 12.5-45.3 0z"
@@ -101,7 +102,7 @@
       </label>
     </div>
   </form>
-  <div class="flex items-center justify-center py-4 bg-white dark:bg-gray-800">
+  <div class="flex items-center justify-center py-4 bg-white dark:bg-gray-800 flex-wrap gap-4">
     <label for="table-search" class="sr-only">Search</label>
     <div class="relative">
       <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -138,7 +139,7 @@
         fill="none" viewBox="0 0 10 6">
         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4" />
       </svg></button>
-    <div id="dropdownBgHover" class="z-10 hidden w-48 bg-white rounded-lg shadow dark:bg-gray-700">
+    <div id="dropdownBgHover" class="z-50 hidden w-48 bg-white rounded-lg shadow dark:bg-gray-700">
       <ul class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownBgHoverButton">
         {% for master_group in master_group_product_name %}
         {% set master_group_no_space = master_group.replace(' ', '_') %}
@@ -158,7 +159,7 @@
     </div>
     <div class="flex items-center ml-auto space-x-2 sm:space-x-3">
       <button type="button" data-target-groups="{{ mstr_prod_grps_prod_grps_names }}"
-        class="product-add-button inline-flex items-center justify-center w-1/2 px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 sm:w-auto dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+        class="product-add-button inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 sm:w-auto dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
         <svg class="w-4 h-4 mr-3 -ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
           <path fill-rule="evenodd"
             d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
@@ -171,23 +172,23 @@
   </div>
   <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-      <tr>
-        <th scope="col" class="px-6 py-3">#</th>
-        <th scope="col" class="px-6 py-3">Image</th>
-        <th scope="col" class="px-6 py-3">Name</th>
-        <th scope="col" class="px-6 py-3">SKU</th>
-        <th id="product-table-th-product-type" scope="col" class="px-6 py-3" >Description</th>
-        <th scope="col" class="px-6 py-3 max-width-100">Currency</th>
-        <th scope="col" class="px-6 py-3 max-width-100">Regular price</th>
-        <th scope="col" class="px-6 py-3 max-width-100">Retail price</th>
-        <th scope="col" class="px-6 py-3 max-width-100">Available Qty</th>
-        <th scope="col" class="px-6 py-3 text-center">Actions</th>
+      <tr id="product-table-header-tr">
+        <th scope="col" class="product-table-header-item px-6 py-3">#</th>
+        <th scope="col" class="product-table-header-item px-6 py-3">Image</th>
+        <th scope="col" class="product-table-header-item px-6 py-3">Name</th>
+        <th scope="col" class="product-table-header-item px-6 py-3">SKU</th>
+        <th scope="col" id="product-table-th-product-type" class="product-table-header-item px-6 py-3">Description</th>
+        <th scope="col" class="product-table-header-item px-6 py-3 max-width-100">Regular price</th>
+        <th scope="col" class="product-table-header-item px-6 py-3 max-width-100">Retail price</th>
+        <th scope="col" class="product-table-header-item px-6 py-3 max-width-100">Available Qty</th>
+        <th scope="col" class="product-table-header-item px-6 py-3 text-center">Actions</th>
       </tr>
     </thead>
     <tbody>
       {% for product in products %}
       <tr
-        class="table-product-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+        class="table-product-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+        data-target-product-sku="{{ product.SKU }}">
         <td class="w-4 p-4">
           <div class="flex items-center">
             {{ loop.index + page.skip }}
@@ -221,11 +222,6 @@
         </td>
         <td class="text-base font-normal text-gray-900  dark:text-white max-width-100">
           <div class="pl-3">
-            <div class="text-sm">{{ product.currency.name }}</div>
-          </div>
-        </td>
-        <td class="text-base font-normal text-gray-900  dark:text-white max-width-100">
-          <div class="pl-3">
             <div class="text-sm">{{ product.regular_price }}</div>
           </div>
         </td>
@@ -241,7 +237,8 @@
           </div>
         </td>
         <td class=" space-x-2 flex gap-2 flex-wrap justify-center py-3">
-          <button type="button" data-target="{{product.json}}" class="product-adjust-button inline-flex items-center w-24 px-3 py-2 text-sm font-medium text-center text-white rounded-lgfocus:outline-none bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 rounded-lg dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+          <button type="button" data-target="{{product.json}}"
+            class="product-adjust-button inline-flex items-center w-24 px-3 py-2 text-sm font-medium text-center text-white rounded-lgfocus:outline-none bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 rounded-lg dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
               <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>

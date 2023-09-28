@@ -42,7 +42,7 @@ class Product(CustomBase):
     numb_of_items_per_case: int | None = Field(alias="numbOfItemsPerCase")
     numb_of_cases_per_outer_case: int | None = Field(alias="numbOfCasesPerOuterCase")
     warehouses: list[Warehouse]
-    warehouse_products: list[WarehouseProduct]
+    warehouse_products: list[WarehouseProduct] = Field(alias="warehouseProducts")
     comments: str | None
     notes_location: str | None
     # shipping

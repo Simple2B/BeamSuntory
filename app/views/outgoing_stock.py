@@ -137,6 +137,17 @@ def save():
 
         products = json.loads(form_edit.products.data)
 
+        report_inventory_list = m.ReportInventoryList(
+            type="Ship Request Dispatched",
+            # TODO who sholud be responsible for change?
+            # one who created inbound order?
+            # or one who accepted it?
+            user_id=current_user.id,
+            ship_request=sr,
+            store=sr.store,
+        )
+        report_inventory_list.save(False)
+
         if not products:
             log(log.ERROR, "No products in ship request: [%s]", form_edit.products.data)
             flash("Cannot save item data", "danger")
@@ -181,7 +192,9 @@ def save():
 
         carts: list[m.Cart] = db.session.scalars(
             m.Cart.select().where(
-                m.Cart.user_id == current_user.id,
+                # TODO do we need this check? Because current_user here is warehouse manager
+                # BUT current_user at Cart creation is user who created cart
+                # m.Cart.user_id == current_user.id,
                 m.Cart.status == "submitted",
                 m.Cart.ship_request_id == ship_request.id,
             )
@@ -210,11 +223,21 @@ def save():
                 )
             )
             if warehouse_product and not is_group_in_master_group:
+                # TODO what if warehouse product not found?
+
                 warehouse_product.product_quantity -= cart.quantity
-                warehouse_product.save()
+                warehouse_product.save(False)
+                report_inventory = m.ReportInventory(
+                    qty_before=warehouse_product.product_quantity + cart.quantity,
+                    qty_after=warehouse_product.product_quantity,
+                    report_inventory_list_id=report_inventory_list.id,
+                    product_id=warehouse_product.product_id,
+                    warehouse_product=warehouse_product,
+                )
+                report_inventory.save(False)
 
             cart.status = "completed"
-            cart.save()
+            cart.save(False)
 
         ship_request.status = s.ShipRequestStatus.assigned
         db.session.commit()

@@ -10,7 +10,7 @@
         <!-- prettier-ignore -->
         <div class="flex items-center ml-auto space-x-2 sm:space-x-3">
             <a type="button" href="{{ url_for('product.get_all') }}"
-                class="inline-flex items-center justify-center w-1/2 px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 sm:w-auto dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                class="inline-flex items-center justify-center  px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 sm:w-auto dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                 <svg class="w-4 h-4 mr-3 -ml-1" fill="currentColor" viewBox="0 0 20 20"
                     xmlns="http://www.w3.org/2000/svg">
                     <path fill-rule="evenodd"
@@ -171,7 +171,7 @@
                 </div>
             </div>
             <div class="w-full flex gap-5">
-                <div class="w-1/2">
+                <div class="">
                     <label for="cart-store-request-category-select"
                         class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select Category</label>
                     <select type="text" name="store_category" id="cart-store-request-category-select"
@@ -201,7 +201,7 @@
                 {% endif %}
             </div>
             <div class="w-full flex gap-5" id="cart-store-container">
-                <div class="w-1/2">
+                <div class="">
                     <label for="cart-store-select"
                         class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select Store</label>
                     <select type="text" name="store" id="cart-store-select"

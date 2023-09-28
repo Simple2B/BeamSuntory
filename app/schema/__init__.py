@@ -17,7 +17,7 @@ from .ship_request import ShipRequest, ShipRequestStatus
 from .store import Store
 from .supplier import Supplier
 from .property import Property
-from .group_for_product import GroupProduct
+from .group_for_product import GroupProduct, GroupProductList
 from .master_group_for_product import MasterGroupProduct, ProductMasterGroupMandatory
 from .product_group import ProductGroup
 from .delivery_agent import DeliveryAgent
@@ -33,7 +33,8 @@ from .division import Division
 from .assign import Assign
 from .request_share import RequestShare
 from .store_category import StoreCategory
-from .adjust import Adjust
+from .adjust import Adjust, AdjustResponse, AdjustList
+from .adjust_group_quantity import AdjustGroupQty
 from .event import (
     Event,
     EventCSVOut,
@@ -48,6 +49,15 @@ from .report_event import (
     ReportEventResponse,
 )
 from .filter_report_events import FilterReportEvents
+from .report_inventory import (
+    ReportInventoryType,
+    ReportInventory,
+    ReportInventoryList,
+    ReportInventoryListArray,
+    ReportInventoryListResponse,
+)
+from .filter_report_inventories import FilterReportInventories
+from .filter_report_adjustments import FilterReportAdjustments
 from .filter_report_request_share import FilterRequestShare
 from .report_request_share import (
     ReportRequestShareType,
@@ -63,4 +73,10 @@ from .report_shipping import (
     ReportShipping,
     ReportShippingList,
     ReportShippingResponse,
+)
+from .filter_report_inbound_orders import FilterReportInboundOrder
+from .report_inbound_order import (
+    ReportInboundOrder,
+    ReportInboundOrderList,
+    ReportInboundOrderResponse,
 )

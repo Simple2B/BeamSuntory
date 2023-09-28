@@ -5,6 +5,11 @@ import { IInboundOrderOut } from './inbound_order/types'
 // ----view modal----
 const $viewModalElement: HTMLElement = document.querySelector('#viewPickupInboundModal')
 
+const viewModalClosingButton: HTMLButtonElement = document.querySelector('#buttonClosingViewPickupInboundModal')
+viewModalClosingButton.addEventListener('click', () => {
+    viewModal.hide()
+})
+
 const viewModalOptions: ModalOptions = {
     placement: 'bottom-right',
     backdrop: 'dynamic',

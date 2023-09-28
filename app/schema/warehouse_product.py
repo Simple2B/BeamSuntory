@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict, Field
 from .warehouse import Warehouse
+from .group import Group
 
 
 class WarehouseProduct(BaseModel):
@@ -10,3 +11,4 @@ class WarehouseProduct(BaseModel):
     warehouse_id: int = Field(alias="warehouseId")
     product_quantity: int = Field(alias="productQuantity")
     warehouse: Warehouse
+    group: Group
