@@ -1,7 +1,7 @@
 <!-- prettier-ignore -->
 {% extends 'base.html' %}
 {% block content %}
-<div class="relative overflow-visible shadow-md sm:rounded-lg overflow-x-auto">
+<div class="relative overflow-visible shadow-md sm:rounded-lg">
 
   <form id="product-filter-form" action="{{url_for('product.sort')}}" method="post"
     class="flex flex-wrap py-4 gap-5 bg-white dark:bg-gray-800">
@@ -138,7 +138,7 @@
         fill="none" viewBox="0 0 10 6">
         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4" />
       </svg></button>
-    <div id="dropdownBgHover" class="z-10 hidden w-48 bg-white rounded-lg shadow dark:bg-gray-700">
+    <div id="dropdownBgHover" class="z-50 hidden w-48 bg-white rounded-lg shadow dark:bg-gray-700">
       <ul class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownBgHoverButton">
         {% for master_group in master_group_product_name %}
         {% set master_group_no_space = master_group.replace(' ', '_') %}
@@ -171,23 +171,24 @@
   </div>
   <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-      <tr>
-        <th scope="col" class="px-6 py-3">#</th>
-        <th scope="col" class="px-6 py-3">Image</th>
-        <th scope="col" class="px-6 py-3">Name</th>
-        <th scope="col" class="px-6 py-3">SKU</th>
-        <th id="product-table-th-product-type" scope="col" class="px-6 py-3" >Description</th>
-        <th scope="col" class="px-6 py-3 max-width-100">Currency</th>
-        <th scope="col" class="px-6 py-3 max-width-100">Regular price</th>
-        <th scope="col" class="px-6 py-3 max-width-100">Retail price</th>
-        <th scope="col" class="px-6 py-3 max-width-100">Available Qty</th>
-        <th scope="col" class="px-6 py-3 text-center">Actions</th>
+      <tr id="product-table-header-tr">
+        <th scope="col" class="product-table-header-item px-6 py-3">#</th>
+        <th scope="col" class="product-table-header-item px-6 py-3">Image</th>
+        <th scope="col" class="product-table-header-item px-6 py-3">Name</th>
+        <th scope="col" class="product-table-header-item px-6 py-3">SKU</th>
+        <th scope="col" id="product-table-th-product-type" class="product-table-header-item px-6 py-3">Description</th>
+        <th scope="col" class="product-table-header-item px-6 py-3 max-width-100">Currency</th>
+        <th scope="col" class="product-table-header-item px-6 py-3 max-width-100">Regular price</th>
+        <th scope="col" class="product-table-header-item px-6 py-3 max-width-100">Retail price</th>
+        <th scope="col" class="product-table-header-item px-6 py-3 max-width-100">Available Qty</th>
+        <th scope="col" class="product-table-header-item px-6 py-3 text-center">Actions</th>
       </tr>
     </thead>
     <tbody>
       {% for product in products %}
       <tr
-        class="table-product-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+        class="table-product-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+        data-target-product-sku="{{ product.SKU }}">
         <td class="w-4 p-4">
           <div class="flex items-center">
             {{ loop.index + page.skip }}
@@ -241,7 +242,8 @@
           </div>
         </td>
         <td class=" space-x-2 flex gap-2 flex-wrap justify-center py-3">
-          <button type="button" data-target="{{product.json}}" class="product-adjust-button inline-flex items-center w-24 px-3 py-2 text-sm font-medium text-center text-white rounded-lgfocus:outline-none bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 rounded-lg dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+          <button type="button" data-target="{{product.json}}"
+            class="product-adjust-button inline-flex items-center w-24 px-3 py-2 text-sm font-medium text-center text-white rounded-lgfocus:outline-none bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 rounded-lg dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
               <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
