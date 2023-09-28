@@ -85,7 +85,9 @@ def create():
         group.save()
 
         admin_users = db.session.scalars(
-            m.User.select().where(m.User.role == s.UserRole.ADMIN.value)
+            m.User.select().where(
+                m.User.role_obj.has(m.Division.role_name == s.UserRole.ADMIN.value)
+            )
         )
 
         for user in admin_users:
