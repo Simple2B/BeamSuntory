@@ -157,6 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const reportViewAction = document.getElementById('report-inbound-order-action') as HTMLDivElement
   const reportViewDate = document.getElementById('report-inbound-order-date') as HTMLDivElement
   const reportViewOrderTitle = document.getElementById('report-inbound-order-title') as HTMLDivElement
+  const reportViewHistory = document.getElementById('report-inbound-order-history') as HTMLDivElement
 
 
   // onload element with events-table id
@@ -170,6 +171,9 @@ document.addEventListener('DOMContentLoaded', () => {
         reportViewAction.innerHTML = reportInboundOrder.type
         reportViewDate.innerHTML = formatDate(reportInboundOrder.createdAt)
         reportViewOrderTitle.innerHTML = reportInboundOrder.inboundOrder.title
+
+        const history = reportInboundOrder.history.split(',').join('<br>') 
+        reportViewHistory.innerHTML = history
 
         const productList = reportInboundOrder.inboundOrder.productsAllocated  
          
