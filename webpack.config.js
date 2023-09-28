@@ -302,6 +302,16 @@ const reportAssignConfig = {
     },
 }
 
+const reportShipping = {
+    entry: {
+        main: './src/report_shipping.ts',
+    },
+    output: {
+        path: path.resolve(__dirname, './app/static'),
+        filename: 'js/report_shipping.js', // <--- Will be compiled to this single file
+    },
+}
+
 const configs = [
     baseConfig,
     userConfig,
@@ -332,6 +342,7 @@ const configs = [
     reportEventConfig,
     reportRequestShareConfig,
     reportAssignConfig,
+    reportShipping,
 ].map((conf) => merge(defaultConfig, conf))
 
 module.exports = configs

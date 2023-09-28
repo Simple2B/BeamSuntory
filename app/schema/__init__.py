@@ -56,4 +56,11 @@ from .report_request_share import (
     ReportRequestShareResponse,
 )
 from .filter_report_assigns import FilterReportAssign
+from .filter_report_shipping import FilterReportShipping
 from .report_assign import ReportAssignsResponse, ReportAssignList
+from .report_shipping import (
+    ReportShipRequestType,
+    ReportShipping,
+    ReportShippingList,
+    ReportShippingResponse,
+)

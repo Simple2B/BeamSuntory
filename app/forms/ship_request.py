@@ -3,6 +3,7 @@ from wtforms import (
     StringField,
     SubmitField,
     ValidationError,
+    IntegerField,
 )
 from wtforms.validators import DataRequired
 
@@ -11,9 +12,9 @@ from app import db
 
 
 class NewShipRequestForm(FlaskForm):
-    store_category = StringField("Store", [DataRequired()])
+    store_category = IntegerField("Store", [DataRequired()])
     order_type = StringField("Order Type")
-    store = StringField("Store", [DataRequired()])
+    store = IntegerField("Store", [DataRequired()])
     comment = StringField("Comment")
     event_date_range = StringField("Event Date Range")
     event_comment = StringField("Event Comment")

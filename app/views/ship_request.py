@@ -110,6 +110,7 @@ def create():
         log(log.ERROR, "Validation failed: [%s]", form_create.errors)
         return redirect(url_for("ship_request.get_all"))
     if form_create.validate_on_submit():
+        # TODO move into form validation
         event_date_range = form_create.event_date_range.data
         start_date = None
         end_date = None
@@ -130,24 +131,52 @@ def create():
                 )
                 return redirect(url_for("product.get_all"))
 
-        report_event = m.ReportEvent(
-            type=s.ReportEventType.created.value,
-            user=current_user,
-        )
+        # Check for store
+        store = db.session.get(m.Store, form_create.store.data)
+        if not store:
+            flash("Store not found", "danger")
+            log(
+                log.INFO,
+                "Store not found: [%s]",
+                form_create.store.data,
+            )
+            return redirect(url_for("product.get_all"))
 
+        # Check for store category
+        store_category = db.session.get(
+            m.StoreCategory, form_create.store_category.data
+        )
+        if not store_category:
+            flash("Store category not found", "danger")
+            log(
+                log.INFO,
+                "Store category not found: [%s]",
+                form_create.store_category.data,
+            )
+            return redirect(url_for("product.get_all"))
+
+        # Create ship request
         ship_request = m.ShipRequest(
-            order_numb=f"BEAM-DO{int(datetime.now().timestamp())}",
             # NOTE: what status is default?
+            # TODO make shiprequest status UPPERCASE (Enum)
             status=s.ShipRequestStatus.waiting_for_warehouse,
-            store_id=form_create.store.data,
-            store_category_id=int(form_create.store_category.data),
+            store=store,
+            store_category=store_category,
             comment=form_create.comment.data,
             # TODO: ask client about store_delivery
             order_type="store_delivery",
             user_id=current_user.id,
-            report_event=report_event,
         )
         ship_request.save(False)
+
+        # Create Report ship request
+        report_shipping = m.ReportShipping(
+            type=s.ReportShipRequestType.CREATED.value,
+            ship_request=ship_request,
+            user=current_user,
+        )
+
+        db.session.add(report_shipping)
 
         warehouse_event = db.session.scalar(
             m.Warehouse.select().where(
@@ -173,6 +202,11 @@ def create():
                 > 0
             )
             if event_date_range and is_group_in_master_group:
+                report_event = m.ReportEvent(
+                    # TODO make report event type UPPERCASE (Enum)
+                    type=s.ReportEventType.created.value,
+                    user=current_user,
+                )
                 # creation event
                 event = m.Event(
                     date_reserve_from=start_date - timedelta(days=5),
@@ -185,6 +219,7 @@ def create():
                     comment=form_create.event_comment.data,
                     user=current_user,
                 )
+                ship_request.report_event = report_event
                 db.session.add(event)
                 log(log.INFO, "Event added. Event: [%s]", event)
 
@@ -210,10 +245,10 @@ def create():
 @ship_request_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
 def delete(id: int):
-    sr: m.ShipRequest = db.session.scalar(
+    ship_request: m.ShipRequest = db.session.scalar(
         m.ShipRequest.select().where(m.ShipRequest.id == id)
     )
-    if not sr:
+    if not ship_request:
         log(log.INFO, "There is no ship request with id: [%s]", id)
         flash("There is no such ship request", "danger")
         return "no ship request", 404
@@ -221,11 +256,11 @@ def delete(id: int):
     delete_sr = sa.delete(m.ShipRequest).where(m.ShipRequest.id == id)
 
     ship_requests = db.session.execute(
-        m.Cart.select().where(m.Cart.ship_request_id == sr.id)
+        m.Cart.select().where(m.Cart.ship_request_id == ship_request.id)
     ).scalars()
 
     for sr in ship_requests:
-        db.session.delete(sr)
+        db.session.delete(ship_request)
 
     db.session.execute(delete_sr)
     db.session.commit()

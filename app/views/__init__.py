@@ -28,6 +28,7 @@ from .event import event_blueprint
 from .report_event import report_blueprint
 from .report_request_share import report_request_share_blueprint
 from .report_assign import report_assign_blueprint
+from .report_shipping import report_shipping_blueprint
 
 BLUEPRINTS = (
     main_blueprint,
@@ -59,4 +60,5 @@ BLUEPRINTS = (
     report_blueprint,
     report_request_share_blueprint,
     report_assign_blueprint,
+    report_shipping_blueprint,
 )

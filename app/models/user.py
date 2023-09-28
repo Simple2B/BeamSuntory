@@ -34,6 +34,13 @@ class User(db.Model, UserMixin, ModelMixin):
     __tablename__ = "users"
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
+
+    # Foreign keys
+    role: orm.Mapped[int] = orm.mapped_column(
+        sa.ForeignKey("divisions.id"), nullable=False
+    )
+
+    # Columns
     username: orm.Mapped[str] = orm.mapped_column(
         sa.String(64),
         unique=True,
@@ -62,10 +69,6 @@ class User(db.Model, UserMixin, ModelMixin):
     image: orm.Mapped[str] = orm.mapped_column(
         sa.String(255), nullable=True, default="png"
     )
-    role: orm.Mapped[int] = orm.mapped_column(
-        sa.ForeignKey("divisions.id"), nullable=False
-    )
-    role_obj: orm.Mapped[Division] = orm.relationship()
     country: orm.Mapped[str] = orm.mapped_column(
         sa.String(255),
         nullable=False,
@@ -89,6 +92,9 @@ class User(db.Model, UserMixin, ModelMixin):
     approval_permission: orm.Mapped[bool] = orm.mapped_column(sa.Boolean, default=False)
     sales_rep: orm.Mapped[bool] = orm.mapped_column(sa.Boolean, default=False)
     phone_number: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=True)
+
+    # Relations
+    role_obj: orm.Mapped[Division] = orm.relationship()
 
     @hybrid_property
     def password(self):

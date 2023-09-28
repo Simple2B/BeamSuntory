@@ -123,10 +123,10 @@ def get_all():
 def save():
     form_edit: f.ShipRequestForm = f.ShipRequestForm()
     if form_edit.validate_on_submit():
-        sr: m.ShipRequest = db.session.get(
+        ship_request: m.ShipRequest = db.session.get(
             m.ShipRequest, form_edit.ship_request_id.data
         )
-        if not sr:
+        if not ship_request:
             log(
                 log.ERROR,
                 "Not found ship request item by id : [%s]",
@@ -143,11 +143,20 @@ def save():
             return redirect(url_for("outgoing_stock.get_all"))
 
         for product in products:
+            warehouse: m.Warehouse | None = db.session.get(
+                m.Warehouse,
+                product["warehouse_id"],
+            )
+            if not warehouse:
+                log(log.ERROR, "Warehouse not found: [%s]", product["warehouse_id"])
+                flash("Warehouse not found", "danger")
+                return redirect(url_for("outgoing_stock.get_all"))
+
             cart: m.Cart = db.session.scalar(
                 m.Cart.select().where(
                     m.Cart.product_id == int(product["product_id"]),
                     m.Cart.group == product["group_name"],
-                    m.Cart.ship_request_id == sr.id,
+                    m.Cart.ship_request_id == ship_request.id,
                     m.Cart.quantity == int(product["quantity"]),
                 )
             )
@@ -155,14 +164,26 @@ def save():
                 cart.warehouse_id = product["warehouse_id"]
                 cart.save(False)
                 log(log.INFO, "Cart warehouse_id updated. Cart item: [%s]", cart)
+            if not cart:
+                log(log.ERROR, "Cart not found")
+                flash("Cannot save item data", "danger")
+                return redirect(url_for("outgoing_stock.get_all"))
 
-        sr.wm_notes = form_edit.wm_notes.data
+            report_shipping = m.ReportShipping(
+                type=s.ReportShipRequestType.ACCEPTED.value,
+                ship_request=ship_request,
+                user=current_user,
+                history=f"{warehouse.name}: {product['quantity']}",
+            )
+            db.session.add(report_shipping)
+
+        ship_request.wm_notes = form_edit.wm_notes.data
 
         carts: list[m.Cart] = db.session.scalars(
             m.Cart.select().where(
                 m.Cart.user_id == current_user.id,
                 m.Cart.status == "submitted",
-                m.Cart.ship_request_id == sr.id,
+                m.Cart.ship_request_id == ship_request.id,
             )
         )
 
@@ -181,13 +202,13 @@ def save():
             cart_user_group: m.Group = db.session.execute(
                 m.Group.select().where(m.Group.name == cart.group)
             ).scalar()
-            warehouse_product: m.WarehouseProduct = db.session.execute(
+            warehouse_product: m.WarehouseProduct = db.session.scalar(
                 m.WarehouseProduct.select().where(
                     m.WarehouseProduct.product_id == cart.product_id,
                     m.WarehouseProduct.warehouse_id == cart.warehouse_id,
                     m.WarehouseProduct.group_id == cart_user_group.id,
                 )
-            ).scalar()
+            )
             if warehouse_product and not is_group_in_master_group:
                 warehouse_product.product_quantity -= cart.quantity
                 warehouse_product.save()
@@ -195,11 +216,14 @@ def save():
             cart.status = "completed"
             cart.save()
 
-        sr.status = s.ShipRequestStatus.assigned
-        sr.save(False)
+        ship_request.status = s.ShipRequestStatus.assigned
         db.session.commit()
 
-        log(log.INFO, "Ship Request saved and dispatched. Ship Request: [%s]", sr)
+        log(
+            log.INFO,
+            "Ship Request saved and dispatched. Ship Request: [%s]",
+            ship_request,
+        )
         flash("Ship Request dispatched!", "success")
 
         if form_edit.next_url.data:

@@ -18,6 +18,7 @@ interface ICart {
     quantity: number;
     event?: IEvent;
     warehouse?: IWarehouse;
+    status: string;
 }
 export interface IShipRequest {
     id: number;
