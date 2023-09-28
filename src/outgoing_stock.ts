@@ -19,11 +19,12 @@ interface IStore {
   zip: string;
 }
 interface ICart {
-  product: IProduct;
-  group: string;
-  quantity: number;
-  event?: IEvent;
-  warehouse?: IWarehouse;
+  product: IProduct
+  group: string
+  quantity: number
+  event?: IEvent
+  warehouse?: IWarehouse
+  status: string
 }
 
 export interface IShipRequest {
