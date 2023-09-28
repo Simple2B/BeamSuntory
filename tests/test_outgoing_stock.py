@@ -108,7 +108,7 @@ def test_edit_outgoing_stock(mg_g_populate: FlaskClient):
             order_type="test type",
             store=1,
             quantity=1,
-            products='[{"product_id": "1", "group_name": "test group", "quantity": "1", "warehouse_id": "1"}]',
+            products='[{"product_id": "1", "group_name": "Canada", "quantity": "100", "warehouse_id": "1"}]',
         ),
     )
     assert response.status_code == 302

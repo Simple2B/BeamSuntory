@@ -143,8 +143,8 @@ def save():
             # one who created inbound order?
             # or one who accepted it?
             user_id=current_user.id,
-            ship_request=sr,
-            store=sr.store,
+            ship_request=ship_request,
+            store=ship_request.store,
         )
         report_inventory_list.save(False)
 

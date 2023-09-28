@@ -2,11 +2,9 @@ import sqlalchemy as sa
 
 from flask.testing import FlaskClient
 from http import HTTPStatus
-from bs4 import BeautifulSoup
 
 from app import db
 from app import models as m
-from app import schema as s
 
 from tests.utils import login
 

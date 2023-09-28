@@ -259,11 +259,11 @@ def delete(id: int):
         m.Cart.select().where(m.Cart.ship_request_id == ship_request.id)
     ).scalars()
 
-    for sr in ship_requests:
+    for ship_request in ship_requests:
         db.session.delete(ship_request)
 
     db.session.execute(delete_sr)
     db.session.commit()
-    log(log.INFO, "Ship Request deleted. Ship Request: [%s]", sr)
+    log(log.INFO, "Ship Request deleted. Ship Request: [%s]", ship_request)
     flash("Ship Request deleted!", "success")
     return "ok", 200
