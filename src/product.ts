@@ -80,7 +80,14 @@ interface IProductGroupMasterGroup {
 
 // global variable for mandatory event instance
 const eventCheckbox: HTMLInputElement = document.querySelector('#product-show-events-toggle-btn');
-const isEvent = eventCheckbox.checked;
+const eventStockOwnByMeCheckbox: HTMLInputElement = document.querySelector('#product-show-events-stocks-own-by-me-btn');
+
+// mark checkbox as checked if we are on event stock own by me route
+if (window.location.pathname + window.location.hash === '/product/events_stocks_owned_by_me') {
+  eventStockOwnByMeCheckbox.checked = true;
+}
+
+const isEvent = eventCheckbox.checked || eventStockOwnByMeCheckbox.checked;
 const eventsWarehouse = 'Warehouse Events';
 const eventMasterGroup = 'Events';
 const fiveDays = 5 * 24 * 60 * 60 * 1000;
@@ -434,7 +441,10 @@ let fetchedAmountByDate = [] as { date: string; quantity: number }[];
 
 async function getEventAvailableQuantity(product_id: number, group: string, calendarFilter: string[]) {
   const response = await fetch(
-    `/event/get_available_quantity?group_name=${group}&product_id=${product_id}&dates=${JSON.stringify(calendarFilter)}`
+    `/event/get_available_quantity?group_name=${group.replace(
+      '_',
+      ' '
+    )}&product_id=${product_id}&dates=${JSON.stringify(calendarFilter)}`
   );
   const data = await response.json();
   fetchedAmountByDate = data;
@@ -655,8 +665,8 @@ viewProductButtonElements.forEach((e) =>
 
     prodGroups.forEach((groupName) => {
       let isEqual = false;
-
       const mstrGroupName = product.mstr_groups_groups[groupName];
+
       if (product.current_user_groups.hasOwnProperty(mstrGroupName)) {
         const currentUserValue = product.current_user_groups[mstrGroupName];
         if (currentUserValue.includes(groupName)) {
@@ -982,8 +992,7 @@ function deleteShipAssignButton(nameGroup: string, nameGroupValue: string) {
 
 // function to add ship, assign, button to view product modal
 function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: string, productParam: IProduct) {
-  const eventCheckbox: HTMLInputElement = document.querySelector('#product-show-events-toggle-btn');
-  const isEvent = eventCheckbox.checked && masterGroup === eventMasterGroup;
+  const isEventItem = isEvent && masterGroup === eventMasterGroup;
   const groupUnderScore = group.replace(/ /g, '_');
   const groupProductIds = productParam.groups_ids;
   const productTypeContainer = document.querySelector(`#product-view-product-name-container`);
@@ -1022,7 +1031,7 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
         </button>
         </div>
     `;
-  isEvent
+  isEventItem
     ? (shipAssignContainer.innerHTML = bookingContainerDiv)
     : (shipAssignContainer.innerHTML = shipAssignContainerDiv);
   const shareContainer = document.createElement('div');
@@ -1061,7 +1070,7 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
     productTypeContainer.parentNode.insertBefore(shareContainer, productTypeContainer.nextSibling);
   }
 
-  if (isEvent) {
+  if (isEventItem) {
     const bookingButtons = document.querySelectorAll('.booking-product-button');
     bookingButtons.forEach((e) =>
       e.addEventListener('click', () => {
@@ -1673,6 +1682,47 @@ showProductByUserGroupCheckbox.addEventListener('change', async () => {
   if (showProductByUserGroupCheckbox.checked) {
     try {
       const response = await fetch('/product/stocks_owned_by_me', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (response.status === 200) {
+        window.location.href = response.url;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  } else {
+    try {
+      const response = await fetch(`/product/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (response.status === 200) {
+        window.location.href = response.url;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+});
+
+// ----product events show stocks own by me----
+const showEventsProductByUserGroupCheckbox: HTMLInputElement = document.querySelector(
+  '#product-show-events-stocks-own-by-me-btn'
+);
+if (window.location.pathname + window.location.hash === '/product/events_stocks_owned_by_me') {
+  window.onload = (event) => {
+    showEventsProductByUserGroupCheckbox.setAttribute('checked', 'checked');
+  };
+}
+showEventsProductByUserGroupCheckbox.addEventListener('change', async () => {
+  if (showEventsProductByUserGroupCheckbox.checked) {
+    try {
+      const response = await fetch('/product/events_stocks_owned_by_me', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
