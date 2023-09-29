@@ -10,6 +10,7 @@ export interface ISupplier {
     id: number;
     name: string;
     address: string;
+    contact_number: string;
 }
 export interface IWarehouse {
     id: number;
@@ -23,6 +24,8 @@ export interface IProduct {
     regularPrice?: number;
     retailPrice?: number;
     warehouseProducts?: IWarehouseProduct[];
+    supplier: ISupplier;
+    warehouses: IWarehouse[];
 }
 export interface IWarehouseProduct {
     id: number;
