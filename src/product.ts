@@ -997,6 +997,7 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
   const groupProductIds = productParam.groups_ids;
   const productTypeContainer = document.querySelector(`#product-view-product-name-container`);
   const shipAssignContainer = document.createElement('div');
+
   shipAssignContainer.classList.add('sm:col-span-3', 'flex', 'gap-4');
   shipAssignContainer.setAttribute('id', `product-ship-assign-share-container-${masterGroup.replace(/ /g, '_')}`);
   const shipAssignContainerDiv = `
@@ -1018,6 +1019,7 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
       </button>
     </div>
   `;
+
   const bookingContainerDiv = `
         <div>
         <label for="product_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Action</label >
@@ -1034,7 +1036,9 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
   isEventItem
     ? (shipAssignContainer.innerHTML = bookingContainerDiv)
     : (shipAssignContainer.innerHTML = shipAssignContainerDiv);
+
   const shareContainer = document.createElement('div');
+
   const shipProductBtn = shipAssignContainer.querySelector(`#ship-product-button-${groupUnderScore}`);
   const assignProductBtn = shipAssignContainer.querySelector(`#assign-product-button-${groupUnderScore}`);
 
@@ -1059,8 +1063,11 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
   const shareProductBtn = shareContainer.querySelector(`#share-product-button-${groupUnderScore}`);
 
   if (productParam.available_quantity[group] === 0 || !productParam.available_quantity[group]) {
-    shipProductBtn.classList.add('invisible');
-    assignProductBtn.classList.add('invisible');
+    if (shipProductBtn && assignProductBtn) {
+      shipProductBtn.classList.add('invisible');
+      assignProductBtn.classList.add('invisible');
+    }
+    // TODO: Ask client about share request when === 0
     shareProductBtn.classList.add('invisible');
   }
 

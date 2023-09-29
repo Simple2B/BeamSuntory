@@ -42,6 +42,7 @@ class ReportInventory(db.Model, ModelMixin):
     # Relationships
     product: orm.Mapped["Product"] = orm.relationship()
     warehouse_product: orm.Mapped["WarehouseProduct"] = orm.relationship()
+    report_inventory_list: orm.Mapped["ReportInventoryList"] = orm.relationship()
 
     @property
     def json(self):
