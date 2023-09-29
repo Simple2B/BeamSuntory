@@ -943,11 +943,6 @@ function booking(product: IProduct, group: string) {
 
             const span = dayContainerShadow.querySelector('.day-price') ?? document.createElement('span');
             span.className = 'day-price';
-
-            if(quantity <=0){
-              dayContainerShadow.classList.add('locked');
-            }
-
             span.innerHTML = quantity.toString();
             dayContainerShadow.append(span);
           });
@@ -1043,7 +1038,6 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
     : (shipAssignContainer.innerHTML = shipAssignContainerDiv);
 
   const shareContainer = document.createElement('div');
-
   const shipProductBtn = shipAssignContainer.querySelector(`#ship-product-button-${groupUnderScore}`);
   const assignProductBtn = shipAssignContainer.querySelector(`#assign-product-button-${groupUnderScore}`);
 
@@ -1259,7 +1253,6 @@ function createAdjustAction(isEqual: boolean, masterGroup: string, group: string
     <div>
       <label for="adjust-product-quantity-${groupUnderScore}" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available</label>
         <input id="adjust-product-quantity-${groupUnderScore}"
-          type="number" min="0" 
           class="product-adjust-group-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
     </div>
 
@@ -1344,19 +1337,6 @@ adjustButton.addEventListener('click', () => {
 async function adjustProduct(productParam: IProduct, csrfToken: string) {
   const adjustNote: HTMLInputElement = document.querySelector('#product-adjust-note');
   const productInWarehouses = JSON.parse(sessionStorage.getItem('productInWarehouses'));
-
-  const adjustQuantityInputs = document.querySelectorAll('.product-adjust-group-quantity');  
-  const quantities:string[] = [];
-  
-  adjustQuantityInputs.forEach((quantityInput: HTMLInputElement) => {
-      quantities.push(quantityInput.value);       
-  });
-
-  const isAllQuantitiesValid = quantities.every(quantity => parseInt(quantity) >= 0);
-  if(!isAllQuantitiesValid){
-    alert('Quantity must be greater than or equal to 0');
-    return
-  }
 
   const data = {
     product_id: productParam.id,
@@ -1697,17 +1677,10 @@ function clearProductGroupContainer() {
   const productGroupEditSelects = document.querySelectorAll('.product-group-edit-add-item');
 }
 
-// ----product show stocks own by me----
-const showProductByUserGroupCheckbox: HTMLInputElement = document.querySelector('#product-show-stocks-own-by-me-btn');
-if (window.location.pathname + window.location.hash === '/product/stocks_owned_by_me') {
-  window.onload = (event) => {
-    showProductByUserGroupCheckbox.setAttribute('checked', 'checked');
-  };
-}
-showProductByUserGroupCheckbox.addEventListener('change', async () => {
-  if (showProductByUserGroupCheckbox.checked) {
+async function getSortOwnByMe(checkbox: HTMLInputElement, sortRoute: string) {
+  if (checkbox.checked) {
     try {
-      const response = await fetch('/product/stocks_owned_by_me', {
+      const response = await fetch(`/product/${sortRoute}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -1734,6 +1707,17 @@ showProductByUserGroupCheckbox.addEventListener('change', async () => {
       console.log(error);
     }
   }
+}
+
+// ----product show stocks own by me----
+const showProductByUserGroupCheckbox: HTMLInputElement = document.querySelector('#product-show-stocks-own-by-me-btn');
+if (window.location.pathname + window.location.hash === '/product/stocks_owned_by_me') {
+  window.onload = (event) => {
+    showProductByUserGroupCheckbox.setAttribute('checked', 'checked');
+  };
+}
+showProductByUserGroupCheckbox.addEventListener('change', async () => {
+  getSortOwnByMe(showProductByUserGroupCheckbox, 'stocks_owned_by_me');
 });
 
 // ----product events show stocks own by me----
@@ -1746,35 +1730,7 @@ if (window.location.pathname + window.location.hash === '/product/events_stocks_
   };
 }
 showEventsProductByUserGroupCheckbox.addEventListener('change', async () => {
-  if (showEventsProductByUserGroupCheckbox.checked) {
-    try {
-      const response = await fetch('/product/events_stocks_owned_by_me', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (response.status === 200) {
-        window.location.href = response.url;
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  } else {
-    try {
-      const response = await fetch(`/product/`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (response.status === 200) {
-        window.location.href = response.url;
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  getSortOwnByMe(showEventsProductByUserGroupCheckbox, 'events_stocks_owned_by_me');
 });
 
 document.querySelector('#product-assign-master-group').addEventListener('change', () => {
