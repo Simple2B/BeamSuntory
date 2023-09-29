@@ -62,7 +62,7 @@ themeToggleButtons.forEach(function (themeToggleBtn) {
 
 //----auto hide toast----
 // target element that will be dismissed
-const $targetEl: HTMLElement = document.querySelector('[id^=toast-]')
+const $targetEl: HTMLElement = document.querySelector('[id^=toast-success]')
 
 // optional trigger element
 const $triggerEl: HTMLElement = document.getElementById('close-toast-btn')
