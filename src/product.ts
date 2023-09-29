@@ -933,6 +933,11 @@ function booking(product: IProduct, group: string) {
 
             const span = dayContainerShadow.querySelector('.day-price') ?? document.createElement('span');
             span.className = 'day-price';
+
+            if(quantity <=0){
+              dayContainerShadow.classList.add('locked');
+            }
+
             span.innerHTML = quantity.toString();
             dayContainerShadow.append(span);
           });
@@ -1238,6 +1243,7 @@ function createAdjustAction(isEqual: boolean, masterGroup: string, group: string
     <div>
       <label for="adjust-product-quantity-${groupUnderScore}" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available</label>
         <input id="adjust-product-quantity-${groupUnderScore}"
+          type="number" min="0" 
           class="product-adjust-group-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
     </div>
 
@@ -1322,6 +1328,19 @@ adjustButton.addEventListener('click', () => {
 async function adjustProduct(productParam: IProduct, csrfToken: string) {
   const adjustNote: HTMLInputElement = document.querySelector('#product-adjust-note');
   const productInWarehouses = JSON.parse(sessionStorage.getItem('productInWarehouses'));
+
+  const adjustQuantityInputs = document.querySelectorAll('.product-adjust-group-quantity');  
+  const quantities:string[] = [];
+  
+  adjustQuantityInputs.forEach((quantityInput: HTMLInputElement) => {
+      quantities.push(quantityInput.value);       
+  });
+
+  const isAllQuantitiesValid = quantities.every(quantity => parseInt(quantity) >= 0);
+  if(!isAllQuantitiesValid){
+    alert('Quantity must be greater than or equal to 0');
+    return
+  }
 
   const data = {
     product_id: productParam.id,
