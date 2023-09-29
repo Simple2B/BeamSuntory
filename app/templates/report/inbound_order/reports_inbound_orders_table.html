@@ -38,11 +38,24 @@
             <div class="text-base font-semibold">{{ report.created_at.strftime('%m/%d/%Y, %H:%M:%S') }}</div>
           </div>
         </td>
+        {% if report.history  %}
         <td scope="row" class="p-4 text-base font-normal text-gray-900 dark:text-white">
-          <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.history }}</div>
+          <div class="pl-3">  
+            {% if report.history.split(',')|length > 1 %}    
+              <div class="text-base font-semibold">{{ report.history.split(',')[0] }}...</div>          
+            {% else %}
+              <div class="text-base font-semibold">{{ report.history }}</div>
+            {% endif %}
           </div>
         </td>
+        {% else %}
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold"></div>
+          </div>
+        </td>
+        {% endif %}
+
         
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">

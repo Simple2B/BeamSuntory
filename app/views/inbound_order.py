@@ -342,19 +342,27 @@ def save():
                 )
 
         if inbound_order.status == s.InboundOrderStatus.assigned:
-            for allocated_product in inbound_order.products_allocated:
-                sumAllocatedQuantityGroups = sum(
+            for product_quantity_group in product_quantity_groups.root:
+                current_product_allocated_quantity = db.session.scalar(
+                    m.ProductAllocated.select().where(
+                        m.ProductAllocated.id
+                        == product_quantity_group.product_allocated_id
+                    )
+                ).quantity
+
+                sum_all_quantity_groups = sum(
                     [
-                        group.quantity
-                        for group in allocated_product.product_quantity_groups
+                        allocated_product.quantity
+                        for allocated_product in product_quantity_group.product_allocated_groups
                     ]
                 )
-                if allocated_product.quantity != sumAllocatedQuantityGroups:
+
+                if current_product_allocated_quantity != sum_all_quantity_groups:
                     log(
                         log.ERROR,
                         "Invalid quantity groups sum: [%s] needs: [%s]",
-                        sumAllocatedQuantityGroups,
-                        allocated_product.quantity,
+                        sum_all_quantity_groups,
+                        product_allocated.quantity,
                     )
                     flash(
                         "Allocated product quantity doesn't match groups total quantity",
