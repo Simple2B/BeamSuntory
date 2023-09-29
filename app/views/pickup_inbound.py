@@ -94,7 +94,22 @@ def pickup():
 
     inbound_order.status = s.InboundOrderStatus.in_transit
     inbound_order.da_notes = form_pickup.da_notes.data
-    inbound_order.save()
+    inbound_order.save(False)
+
+    report_skus: list[m.ReportSKU] = db.session.scalars(
+        m.ReportSKU.select().where(
+            m.ReportSKU.inbound_order_id == inbound_order.id,
+            m.ReportSKU.status == "Products allocated. Inbound order assigned.",
+        )
+    )
+    for report_sku in report_skus:
+        m.ReportSKU(
+            product_id=report_sku.product_id,
+            inbound_order=inbound_order,
+            type=s.ReportSKUType.inbound_order.value,
+            status="Inbound order in transit",
+        ).save(False)
+    db.session.commit()
 
     log(log.INFO, "Inbound order pickup done. Inbound order: [%s]", inbound_order)
     flash("Inbound order pickup done!", "success")
