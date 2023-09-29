@@ -11,7 +11,7 @@ interface ICart {
   product: IProduct;
 }
 
-interface IReportInventory {
+interface IReportSKU {
   qtyBefore: number;
   qtyAfter: number;
   product: IProduct;
@@ -19,7 +19,7 @@ interface IReportInventory {
   createdAt: string;
 }
 
-interface IReportInventoryList {
+interface IReportSKUList {
   type: string;
   user: IUser;
   createdAt: string;
@@ -27,7 +27,7 @@ interface IReportInventoryList {
   inbound_order: IInboundOrderBase;
   warehouse: IWarehouse;
   store: IStore;
-  reportInventories: IReportInventory[];
+  reportInventories: IReportSKU[];
 }
 
 interface IShipRequest {
@@ -61,7 +61,7 @@ interface IStore {
 
 interface IInventoriesReportResponse {
   pagination: IPagination;
-  reportInventoryList: IReportInventoryList[];
+  reportSKUList: IReportSKUList[];
 }
 
 // initialize htmx listener
@@ -82,18 +82,14 @@ const formatDate = (date: string) => {
 
 const downloadCSV = async function () {
   // Filters
-  const searchInventoryInput: HTMLInputElement = document.querySelector('#table-search-inventory');
-  const dateInventoryCreatedFromInput: HTMLInputElement = document.querySelector(
-    '#product-inventory-sort-created-from-datepicker'
-  );
-  const dateInventoryCreatedToInput: HTMLInputElement = document.querySelector(
-    '#product-inventory-sort-created-to-datepicker'
-  );
+  const searchSKUInput: HTMLInputElement = document.querySelector('#table-search-sku');
+  const dateSKUCreatedFromInput: HTMLInputElement = document.querySelector('#product-sku-sort-created-from-datepicker');
+  const dateSKUCreatedToInput: HTMLInputElement = document.querySelector('#product-sku-sort-created-to-datepicker');
 
   const filtersMap = {
-    q: searchInventoryInput,
-    created_from: dateInventoryCreatedFromInput,
-    created_to: dateInventoryCreatedToInput,
+    q: searchSKUInput,
+    created_from: dateSKUCreatedFromInput,
+    created_to: dateSKUCreatedToInput,
   };
 
   const filterQuery = [];
@@ -117,8 +113,8 @@ const downloadCSV = async function () {
     const res = await fetch(`${urlWithoutQueryParams}/${url}`);
     const data: IInventoriesReportResponse = await res.json();
 
-    data.reportInventoryList.forEach((reportInventories) => {
-      reportInventories.reportInventories.forEach((report: IReportInventory) => {
+    data.reportSKUList.forEach((reportInventories) => {
+      reportInventories.reportInventories.forEach((report: IReportSKU) => {
         let reportTarget;
         if (reportInventories.store) {
           reportTarget = reportInventories.store.storeName;
@@ -160,16 +156,16 @@ document.addEventListener('DOMContentLoaded', () => {
   );
   const buttonLoadInventoriesTable = document.querySelector('#table-report-loader') as HTMLButtonElement;
 
-  const tableRow = document.querySelectorAll('.table-inventory-item-tr');
+  const tableRow = document.querySelectorAll('.table-sku-item-tr');
   tableRow.forEach((row: HTMLDivElement) => {
-    const viewReportInventoriesModal = row.querySelector('.report-inventory-view-btn');
+    const viewReportInventoriesModal = row.querySelector('.report-sku-view-btn');
     const data = JSON.parse(viewReportInventoriesModal.getAttribute('data-target'));
     const reportStore = data.shipRequest.store.storeName;
-    const reportInventoryStoreDiv = row.querySelector('.report-inventory-store') as HTMLDivElement;
-    reportInventoryStoreDiv.innerHTML = reportStore;
+    const reportSKUStoreDiv = row.querySelector('.report-sku-store') as HTMLDivElement;
+    reportSKUStoreDiv.innerHTML = reportStore;
   });
 
-  const clearFilterButton = document.querySelector('#product-inventory-clear-button');
+  const clearFilterButton = document.querySelector('#product-sku-clear-button');
   clearFilterButton.addEventListener('click', () => {
     filtersHTML.forEach((filter) => {
       (filter as HTMLInputElement).value = '';
@@ -195,37 +191,37 @@ document.addEventListener('DOMContentLoaded', () => {
   const viewModal = new Modal(viewReportInventoriesModal, viewModalOptions);
   const reportViewProductTbody = document.querySelector('#table-products') as HTMLTableElement;
   const productItemTemplate = document.querySelector('#view-product-item-template') as HTMLTableRowElement;
-  const closingViewModalButton = document.querySelector('#button-closing-report-inventory-modal') as HTMLButtonElement;
+  const closingViewModalButton = document.querySelector('#button-closing-report-sku-modal') as HTMLButtonElement;
   closingViewModalButton.addEventListener('click', () => {
     viewModal.hide();
   });
 
   // view buttons click
-  const reportViewUser = document.getElementById('report-inventory-user') as HTMLDivElement;
-  const reportViewAction = document.getElementById('report-inventory-action') as HTMLDivElement;
-  const reportViewDate = document.getElementById('report-inventory-date') as HTMLDivElement;
+  const reportViewUser = document.getElementById('report-sku-user') as HTMLDivElement;
+  const reportViewAction = document.getElementById('report-sku-action') as HTMLDivElement;
+  const reportViewDate = document.getElementById('report-sku-date') as HTMLDivElement;
   const reportStoreName = document.getElementById('report-store-name') as HTMLDivElement;
 
   // onload element with inventories-table id
   htmxDispatcher.onLoad('inventories-table', (target) => {
-    const reportViewButtons: NodeListOf<HTMLButtonElement> = target.querySelectorAll('.report-inventory-view-btn');
+    const reportViewButtons: NodeListOf<HTMLButtonElement> = target.querySelectorAll('.report-sku-view-btn');
     reportViewButtons.forEach((btn) => {
       btn.addEventListener('click', () => {
-        const reportInventory: IReportInventoryList = JSON.parse(btn.getAttribute('data-target'));
+        const reportSKU: IReportSKUList = JSON.parse(btn.getAttribute('data-target'));
 
-        reportViewUser.innerHTML = reportInventory.user.username;
-        reportViewAction.innerHTML = reportInventory.type;
-        reportViewDate.innerHTML = formatDate(reportInventory.createdAt);
-        if (reportInventory.store) {
-          reportStoreName.innerHTML = reportInventory.store.storeName;
-        } else if (reportInventory.warehouse) {
-          reportStoreName.innerHTML = reportInventory.warehouse.name;
+        reportViewUser.innerHTML = reportSKU.user.username;
+        reportViewAction.innerHTML = reportSKU.type;
+        reportViewDate.innerHTML = formatDate(reportSKU.createdAt);
+        if (reportSKU.store) {
+          reportStoreName.innerHTML = reportSKU.store.storeName;
+        } else if (reportSKU.warehouse) {
+          reportStoreName.innerHTML = reportSKU.warehouse.name;
         } else {
           reportStoreName.innerHTML = 'Internal action';
         }
 
-        reportInventory.reportInventories.forEach((inventory, i) => {
-          // Render inventory
+        reportSKU.reportInventories.forEach((sku, i) => {
+          // Render sku
           const newProductItem = productItemTemplate.cloneNode(true) as HTMLElement;
           newProductItem.removeAttribute('id');
           newProductItem.classList.remove('hidden');
@@ -245,41 +241,41 @@ document.addEventListener('DOMContentLoaded', () => {
           const productWarehouse = newProductItem.querySelector('.product-warehouse') as HTMLDivElement;
           const img: HTMLImageElement = newProductItem.querySelector('.product-image');
 
-          inventory.product.image.length > 100
-            ? (img.src = `data:image/png;base64, ${inventory.product.image}`)
+          sku.product.image.length > 100
+            ? (img.src = `data:image/png;base64, ${sku.product.image}`)
             : (img.src = defaultBrandImage);
 
           productIndex.innerHTML = (i + 1).toString();
-          productName.innerHTML = inventory.product.name;
-          productSku.innerHTML = inventory.product.SKU;
+          productName.innerHTML = sku.product.name;
+          productSku.innerHTML = sku.product.SKU;
 
           // TODO do we need to show price or qty or both?
-          // if (inventory.product.regularPrice) {
-          //   productRegularPrice.innerHTML = inventory.product.regularPrice.toString()
+          // if (sku.product.regularPrice) {
+          //   productRegularPrice.innerHTML = sku.product.regularPrice.toString()
           // } else {
           //   productRegularPrice.innerHTML = 'No price'
           //
           // }
 
-          // if (inventory.product.retailPrice) {
-          //   productRetailPrice.innerHTML = inventory.product.retailPrice.toString()
+          // if (sku.product.retailPrice) {
+          //   productRetailPrice.innerHTML = sku.product.retailPrice.toString()
           // } else {
           //   productRetailPrice.innerHTML = 'No price'
           // }
 
-          if (inventory.qtyBefore) {
-            productRegularPrice.innerHTML = inventory.qtyBefore.toString();
+          if (sku.qtyBefore) {
+            productRegularPrice.innerHTML = sku.qtyBefore.toString();
           } else {
             productRegularPrice.innerHTML = '0';
           }
 
-          if (inventory.qtyAfter) {
-            productRetailPrice.innerHTML = inventory.qtyAfter.toString();
+          if (sku.qtyAfter) {
+            productRetailPrice.innerHTML = sku.qtyAfter.toString();
           } else {
             productRetailPrice.innerHTML = '0';
           }
-          inventory.product.warehouseProducts.forEach((warehouseProduct) => {
-            if (warehouseProduct.id === inventory.warehouseProductId) {
+          sku.product.warehouseProducts.forEach((warehouseProduct) => {
+            if (warehouseProduct.id === sku.warehouseProductId) {
               productGroup.innerHTML = warehouseProduct.group.name;
               productWarehouse.innerHTML = warehouseProduct.warehouse.name;
             }

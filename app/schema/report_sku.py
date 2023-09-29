@@ -21,20 +21,24 @@ class ReportSKUType(Enum):
 
 class ReportSKU(BaseModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
-    qty_before: int = Field(alias="qtyBefore")
-    qty_after: int = Field(alias="qtyAfter")
+    qty_before: int | None = Field(alias="qtyBefore", default=None)
+    qty_after: int | None = Field(alias="qtyAfter", default=None)
     type: str
     status: str
     created_at: datetime = Field(alias="createdAt")
 
     # Relationships
-    product: Product
-    inbound_orders: list[InboundOrder] = Field(alias="inboundOrders")
-    ship_requests: list[ShipRequest] = Field(alias="shipRequests")
-    adjustments: list[Adjust]
-    assigns: list[Assign]
-    shares: list[RequestShare] = Field(alias="shareRequests")
-    warehouse_products: list[WarehouseProduct] = Field(alias="warehouseProducts")
+    product: Product | None = None
+    inbound_orders: list[InboundOrder] | None = Field(
+        alias="inboundOrders", default=None
+    )
+    ship_requests: list[ShipRequest] | None = Field(alias="shipRequests", default=None)
+    adjustments: list[Adjust] | None = None
+    assigns: list[Assign] | None = None
+    shares: list[RequestShare] | None = Field(alias="shareRequests", default=None)
+    warehouse_products: list[WarehouseProduct] | None = Field(
+        alias="warehouseProducts", default=None
+    )
 
 
 class ReportSKUResponse(BaseModel):
