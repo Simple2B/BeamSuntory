@@ -80,3 +80,4 @@ from .report_inbound_order import (
     ReportInboundOrderList,
     ReportInboundOrderResponse,
 )
+from .report_sku import ReportSKU, ReportSKUList, ReportSKUResponse, ReportSKUType
