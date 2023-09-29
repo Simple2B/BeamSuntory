@@ -103,11 +103,11 @@ const downloadCSV = async function () {
   const queryTail = filterQuery ? filterQuery.join('&') : '' ;
 
   for (let page = 1; page <= pages; page++) {
-    const currentURL = window.location.href;
+    const currentURL = window.location.href.replace(/#/g, '').replace(/#/g, '').replace(/#/g, '');
     const url = [`api?page=${page}`, queryTail].join('&');
     const res = await fetch(`${currentURL}/${url}`);
     const data: IEventsReportResponse = await res.json();
-
+    
     data.report_events.forEach((reportEvent) => {
       reportEvent.shipRequest.carts.forEach((cart: IProductEvent) => {
         csvData.push(
@@ -116,8 +116,8 @@ const downloadCSV = async function () {
             reportEvent.shipRequest.store.storeName,
             reportEvent.type,
             reportEvent.user.username,
-            cart.event.dateFrom,
-            cart.event.dateTo,
+            cart.event ? cart.event.dateFrom: '',
+            cart.event ? cart.event.dateTo: '',
             cart.product.SKU,
             cart.product.name,
           ].join(',')

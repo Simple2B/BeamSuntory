@@ -68,7 +68,7 @@ const downloadCSV = async function () {
   const queryTail = filterQuery.join('&');
 
   for (let page = 1; page <= pages; page++) {
-    const currentURL = window.location.href;
+    const currentURL = window.location.href.replace(/#/g, '');
     const urlWithoutQueryParams = currentURL.split('?')[0];
     const url = [`api?page=${page}`, queryTail].join('&');
     const res = await fetch(`${urlWithoutQueryParams}/${url}`);

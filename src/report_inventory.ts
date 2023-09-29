@@ -107,7 +107,7 @@ const downloadCSV = async function () {
   const queryTail = filterQuery ? filterQuery.join('&') : '';
 
   for (let page = 1; page <= pages; page++) {
-    const currentURL = window.location.href;
+    const currentURL = window.location.href.replace(/#/g, '');
     const urlWithoutQueryParams = currentURL.split('?')[0];
     // TODO do we need to loads only one page csv???
     // const url = [`api?page=${page}`, queryTail].join('&')
