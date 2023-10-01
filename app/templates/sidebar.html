@@ -379,7 +379,7 @@
           >
             <li>
               <!-- prettier-ignore -->
-              <a href="{{ url_for('report.events') }}"
+              <a href="{{ url_for('report_events.events') }}"
                 class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
                 {% include "icon/circle.html" %}
                 <span class="flex-1 ml-4 whitespace-nowrap">Events</span>
@@ -448,6 +448,13 @@
               <a href="{{ url_for('report_shipping.index') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700" >
                 {% include "icon/circle.html" %}
                 <span class="flex-1 ml-4 whitespace-nowrap">Shipping</span>
+              </a>
+            </li>
+            <li>
+              <!-- prettier-ignore -->
+              <a href="{{ url_for('report.index') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700" >
+                {% include "icon/circle.html" %}
+                <span class="flex-1 ml-4 whitespace-nowrap">Reports all</span>
               </a>
             </li>
           </ul>
