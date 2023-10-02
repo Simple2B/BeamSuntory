@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from .ship_request import ShipRequest
     from .inbound_order import InboundOrder
     from .warehouse_product import WarehouseProduct
-    from .adjust import Adjust
+    from .adjusts_group_qty import AdjustGroupQty
     from .assign import Assign
     from .request_share import RequestShare
 
@@ -29,7 +29,7 @@ class ReportSKU(db.Model, ModelMixin):
         sa.ForeignKey("ship_requests.id"), nullable=True
     )
     adjustment_id: orm.Mapped[int] = orm.mapped_column(
-        sa.ForeignKey("adjusts.id"), nullable=True
+        sa.ForeignKey("adjusts_group_qty.id"), nullable=True
     )
     assign_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("assigns.id"), nullable=True
@@ -56,7 +56,7 @@ class ReportSKU(db.Model, ModelMixin):
     product: orm.Mapped["Product"] = orm.relationship()
     inbound_order: orm.Mapped["InboundOrder"] = orm.relationship()
     ship_request: orm.Mapped["ShipRequest"] = orm.relationship()
-    adjustment: orm.Mapped["Adjust"] = orm.relationship()
+    adjustment: orm.Mapped["AdjustGroupQty"] = orm.relationship()
     assign: orm.Mapped["Assign"] = orm.relationship()
     share: orm.Mapped["RequestShare"] = orm.relationship()
     warehouse_product: orm.Mapped["WarehouseProduct"] = orm.relationship()
