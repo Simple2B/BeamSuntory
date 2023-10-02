@@ -109,10 +109,7 @@ const downloadCSV = async function () {
   for (let page = 1; page <= pages; page++) {
     const currentURL = window.location.href;
     const urlWithoutQueryParams = currentURL.split('?')[0];
-    // TODO do we need to loads only one page csv???
-    // const url = [`api?page=${page}`, queryTail].join('&')
-    // const url = ['api', queryTail].join('&')
-    const url = queryTail ? ['api', queryTail].join('?') : 'api';
+    const url = [`api?page=${page}`, queryTail].join('&');
 
     const res = await fetch(`${urlWithoutQueryParams}/${url}`);
     const data: IInventoriesReportResponse = await res.json();

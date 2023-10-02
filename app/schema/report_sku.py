@@ -36,8 +36,8 @@ class ReportSKU(BaseModel):
     adjustments: list[Adjust] | None = None
     assigns: list[Assign] | None = None
     shares: list[RequestShare] | None = Field(alias="shareRequests", default=None)
-    warehouse_products: list[WarehouseProduct] | None = Field(
-        alias="warehouseProducts", default=None
+    warehouse_product: WarehouseProduct | None = Field(
+        alias="warehouseProduct", default=None
     )
 
 

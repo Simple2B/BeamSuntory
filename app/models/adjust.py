@@ -26,7 +26,7 @@ class Adjust(db.Model, ModelMixin):
     # Relationships
     product: orm.Mapped[Product] = orm.relationship()
     user: orm.Mapped[User] = orm.relationship()
-    adjust_group_qty: orm.Mapped[AdjustGroupQty] = orm.relationship()
+    adjust_group_qty: orm.Mapped[list[AdjustGroupQty]] = orm.relationship()
 
     @property
     def json(self):
