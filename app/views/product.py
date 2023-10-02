@@ -567,6 +567,12 @@ def assign():
                 m.Group.name == form.from_group.data,
             )
         ).scalar()
+        form.group.data
+        product_to_group: m.Group = db.session.execute(
+            m.Group.select().where(
+                m.Group.name == form.group.data,
+            )
+        ).scalar()
         report_inventory_list = m.ReportInventoryList(
             type="Product Assigned",
             user_id=current_user.id,
@@ -621,13 +627,21 @@ def assign():
         )
         report_inventory.save(False)
 
-        m.Assign(
+        assign_obj = m.Assign(
             product_id=p.id,
             group_id=int(form.group.data),
             quantity=form.quantity.data,
             from_group_id=form.from_group_id.data,
             user_id=current_user.id,
             type=s.ReportEventType.created.value,
+        )
+        assign_obj.save(False)
+
+        m.ReportSKU(
+            product_id=new_product_warehouse.product_id,
+            assign=assign_obj,
+            type=s.ReportSKUType.assign.value,
+            status=f"Assigned from {product_from_group.name} to {product_to_group.name}",
         ).save(False)
 
         db.session.commit()
@@ -809,7 +823,18 @@ def adjust():
                             warehouse_product=product_warehouse,
                         ).save(False)
 
+                        m.ReportSKU(
+                            product_id=product_warehouse.product_id,
+                            adjust=adjust_gr_qty,
+                            type=s.ReportSKUType.adjustment.value,
+                            status="Adjusted quantity",
+                            qty_after=quantity,
+                            qty_before=product_warehouse.product_quantity,
+                            warehouse_product=product_warehouse,
+                        ).save(False)
+
                         is_adjust_products = True
+
                     product_warehouse.product_quantity = quantity
                     db.session.add(product_warehouse)
                 else:
@@ -838,6 +863,16 @@ def adjust():
                         product_id=form.product_id.data,
                     )
                     db.session.add(adjust_gr_qty)
+
+                    m.ReportSKU(
+                        product_id=product_warehouse.product_id,
+                        adjust=adjust_gr_qty,
+                        type=s.ReportSKUType.adjustment.value,
+                        status="Adjusted quantity",
+                        qty_after=quantity,
+                        qty_before=0,
+                        warehouse_product=product_warehouse,
+                    ).save(False)
 
         if not is_adjust_products:
             db.session.delete(adjust_item)

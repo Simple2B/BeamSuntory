@@ -219,6 +219,14 @@ def share(id: int):
         warehouse_product=warehouse_to_prod,
     ).save(False)
 
+    m.ReportSKU(
+        product_id=request_share.product_id,
+        share=request_share,
+        type=s.ReportSKUType.share.value,
+        status=f"Assigned from {request_share.from_group_id} to {request_share.group_id}",
+        warehouse_product=warehouse_to_prod,
+    ).save(False)
+
     report_request_share = m.ReportRequestShare(
         type=s.ReportRequestShareType.SHARED.value,
         user=current_user,
