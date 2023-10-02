@@ -50,12 +50,12 @@ def get_pickup_inbound():
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
-    reports = db.session.scalars(
+    orders = db.session.scalars(
         query.offset((pagination.page - 1) * pagination.per_page).limit(
             pagination.per_page
         )
     )
-    return pagination, reports
+    return pagination, orders
 
 
 @pickup_inbound_blueprint.route("/", methods=["GET"])
