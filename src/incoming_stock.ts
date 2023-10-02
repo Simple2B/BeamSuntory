@@ -271,6 +271,19 @@ cancelOrderButtons.forEach((e) => {
 // ----submit form through hidden submit button----
 const inboundOrderSubmitButton: HTMLButtonElement = document.querySelector('#incoming-stock-submit-btn')
 
+const filterButton = document.querySelector('#incoming-stock-filter-button') as HTMLButtonElement;
+const orderFilterInputs = document.querySelectorAll('.incoming-stock-filter-input');
+const hiddenInput = document.querySelector('#sort_by') as HTMLInputElement;
+
+filterButton.addEventListener('click', () => {
+    orderFilterInputs.forEach((input: HTMLInputElement) => {    
+        if (input.checked && input.nextElementSibling.textContent.trim()!='Default Value') {            
+            hiddenInput.value = input.nextElementSibling.textContent.trim();
+        }        
+    })
+})
+
+
 document.addEventListener('DOMContentLoaded', () => {
     // ----accept goods---
     const acceptGoodsSubmitButton: HTMLButtonElement = document.querySelector('#incoming-stock-save-products-btn')
@@ -520,12 +533,3 @@ document.addEventListener('DOMContentLoaded', () => {
 //         </svg>`
 // }
 
-// orderFilterInputs.forEach((input: HTMLInputElement) => {
-//     const hiddenInput = document.querySelector('#sort_by') as HTMLInputElement
-//     input.addEventListener('change', () => {
-//         if (input.checked) {
-//             hiddenInput.value = input.value
-//             sessionStorage.setItem('sortByNameIncomingStock', JSON.stringify(input.value))
-//         }
-//     })
-// })
