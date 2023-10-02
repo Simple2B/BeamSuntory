@@ -230,6 +230,13 @@ def create():
 
                 cart.warehouse = warehouse_event
 
+            m.ReportSKU(
+                product_id=cart.product_id,
+                ship_request=ship_request,
+                type=s.ReportSKUType.ship_request.value,
+                status="Ship request created.",
+            ).save(False)
+
             cart.status = "submitted"
             cart.order_numb = ship_request.order_numb
             cart.ship_request_id = ship_request.id

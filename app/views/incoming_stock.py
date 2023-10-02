@@ -203,6 +203,7 @@ def accept():
                 inbound_order=inbound_order,
                 type=s.ReportSKUType.inbound_order.value,
                 status="Inbound order accepted",
+                warehouse_product=warehouse_product,
             ).save(False)
 
     inbound_order.status = s.InboundOrderStatus.delivered
