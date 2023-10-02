@@ -80,7 +80,14 @@ interface IProductGroupMasterGroup {
 
 // global variable for mandatory event instance
 const eventCheckbox: HTMLInputElement = document.querySelector('#product-show-events-toggle-btn');
-const isEvent = eventCheckbox.checked;
+const eventStockOwnByMeCheckbox: HTMLInputElement = document.querySelector('#product-show-events-stocks-own-by-me-btn');
+
+// mark checkbox as checked if we are on event stock own by me route
+if (window.location.pathname + window.location.hash === '/product/events_stocks_owned_by_me') {
+  eventStockOwnByMeCheckbox.checked = true;
+}
+
+const isEvent = eventCheckbox.checked || eventStockOwnByMeCheckbox.checked;
 const eventsWarehouse = 'Warehouse Events';
 const eventMasterGroup = 'Events';
 const fiveDays = 5 * 24 * 60 * 60 * 1000;
@@ -434,7 +441,10 @@ let fetchedAmountByDate = [] as { date: string; quantity: number }[];
 
 async function getEventAvailableQuantity(product_id: number, group: string, calendarFilter: string[]) {
   const response = await fetch(
-    `/event/get_available_quantity?group_name=${group}&product_id=${product_id}&dates=${JSON.stringify(calendarFilter)}`
+    `/event/get_available_quantity?group_name=${group.replace(
+      '_',
+      ' '
+    )}&product_id=${product_id}&dates=${JSON.stringify(calendarFilter)}`
   );
   const data = await response.json();
   fetchedAmountByDate = data;
@@ -655,8 +665,8 @@ viewProductButtonElements.forEach((e) =>
 
     prodGroups.forEach((groupName) => {
       let isEqual = false;
-
       const mstrGroupName = product.mstr_groups_groups[groupName];
+
       if (product.current_user_groups.hasOwnProperty(mstrGroupName)) {
         const currentUserValue = product.current_user_groups[mstrGroupName];
         if (currentUserValue.includes(groupName)) {
@@ -933,11 +943,6 @@ function booking(product: IProduct, group: string) {
 
             const span = dayContainerShadow.querySelector('.day-price') ?? document.createElement('span');
             span.className = 'day-price';
-
-            if(quantity <=0){
-              dayContainerShadow.classList.add('locked');
-            }
-
             span.innerHTML = quantity.toString();
             dayContainerShadow.append(span);
           });
@@ -987,12 +992,12 @@ function deleteShipAssignButton(nameGroup: string, nameGroupValue: string) {
 
 // function to add ship, assign, button to view product modal
 function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: string, productParam: IProduct) {
-  const eventCheckbox: HTMLInputElement = document.querySelector('#product-show-events-toggle-btn');
-  const isEvent = eventCheckbox.checked && masterGroup === eventMasterGroup;
+  const isEventItem = isEvent && masterGroup === eventMasterGroup;
   const groupUnderScore = group.replace(/ /g, '_');
   const groupProductIds = productParam.groups_ids;
   const productTypeContainer = document.querySelector(`#product-view-product-name-container`);
   const shipAssignContainer = document.createElement('div');
+
   shipAssignContainer.classList.add('sm:col-span-3', 'flex', 'gap-4');
   shipAssignContainer.setAttribute('id', `product-ship-assign-share-container-${masterGroup.replace(/ /g, '_')}`);
   const shipAssignContainerDiv = `
@@ -1014,6 +1019,7 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
       </button>
     </div>
   `;
+
   const bookingContainerDiv = `
         <div>
         <label for="product_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Action</label >
@@ -1027,9 +1033,10 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
         </button>
         </div>
     `;
-  isEvent
+  isEventItem
     ? (shipAssignContainer.innerHTML = bookingContainerDiv)
     : (shipAssignContainer.innerHTML = shipAssignContainerDiv);
+
   const shareContainer = document.createElement('div');
   const shipProductBtn = shipAssignContainer.querySelector(`#ship-product-button-${groupUnderScore}`);
   const assignProductBtn = shipAssignContainer.querySelector(`#assign-product-button-${groupUnderScore}`);
@@ -1055,8 +1062,11 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
   const shareProductBtn = shareContainer.querySelector(`#share-product-button-${groupUnderScore}`);
 
   if (productParam.available_quantity[group] === 0 || !productParam.available_quantity[group]) {
-    shipProductBtn.classList.add('invisible');
-    assignProductBtn.classList.add('invisible');
+    if (shipProductBtn && assignProductBtn) {
+      shipProductBtn.classList.add('invisible');
+      assignProductBtn.classList.add('invisible');
+    }
+    // TODO: Ask client about share request when === 0
     shareProductBtn.classList.add('invisible');
   }
 
@@ -1066,7 +1076,7 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
     productTypeContainer.parentNode.insertBefore(shareContainer, productTypeContainer.nextSibling);
   }
 
-  if (isEvent) {
+  if (isEventItem) {
     const bookingButtons = document.querySelectorAll('.booking-product-button');
     bookingButtons.forEach((e) =>
       e.addEventListener('click', () => {
@@ -1243,7 +1253,6 @@ function createAdjustAction(isEqual: boolean, masterGroup: string, group: string
     <div>
       <label for="adjust-product-quantity-${groupUnderScore}" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available</label>
         <input id="adjust-product-quantity-${groupUnderScore}"
-          type="number" min="0" 
           class="product-adjust-group-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
     </div>
 
@@ -1328,19 +1337,6 @@ adjustButton.addEventListener('click', () => {
 async function adjustProduct(productParam: IProduct, csrfToken: string) {
   const adjustNote: HTMLInputElement = document.querySelector('#product-adjust-note');
   const productInWarehouses = JSON.parse(sessionStorage.getItem('productInWarehouses'));
-
-  const adjustQuantityInputs = document.querySelectorAll('.product-adjust-group-quantity');  
-  const quantities:string[] = [];
-  
-  adjustQuantityInputs.forEach((quantityInput: HTMLInputElement) => {
-      quantities.push(quantityInput.value);       
-  });
-
-  const isAllQuantitiesValid = quantities.every(quantity => parseInt(quantity) >= 0);
-  if(!isAllQuantitiesValid){
-    alert('Quantity must be greater than or equal to 0');
-    return
-  }
 
   const data = {
     product_id: productParam.id,
@@ -1681,17 +1677,10 @@ function clearProductGroupContainer() {
   const productGroupEditSelects = document.querySelectorAll('.product-group-edit-add-item');
 }
 
-// ----product show stocks own by me----
-const showProductByUserGroupCheckbox: HTMLInputElement = document.querySelector('#product-show-stocks-own-by-me-btn');
-if (window.location.pathname + window.location.hash === '/product/stocks_owned_by_me') {
-  window.onload = (event) => {
-    showProductByUserGroupCheckbox.setAttribute('checked', 'checked');
-  };
-}
-showProductByUserGroupCheckbox.addEventListener('change', async () => {
-  if (showProductByUserGroupCheckbox.checked) {
+async function getSortOwnByMe(checkbox: HTMLInputElement, sortRoute: string) {
+  if (checkbox.checked) {
     try {
-      const response = await fetch('/product/stocks_owned_by_me', {
+      const response = await fetch(`/product/${sortRoute}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -1718,6 +1707,30 @@ showProductByUserGroupCheckbox.addEventListener('change', async () => {
       console.log(error);
     }
   }
+}
+
+// ----product show stocks own by me----
+const showProductByUserGroupCheckbox: HTMLInputElement = document.querySelector('#product-show-stocks-own-by-me-btn');
+if (window.location.pathname + window.location.hash === '/product/stocks_owned_by_me') {
+  window.onload = (event) => {
+    showProductByUserGroupCheckbox.setAttribute('checked', 'checked');
+  };
+}
+showProductByUserGroupCheckbox.addEventListener('change', async () => {
+  getSortOwnByMe(showProductByUserGroupCheckbox, 'stocks_owned_by_me');
+});
+
+// ----product events show stocks own by me----
+const showEventsProductByUserGroupCheckbox: HTMLInputElement = document.querySelector(
+  '#product-show-events-stocks-own-by-me-btn'
+);
+if (window.location.pathname + window.location.hash === '/product/events_stocks_owned_by_me') {
+  window.onload = (event) => {
+    showEventsProductByUserGroupCheckbox.setAttribute('checked', 'checked');
+  };
+}
+showEventsProductByUserGroupCheckbox.addEventListener('change', async () => {
+  getSortOwnByMe(showEventsProductByUserGroupCheckbox, 'events_stocks_owned_by_me');
 });
 
 document.querySelector('#product-assign-master-group').addEventListener('change', () => {

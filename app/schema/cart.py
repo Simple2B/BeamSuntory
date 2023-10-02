@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from .product import Product
 from .warehouse import Warehouse
 from .event import Event
+from .group import Group
 
 
 class Cart(BaseModel):
@@ -13,10 +14,9 @@ class Cart(BaseModel):
     id: int
     product_id: int = Field(alias="productId")
     status: str
-    group: str
+    group: Group
     quantity: int
     user_id: int = Field(alias="userId")
-    group: str
     product: Product
     warehouse: Warehouse | None = None
     event: Event | None = None
