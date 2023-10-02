@@ -1,6 +1,6 @@
 import { Modal } from 'flowbite'
 import type { ModalOptions, ModalInterface } from 'flowbite'
-import { IInboundOrderOut } from './inbound_order/types'
+import { IInboundOrderOut, IProductAllocatedBase } from './inbound_order/types'
 
 // ----view modal----
 const $viewModalElement: HTMLElement = document.querySelector('#viewPickupInboundModal')
@@ -84,6 +84,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const daNotesView: HTMLInputElement = document.querySelector('#pickup-inbound-view-da-notes')
     const pickupInboundButton: HTMLDivElement = document.querySelector('.pickup-inbound-btn')
 
+    const orderProductAllocatedBaseView: HTMLDivElement = document.querySelector('#product-allocated-container');
+    const orderProductContainerView: HTMLDivElement = document.querySelector('#pickup-inbound-product-container');
+
     buttonsOpenViewModal.forEach((button) => {
         button.addEventListener('click', () => {
             const inboundOrder: IInboundOrderOut = JSON.parse(button.getAttribute('data-target'))
@@ -99,6 +102,23 @@ document.addEventListener('DOMContentLoaded', () => {
             orderDeliveryDateView.innerHTML = inboundOrder.deliveryDate
             wmNotesView.value = inboundOrder.wmNotes
             daNotesView.value = inboundOrder.daNotes
+
+            inboundOrder.productsAllocated.forEach((productsAllocated) => {
+                const productAllocatedContainer = orderProductAllocatedBaseView.cloneNode(true) as HTMLDivElement;
+                productAllocatedContainer.classList.remove('hidden');
+                productAllocatedContainer.classList.add('grid');
+                 
+                const orderProductNamesView: HTMLDivElement = productAllocatedContainer.querySelector('#pickup-inbound-view-product-name');
+                const orderProductQuantitiesView: HTMLDivElement = productAllocatedContainer.querySelector('#pickup-inbound-view-product-quantity');
+                const orderProductSkuView: HTMLDivElement = productAllocatedContainer.querySelector('#pickup-inbound-view-product-sku');
+
+                orderProductNamesView.innerHTML = productsAllocated.product.name;
+                orderProductQuantitiesView.innerHTML = productsAllocated.quantity.toString();
+                orderProductSkuView.innerHTML = productsAllocated.product.SKU;
+                
+                orderProductContainerView.appendChild(productAllocatedContainer);                           
+            })
+            
 
             if (inboundOrder.status !== 'Assigned to pickup') {
                 pickupInboundButton.classList.add('invisible')
