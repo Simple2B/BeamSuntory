@@ -103,6 +103,11 @@ document.addEventListener('DOMContentLoaded', () => {
             wmNotesView.value = inboundOrder.wmNotes
             daNotesView.value = inboundOrder.daNotes
 
+            const previousProducts = orderProductContainerView.querySelectorAll('#product-allocated-container');
+            previousProducts.forEach((previousProduct) => {
+                previousProduct.remove();
+            })
+
             inboundOrder.productsAllocated.forEach((productsAllocated) => {
                 const productAllocatedContainer = orderProductAllocatedBaseView.cloneNode(true) as HTMLDivElement;
                 productAllocatedContainer.classList.remove('hidden');

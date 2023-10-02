@@ -293,6 +293,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const daNotesView: HTMLInputElement = document.querySelector('#incoming-stock-view-da-notes')
     const orderIdInput: HTMLInputElement = document.querySelector('#incoming-stock-edit-id')
 
+    const orderProductAllocatedBaseView: HTMLDivElement = document.querySelector('#product-allocated-container');
+    const orderProductContainerView: HTMLDivElement = document.querySelector('#incoming-stock-product-container');
+
     viewModalAcceptButton.addEventListener('click', (e: MouseEvent) => {
         const inboundOrder: IInboundOrderOut = JSON.parse(
             (e.currentTarget as HTMLButtonElement).getAttribute('data-target')
@@ -328,6 +331,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 viewModalAcceptButton.classList.remove('invisible')
                 viewModalAcceptButton.setAttribute('data-target', viewButton.getAttribute('data-target'))
             }
+            
+            const previousProducts = orderProductContainerView.querySelectorAll('#product-allocated-container');
+            previousProducts.forEach((previousProduct) => {
+                previousProduct.remove();
+            })
+
+            inboundOrder.productsAllocated.forEach((productsAllocated) => {                
+                const productAllocatedContainer = orderProductAllocatedBaseView.cloneNode(true) as HTMLDivElement;
+                productAllocatedContainer.classList.remove('hidden');
+                productAllocatedContainer.classList.add('grid');
+                 
+                const orderProductNamesView: HTMLDivElement = productAllocatedContainer.querySelector('#incoming-stock-view-product-name');
+                const orderProductQuantitiesView: HTMLDivElement = productAllocatedContainer.querySelector('#incoming-stock-view-product-quantity');
+                const orderProductSkuView: HTMLDivElement = productAllocatedContainer.querySelector('#incoming-stock-view-product-sku');
+
+                orderProductNamesView.innerHTML = productsAllocated.product.name;
+                orderProductQuantitiesView.innerHTML = productsAllocated.quantity.toString();
+                orderProductSkuView.innerHTML = productsAllocated.product.SKU;
+                
+                orderProductContainerView.appendChild(productAllocatedContainer);          
+            })
 
             viewModal.show()
         })
