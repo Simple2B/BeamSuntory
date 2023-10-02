@@ -156,14 +156,14 @@ document.addEventListener('DOMContentLoaded', () => {
   );
   const buttonLoadInventoriesTable = document.querySelector('#table-report-loader') as HTMLButtonElement;
 
-  const tableRow = document.querySelectorAll('.table-sku-item-tr');
-  tableRow.forEach((row: HTMLDivElement) => {
-    const viewReportInventoriesModal = row.querySelector('.report-sku-view-btn');
-    const data = JSON.parse(viewReportInventoriesModal.getAttribute('data-target'));
-    const reportStore = data.shipRequest.store.storeName;
-    const reportSKUStoreDiv = row.querySelector('.report-sku-store') as HTMLDivElement;
-    reportSKUStoreDiv.innerHTML = reportStore;
-  });
+  // const tableRow = document.querySelectorAll('.table-sku-item-tr');
+  // tableRow.forEach((row: HTMLDivElement) => {
+  //   const viewReportInventoriesModal = row.querySelector('.report-sku-view-btn');
+  //   const data = JSON.parse(viewReportInventoriesModal.getAttribute('data-target'));
+  //   const reportStore = data.shipRequest.store.storeName;
+  //   const reportSKUStoreDiv = row.querySelector('.report-sku-store') as HTMLDivElement;
+  //   reportSKUStoreDiv.innerHTML = reportStore;
+  // });
 
   const clearFilterButton = document.querySelector('#product-sku-clear-button');
   clearFilterButton.addEventListener('click', () => {
@@ -176,116 +176,116 @@ document.addEventListener('DOMContentLoaded', () => {
   buttonLoadInventoriesTable.click();
 
   // initialize modal
-  const viewReportInventoriesModal = document.getElementById('view-report-inventories-modal') as HTMLDivElement;
-  const viewModalOptions: ModalOptions = {
-    placement: 'bottom-right',
-    backdrop: 'dynamic',
-    backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
-    closable: true,
-    onHide: () => {
-      const productItems = document.querySelectorAll('.product-item-view') as NodeListOf<HTMLTableColElement>;
-      productItems.forEach((productItem) => productItem.remove());
-    },
-  };
+  // const viewReportInventoriesModal = document.getElementById('view-report-inventories-modal') as HTMLDivElement;
+  // const viewModalOptions: ModalOptions = {
+  //   placement: 'bottom-right',
+  //   backdrop: 'dynamic',
+  //   backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
+  //   closable: true,
+  //   onHide: () => {
+  //     const productItems = document.querySelectorAll('.product-item-view') as NodeListOf<HTMLTableColElement>;
+  //     productItems.forEach((productItem) => productItem.remove());
+  //   },
+  // };
 
-  const viewModal = new Modal(viewReportInventoriesModal, viewModalOptions);
-  const reportViewProductTbody = document.querySelector('#table-products') as HTMLTableElement;
-  const productItemTemplate = document.querySelector('#view-product-item-template') as HTMLTableRowElement;
-  const closingViewModalButton = document.querySelector('#button-closing-report-sku-modal') as HTMLButtonElement;
-  closingViewModalButton.addEventListener('click', () => {
-    viewModal.hide();
-  });
+  // const viewModal = new Modal(viewReportInventoriesModal, viewModalOptions);
+  // const reportViewProductTbody = document.querySelector('#table-products') as HTMLTableElement;
+  // const productItemTemplate = document.querySelector('#view-product-item-template') as HTMLTableRowElement;
+  // const closingViewModalButton = document.querySelector('#button-closing-report-sku-modal') as HTMLButtonElement;
+  // closingViewModalButton.addEventListener('click', () => {
+  //   viewModal.hide();
+  // });
 
   // view buttons click
-  const reportViewUser = document.getElementById('report-sku-user') as HTMLDivElement;
-  const reportViewAction = document.getElementById('report-sku-action') as HTMLDivElement;
-  const reportViewDate = document.getElementById('report-sku-date') as HTMLDivElement;
-  const reportStoreName = document.getElementById('report-store-name') as HTMLDivElement;
+  // const reportViewUser = document.getElementById('report-sku-user') as HTMLDivElement;
+  // const reportViewAction = document.getElementById('report-sku-action') as HTMLDivElement;
+  // const reportViewDate = document.getElementById('report-sku-date') as HTMLDivElement;
+  // const reportStoreName = document.getElementById('report-store-name') as HTMLDivElement;
 
   // onload element with inventories-table id
-  htmxDispatcher.onLoad('inventories-table', (target) => {
-    const reportViewButtons: NodeListOf<HTMLButtonElement> = target.querySelectorAll('.report-sku-view-btn');
-    reportViewButtons.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const reportSKU: IReportSKUList = JSON.parse(btn.getAttribute('data-target'));
+  // htmxDispatcher.onLoad('inventories-table', (target) => {
+  //   const reportViewButtons: NodeListOf<HTMLButtonElement> = target.querySelectorAll('.report-sku-view-btn');
+  //   reportViewButtons.forEach((btn) => {
+  //     btn.addEventListener('click', () => {
+  //       const reportSKU: IReportSKUList = JSON.parse(btn.getAttribute('data-target'));
 
-        reportViewUser.innerHTML = reportSKU.user.username;
-        reportViewAction.innerHTML = reportSKU.type;
-        reportViewDate.innerHTML = formatDate(reportSKU.createdAt);
-        if (reportSKU.store) {
-          reportStoreName.innerHTML = reportSKU.store.storeName;
-        } else if (reportSKU.warehouse) {
-          reportStoreName.innerHTML = reportSKU.warehouse.name;
-        } else {
-          reportStoreName.innerHTML = 'Internal action';
-        }
+  //       reportViewUser.innerHTML = reportSKU.user.username;
+  //       reportViewAction.innerHTML = reportSKU.type;
+  //       reportViewDate.innerHTML = formatDate(reportSKU.createdAt);
+  //       if (reportSKU.store) {
+  //         reportStoreName.innerHTML = reportSKU.store.storeName;
+  //       } else if (reportSKU.warehouse) {
+  //         reportStoreName.innerHTML = reportSKU.warehouse.name;
+  //       } else {
+  //         reportStoreName.innerHTML = 'Internal action';
+  //       }
 
-        reportSKU.reportInventories.forEach((sku, i) => {
-          // Render sku
-          const newProductItem = productItemTemplate.cloneNode(true) as HTMLElement;
-          newProductItem.removeAttribute('id');
-          newProductItem.classList.remove('hidden');
-          newProductItem.classList.add(
-            'product-item-view',
-            'text-base',
-            'font-semibold',
-            'text-gray-900',
-            'dark:text-white'
-          );
-          const productIndex = newProductItem.querySelector('.product-index') as HTMLDivElement;
-          const productName = newProductItem.querySelector('.product-name') as HTMLDivElement;
-          const productSku = newProductItem.querySelector('.product-sku') as HTMLDivElement;
-          const productRegularPrice = newProductItem.querySelector('.product-regular-price') as HTMLDivElement;
-          const productRetailPrice = newProductItem.querySelector('.product-retail-price') as HTMLDivElement;
-          const productGroup = newProductItem.querySelector('.product-group') as HTMLDivElement;
-          const productWarehouse = newProductItem.querySelector('.product-warehouse') as HTMLDivElement;
-          const img: HTMLImageElement = newProductItem.querySelector('.product-image');
+  //       reportSKU.reportInventories.forEach((sku, i) => {
+  //         // Render sku
+  //         const newProductItem = productItemTemplate.cloneNode(true) as HTMLElement;
+  //         newProductItem.removeAttribute('id');
+  //         newProductItem.classList.remove('hidden');
+  //         newProductItem.classList.add(
+  //           'product-item-view',
+  //           'text-base',
+  //           'font-semibold',
+  //           'text-gray-900',
+  //           'dark:text-white'
+  //         );
+  //         const productIndex = newProductItem.querySelector('.product-index') as HTMLDivElement;
+  //         const productName = newProductItem.querySelector('.product-name') as HTMLDivElement;
+  //         const productSku = newProductItem.querySelector('.product-sku') as HTMLDivElement;
+  //         const productRegularPrice = newProductItem.querySelector('.product-regular-price') as HTMLDivElement;
+  //         const productRetailPrice = newProductItem.querySelector('.product-retail-price') as HTMLDivElement;
+  //         const productGroup = newProductItem.querySelector('.product-group') as HTMLDivElement;
+  //         const productWarehouse = newProductItem.querySelector('.product-warehouse') as HTMLDivElement;
+  //         const img: HTMLImageElement = newProductItem.querySelector('.product-image');
 
-          sku.product.image.length > 100
-            ? (img.src = `data:image/png;base64, ${sku.product.image}`)
-            : (img.src = defaultBrandImage);
+  //         sku.product.image.length > 100
+  //           ? (img.src = `data:image/png;base64, ${sku.product.image}`)
+  //           : (img.src = defaultBrandImage);
 
-          productIndex.innerHTML = (i + 1).toString();
-          productName.innerHTML = sku.product.name;
-          productSku.innerHTML = sku.product.SKU;
+  //         productIndex.innerHTML = (i + 1).toString();
+  //         productName.innerHTML = sku.product.name;
+  //         productSku.innerHTML = sku.product.SKU;
 
-          // TODO do we need to show price or qty or both?
-          // if (sku.product.regularPrice) {
-          //   productRegularPrice.innerHTML = sku.product.regularPrice.toString()
-          // } else {
-          //   productRegularPrice.innerHTML = 'No price'
-          //
-          // }
+  //         // TODO do we need to show price or qty or both?
+  //         // if (sku.product.regularPrice) {
+  //         //   productRegularPrice.innerHTML = sku.product.regularPrice.toString()
+  //         // } else {
+  //         //   productRegularPrice.innerHTML = 'No price'
+  //         //
+  //         // }
 
-          // if (sku.product.retailPrice) {
-          //   productRetailPrice.innerHTML = sku.product.retailPrice.toString()
-          // } else {
-          //   productRetailPrice.innerHTML = 'No price'
-          // }
+  //         // if (sku.product.retailPrice) {
+  //         //   productRetailPrice.innerHTML = sku.product.retailPrice.toString()
+  //         // } else {
+  //         //   productRetailPrice.innerHTML = 'No price'
+  //         // }
 
-          if (sku.qtyBefore) {
-            productRegularPrice.innerHTML = sku.qtyBefore.toString();
-          } else {
-            productRegularPrice.innerHTML = '0';
-          }
+  //         if (sku.qtyBefore) {
+  //           productRegularPrice.innerHTML = sku.qtyBefore.toString();
+  //         } else {
+  //           productRegularPrice.innerHTML = '0';
+  //         }
 
-          if (sku.qtyAfter) {
-            productRetailPrice.innerHTML = sku.qtyAfter.toString();
-          } else {
-            productRetailPrice.innerHTML = '0';
-          }
-          sku.product.warehouseProducts.forEach((warehouseProduct) => {
-            if (warehouseProduct.id === sku.warehouseProductId) {
-              productGroup.innerHTML = warehouseProduct.group.name;
-              productWarehouse.innerHTML = warehouseProduct.warehouse.name;
-            }
-          });
-          reportViewProductTbody.appendChild(newProductItem);
-          viewModal.show();
-        });
-      });
-    });
-  });
+  //         if (sku.qtyAfter) {
+  //           productRetailPrice.innerHTML = sku.qtyAfter.toString();
+  //         } else {
+  //           productRetailPrice.innerHTML = '0';
+  //         }
+  //         sku.product.warehouseProducts.forEach((warehouseProduct) => {
+  //           if (warehouseProduct.id === sku.warehouseProductId) {
+  //             productGroup.innerHTML = warehouseProduct.group.name;
+  //             productWarehouse.innerHTML = warehouseProduct.warehouse.name;
+  //           }
+  //         });
+  //         reportViewProductTbody.appendChild(newProductItem);
+  //         viewModal.show();
+  //       });
+  //     });
+  //   });
+  // });
 });
 // Download csv
 const downloadCsvButton = document.getElementById('button-csv-download') as HTMLButtonElement;

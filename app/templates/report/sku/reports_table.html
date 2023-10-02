@@ -16,6 +16,12 @@
           scope="col"
           class="px-6 py-3"
         >
+          SKU
+        </th>
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
           Report Type
         </th>
         <th
@@ -23,12 +29,6 @@
           class="px-6 py-3"
         >
           Status
-        </th>
-        <th
-          scope="col"
-          class="px-6 py-3"
-        >
-          SKU
         </th>
         <th
           scope="col"
@@ -48,12 +48,12 @@
         >
           Date
         </th>
-        <th
+        <!-- <th
           scope="col"
           class="px-6 py-3"
         >
           Actions
-        </th>
+        </th> -->
       </tr>
     </thead>
     <tbody>
@@ -65,17 +65,17 @@
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.product.SKU }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
             <div class="text-base font-semibold">{{ report.type }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
             <div class="text-base font-semibold">{{ report.status }}</div>
-          </div>
-        </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.product.SKU }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
@@ -106,16 +106,16 @@
           </div>
         </td>
         
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+        <!-- <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
             <div class="text-base font-semibold">
               <button type="button" data-target="{{report.json}}" class="report-sku-view-btn inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-              {% include "icon/view.html" %}
+              include "icon/view.html"
                 View
               </button>
             </div>
           </div>
-        </td>
+        </td> -->
       </tr>
       {% endfor %}
     </tbody>

@@ -62,19 +62,15 @@ def get_sku_reports():
             <= datetime.strptime(filter_skus.created_to, "%m/%d/%Y")
         )
 
-    if filter_skus.username:
-        query = query.where(
-            m.ReportSKU.user.has(m.User.username == filter_skus.username)
-        )
+    if filter_skus.report_type:
+        query = query.where(m.ReportSKU.type == filter_skus.report_type)
 
     if filter_skus.master_group:
         query = query.where(
-            m.ReportSKU.report_skus.any(
-                m.ReportSKU.warehouse_product.has(
-                    m.WarehouseProduct.group.has(
-                        m.Group.master_group.has(
-                            m.MasterGroup.name == filter_skus.master_group
-                        )
+            m.ReportSKU.warehouse_product.has(
+                m.WarehouseProduct.group.has(
+                    m.Group.master_group.has(
+                        m.MasterGroup.name == filter_skus.master_group
                     )
                 )
             )
@@ -82,10 +78,8 @@ def get_sku_reports():
 
     if filter_skus.group:
         query = query.where(
-            m.ReportSKU.report_skus.any(
-                m.ReportSKU.warehouse_product.has(
-                    m.WarehouseProduct.group.has(m.Group.name == filter_skus.group)
-                )
+            m.ReportSKU.warehouse_product.has(
+                m.WarehouseProduct.group.has(m.Group.name == filter_skus.group)
             )
         )
 
@@ -94,7 +88,6 @@ def get_sku_reports():
         filter_skus.group_language,
         filter_skus.group_category,
         filter_skus.group_premises,
-        filter_skus.group_event,
     ]
 
     if master_groups.count(None) != len(master_groups):
@@ -102,20 +95,16 @@ def get_sku_reports():
             # TODO consider better validation for master_groups values
             if group:
                 query = query.where(
-                    m.ReportSKU.report_skus.any(
-                        m.ReportSKU.product.has(
-                            m.Product.product_groups.any(
-                                m.ProductGroup.parent.has(m.GroupProduct.name == group)
-                            )
+                    m.ReportSKU.product.has(
+                        m.Product.product_groups.any(
+                            m.ProductGroup.parent.has(m.GroupProduct.name == group)
                         )
                     )
                 )
                 count_query = count_query.where(
-                    m.ReportSKU.report_skus.any(
-                        m.ReportSKU.product.has(
-                            m.Product.product_groups.any(
-                                m.ProductGroup.parent.has(m.GroupProduct.name == group)
-                            )
+                    m.ReportSKU.product.has(
+                        m.Product.product_groups.any(
+                            m.ProductGroup.parent.has(m.GroupProduct.name == group)
                         )
                     )
                 )
@@ -149,9 +138,7 @@ def skus():
     # TODO maybe move default master product groups to config
     product_master_groups = db.session.scalars(
         m.MasterGroupProduct.select().where(
-            m.MasterGroupProduct.name.in_(
-                ["Brand", "Language", "Category", "Premises", "Events"]
-            )
+            m.MasterGroupProduct.name.in_(["Brand", "Language", "Category", "Premises"])
         )
     )
     master_groups = db.session.scalars(m.MasterGroup.select())
@@ -163,6 +150,7 @@ def skus():
         master_groups=master_groups,
         groups=groups,
         product_master_groups=product_master_groups,
+        report_types_enum=s.ReportSKUType,
     )
 
 
