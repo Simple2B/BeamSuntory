@@ -116,6 +116,7 @@ export const initEditOrderModal = () => {
           const currentProductAllocatedContainer = orderEditProductsAllocatedContainer.children[i];
           const productAllocatedIdInput = currentProductAllocatedContainer.querySelector('.product-allocated-id') as HTMLInputElement;
           const productAllocatedNameDiv = currentProductAllocatedContainer.querySelector('.inbound-order-edit-check-product') as HTMLDivElement;
+          const productAllocatedSKUDiv = currentProductAllocatedContainer.querySelector('.inbound-order-edit-check-product-sku') as HTMLDivElement;
           const productAllocatedQuantityDiv = currentProductAllocatedContainer.querySelector('.inbound-order-edit-check-quantity') as HTMLDivElement;
           const productAllocatedShelfLifeFromDiv = currentProductAllocatedContainer.querySelector('.inbound-order-edit-shelf-life-from') as HTMLDivElement;
           const productAllocatedShelfLifeToDiv = currentProductAllocatedContainer.querySelector('.inbound-order-edit-shelf-life-to') as HTMLDivElement;
@@ -123,7 +124,8 @@ export const initEditOrderModal = () => {
 
           productAllocatedIdInput.value = productAllocated.id.toString();
 
-          productAllocatedNameDiv.innerHTML = productAllocated.product.name;
+          productAllocatedNameDiv.innerHTML = `<p title='${productAllocated.product.name}' class='cropped-text'>${productAllocated.product.name}</p>`;
+          productAllocatedSKUDiv.innerHTML = `<p title='${productAllocated.product.SKU}'>${productAllocated.product.SKU}</p>`;
           productAllocatedQuantityDiv.innerHTML = productAllocated.quantity.toString();
           productAllocatedQuantityDiv.setAttribute('data-quantity', productAllocated.quantity.toString());
           productAllocatedTotalQuantityDiv.innerHTML = productAllocated.quantity.toString();
