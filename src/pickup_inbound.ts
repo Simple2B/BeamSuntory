@@ -34,12 +34,11 @@ const viewModal: ModalInterface = new Modal($viewModalElement, viewModalOptions)
 
 // function to filter order by status
 const orderFilterPickupInboundInputs = document.querySelectorAll('.pickup-inbound-filter-input')
-const sortByNamePickupInboundStorage = JSON.parse(sessionStorage.getItem('sortByNamePickupInbound'))
+const sortByNamePickupInboundStorage = JSON.parse(sessionStorage.getItem('sortByNamePickupInbound')).replace(/"/g, '')
 
 if (sortByNamePickupInboundStorage) {
     const filterDropdownContainer = document.querySelector('#dropdownRadioButton-pickup-inbound-status')
-    const [entityName , filteredStatusValue] = sortByNamePickupInboundStorage.split('.')
-    filterDropdownContainer.innerHTML = `${filteredStatusValue}
+    filterDropdownContainer.innerHTML = `${sortByNamePickupInboundStorage}
           <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
           viewBox="0 0 10 6">
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

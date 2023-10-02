@@ -120,20 +120,16 @@ def sort():
         return redirect(url_for("pickup_inbound.get_all"))
 
     filtered = True
-    status = form_sort.sort_by.data if request.method == "POST" else "Draft"
-
-    mapped_status = status.split(".")
-    status_str = mapped_status[1]
 
     q = request.args.get("q", type=str, default=None)
     query = (
         m.InboundOrder.select()
-        .where(m.InboundOrder.status == status_str)
+        .where(m.InboundOrder.status == s.InboundOrderStatus(form_sort.sort_by.data))
         .order_by(m.InboundOrder.id)
     )
     count_query = (
         sa.select(sa.func.count())
-        .where(m.InboundOrder.status == status_str)
+        .where(m.InboundOrder.status == s.InboundOrderStatus(form_sort.sort_by.data))
         .select_from(m.InboundOrder)
     )
     if q:
