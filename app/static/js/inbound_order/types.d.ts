@@ -72,3 +72,9 @@ export interface IInboundOrderOut extends IInboundOrderBase {
     uuid: string;
     productsAllocated: IAllocatedProductOut[];
 }
+export interface IPagination {
+    pages: number;
+}
+export interface IUser {
+    username: string;
+}

@@ -1,5 +1,5 @@
 import { ModalOptions, Modal } from 'flowbite';
-import { IProduct } from './inbound_order/types';
+import { IProduct, IPagination } from './inbound_order/types';
 import HTMXDispatcher from './htmx';
 
 interface IUser {
@@ -161,7 +161,6 @@ document.addEventListener('DOMContentLoaded', () => {
   closingViewModalButton.addEventListener('click', () => {
     viewModal.hide();
   });
-
 
   // view buttons click
   const reportViewUser = document.getElementById('report-adjustment-user') as HTMLDivElement;

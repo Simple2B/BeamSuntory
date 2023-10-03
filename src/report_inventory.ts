@@ -1,5 +1,5 @@
 import { ModalOptions, Modal } from 'flowbite';
-import { IProduct, IWarehouse, IInboundOrderBase } from './inbound_order/types';
+import { IProduct, IWarehouse, IInboundOrderBase, IPagination } from './inbound_order/types';
 import HTMXDispatcher from './htmx';
 
 interface IUser {

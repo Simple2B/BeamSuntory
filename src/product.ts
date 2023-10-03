@@ -26,14 +26,7 @@ interface IProduct {
   length: number;
   width: number;
   height: number;
-  mstr_groups_groups: object;
   current_user_groups: object;
-  groups_ids: {
-    [index: string]: number;
-  };
-  available_quantity: {
-    [index: string]: number;
-  };
   total_available_items: {
     [index: string]: number;
   };
@@ -42,11 +35,33 @@ interface IProduct {
       [index: string]: number | string;
     }
   ];
-  mstr_prod_grps_prod_grps_names: { [index: string]: { group_name: string; group_id: number }[] };
-  mstr_grps_grps_names_in_prod: { [index: string]: { group_name: string; group_id: number }[] };
-  warehouse_product_qty: number;
   product_in_warehouses: { [index: string]: { [index: string]: number } };
   warehouse_products: IWarehouseProduct[];
+  product_groups: IProductGroup[];
+}
+
+interface IProductAdditionalInfo {
+  all_warehouses: IWarehouse[];
+  current_master_product_groups: IMasterGroupGroup[];
+  current_user_groups: IMasterGroupGroupUser[];
+  master_groups_groups: IMasterGroupGroup[];
+}
+
+interface IMasterGroupGroup {
+  master_group: string;
+  groups: { group_name: string; group_id: number }[];
+}
+
+interface IMasterGroupGroupUser {
+  master_group_name: string;
+  groups: { group_name: string; group_id: number }[];
+}
+
+interface IProductGroup {
+  id: number;
+  product_id: number;
+  group_id: number;
+  parent: IGroup;
 }
 interface FilterJsonData {
   [key: string]: string;
@@ -56,7 +71,16 @@ interface IProductMasterGroupGroup {
   [index: string]: { group_name: string; group_id: number }[];
 }
 
+interface IGroup {
+  id: number;
+  name: string;
+  master_group: IMasterGroup;
+  master_group_id: number;
+  master_groups_for_product: IMasterGroup;
+}
+
 interface IMasterGroup {
+  id: number;
   name: string;
   master_groups_list_groups: { [index: string]: { group_name: string; group_id: number }[] };
 }
@@ -67,6 +91,7 @@ interface IWarehouseProduct {
   warehouse_id: number;
   product_quantity: number;
   warehouse: IWarehouse;
+  group: IGroup;
 }
 
 interface IWarehouse {
@@ -148,8 +173,23 @@ if (filterData !== null || filterData !== undefined) {
   }
 }
 
+// function to get groups object from product
+function getGroupsMasterGroups(product: IProduct) {
+  const groupsMasterGroups = {} as { [group: string]: string };
+
+  product.warehouse_products.forEach((warehouseProduct: IWarehouseProduct) => {
+    const group = warehouseProduct.group.name;
+    const masterGroup = warehouseProduct.group.master_group.name;
+    if (!groupsMasterGroups.hasOwnProperty(group)) {
+      groupsMasterGroups[group] = masterGroup;
+    }
+  });
+
+  return groupsMasterGroups;
+}
+
 // function to add column by filter
-function createCustomizeViewColumn(productsGroups: IProductGroupMasterGroup, groupName: string) {
+function createCustomizeViewColumn(masterGroupName: string) {
   //choose position in table
   const positionInTable = 4;
   const productTableHeader = document.querySelector('#product-table-header-tr');
@@ -157,17 +197,21 @@ function createCustomizeViewColumn(productsGroups: IProductGroupMasterGroup, gro
 
   const productItemHeaderReference = productTableHeader.children[positionInTable];
   const productItemHeader = productItemHeaderReference.cloneNode(true) as HTMLElement;
-  productItemHeader.setAttribute('id', `product-table-filter-master-group-${groupName}`);
-  productItemHeader.innerHTML = groupName.replace(/_/g, ' ');
+  productItemHeader.setAttribute('id', `product-table-filter-master-group-${masterGroupName}`);
+  productItemHeader.innerHTML = masterGroupName.replace(/_/g, ' ');
   productTableHeader.insertBefore(productItemHeader, productItemHeaderReference.nextSibling);
 
   productItemTrs.forEach((productItem: HTMLTableRowElement) => {
     const productItemReference = productItem.children[positionInTable];
     const productSKU = productItem.getAttribute('data-target-product-sku');
-
     const productItemTd = productItemReference.cloneNode(true) as HTMLElement;
-    productItemTd.classList.add(`product-table-item-td-${groupName}`);
-    productItemTd.innerHTML = productsGroups[productSKU][groupName.replace(/_/g, ' ')] || '-';
+    productItemTd.classList.add(`product-table-item-td-${masterGroupName}`);
+    const product = JSON.parse(productItem.getAttribute('data-target-product'));
+    const group = product.product_groups.find(
+      (group: IProductGroup) => group.parent.master_groups_for_product.name === masterGroupName
+    );
+    group ? (productItemTd.innerHTML = group.parent.name) : (productItemTd.innerHTML = '-');
+
     productItem.insertBefore(productItemTd, productItemReference.nextSibling);
   });
 }
@@ -180,7 +224,6 @@ if (!globalFilterMasterGroup) {
   globalFilterMasterGroup = [groupBrand];
   sessionStorage.setItem('globalFilterMasterGroup', JSON.stringify(globalFilterMasterGroup));
 }
-const productMgGGlobal = JSON.parse(sessionStorage.getItem('productMgG'));
 
 // add brand to default global filter
 if (!globalFilterMasterGroup.includes(groupBrand)) {
@@ -200,7 +243,7 @@ if (globalFilterMasterGroup && globalFilterMasterGroup.length !== 0) {
     const isGroupExist = document.querySelector(`#product-table-filter-master-group-${masterGroupName}`);
 
     if (!isGroupExist) {
-      createCustomizeViewColumn(productMgGGlobal, masterGroupName);
+      createCustomizeViewColumn(masterGroupName);
     }
   }
 }
@@ -209,7 +252,6 @@ if (globalFilterMasterGroup && globalFilterMasterGroup.length !== 0) {
 const checkboxFilterProductMasterGroups = document.querySelectorAll('.products-filter-product-master-group-checkbox');
 checkboxFilterProductMasterGroups.forEach((checkbox) => {
   checkbox.addEventListener('change', (e) => {
-    const productMgG = JSON.parse(checkbox.getAttribute('data-target-product-mg-g'));
     const globalFilterMasterGroup = JSON.parse(sessionStorage.getItem('globalFilterMasterGroup'));
 
     const masterGroupName = checkbox.getAttribute('data-target-group-name');
@@ -225,7 +267,7 @@ checkboxFilterProductMasterGroups.forEach((checkbox) => {
       const isGroupExist = document.querySelector(`#product-table-filter-master-group-${masterGroupName}`);
 
       if (!isGroupExist) {
-        createCustomizeViewColumn(productMgG, masterGroupName);
+        createCustomizeViewColumn(masterGroupName);
       }
     }
     if (!isActive) {
@@ -278,7 +320,8 @@ const modalOptions: ModalOptions = {
   closable: true,
   onHide: () => {
     const product = JSON.parse(sessionStorage.product);
-    const mstrGroupsEntries = Object.entries(product.mstr_groups_groups);
+    const groupsMasterGroups = getGroupsMasterGroups(product);
+    const mstrGroupsEntries = Object.entries(groupsMasterGroups);
 
     mstrGroupsEntries.forEach(([key, value]: [string, string]) => {
       deleteShipAssignButton(value.replace(/\s/g, '_'), key);
@@ -300,7 +343,8 @@ const adjustModalOptions: ModalOptions = {
   closable: true,
   onHide: () => {
     const product = JSON.parse(sessionStorage.product);
-    const mstrGroupsEntries = Object.entries(product.mstr_groups_groups);
+    const groupsMasterGroups = getGroupsMasterGroups(product);
+    const mstrGroupsEntries = Object.entries(groupsMasterGroups);
 
     mstrGroupsEntries.forEach(([key, value]: [string, string]) => {
       deleteAdjustContainer(value.replace(/\s/g, '_'), key);
@@ -348,7 +392,8 @@ const eventModalOptions: ModalOptions = {
   closable: true,
   onHide: () => {
     const product = JSON.parse(sessionStorage.product);
-    const mstrGroupsEntries = Object.entries(product.mstr_groups_groups);
+    const groupsMasterGroups = getGroupsMasterGroups(product);
+    const mstrGroupsEntries = Object.entries(groupsMasterGroups);
 
     mstrGroupsEntries.forEach(([key, value]: [string, string]) => {
       deleteShipAssignButton(value.replace(/\s/g, '_'), key);
@@ -478,6 +523,16 @@ deleteButtons.forEach((e) => {
   });
 });
 
+async function getAdditionalProductInfo(product_id: number) {
+  try {
+    const response = await fetch(`/product/get_additional_info/${product_id}`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 function addProduct(groups: IProductMasterGroupGroup) {
   addModal.show();
   const productMasterGroupAddSelect: HTMLSelectElement = document.querySelector(
@@ -506,8 +561,9 @@ function addProduct(groups: IProductMasterGroupGroup) {
   });
 }
 
-function editProduct(product: IProduct) {
+async function editProduct(product: IProduct) {
   sessionStorage.setItem('product', JSON.stringify(product));
+  const productAdditionalInfo = await getAdditionalProductInfo(product.id);
 
   const img: HTMLImageElement = document.querySelector('#product-edit-show-image');
   const fullImageAnchor = img.closest('.product-full-image-anchor');
@@ -562,38 +618,50 @@ function editProduct(product: IProduct) {
     '#product-master-group-edit-add-product-1'
   );
   const options = productMasterGroupEditSelect.querySelectorAll('option');
-  const productMasterGroups = Object.keys(product.mstr_grps_grps_names_in_prod);
+  const productMasterGroups = product.product_groups.map(
+    (group: IProductGroup) => group.parent.master_groups_for_product.name as string
+  );
 
   if (productMasterGroups.length > 0) {
     const productGroupsEditSelects = document.querySelectorAll<HTMLSelectElement>('.product-group-edit-item');
 
     for (let i = 0; i < productMasterGroups.length; i++) {
+      const currentProductMasterGroup = productAdditionalInfo.current_master_product_groups.find(
+        (masterGroupItem: IMasterGroupGroup) => masterGroupItem.master_group === productMasterGroups[i]
+      );
       if (i === 0) {
         const productGroupsEditSelect = productGroupsEditSelects[i];
 
         productMasterGroupEditSelect.value = productMasterGroups[i];
 
-        product.mstr_prod_grps_prod_grps_names[productMasterGroups[i]].forEach(
-          (group: { group_name: string; group_id: number }) => {
-            const storeSelectOption = document.createElement('option');
-            storeSelectOption.setAttribute('value', group.group_id.toString());
-            storeSelectOption.textContent = group.group_name;
-            productGroupsEditSelect.appendChild(storeSelectOption);
-          }
+        const masterGroupGroup = productAdditionalInfo.master_groups_groups.find(
+          (masterGroup: IMasterGroupGroup) => masterGroup.master_group === productMasterGroups[i]
         );
+
+        masterGroupGroup.groups.forEach((group: { group_name: string; group_id: number }) => {
+          const storeSelectOption = document.createElement('option');
+          storeSelectOption.setAttribute('value', group.group_id.toString());
+          storeSelectOption.textContent = group.group_name;
+          productGroupsEditSelect.appendChild(storeSelectOption);
+        });
         // TODO: always select first option
-        productGroupsEditSelect.value =
-          product.mstr_grps_grps_names_in_prod[productMasterGroups[i]][0].group_id.toString();
+        const currentProductGroup = product.product_groups.find(
+          (group: IProductGroup) => group.parent.master_groups_for_product.name === productMasterGroups[i]
+        );
+
+        productGroupsEditSelect.value = currentProductGroup.group_id.toString();
         productMasterGroupEditSelect.addEventListener('change', () => {
           options.forEach((e) => {
             if (
               e.textContent === productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
             ) {
               const groupSelect = document.querySelector('#product-group-edit-item-1');
-              const optionCategory =
-                product.mstr_prod_grps_prod_grps_names[
+              const optionCategory = productAdditionalInfo.master_groups_groups.find(
+                (masteGroup: IMasterGroupGroup) =>
+                  masteGroup.master_group ===
                   productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
-                ];
+              )?.groups;
+
               groupSelect.innerHTML = '';
               if (optionCategory) {
                 optionCategory.forEach((group: { group_name: string; group_id: number }) => {
@@ -607,9 +675,9 @@ function editProduct(product: IProduct) {
           });
         });
 
-        if (product.mstr_grps_grps_names_in_prod[productMasterGroups[i]].length > 1) {
-          for (let j = 1; j < product.mstr_grps_grps_names_in_prod[productMasterGroups[i]].length; j++) {
-            createProductGroupEditItem(null, productMasterGroups[i], j);
+        if (currentProductMasterGroup.groups.length > 1) {
+          for (let j = 1; j < currentProductMasterGroup.groups.length; j++) {
+            createProductGroupEditItem(null, productAdditionalInfo, productMasterGroups[i], j);
           }
           continue;
         } else {
@@ -617,12 +685,12 @@ function editProduct(product: IProduct) {
         }
       }
 
-      if (product.mstr_grps_grps_names_in_prod[productMasterGroups[i]].length > 0) {
-        for (let j = 0; j < product.mstr_grps_grps_names_in_prod[productMasterGroups[i]].length; j++) {
-          createProductGroupEditItem(null, productMasterGroups[i], j);
+      if (currentProductMasterGroup.groups.length > 0) {
+        for (let j = 0; j < currentProductMasterGroup.groups.length; j++) {
+          createProductGroupEditItem(null, productAdditionalInfo, productMasterGroups[i], j);
         }
       } else {
-        createProductGroupEditItem(null, productMasterGroups[i]);
+        createProductGroupEditItem(null, productAdditionalInfo, productMasterGroups[i]);
       }
     }
   }
@@ -633,10 +701,11 @@ function editProduct(product: IProduct) {
     options.forEach((e) => {
       if (e.textContent === productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text) {
         const groupSelect = document.querySelector('#product-group-edit-item-1');
-        const optionCategory =
-          product.mstr_prod_grps_prod_grps_names[
+        const optionCategory = productAdditionalInfo.master_groups_groups.find(
+          (masterGroup: IMasterGroupGroup) =>
+            masterGroup.master_group ===
             productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
-          ];
+        )?.groups;
 
         groupSelect.innerHTML = '';
         if (optionCategory) {
@@ -654,21 +723,32 @@ function editProduct(product: IProduct) {
 
 const viewProductButtonElements = document.querySelectorAll('.product-view-button');
 viewProductButtonElements.forEach((e) =>
-  e.addEventListener('click', () => {
+  e.addEventListener('click', async () => {
     const bookingButton = document.querySelector('.product-booking-button');
     if (bookingButton) {
       bookingButton.setAttribute('data-target', e.getAttribute('data-target'));
     }
     const product = JSON.parse(e.getAttribute('data-target'));
+    const groupsMasterGroups = getGroupsMasterGroups(product);
+    const totalWarehouseQty = product.warehouse_products.reduce(
+      (acc: IWarehouseProduct, warehouseProduct: IWarehouseProduct) =>
+        acc.product_quantity + warehouseProduct.product_quantity
+    );
+
+    const productInfo = await getAdditionalProductInfo(product.id);
+
     sessionStorage.setItem('product', JSON.stringify(product));
-    const prodGroups = Object.keys(product.mstr_groups_groups);
+    const prodGroups = Object.keys(groupsMasterGroups);
 
     prodGroups.forEach((groupName) => {
       let isEqual = false;
-      const mstrGroupName = product.mstr_groups_groups[groupName];
+      const mstrGroupName = groupsMasterGroups[groupName];
+      const currentUserGroup = productInfo.current_user_groups.find(
+        (userGroup: IMasterGroupGroupUser) => userGroup.master_group_name === mstrGroupName
+      );
 
-      if (product.current_user_groups.hasOwnProperty(mstrGroupName)) {
-        const currentUserValue = product.current_user_groups[mstrGroupName];
+      if (currentUserGroup) {
+        const currentUserValue = currentUserGroup.groups[0].group_name;
         if (currentUserValue.includes(groupName)) {
           isEqual = true;
         }
@@ -691,7 +771,7 @@ viewProductButtonElements.forEach((e) =>
     div = document.querySelector('#product-view-retail_price');
     div.innerHTML = product.retail_price?.toString() ?? '0';
     div = document.querySelector('#product-view-warehouse-qty');
-    div.innerHTML = product.warehouse_product_qty.toString();
+    div.innerHTML = totalWarehouseQty.toString();
     // General Info ->
     div = document.querySelector('#product-view-SKU');
     div.innerHTML = product.SKU;
@@ -741,17 +821,23 @@ viewProductButtonElements.forEach((e) =>
 
 const adjustProductButtonElements = document.querySelectorAll('.product-adjust-button');
 adjustProductButtonElements.forEach((e) =>
-  e.addEventListener('click', () => {
+  e.addEventListener('click', async () => {
     const product = JSON.parse(e.getAttribute('data-target'));
     sessionStorage.setItem('product', JSON.stringify(product));
-    const prodGroups = Object.keys(product.mstr_groups_groups);
+    const groupsMasterGroups = getGroupsMasterGroups(product);
+    const productInfo = await getAdditionalProductInfo(product.id);
+
+    const prodGroups = Object.keys(groupsMasterGroups);
 
     prodGroups.forEach((groupName) => {
       let isEqual = false;
+      const currentUserGroup = productInfo.current_user_groups.find(
+        (userGroup: IMasterGroupGroupUser) => userGroup.master_group_name === mstrGroupName
+      );
 
-      const mstrGroupName = product.mstr_groups_groups[groupName];
-      if (product.current_user_groups.hasOwnProperty(mstrGroupName)) {
-        const currentUserValue = product.current_user_groups[mstrGroupName];
+      const mstrGroupName = groupsMasterGroups[groupName];
+      if (currentUserGroup) {
+        const currentUserValue = currentUserGroup.groups[0].group_name;
         if (currentUserValue.includes(groupName)) {
           isEqual = true;
         }
@@ -778,6 +864,9 @@ adjustProductButtonElements.forEach((e) =>
 // function to request share
 // TODO refactor !!!
 function requestShare(product: IProduct, group: string) {
+  const warehouseGroupProduct = product.warehouse_products.find(
+    (warehouseProduct) => warehouseProduct.group.name === group.replace('_', ' ')
+  );
   const img: HTMLImageElement = document.querySelector('#product-request-share-image');
   const fullImageAnchor = img.closest('.product-full-image-anchor');
   fullImageAnchor.setAttribute('data-target-product-id', product.id.toString());
@@ -791,35 +880,54 @@ function requestShare(product: IProduct, group: string) {
   productSKUInput.value = product.SKU;
 
   div = document.querySelector('#product-request-share-available-quantity');
-  div.innerHTML = product.available_quantity[group.replace('_', ' ')].toString();
+  div.innerHTML = warehouseGroupProduct.product_quantity.toString();
   div = document.querySelector('#product-request-share-owner');
   // TODO change to something not hardcoded here and in rest funcs
   div.innerHTML = 'Mike';
   div = document.querySelector('#product-request-share-role');
   div.innerHTML = 'ADMIN';
   div = document.querySelector('#product-request-share-total-available-items');
-  div.innerHTML = product.total_available_items[group.replace('_', ' ')].toString();
+  div.innerHTML = warehouseGroupProduct.product_quantity.toString();
   let input: HTMLInputElement = document.querySelector('#product-request-share-quantity');
-  input.max = product.available_quantity[group.replace('_', ' ')].toString();
+  input.max = warehouseGroupProduct.product_quantity.toString();
   input.min = '1';
   input = document.querySelector('#product-request-share-name-hidden-input');
   input.value = product.name;
   input = document.querySelector('#product-request-share-SKU-hidden-input');
   input.value = product.SKU;
   input = document.querySelector('#product-request-share-available-quantity-hidden-input');
-  input.value = product.available_quantity[group.replace('_', ' ')].toString();
+  input.value = warehouseGroupProduct.product_quantity.toString();
 
   const groupNameView = document.querySelector('#product-request-share-from-group');
   groupNameView.innerHTML = group.replace('_', ' ');
 
   const fromGroupId = document.querySelector('#from-group-id') as HTMLInputElement;
-  fromGroupId.value = product.groups_ids[group.replace('_', ' ')].toString();
+  const groupsIds = getGroupsIds(product);
+
+  fromGroupId.value = groupsIds[group.replace('_', ' ')].toString();
 
   requestShareModal.show();
 }
 
+function getGroupsIds(product: IProduct) {
+  const groupsIds = {} as { [group: string]: number };
+
+  product.warehouse_products.forEach((warehouseProduct: IWarehouseProduct) => {
+    const group = warehouseProduct.group.name;
+    const id = warehouseProduct.group.id;
+    if (!groupsIds.hasOwnProperty(group)) {
+      groupsIds[group] = id;
+    }
+  });
+
+  return groupsIds;
+}
+
 // function to ship
 function ship(product: IProduct, group: string) {
+  const warehouseGroupProduct = product.warehouse_products.find(
+    (warehouseProduct) => warehouseProduct.group.name === group.replace('_', ' ')
+  );
   const img: HTMLImageElement = document.querySelector('#product-ship-image');
   const fullImageAnchor = img.closest('.product-full-image-anchor');
   fullImageAnchor.setAttribute('data-target-product-id', product.id.toString());
@@ -829,14 +937,14 @@ function ship(product: IProduct, group: string) {
   div = document.querySelector('#product-ship-sku');
   div.innerHTML = product.SKU;
   div = document.querySelector('#product-ship-available-quantity');
-  div.innerHTML = product.available_quantity[group.replace('_', ' ')].toString();
+  div.innerHTML = warehouseGroupProduct.product_quantity.toString();
   div = document.querySelector('#product-ship-total-available-items');
-  div.innerHTML = product.total_available_items[group.replace('_', ' ')].toString();
+  div.innerHTML = warehouseGroupProduct.product_quantity.toString();
 
   let input: HTMLInputElement = document.querySelector('#product-ship-product-id');
   input.value = product.id.toString();
   input = document.querySelector('#product-ship-desire-quantity');
-  input.max = product.available_quantity[group.replace('_', ' ')].toString();
+  input.max = warehouseGroupProduct.product_quantity.toString();
   input.min = '1';
   input = document.querySelector('#product-ship-group');
   input.value = group.replace('_', ' ');
@@ -845,16 +953,16 @@ function ship(product: IProduct, group: string) {
 
   // -----count rest quantity in ship request product modal------
   const desiredQuantityInput: HTMLInputElement = document.querySelector('#product-ship-desire-quantity');
-  desiredQuantityInput.setAttribute('max', product.available_quantity[group.replace('_', ' ')].toString());
+  desiredQuantityInput.setAttribute('max', warehouseGroupProduct.product_quantity.toString());
   desiredQuantityInput.addEventListener('change', () => {
     const availableQuantityDiv = document.querySelector('#product-ship-available-quantity');
-    availableQuantityDiv.textContent = product.available_quantity[group.replace('_', ' ')].toString();
+    availableQuantityDiv.textContent = warehouseGroupProduct.product_quantity.toString();
     let desiredQuantity = parseInt(desiredQuantityInput.value);
     const availableQuantity = parseInt(availableQuantityDiv.textContent);
     if (desiredQuantity < 0) {
       desiredQuantityInput.value = '0';
     } else if (desiredQuantity > availableQuantity) {
-      desiredQuantityInput.value = product.available_quantity[group.replace('_', ' ')].toString();
+      desiredQuantityInput.value = warehouseGroupProduct.product_quantity.toString();
       availableQuantityDiv.textContent = '0';
     } else if (desiredQuantity) {
       availableQuantityDiv.textContent = (availableQuantity - desiredQuantity).toString();
@@ -868,6 +976,9 @@ let calendarFilter: string[] = [];
 
 // function to booking
 function booking(product: IProduct, group: string) {
+  const warehouseGroupProduct = product.warehouse_products.find(
+    (warehouseProduct) => warehouseProduct.group.name === group.replace('_', ' ')
+  );
   const img: HTMLImageElement = document.querySelector('#product-event-image');
   const fullImageAnchor = img.closest('.product-full-image-anchor');
   fullImageAnchor.setAttribute('data-target-product-id', product.id.toString());
@@ -883,7 +994,7 @@ function booking(product: IProduct, group: string) {
   input.value = product.id.toString();
   input = document.querySelector('#product-event-quantity');
   input.min = '1';
-  input.max = product.available_quantity[group.replace('_', ' ')].toString();
+  input.max = warehouseGroupProduct.product_quantity.toString();
 
   const currentDate = new Date();
 
@@ -959,16 +1070,20 @@ function booking(product: IProduct, group: string) {
 
 // function to assign
 function assign(product: IProduct, group: string) {
+  const warehouseGroupProduct = product.warehouse_products.find(
+    (warehouseProduct) => warehouseProduct.group.name === group.replace('_', ' ')
+  );
   let input: HTMLInputElement = document.querySelector('#product-assign-name');
   input.value = product.name;
   input = document.querySelector('#product-assign-amount');
-  input.max = product.available_quantity[group.replace('_', ' ')].toString();
+  input.max = warehouseGroupProduct.product_quantity.toString();
   input.min = '1';
   const groupName = group.replace('_', ' ');
+  const groupIds = getGroupsIds(product);
+  const group_id = groupIds[groupName];
   input = document.querySelector('#product-assign-from-group');
   input.value = groupName;
 
-  const group_id = product.groups_ids[groupName];
   input = document.querySelector('#product-assign-from-group_id');
   input.value = group_id.toString();
   assignModal.show();
@@ -992,9 +1107,13 @@ function deleteShipAssignButton(nameGroup: string, nameGroupValue: string) {
 
 // function to add ship, assign, button to view product modal
 function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: string, productParam: IProduct) {
+  const warehouseGroupProduct = productParam.warehouse_products.find(
+    (warehouseProduct) => warehouseProduct.group.name === group.replace('_', ' ')
+  );
   const isEventItem = isEvent && masterGroup === eventMasterGroup;
   const groupUnderScore = group.replace(/ /g, '_');
-  const groupProductIds = productParam.groups_ids;
+  const groupIds = getGroupsIds(productParam);
+  const groupProductIds = groupIds;
   const productTypeContainer = document.querySelector(`#product-view-product-name-container`);
   const shipAssignContainer = document.createElement('div');
 
@@ -1005,7 +1124,7 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
       <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available</label>
         <div id="ship-product-quantity"
           class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-      ${productParam.available_quantity[group] || 0}</div>
+      ${warehouseGroupProduct.product_quantity || 0}</div>
     </div>
     <div>
       <label for="product_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Action</label >
@@ -1048,7 +1167,7 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
       <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available</label>
         <div id="ship-product-quantity"
           class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-      ${productParam.available_quantity[group] || 0}</div>
+      ${warehouseGroupProduct.product_quantity || 0}</div>
     </div>
     <div>
       <label for="product_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Action</label >
@@ -1061,7 +1180,7 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
 
   const shareProductBtn = shareContainer.querySelector(`#share-product-button-${groupUnderScore}`);
 
-  if (productParam.available_quantity[group] === 0 || !productParam.available_quantity[group]) {
+  if (warehouseGroupProduct.product_quantity === 0 || !warehouseGroupProduct) {
     if (shipProductBtn && assignProductBtn) {
       shipProductBtn.classList.add('invisible');
       assignProductBtn.classList.add('invisible');
@@ -1238,13 +1357,14 @@ function getSessionStorageObject(
   }
 }
 
-function createAdjustAction(isEqual: boolean, masterGroup: string, group: string, productParam: IProduct) {
+async function createAdjustAction(isEqual: boolean, masterGroup: string, group: string, productParam: IProduct) {
   const productInWarehouses = sessionStorage.setItem(
     'productInWarehouses',
     JSON.stringify(productParam.product_in_warehouses)
   );
+  const productInfo = await getAdditionalProductInfo(productParam.id);
   const groupUnderScore = group.replace(/ /g, '_');
-  const groupProductIds = productParam.groups_ids;
+  const groupProductIds = getGroupsIds(productParam);
   const productTypeContainer = document.querySelector(`#product-adjust-product-name-container`);
   const adjustContainer = document.createElement('div');
   adjustContainer.classList.add('sm:col-span-2', 'flex', 'gap-4');
@@ -1295,7 +1415,7 @@ function createAdjustAction(isEqual: boolean, masterGroup: string, group: string
     `#adjust-product-quantity-${groupUnderScore}`
   );
 
-  for (const warehouse of productParam.all_warehouses) {
+  for (const warehouse of productInfo.all_warehouses) {
     if (isEvent && warehouse.name !== eventsWarehouse) {
       continue;
     }
@@ -1379,14 +1499,19 @@ function deleteAdjustContainer(nameGroup: string, nameGroupValue: string) {
 }
 
 // ----add inbound order item for edit modal----
-function createProductGroupEditItem(
+async function createProductGroupEditItem(
   productParam: IProduct = null,
+  productInfo: IProductAdditionalInfo = null,
   masterGroup: string = null,
   itemIndex: number = null
 ) {
   if (!productParam) {
     const product: IProduct = JSON.parse(sessionStorage.getItem('product'));
     productParam = product;
+  }
+
+  if (!productInfo) {
+    productInfo = await getAdditionalProductInfo(productParam.id);
   }
 
   const productGroupEditContainer = document.querySelector('#product-group-edit-add-container');
@@ -1444,11 +1569,12 @@ function createProductGroupEditItem(
   `;
 
   const productGroupEditSelect: HTMLSelectElement = productGroupEditItem.querySelector('.product-group-edit-item');
-  const availableMasterGroups = Object.keys(productParam.mstr_prod_grps_prod_grps_names);
+  const availableMasterGroups = [...productInfo.master_groups_groups.map((e) => e.master_group)];
   const productMasterGroupEditSelect: HTMLSelectElement = productGroupEditItem.querySelector(
     `#product-master-group-edit-item-${index}`
   );
-  availableMasterGroups.forEach((masterGroup) => {
+
+  availableMasterGroups.forEach((masterGroup: string) => {
     const option = document.createElement('option');
     option.setAttribute('value', masterGroup);
     option.innerHTML = masterGroup;
@@ -1456,30 +1582,36 @@ function createProductGroupEditItem(
   });
   if (masterGroup) {
     productMasterGroupEditSelect.value = masterGroup;
-    productParam.mstr_prod_grps_prod_grps_names[masterGroup].forEach(
-      (group: { group_name: string; group_id: number }) => {
-        const productGroupSelectOption = document.createElement('option');
-        productGroupSelectOption.setAttribute('value', group.group_id.toString());
-        productGroupSelectOption.textContent = group.group_name;
-        productGroupEditSelect.appendChild(productGroupSelectOption);
-      }
+    const currentMasterGroup = productInfo.master_groups_groups.find(
+      (masterGroupItem) => masterGroupItem.master_group === masterGroup
     );
+
+    currentMasterGroup.groups.forEach((group: { group_name: string; group_id: number }) => {
+      const productGroupSelectOption = document.createElement('option');
+      productGroupSelectOption.setAttribute('value', group.group_id.toString());
+      productGroupSelectOption.textContent = group.group_name;
+      productGroupEditSelect.appendChild(productGroupSelectOption);
+    });
     // TODO: always select first option
     if (!itemIndex) {
       itemIndex = 0;
     }
-    productGroupEditSelect.value =
-      productParam.mstr_grps_grps_names_in_prod[masterGroup][itemIndex].group_id.toString();
+    const currentProductMasterGroup = productInfo.current_master_product_groups.find(
+      (masterGroupItem) => masterGroupItem.master_group === masterGroup
+    );
+
+    productGroupEditSelect.value = currentProductMasterGroup.groups[itemIndex].group_id.toString();
   }
 
   const options = productMasterGroupEditSelect.querySelectorAll('option');
   productMasterGroupEditSelect.addEventListener('change', () => {
     options.forEach((e) => {
       if (e.textContent === productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text) {
-        const optionCategory =
-          productParam.mstr_prod_grps_prod_grps_names[
+        const optionCategory = productInfo.master_groups_groups.find(
+          (masteGroup) =>
+            masteGroup.master_group ===
             productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
-          ];
+        )?.groups;
 
         document.getElementById(`product-group-edit-item-${index}`).innerHTML = '';
         if (optionCategory) {

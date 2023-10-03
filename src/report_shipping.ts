@@ -1,8 +1,8 @@
-import { Modal, ModalOptions } from "flowbite";
-import HTMXDispatcher from "./htmx";
-import { IGroup } from "./inbound_order/types";
-import { IShipRequest } from "./outgoing_stock";
-import { defaultBrandImage } from "./base";
+import { Modal, ModalOptions } from 'flowbite';
+import HTMXDispatcher from './htmx';
+import { IGroup, IProduct, IPagination } from './inbound_order/types';
+import { IShipRequest } from './outgoing_stock';
+import { defaultBrandImage } from './base';
 
 export interface IRequestShare {
   status: string;
@@ -13,12 +13,16 @@ export interface IRequestShare {
 }
 
 interface IReportShipping {
-  type: string
+  type: string;
   createdAt: string;
   history: string;
 
   shipRequest: IShipRequest;
   user: IUser;
+}
+
+interface IUser {
+  username: string;
 }
 
 interface IReportShippingResponse {
@@ -38,15 +42,17 @@ const downloadCSV = async function () {
     created_from: filterCreatedFromHTML,
     created_to: filterCreatedToHTML,
     q: filterSearchQueryHTML,
-  }
+  };
 
-  const filterQuery = []
+  const filterQuery = [];
   for (const [queryKey, queryInput] of Object.entries(filtersMap)) {
     filterQuery.push(`${queryKey}=${queryInput.value}`);
   }
 
   // CSV Headers
-  const csvData = ['action_type,user,created_at,history,current_ship_request_status,order_number,store_name,sku,product_name,group,quantity'];
+  const csvData = [
+    'action_type,user,created_at,history,current_ship_request_status,order_number,store_name,sku,product_name,group,quantity',
+  ];
   let pages = 1;
 
   const urlWithoutQueryParams = location.origin + location.pathname;
@@ -55,25 +61,24 @@ const downloadCSV = async function () {
     const res = await fetch(`${urlWithoutQueryParams}${url}`);
     const data: IReportShippingResponse = JSON.parse(await res.json());
 
-    data.reports.forEach(report => {
-      report.shipRequest.carts.forEach(cart => {
+    data.reports.forEach((report) => {
+      report.shipRequest.carts.forEach((cart) => {
         csvData.push(
-        [
-          report.type,
-          report.user.username,
-          report.createdAt,
-          report.history,
-          report.shipRequest.status,
-          report.shipRequest.orderNumb,
-          report.shipRequest.store.storeName,
-          cart.product.SKU,
-          cart.product.name,
-          cart.group,
-          cart.quantity,
-        ].join(',')
-      )
-      })
-     
+          [
+            report.type,
+            report.user.username,
+            report.createdAt,
+            report.history,
+            report.shipRequest.status,
+            report.shipRequest.orderNumb,
+            report.shipRequest.store.storeName,
+            cart.product.SKU,
+            cart.product.name,
+            cart.group,
+            cart.quantity,
+          ].join(',')
+        );
+      });
     });
 
     pages = data.pagination.pages;
@@ -85,7 +90,7 @@ const downloadCSV = async function () {
   a.setAttribute('download', 'report_shipping.csv');
   a.click();
   a.remove();
-}
+};
 
 document.addEventListener('DOMContentLoaded', () => {
   // init view modal
@@ -100,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const cartsTable = document.querySelector('#table-carts') as HTMLTableElement;
   const cartItemTemplate = document.querySelector('#view-cart-template') as HTMLTableRowElement;
-  
+
   const viewModalOptions: ModalOptions = {
     placement: 'bottom-right',
     backdrop: 'dynamic',
@@ -108,9 +113,9 @@ document.addEventListener('DOMContentLoaded', () => {
     closable: true,
     onHide: () => {
       (viewHistoryHTML.parentNode as HTMLDivElement).classList.add('hidden');
-      cartsTable.querySelectorAll('.cart-item-view').forEach(cartItem => cartItem.remove());
+      cartsTable.querySelectorAll('.cart-item-view').forEach((cartItem) => cartItem.remove());
     },
-  }
+  };
   const viewModal = new Modal(viewModalHTML, viewModalOptions);
 
   // Init loader
@@ -153,8 +158,10 @@ document.addEventListener('DOMContentLoaded', () => {
           const cartStatusHTML = cartTemplateClone.querySelector('.view-status') as HTMLDivElement;
 
           cartIndexHTML.innerHTML = (i + 1).toString();
-          cartItemImageHTML.setAttribute('src', cart.product.image !== 'default' ? cart.product.image : defaultBrandImage);
-          
+          cartItemImageHTML.setAttribute(
+            'src',
+            cart.product.image !== 'default' ? cart.product.image : defaultBrandImage
+          );
 
           cartProductNameHTML.innerHTML = cart.product.name;
           cartProductSKUHTML.innerHTML = cart.product.SKU;
@@ -163,20 +170,20 @@ document.addEventListener('DOMContentLoaded', () => {
           cartStatusHTML.innerHTML = cart.status;
 
           cartsTable.appendChild(cartTemplateClone);
-        })
+        });
 
         viewModal.show();
-      })
+      });
     });
   });
 
   // clear button
   const clearFilterButton = document.querySelector('#report-filter-clear-button') as HTMLButtonElement;
-  const filtersHTML = document.querySelectorAll('.report-filter') as NodeListOf<HTMLInputElement | HTMLSelectElement>
+  const filtersHTML = document.querySelectorAll('.report-filter') as NodeListOf<HTMLInputElement | HTMLSelectElement>;
   clearFilterButton.addEventListener('click', () => {
-    filtersHTML.forEach(filter => {
-      (filter as HTMLInputElement).value = "";
-    })
+    filtersHTML.forEach((filter) => {
+      (filter as HTMLInputElement).value = '';
+    });
     reportShareRequestLoader.click();
   });
 
@@ -190,17 +197,17 @@ function formatDate(date: Date) {
   let now = new Date();
   let differSec = (+now - +date) / 1000;
 
-  if (differSec < 1) return result = "right now";
-  if (differSec < 60) return result = `${Math.floor(differSec)} sec. ago`;
-  if (differSec < 3600) return result = `${Math.floor(differSec / 60)} min. ago`;
+  if (differSec < 1) return (result = 'right now');
+  if (differSec < 60) return (result = `${Math.floor(differSec)} sec. ago`);
+  if (differSec < 3600) return (result = `${Math.floor(differSec / 60)} min. ago`);
   if (differSec >= 3600) {
     const day = date.getDate();
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
 
-    let [hours, minutes] = date.toLocaleTimeString().split(":");
-    return result = `${month}.${day}.${year} ${hours}:${minutes}`;
-  };
+    let [hours, minutes] = date.toLocaleTimeString().split(':');
+    return (result = `${month}.${day}.${year} ${hours}:${minutes}`);
+  }
 
   return result;
 }

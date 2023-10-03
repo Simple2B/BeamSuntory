@@ -38,8 +38,6 @@ class Cart(db.Model, ModelMixin):
     # Column
     quantity: orm.Mapped[int] = orm.mapped_column(sa.Integer)
     order_numb: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=True)
-    # TODO replace with group_id
-    group: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=True)
     status: orm.Mapped[str] = orm.mapped_column(
         sa.String(64), default="pending"
     )  # in progress, completed, removed
