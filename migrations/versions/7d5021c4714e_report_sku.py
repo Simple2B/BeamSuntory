@@ -1,8 +1,8 @@
 """report sku
 
-Revision ID: 943a9c8ca92f
-Revises: ad231b84dcd3
-Create Date: 2023-09-29 13:03:15.824880
+Revision ID: 7d5021c4714e
+Revises: 6278e53df31e
+Create Date: 2023-10-03 15:56:40.436810
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = "943a9c8ca92f"
-down_revision = "ad231b84dcd3"
+revision = "7d5021c4714e"
+down_revision = "6278e53df31e"
 branch_labels = None
 depends_on = None
 
@@ -35,8 +35,8 @@ def upgrade():
         sa.Column("created_at", sa.DateTime(), nullable=False),
         sa.ForeignKeyConstraint(
             ["adjustment_id"],
-            ["adjusts.id"],
-            name=op.f("fk_report_skus_adjustment_id_adjusts"),
+            ["adjusts_group_qty.id"],
+            name=op.f("fk_report_skus_adjustment_id_adjusts_group_qty"),
         ),
         sa.ForeignKeyConstraint(
             ["assign_id"], ["assigns.id"], name=op.f("fk_report_skus_assign_id_assigns")
