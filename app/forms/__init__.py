@@ -37,4 +37,4 @@ from .package_info import PackageInfoForm
 from .division import DivisionForm, NewDivisionForm
 from .request_share import RequestShareForm
 from .store_category import StoreCategoryForm, NewStoreCategoryForm
-from .event import EventFormCreate
+from .event import EventFormCreate, EventUpdateReservedDaysAmount
