@@ -1,5 +1,5 @@
 import { ModalOptions, Modal } from 'flowbite';
-import { IProduct } from './inbound_order/types';
+import { IProduct, IPagination } from './inbound_order/types';
 import HTMXDispatcher from './htmx';
 
 interface IUser {
@@ -68,6 +68,15 @@ interface IEventsReportResponse {
   report_events: IReportEvent[];
 }
 
+interface IEvents {
+  id: number;
+  product: IProduct;
+  dateFrom: string;
+  dateTo: string;
+  comment: string;
+  user: IUser;
+}
+
 // initialize htmx listener
 const htmxDispatcher = new HTMXDispatcher();
 
@@ -100,14 +109,14 @@ const downloadCSV = async function () {
   // CSV Headers
   const csvData = ['created_at,store_name,type,username,date_from,date_to,sku,product_name'];
   let pages = 1;
-  const queryTail = filterQuery ? filterQuery.join('&') : '' ;
+  const queryTail = filterQuery ? filterQuery.join('&') : '';
 
   for (let page = 1; page <= pages; page++) {
     const currentURL = window.location.href.replace(/#/g, '');
     const url = [`api?page=${page}`, queryTail].join('&');
     const res = await fetch(`${currentURL}/${url}`);
     const data: IEventsReportResponse = await res.json();
-    
+
     data.report_events.forEach((reportEvent) => {
       reportEvent.shipRequest.carts.forEach((cart: IProductEvent) => {
         csvData.push(
@@ -116,8 +125,8 @@ const downloadCSV = async function () {
             reportEvent.shipRequest.store.storeName,
             reportEvent.type,
             reportEvent.user.username,
-            cart.event ? cart.event.dateFrom: '',
-            cart.event ? cart.event.dateTo: '',
+            cart.event ? cart.event.dateFrom : '',
+            cart.event ? cart.event.dateTo : '',
             cart.product.SKU,
             cart.product.name,
           ].join(',')
@@ -183,10 +192,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const reportViewDate = document.getElementById('report-event-date') as HTMLDivElement;
   const reportStoreName = document.getElementById('report-store-name') as HTMLDivElement;
 
-  const viewReportEventsModalCloseButton = document.querySelector('#buttonClosingReportEventModal') as HTMLButtonElement
+  const viewReportEventsModalCloseButton = document.querySelector(
+    '#buttonClosingReportEventModal'
+  ) as HTMLButtonElement;
   viewReportEventsModalCloseButton.addEventListener('click', () => {
     viewModal.hide();
-  })
+  });
 
   // onload element with events-table id
   htmxDispatcher.onLoad('events-table', (target) => {

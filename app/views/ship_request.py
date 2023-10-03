@@ -155,6 +155,10 @@ def create():
             )
             return redirect(url_for("product.get_all"))
 
+        # check if there are events in the ship request
+        # if yes - create event report
+        events_exist = False
+
         # Create ship request
         ship_request = m.ShipRequest(
             # NOTE: what status is default?
@@ -207,6 +211,7 @@ def create():
                     type=s.ReportEventType.created.value,
                     user=current_user,
                 )
+                events_exist = True
                 # creation event
                 event = m.Event(
                     date_reserve_from=start_date - timedelta(days=5),
@@ -225,6 +230,13 @@ def create():
 
                 cart.warehouse = warehouse_event
 
+            m.ReportSKU(
+                product_id=cart.product_id,
+                ship_request=ship_request,
+                type=s.ReportSKUType.ship_request.value,
+                status="Ship request created.",
+            ).save(False)
+
             cart.status = "submitted"
             cart.order_numb = ship_request.order_numb
             cart.ship_request_id = ship_request.id
@@ -232,6 +244,10 @@ def create():
 
         log(log.INFO, "Form submitted. Ship Request: [%s]", ship_request)
         flash("Ship request added!", "success")
+        if events_exist:
+            ship_request.report_event = report_event
+            report_event.save(False)
+
         ship_request.save(False)
 
         db.session.commit()

@@ -1,113 +1,81 @@
-import { Modal } from 'flowbite'
-import type { ModalOptions, ModalInterface } from 'flowbite'
-import { IInboundOrderOut } from './inbound_order/types'
+import { ModalOptions, Modal } from 'flowbite'
+import { IInboundOrderBase } from './inbound_order/types'
+import HTMXDispatcher from './htmx'
 
-// ----view modal----
-const $viewModalElement: HTMLElement = document.querySelector('#viewPickupInboundModal')
 
-const viewModalClosingButton: HTMLButtonElement = document.querySelector('#buttonClosingViewPickupInboundModal')
-viewModalClosingButton.addEventListener('click', () => {
-    viewModal.hide()
-})
+// initialize htmx listener
+const htmxDispatcher = new HTMXDispatcher();
 
-const viewModalOptions: ModalOptions = {
+
+document.addEventListener('DOMContentLoaded', () => {
+  const buttonLoadEventsTable = document.querySelector('#table-report-loader') as HTMLButtonElement;
+
+  // load table
+  buttonLoadEventsTable.click();
+
+  // initialize modal
+  const viewReportEventsModal = document.getElementById('viewPickupInboundModal') as HTMLDivElement;
+  const viewModalOptions: ModalOptions = {
     placement: 'bottom-right',
     backdrop: 'dynamic',
     backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
     closable: true,
     onHide: () => {
-        const productItems = document.querySelectorAll('.pickup-inbound-view-add-item')
-        productItems.forEach((item) => {
-            item.remove()
-        })
-        sessionStorage.removeItem('inboundOrder')
+      const productItems = document.querySelectorAll('.product-item-view') as NodeListOf<HTMLTableColElement>
+      productItems.forEach((productItem) => productItem.remove());
     },
-    onShow: () => {
-        console.log('pickup-inbound id: ')
-    },
-    onToggle: () => {
-        console.log('modal has been toggled')
-    },
-}
+  }
 
-const viewModal: ModalInterface = new Modal($viewModalElement, viewModalOptions)
+  const viewModal = new Modal(viewReportEventsModal, viewModalOptions);
+  const closingViewModalButton = document.querySelector('#buttonClosingViewPickupInboundModal') as HTMLButtonElement;
+  closingViewModalButton.addEventListener('click', () => {
+    viewModal.hide();
+  })
 
-// function to filter order by status
-const orderFilterPickupInboundInputs = document.querySelectorAll('.pickup-inbound-filter-input')
-const sortByNamePickupInboundStorage = JSON.parse(sessionStorage.getItem('sortByNamePickupInbound'))
+  // view buttons click
+  const orderTitleId = document.getElementById('pickup-inbound-view-order-id') as HTMLDivElement;
+  const orderTitle = document.getElementById('pickup-inbound-view-order-title') as HTMLDivElement;
+  const orderStatus = document.getElementById('pickup-inbound-view-status') as HTMLDivElement;
+  const orderWarehouse = document.getElementById('pickup-inbound-view-warehouse-id') as HTMLDivElement;
+  const orderActiveDate = document.getElementById('pickup-inbound-view-active-date') as HTMLDivElement;
+  const orderActiveTime = document.getElementById('pickup-inbound-view-active-time') as HTMLDivElement;
+  const orderDeliveryDate = document.getElementById('pickup-inbound-view-delivery-date') as HTMLDivElement;
+  const supplierName = document.getElementById('pickup-inbound-view-supplier-id') as HTMLDivElement;
+  const supplierAddress = document.getElementById('pickup-inbound-view-supplier-address') as HTMLDivElement;
+  const orderId= document.getElementById('pickup-inbound-view-inbound-order-id') as HTMLInputElement;
+  const pickupInboundButton = document.querySelector('.pickup-inbound-btn') as HTMLButtonElement;
+  const  deliverAgentNotes = document.getElementById('pickup-inbound-view-da-notes') as HTMLDivElement;
+  const warehouseManagerNotes = document.getElementById('pickup-inbound-view-wm-notes') as HTMLDivElement;
 
-if (sortByNamePickupInboundStorage) {
-    const filterDropdownContainer = document.querySelector('#dropdownRadioButton-pickup-inbound-status')
-    const [entityName , filteredStatusValue] = sortByNamePickupInboundStorage.split('.')
-    filterDropdownContainer.innerHTML = `${filteredStatusValue}
-          <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-          viewBox="0 0 10 6">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="m1 1 4 4 4-4" />
-        </svg>`
-}
+  // onload element with events-table id
+  htmxDispatcher.onLoad('events-table', (target) => {
+    const reportViewButtons: NodeListOf<HTMLButtonElement> = target.querySelectorAll('.pickup-inbound-view-button');
+    reportViewButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const reportAssign: IInboundOrderBase = JSON.parse(btn.getAttribute('data-target'));
 
-orderFilterPickupInboundInputs.forEach((input: HTMLInputElement) => {
-    const hiddenInput = document.querySelector('#sort_by') as HTMLInputElement
-    input.addEventListener('change', () => {
-        if (input.checked) {
-            hiddenInput.value = input.value
-            sessionStorage.setItem('sortByNamePickupInbound', JSON.stringify(input.value))
+        orderId.value = reportAssign.id.toString();
+        orderTitleId.innerHTML = reportAssign.orderId;
+        orderTitle.innerHTML = reportAssign.title;
+        orderStatus.innerHTML = reportAssign.status;
+        orderWarehouse.innerHTML = reportAssign.warehouse.name;
+        orderActiveDate.innerHTML = reportAssign.activeDate;
+        orderActiveTime.innerHTML = reportAssign.activeTime;
+        orderDeliveryDate.innerHTML = reportAssign.deliveryDate;
+        supplierName.innerHTML = reportAssign.supplier.name;
+        supplierAddress.innerHTML = reportAssign.supplier.address;
+
+        deliverAgentNotes.innerHTML = reportAssign.daNotes;
+        warehouseManagerNotes.innerHTML = reportAssign.wmNotes;
+        
+        pickupInboundButton.classList.add('hidden');
+
+        if (reportAssign.status == 'Assigned to pickup') {
+          pickupInboundButton.classList.remove('hidden');
         }
-    })
-})
 
-const pickupInboundSearchButton= document.querySelector('#table-search-pickup-inbound-button')
-pickupInboundSearchButton.addEventListener('click', () => {
-    const searchInput = document.querySelector('#table-search-pickup-inbounds') as HTMLInputElement
-    console.log(searchInput.value)
-    const url = new URL(window.location.href)
-    const params = new URLSearchParams(url.search)
-    params.set('q', searchInput.value)
-    window.location.href = `${url.origin}${url.pathname}?${params.toString()}`    
-})
-
-document.addEventListener('DOMContentLoaded', () => {
-    // open view modal
-    const buttonsOpenViewModal: NodeListOf<HTMLButtonElement> = document.querySelectorAll('.pickup-inbound-view-button')
-    const inboundOrderId: HTMLInputElement = document.querySelector('#pickup-inbound-view-inbound-order-id')
-    const orderIdView: HTMLDivElement = document.querySelector('#pickup-inbound-view-order-id')
-    const orderTitleView: HTMLDivElement = document.querySelector('#pickup-inbound-view-order-title')
-    const orderStatusView: HTMLDivElement = document.querySelector('#pickup-inbound-view-status')
-    const orderSupplierNameView: HTMLDivElement = document.querySelector('#pickup-inbound-view-supplier-id')
-    const orderSupplierAddressView: HTMLDivElement = document.querySelector('#pickup-inbound-view-supplier-address')
-    const orderWarehouseView: HTMLDivElement = document.querySelector('#pickup-inbound-view-warehouse-id')
-    const orderActiveDateView: HTMLDivElement = document.querySelector('#pickup-inbound-view-active-date')
-    const orderActiveTimeView: HTMLDivElement = document.querySelector('#pickup-inbound-view-active-time')
-    const orderDeliveryDateView: HTMLDivElement = document.querySelector('#pickup-inbound-view-delivery-date')
-    const wmNotesView: HTMLInputElement = document.querySelector('#pickup-inbound-view-wm-notes')
-    const daNotesView: HTMLInputElement = document.querySelector('#pickup-inbound-view-da-notes')
-    const pickupInboundButton: HTMLDivElement = document.querySelector('.pickup-inbound-btn')
-
-    buttonsOpenViewModal.forEach((button) => {
-        button.addEventListener('click', () => {
-            const inboundOrder: IInboundOrderOut = JSON.parse(button.getAttribute('data-target'))
-            inboundOrderId.value = inboundOrder.id.toString()
-            orderIdView.innerHTML = inboundOrder.orderId
-            orderTitleView.innerHTML = inboundOrder.title
-            orderStatusView.innerHTML = inboundOrder.status
-            orderSupplierNameView.innerHTML = inboundOrder.supplier.name
-            orderSupplierAddressView.innerHTML = inboundOrder.supplier.address
-            orderWarehouseView.innerHTML = inboundOrder.warehouse.name
-            orderActiveDateView.innerHTML = inboundOrder.activeDate
-            orderActiveTimeView.innerHTML = inboundOrder.activeTime
-            orderDeliveryDateView.innerHTML = inboundOrder.deliveryDate
-            wmNotesView.value = inboundOrder.wmNotes
-            daNotesView.value = inboundOrder.daNotes
-
-            if (inboundOrder.status !== 'Assigned to pickup') {
-                pickupInboundButton.classList.add('invisible')
-            } else {
-                // Pickup order
-                pickupInboundButton.classList.remove('invisible')
-                pickupInboundButton.setAttribute('data-target', inboundOrder.id.toString())
-            }
-            viewModal.show()
-        })
-    })
+        viewModal.show();
+      })
+    });
+  });
 })

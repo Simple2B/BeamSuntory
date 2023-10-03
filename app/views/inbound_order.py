@@ -160,6 +160,12 @@ def create():
                     shelf_life_end=product_data.shelf_life_end,
                 )
             )
+            m.ReportSKU(
+                product=product,
+                inbound_order=inbound_order,
+                type=s.ReportSKUType.inbound_order.value,
+                status="Allocation created",
+            ).save(False)
 
         inbound_order.save()
 
@@ -286,7 +292,7 @@ def save():
                 )
 
         for product_quantity_group in product_quantity_groups.root:
-            product_allocated = db.session.scalar(
+            product_allocated: m.ProductAllocated = db.session.scalar(
                 m.ProductAllocated.select().where(
                     m.ProductAllocated.id
                     == product_quantity_group.product_allocated_id,
@@ -340,6 +346,13 @@ def save():
                         product_allocated_id=product_allocated.id,
                     )
                 )
+                if inbound_order.status == s.InboundOrderStatus.assigned:
+                    m.ReportSKU(
+                        product_id=product_allocated.product_id,
+                        inbound_order=inbound_order,
+                        type=s.ReportSKUType.inbound_order.value,
+                        status="Products allocated. Inbound order assigned.",
+                    ).save(False)
 
         if inbound_order.status == s.InboundOrderStatus.assigned:
             for product_quantity_group in product_quantity_groups.root:

@@ -1,6 +1,6 @@
-import { Modal, ModalOptions } from "flowbite";
-import HTMXDispatcher from "./htmx";
-import { IGroup } from "./inbound_order/types";
+import { Modal, ModalOptions } from 'flowbite';
+import HTMXDispatcher from './htmx';
+import { IGroup, IPagination, IProduct, IUser } from './inbound_order/types';
 
 export interface IRequestShare {
   status: string;
@@ -11,7 +11,7 @@ export interface IRequestShare {
 }
 
 interface IReportRequestShare {
-  type: string
+  type: string;
   createdAt: string;
   history: string;
 
@@ -36,9 +36,9 @@ const downloadCSV = async function () {
     created_from: filterCreatedFromHTML,
     created_to: filterCreatedToHTML,
     q: filterSearchQueryHTML,
-  }
+  };
 
-  const filterQuery = []
+  const filterQuery = [];
   for (const [queryKey, queryInput] of Object.entries(filtersMap)) {
     filterQuery.push(`${queryKey}=${queryInput.value}`);
   }
@@ -55,7 +55,7 @@ const downloadCSV = async function () {
 
     console.log(data);
 
-    data.reports.forEach(report => {
+    data.reports.forEach((report) => {
       csvData.push(
         [
           report.type,
@@ -67,7 +67,7 @@ const downloadCSV = async function () {
           report.requestShare.product.SKU,
           report.requestShare.product.name,
         ].join(',')
-      )
+      );
     });
 
     pages = data.pagination.pages;
@@ -79,7 +79,7 @@ const downloadCSV = async function () {
   a.setAttribute('download', 'events.csv');
   a.click();
   a.remove();
-}
+};
 
 document.addEventListener('DOMContentLoaded', () => {
   // init view modal
@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const viewProductSkuHTML = viewModalHTML.querySelector('#view-product-sku') as HTMLDivElement;
   const viewProductNameHTML = viewModalHTML.querySelector('#view-product-name') as HTMLDivElement;
   const viewHistoryHTML = viewModalHTML.querySelector('#view-history') as HTMLDivElement;
-  
+
   const viewModalOptions: ModalOptions = {
     placement: 'bottom-right',
     backdrop: 'dynamic',
@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
     onHide: () => {
       (viewHistoryHTML.parentNode as HTMLDivElement).classList.add('hidden');
     },
-  }
+  };
   const viewModal = new Modal(viewModalHTML, viewModalOptions);
 
   // Init loader
@@ -113,7 +113,6 @@ document.addEventListener('DOMContentLoaded', () => {
   htmxDispatcher.onLoad('request-shares-table', () => {
     const viewButtons = document.querySelectorAll('.report-view-btn') as NodeListOf<HTMLButtonElement>;
     viewButtons.forEach((button) => {
-
       const reportRequestShare: IReportRequestShare = JSON.parse(button.getAttribute('data-target'));
 
       // view click
@@ -133,17 +132,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         viewModal.show();
-      })
+      });
     });
   });
 
   // clear button
   const clearFilterButton = document.querySelector('#report-filter-clear-button') as HTMLButtonElement;
-  const filtersHTML = document.querySelectorAll('.report-filter') as NodeListOf<HTMLInputElement | HTMLSelectElement>
+  const filtersHTML = document.querySelectorAll('.report-filter') as NodeListOf<HTMLInputElement | HTMLSelectElement>;
   clearFilterButton.addEventListener('click', () => {
-    filtersHTML.forEach(filter => {
-      (filter as HTMLInputElement).value = "";
-    })
+    filtersHTML.forEach((filter) => {
+      (filter as HTMLInputElement).value = '';
+    });
     reportShareRequestLoader.click();
   });
 
@@ -157,17 +156,17 @@ function formatDate(date: Date) {
   let now = new Date();
   let differSec = (+now - +date) / 1000;
 
-  if (differSec < 1) return result = "right now";
-  if (differSec < 60) return result = `${Math.floor(differSec)} sec. ago`;
-  if (differSec < 3600) return result = `${Math.floor(differSec / 60)} min. ago`;
+  if (differSec < 1) return (result = 'right now');
+  if (differSec < 60) return (result = `${Math.floor(differSec)} sec. ago`);
+  if (differSec < 3600) return (result = `${Math.floor(differSec / 60)} min. ago`);
   if (differSec >= 3600) {
     const day = date.getDate();
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
 
-    let [hours, minutes] = date.toLocaleTimeString().split(":");
-    return result = `${month}.${day}.${year} ${hours}:${minutes}`;
-  };
+    let [hours, minutes] = date.toLocaleTimeString().split(':');
+    return (result = `${month}.${day}.${year} ${hours}:${minutes}`);
+  }
 
   return result;
 }

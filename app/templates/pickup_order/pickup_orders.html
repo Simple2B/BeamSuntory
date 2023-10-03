@@ -6,7 +6,7 @@
 {% else %}
 {% set base_url = url_for('pickup_order.get_all') %}
 {% endif %}
-<div class="relative overflow-visible shadow-md sm:rounded-lg overflow-x-auto">
+<div class="relative overflow-visible shadow-md sm:rounded-lg overflow-x-auto min-h-half">
   <div class="flex flex-wrap sm:gap-4">
     <form id="pickup-order-filter-form" action="{{url_for('pickup_order.sort')}}" method="post"
       class="flex flex-wrap py-4 gap-3 bg-white dark:bg-gray-800">

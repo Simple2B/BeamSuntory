@@ -1,5 +1,5 @@
 import { ModalOptions, Modal } from 'flowbite';
-import { IProduct, IWarehouse, IInboundOrderBase } from './inbound_order/types';
+import { IProduct, IWarehouse, IInboundOrderBase, IPagination } from './inbound_order/types';
 import HTMXDispatcher from './htmx';
 
 interface IUser {
@@ -109,16 +109,12 @@ const downloadCSV = async function () {
   for (let page = 1; page <= pages; page++) {
     const currentURL = window.location.href.replace(/#/g, '');
     const urlWithoutQueryParams = currentURL.split('?')[0];
-    // TODO do we need to loads only one page csv???
-    // const url = [`api?page=${page}`, queryTail].join('&')
-    // const url = ['api', queryTail].join('&')
-    const url = queryTail ? ['api', queryTail].join('?') : 'api';
+    const url = [`api?page=${page}`, queryTail].join('&');
 
     const res = await fetch(`${urlWithoutQueryParams}/${url}`);
     const data: IInventoriesReportResponse = await res.json();
 
     data.reportInventoryList.forEach((reportInventories) => {
-      console.log('CSV data', reportInventories);
       reportInventories.reportInventories.forEach((report: IReportInventory) => {
         let reportTarget;
         if (reportInventories.store) {
@@ -201,7 +197,6 @@ document.addEventListener('DOMContentLoaded', () => {
     viewModal.hide();
   });
 
-
   // view buttons click
   const reportViewUser = document.getElementById('report-inventory-user') as HTMLDivElement;
   const reportViewAction = document.getElementById('report-inventory-action') as HTMLDivElement;
@@ -214,7 +209,6 @@ document.addEventListener('DOMContentLoaded', () => {
     reportViewButtons.forEach((btn) => {
       btn.addEventListener('click', () => {
         const reportInventory: IReportInventoryList = JSON.parse(btn.getAttribute('data-target'));
-        console.log('reportInventory json', reportInventory);
 
         reportViewUser.innerHTML = reportInventory.user.username;
         reportViewAction.innerHTML = reportInventory.type;
@@ -261,6 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
           //   productRegularPrice.innerHTML = inventory.product.regularPrice.toString()
           // } else {
           //   productRegularPrice.innerHTML = 'No price'
+          //
           // }
 
           // if (inventory.product.retailPrice) {

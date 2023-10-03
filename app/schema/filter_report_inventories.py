@@ -15,3 +15,4 @@ class FilterReportInventories(BaseModel):
     group_category: str | None = None
     group_premises: str | None = None
     group_event: str | None = None
+    report_type: str | None = None

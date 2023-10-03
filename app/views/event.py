@@ -2,12 +2,7 @@ import json
 from datetime import datetime
 from http import HTTPStatus
 import functools
-from flask import (
-    Blueprint,
-    jsonify,
-    request,
-    render_template,
-)
+from flask import Blueprint, jsonify, request, render_template, redirect, url_for, flash
 from flask_login import login_required
 import sqlalchemy as sa
 from app.controllers import create_pagination
@@ -15,6 +10,7 @@ from app.controllers import create_pagination
 from app import schema as s
 from app import models as m, db
 from app.logger import log
+from app import forms as f
 
 
 event_blueprint = Blueprint("event", __name__, url_prefix="/event")
@@ -81,6 +77,8 @@ def get_events_json():
 @event_blueprint.route("/", methods=["GET"])
 @login_required
 def get_all():
+    form_edit = f.InboundOrderUpdateForm()
+
     q = request.args.get("q", type=str, default=None)
     start_from = request.args.get("start_from", type=str, default=None)
     start_to = request.args.get("start_to", type=str, default=None)
@@ -98,6 +96,7 @@ def get_all():
         start_to=start_to,
         end_from=end_from,
         end_to=end_to,
+        form_edit=form_edit,
     )
 
 
@@ -226,3 +225,29 @@ def get_available_quantity_by_date():
             HTTPStatus.BAD_REQUEST,
         )
     return "ok", HTTPStatus.OK
+
+
+@event_blueprint.route("/save_reserved_days_amount", methods=["POST"])
+@login_required
+def save_reserved_days_amount():
+    form: f.EventUpdateReservedDaysAmount = f.EventUpdateReservedDaysAmount()
+    if form.validate_on_submit():
+        query = m.Event.select().where(m.Event.id == int(form.event_id.data))
+        event: m.Event | None = db.session.scalar(query)
+        if not event:
+            log(
+                log.ERROR,
+                "Not found store by id : [%s]",
+                form.event_id.data,
+            )
+            flash("Cannot save event data", "danger")
+        event.date_reserve_to = form.date_reserve_to.data
+        event.save()
+        if form.next_url.data:
+            return redirect(form.next_url.data)
+        return redirect(url_for("event.get_all"))
+
+    else:
+        log(log.ERROR, "event save errors: [%s]", form.errors)
+        flash(f"{form.errors}", "danger")
+        return redirect(url_for("event.get_all"))

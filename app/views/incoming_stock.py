@@ -196,6 +196,16 @@ def accept():
             )
             report_inventory.save(False)
 
+            m.ReportSKU(
+                qty_before=qty_before,
+                qty_after=new_package_info.quantity_received,
+                product_id=product_quantity_group.product_allocated.product_id,
+                inbound_order=inbound_order,
+                type=s.ReportSKUType.inbound_order.value,
+                status="Inbound order accepted",
+                warehouse_product=warehouse_product,
+            ).save(False)
+
     inbound_order.status = s.InboundOrderStatus.delivered
     log(log.INFO, "Inbound order accepted. Inbound order: [%s]", inbound_order)
 

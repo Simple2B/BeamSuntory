@@ -55,6 +55,7 @@ export interface IAllocatedProductOut extends IProductAllocatedBase {
     productQuantityGroups: IProductQuantityGroupOut[];
 }
 export interface IInboundOrderBase {
+    id: number;
     orderId: string;
     status: string;
     title: string;
@@ -70,4 +71,10 @@ export interface IInboundOrderOut extends IInboundOrderBase {
     id: number;
     uuid: string;
     productsAllocated: IAllocatedProductOut[];
+}
+export interface IPagination {
+    pages: number;
+}
+export interface IUser {
+    username: string;
 }

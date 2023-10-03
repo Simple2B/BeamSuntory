@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField
+from wtforms import StringField, IntegerField, DateField
 from wtforms.validators import DataRequired
 
 
@@ -12,3 +12,11 @@ class EventFormCreate(FlaskForm):
     quantity = IntegerField("Quantity", [DataRequired()])
     cart_id = IntegerField("Cart ID", [DataRequired()])
     comment = StringField("Comment")
+
+
+class EventUpdateReservedDaysAmount(FlaskForm):
+    next_url = StringField("next_url")
+    event_id = IntegerField("event_id", [DataRequired()])
+    date_reserve_to = DateField(
+        "Reserved days to:", [DataRequired()], format="%m/%d/%Y"
+    )
