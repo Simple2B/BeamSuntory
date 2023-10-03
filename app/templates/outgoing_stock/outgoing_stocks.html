@@ -10,7 +10,7 @@
 <input hidden id="warehouses-json-input" value="{{warehouses_json}}">
 <input hidden id="warehouses-events-json-input" value="{{warehouses_events_json}}">
 
-<div class="relative overflow-visible shadow-md sm:rounded-lg overflow-x-auto">
+<div class="relative overflow-visible shadow-md sm:rounded-lg overflow-x-auto min-h-half">
   <div class="flex sm:gap-5 flex-wrap">
     <form id="outgoing-stock-filter-form" action="{{url_for('outgoing_stock.sort')}}" method="post"
       class="flex flex-wrap py-4 gap-3 bg-white dark:bg-gray-800">
