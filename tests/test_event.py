@@ -101,3 +101,22 @@ def test_get_available_quantity_by_date_event(mg_g_populate: FlaskClient):
         f"Product: {product.name}, available quantity: {available_quantity}"
         in response.text
     )
+
+
+def test_save_reserved_days_amount(mg_g_populate: FlaskClient):
+    login(mg_g_populate)
+
+    event: m.Event = db.session.scalar(m.Event.select())
+    event_date_reserve_to_old = event.date_reserve_to
+    event.date_reserve_to = event_date_reserve_to_old - timedelta(days=50)
+
+    response = mg_g_populate.post(
+        "/event/save_reserved_days_amount",
+        follow_redirects=True,
+    )
+    assert response.status_code == HTTPStatus.OK
+
+    event: m.Event = db.session.scalar(m.Event.select())
+    event_date_reserve_to_new = event.date_reserve_to
+
+    assert event_date_reserve_to_new != event_date_reserve_to_old
