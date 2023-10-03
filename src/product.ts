@@ -37,6 +37,31 @@ interface IProduct {
   ];
   product_in_warehouses: { [index: string]: { [index: string]: number } };
   warehouse_products: IWarehouseProduct[];
+  product_groups: IProductGroup[];
+}
+
+interface IProductAdditionalInfo {
+  all_warehouses: IWarehouse[];
+  current_master_product_groups: IMasterGroupGroup[];
+  current_user_groups: IMasterGroupGroupUser[];
+  master_groups_groups: IMasterGroupGroup[];
+}
+
+interface IMasterGroupGroup {
+  master_group: string;
+  groups: { group_name: string; group_id: number }[];
+}
+
+interface IMasterGroupGroupUser {
+  master_group_name: string;
+  groups: { group_name: string; group_id: number }[];
+}
+
+interface IProductGroup {
+  id: number;
+  product_id: number;
+  group_id: number;
+  parent: IGroup;
 }
 interface FilterJsonData {
   [key: string]: string;
@@ -50,9 +75,12 @@ interface IGroup {
   id: number;
   name: string;
   master_group: IMasterGroup;
+  master_group_id: number;
+  master_groups_for_product: IMasterGroup;
 }
 
 interface IMasterGroup {
+  id: number;
   name: string;
   master_groups_list_groups: { [index: string]: { group_name: string; group_id: number }[] };
 }
@@ -176,18 +204,12 @@ function createCustomizeViewColumn(masterGroupName: string) {
   productItemTrs.forEach((productItem: HTMLTableRowElement) => {
     const productItemReference = productItem.children[positionInTable];
     const productSKU = productItem.getAttribute('data-target-product-sku');
-
     const productItemTd = productItemReference.cloneNode(true) as HTMLElement;
     productItemTd.classList.add(`product-table-item-td-${masterGroupName}`);
     const product = JSON.parse(productItem.getAttribute('data-target-product'));
-    console.log('masterGroupName', masterGroupName);
-
-    console.log(product.product_groups);
-
-    const group = product.product_groups.find((group: IGroup) => {
-      console.log(productSKU, group);
-      return group.parent.master_groups_for_product.name === masterGroupName;
-    });
+    const group = product.product_groups.find(
+      (group: IProductGroup) => group.parent.master_groups_for_product.name === masterGroupName
+    );
     group ? (productItemTd.innerHTML = group.parent.name) : (productItemTd.innerHTML = '-');
 
     productItem.insertBefore(productItemTd, productItemReference.nextSibling);
@@ -501,6 +523,16 @@ deleteButtons.forEach((e) => {
   });
 });
 
+async function getAdditionalProductInfo(product_id: number) {
+  try {
+    const response = await fetch(`/product/get_additional_info/${product_id}`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 function addProduct(groups: IProductMasterGroupGroup) {
   addModal.show();
   const productMasterGroupAddSelect: HTMLSelectElement = document.querySelector(
@@ -531,10 +563,7 @@ function addProduct(groups: IProductMasterGroupGroup) {
 
 async function editProduct(product: IProduct) {
   sessionStorage.setItem('product', JSON.stringify(product));
-  console.log(product);
-
   const productAdditionalInfo = await getAdditionalProductInfo(product.id);
-  console.log('productAdditionalInfo', productAdditionalInfo);
 
   const img: HTMLImageElement = document.querySelector('#product-edit-show-image');
   const fullImageAnchor = img.closest('.product-full-image-anchor');
@@ -590,7 +619,7 @@ async function editProduct(product: IProduct) {
   );
   const options = productMasterGroupEditSelect.querySelectorAll('option');
   const productMasterGroups = product.product_groups.map(
-    (group: IGroup) => group.parent.master_groups_for_product.name as string
+    (group: IProductGroup) => group.parent.master_groups_for_product.name as string
   );
 
   if (productMasterGroups.length > 0) {
@@ -598,7 +627,7 @@ async function editProduct(product: IProduct) {
 
     for (let i = 0; i < productMasterGroups.length; i++) {
       const currentProductMasterGroup = productAdditionalInfo.current_master_product_groups.find(
-        (masterGroupItem) => masterGroupItem.master_group === productMasterGroups[i]
+        (masterGroupItem: IMasterGroupGroup) => masterGroupItem.master_group === productMasterGroups[i]
       );
       if (i === 0) {
         const productGroupsEditSelect = productGroupsEditSelects[i];
@@ -606,7 +635,7 @@ async function editProduct(product: IProduct) {
         productMasterGroupEditSelect.value = productMasterGroups[i];
 
         const masterGroupGroup = productAdditionalInfo.master_groups_groups.find(
-          (masterGroup) => masterGroup.master_group === productMasterGroups[i]
+          (masterGroup: IMasterGroupGroup) => masterGroup.master_group === productMasterGroups[i]
         );
 
         masterGroupGroup.groups.forEach((group: { group_name: string; group_id: number }) => {
@@ -616,9 +645,8 @@ async function editProduct(product: IProduct) {
           productGroupsEditSelect.appendChild(storeSelectOption);
         });
         // TODO: always select first option
-        console.log(productMasterGroups[i]);
         const currentProductGroup = product.product_groups.find(
-          (group: IGroup) => group.parent.master_groups_for_product.name === productMasterGroups[i]
+          (group: IProductGroup) => group.parent.master_groups_for_product.name === productMasterGroups[i]
         );
 
         productGroupsEditSelect.value = currentProductGroup.group_id.toString();
@@ -629,7 +657,7 @@ async function editProduct(product: IProduct) {
             ) {
               const groupSelect = document.querySelector('#product-group-edit-item-1');
               const optionCategory = productAdditionalInfo.master_groups_groups.find(
-                (masteGroup) =>
+                (masteGroup: IMasterGroupGroup) =>
                   masteGroup.master_group ===
                   productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
               )?.groups;
@@ -657,8 +685,6 @@ async function editProduct(product: IProduct) {
         }
       }
 
-      console.log('currentProductMasterGroup', currentProductMasterGroup);
-
       if (currentProductMasterGroup.groups.length > 0) {
         for (let j = 0; j < currentProductMasterGroup.groups.length; j++) {
           createProductGroupEditItem(null, productAdditionalInfo, productMasterGroups[i], j);
@@ -676,8 +702,8 @@ async function editProduct(product: IProduct) {
       if (e.textContent === productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text) {
         const groupSelect = document.querySelector('#product-group-edit-item-1');
         const optionCategory = productAdditionalInfo.master_groups_groups.find(
-          (masteGroup) =>
-            masteGroup.master_group ===
+          (masterGroup: IMasterGroupGroup) =>
+            masterGroup.master_group ===
             productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
         )?.groups;
 
@@ -695,16 +721,6 @@ async function editProduct(product: IProduct) {
   });
 }
 
-async function getAdditionalProductInfo(product_id: number) {
-  try {
-    const response = await fetch(`/product/get_additional_info/${product_id}`);
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.log(error);
-  }
-}
-
 const viewProductButtonElements = document.querySelectorAll('.product-view-button');
 viewProductButtonElements.forEach((e) =>
   e.addEventListener('click', async () => {
@@ -713,8 +729,6 @@ viewProductButtonElements.forEach((e) =>
       bookingButton.setAttribute('data-target', e.getAttribute('data-target'));
     }
     const product = JSON.parse(e.getAttribute('data-target'));
-    console.log(product.id);
-
     const groupsMasterGroups = getGroupsMasterGroups(product);
     const totalWarehouseQty = product.warehouse_products.reduce(
       (acc: IWarehouseProduct, warehouseProduct: IWarehouseProduct) =>
@@ -729,18 +743,11 @@ viewProductButtonElements.forEach((e) =>
     prodGroups.forEach((groupName) => {
       let isEqual = false;
       const mstrGroupName = groupsMasterGroups[groupName];
-      console.log('product.current_user_groups', product.current_user_groups);
-      console.log('productInfo', productInfo);
       const currentUserGroup = productInfo.current_user_groups.find(
-        (userGroup) => userGroup.master_group_name === mstrGroupName
+        (userGroup: IMasterGroupGroupUser) => userGroup.master_group_name === mstrGroupName
       );
-      console.log('mstrGroupName', mstrGroupName);
-
-      console.log('currentUserGroup', currentUserGroup);
 
       if (currentUserGroup) {
-        console.log('currentUserGroup', currentUserGroup);
-
         const currentUserValue = currentUserGroup.groups[0].group_name;
         if (currentUserValue.includes(groupName)) {
           isEqual = true;
@@ -825,7 +832,7 @@ adjustProductButtonElements.forEach((e) =>
     prodGroups.forEach((groupName) => {
       let isEqual = false;
       const currentUserGroup = productInfo.current_user_groups.find(
-        (userGroup) => userGroup.master_group_name === mstrGroupName
+        (userGroup: IMasterGroupGroupUser) => userGroup.master_group_name === mstrGroupName
       );
 
       const mstrGroupName = groupsMasterGroups[groupName];
@@ -860,8 +867,6 @@ function requestShare(product: IProduct, group: string) {
   const warehouseGroupProduct = product.warehouse_products.find(
     (warehouseProduct) => warehouseProduct.group.name === group.replace('_', ' ')
   );
-  console.log(product);
-
   const img: HTMLImageElement = document.querySelector('#product-request-share-image');
   const fullImageAnchor = img.closest('.product-full-image-anchor');
   fullImageAnchor.setAttribute('data-target-product-id', product.id.toString());
@@ -1423,7 +1428,6 @@ async function createAdjustAction(isEqual: boolean, masterGroup: string, group: 
   const productQuantity: HTMLInputElement = adjustContainer.querySelector(
     `#adjust-product-quantity-${groupUnderScore}`
   );
-  console.log(productInfo);
 
   for (const warehouse of productInfo.all_warehouses) {
     if (isEvent && warehouse.name !== eventsWarehouse) {
@@ -1511,7 +1515,7 @@ function deleteAdjustContainer(nameGroup: string, nameGroupValue: string) {
 // ----add inbound order item for edit modal----
 async function createProductGroupEditItem(
   productParam: IProduct = null,
-  productInfo = null,
+  productInfo: IProductAdditionalInfo = null,
   masterGroup: string = null,
   itemIndex: number = null
 ) {
@@ -1579,8 +1583,6 @@ async function createProductGroupEditItem(
   `;
 
   const productGroupEditSelect: HTMLSelectElement = productGroupEditItem.querySelector('.product-group-edit-item');
-  console.log('productInfo', productInfo);
-
   const availableMasterGroups = [...productInfo.master_groups_groups.map((e) => e.master_group)];
   const productMasterGroupEditSelect: HTMLSelectElement = productGroupEditItem.querySelector(
     `#product-master-group-edit-item-${index}`

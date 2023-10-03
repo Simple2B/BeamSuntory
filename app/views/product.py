@@ -116,11 +116,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     ).all()
 
     master_groups_search = {}
-    count = 0
     for group in groups_for_products_obj:
-        if count == 108:
-            ...
-        print(datetime.now(), count)
         if group[0].master_groups_for_product.name not in master_groups_search:
             master_groups_search[group[0].master_groups_for_product.name] = [
                 group[0].name
@@ -129,7 +125,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
             master_groups_search[group[0].master_groups_for_product.name].append(
                 group[0].name
             )
-        count += 1
 
     master_group_product_name = [
         mgp[0].name for mgp in db.session.execute(m.MasterGroupProduct.select()).all()
@@ -510,7 +505,6 @@ def sort():
                 "mastr_for_prods_groups_for_prods"
             ],
             master_groups_search=products_object["master_groups_search"],
-            # product_mg_g=products_object["product_mg_g"],
             master_group_product_name=products_object["master_product_groups_name"],
             suppliers=products_object["suppliers"],
             mstr_prod_grps_prod_grps_names=products_object[
@@ -1100,7 +1094,6 @@ def stocks_owned_by_me():
             "mastr_for_prods_groups_for_prods"
         ],
         master_groups_search=products_object["master_groups_search"],
-        # product_mg_g=products_object["product_mg_g"],
         master_group_product_name=products_object["master_product_groups_name"],
         suppliers=products_object["suppliers"],
         mstr_prod_grps_prod_grps_names=products_object[
@@ -1202,7 +1195,6 @@ def events_stocks_owned_by_me():
             "mastr_for_prods_groups_for_prods"
         ],
         master_groups_search=products_object["master_groups_search"],
-        # product_mg_g=products_object["product_mg_g"],
         master_group_product_name=products_object["master_product_groups_name"],
         suppliers=products_object["suppliers"],
         mstr_prod_grps_prod_grps_names=products_object[
@@ -1257,19 +1249,6 @@ def get_additional_info(product_id):
                 ],
             }
         )
-        # for g in current_user_groups_rows:
-        #     if group.parent.master_group.name == g.parent.master_group.name:
-        #         current_user_groups[group.parent.master_group.name].append(
-        #             {"group_name": g.parent.name}
-        #         )
-        # if group.master_groups_for_product.name not in mstr_prod_grps_prod_grps_names:
-        #     mstr_prod_grps_prod_grps_names[group.master_groups_for_product.name] = [
-        #         {"group_name": group.name, "group_id": group.id}
-        #     ]
-        # else:
-        #     mstr_prod_grps_prod_grps_names[group.master_groups_for_product.name].append(
-        #         {"group_name": group.name, "group_id": group.id}
-        #     )
 
     all_warehouses = [
         {
@@ -1290,21 +1269,13 @@ def get_additional_info(product_id):
         }
         for mg in master_group_product
     ]
-
-    # db.session.query(m.Group)
-    #             .join(m.MasterGroup)
-    #             .filter(
-    #                 m.MasterGroup.name == s.MasterGroupMandatory.events.value,
-    #                 m.Group.name == cart.group.name,
-    #             )
-    #             .count()
-    #             > 0
+    prod = db.session.get(m.Product, product_id)
 
     current_product_master_groups = db.session.scalars(
         m.MasterGroupProduct.select().where(
             m.MasterGroupProduct.groups_for_product.any(
                 m.GroupProduct.product_groups.any(
-                    m.ProductGroup.product_id == product_id
+                    m.ProductGroup.product_id == product_id,
                 )
             )
         )
@@ -1315,6 +1286,7 @@ def get_additional_info(product_id):
             "groups": [
                 {"group_name": group.name, "group_id": group.id}
                 for group in mg.groups_for_product
+                if group.id in [g.group_id for g in prod.product_groups]
             ],
         }
         for mg in current_product_master_groups
