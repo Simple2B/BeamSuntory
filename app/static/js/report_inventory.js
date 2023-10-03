@@ -5901,7 +5901,7 @@ var downloadCSV = function () {
                     if (!(page <= pages)) return [3 /*break*/, 5];
                     currentURL = window.location.href.replace(/#/g, '');
                     urlWithoutQueryParams = currentURL.split('?')[0];
-                    url_1 = queryTail ? ['api', queryTail].join('?') : 'api';
+                    url_1 = ["api?page=".concat(page), queryTail].join('&');
                     return [4 /*yield*/, fetch("".concat(urlWithoutQueryParams, "/").concat(url_1))];
                 case 2:
                     res = _c.sent();
@@ -5909,7 +5909,6 @@ var downloadCSV = function () {
                 case 3:
                     data = _c.sent();
                     data.reportInventoryList.forEach(function (reportInventories) {
-                        console.log('CSV data', reportInventories);
                         reportInventories.reportInventories.forEach(function (report) {
                             var reportTarget;
                             if (reportInventories.store) {
@@ -6001,7 +6000,6 @@ document.addEventListener('DOMContentLoaded', function () {
         reportViewButtons.forEach(function (btn) {
             btn.addEventListener('click', function () {
                 var reportInventory = JSON.parse(btn.getAttribute('data-target'));
-                console.log('reportInventory json', reportInventory);
                 reportViewUser.innerHTML = reportInventory.user.username;
                 reportViewAction.innerHTML = reportInventory.type;
                 reportViewDate.innerHTML = formatDate(reportInventory.createdAt);
@@ -6039,6 +6037,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     //   productRegularPrice.innerHTML = inventory.product.regularPrice.toString()
                     // } else {
                     //   productRegularPrice.innerHTML = 'No price'
+                    //
                     // }
                     // if (inventory.product.retailPrice) {
                     //   productRetailPrice.innerHTML = inventory.product.retailPrice.toString()

@@ -333,14 +333,24 @@ const reportInboundOrderConfig = {
 };
 
 const reportShipping = {
-    entry: {
-        main: './src/report_shipping.ts',
-    },
-    output: {
-        path: path.resolve(__dirname, './app/static'),
-        filename: 'js/report_shipping.js', // <--- Will be compiled to this single file
-    },
-}
+  entry: {
+    main: './src/report_shipping.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/report_shipping.js', // <--- Will be compiled to this single file
+  },
+};
+
+const reportSku = {
+  entry: {
+    main: './src/report_sku.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/report_sku.js', // <--- Will be compiled to this single file
+  },
+};
 
 const configs = [
   baseConfig,
@@ -376,6 +386,7 @@ const configs = [
   reportAdjustmentConfig,
   reportInboundOrderConfig,
   reportShipping,
+  reportSku,
 ].map((conf) => merge(defaultConfig, conf));
 
 module.exports = configs;
