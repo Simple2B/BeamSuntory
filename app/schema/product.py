@@ -3,6 +3,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from .supplier import Supplier
 from .warehouse import Warehouse
 from .warehouse_product import WarehouseProduct
+from .product_group import ProductGroup
 
 
 class CustomBase(BaseModel):
@@ -43,6 +44,7 @@ class Product(CustomBase):
     numb_of_cases_per_outer_case: int | None = Field(alias="numbOfCasesPerOuterCase")
     warehouses: list[Warehouse]
     warehouse_products: list[WarehouseProduct] = Field(alias="warehouseProducts")
+    product_groups: list["ProductGroup"] = Field(alias="productGroups")
     comments: str | None
     notes_location: str | None
     # shipping
@@ -50,3 +52,44 @@ class Product(CustomBase):
     length: float | None
     width: float | None
     height: float | None
+
+
+class UserGroup(BaseModel):
+    group_name: str
+
+
+class UserGroups(BaseModel):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    master_group_name: str
+    groups: list[UserGroup]
+
+
+class WarehouseNameId(BaseModel):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: int
+    name: str
+
+
+class ProductGroups(BaseModel):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    group_id: int | None = None
+    group_name: str | None = None
+
+
+class MasterGroupsGroups(BaseModel):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    master_group: str
+    groups: list[ProductGroups]
+
+
+class ProductAdditionalInfo(CustomBase):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    current_user_groups: list[UserGroups]
+    all_warehouses: list[WarehouseNameId]
+    master_groups_groups: list[MasterGroupsGroups]
+    current_master_product_groups: list[MasterGroupsGroups]

@@ -12,6 +12,7 @@ from app import schema as s
 # avoid circular import during initialization
 if TYPE_CHECKING:
     from .master_group_for_product import MasterGroupProduct
+    from .product_group import ProductGroup
 
 
 class GroupProduct(db.Model, ModelMixin):
@@ -33,6 +34,9 @@ class GroupProduct(db.Model, ModelMixin):
     )
     master_groups_for_product: orm.Mapped["MasterGroupProduct"] = orm.relationship(
         back_populates="groups_for_product"
+    )
+    product_groups: orm.Mapped[list["ProductGroup"]] = orm.relationship(
+        back_populates="parent"
     )
 
     def __repr__(self):

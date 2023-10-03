@@ -5,7 +5,7 @@ from .master_group import MasterGroup, MasterGroupMandatory
 from .group import Group
 from .warehouse import Warehouse, WarehouseMandatory, WarehouseList
 from .inbound_order import InboundOrder, InboundOrderStatus
-from .product import Product, Currency
+from .product import Product, Currency, ProductAdditionalInfo
 from .product_category import ProductCategory
 from .product_quantity_group import (
     ProductQuantityGroups,

@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict, Field
 from .group import Group
+from .group_for_product import GroupProduct
 
 
 class ProductGroup(BaseModel):
@@ -8,6 +9,7 @@ class ProductGroup(BaseModel):
     id: int
     product_id: int = Field(alias="productId")
     group_id: int = Field(alias="groupId")
+    parent: GroupProduct
 
 
 class ProductGroupOut(BaseModel):
