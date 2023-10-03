@@ -909,20 +909,6 @@ function requestShare(product: IProduct, group: string) {
   requestShareModal.show();
 }
 
-// function getGroupsMasterGroups(product: IProduct) {
-//   const groupsMasterGroups = {} as { [group: string]: string };
-
-//   product.warehouse_products.forEach((warehouseProduct: IWarehouseProduct) => {
-//     const group = warehouseProduct.group.name;
-//     const masterGroup = warehouseProduct.group.master_group.name;
-//     if (!groupsMasterGroups.hasOwnProperty(group)) {
-//       groupsMasterGroups[group] = masterGroup;
-//     }
-//   });
-
-//   return groupsMasterGroups;
-// }
-
 function getGroupsIds(product: IProduct) {
   const groupsIds = {} as { [group: string]: number };
 
