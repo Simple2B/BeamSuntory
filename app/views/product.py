@@ -562,17 +562,12 @@ def assign():
             log(log.ERROR, "Not found product by name : [%s]", form.name.data)
             flash("Cannot save product data", "danger")
 
-        product_from_group: m.Group = db.session.execute(
+        product_from_group: m.Group = db.session.scalar(
             m.Group.select().where(
                 m.Group.name == form.from_group.data,
             )
-        ).scalar()
-        form.group.data
-        product_to_group: m.Group = db.session.execute(
-            m.Group.select().where(
-                m.Group.name == form.group.data,
-            )
-        ).scalar()
+        )
+        product_to_group: m.Group = db.session.get(m.Group, int(form.group.data))
         report_inventory_list = m.ReportInventoryList(
             type="Product Assigned",
             user_id=current_user.id,
