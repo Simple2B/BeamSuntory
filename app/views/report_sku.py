@@ -92,7 +92,6 @@ def get_sku_reports():
 
     if master_groups.count(None) != len(master_groups):
         for group in master_groups:
-            # TODO consider better validation for master_groups values
             if group:
                 query = query.where(
                     m.ReportSKU.product.has(

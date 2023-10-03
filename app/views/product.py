@@ -825,7 +825,7 @@ def adjust():
 
                         m.ReportSKU(
                             product_id=product_warehouse.product_id,
-                            adjust=adjust_gr_qty,
+                            adjustment=adjust_gr_qty,
                             type=s.ReportSKUType.adjustment.value,
                             status="Adjusted quantity",
                             qty_after=quantity,
@@ -866,7 +866,7 @@ def adjust():
 
                     m.ReportSKU(
                         product_id=product_warehouse.product_id,
-                        adjust=adjust_gr_qty,
+                        adjustment=adjust_gr_qty,
                         type=s.ReportSKUType.adjustment.value,
                         status="Adjusted quantity",
                         qty_after=quantity,
