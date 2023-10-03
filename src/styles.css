@@ -146,3 +146,7 @@ button[disabled]{
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+.min-h-half{
+    min-height: 50vh;
+}
