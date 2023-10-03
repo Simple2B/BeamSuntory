@@ -389,7 +389,7 @@
               <!-- prettier-ignore -->
               <a href="{{ url_for('report_inventory.inventories') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700" >
                 {% include "icon/circle.html" %}
-                <span class="flex-1 ml-4 whitespace-nowrap">Inventories</span>
+                <span class="flex-1 ml-4 whitespace-nowrap">Inventory</span>
               </a>
             </li>
             <li>             
@@ -439,6 +439,13 @@
               <a href="{{ url_for('report_shipping.index') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700" >
                 {% include "icon/circle.html" %}
                 <span class="flex-1 ml-4 whitespace-nowrap">Shipping</span>
+              </a>
+            </li>
+            <li>
+              <!-- prettier-ignore -->
+              <a href="{{ url_for('report_sku.skus') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700" >
+                {% include "icon/circle.html" %}
+                <span class="flex-1 ml-4 whitespace-nowrap">SKU</span>
               </a>
             </li>
           </ul>

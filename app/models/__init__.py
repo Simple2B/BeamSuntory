@@ -38,3 +38,4 @@ from .report_inventory import ReportInventory, ReportInventoryList
 from .report_inbound_order import ReportInboundOrder
 from .report_request_share import ReportRequestShare
 from .report_shipping import ReportShipping
+from .report_sku import ReportSKU

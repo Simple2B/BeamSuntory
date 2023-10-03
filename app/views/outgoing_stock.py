@@ -236,6 +236,13 @@ def save():
                 )
                 report_inventory.save(False)
 
+                m.ReportSKU(
+                    product_id=warehouse_product.product_id,
+                    ship_request=ship_request,
+                    type=s.ReportSKUType.ship_request.value,
+                    status="Ship request assigned to pickup.",
+                ).save(False)
+
             cart.status = "completed"
             cart.save(False)
 
