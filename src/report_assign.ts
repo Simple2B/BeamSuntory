@@ -74,7 +74,7 @@ const downloadCSV = async function () {
   const queryTail = filterQuery ? filterQuery.join('&') : ''
 
   for (let page = 1; page <= pages; page++) {
-    const currentURL = window.location.href;
+    const currentURL = window.location.href.replace(/#/g, '');
     const url = [`api?page=${page}`, queryTail].join('&')
     const res = await fetch(`${currentURL}/${url}`)
     const data = await res.json()    
@@ -145,8 +145,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const viewModal = new Modal(viewReportEventsModal, viewModalOptions);
-  const reportViewProductTbody = document.querySelector('#table-products') as HTMLTableElement;
-  const productItemTemplate = document.querySelector('#view-product-item-template') as HTMLTableRowElement;
   const closingViewModalButton = document.querySelector('#button-closing-report-assign-modal') as HTMLButtonElement;
   closingViewModalButton.addEventListener('click', () => {
     viewModal.hide();
@@ -166,28 +164,19 @@ document.addEventListener('DOMContentLoaded', () => {
         
         reportViewUser.innerHTML = reportAssign.user.username
         reportViewAction.innerHTML = reportAssign.type
-
         reportViewDate.innerHTML = formatDate(reportAssign.created_at) 
 
-        const newProductItem = productItemTemplate
-        newProductItem.removeAttribute('id')
-        newProductItem.classList.remove('hidden')
-        newProductItem.classList.add(
-          'product-item-view',
-          'text-base',
-          'font-semibold',
-          'text-gray-900',
-          'dark:text-white'
-        )
-        const productName = newProductItem.querySelector('.product-name') as HTMLDivElement
-        const productSku = newProductItem.querySelector('.product-sku') as HTMLDivElement
-        const productRegularPrice = newProductItem.querySelector('.product-regular-price') as HTMLDivElement
-        const productRetailPrice = newProductItem.querySelector('.product-retail-price') as HTMLDivElement
-        const productGroup = newProductItem.querySelector('.product-group') as HTMLDivElement
-        const productGroupFrom = newProductItem.querySelector('.product-group-from') as HTMLDivElement
-        const productQuantity = newProductItem.querySelector('.product-quantity') as HTMLDivElement
-        const img: HTMLImageElement = newProductItem.querySelector('.product-image')
 
+        const productName =  document.querySelector('.product-name') as HTMLDivElement
+        const productSku = document.querySelector('.product-sku') as HTMLDivElement
+        const productGroup = document.querySelector('.product-group') as HTMLDivElement
+        const productGroupFrom = document.querySelector('.product-group-from') as HTMLDivElement
+        const productQuantity = document.querySelector('.product-quantity') as HTMLDivElement
+        const productSupplierName = document.querySelector('.supplier-name') as HTMLDivElement
+        const productSupplierAddress = document.querySelector('.supplier-address') as HTMLDivElement
+        const productSupplierPhone = document.querySelector('.supplier-number') as HTMLDivElement
+        const productWarehouse = document.querySelector('.product-warehouse') as HTMLDivElement
+        const img: HTMLImageElement = document.querySelector('.product-image')
 
           reportAssign.product.image.length > 100
           ? (img.src = `data:image/png;base64, ${reportAssign.product.image}`)
@@ -195,24 +184,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         productName.innerHTML = reportAssign.product.name
         productSku.innerHTML = reportAssign.product.SKU
-        productQuantity.innerHTML = reportAssign.quantity.toString()
-        if (reportAssign.product.regularPrice) {
-          productRegularPrice.innerHTML = reportAssign.product.regularPrice.toString()
-        } else {
-          productRegularPrice.innerHTML = 'No price'
-        }
-
-        if (reportAssign.product.retailPrice) {
-          productRetailPrice.innerHTML = reportAssign.product.retailPrice.toString()
-        } else {
-          productRetailPrice.innerHTML = 'No price'
-        }
+        productQuantity.innerHTML = reportAssign.quantity.toString()        
 
         productGroup.innerHTML = reportAssign.group.name;
         productGroupFrom.innerHTML = reportAssign.from_group.name;
-        reportViewProductTbody.appendChild(newProductItem);
-        viewModal.show();
 
+        productSupplierName.innerHTML = reportAssign.product.supplier.name
+        productSupplierAddress.innerHTML = reportAssign.product.supplier.address
+        productSupplierPhone.innerHTML = reportAssign.product.supplier.contact_number ?? '-'
+
+        const warehousesAmount = reportAssign.product.warehouses.length        
+        const warehouses = reportAssign.product.warehouses.reduce((acc, warehouseProduct, index) => {
+          acc += warehouseProduct.name
+          if(index < warehousesAmount - 1) acc += ', '
+
+          return acc
+        },'')  
+        productWarehouse.innerHTML = warehouses
+
+        viewModal.show();
       })
     });
   });

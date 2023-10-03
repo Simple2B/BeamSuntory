@@ -21,6 +21,8 @@ def test_carts_pages(mg_g_populate: FlaskClient):
 def test_create_cart(mg_g_populate: FlaskClient):
     login(mg_g_populate, "bob")
 
+    group_jb: m.Group = db.session.scalar(m.Group.select().where(m.Group.name == "JB"))
+
     response = mg_g_populate.post(
         "/cart/create",
         data=dict(
@@ -35,7 +37,7 @@ def test_create_cart(mg_g_populate: FlaskClient):
     assert "Item added!" in response.text
     carts_rows_objs = db.session.execute(
         m.Cart.select().where(
-            m.Cart.group == "JB",
+            m.Cart.group_id == group_jb.id,
             m.Cart.user_id == 1,
             m.Cart.product_id == 1,
             m.Cart.quantity == 11,
@@ -59,9 +61,14 @@ def test_delete_cart(mg_g_populate: FlaskClient):
 def test_edit_cart(mg_g_populate: FlaskClient):
     login(mg_g_populate)
 
+    group_canada: m.Group = db.session.scalar(
+        m.Group.select().where(m.Group.name == "Canada")
+    )
+    group_jb: m.Group = db.session.scalar(m.Group.select().where(m.Group.name == "JB"))
+
     carts_rows_objs = db.session.execute(
         m.Cart.select().where(
-            m.Cart.group == "JB",
+            m.Cart.group_id == group_jb.id,
             m.Cart.user_id == 1,
             m.Cart.product_id == 1,
             m.Cart.quantity == 11,
@@ -69,33 +76,34 @@ def test_edit_cart(mg_g_populate: FlaskClient):
     ).first()
     assert len(carts_rows_objs) == 1
 
+    cart_canada: m.Cart = db.session.scalar(
+        m.Cart.select().where(m.Cart.group_id == group_canada.id)
+    )
+
     response = mg_g_populate.post(
         "/cart/edit",
         data=dict(
-            cart_id=1,
-            product_id=1,
+            cart_id=cart_canada.id,
             quantity=211,
-            user_id=1,
-            group="Canada",
         ),
     )
     assert response.status_code == 302
     assert "cart" in response.text
     carts_rows_objs = db.session.execute(
         m.Cart.select().where(
-            m.Cart.group == "Canada",
-            m.Cart.user_id == 1,
-            m.Cart.product_id == 1,
-            m.Cart.quantity == 211,
-        )
-    ).all()
-    assert len(carts_rows_objs) == 0
-    carts_rows_objs = db.session.execute(
-        m.Cart.select().where(
-            m.Cart.group == "JB",
+            m.Cart.group == group_canada,
             m.Cart.user_id == 1,
             m.Cart.product_id == 1,
             m.Cart.quantity == 211,
         )
     ).all()
     assert len(carts_rows_objs) == 1
+    carts_rows_objs = db.session.execute(
+        m.Cart.select().where(
+            m.Cart.group == group_jb,
+            m.Cart.user_id == 1,
+            m.Cart.product_id == 1,
+            m.Cart.quantity == 211,
+        )
+    ).all()
+    assert len(carts_rows_objs) == 0

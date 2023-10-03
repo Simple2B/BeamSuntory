@@ -133,6 +133,22 @@ def mg_g_populate(client: FlaskClient):
         sales_rep=False,
     ).save(False)
 
+    m.User(
+        username="user2",
+        email="user_second@mail.com",
+        password="password",
+        role=role.id,
+        activated=True,
+        approval_permission=True,
+        street_address="street",
+        phone_number="123456789",
+        country="UK",
+        region="Lv",
+        city="Dro",
+        zip_code="82100",
+        sales_rep=False,
+    ).save(False)
+
     for mg in master_groups:
         m.MasterGroup(
             name=mg,
@@ -310,13 +326,6 @@ def mg_g_populate(client: FlaskClient):
         address="st.1",
         zip="45778",
         active=True,
-    ).save(False)
-
-    m.Cart(
-        product_id=1,
-        quantity=11,
-        user_id=1,
-        group="JB",
     ).save(False)
 
     sr_atp = m.ShipRequest(
@@ -569,15 +578,6 @@ def mg_g_populate(client: FlaskClient):
     )
     received_two_products_two_groups.save(False)
 
-    m.Cart(
-        product=populate_test_product,
-        quantity=15,
-        user_id=1,
-        group="Canada",
-        warehouse_id=jw.id,
-        ship_request_id=sr_atp.id,
-    ).save(False)
-
     report = m.ReportEvent(
         type="test_type",
         user_id=1,
@@ -587,11 +587,32 @@ def mg_g_populate(client: FlaskClient):
 
     db.session.commit()
 
+    group_canada: m.Group = db.session.scalar(
+        m.Group.select().where(m.Group.name == "Canada")
+    )
+    group_jb: m.Group = db.session.scalar(m.Group.select().where(m.Group.name == "JB"))
+
+    m.Cart(
+        product=populate_test_product,
+        quantity=15,
+        user_id=1,
+        group_id=group_canada.id,
+        warehouse_id=jw.id,
+        ship_request_id=sr_atp.id,
+    ).save(False)
+
+    m.Cart(
+        product_id=1,
+        quantity=11,
+        user_id=1,
+        group_id=group_jb.id,
+    ).save(False)
+
     m.Cart(
         product=populate_test_product,
         quantity=100,
         user_id=1,
-        group="Canada",
+        group_id=group_canada.id,
         warehouse_id=jw.id,
         ship_request_id=waiting_ship.id,
         status="submitted",
@@ -612,7 +633,7 @@ def mg_g_populate(client: FlaskClient):
             product=event_test_product,
             quantity=10,
             user_id=3,
-            group=s.MasterGroupMandatory.events.value,
+            group_id=group_event.id,
             ship_request_id=sr.id,
             warehouse_id=warehouse_events.id,
             status="pending",

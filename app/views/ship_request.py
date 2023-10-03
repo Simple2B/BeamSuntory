@@ -200,7 +200,7 @@ def create():
                 .join(m.MasterGroup)
                 .filter(
                     m.MasterGroup.name == s.MasterGroupMandatory.events.value,
-                    m.Group.name == cart.group,
+                    m.Group.name == cart.group.name,
                 )
                 .count()
                 > 0

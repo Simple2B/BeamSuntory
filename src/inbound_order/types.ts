@@ -12,6 +12,7 @@ export interface ISupplier {
   id: number
   name: string
   address: string
+  contact_number: string
 }
 
 export interface IWarehouse {
@@ -27,6 +28,8 @@ export interface IProduct {
   regularPrice?: number
   retailPrice?: number
   warehouseProducts?: IWarehouseProduct[]
+  supplier: ISupplier
+  warehouses: IWarehouse[]
 }
 
 export interface IWarehouseProduct {
@@ -62,6 +65,7 @@ export interface IAllocatedProductOut extends IProductAllocatedBase {
 }
 
 export interface IInboundOrderBase {
+  id: number
   orderId: string
   status: string
   title: string

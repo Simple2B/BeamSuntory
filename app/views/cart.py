@@ -127,7 +127,7 @@ def get_all():
     ).all()
     carts = [
         {
-            "group": cart.group,
+            "group": cart.group.name,
             "id": cart.id,
             "quantity": cart.quantity,
             "product_id": cart.product_id,
@@ -137,11 +137,12 @@ def get_all():
         .join(m.MasterGroup)
         .filter(
             m.MasterGroup.name == s.MasterGroupMandatory.events.value,
-            m.Group.name == cart.group,
+            m.Group.name == cart.group.name,
         )
         .count()
         > 0
     ]
+
     return render_template(
         "cart.html",
         cart_items=cart_items,
@@ -169,11 +170,18 @@ def create():
     url = request.referrer
     query = url_parse(url).query if url else None
     if form.validate_on_submit():
+        group = db.session.scalar(
+            m.Group.select().where(m.Group.name == form.group.data)
+        )
+        if not group:
+            log(log.ERROR, "Not found group by name : [%s]", form.group.data)
+            flash("Can not create item", "danger")
+            return redirect(url_for("product.get_all"))
         item = m.Cart(
             product_id=int(form.product_id.data),
             quantity=int(form.quantity.data),
             user_id=current_user.id,
-            group=form.group.data,
+            group=group,
         )
         log(log.INFO, "Form submitted. Cart: [%s]", item)
         item.save()

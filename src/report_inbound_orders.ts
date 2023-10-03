@@ -75,7 +75,7 @@ const downloadCSV = async function () {
   const queryTail = filterQuery ? filterQuery.join('&') : ''
 
   for (let page = 1; page <= pages; page++) {
-    const currentURL = window.location.href;
+    const currentURL = window.location.href.replace(/#/g, '');
     const url = [`api?page=${page}`, queryTail].join('&')
     const res = await fetch(`${currentURL}/${url}`)
     const data = await res.json()
@@ -172,8 +172,13 @@ document.addEventListener('DOMContentLoaded', () => {
         reportViewDate.innerHTML = formatDate(reportInboundOrder.createdAt)
         reportViewOrderTitle.innerHTML = reportInboundOrder.inboundOrder.title
 
-        const history = reportInboundOrder.history.split(',').join('<br>') 
-        reportViewHistory.innerHTML = history
+        if(reportInboundOrder.history){
+          const history = reportInboundOrder.history.split(',').join('<br>') 
+          reportViewHistory.innerHTML = history
+        }else{
+          reportViewHistory.innerHTML = 'No history'
+        }
+
 
         const productList = reportInboundOrder.inboundOrder.productsAllocated  
          
@@ -193,8 +198,6 @@ document.addEventListener('DOMContentLoaded', () => {
           const productIndex = newProductItem.querySelector('.product-index') as HTMLDivElement
           const productName = newProductItem.querySelector('.product-name') as HTMLDivElement
           const productSku = newProductItem.querySelector('.product-sku') as HTMLDivElement
-          const productRegularPrice = newProductItem.querySelector('.product-regular-price') as HTMLDivElement
-          const productRetailPrice = newProductItem.querySelector('.product-retail-price') as HTMLDivElement
           const productGroup = newProductItem.querySelector('.product-group') as HTMLDivElement
           const productQuantity = newProductItem.querySelector('.product-quantity') as HTMLDivElement
           const productWarehouse = newProductItem.querySelector('.product-warehouse') as HTMLDivElement
@@ -208,17 +211,6 @@ document.addEventListener('DOMContentLoaded', () => {
           productName.innerHTML = product.name
           productSku.innerHTML = product.SKU
           productQuantity.innerHTML = productOrder.quantity.toString()
-
-          if (product.regularPrice) {
-            productRegularPrice.innerHTML = product.regularPrice.toString()
-          } else {
-            productRegularPrice.innerHTML = 'No price'
-          }
-          if (product.retailPrice) {
-            productRetailPrice.innerHTML = product.retailPrice.toString()
-          } else {
-            productRetailPrice.innerHTML = 'No price'
-          }
 
           if(productOrder.productQuantityGroups.length > 0) {
             const groups = productOrder.productQuantityGroups[0].group.name  
