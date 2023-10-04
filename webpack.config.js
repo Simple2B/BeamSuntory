@@ -352,6 +352,16 @@ const reportSku = {
   },
 };
 
+const reportShelfLife = {
+  entry: {
+    main: './src/report_shelf_life.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/report_shelf_life.js', // <--- Will be compiled to this single file
+  },
+};
+
 const configs = [
   baseConfig,
   userConfig,
@@ -387,6 +397,7 @@ const configs = [
   reportInboundOrderConfig,
   reportShipping,
   reportSku,
+  reportShelfLife,
 ].map((conf) => merge(defaultConfig, conf));
 
 module.exports = configs;

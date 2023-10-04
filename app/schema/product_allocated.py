@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field, RootModel, ConfigDict, field_validator
 
 from .product import Product
 from .product_group import ProductGroupOut
+from .pagination import PaginationOut
 
 
 class ProductAllocated(BaseModel):
@@ -36,3 +37,14 @@ class ProductAllocatedOut(BaseModel):
 
 
 ProductAllocatedList = RootModel[list[ProductAllocated]]
+
+
+class ReportShelfLifeResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+    pagination: PaginationOut
+    report_shelf_life_list: list[ProductAllocatedOut] = Field(
+        alias="reportShelfLifeList"
+    )
+
+
+ReportShelfLifeList = RootModel[list[ProductAllocatedOut]]
