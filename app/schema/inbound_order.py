@@ -38,3 +38,10 @@ class InboundOrder(BaseModel):
     da_notes: str | None = Field(alias="daNotes")
 
     created_at: datetime = Field(alias="createdAt")
+
+
+class FilterInboundOrder(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    q: str | None = None
+    status: str | None = None

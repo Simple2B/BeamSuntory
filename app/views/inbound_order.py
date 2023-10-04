@@ -160,6 +160,12 @@ def create():
                     shelf_life_end=product_data.shelf_life_end,
                 )
             )
+            m.ReportSKU(
+                product=product,
+                inbound_order=inbound_order,
+                type=s.ReportSKUType.inbound_order.value,
+                status="Allocation created",
+            ).save(False)
 
         inbound_order.save()
 
@@ -286,7 +292,7 @@ def save():
                 )
 
         for product_quantity_group in product_quantity_groups.root:
-            product_allocated = db.session.scalar(
+            product_allocated: m.ProductAllocated = db.session.scalar(
                 m.ProductAllocated.select().where(
                     m.ProductAllocated.id
                     == product_quantity_group.product_allocated_id,
@@ -340,21 +346,36 @@ def save():
                         product_allocated_id=product_allocated.id,
                     )
                 )
+                if inbound_order.status == s.InboundOrderStatus.assigned:
+                    m.ReportSKU(
+                        product_id=product_allocated.product_id,
+                        inbound_order=inbound_order,
+                        type=s.ReportSKUType.inbound_order.value,
+                        status="Products allocated. Inbound order assigned.",
+                    ).save(False)
 
         if inbound_order.status == s.InboundOrderStatus.assigned:
-            for allocated_product in inbound_order.products_allocated:
-                sumAllocatedQuantityGroups = sum(
+            for product_quantity_group in product_quantity_groups.root:
+                current_product_allocated_quantity = db.session.scalar(
+                    m.ProductAllocated.select().where(
+                        m.ProductAllocated.id
+                        == product_quantity_group.product_allocated_id
+                    )
+                ).quantity
+
+                sum_all_quantity_groups = sum(
                     [
-                        group.quantity
-                        for group in allocated_product.product_quantity_groups
+                        allocated_product.quantity
+                        for allocated_product in product_quantity_group.product_allocated_groups
                     ]
                 )
-                if allocated_product.quantity != sumAllocatedQuantityGroups:
+
+                if current_product_allocated_quantity != sum_all_quantity_groups:
                     log(
                         log.ERROR,
                         "Invalid quantity groups sum: [%s] needs: [%s]",
-                        sumAllocatedQuantityGroups,
-                        allocated_product.quantity,
+                        sum_all_quantity_groups,
+                        product_allocated.quantity,
                     )
                     flash(
                         "Allocated product quantity doesn't match groups total quantity",

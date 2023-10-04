@@ -5,6 +5,8 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
+from sqlalchemy import desc
+
 from app.controllers import create_pagination
 
 from app import schema as s
@@ -19,7 +21,7 @@ report_assign_blueprint = Blueprint(
 def get_assigns_report():
     filter_assign = s.FilterReportAssign.model_validate(dict(request.args))
 
-    query = m.Assign.select().order_by(m.Assign.id)
+    query = m.Assign.select().order_by(desc(m.Assign.id))
     count_query = sa.select(sa.func.count()).select_from(m.Assign)
 
     if filter_assign.q:

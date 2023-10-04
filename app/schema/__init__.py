@@ -4,8 +4,8 @@ from .user import User, UserRole, AdminCreate
 from .master_group import MasterGroup, MasterGroupMandatory
 from .group import Group
 from .warehouse import Warehouse, WarehouseMandatory, WarehouseList
-from .inbound_order import InboundOrder, InboundOrderStatus
-from .product import Product, Currency
+from .product import Product, Currency, ProductAdditionalInfo
+from .inbound_order import InboundOrder, InboundOrderStatus, FilterInboundOrder
 from .product_category import ProductCategory
 from .product_quantity_group import (
     ProductQuantityGroups,
@@ -85,3 +85,4 @@ from .report import (
     ReportRequestShareActionType,
     ReportShipRequestActionType,
 )
+from .report_sku import ReportSKU, ReportSKUList, ReportSKUResponse, ReportSKUType

@@ -206,7 +206,7 @@ def share(id: int):
     m.ReportInventory(
         qty_before=warehouse_from_prod.product_quantity + request_share.desire_quantity,
         qty_after=warehouse_from_prod.product_quantity,
-        report_inventory_list_id=report_inventory_list.id,
+        report_inventory_list=report_inventory_list,
         product_id=warehouse_from_prod.product_id,
         warehouse_product=warehouse_from_prod,
     ).save(False)
@@ -214,8 +214,16 @@ def share(id: int):
     m.ReportInventory(
         qty_before=qty_before,
         qty_after=warehouse_to_prod.product_quantity,
-        report_inventory_list_id=report_inventory_list.id,
+        report_inventory_list=report_inventory_list,
         product_id=warehouse_to_prod.product_id,
+        warehouse_product=warehouse_to_prod,
+    ).save(False)
+
+    m.ReportSKU(
+        product_id=request_share.product_id,
+        share=request_share,
+        type=s.ReportSKUType.share.value,
+        status=f"Assigned from {request_share.from_group_id} to {request_share.group_id}",
         warehouse_product=warehouse_to_prod,
     ).save(False)
 

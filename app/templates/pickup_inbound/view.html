@@ -67,7 +67,7 @@
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
           </div>
-          <div class="col-span-6 sm:col-span-6 grid grid-cols-6 border-y border-gray-600 py-6 gap-6">
+          <div class="col-span-6 sm:col-span-6 grid grid-cols-6 border-y border-gray-300 dark:border-gray-600 py-6 gap-6">
             <div class="col-span-6 sm:col-span-3">
               <label for="supplier_id"
                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Supplier name</label>
@@ -83,6 +83,34 @@
               </div>
             </div>
           </div>
+          
+          <div class="grid-cols-6 border-b border-gray-300 dark:border-gray-600  pb-6 gap-6 hidden" id="product-allocated-container">          
+              <div class="col-span-6 sm:col-span-2">
+                <label
+                  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product name</label>
+                <div id="pickup-inbound-view-product-name"
+                  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                </div>
+              </div>
+              <div class="col-span-6 sm:col-span-2">
+                <label
+                  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product SKU</label>
+                <div id="pickup-inbound-view-product-sku"
+                  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                </div>
+              </div>
+              <div class="col-span-6 sm:col-span-2">
+                <label 
+                  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Quantity</label>
+                <div id="pickup-inbound-view-product-quantity"
+                  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                </div>
+              </div>
+            </div>
+
+          <div id="pickup-inbound-product-container" class="col-span-6 sm:col-span-6 grid gap-6">              
+          </div>
+          
           <div class="col-span-6 sm:col-span-3 row-span-2 flex flex-col">
             <label for="da_notes"
               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Delivery agent notes</label>

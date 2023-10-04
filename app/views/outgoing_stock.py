@@ -166,7 +166,7 @@ def save():
             cart: m.Cart = db.session.scalar(
                 m.Cart.select().where(
                     m.Cart.product_id == int(product["product_id"]),
-                    m.Cart.group == product["group_name"],
+                    m.Cart.group.has(m.Group.name == product["group_name"]),
                     m.Cart.ship_request_id == ship_request.id,
                     m.Cart.quantity == int(product["quantity"]),
                 )
@@ -206,14 +206,14 @@ def save():
                 .join(m.MasterGroup)
                 .filter(
                     m.MasterGroup.name == s.MasterGroupMandatory.events.value,
-                    m.Group.name == cart.group,
+                    m.Group.name == cart.group.name,
                 )
                 .count()
                 > 0
             )
 
             cart_user_group: m.Group = db.session.execute(
-                m.Group.select().where(m.Group.name == cart.group)
+                m.Group.select().where(m.Group.name == cart.group.name)
             ).scalar()
             warehouse_product: m.WarehouseProduct = db.session.scalar(
                 m.WarehouseProduct.select().where(
@@ -235,6 +235,13 @@ def save():
                     warehouse_product=warehouse_product,
                 )
                 report_inventory.save(False)
+
+                m.ReportSKU(
+                    product_id=warehouse_product.product_id,
+                    ship_request=ship_request,
+                    type=s.ReportSKUType.ship_request.value,
+                    status="Ship request assigned to pickup.",
+                ).save(False)
 
             cart.status = "completed"
             cart.save(False)
@@ -308,7 +315,7 @@ def cancel(id: int):
     ).scalars()
     for cart in carts:
         cart_user_group: m.Group = db.session.execute(
-            m.Group.select().where(m.Group.name == cart.group)
+            m.Group.select().where(m.Group.name == cart.group.name)
         ).scalar()
         # TODO consider to add warehouse id
         warehouse_product: m.WarehouseProduct = db.session.execute(

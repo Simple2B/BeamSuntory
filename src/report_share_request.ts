@@ -23,7 +23,7 @@ htmxLoader.onLoad('share-request-table', (target) => {
     onHide: () => {
       (viewHistoryHTML.parentNode as HTMLDivElement).classList.add('hidden');
     },
-  }
+  };
   const viewModal = new Modal(viewModalHTML, viewModalOptions);
 
   const viewButtons = document.querySelectorAll('.report-view-btn') as NodeListOf<HTMLButtonElement>;
@@ -56,17 +56,17 @@ function formatDate(date: Date) {
   let now = new Date();
   let differSec = (+now - +date) / 1000;
 
-  if (differSec < 1) return result = "right now";
-  if (differSec < 60) return result = `${Math.floor(differSec)} sec. ago`;
-  if (differSec < 3600) return result = `${Math.floor(differSec / 60)} min. ago`;
+  if (differSec < 1) return (result = 'right now');
+  if (differSec < 60) return (result = `${Math.floor(differSec)} sec. ago`);
+  if (differSec < 3600) return (result = `${Math.floor(differSec / 60)} min. ago`);
   if (differSec >= 3600) {
     const day = date.getDate();
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
 
-    let [hours, minutes] = date.toLocaleTimeString().split(":");
-    return result = `${month}.${day}.${year} ${hours}:${minutes}`;
-  };
+    let [hours, minutes] = date.toLocaleTimeString().split(':');
+    return (result = `${month}.${day}.${year} ${hours}:${minutes}`);
+  }
 
   return result;
 }

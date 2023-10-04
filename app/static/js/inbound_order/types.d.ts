@@ -11,6 +11,7 @@ export interface ISupplier {
     id: number;
     name: string;
     address: string;
+    contact_number: string;
 }
 export interface IWarehouse {
     id: number;
@@ -24,6 +25,8 @@ export interface IProduct {
     regularPrice?: number;
     retailPrice?: number;
     warehouseProducts?: IWarehouseProduct[];
+    supplier: ISupplier;
+    warehouses: IWarehouse[];
 }
 export interface IWarehouseProduct {
     id: number;
@@ -49,6 +52,7 @@ export interface IAllocatedProductOut extends IProductAllocatedBase {
     productQuantityGroups: IProductQuantityGroupOut[];
 }
 export interface IInboundOrderBase {
+    id: number;
     orderId: string;
     status: string;
     title: string;
@@ -64,4 +68,10 @@ export interface IInboundOrderOut extends IInboundOrderBase {
     id: number;
     uuid: string;
     productsAllocated: IAllocatedProductOut[];
+}
+export interface IPagination {
+    pages: number;
+}
+export interface IUser {
+    username: string;
 }

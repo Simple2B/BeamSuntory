@@ -125,3 +125,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const buttonDownloadCSV = document.getElementById('button-csv-download')
     buttonDownloadCSV.addEventListener('click', downloadCSV);
 })
+
+// edit modal
+const modalEditOptions: ModalOptions = {
+    placement: 'bottom-right',
+    backdrop: 'dynamic',
+    backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
+    closable: true,
+    onHide: () => {},
+    onShow: () => {},
+    onToggle: () => {
+      console.log('modal has been toggled')
+    },
+  }
+
+const $modalEditElement: HTMLElement = document.querySelector('#event-edit-modal');
+const editModal: ModalInterface = new Modal($modalEditElement, modalEditOptions);
+
+const editModalCloseButton = document.querySelector('#edit-event-modal-close-btn')
+editModalCloseButton.addEventListener('click', () => {
+    editModal.hide();
+});
+
+const editModalButtons = document.querySelectorAll('#event-edit-button');
+editModalButtons.forEach((e) =>
+  e.addEventListener('click', () => {
+    const eventData = JSON.parse(e.getAttribute('data-target'));
+    const reservedDaysAmountBefore = document.querySelector('#event-edit-reserve-date-to-before');
+    const eventId = document.querySelector('#event-edit-id') as HTMLInputElement;
+    reservedDaysAmountBefore.innerHTML = formatDate(eventData.dateReserveTo);
+    eventId.value = eventData.id;
+
+    editModal.show();
+  })
+)

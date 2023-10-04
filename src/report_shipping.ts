@@ -64,8 +64,10 @@ document.addEventListener('DOMContentLoaded', () => {
           const cartStatusHTML = cartTemplateClone.querySelector('.view-status') as HTMLDivElement;
 
           cartIndexHTML.innerHTML = (i + 1).toString();
-          cartItemImageHTML.setAttribute('src', cart.product.image !== 'default' ? cart.product.image : defaultBrandImage);
-          
+          cartItemImageHTML.setAttribute(
+            'src',
+            cart.product.image !== 'default' ? cart.product.image : defaultBrandImage
+          );
 
           cartProductNameHTML.innerHTML = cart.product.name;
           cartProductSKUHTML.innerHTML = cart.product.SKU;
@@ -76,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
           cartsTable.appendChild(cartTemplateClone);
         })
         viewModal.show();
-      })
+      });
     });
   });
 });
@@ -86,17 +88,17 @@ function formatDate(date: Date) {
   let now = new Date();
   let differSec = (+now - +date) / 1000;
 
-  if (differSec < 1) return result = "right now";
-  if (differSec < 60) return result = `${Math.floor(differSec)} sec. ago`;
-  if (differSec < 3600) return result = `${Math.floor(differSec / 60)} min. ago`;
+  if (differSec < 1) return (result = 'right now');
+  if (differSec < 60) return (result = `${Math.floor(differSec)} sec. ago`);
+  if (differSec < 3600) return (result = `${Math.floor(differSec / 60)} min. ago`);
   if (differSec >= 3600) {
     const day = date.getDate();
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
 
-    let [hours, minutes] = date.toLocaleTimeString().split(":");
-    return result = `${month}.${day}.${year} ${hours}:${minutes}`;
-  };
+    let [hours, minutes] = date.toLocaleTimeString().split(':');
+    return (result = `${month}.${day}.${year} ${hours}:${minutes}`);
+  }
 
   return result;
 }

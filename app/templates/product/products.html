@@ -1,7 +1,7 @@
 <!-- prettier-ignore -->
 {% extends 'base.html' %}
 {% block content %}
-<div class="relative overflow-visible shadow-md sm:rounded-lg overflow-x-auto">
+<div class="relative overflow-visible shadow-md sm:rounded-lg overflow-x-auto min-h-half">
 
   <form id="product-filter-form" action="{{url_for('product.sort')}}" method="post"
     class="flex flex-wrap py-4 gap-5 bg-white dark:bg-gray-800">
@@ -91,6 +91,13 @@
           class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-400">
         </div>
         <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Stocks Own By Me</span>
+      </label>
+      <label class="ml-7 relative inline-flex items-center cursor-pointer">
+        <input id="product-show-events-stocks-own-by-me-btn" type="checkbox" value="" class="sr-only peer">
+        <div
+          class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-400">
+        </div>
+        <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Events Stocks Own By Me</span>
       </label>
       <label class="ml-13 relative inline-flex items-center cursor-pointer">
         <input id="product-show-events-toggle-btn" {% if is_events %}checked{% endif %} type="checkbox" value=""
@@ -188,7 +195,7 @@
       {% for product in products %}
       <tr
         class="table-product-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
-        data-target-product-sku="{{ product.SKU }}">
+        data-target-product-sku="{{ product.SKU }}" data-target-product="{{ product.json }}">
         <td class="w-4 p-4">
           <div class="flex items-center">
             {{ loop.index + page.skip }}
@@ -404,10 +411,6 @@
 {% endblock %}
 <!-- prettier-ignore -->
 {% block scripts %}
-<script>
-  const productMgG = '{{ product_mg_g | safe }}';
-  sessionStorage.setItem('productMgG', productMgG);
-</script>
 <script src="{{ url_for('static', filename='js/product.js') }}" type="text/javascript" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.umd.min.js"></script>
 {% endblock %}
