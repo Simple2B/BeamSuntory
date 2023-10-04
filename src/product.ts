@@ -1866,7 +1866,7 @@ showEventsProductByUserGroupCheckbox.addEventListener('change', async () => {
 });
 
 const showAllProductStocksCheckbox: HTMLInputElement = document.querySelector('#product-show-all-stocks');
-if (window.location.pathname + window.location.hash === '/product/' && !window.location.href.includes('events=true')) {
+if (window.location.pathname + window.location.hash === '/product/' && !window.location.href.includes('events')) {
   window.onload = (event) => {
     showAllProductStocksCheckbox.setAttribute('checked', 'checked');
   };
@@ -2029,6 +2029,8 @@ function getFilterValues(isChecked: boolean) {
   const url = new URL(window.location.href);
   const eventSortToggleButton = document.querySelector('#product-show-events-toggle-btn');
 
+  url.pathname = '/product';
+  
   isChecked ? url.searchParams.set('events', 'true') : url.searchParams.delete('events');
   window.location.href = `${url.href}`;
 }
