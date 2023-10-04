@@ -1,12 +1,41 @@
-<div id="events-table">
-  <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+<div id="report-assign-table">
+  <table
+    class="w-full text-sm text-left text-gray-500 dark:text-gray-400"
+  >
+    <thead
+      class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
+    >
       <tr>
-        <th scope="col" class="px-6 py-3">#</th>
-        <th scope="col" class="px-6 py-3">Action</th>
-        <th scope="col" class="px-6 py-3">User</th>
-        <th scope="col" class="px-6 py-3">Date</th>
-        <th scope="col" class="px-6 py-3">Actions</th>
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
+          #
+        </th>
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
+          Action
+        </th>
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
+          User
+        </th>
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
+          Date
+        </th>
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
+          Actions
+        </th>
       </tr>
     </thead>
     <tbody>
@@ -47,9 +76,16 @@
     </tbody>
   </table>
   {% if page.pages > 1 %}
-  <div class="container content-center mt-3 flex bg-white dark:bg-gray-800">
-    <nav aria-label="Page navigation example" class="mx-auto">
-      <ul class="inline-flex items-center -space-x-px">
+  <div
+    class="container content-center mt-3 flex bg-white dark:bg-gray-800"
+  >
+    <nav
+      aria-label="Page navigation example"
+      class="mx-auto"
+    >
+      <ul
+        class="inline-flex items-center -space-x-px"
+      >
         <li>
           <button
             hx-get="{{ url_for('report_assign.search_report_assigns') }}?page=1&q={{page.query}}"
@@ -58,8 +94,12 @@
             hx-indicator="#report-table-spinner"
             class="block px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
           >
-            <span class="sr-only">First</span>
-            {% include "icon/left_arrow_double.html" %}
+            <span class="sr-only"
+              >First</span
+            >
+            {% include
+            "icon/left_arrow_double.html"
+            %}
           </button>
         </li>
         <li>
@@ -70,8 +110,11 @@
             hx-indicator="#report-table-spinner"
             class="block px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
           >
-            <span class="sr-only">Previous</span>
-            {% include "icon/left_arrow.html" %}
+            <span class="sr-only"
+              >Previous</span
+            >
+            {% include
+            "icon/left_arrow.html" %}
           </button>
         </li>
 
@@ -113,7 +156,8 @@
           >
             <!-- prettier-ignore -->
             <span class="sr-only">Next</span>
-            {% include "icon/right_arrow.html" %}
+            {% include
+            "icon/right_arrow.html" %}
           </button>
         </li>
         <li>
@@ -126,7 +170,9 @@
           >
             <!-- prettier-ignore -->
             <span class="sr-only">Last</span>
-            {% include "icon/right_arrow_double.html" %}
+            {% include
+            "icon/right_arrow_double.html"
+            %}
           </button>
         </li>
       </ul>

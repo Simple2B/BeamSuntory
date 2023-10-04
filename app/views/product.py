@@ -684,7 +684,7 @@ def request_share():
 
         report_request_share = m.ReportRequestShare(
             user=current_user,
-            type=s.ReportRequestShareType.CREATED.value,
+            type=s.ReportRequestShareActionType.CREATED.value,
             request_share=request_share,
         )
 

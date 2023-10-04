@@ -342,6 +342,16 @@ const reportShipping = {
     },
 }
 
+const reportConfig = {
+    entry: {
+        main: './src/report.ts',
+    },
+    output: {
+        path: path.resolve(__dirname, './app/static'),
+        filename: 'js/report.js', // <--- Will be compiled to this single file
+    },
+}
+
 const configs = [
   baseConfig,
   userConfig,
@@ -369,6 +379,8 @@ const configs = [
   inventoryConfig,
   adjustConfig,
   eventConfig,
+  reportConfig,
+  // TODO remove else reports
   reportEventConfig,
   reportRequestShareConfig,
   reportAssignConfig,

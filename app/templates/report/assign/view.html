@@ -2,7 +2,7 @@
 <!-- prettier-ignore-->
 
 <div
-  id="view-report-events-modal"
+  id="report-assign-view-modal"
   tabindex="-1"
   aria-hidden="true"
   class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full"
@@ -23,27 +23,27 @@
       <div class="p-6 space-y-6">
         <div class="grid grid-cols-6 gap-6">
           <div class="col-span-3 sm:col-span-3">
-            <label for="report-event-user" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+            <label for="report-assign-user" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
               >User</label
             >
             <div
-              id="report-event-user"
+              id="report-assign-user"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             ></div>
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="report-event-action" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Action</label>
+            <label for="report-assign-action" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Action</label>
             <div
-              id="report-event-action"
+              id="report-assign-action"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             ></div>
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="report-event-date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+            <label for="report-assign-date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
               >Date</label
             >
             <div
-              id="report-event-date"
+              id="report-assign-date"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             ></div>
           </div>          
@@ -64,8 +64,8 @@
             <th scope="col" class="px-4 py-3">Warehouse</th>
           </tr>
         </thead>
-        <tbody id="table-products">
-        <tr id="view-product-item-template" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+        <tbody id="report-assign-table-products">
+        <tr id="report-assign-view-product-item-template" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
           <td class="w-4 p-4">
             <img src="" class="product-image">
           </td>
@@ -100,3 +100,5 @@
     </form>
   </div>
 </div>
+<!-- prettier-ignore -->
+<script src="{{ url_for('static', filename='js/report_assign.js') }}" type="text/javascript" defer></script>

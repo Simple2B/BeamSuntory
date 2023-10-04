@@ -171,7 +171,7 @@ def create():
 
         # Create Report ship request
         report_shipping = m.ReportShipping(
-            type=s.ReportShipRequestType.CREATED.value,
+            type=s.ReportShipRequestActionType.CREATED.value,
             ship_request=ship_request,
             user=current_user,
         )

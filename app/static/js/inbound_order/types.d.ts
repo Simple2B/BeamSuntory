@@ -1,3 +1,4 @@
+import { IGroup } from "../types";
 export interface IProductAllocatedGroup {
     groupId: number;
     quantity: number;
@@ -31,10 +32,6 @@ export interface IWarehouseProduct {
     product_quantity: number;
     warehouse: IWarehouse;
     group: IGroup;
-}
-export interface IGroup {
-    id: number;
-    name: string;
 }
 export interface IProductAllocatedBase {
     id: number;

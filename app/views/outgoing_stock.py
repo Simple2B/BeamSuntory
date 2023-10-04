@@ -181,7 +181,7 @@ def save():
                 return redirect(url_for("outgoing_stock.get_all"))
 
             report_shipping = m.ReportShipping(
-                type=s.ReportShipRequestType.ACCEPTED.value,
+                type=s.ReportShipRequestActionType.ACCEPTED.value,
                 ship_request=ship_request,
                 user=current_user,
                 history=f"{warehouse.name}: {product['quantity']}",

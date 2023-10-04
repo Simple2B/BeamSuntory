@@ -1,30 +1,3 @@
-interface IPagination {
-    pages: number
-}
-
-interface IProduct {
-    name: string
-    SKU: string
-}
-
-interface IEvents {
-    id: number
-    product: IProduct
-    dateFrom: string
-    dateTo: string
-    comment: string
-    user: IUser
-}
-
-interface IUser {
-    username: string
-}
-
-interface IEventsResponse {
-    pagination: IPagination
-    events: IEvents[]
-}
-
 function getFilterValues() {
     const url = new URL(window.location.href)
     const searchEventInput: HTMLInputElement = document.querySelector('#table-search-event')

@@ -96,7 +96,7 @@ def save():
             return redirect(url_for("request_share.get_all"))
 
         report_request_share = m.ReportRequestShare(
-            type=s.ReportRequestShareType.UPDATED_QUANTITY.value,
+            type=s.ReportRequestShareActionType.UPDATED_QUANTITY.value,
             history=f"{request_share.desire_quantity} => {form.desire_quantity.data}",
             user=current_user,
             request_share=request_share,
@@ -220,7 +220,7 @@ def share(id: int):
     ).save(False)
 
     report_request_share = m.ReportRequestShare(
-        type=s.ReportRequestShareType.SHARED.value,
+        type=s.ReportRequestShareActionType.SHARED.value,
         user=current_user,
         request_share=request_share,
         history=" ".join(
@@ -252,7 +252,7 @@ def decline(id: int):
     request_share.status = "declined"
     request_share.finished_date = datetime.now().replace(microsecond=0)
     report_request_share = m.ReportRequestShare(
-        type=s.ReportRequestShareType.DECLINED.value,
+        type=s.ReportRequestShareActionType.DECLINED.value,
         user=current_user,
         request_share=request_share,
     )

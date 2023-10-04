@@ -1,16 +1,8 @@
-from enum import Enum
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, RootModel
 from .request_share import RequestShare
 from .user import User
-from .pagination import PaginationOut
-
-
-class ReportRequestShareType(Enum):
-    CREATED: str = "created"
-    UPDATED_QUANTITY: str = "updated quantity"
-    SHARED: str = "shared"
-    DECLINED: str = "declined"
+from .report import ReportsBaseResponse
 
 
 class ReportRequestShare(BaseModel):
@@ -26,6 +18,5 @@ class ReportRequestShare(BaseModel):
 ReportRequestShareList = RootModel[list[ReportRequestShare]]
 
 
-class ReportRequestShareResponse(BaseModel):
-    pagination: PaginationOut
+class ReportRequestShareResponse(ReportsBaseResponse):
     reports: ReportRequestShareList

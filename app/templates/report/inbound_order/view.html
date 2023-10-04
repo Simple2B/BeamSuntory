@@ -73,9 +73,9 @@
             <th scope="col" class="px-4 py-3">Warehouse</th>
           </tr>
         </thead>
-        <tbody id="table-products">
+        <tbody id="report-inbound-order-table-products">
 
-<tr id="view-product-item-template" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 hidden">
+<tr id="report-inbound-order-view-product-item-template" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 hidden">
   <td class="w-4 p-4">
     <div class="product-index">0</div>
   </td>
@@ -110,3 +110,5 @@
     </form>
   </div>
 </div>
+<!-- prettier-ignore -->
+<script src="{{ url_for('static', filename='js/report_inbound_orders.js') }}" type="text/javascript" defer></script>

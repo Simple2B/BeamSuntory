@@ -11,7 +11,7 @@ from app.controllers import create_pagination
 
 from app import schema as s
 from app import models as m, db
-
+from app import controllers as c
 
 report_blueprint = Blueprint(
     "report",
@@ -95,6 +95,7 @@ def index():
     ).all()
 
     users = db.session.scalars(sa.select(m.User))
+    divisions = db.session.scalars(m.Division.select())
     master_groups = db.session.scalars(m.MasterGroup.select())
     groups = db.session.scalars(m.Group.select())
     product_master_groups = db.session.scalars(
@@ -107,7 +108,7 @@ def index():
 
     return render_template(
         "report/index.html",
-        report_types=s.ReportRequestShareType,
+        report_types=s.ReportRequestShareActionType,
         master_groups_brand=brands,
         master_group_category=categories,
         product_premises=premises,
@@ -115,28 +116,19 @@ def index():
         master_groups=master_groups,
         groups=groups,
         product_master_groups=product_master_groups,
+        report_request_share_action_types=s.ReportRequestShareActionType,
+        report_shipping_action_types=s.ReportShipRequestActionType,
+        divisions=divisions,
     )
 
 
 @report_blueprint.route("/api", methods=["GET"])
 @login_required
 def report_json():
-    pagination, reports = get_request_share_report()
-    report_list_schema = s.ReportRequestShareList.model_validate(reports)
-
-    return jsonify(
-        s.ReportRequestShareResponse(
-            pagination=pagination, reports=report_list_schema.root
-        ).model_dump_json(by_alias=True)
-    )
+    return jsonify(c.get_reports())
 
 
 @report_blueprint.route("search")
 @login_required
 def search():
-    # pagination, reports = get_request_share_report()
-    return "Hello, world"
-
-    # return render_template(
-    #     "report/reports_table.html", page=pagination, reports=reports
-    # )
+    return c.get_reports(render=True)

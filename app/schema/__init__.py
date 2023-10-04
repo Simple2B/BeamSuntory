@@ -60,7 +60,6 @@ from .filter_report_inventories import FilterReportInventories
 from .filter_report_adjustments import FilterReportAdjustments
 from .filter_report_request_share import FilterRequestShare
 from .report_request_share import (
-    ReportRequestShareType,
     ReportRequestShare,
     ReportRequestShareList,
     ReportRequestShareResponse,
@@ -69,7 +68,6 @@ from .filter_report_assigns import FilterReportAssign
 from .filter_report_shipping import FilterReportShipping
 from .report_assign import ReportAssignsResponse, ReportAssignList
 from .report_shipping import (
-    ReportShipRequestType,
     ReportShipping,
     ReportShippingList,
     ReportShippingResponse,
@@ -80,4 +78,10 @@ from .report_inbound_order import (
     ReportInboundOrderList,
     ReportInboundOrderResponse,
 )
-from .report import ReportFilter, ReportType
+from .report import (
+    ReportFilter,
+    ReportType,
+    ReportsBaseResponse,
+    ReportRequestShareActionType,
+    ReportShipRequestActionType,
+)

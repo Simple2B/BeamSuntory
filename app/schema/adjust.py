@@ -4,6 +4,7 @@ from .product import Product
 from .pagination import PaginationOut
 from .user import User
 from .adjust_group_quantity import AdjustGroupQty
+from .report import ReportsBaseResponse
 
 
 class Adjust(BaseModel):
@@ -17,10 +18,8 @@ class Adjust(BaseModel):
     adjust_group_qty: list[AdjustGroupQty] = Field(alias="adjustGroupQty")
 
 
-class AdjustResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
-    pagination: PaginationOut
-    adjusts: list[Adjust]
+class AdjustResponse(ReportsBaseResponse):
+    reports: list[Adjust]
 
 
 AdjustList = RootModel[list[Adjust]]

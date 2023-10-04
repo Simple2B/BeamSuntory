@@ -117,17 +117,6 @@ def get_events_report():
     return pagination, reports
 
 
-@report_event_blueprint.route("/event/api", methods=["GET"])
-@login_required
-def get_events_json():
-    pagination, reports = get_events_report()
-    report_list_schema = s.ReportEventList.model_validate(reports)
-
-    return s.ReportEventResponse(
-        pagination=pagination, report_events=report_list_schema.root
-    ).model_dump_json(by_alias=True)
-
-
 @report_event_blueprint.route("/event", methods=["GET"])
 @login_required
 def events():
