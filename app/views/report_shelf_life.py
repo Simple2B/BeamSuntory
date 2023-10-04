@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import (
     Blueprint,
     request,
@@ -60,8 +60,11 @@ def get_shelf_life_reports():
             <= datetime.strptime(filter_shelf_lifes.created_to, "%m/%d/%Y")
         )
 
-    # if filter_shelf_lifes.days_to_expire:
-    #     query = query.where(m.ProductAllocated.type == filter_shelf_lifes.days_to_expire)
+    if filter_shelf_lifes.expire_in:
+        query = query.where(
+            m.ProductAllocated.shelf_life_end
+            <= datetime.now() + timedelta(days=int(filter_shelf_lifes.expire_in))
+        )
 
     # if filter_shelf_lifes.master_group:
     #     query = query.where(

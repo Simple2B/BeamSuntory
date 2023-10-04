@@ -1,7 +1,7 @@
 <!-- prettier-ignore -->
 {% extends 'base.html' %}
 {% block content %}
-{% set all_includes = "[name='q'], [name='username'], [name='created_from'], [name='created_to'], [name='master_group'], [name='group'], [name='group_brand'],  [name='group_category'], [name='group_language'], [name='group_premises'], [name='report_type']" %}
+{% set all_includes = "[name='q'], [name='username'], [name='created_from'], [name='created_to'], [name='master_group'], [name='group'], [name='group_brand'],  [name='group_category'], [name='group_language'], [name='group_premises'], [name='expire_in']" %}
 <div
   class="relative overflow-x-auto shadow-md sm:rounded-lg"
 >
@@ -86,7 +86,7 @@
         hx-swap="innerHTML"
         type="text"
         id="product-shelf-life-sort-created-from-datepicker"
-        placeholder="Created date: from"
+        placeholder="Shelf life start"
         hx-indicator="#report-table-spinner"
         class="product-shelf-life-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
       />
@@ -110,7 +110,7 @@
         hx-target="#reports-table"
         hx-swap="innerHTML"
         type="text"
-        placeholder="Created date: to"
+        placeholder="Shelf life end"
         id="product-shelf-life-sort-created-to-datepicker"
         hx-indicator="#report-table-spinner"
         class="product-shelf-life-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -188,15 +188,19 @@
       class="flex flex-wrap py-1 bg-white dark:bg-gray-800"
     >
       <!-- prettier-ignore -->
-      <select id="shelf-life-filter-report-type" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"
-        name="report_type"
+      <select id="shelf-life-filter-expire-in" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"
+        name="expire_in"
         hx-include="{{all_includes}}"
         hx-get="{{ url_for('report_shelf_life.search_shelf_life_reports') }}" hx-indicator="#report-table-spinner"
         class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-        <option selected value="">Report Type</option>
-        {% for report_type in report_types_enum %}
-        <option value="{{ report_type.value }}">{{ report_type.value }}</option>
-        {% endfor %}
+        <option selected value="">Expire in (days)</option>
+        <option value="1">1</option>
+        <option value="1">5</option>
+        <option value="1">10</option>
+        <option value="1">15</option>
+        <option value="1">20</option>
+        <option value="1">30</option>
+        <option value="1">60</option>
       </select>
     </div>
   </div>
