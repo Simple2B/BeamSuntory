@@ -66,23 +66,31 @@ def get_shelf_life_reports():
             <= datetime.now() + timedelta(days=int(filter_shelf_lifes.expire_in))
         )
 
-    # if filter_shelf_lifes.master_group:
-    #     query = query.where(
-    #         m.ReportSKU.warehouse_product.has(
-    #             m.WarehouseProduct.group.has(
-    #                 m.Group.master_group.has(
-    #                     m.MasterGroup.name == filter_shelf_lifes.master_group
-    #                 )
-    #             )
-    #         )
-    #     )
+    if filter_shelf_lifes.master_group:
+        mg_product_ids = db.session.scalars(
+            m.WarehouseProduct.select()
+            .with_only_columns(m.WarehouseProduct.product_id)
+            .where(
+                m.WarehouseProduct.group.has(
+                    m.Group.master_group.has(
+                        m.MasterGroup.name == filter_shelf_lifes.master_group
+                    )
+                )
+            )
+        ).all()
 
-    # if filter_shelf_lifes.group:
-    #     query = query.where(
-    #         m.ReportSKU.warehouse_product.has(
-    #             m.WarehouseProduct.group.has(m.Group.name == filter_shelf_lifes.group)
-    #         )
-    #     )
+        query = query.where(m.ProductAllocated.product_id.in_(mg_product_ids))
+
+    if filter_shelf_lifes.group:
+        product_ids = db.session.scalars(
+            m.WarehouseProduct.select()
+            .with_only_columns(m.WarehouseProduct.product_id)
+            .where(
+                m.WarehouseProduct.group.has(m.Group.name == filter_shelf_lifes.group)
+            )
+        ).all()
+
+        query = query.where(m.ProductAllocated.product_id.in_(product_ids))
 
     master_groups = [
         filter_shelf_lifes.group_brand,
