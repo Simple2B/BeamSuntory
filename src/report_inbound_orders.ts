@@ -69,8 +69,6 @@ htmxLoader.onLoad('report-inbound-order-table', (target) => {
         const productIndex = newProductItem.querySelector('.product-index') as HTMLDivElement
         const productName = newProductItem.querySelector('.product-name') as HTMLDivElement
         const productSku = newProductItem.querySelector('.product-sku') as HTMLDivElement
-        const productRegularPrice = newProductItem.querySelector('.product-regular-price') as HTMLDivElement
-        const productRetailPrice = newProductItem.querySelector('.product-retail-price') as HTMLDivElement
         const productGroup = newProductItem.querySelector('.product-group') as HTMLDivElement
         const productQuantity = newProductItem.querySelector('.product-quantity') as HTMLDivElement
         const productWarehouse = newProductItem.querySelector('.product-warehouse') as HTMLDivElement
@@ -86,7 +84,9 @@ htmxLoader.onLoad('report-inbound-order-table', (target) => {
         productQuantity.innerHTML = productOrder.quantity.toString();
 
         if(productOrder.productQuantityGroups.length > 0) {
-          const groups = productOrder.productQuantityGroups[0].group.name  
+          const groups = productOrder.productQuantityGroups.reduce((acc, group) => {
+            return acc + group.group.name + ' (' + group.quantity + ') <br>'
+          }, '');
           productGroup.innerHTML = groups;
         }else{
           productGroup.innerHTML = 'No group'
