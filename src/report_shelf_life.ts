@@ -1,29 +1,8 @@
-import { ModalOptions, Modal } from 'flowbite';
-import { IProduct, IWarehouse, IInboundOrderBase } from './inbound_order/types';
+import { IProduct } from './inbound_order/types';
 import HTMXDispatcher from './htmx';
 
 interface IUser {
   username: string;
-}
-
-interface ICart {
-  group: string;
-  product: IProduct;
-}
-
-interface IAdjust {
-  group: string;
-  product: IProduct;
-}
-
-interface IAssign {
-  group: string;
-  product: IProduct;
-}
-
-interface IRequestShare {
-  group: string;
-  product: IProduct;
 }
 
 interface IWarehouseProduct {
@@ -31,53 +10,21 @@ interface IWarehouseProduct {
   product: IProduct;
 }
 
-interface IReportSKU {
-  qtyBefore: number;
-  qtyAfter: number;
-  type: string;
-  status: string;
+interface IReportShelfLife {
+  quantity: number;
+  quantityReceived: number;
+  shelfLifeStart: string;
+  shelfLifeEnd: string;
   product: IProduct;
-  inboundOrders: IInboundOrderBase[];
-  shipRequests: IShipRequest[];
-  adjustments: IAdjust[];
-  assigns: IAssign[];
-  shares: IRequestShare[];
-  warehouseProduct: IWarehouseProduct;
-  createdAt: string;
+  // TODO do we need this?
+  // productQuantityGroups: list[ProductGroupOut] = Field(
+  //     alias="productQuantityGroups"
+  // )
 }
 
-interface IShipRequest {
-  id: number;
-  carts: ICart[];
-  comment: string;
-  createdAt: string;
-  daNotes: string;
-  orderNumb: string;
-  orderStatus: string;
-  store: IStore;
-  storeId: number;
-  wmNotes: string;
-}
-
-interface IStore {
-  active: boolean;
-  address: string;
-  city: string;
-  contactPerson: string;
-  country: string;
-  createdAt: string;
-  email: string;
-  id: number;
-  phoneNumb: string;
-  region: string;
-  storeCategoryId: number;
-  storeName: string;
-  zip: string;
-}
-
-interface IReportSKUResponse {
+interface IReportShelfLifeResponse {
   pagination: IPagination;
-  reportSKUList: IReportSKU[];
+  reportShelfLifeList: IReportShelfLife[];
 }
 
 // initialize htmx listener
@@ -93,23 +40,23 @@ const formatDate = (date: string) => {
   const day = String(createAt.getDate()).padStart(2, '0');
   const hours = String(createAt.getHours()).padStart(2, '0');
   const minutes = String(createAt.getMinutes()).padStart(2, '0');
-  return `${month}/${day}/${year} ${hours}:${minutes}`;
+  return `${month}/${day}/${year}`;
 };
 
 const downloadCSV = async function () {
   // Filters
-  const searchSKUInput: HTMLInputElement = document.querySelector('#table-search-shelf-life');
-  const dateSKUCreatedFromInput: HTMLInputElement = document.querySelector(
+  const searchShelfLifeInput: HTMLInputElement = document.querySelector('#table-search-shelf-life');
+  const dateShelfLifeCreatedFromInput: HTMLInputElement = document.querySelector(
     '#product-shelf-life-sort-created-from-datepicker'
   );
-  const dateSKUCreatedToInput: HTMLInputElement = document.querySelector(
+  const dateShelfLifeCreatedToInput: HTMLInputElement = document.querySelector(
     '#product-shelf-life-sort-created-to-datepicker'
   );
 
   const filtersMap = {
-    q: searchSKUInput,
-    created_from: dateSKUCreatedFromInput,
-    created_to: dateSKUCreatedToInput,
+    q: searchShelfLifeInput,
+    created_from: dateShelfLifeCreatedFromInput,
+    created_to: dateShelfLifeCreatedToInput,
   };
 
   const filterQuery = [];
@@ -118,7 +65,7 @@ const downloadCSV = async function () {
   }
 
   // CSV Headers
-  const csvData = ['SKU, Report Type, Status, Qty Before, Qty After, Created at'];
+  const csvData = ['ShelfLife, shelfLifeStart, shelfLifeEnd, quantityOrdered, quantityReceived'];
   let pages = 1;
   const queryTail = filterQuery ? filterQuery.join('&') : '';
 
@@ -128,25 +75,25 @@ const downloadCSV = async function () {
     const url = [`api?page=${page}`, queryTail].join('&');
 
     const res = await fetch(`${urlWithoutQueryParams}/${url}`);
-    const data: IReportSKUResponse = await res.json();
+    const data: IReportShelfLifeResponse = await res.json();
+    console.log(data);
 
-    data.reportSKUList.forEach((report: IReportSKU) => {
-      let qtyBefore;
-      let qtyAfter;
-      if (!qtyBefore && !qtyBefore) {
-        qtyBefore = '-';
-        qtyAfter = '-';
-        console.log(qtyBefore, qtyAfter);
-      } else if (!qtyBefore) {
-        qtyBefore = '-';
-        qtyAfter = report.qtyAfter.toString();
+    data.reportShelfLifeList.forEach((report: IReportShelfLife) => {
+      let received;
+      if (!report.quantityReceived) {
+        received = '-';
       } else {
-        qtyBefore = report.qtyBefore.toString();
-        qtyAfter = report.qtyAfter.toString();
+        received = report.quantityReceived.toString();
       }
 
       csvData.push(
-        [report.product.SKU, report.type, report.status, qtyBefore, qtyAfter, formatDate(report.createdAt)].join(',')
+        [
+          report.product.SKU,
+          formatDate(report.shelfLifeStart),
+          formatDate(report.shelfLifeStart),
+          report.quantity,
+          received,
+        ].join(',')
       );
     });
 

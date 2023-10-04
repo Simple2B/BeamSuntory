@@ -34,6 +34,7 @@ class ProductAllocatedOut(BaseModel):
     product_quantity_groups: list[ProductGroupOut] = Field(
         alias="productQuantityGroups"
     )
+    quantity_received: int | None = Field(alias="quantityReceived", default=None)
 
 
 ProductAllocatedList = RootModel[list[ProductAllocated]]
