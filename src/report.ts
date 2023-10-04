@@ -207,7 +207,7 @@ const generateCSVShipping = async (queryParams: URLSearchParams) => {
 
 const generateCSVAssign = async (queryParams: URLSearchParams) => {
   // CSV Headers
-  const csvData = ['created_at,username,type,from_group,to_group,sku,product_name']
+  const csvData = ['created_at,username,type,from_group,to_group,sku,product_name,quantity']
   
   await fetchReportAPI(queryParams, (data: IReportAssignResponse) => {
     console.log(data)
@@ -221,6 +221,7 @@ const generateCSVAssign = async (queryParams: URLSearchParams) => {
           report.group.name,
           report.product.SKU,
           report.product.name,
+          report.quantity,
         ].join(',')
       )
     });
