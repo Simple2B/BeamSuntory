@@ -27,6 +27,7 @@ const reportViewUser = document.getElementById('report-inbound-order-user') as H
 const reportViewAction = document.getElementById('report-inbound-order-action') as HTMLDivElement
 const reportViewDate = document.getElementById('report-inbound-order-date') as HTMLDivElement
 const reportViewOrderTitle = document.getElementById('report-inbound-order-title') as HTMLDivElement
+const reportViewHistory = document.getElementById('report-inbound-order-history') as HTMLDivElement
 
 const reportViewProductTbody = document.querySelector('#report-inbound-order-table-products') as HTMLTableElement;
 const productItemTemplate = document.querySelector('#report-inbound-order-view-product-item-template') as HTMLTableRowElement;
@@ -41,6 +42,14 @@ htmxLoader.onLoad('report-inbound-order-table', (target) => {
       reportViewAction.innerHTML = reportInboundOrder.type
       reportViewDate.innerHTML = formatDate(reportInboundOrder.createdAt)
       reportViewOrderTitle.innerHTML = reportInboundOrder.inboundOrder.title
+
+      if (reportInboundOrder.history){
+        reportViewHistory.innerHTML = reportInboundOrder.history.split(',').join('<br>');
+        reportViewHistory.parentElement.classList.remove('hidden');
+      } else {
+        reportViewHistory.parentElement.classList.add('hidden');
+      }
+      
 
       const productList = reportInboundOrder.inboundOrder.productsAllocated  
         
@@ -71,21 +80,10 @@ htmxLoader.onLoad('report-inbound-order-table', (target) => {
           ? (img.src = `data:image/png;base64, ${product.image}`)
           : (img.src = defaultBrandImage)
 
-        productIndex.innerHTML = (i + 1).toString()
-        productName.innerHTML = product.name
-        productSku.innerHTML = product.SKU
-        productQuantity.innerHTML = productOrder.quantity.toString()
-
-        if (product.regularPrice) {
-          productRegularPrice.innerHTML = product.regularPrice.toString()
-        } else {
-          productRegularPrice.innerHTML = 'No price'
-        }
-        if (product.retailPrice) {
-          productRetailPrice.innerHTML = product.retailPrice.toString()
-        } else {
-          productRetailPrice.innerHTML = 'No price'
-        }
+        productIndex.innerHTML = (i + 1).toString();
+        productName.innerHTML = product.name;
+        productSku.innerHTML = product.SKU;
+        productQuantity.innerHTML = productOrder.quantity.toString();
 
         if(productOrder.productQuantityGroups.length > 0) {
           const groups = productOrder.productQuantityGroups[0].group.name  

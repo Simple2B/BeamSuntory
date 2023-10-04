@@ -184,7 +184,7 @@ const generateCSVShipping = async (queryParams: URLSearchParams) => {
           report.shipRequest.store.storeName,
           cart.product.SKU,
           cart.product.name,
-          cart.group,
+          cart.group.name,
           cart.quantity,
         ].join(',')
       )

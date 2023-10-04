@@ -28,6 +28,10 @@ closingViewModalButton.addEventListener('click', () => {
 const reportViewUser = document.getElementById('report-assign-user') as HTMLDivElement
 const reportViewAction = document.getElementById('report-assign-action') as HTMLDivElement
 const reportViewDate = document.getElementById('report-assign-date') as HTMLDivElement
+const reportGroupFrom = document.getElementById('report-assign-group-from-view') as HTMLDivElement;
+const reportGroupTo = document.getElementById('report-assign-group-to-view') as HTMLDivElement;
+const reportQuantity = document.getElementById("report-assign-quantity-view") as HTMLDivElement;
+const reportWarehouse = document.getElementById("report-assign-warehouse-view") as HTMLDivElement;
 
 htmxLoader.onLoad('report-assign-table', (target) => {
   // onload element with events-table id
@@ -35,12 +39,14 @@ htmxLoader.onLoad('report-assign-table', (target) => {
   reportViewButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
       const reportAssign: IReportAssign = JSON.parse(btn.getAttribute('data-target'));
-      console.log(reportAssign);
-      
+
       reportViewUser.innerHTML = reportAssign.user.username
       reportViewAction.innerHTML = reportAssign.type
-
       reportViewDate.innerHTML = formatDate(reportAssign.createdAt);
+      reportGroupFrom.innerHTML = reportAssign.fromGroup.name;
+      reportGroupTo.innerHTML = reportAssign.group.name;
+      reportQuantity.innerHTML = reportAssign.quantity.toString();
+      reportWarehouse.innerHTML = reportAssign.product.warehouseProducts.map(warehouseProduct => warehouseProduct.warehouse.name).filter((value, index, array) => array.indexOf(value) === index).join(', ');
 
       const newProductItem = productItemTemplate
       newProductItem.removeAttribute('id')

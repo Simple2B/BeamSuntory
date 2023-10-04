@@ -92,7 +92,7 @@ htmxLoader.onLoad('events-table', (target) => {
             productRetailPrice.innerHTML = 'No price';
           }
 
-          productGroup.innerHTML = event.group;
+          productGroup.innerHTML = event.group.name;
           reportViewProductTbody.appendChild(newProductItem);
           viewModal.show();
         });

@@ -171,7 +171,7 @@ def create():
             order_type="store_delivery",
             user_id=current_user.id,
         )
-        ship_request.save(False)
+        db.session.add(ship_request)
 
         # Create Report ship request
         report_shipping = m.ReportShipping(
@@ -210,6 +210,7 @@ def create():
                     # TODO make report event type UPPERCASE (Enum)
                     type=s.ReportEventType.created.value,
                     user=current_user,
+                    ship_request=ship_request,
                 )
                 events_exist = True
                 # creation event
@@ -224,8 +225,8 @@ def create():
                     comment=form_create.event_comment.data,
                     user=current_user,
                 )
-                ship_request.report_event = report_event
                 db.session.add(event)
+                db.session.add(report_event)
                 log(log.INFO, "Event added. Event: [%s]", event)
 
                 cart.warehouse = warehouse_event
@@ -244,11 +245,10 @@ def create():
 
         log(log.INFO, "Form submitted. Ship Request: [%s]", ship_request)
         flash("Ship request added!", "success")
+
         if events_exist:
             ship_request.report_event = report_event
             report_event.save(False)
-
-        ship_request.save(False)
 
         db.session.commit()
 

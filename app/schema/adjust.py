@@ -1,7 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, RootModel, Field
 from .product import Product
-from .pagination import PaginationOut
 from .user import User
 from .adjust_group_quantity import AdjustGroupQty
 from .report import ReportsBaseResponse

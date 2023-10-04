@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           cartProductNameHTML.innerHTML = cart.product.name;
           cartProductSKUHTML.innerHTML = cart.product.SKU;
-          cartGroupHTML.innerHTML = cart.group;
+          cartGroupHTML.innerHTML = cart.group.name;
           cartQuantityHTML.innerHTML = cart.quantity.toString();
           cartStatusHTML.innerHTML = cart.status;
 

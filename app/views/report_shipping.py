@@ -3,7 +3,6 @@ from flask import (
     Blueprint,
     request,
     render_template,
-    jsonify,
 )
 from flask_login import login_required
 import sqlalchemy as sa

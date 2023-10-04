@@ -10,8 +10,20 @@ interface IProduct {
     retailPrice: number;
     warehouseProducts: IWarehouseProduct[];
 }
+interface IEvents {
+    id: number;
+    product: IProduct;
+    dateFrom: string;
+    dateTo: string;
+    comment: string;
+    user: IUser;
+}
 interface IUser {
     username: string;
+}
+export interface IEventsResponse {
+    pagination: IPagination;
+    events: IEvents[];
 }
 interface IStore {
     active: boolean;
@@ -38,7 +50,8 @@ interface IProductEvent {
     product: IProduct;
     quantity: number;
     event: IEvent;
-    group: string;
+    group: IGroup;
+    status: string;
 }
 interface IShipRequest {
     id: number;
@@ -74,7 +87,7 @@ export interface IGroup {
     name: string;
     masterGroup: IMasterGroup;
 }
-interface IRequestShare {
+export interface IRequestShare {
     status: string;
     desireQuantity: number;
     product: IProduct;
@@ -91,16 +104,17 @@ export interface IReportRequestShareResponse {
     pagination: IPagination;
     reports: IReportRequestShare[];
 }
-interface ISupplier {
+export interface ISupplier {
     id: number;
     name: string;
     address: string;
 }
-interface IWarehouse {
+export interface IWarehouse {
     id: number;
     name: string;
 }
-interface IInboundOrderBase {
+export interface IInboundOrderBase {
+    id: number;
     orderId: string;
     status: string;
     title: string;

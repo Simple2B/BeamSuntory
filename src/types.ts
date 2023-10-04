@@ -26,7 +26,7 @@ interface IUser {
     username: string
 }
 
-interface IEventsResponse {
+export interface IEventsResponse {
     pagination: IPagination
     events: IEvents[]
 }
@@ -59,7 +59,8 @@ interface IProductEvent {
   product: IProduct;
   quantity: number;
   event: IEvent;
-  group: string;
+  group: IGroup;
+  status: string;
 }
 
 interface IShipRequest {
@@ -101,7 +102,7 @@ export interface IGroup {
   masterGroup: IMasterGroup;
 }
 
-interface IRequestShare {
+export interface IRequestShare {
   status: string;
   desireQuantity: number;
 
@@ -124,19 +125,20 @@ export interface IReportRequestShareResponse {
 }
 
 
-interface ISupplier {
+export interface ISupplier {
   id: number
   name: string
   address: string
 }
 
-interface IWarehouse {
+export interface IWarehouse {
   id: number
   name: string
 }
 
 
-interface IInboundOrderBase {
+export interface IInboundOrderBase {
+  id: number;
   orderId: string
   status: string
   title: string

@@ -1,3 +1,7 @@
+import { formatDate } from "./utils"
+import { ModalOptions, ModalInterface, Modal } from "flowbite"
+import { IEventsResponse } from "./types"
+
 function getFilterValues() {
     const url = new URL(window.location.href)
     const searchEventInput: HTMLInputElement = document.querySelector('#table-search-event')
