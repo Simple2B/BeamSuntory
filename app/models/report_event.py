@@ -19,7 +19,7 @@ class ReportEvent(db.Model, ModelMixin):
 
     # Foreign keys
     user_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("users.id"))
-
+    ship_request_id = orm.mapped_column(sa.ForeignKey("ship_requests.id"))
     # Columns
     type: orm.Mapped[str] = orm.mapped_column(sa.String(64))
     history: orm.Mapped[str] = orm.mapped_column(sa.String(128), default="")
@@ -27,10 +27,9 @@ class ReportEvent(db.Model, ModelMixin):
         sa.DateTime,
         default=datetime.now,
     )
-
     # Relationships
     ship_request: orm.Mapped["ShipRequest"] = orm.relationship(
-        back_populates="report_event"
+        back_populates="reports_event"
     )
     user: orm.Mapped["User"] = orm.relationship()
 

@@ -117,7 +117,7 @@ def save():
         ship_request.status = s.ShipRequestStatus.in_transit
 
         report_shipping = m.ReportShipping(
-            type=s.ReportShipRequestType.PICKED_UP.value,
+            type=s.ReportShipRequestActionType.PICKED_UP.value,
             ship_request=ship_request,
             user=current_user,
         )
@@ -180,7 +180,7 @@ def deliver(id: int):
 
     ship_request.status = s.ShipRequestStatus.delivered
     report_shipping = m.ReportShipping(
-        type=s.ReportShipRequestType.DELIVERED.value,
+        type=s.ReportShipRequestActionType.DELIVERED.value,
         user=current_user,
         ship_request=ship_request,
     )

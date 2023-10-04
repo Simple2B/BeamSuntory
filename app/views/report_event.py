@@ -12,7 +12,9 @@ from app import schema as s
 from app import models as m, db
 
 
-report_blueprint = Blueprint("report", __name__, url_prefix="/report")
+report_event_blueprint = Blueprint(
+    "report_events", __name__, url_prefix="/report_events"
+)
 
 
 def get_events_report():
@@ -115,18 +117,7 @@ def get_events_report():
     return pagination, reports
 
 
-@report_blueprint.route("/event/api", methods=["GET"])
-@login_required
-def get_events_json():
-    pagination, reports = get_events_report()
-    report_list_schema = s.ReportEventList.model_validate(reports)
-
-    return s.ReportEventResponse(
-        pagination=pagination, report_events=report_list_schema.root
-    ).model_dump_json(by_alias=True)
-
-
-@report_blueprint.route("/event", methods=["GET"])
+@report_event_blueprint.route("/event", methods=["GET"])
 @login_required
 def events():
     users = db.session.scalars(sa.select(m.User))
@@ -137,7 +128,7 @@ def events():
     )
 
 
-@report_blueprint.route("event/search")
+@report_event_blueprint.route("event/search")
 @login_required
 def search_report_events():
     pagination, reports = get_events_report()

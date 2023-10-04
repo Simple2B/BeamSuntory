@@ -4,6 +4,7 @@ from pydantic import BaseModel, RootModel, ConfigDict, Field
 from .ship_request import ShipRequest
 from .user import User
 from .pagination import PaginationOut
+from .report import ReportsBaseResponse
 
 
 class ReportEventType(Enum):
@@ -20,9 +21,9 @@ class ReportEvent(BaseModel):
     ship_request: ShipRequest = Field(alias="shipRequest")
 
 
-class ReportEventResponse(BaseModel):
+class ReportEventResponse(ReportsBaseResponse):
     pagination: PaginationOut
-    report_events: list[ReportEvent]
+    reports: list[ReportEvent]
 
 
 ReportEventList = RootModel[list[ReportEvent]]

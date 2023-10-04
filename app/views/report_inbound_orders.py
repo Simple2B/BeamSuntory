@@ -157,26 +157,3 @@ def inbound_orders():
         product_master_group_category=product_master_group_category,
         product_master_group_premises=product_master_group_premises,
     )
-
-
-@report_inbound_orders_blueprint.route("inbound_orders/search")
-@login_required
-def search_report_inbound_orders():
-    pagination, reports = get_inbound_order_report()
-
-    return render_template(
-        "report/inbound_order/reports_inbound_orders_table.html",
-        page=pagination,
-        reports=reports,
-    )
-
-
-@report_inbound_orders_blueprint.route("/inbound_orders/api", methods=["GET"])
-@login_required
-def get_inbound_orders_json():
-    pagination, reports = get_inbound_order_report()
-    report_list_schema = s.ReportInboundOrderList.model_validate(reports)
-
-    return s.ReportInboundOrderResponse(
-        pagination=pagination, report_inbound_orders=report_list_schema.root
-    ).model_dump_json(by_alias=True)

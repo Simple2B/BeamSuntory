@@ -1,12 +1,10 @@
-from pydantic import BaseModel, RootModel
-
-from .pagination import PaginationOut
+from pydantic import RootModel
 from .assign import Assign
+from .report import ReportsBaseResponse
 
 
-class ReportAssignsResponse(BaseModel):
-    pagination: PaginationOut
-    report_events: list[Assign]
+class ReportAssignsResponse(ReportsBaseResponse):
+    reports: list[Assign]
 
 
 ReportAssignList = RootModel[list[Assign]]

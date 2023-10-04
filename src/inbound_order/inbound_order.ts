@@ -1,5 +1,5 @@
 import { Input, Timepicker, initTE } from 'tw-elements'
-import { IInboundOrderBase } from './types';
+import { IInboundOrderBase } from '../types';
 import { initAddInboundOrderModal } from './add';
 import { initViewInboundOrderModal } from './view';
 import {initEditOrderModal} from './edit';

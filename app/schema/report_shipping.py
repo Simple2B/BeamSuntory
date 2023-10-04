@@ -1,18 +1,10 @@
-from enum import Enum
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, RootModel
 
 
 from .user import User
 from .ship_request import ShipRequest
-from .pagination import PaginationOut
-
-
-class ReportShipRequestType(Enum):
-    CREATED = "created"
-    ACCEPTED = "accepted"
-    PICKED_UP = "picked_up"
-    DELIVERED = "delivered"
+from .report import ReportsBaseResponse
 
 
 class ReportShipping(BaseModel):
@@ -28,6 +20,5 @@ class ReportShipping(BaseModel):
 ReportShippingList = RootModel[list[ReportShipping]]
 
 
-class ReportShippingResponse(BaseModel):
-    pagination: PaginationOut
+class ReportShippingResponse(ReportsBaseResponse):
     reports: ReportShippingList

@@ -3,7 +3,6 @@ from flask import (
     Blueprint,
     request,
     render_template,
-    jsonify,
 )
 from flask_login import login_required
 import sqlalchemy as sa
@@ -138,34 +137,11 @@ def index():
 
     return render_template(
         "report/shipping/index.html",
-        report_types=s.ReportShipRequestType,
+        report_types=s.ReportShipRequestActionType,
         divisions=divisions,
         target_groups=target_groups,
         languages=languages,
         brands=brands,
         categories=categories,
         premises=premises,
-    )
-
-
-@report_shipping_blueprint.route("/api", methods=["GET"])
-@login_required
-def report_json():
-    pagination, reports = get_shipping_report()
-    report_list_schema = s.ReportShippingList.model_validate(reports)
-
-    return jsonify(
-        s.ReportShippingResponse(
-            pagination=pagination, reports=report_list_schema.root
-        ).model_dump_json(by_alias=True)
-    )
-
-
-@report_shipping_blueprint.route("search")
-@login_required
-def search():
-    pagination, reports = get_shipping_report()
-
-    return render_template(
-        "report/shipping/reports_table.html", page=pagination, reports=reports
     )
