@@ -1091,7 +1091,6 @@ function assign(product: IProduct, group: string) {
   assignProductGroupOptions.forEach((option) => {
     if(option.textContent===group){
       option.classList.add('hidden')
-      console.log(option.textContent)
     }
   });
 
