@@ -1086,6 +1086,15 @@ function assign(product: IProduct, group: string) {
 
   input = document.querySelector('#product-assign-from-group_id');
   input.value = group_id.toString();
+
+  const assignProductGroupOptions = document.querySelectorAll('.product-assign-to-group');
+  assignProductGroupOptions.forEach((option) => {
+    if(option.textContent===group){
+      option.classList.add('hidden')
+      console.log(option.textContent)
+    }
+  });
+
   assignModal.show();
 }
 

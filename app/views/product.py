@@ -538,6 +538,15 @@ def assign():
             )
         )
         product_to_group: m.Group = db.session.get(m.Group, int(form.group.data))
+
+        if product_from_group.id == product_to_group.id:
+            log(log.ERROR, "Cannot assign to same group", form.errors)
+            flash(
+                f"Cannot assign from {product_from_group.name} to {product_to_group.name}",
+                "danger",
+            )
+            return redirect(url_for("product.get_all"))
+
         report_inventory_list = m.ReportInventoryList(
             type="Product Assigned",
             user_id=current_user.id,
