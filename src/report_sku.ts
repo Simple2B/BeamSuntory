@@ -1,10 +1,10 @@
 import { ModalOptions, Modal } from 'flowbite';
-import { IProduct, IWarehouse, IInboundOrderBase, IPagination } from './inbound_order/types';
 import HTMXDispatcher from './htmx';
+import { IProduct } from './inbound_order/types';
+import { IInboundOrderBase } from './types';
+import { IPagination } from './inbound_order/types';
+import { defaultBrandImage } from './base';
 
-interface IUser {
-  username: string;
-}
 
 interface ICart {
   group: string;
@@ -82,9 +82,6 @@ interface IReportSKUResponse {
 
 // initialize htmx listener
 const htmxDispatcher = new HTMXDispatcher();
-
-const defaultBrandImage =
-  'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png';
 
 const formatDate = (date: string) => {
   const createAt = new Date(date);

@@ -78,7 +78,7 @@ def get_request_share_report():
 def index():
     return render_template(
         "report/request_share/index.html",
-        report_types=s.ReportRequestShareType,
+        report_types=s.ReportRequestShareActionType,
     )
 
 

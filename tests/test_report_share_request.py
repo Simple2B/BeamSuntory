@@ -65,7 +65,7 @@ def test_report_share_request_on_create(mg_g_populate: FlaskClient):
 
     # Created
     response = mg_g_populate.get(
-        f"/report_request_share/search?report_type={s.ReportRequestShareType.CREATED.value}",
+        f"/report_request_share/search?report_type={s.ReportRequestShareActionType.CREATED.value}",
         follow_redirects=True,
     )
 
@@ -75,7 +75,8 @@ def test_report_share_request_on_create(mg_g_populate: FlaskClient):
     assert len(
         db.session.scalars(
             m.ReportRequestShare.select().where(
-                m.ReportRequestShare.type == s.ReportRequestShareType.CREATED.value
+                m.ReportRequestShare.type
+                == s.ReportRequestShareActionType.CREATED.value
             )
         ).all()
     ) == len(reports_tr)

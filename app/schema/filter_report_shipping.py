@@ -1,9 +1,9 @@
-from .report_shipping import ReportShipRequestType
+from .report import ReportShipRequestActionType
 from .query_filter import QueryFilterBase
 
 
 class FilterReportShipping(QueryFilterBase):
-    report_type: ReportShipRequestType | None = None
+    report_type: ReportShipRequestActionType | None = None
     division: str | None = None
     target_group: str | None = None
     language: int | None = None

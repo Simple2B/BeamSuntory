@@ -732,7 +732,7 @@ viewProductButtonElements.forEach((e) =>
     const groupsMasterGroups = getGroupsMasterGroups(product);
     const totalWarehouseQty = product.warehouse_products.reduce(
       (acc: IWarehouseProduct, warehouseProduct: IWarehouseProduct) =>
-        acc.product_quantity + warehouseProduct.product_quantity
+        acc.product_quantity + warehouseProduct.product_quantity, 0
     );
 
     const productInfo = await getAdditionalProductInfo(product.id);

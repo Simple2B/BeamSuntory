@@ -1,41 +1,6 @@
-import { Modal } from 'flowbite'
-import type { ModalOptions, ModalInterface } from 'flowbite'
-
-interface IPagination {
-    pages: number
-}
-
-interface IProduct {
-    name: string
-    SKU: string
-}
-
-interface IEvents {
-    id: number
-    product: IProduct
-    dateFrom: string
-    dateTo: string
-    comment: string
-    user: IUser
-}
-
-interface IUser {
-    username: string
-}
-
-interface IEventsResponse {
-    pagination: IPagination
-    events: IEvents[]
-}
-
-
-const formatDate = (date: string) => {
-    const createAt = new Date(date);
-    const year = createAt.getFullYear();
-    const month = String(createAt.getMonth() + 1).padStart(2, '0');
-    const day = String(createAt.getDate()).padStart(2, '0');
-    return `${month}/${day}/${year}`;
-  }
+import { formatDate } from "./utils"
+import { ModalOptions, ModalInterface, Modal } from "flowbite"
+import { IEventsResponse } from "./types"
 
 function getFilterValues() {
     const url = new URL(window.location.href)

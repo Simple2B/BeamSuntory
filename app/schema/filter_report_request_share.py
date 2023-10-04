@@ -1,6 +1,6 @@
-from .report_request_share import ReportRequestShareType
+from .report import ReportRequestShareActionType
 from .query_filter import QueryFilterBase
 
 
 class FilterRequestShare(QueryFilterBase):
-    report_type: ReportRequestShareType | None = None
+    report_type: ReportRequestShareActionType | None = None

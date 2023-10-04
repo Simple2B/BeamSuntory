@@ -379,73 +379,20 @@
           >
             <li>
               <!-- prettier-ignore -->
-              <a href="{{ url_for('report.events') }}"
-                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+              <a href="{{ url_for('report.index') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700" >                
                 {% include "icon/circle.html" %}
-                <span class="flex-1 ml-4 whitespace-nowrap">Events</span>
+                <span class="flex-1 ml-4 whitespace-nowrap">Reports all</span>
               </a>
-            </li>
-            <li>
-              <!-- prettier-ignore -->
-              <a href="{{ url_for('report_inventory.inventories') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700" >
-                {% include "icon/circle.html" %}
-                <span class="flex-1 ml-4 whitespace-nowrap">Inventory</span>
-              </a>
-            </li>
-            <li>             
               <a
-                href="{{ url_for('report_adjustment.adjustments') }}"
+                href="{{ url_for('report_sku.skus') }}"
                 class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 {% include
                 "icon/circle.html" %}
                 <span
                   class="flex-1 ml-4 whitespace-nowrap"
-                  >Adjustments</span
+                  >SKU</span
                 >
-              </a>
-              <a
-                href="{{ url_for('report_assign.assigns') }}"
-                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                {% include
-                "icon/circle.html" %}
-                <span
-                  class="flex-1 ml-4 whitespace-nowrap"
-                  >Assigns</span
-                >
-              </a>
-              <a
-                href="{{ url_for('report_request_share.index') }}"
-                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                {% include
-                "icon/circle.html" %}
-                <span
-                  class="flex-1 ml-4 whitespace-nowrap"
-                  >Request share</span
-                >
-              </a>
-            </li>
-            <li>
-              <!-- prettier-ignore -->
-              <a href="{{ url_for('report_inbound_orders.inbound_orders') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700" >
-                {% include "icon/circle.html" %}
-                <span class="flex-1 ml-4 whitespace-nowrap">Inbound orders</span>
-              </a>
-            </li>
-            <li>
-              <!-- prettier-ignore -->
-              <a href="{{ url_for('report_shipping.index') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700" >
-                {% include "icon/circle.html" %}
-                <span class="flex-1 ml-4 whitespace-nowrap">Shipping</span>
-              </a>
-            </li>
-            <li>
-              <!-- prettier-ignore -->
-              <a href="{{ url_for('report_sku.skus') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700" >
-                {% include "icon/circle.html" %}
-                <span class="flex-1 ml-4 whitespace-nowrap">SKU</span>
               </a>
             </li>
           </ul>

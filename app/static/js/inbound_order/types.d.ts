@@ -1,3 +1,4 @@
+import { IGroup, IInboundOrderBase, ISupplier, IWarehouse } from "../types";
 export interface IProductAllocatedGroup {
     groupId: number;
     quantity: number;
@@ -5,16 +6,6 @@ export interface IProductAllocatedGroup {
 export interface IProductGroupCreate {
     productAllocatedId: number;
     productAllocatedGroups: IProductAllocatedGroup[];
-}
-export interface ISupplier {
-    id: number;
-    name: string;
-    address: string;
-    contact_number: string;
-}
-export interface IWarehouse {
-    id: number;
-    name: string;
 }
 export interface IProduct {
     id: number;
@@ -35,10 +26,6 @@ export interface IWarehouseProduct {
     warehouse: IWarehouse;
     group: IGroup;
 }
-export interface IGroup {
-    id: number;
-    name: string;
-}
 export interface IProductAllocatedBase {
     id: number;
     quantity: number;
@@ -53,19 +40,6 @@ export interface IProductQuantityGroupOut {
 export interface IAllocatedProductOut extends IProductAllocatedBase {
     product: IProduct;
     productQuantityGroups: IProductQuantityGroupOut[];
-}
-export interface IInboundOrderBase {
-    id: number;
-    orderId: string;
-    status: string;
-    title: string;
-    activeDate: string;
-    activeTime: string;
-    deliveryDate: string;
-    supplier: ISupplier;
-    warehouse: IWarehouse;
-    wmNotes: string;
-    daNotes: string;
 }
 export interface IInboundOrderOut extends IInboundOrderBase {
     id: number;
