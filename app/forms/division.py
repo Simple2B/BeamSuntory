@@ -20,9 +20,9 @@ class DivisionForm(FlaskForm):
 
     def validate_role_name(self, field):
         query = (
-            m.Division.select()
-            .where(m.Division.role_name == field.data)
-            .where(m.Division.id != int(self.division_id.data))
+            m.Role.select()
+            .where(m.Role.name == field.data)
+            .where(m.Role.id != int(self.division_id.data))
         )
         if db.session.scalar(query) is not None:
             raise ValidationError("This role name is taken.")
@@ -36,6 +36,6 @@ class NewDivisionForm(FlaskForm):
     submit = SubmitField("Save")
 
     def validate_role_name(self, field):
-        query = m.Division.select().where(m.Division.role_name == field.data)
+        query = m.Role.select().where(m.Role.name == field.data)
         if db.session.scalar(query) is not None:
             raise ValidationError("This role name is taken.")

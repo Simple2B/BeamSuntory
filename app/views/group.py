@@ -86,7 +86,7 @@ def create():
 
         admin_users = db.session.scalars(
             m.User.select().where(
-                m.User.role_obj.has(m.Division.role_name == s.UserRole.ADMIN.value)
+                m.User.roles.has(m.Role.name == s.UserRole.ADMIN.value)
             )
         )
 

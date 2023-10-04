@@ -34,18 +34,18 @@ def test_create_division(client):
     assert response.status_code == 200
     assert "Role added!" in response.text
     division_rows_objs = db.session.execute(
-        m.Division.select().where(m.Division.role_name == s.UserRole.SALES_REP.value)
+        m.Role.select().where(m.Role.name == s.UserRole.SALES_REP.value)
     ).all()
     assert len(division_rows_objs) > 0
 
 
 def test_delete_division(mg_g_populate: FlaskClient):
     login(mg_g_populate)
-    divisions_count = db.session.scalar(sa.func.count(m.Division.id))
+    divisions_count = db.session.scalar(sa.func.count(m.Role.id))
     response = mg_g_populate.delete("/division/delete/1")
     assert response.status_code == 200
     assert "ok" in response.text
-    assert divisions_count - 1 == db.session.scalar(sa.func.count(m.Division.id))
+    assert divisions_count - 1 == db.session.scalar(sa.func.count(m.Role.id))
 
 
 def test_edit_division(mg_g_populate: FlaskClient):
@@ -62,8 +62,6 @@ def test_edit_division(mg_g_populate: FlaskClient):
     assert response.status_code == 302
     assert "division" in response.text
     divisions_rows_objs = db.session.execute(
-        m.Division.select().where(
-            m.Division.role_name == s.UserRole.WAREHOUSE_MANAGER.value
-        )
+        m.Role.select().where(m.Role.name == s.UserRole.WAREHOUSE_MANAGER.value)
     ).all()
     assert len(divisions_rows_objs) > 0

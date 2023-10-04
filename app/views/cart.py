@@ -98,9 +98,9 @@ def get_all():
         ).scalars()
     ]
     sales_rep_role_id = db.session.execute(
-        m.Division.select()
-        .where(m.Division.role_name == s.UserRole.SALES_REP.value)
-        .with_only_columns(m.Division.id)
+        m.Role.select()
+        .where(m.Role.name == s.UserRole.SALES_REP.value)
+        .with_only_columns(m.Role.id)
     ).scalar()
     locker_store_category_ids = None
 
@@ -113,11 +113,9 @@ def get_all():
             sales_rep_locker.store_category_id,
         ]
     current_user_role_name = (
-        db.session.execute(
-            m.Division.select().where(m.Division.id == current_user.role)
-        )
+        db.session.execute(m.Role.select().where(m.Role.id == current_user.role))
         .scalar()
-        .role_name
+        .name
     )
 
     cart_items = db.session.scalars(

@@ -44,9 +44,7 @@ def get_all():
     master_groups_rows = db.session.execute(sa.select(m.MasterGroup)).all()
 
     wh_role = db.session.execute(
-        sa.select(m.Division).where(
-            m.Division.role_name == s.UserRole.WAREHOUSE_MANAGER.value
-        )
+        sa.select(m.Role).where(m.Role.name == s.UserRole.WAREHOUSE_MANAGER.value)
     ).scalar()
 
     managers = [
@@ -93,10 +91,8 @@ def create():
                 )
             )
         )
-        manager_role: m.Division = db.session.execute(
-            m.Division.select().where(
-                m.Division.role_name == s.UserRole.WAREHOUSE_MANAGER.value
-            )
+        manager_role: m.Role = db.session.execute(
+            m.Role.select().where(m.Role.name == s.UserRole.WAREHOUSE_MANAGER.value)
         ).scalar()
 
         if int(manager.role) != manager_role.id:
@@ -147,10 +143,8 @@ def save():
                 )
             )
         )
-        manager_role: m.Division = db.session.execute(
-            m.Division.select().where(
-                m.Division.role_name == s.UserRole.WAREHOUSE_MANAGER.value
-            )
+        manager_role: m.Role = db.session.execute(
+            m.Role.select().where(m.Role.name == s.UserRole.WAREHOUSE_MANAGER.value)
         ).scalar()
 
         if int(manager.role) != manager_role.id:

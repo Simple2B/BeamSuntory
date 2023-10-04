@@ -101,7 +101,7 @@ def get_shipping_report():
 @report_shipping_blueprint.route("/", methods=["GET"])
 @login_required
 def index():
-    divisions = db.session.scalars(m.Division.select())
+    divisions = db.session.scalars(m.Role.select())
     target_groups = db.session.scalars(m.Group.select())
 
     languages = db.session.scalars(

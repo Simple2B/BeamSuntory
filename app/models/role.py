@@ -8,14 +8,15 @@ from .utils import ModelMixin
 from app import schema as s
 
 
-class Division(db.Model, ModelMixin):
-    __tablename__ = "divisions"
+class Role(db.Model, ModelMixin):
+    __tablename__ = "roles"
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
-    role_name: orm.Mapped[str] = orm.mapped_column(
+
+    # Columns
+    name: orm.Mapped[str] = orm.mapped_column(
         sa.String(64),
         unique=True,
-        nullable=False,
     )
     activated: orm.Mapped[bool] = orm.mapped_column(sa.Boolean, default=False)
 
@@ -25,7 +26,7 @@ class Division(db.Model, ModelMixin):
     )
 
     def __repr__(self):
-        return f"<{self.id}: {self.role_name}>"
+        return f"<{self.id}: {self.name}>"
 
     @property
     def json(self):

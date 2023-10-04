@@ -1,5 +1,5 @@
-import {Modal} from 'flowbite';
-import type {ModalOptions, ModalInterface} from 'flowbite';
+import { Modal } from 'flowbite';
+import type { ModalOptions, ModalInterface } from 'flowbite';
 
 // /*
 //  * $editUserModal: required
@@ -9,7 +9,7 @@ import type {ModalOptions, ModalInterface} from 'flowbite';
 // // For your js code
 
 interface IDivision {
-  role_name: string;
+  name: string;
   id: number;
   type: string;
   parent_role: string;
@@ -22,8 +22,7 @@ const $modalElement: HTMLElement = document.querySelector('#editDivisionModal');
 const modalOptions: ModalOptions = {
   placement: 'bottom-right',
   backdrop: 'dynamic',
-  backdropClasses:
-    'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
+  backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
   closable: true,
   onHide: () => {
     console.log('modal is hidden');
@@ -44,19 +43,15 @@ editDivisionCloseModalButton.addEventListener('click', () => {
 });
 
 const $buttonElements = document.querySelectorAll('.division-edit-button');
-$buttonElements.forEach(e =>
+$buttonElements.forEach((e) =>
   e.addEventListener('click', () => {
     editDivision(JSON.parse(e.getAttribute('data-target')));
-  }),
+  })
 );
 
 // search flow
-const searchInput: HTMLInputElement = document.querySelector(
-  '#table-search-divisions',
-);
-const searchInputButton = document.querySelector(
-  '#table-search-division-button',
-);
+const searchInput: HTMLInputElement = document.querySelector('#table-search-divisions');
+const searchInputButton = document.querySelector('#table-search-division-button');
 
 if (searchInputButton && searchInput) {
   searchInputButton.addEventListener('click', () => {
@@ -67,7 +62,7 @@ if (searchInputButton && searchInput) {
 }
 const deleteButtons = document.querySelectorAll('.delete-division-btn');
 
-deleteButtons.forEach(e => {
+deleteButtons.forEach((e) => {
   e.addEventListener('click', async () => {
     if (confirm('Are sure?')) {
       let id = e.getAttribute('data-division-id');
@@ -83,10 +78,8 @@ deleteButtons.forEach(e => {
 
 // -----user edit modal window----
 function editDivision(division: IDivision) {
-  let input: HTMLInputElement = document.querySelector(
-    '#division-edit-role-name',
-  );
-  input.value = division.role_name;
+  let input: HTMLInputElement = document.querySelector('#division-edit-role-name');
+  input.value = division.name;
   input = document.querySelector('#division-edit-id');
   input.value = division.id.toString();
 

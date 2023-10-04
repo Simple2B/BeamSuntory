@@ -25,26 +25,20 @@ def get_all():
     form_edit: f.DivisionForm = f.DivisionForm()
 
     q = request.args.get("q", type=str, default=None)
-    query = m.Division.select().order_by(m.Division.id)
-    count_query = sa.select(sa.func.count()).select_from(m.Division)
+    query = m.Role.select().order_by(m.Role.id)
+    count_query = sa.select(sa.func.count()).select_from(m.Role)
     if q:
-        query = (
-            m.Division.select()
-            .where(m.Division.role_name.ilike(f"%{q}%"))
-            .order_by(m.Division.id)
-        )
+        query = m.Role.select().where(m.Role.name.ilike(f"%{q}%")).order_by(m.Role.id)
         count_query = (
             sa.select(sa.func.count())
-            .where(m.Division.role_name.ilike(f"%{q}%"))
-            .select_from(m.Division)
+            .where(m.Role.name.ilike(f"%{q}%"))
+            .select_from(m.Role)
         )
 
     pagination = create_pagination(total=db.session.scalar(count_query))
     parent_roles = [
-        i.role_name
-        for i in db.session.execute(
-            m.Division.select().order_by(m.Division.id)
-        ).scalars()
+        i.name
+        for i in db.session.execute(m.Role.select().order_by(m.Role.id)).scalars()
     ]
 
     return render_template(
@@ -67,13 +61,13 @@ def get_all():
 def save():
     form: f.DivisionForm = f.DivisionForm()
     if form.validate_on_submit():
-        query = m.Division.select().where(m.Division.id == int(form.division_id.data))
-        d: m.Division | None = db.session.scalar(query)
+        query = m.Role.select().where(m.Role.id == int(form.division_id.data))
+        d: m.Role | None = db.session.scalar(query)
         if not d:
             log(log.ERROR, "Not found role by id : [%s]", form.division_id.data)
             flash("Cannot save role", "danger")
 
-        d.role_name = form.role_name.data
+        d.name = form.role_name.data
         d.activated = form.activated.data
         d.save()
 
@@ -95,14 +89,14 @@ def create():
         flash("This role is already taken.", "danger")
         return redirect(url_for("division.get_all"))
     if form.validate_on_submit():
-        division = m.Division(
-            role_name=form.role_name.data,
+        division = m.Role(
+            name=form.role_name.data,
             activated=form.activated.data,
         )
-        query = m.Division.select().where(m.Division.role_name == division.role_name)
+        query = m.Role.select().where(m.Role.name == division.name)
 
         if db.session.scalar(query) is not None:
-            log(log.INFO, "Cannot create role with name: [%s]", division.role_name)
+            log(log.INFO, "Cannot create role with name: [%s]", division.name)
             flash("This role is already taken.", "danger")
             return redirect(url_for("division.get_all"))
         log(log.INFO, "Form submitted. Division: [%s]", division)
@@ -118,7 +112,7 @@ def create():
 @division_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
 def delete(id: int):
-    division = db.session.get(m.Division, id)
+    division = db.session.get(m.Role, id)
     if not division:
         log(log.INFO, "There is no role with id: [%s]", id)
         flash("There is no such role", "danger")

@@ -1,4 +1,4 @@
-from app.models import User, Division
+from app.models import User, Role
 from app import schema as s
 from app import db
 
@@ -18,7 +18,7 @@ def register(
 
     if not role:
         role = db.session.execute(
-            Division.select().where(Division.role_name == s.UserRole.ADMIN.value)
+            Role.select().where(Role.name == s.UserRole.ADMIN.value)
         ).scalar()
     user = User(
         username=username,
@@ -59,7 +59,7 @@ def create_default_divisions():
     # ]:
     for role in s.UserRole:
         check_role = db.session.execute(
-            Division.select().where(Division.role_name == role.value)
+            Role.select().where(Role.name == role.value)
         ).scalar()
         if not check_role:
-            Division(role_name=role.value, activated=True).save()
+            Role(name=role.value, activated=True).save()

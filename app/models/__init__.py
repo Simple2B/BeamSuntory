@@ -1,5 +1,7 @@
 # flake8: noqa F401
 from .user import User, AnonymousUser, gen_password_reset_id
+from .user_roles import UserRoles
+from .role import Role
 from .group import Group
 from .master_group import MasterGroup
 from .values import IntValue, FloatValue, StrValue, BoolValue, DateValue
@@ -25,7 +27,6 @@ from .warehouse_product import WarehouseProduct
 from .product_quantity_group import ProductQuantityGroup
 from .favorite_store_user import FavoriteStoreUser
 from .package_info import PackageInfo
-from .division import Division
 from .assign import Assign
 from .request_share import RequestShare
 from .request_share_user import RequestShareUser

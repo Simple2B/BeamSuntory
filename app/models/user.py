@@ -10,10 +10,11 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app.database import db
-from app.models.division import Division
+from .role import Role
 from .utils import ModelMixin
 from .group import Group
 from .user_group import UserGroup
+from .user_roles import UserRoles
 from app.logger import log
 from app import schema as s
 
@@ -36,9 +37,9 @@ class User(db.Model, UserMixin, ModelMixin):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
 
     # Foreign keys
-    role: orm.Mapped[int] = orm.mapped_column(
-        sa.ForeignKey("divisions.id"), nullable=False
-    )
+    # role: orm.Mapped[int] = orm.mapped_column(
+    #     sa.ForeignKey("divisions.id"), nullable=False
+    # )
 
     # Columns
     username: orm.Mapped[str] = orm.mapped_column(
@@ -94,7 +95,7 @@ class User(db.Model, UserMixin, ModelMixin):
     phone_number: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=True)
 
     # Relations
-    role_obj: orm.Mapped[Division] = orm.relationship()
+    roles: orm.Mapped[list[Role]] = orm.relationship(secondary=UserRoles.__table__)
 
     @hybrid_property
     def password(self):
@@ -149,10 +150,10 @@ class User(db.Model, UserMixin, ModelMixin):
             u_dict["group_name"] = "Without group"
 
         u_dict["role_name"] = (
-            db.session.execute(Division.select().where(Division.id == u_dict["role"]))
+            db.session.execute(Role.select().where(Role.id == u_dict["role"]))
             .scalars()
             .first()
-            .role_name
+            .name
         )
         return json.dumps(u_dict)
 

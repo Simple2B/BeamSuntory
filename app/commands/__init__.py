@@ -37,10 +37,10 @@ def init(app: Flask):
             return
         for role in s.UserRole:
             check_role = db.session.execute(
-                m.Division.select().where(m.Division.role_name == role.value)
+                m.Role.select().where(m.Role.name == role.value)
             ).scalar()
             if not check_role:
-                m.Division(role_name=role.value, activated=True).save()
+                m.Role(name=role.value, activated=True).save()
 
         c.create_admin(
             s.AdminCreate(
@@ -119,18 +119,15 @@ def init(app: Flask):
                         master_group_id=master_group.id,
                     ).save(False)
 
-        role = db.session.execute(
-            m.Division.select().where(
-                m.Division.role_name == s.UserRole.WAREHOUSE_MANAGER.value
-            )
+        warehouse_role = db.session.execute(
+            m.Role.select().where(m.Role.name == s.UserRole.WAREHOUSE_MANAGER.value)
         ).scalar()
-        if role:
+        if warehouse_role:
             wh_user = "warehouse manager 1"
-            m.User(
+            user_warehouse = m.User(
                 username=wh_user,
                 email="warehouseuser1@mail.com",
                 password="warehousemanagerpassword1",
-                role=role.id,
                 activated=True,
                 approval_permission=True,
                 street_address="street",
@@ -140,7 +137,9 @@ def init(app: Flask):
                 city="Dro",
                 zip_code="82100",
                 sales_rep=False,
-            ).save(False)
+            )
+            user_warehouse.roles.append(warehouse_role)
+            db.session.add(user_warehouse)
 
             wh_manager: m.User = db.session.execute(
                 m.User.select().where(m.User.username == wh_user)

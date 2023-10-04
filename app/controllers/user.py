@@ -5,7 +5,7 @@ from app import models as m
 
 def create_admin(admin_data: s.AdminCreate):
     role = db.session.execute(
-        m.Division.select().where(m.Division.role_name == s.UserRole.ADMIN.value)
+        m.Role.select().where(m.Role.name == s.UserRole.ADMIN.value)
     ).scalar()
     admin = m.User(**admin_data.model_dump(exclude_none=True))
     admin.role = role.id

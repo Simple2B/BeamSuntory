@@ -33,7 +33,7 @@ def get_all():
     form_create: f.NewUserForm = f.NewUserForm()
     form_edit: f.UserForm = f.UserForm()
 
-    role = aliased(m.Division)
+    role = aliased(m.Role)
     q = request.args.get("q", type=str, default=None)
     query = m.User.select().order_by(m.User.id)
     count_query = sa.select(sa.func.count()).select_from(m.User)
@@ -44,7 +44,7 @@ def get_all():
             .where(
                 m.User.username.ilike(f"%{q}%")
                 | m.User.email.ilike(f"%{q}%")
-                | role.role_name.ilike(f"%{q}%")
+                | role.name.ilike(f"%{q}%")
             )
             .order_by(m.User.id)
         )
@@ -53,7 +53,7 @@ def get_all():
             .where(
                 m.User.username.ilike(f"%{q}%")
                 | m.User.email.ilike(f"%{q}%")
-                | role.role_name.ilike(f"%{q}%")
+                | role.name.ilike(f"%{q}%")
             )
             .select_from(m.User)
         )
@@ -62,7 +62,7 @@ def get_all():
 
     groups_rows = db.session.execute(sa.select(m.Group)).all()
     master_groups_rows = db.session.execute(sa.select(m.MasterGroup)).all()
-    divisions = [i for i in db.session.execute(m.Division.select()).scalars()]
+    divisions = [i for i in db.session.execute(m.Role.select()).scalars()]
 
     return render_template(
         "user/users.html",
@@ -122,7 +122,7 @@ def save():
 
         for user_group_id in user_group_group_ids:
             if user_group_id not in group_ids:
-                if u.role_obj.role_name == s.UserRole.ADMIN.value:
+                if u.roles.name == s.UserRole.ADMIN.value:
                     log(log.ERROR, "Can not remove groups from user: admin")
                     flash(
                         "Can not remove groups from user: admin",
@@ -163,7 +163,6 @@ def create():
         user = m.User(
             username=form.username.data,
             email=form.email.data,
-            role=form.role.data,
             password=form.password.data,
             activated=form.activated.data,
             country=form.country.data,
@@ -176,17 +175,18 @@ def create():
             phone_number=form.phone_number.data,
         )
 
+        user_role = m.Role(name=form.role.data)
+        user.roles.append(user_role)
         user.save()
+
         sales_rep_role_id = (
             db.session.execute(
-                m.Division.select().where(
-                    m.Division.role_name == s.UserRole.SALES_REP.value
-                )
+                m.Role.select().where(m.Role.name == s.UserRole.SALES_REP.value)
             )
             .scalar()
             .id
         )
-        if user.role == sales_rep_role_id:
+        if user.roles.in_(sales_rep_role_id):
             store_category: m.StoreCategory = db.session.execute(
                 m.StoreCategory.select().where(
                     m.StoreCategory.name == SALES_REP_LOCKER_NAME
@@ -262,9 +262,7 @@ def delete(id: int):
         return "no user", 404
     sales_rep_role_id = (
         db.session.execute(
-            m.Division.select().where(
-                m.Division.role_name == s.UserRole.SALES_REP.value
-            )
+            m.Role.select().where(m.Role.name == s.UserRole.SALES_REP.value)
         )
         .scalar()
         .id

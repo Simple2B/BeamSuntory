@@ -52,7 +52,7 @@ def populate(client: FlaskClient):
 
     create_default_divisions()
     role = db.session.execute(
-        m.Division.select().where(m.Division.role_name == "manager")  # TODO ?
+        m.Role.select().where(m.Role.name == "manager")  # TODO ?
     ).scalar()
     for i in range(NUM_TEST_USERS):
         m.User(
@@ -79,9 +79,7 @@ def populate_one_user(client: FlaskClient):
     create_default_divisions()
 
     role = db.session.execute(
-        m.Division.select().where(
-            m.Division.role_name == s.UserRole.WAREHOUSE_MANAGER.value
-        )
+        m.Role.select().where(m.Role.name == s.UserRole.WAREHOUSE_MANAGER.value)
     ).scalar()
     m.User(
         username="user",
@@ -113,9 +111,7 @@ def mg_g_populate(client: FlaskClient):
     }
     create_default_divisions()
     role = db.session.execute(
-        m.Division.select().where(
-            m.Division.role_name == s.UserRole.WAREHOUSE_MANAGER.value
-        )
+        m.Role.select().where(m.Role.name == s.UserRole.WAREHOUSE_MANAGER.value)
     ).scalar()
     m.User(
         username="user1",
