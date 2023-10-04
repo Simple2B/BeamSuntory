@@ -10,8 +10,8 @@ class Assign(BaseModel):
 
     id: int
     quantity: int
-    product_id: int
-    group_id: int
+    product_id: int = Field(alias="productId")
+    group_id: int = Field(alias="groupId")
     product: Product
     group: Group
     from_group: Group = Field(alias="fromGroup")

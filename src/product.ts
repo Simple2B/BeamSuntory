@@ -732,7 +732,7 @@ viewProductButtonElements.forEach((e) =>
     const groupsMasterGroups = getGroupsMasterGroups(product);
     const totalWarehouseQty = product.warehouse_products.reduce(
       (acc: IWarehouseProduct, warehouseProduct: IWarehouseProduct) =>
-        acc.product_quantity + warehouseProduct.product_quantity
+        acc.product_quantity + warehouseProduct.product_quantity, 0
     );
 
     const productInfo = await getAdditionalProductInfo(product.id);
@@ -1874,6 +1874,28 @@ showEventsProductByUserGroupCheckbox.addEventListener('change', async () => {
   getSortOwnByMe(showEventsProductByUserGroupCheckbox, 'events_stocks_owned_by_me');
 });
 
+const showAllProductStocksCheckbox: HTMLInputElement = document.querySelector('#product-show-all-stocks');
+if (window.location.pathname + window.location.hash === '/product/' && !window.location.href.includes('events')) {
+  window.onload = (event) => {
+    showAllProductStocksCheckbox.setAttribute('checked', 'checked');
+  };
+}
+showAllProductStocksCheckbox.addEventListener('change', async () => {
+  getSortOwnByMe(showAllProductStocksCheckbox, '');
+});
+
+
+const showAllStocksInventoryCheckbox: HTMLInputElement = document.querySelector('#product-show-all-stocks-inventory');
+if (window.location.pathname + window.location.hash === '/product/stocks_in_inventory') {
+  window.onload = (event) => {
+    showAllStocksInventoryCheckbox.setAttribute('checked', 'checked');
+  };
+}
+showAllStocksInventoryCheckbox.addEventListener('change', async () => {
+  getSortOwnByMe(showAllStocksInventoryCheckbox, 'stocks_in_inventory');
+});
+
+
 document.querySelector('#product-assign-master-group').addEventListener('change', () => {
   const productAssignMasterGroupSelect: HTMLSelectElement = document.querySelector('#product-assign-master-group');
   const productAssignGroupSelect: HTMLSelectElement = document.querySelector('#product-assign-group');
@@ -2016,6 +2038,8 @@ function getFilterValues(isChecked: boolean) {
   const url = new URL(window.location.href);
   const eventSortToggleButton = document.querySelector('#product-show-events-toggle-btn');
 
+  url.pathname = '/product';
+  
   isChecked ? url.searchParams.set('events', 'true') : url.searchParams.delete('events');
   window.location.href = `${url.href}`;
 }

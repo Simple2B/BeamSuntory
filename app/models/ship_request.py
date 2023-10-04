@@ -30,9 +30,6 @@ class ShipRequest(db.Model, ModelMixin):
     user_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
-    report_event_id: orm.Mapped[int] = orm.mapped_column(
-        sa.ForeignKey("report_events.id", ondelete="SET NULL"), nullable=True
-    )
     report_inventory_list_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("report_inventory_lists.id"), nullable=True
     )
@@ -62,7 +59,7 @@ class ShipRequest(db.Model, ModelMixin):
     carts: orm.Mapped[list["Cart"]] = orm.relationship(back_populates="ship_request")
     store: orm.Mapped[Store] = orm.relationship()
     store_category: orm.Mapped[StoreCategory] = orm.relationship()
-    report_event: orm.Mapped["ReportEvent"] = orm.relationship(
+    reports_event: orm.Mapped[list["ReportEvent"]] = orm.relationship(
         back_populates="ship_request"
     )
     report_inventory_list: orm.Mapped["ReportInventoryList"] = orm.relationship(
@@ -74,6 +71,4 @@ class ShipRequest(db.Model, ModelMixin):
 
     @property
     def json(self):
-        ship_request = s.ShipRequest.model_validate(self).model_dump()
-
-        return s.ShipRequest.model_validate(ship_request).model_dump_json(by_alias=True)
+        return s.ShipRequest.model_validate(self).model_dump_json(by_alias=True)

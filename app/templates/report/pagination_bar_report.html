@@ -1,0 +1,110 @@
+{% if page.pages > 1 %}
+<div
+  class="container content-center mt-3 flex bg-white dark:bg-gray-800"
+>
+  <nav
+    aria-label="Page navigation example"
+    class="mx-auto"
+  >
+    <ul
+      class="inline-flex items-center -space-x-px"
+    >
+      <li>
+        <button
+          hx-get="{{ url_for('report.search') }}?page=1"
+          hx-trigger="click"
+          hx-target="#reports-table"
+          hx-indicator="#report-table-spinner"
+          hx-include="[name='report_type'], [name='division'], [name='q'], [name='group_from'], [name='group_to'], [name='request_share_type'], [name='action_type_shipping'], [name='user'], [name='start_date'], [name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='target_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events']"
+          class="block px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+        >
+          <span class="sr-only"
+            >First</span
+          >
+          {% include
+          "icon/left_arrow_double.html"
+          %}
+        </button>
+      </li>
+      <li>
+        <button
+          hx-get="{{ url_for('report.search') }}?page={{page.page-1 if page.page > 1 else 1}}"
+          hx-trigger="click"
+          hx-target="#reports-table"
+          hx-indicator="#report-table-spinner"
+          hx-include="[name='report_type'], [name='division'], [name='q'], [name='group_from'], [name='group_to'], [name='request_share_type'], [name='action_type_shipping'], [name='user'], [name='start_date'], [name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='target_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events']"
+          class="block px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+        >
+          <span class="sr-only"
+            >Previous</span
+          >
+          {% include
+          "icon/left_arrow.html" %}
+        </button>
+      </li>
+
+      <!-- prettier-ignore -->
+      {% for p in page.pages_for_links %}
+      <li>
+        <!-- prettier-ignore -->
+        {% if p == page.page %}
+        <button
+          hx-get="{{ url_for('report.search') }}?page={{p}}"
+          hx-trigger="click"
+          hx-target="#reports-table"
+          hx-indicator="#report-table-spinner"
+          hx-include="[name='report_type'], [name='division'], [name='q'], [name='group_from'], [name='group_to'], [name='request_share_type'], [name='action_type_shipping'], [name='user'], [name='start_date'], [name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='target_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events']"
+          aria-current="page"
+          class="z-10 px-3 py-2 leading-tight text-blue-600 border border-blue-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white"
+        >
+          {{p}}
+        </button>
+        {% else %}
+        <button
+          hx-get="{{ url_for('report.search') }}?page={{p}}"
+          hx-trigger="click"
+          hx-target="#reports-table"
+          hx-indicator="#report-table-spinner"
+          hx-include="[name='report_type'], [name='division'], [name='q'], [name='group_from'], [name='group_to'], [name='request_share_type'], [name='action_type_shipping'], [name='user'], [name='start_date'], [name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='target_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events']"
+          class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+        >
+          {{p}}
+        </button>
+        {% endif %}
+      </li>
+      {% endfor %}
+      <li>
+        <button
+          hx-get="{{ url_for('report.search') }}?page={{page.page+1 if page.page < page.pages else page.pages}}"
+          hx-trigger="click"
+          hx-target="#reports-table"
+          hx-indicator="#report-table-spinner"
+          hx-include="[name='report_type'], [name='division'], [name='q'], [name='group_from'], [name='group_to'], [name='request_share_type'], [name='action_type_shipping'], [name='user'], [name='start_date'], [name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='target_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events']"
+          class="block px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+        >
+          <!-- prettier-ignore -->
+          <span class="sr-only">Next</span>
+          {% include
+          "icon/right_arrow.html" %}
+        </button>
+      </li>
+      <li>
+        <button
+          hx-get="{{ url_for('report.search') }}?page={{page.pages}}"
+          hx-trigger="click"
+          hx-target="#reports-table"
+          hx-indicator="#report-table-spinner"
+          class="block px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+          hx-include="[name='report_type'], [name='division'], [name='q'], [name='group_from'], [name='group_to'], [name='request_share_type'], [name='action_type_shipping'], [name='user'], [name='start_date'], [name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='target_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events']"
+        >
+          <!-- prettier-ignore -->
+          <span class="sr-only">Last</span>
+          {% include
+          "icon/right_arrow_double.html"
+          %}
+        </button>
+      </li>
+    </ul>
+  </nav>
+</div>
+{% endif %}

@@ -1,6 +1,6 @@
 import { ModalOptions, Modal } from 'flowbite'
-import { IInboundOrderBase } from './inbound_order/types'
 import HTMXDispatcher from './htmx'
+import { IInboundOrderBase } from './types';
 
 
 // initialize htmx listener
@@ -9,10 +9,8 @@ const htmxDispatcher = new HTMXDispatcher();
 
 document.addEventListener('DOMContentLoaded', () => {
   const buttonLoadEventsTable = document.querySelector('#table-report-loader') as HTMLButtonElement;
-
   // load table
   buttonLoadEventsTable.click();
-
   // initialize modal
   const viewReportEventsModal = document.getElementById('viewPickupInboundModal') as HTMLDivElement;
   const viewModalOptions: ModalOptions = {

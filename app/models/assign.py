@@ -37,5 +37,4 @@ class Assign(db.Model, ModelMixin):
 
     @property
     def json(self):
-        assign = s.Assign.model_validate(self)
-        return assign.model_dump_json()
+        return s.Assign.model_validate(self).model_dump_json(by_alias=True)

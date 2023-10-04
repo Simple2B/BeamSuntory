@@ -1,6 +1,5 @@
 <!-- View outgoing stock modal -->
 <!-- prettier-ignore-->
-
 <div id="view-report-adjustment-modal" tabindex="-1" aria-hidden="true"
   class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
   <div class="relative w-full max-w-screen-2xl max-h-full">
@@ -72,9 +71,9 @@
             <th scope="col" class="px-4 py-3">Quantity After</th>
           </tr>
         </thead>
-        <tbody id="table-products">
+        <tbody id="report-adjustment-table-products">
 
-          <tr id="view-product-item-template"
+          <tr id="report-adjustment-view-product-item-template"
             class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 hidden">
             <td class="w-4 p-4">
               <div class="product-index">0</div>
@@ -100,3 +99,5 @@
     </form>
   </div>
 </div>
+<!-- prettier-ignore -->
+<script src="{{ url_for('static', filename='js/report_adjustment.js') }}" type="text/javascript" defer></script>

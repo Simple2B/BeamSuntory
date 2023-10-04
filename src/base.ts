@@ -7,6 +7,7 @@ import type { ModalOptions, ModalInterface } from 'flowbite'
 const themeToggleDarkIcons = document.querySelectorAll('#theme-toggle-dark-icon')
 const themeToggleLightIcons = document.querySelectorAll('#theme-toggle-light-icon')
 export const defaultBrandImage = 'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png'
+import HTMXDispatcher from './htmx'
 
 // Change the icons inside the button based on previous settings
 if (
@@ -136,3 +137,6 @@ export async function getFullImage(id: string) {
         viewModal.show()
     }
 }
+
+
+export const htmxLoader = new HTMXDispatcher();

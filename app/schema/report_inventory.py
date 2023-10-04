@@ -6,8 +6,8 @@ from .inbound_order import InboundOrder
 from .warehouse import Warehouse
 from .store import Store
 from .user import User
-from .pagination import PaginationOut
 from .product import Product
+from .report import ReportsBaseResponse
 
 
 class ReportInventoryType(Enum):
@@ -36,12 +36,8 @@ class ReportInventoryList(BaseModel):
     report_inventories: list[ReportInventory] = Field(alias="reportInventories")
 
 
-class ReportInventoryListResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
-    pagination: PaginationOut
-    report_inventory_list: list[ReportInventoryList] = Field(
-        alias="reportInventoryList"
-    )
+class ReportInventoryListResponse(ReportsBaseResponse):
+    reports: list[ReportInventoryList]
 
 
 ReportInventoryListArray = RootModel[list[ReportInventoryList]]
