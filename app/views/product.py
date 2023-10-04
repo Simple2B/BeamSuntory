@@ -1330,13 +1330,6 @@ def get_additional_info(product_id):
     ).model_dump_json()
 
 
-@product_blueprint.route("/stocks", methods=["GET"])
-@login_required
-def stocks():
-    print(55)
-    return redirect(url_for("product.get_all", events=True))
-
-
 @product_blueprint.route("/stocks_in_inventory", methods=["GET"])
 @login_required
 def stocks_in_inventory():

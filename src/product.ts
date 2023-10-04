@@ -1866,13 +1866,13 @@ showEventsProductByUserGroupCheckbox.addEventListener('change', async () => {
 });
 
 const showAllProductStocksCheckbox: HTMLInputElement = document.querySelector('#product-show-all-stocks');
-if (window.location.pathname + window.location.hash === '/product/stocks') {
+if (window.location.pathname + window.location.hash === '/product/' && !window.location.href.includes('events=true')) {
   window.onload = (event) => {
     showAllProductStocksCheckbox.setAttribute('checked', 'checked');
   };
 }
 showAllProductStocksCheckbox.addEventListener('change', async () => {
-  getSortOwnByMe(showAllProductStocksCheckbox, 'stocks');
+  getSortOwnByMe(showAllProductStocksCheckbox, '');
 });
 
 
