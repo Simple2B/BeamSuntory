@@ -33,6 +33,7 @@ inbound_order_blueprint = Blueprint(
 def get_all():
     form_create = f.InboundOrderUpdateForm()
     form_edit = f.InboundOrderUpdateForm()
+    form_sort: f.SortByStatusInboundOrderForm = f.SortByStatusInboundOrderForm()
 
     q = request.args.get("q", type=str, default=None)
     current_order_uuid = request.args.get("current_order_uuid", type=str, default=None)
@@ -92,6 +93,7 @@ def get_all():
         groups=db.session.scalars(m.Group.select().order_by(m.Group.id)).all(),
         form_create=form_create,
         form_edit=form_edit,
+        form_sort=form_sort,
         inbound_order_statuses=s.InboundOrderStatus,
     )
 
@@ -456,3 +458,67 @@ def delete(id: int):
     log(log.INFO, "Inbound order deleted. Inbound order: [%s]", inbound_order)
     flash("Inbound order deleted!", "success")
     return "ok", 200
+
+
+@inbound_order_blueprint.route("/sort", methods=["GET", "POST"])
+@login_required
+def sort():
+    form_sort: f.SortByStatusInboundOrderForm = f.SortByStatusInboundOrderForm()
+    form_create = f.InboundOrderCreateForm()
+    form_edit = f.InboundOrderUpdateForm()
+
+    if not form_sort.validate_on_submit() and request.method == "POST":
+        # NOTE: this is drop filters action
+        return redirect(url_for("inbound_order.get_all"))
+
+    status = form_sort.sort_by.data if request.method == "POST" else "Draft"
+
+    q = request.args.get("q", type=str, default=None)
+    query = (
+        m.InboundOrder.select()
+        .where(m.InboundOrder.status == s.InboundOrderStatus(status))
+        .order_by(desc(m.InboundOrder.id))
+    )
+    count_query = (
+        sa.select(sa.func.count())
+        .where(m.InboundOrder.status == s.InboundOrderStatus(status))
+        .select_from(m.InboundOrder)
+    )
+    if q:
+        query = query.where(m.InboundOrder.title.ilike(f"%{q}%"))
+
+        count_query = count_query.where(m.InboundOrder.title.ilike(f"%{q}%"))
+
+    pagination = create_pagination(total=db.session.scalar(count_query))
+
+    inbound_orders_json = json.dumps(
+        [
+            json.loads(io.json)
+            for io in db.session.scalars(
+                m.InboundOrder.select().order_by(desc(m.InboundOrder.id))
+            )
+        ]
+    )
+
+    return render_template(
+        "inbound_order/inbound_orders.html",
+        inbound_orders=db.session.scalars(
+            query.offset((pagination.page - 1) * pagination.per_page).limit(
+                pagination.per_page
+            )
+        ).all(),
+        inbound_orders_json=inbound_orders_json,
+        page=pagination,
+        search_query=q,
+        suppliers=db.session.scalars(m.Supplier.select().order_by(m.Supplier.id)).all(),
+        warehouses=db.session.scalars(
+            m.Warehouse.select().order_by(m.Warehouse.id)
+        ).all(),
+        products=db.session.scalars(m.Product.select().order_by(m.Product.id)).all(),
+        groups=db.session.scalars(m.Group.select().order_by(m.Group.id)).all(),
+        form_create=form_create,
+        form_edit=form_edit,
+        form_sort=form_sort,
+        inbound_order_statuses=s.InboundOrderStatus,
+        selected_status=status,
+    )
