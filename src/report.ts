@@ -169,6 +169,18 @@ const generateCSVInboundOrder = async (queryParams: URLSearchParams) => {
             ].join(',')
           );
         });
+        if(!productsAllocated.productQuantityGroups.length ){
+          csvData.push(
+            [
+              formatDate(report.createdAt),
+              report.user.username,
+              report.type,     
+              report.inboundOrder.title,    
+              productsAllocated.product.name,
+              productsAllocated.product.SKU,
+            ].join(',')
+          );
+        }
       });
     });
   });
