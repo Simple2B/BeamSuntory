@@ -54,6 +54,12 @@
         >
           Deliver to
         </th>
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
+          Deliver to
+        </th>
       </tr>
     </thead>
     <!-- prettier-ignore -->
@@ -78,6 +84,18 @@
             <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
               <div class="pl-3">
                 <div class="text-base font-semibold">{{ report.created_at.strftime('%m/%d/%Y, %H:%M:%S') }}</div>
+              </div>
+            </td>
+            <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+              <div class="pl-3">
+                <div class="text-base font-semibold">
+                  {% if report_details.product.image|length > 100 %}
+                  <img src="data:image/png;base64, {{ report_details.product.image }}" alt="{{ report_details.product.image }}" class="w-14 object-cover">
+                  {% else %}
+                  <img src="{{ url_for('static', filename='img/default_image_brand.png') }}" alt="{{ report_details.product.image }}"
+                    class="w-14 object-cover">
+                  {% endif %}
+                </div>
               </div>
             </td>
             <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
