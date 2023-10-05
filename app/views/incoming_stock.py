@@ -305,7 +305,7 @@ def sort():
         form_edit=form_edit,
         form_sort=form_sort,
         filtered=filtered,
-        inbound_orders_status=s.ShipRequestStatus,
+        inbound_orders_status=s.InboundOrderStatus,
     )
 
 
