@@ -25,13 +25,14 @@ from .store_category import store_category_blueprint
 from .inventory import inventory_blueprint
 from .adjust import adjust_blueprint
 from .event import event_blueprint
-from .report_event import report_blueprint
+from .report_event import report_event_blueprint
 from .report_inventory import report_inventory_blueprint
 from .report_adjustment import report_adjustment_blueprint
 from .report_request_share import report_request_share_blueprint
 from .report_assign import report_assign_blueprint
 from .report_shipping import report_shipping_blueprint
 from .report_inbound_orders import report_inbound_orders_blueprint
+from .report import report_blueprint
 from .report_sku import report_sku_blueprint
 from .report_shelf_life import report_shelf_life_blueprint
 
@@ -62,13 +63,14 @@ BLUEPRINTS = (
     inventory_blueprint,
     adjust_blueprint,
     event_blueprint,
-    report_blueprint,
     report_inventory_blueprint,
     report_adjustment_blueprint,
     report_request_share_blueprint,
     report_assign_blueprint,
     report_shipping_blueprint,
     report_inbound_orders_blueprint,
+    report_event_blueprint,
+    report_blueprint,
     report_sku_blueprint,
     report_shelf_life_blueprint,
 )

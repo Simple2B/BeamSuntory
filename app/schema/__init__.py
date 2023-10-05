@@ -4,8 +4,8 @@ from .user import User, UserRole, AdminCreate
 from .master_group import MasterGroup, MasterGroupMandatory
 from .group import Group
 from .warehouse import Warehouse, WarehouseMandatory, WarehouseList
+from .product import Product, Currency, ProductAdditionalInfo
 from .inbound_order import InboundOrder, InboundOrderStatus, FilterInboundOrder
-from .product import Product, Currency
 from .product_category import ProductCategory
 from .product_quantity_group import (
     ProductQuantityGroups,
@@ -65,7 +65,6 @@ from .filter_report_inventories import FilterReportInventories
 from .filter_report_adjustments import FilterReportAdjustments
 from .filter_report_request_share import FilterRequestShare
 from .report_request_share import (
-    ReportRequestShareType,
     ReportRequestShare,
     ReportRequestShareList,
     ReportRequestShareResponse,
@@ -74,7 +73,6 @@ from .filter_report_assigns import FilterReportAssign
 from .filter_report_shipping import FilterReportShipping
 from .report_assign import ReportAssignsResponse, ReportAssignList
 from .report_shipping import (
-    ReportShipRequestType,
     ReportShipping,
     ReportShippingList,
     ReportShippingResponse,
@@ -84,5 +82,12 @@ from .report_inbound_order import (
     ReportInboundOrder,
     ReportInboundOrderList,
     ReportInboundOrderResponse,
+)
+from .report import (
+    ReportFilter,
+    ReportType,
+    ReportsBaseResponse,
+    ReportRequestShareActionType,
+    ReportShipRequestActionType,
 )
 from .report_sku import ReportSKU, ReportSKUList, ReportSKUResponse, ReportSKUType

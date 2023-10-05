@@ -1,4 +1,5 @@
 import { IProduct } from './inbound_order/types';
+import { IPagination } from './inbound_order/types';
 import HTMXDispatcher from './htmx';
 
 interface IUser {

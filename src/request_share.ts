@@ -1,15 +1,16 @@
 import { Modal } from 'flowbite'
 import type { ModalOptions, ModalInterface } from 'flowbite'
-import { IRequestShare } from './report_share_request'
+import { IRequestShare } from './types'
 // /*
 //  * $editRequestShareModal: required
 //  * options: optional
 //  */
 
 // TODO need refactoring
-interface IRequestShareDepricated extends IRequestShare{
+interface IRequestShareDepricated extends IRequestShare {
     id: number
     desire_quantity: number
+    status: string;
 }
 
 // search flow

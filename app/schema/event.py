@@ -14,6 +14,7 @@ class Event(BaseModel):
     quantity: int
     product: Product
     user: User
+    date_reserve_to: date | None = Field(alias="dateReserveTo")
 
 
 class EventCSVOut(BaseModel):

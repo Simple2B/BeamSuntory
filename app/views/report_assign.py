@@ -152,24 +152,3 @@ def assigns():
         product_master_group_premises=product_master_group_premises,
         product_groups=product_groups,
     )
-
-
-@report_assign_blueprint.route("assign/search")
-@login_required
-def search_report_assigns():
-    pagination, reports = get_assigns_report()
-
-    return render_template(
-        "report/assign/reports_assign_table.html", page=pagination, reports=reports
-    )
-
-
-@report_assign_blueprint.route("/assign/api", methods=["GET"])
-@login_required
-def get_assigns_json():
-    pagination, reports = get_assigns_report()
-    report_list_schema = s.ReportAssignList.model_validate(reports)
-
-    return s.ReportAssignsResponse(
-        pagination=pagination, report_events=report_list_schema.root
-    ).model_dump_json(by_alias=True)

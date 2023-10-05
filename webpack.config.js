@@ -312,26 +312,6 @@ const reportAdjustmentConfig = {
   },
 };
 
-const reportAssignConfig = {
-  entry: {
-    main: './src/report_assign.ts',
-  },
-  output: {
-    path: path.resolve(__dirname, './app/static'),
-    filename: 'js/report_assign.js', // <--- Will be compiled to this single file
-  },
-};
-
-const reportInboundOrderConfig = {
-  entry: {
-    main: './src/report_inbound_orders.ts',
-  },
-  output: {
-    path: path.resolve(__dirname, './app/static'),
-    filename: 'js/report_inbound_orders.js', // <--- Will be compiled to this single file
-  },
-};
-
 const reportShipping = {
   entry: {
     main: './src/report_shipping.ts',
@@ -359,6 +339,15 @@ const reportShelfLife = {
   output: {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/report_shelf_life.js', // <--- Will be compiled to this single file
+  },
+};
+const reportConfig = {
+  entry: {
+    main: './src/report.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/report.js', // <--- Will be compiled to this single file
   },
 };
 
@@ -389,12 +378,12 @@ const configs = [
   inventoryConfig,
   adjustConfig,
   eventConfig,
+  reportConfig,
+  // TODO remove else reports
   reportEventConfig,
   reportRequestShareConfig,
-  reportAssignConfig,
   reportInventoryConfig,
   reportAdjustmentConfig,
-  reportInboundOrderConfig,
   reportShipping,
   reportSku,
   reportShelfLife,
