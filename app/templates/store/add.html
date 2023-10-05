@@ -1,16 +1,20 @@
 <!-- Adding store modal -->
 <!-- prettier-ignore-->
-<div id="add-store-modal" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
+<div id="add-store-modal" tabindex="-1" aria-hidden="true"
+  class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
   <div class="relative w-full max-w-2xl max-h-full">
     <!-- Modal content -->
-    <form action="{{url_for('store.create')}}" method="post" class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+    <form action="{{url_for('store.create')}}" method="post"
+      class="relative bg-white rounded-lg shadow dark:bg-gray-700">
       {{ form_create.hidden_tag() }}
       <!-- Modal header -->
       <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Add new store </h3>
-        <button data-modal-hide="add-store-modal" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+        <button data-modal-hide="add-store-modal" type="button"
+          class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
           <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
           </svg>
         </button>
       </div>
@@ -18,57 +22,86 @@
       <div class="p-6 space-y-6">
         <div class="grid grid-cols-6 gap-6">
           <div class="col-span-6 sm:col-span-3">
-            <label for="store_category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Store category</label >
-              <select type="text" name="store_category" id="store-add-store_category" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Store category" required>
-                {% for store_category in store_categories %}
-                  <option value="{{store_category.id}}">{{store_category.name}}</option>
-                {% endfor %}
-              </select>           </div>
-          <div class="col-span-6 sm:col-span-3">
-            <label for="store_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Name</label >
-            <input type="text" name="store_name" id="store-add-store_name" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Name" required />
+            <label for="store_category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store
+              category</label>
+            <select type="text" name="store_category" id="store-add-store_category"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="Store category" required>
+              {% for store_category in store_categories %}
+              {% if store_category.name != "Locker" %}
+              <option value="{{store_category.id}}">{{store_category.name}}</option>
+              {% endif %}
+              {% endfor %}
+            </select>
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="contact_person" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Contact person</label >
-            <input type="text" name="contact_person" id="store-add-contact_person" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Contact person" required />
+            <label for="store_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
+            <input type="text" name="store_name" id="store-add-store_name"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="Name" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Email</label >
-            <input type="email" name="email" id="store-add-email" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="example@company.com" required />
+            <label for="contact_person" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Contact
+              person</label>
+            <input type="text" name="contact_person" id="store-add-contact_person"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="Contact person" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="phone_numb" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Phone number</label >
-            <input type="text" name="phone_numb" id="store-add-phone_numb" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="contact_number" required />
+            <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
+            <input type="email" name="email" id="store-add-email"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="example@company.com" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="country" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Country</label >
-            <input type="country" name="country" id="store-add-country" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="country" required />
+            <label for="phone_numb" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Phone
+              number</label>
+            <input type="text" name="phone_numb" id="store-add-phone_numb"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="contact_number" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="region" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Region</label >
-            <input type="region" name="region" id="store-add-region" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="region" required />
+            <label for="country" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Country</label>
+            <input type="country" name="country" id="store-add-country"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="country" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="city" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >City</label >
-            <input type="city" name="city" id="store-add-city" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="city" required />
+            <label for="region" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Region</label>
+            <input type="region" name="region" id="store-add-region"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="region" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Address</label >
-            <input type="address" name="address" id="store-add-address" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="address" required />
+            <label for="city" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">City</label>
+            <input type="city" name="city" id="store-add-city"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="city" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="zip" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >ZIP</label >
-            <input type="zip" name="zip" id="store-add-zip" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="zip" required />
+            <label for="address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Address</label>
+            <input type="address" name="address" id="store-add-address"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="address" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="active" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Active</label >
-            <input type="checkbox" name="active" id="store-add-active" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block  p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+            <label for="zip" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">ZIP</label>
+            <input type="zip" name="zip" id="store-add-zip"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="zip" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="active" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Active</label>
+            <input type="checkbox" name="active" id="store-add-active"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block  p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
           </div>
         </div>
       </div>
       <!-- Modal footer -->
       <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
-        <button name="submit" type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"> Save all </button>
+        <button name="submit" type="submit"
+          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+          Save all </button>
       </div>
     </form>
   </div>
