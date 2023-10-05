@@ -1,5 +1,6 @@
 from enum import Enum
 from pydantic import BaseModel, Field, ConfigDict
+from .division import Division
 
 
 class UserRole(Enum):
@@ -17,6 +18,7 @@ class User(BaseModel):
     email: str
     image: str
     role: int
+    role_obj: Division = Field(alias="roleObj")
     activated: bool
     approval_permission: bool = Field(alias="approvalPermission")
     street_address: str = Field(alias="streetAddress")

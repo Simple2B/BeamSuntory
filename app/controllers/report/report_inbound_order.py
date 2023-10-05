@@ -114,6 +114,19 @@ class ReportDataInboundOrders(ReportData):
                 m.ReportInboundOrder.created_at <= report_filter.end_date
             )
 
+        if report_filter.product_group:
+            where_stmt = m.ReportInboundOrder.inbound_order.has(
+                m.InboundOrder.products_allocated.any(
+                    m.ProductAllocated.product_quantity_groups.any(
+                        m.ProductQuantityGroup.group.has(
+                            m.Group.name == report_filter.product_group
+                        )
+                    )
+                )
+            )
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
+
         pagination = create_pagination(total=db.session.scalar(count_query))
 
         reports = db.session.scalars(
