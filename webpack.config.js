@@ -332,15 +332,24 @@ const reportSku = {
   },
 };
 
+const reportShelfLife = {
+  entry: {
+    main: './src/report_shelf_life.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/report_shelf_life.js', // <--- Will be compiled to this single file
+  },
+};
 const reportConfig = {
-    entry: {
-        main: './src/report.ts',
-    },
-    output: {
-        path: path.resolve(__dirname, './app/static'),
-        filename: 'js/report.js', // <--- Will be compiled to this single file
-    },
-}
+  entry: {
+    main: './src/report.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/report.js', // <--- Will be compiled to this single file
+  },
+};
 
 const configs = [
   baseConfig,
@@ -377,6 +386,7 @@ const configs = [
   reportAdjustmentConfig,
   reportShipping,
   reportSku,
+  reportShelfLife,
 ].map((conf) => merge(defaultConfig, conf));
 
 module.exports = configs;

@@ -8,7 +8,9 @@ const reportViewUser = document.getElementById('report-inventory-user') as HTMLD
 const reportViewAction = document.getElementById('report-inventory-action') as HTMLDivElement;
 const reportViewDate = document.getElementById('report-inventory-date') as HTMLDivElement;
 const reportStoreName = document.getElementById('report-inventory-store-name') as HTMLDivElement;
-const productItemTemplate = document.querySelector('#report-inventory-view-product-item-template') as HTMLTableRowElement;
+const productItemTemplate = document.querySelector(
+  '#report-inventory-view-product-item-template'
+) as HTMLTableRowElement;
 const reportViewProductTbody = document.querySelector('#report-inventory-table-products') as HTMLTableElement;
 // initialize modal
 const viewReportInventoriesModal = document.getElementById('view-report-inventories-modal') as HTMLDivElement;
@@ -18,7 +20,9 @@ const viewModalOptions: ModalOptions = {
   backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
   closable: true,
   onHide: () => {
-    const productItems = document.querySelectorAll('.report-inventory-product-item-view') as NodeListOf<HTMLTableColElement>;
+    const productItems = document.querySelectorAll(
+      '.report-inventory-product-item-view'
+    ) as NodeListOf<HTMLTableColElement>;
     productItems.forEach((productItem) => productItem.remove());
   },
 };

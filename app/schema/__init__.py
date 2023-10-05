@@ -12,7 +12,12 @@ from .product_quantity_group import (
     ProductQuantityGroup,
     ProductQuantityGroupsCreate,
 )
-from .product_allocated import ProductAllocated, ProductAllocatedList
+from .product_allocated import (
+    ProductAllocated,
+    ProductAllocatedList,
+    ReportShelfLifeResponse,
+    ReportShelfLifeList,
+)
 from .ship_request import ShipRequest, ShipRequestStatus
 from .store import Store
 from .supplier import Supplier

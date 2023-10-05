@@ -6,6 +6,7 @@ import {
   IReportInboundOrderResponse,
   IReportShippingResponse,
   IReportAssignResponse,
+  IReportShelfLifeResponse,
 } from './types';
 import { formatDate } from './utils';
 
@@ -71,6 +72,17 @@ const filtersMap: IFilterMap = {
     'filter-group-language',
     'filter-group-category',
     'filter-group-premises',
+  ],
+  shelf_life: [
+    'filter-start-date',
+    'filter-end-date',
+    'master-group',
+    'target-group',
+    'filter-group-brand',
+    'filter-group-language',
+    'filter-group-premises',
+    'filter-group-category',
+    'shelf-life-filter-expire-in',
   ],
 };
 
@@ -285,6 +297,33 @@ const generateCSVAssign = async (queryParams: URLSearchParams) => {
   return csvData;
 };
 
+const generateCSVShelfLife = async (queryParams: URLSearchParams) => {
+  // CSV Headers
+  const csvData = ['ShelfLife, shelfLifeStart, shelfLifeEnd, quantityOrdered, quantityReceived'];
+
+  await fetchReportAPI(queryParams, (data: IReportShelfLifeResponse) => {
+    data.reportShelfLifeList.forEach((report) => {
+      let received;
+      if (!report.quantityReceived) {
+        received = '-';
+      } else {
+        received = report.quantityReceived.toString();
+      }
+
+      csvData.push(
+        [
+          report.product.SKU,
+          formatDate(report.shelfLifeStart),
+          formatDate(report.shelfLifeStart),
+          report.quantity,
+          received,
+        ].join(',')
+      );
+    });
+  });
+  return csvData;
+};
+
 const csvDownloadMap: ICSVDownloadMap = {
   events: generateCSVEvents,
   request_share: generateCSVRequestShare,
@@ -293,6 +332,7 @@ const csvDownloadMap: ICSVDownloadMap = {
   assign: generateCSVAssign,
   inbound_order: generateCSVInboundOrder,
   shipping: generateCSVShipping,
+  shelf_life: generateCSVShelfLife,
 };
 
 const filtersIds = [
@@ -313,6 +353,7 @@ const filtersIds = [
   'group-from',
   'group-to',
   'division-select',
+  'shelf-life-filter-expire-in',
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -331,8 +372,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Show/remove filters when choose event report type
   reportTypeSelectHTML.addEventListener('change', (e) => {
     const selectHTML = e.target as HTMLSelectElement;
+
     allFiltersHTML.forEach((filterHTML) => filterHTML.classList.add('hidden'));
     const visibleFilters = filtersMap[selectHTML.value] as HTMLElement[];
+
     visibleFilters.forEach((filterHTML) => filterHTML.classList.remove('hidden'));
   });
 
@@ -352,9 +395,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const input = filterHTML.querySelector('input, select') as HTMLSelectElement | HTMLInputElement;
       filtersQueryParams.append(input.getAttribute('name'), input.value);
     });
+
     filtersQueryParams.append('q', searchQueryHTML.value);
     filtersQueryParams.append('report_type', reportTypeSelectHTML.value);
-    console.log('report_type', reportTypeSelectHTML.value);
     const csvData = await csvDownloadMap[reportTypeSelectHTML.value](filtersQueryParams);
     const blob = new Blob([csvData.join('\n')], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);

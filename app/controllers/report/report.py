@@ -8,6 +8,7 @@ from .report_assign import ReportDataAssigns
 from .report_request_share import ReportDataShareRequests
 from .report_inbound_order import ReportDataInboundOrders
 from .report_shipping import ReportDataShipping
+from .report_shelf_life import ReportDataShelfLife
 
 REPORT_GENERATORS: tuple[ReportData] = (
     ReportDataEvents,
@@ -17,6 +18,7 @@ REPORT_GENERATORS: tuple[ReportData] = (
     ReportDataAssigns,
     ReportDataInboundOrders,
     ReportDataShipping,
+    ReportDataShelfLife,
 )
 
 REPORT_DISPATCHERS = {
