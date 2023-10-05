@@ -175,6 +175,7 @@ export interface IReportInboundOrder {
 }
 interface IProductQuantityGroup {
     group: IGroup;
+    quantity: number;
 }
 interface IProductsAllocated {
     product: IProduct;
