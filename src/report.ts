@@ -87,6 +87,8 @@ const filtersMap: IFilterMap = {
   ],
 };
 
+const searchSKUInput = document.getElementById('search-sku') as HTMLInputElement;
+
 const fetchReportAPI = async (queryParams: URLSearchParams, callback: (data: Object) => void) => {
   let pages = 1;
 
@@ -105,7 +107,14 @@ const generateCSVEvents = async (queryParams: URLSearchParams) => {
   const csvData = ['action_type,user,created_at,store,event_date_from,event_date_to,sku,product_name',];
   await fetchReportAPI(queryParams, (data: IEventsReportResponse) => {
     data.reports.forEach((report) => {
+      
+
       report.shipRequest.carts.forEach((cart) => {
+        console.log(searchSKUInput.value, cart.product.SKU)
+        if (searchSKUInput.value && !cart.product.SKU.includes(searchSKUInput.value) ){
+          return;
+        }
+
         csvData.push(
           [
             report.type,
@@ -128,7 +137,10 @@ const generateCSVRequestShare = async (queryParams: URLSearchParams) => {
   const csvData = ['action_type,user,created_at,current_share_request_status,group_from,group_to,desired_quantity,sku,product_name'];
   await fetchReportAPI(queryParams, (data: IReportRequestShareResponse) => {
     data.reports.forEach((report) => {
-      console.log(report.requestShare)
+      if (searchSKUInput.value && !report.requestShare.product.SKU.includes(searchSKUInput.value) ){
+          return;
+      }
+
       csvData.push(
         [
           report.type,
@@ -162,6 +174,9 @@ const generateCSVInventories = async (queryParams: URLSearchParams) => {
       }
 
       report.reportInventories.forEach((inventory) => {
+          if (searchSKUInput.value && !inventory.product.SKU.includes(searchSKUInput.value) ){
+            return;
+        }
         csvData.push(
           [
             formatDate(report.createdAt),
@@ -186,9 +201,11 @@ const generateCSVAdjustments = async (queryParams: URLSearchParams) => {
     'created_at,product_name,sku,username,master_group,group,warehouse,quantity_before,quantity_after,note',
   ];
   await fetchReportAPI(queryParams, (data: IReportAdjustResponse) => {
-    console.log(data);
     data.reports.forEach((adjust) => {
       adjust.adjustGroupQty.forEach((reportAdjust) => {
+        if (searchSKUInput.value && !adjust.product.SKU.includes(searchSKUInput.value) ){
+          return;
+        }
         csvData.push(
           [
             formatDate(adjust.createdAt),
@@ -215,6 +232,9 @@ const generateCSVInboundOrder = async (queryParams: URLSearchParams) => {
     data.reports.forEach((report) => {
       report.inboundOrder.productsAllocated.forEach((productsAllocated) => {
         productsAllocated.productQuantityGroups.forEach((productQuantityGroup) => {
+          if (searchSKUInput.value && !productsAllocated.product.SKU.includes(searchSKUInput.value) ){
+            return;
+          }
           csvData.push(
             [
               formatDate(report.createdAt),
@@ -254,6 +274,9 @@ const generateCSVShipping = async (queryParams: URLSearchParams) => {
   await fetchReportAPI(queryParams, (data: IReportShippingResponse) => {
     data.reports.forEach((report) => {
       report.shipRequest.carts.forEach((cart) => {
+        if (searchSKUInput.value && !cart.product.SKU.includes(searchSKUInput.value) ){
+            return;
+        }
         csvData.push(
           [
             report.type,
@@ -279,8 +302,10 @@ const generateCSVAssign = async (queryParams: URLSearchParams) => {
   const csvData = ['created_at,username,type,from_group,to_group,sku,product_name,quantity'];
 
   await fetchReportAPI(queryParams, (data: IReportAssignResponse) => {
-    console.log(data);
     data.reports.forEach((report) => {
+      if (searchSKUInput.value && !report.product.SKU.includes(searchSKUInput.value) ){
+        return;
+      }
       csvData.push(
         [
           formatDate(report.createdAt),
@@ -300,7 +325,7 @@ const generateCSVAssign = async (queryParams: URLSearchParams) => {
 
 const generateCSVShelfLife = async (queryParams: URLSearchParams) => {
   // CSV Headers
-  const csvData = ['ShelfLife, shelfLifeStart, shelfLifeEnd, quantityOrdered, quantityReceived'];
+  const csvData = ['SKU, shelfLifeStart, shelfLifeEnd, quantityOrdered, quantityReceived'];
 
   await fetchReportAPI(queryParams, (data: IReportShelfLifeResponse) => {
     data.reportShelfLifeList.forEach((report) => {
@@ -309,6 +334,12 @@ const generateCSVShelfLife = async (queryParams: URLSearchParams) => {
         received = '-';
       } else {
         received = report.quantityReceived.toString();
+      }
+
+      
+
+      if (searchSKUInput.value.length && !report.product.SKU.includes(searchSKUInput.value) ){
+        return;
       }
 
       csvData.push(

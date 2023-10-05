@@ -27,13 +27,6 @@ class ReportDataInboundOrders(ReportData):
                         )
                     )
                 )
-                | m.ReportInboundOrder.inbound_order.has(
-                    m.InboundOrder.products_allocated.any(
-                        m.ProductAllocated.product.has(
-                            m.Product.SKU.ilike(f"%{report_filter.q}%")
-                        )
-                    )
-                )
                 | m.ReportInboundOrder.user.has(
                     m.User.username.ilike(f"%{report_filter.q}%")
                 )
@@ -49,13 +42,6 @@ class ReportDataInboundOrders(ReportData):
                         )
                     )
                 )
-                | m.ReportInboundOrder.inbound_order.has(
-                    m.InboundOrder.products_allocated.any(
-                        m.ProductAllocated.product.has(
-                            m.Product.SKU.ilike(f"%{report_filter.q}%")
-                        )
-                    )
-                )
                 | m.ReportInboundOrder.user.has(
                     m.User.username.ilike(f"%{report_filter.q}%")
                 )
@@ -63,6 +49,17 @@ class ReportDataInboundOrders(ReportData):
                     m.InboundOrder.title.ilike(f"%{report_filter.q}%")
                 )
             )
+
+        if report_filter.search_sku:
+            where_stmt = m.ReportInboundOrder.inbound_order.has(
+                m.InboundOrder.products_allocated.any(
+                    m.ProductAllocated.product.has(
+                        m.Product.SKU.ilike(f"%{report_filter.search_sku}%")
+                    )
+                )
+            )
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
 
         master_groups = [
             report_filter.brand,

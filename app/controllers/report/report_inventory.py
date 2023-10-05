@@ -35,11 +35,6 @@ class ReportDataInventories(ReportData):
                         m.Product.name.ilike(f"%{report_filter.q}%")
                     )
                 )
-                | m.ReportInventoryList.report_inventories.any(
-                    m.ReportInventory.product.has(
-                        m.Product.SKU.ilike(f"%{report_filter.q}%")
-                    )
-                )
             )
 
             count_query = count_query.where(
@@ -57,12 +52,16 @@ class ReportDataInventories(ReportData):
                         m.Product.name.ilike(f"%{report_filter.q}%")
                     )
                 )
-                | m.ReportInventoryList.report_inventories.any(
-                    m.ReportInventory.product.has(
-                        m.Product.SKU.ilike(f"%{report_filter.q}%")
-                    )
+            )
+
+        if report_filter.search_sku:
+            where_stmt = m.ReportInventoryList.report_inventories.any(
+                m.ReportInventory.product.has(
+                    m.Product.SKU.ilike(f"%{report_filter.search_sku}%")
                 )
             )
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
 
         if report_filter.start_date:
             query = query.where(

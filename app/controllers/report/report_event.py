@@ -30,15 +30,6 @@ class ReportDataEvents(ReportData):
                         )
                     )
                 )
-                | m.ReportEvent.ship_request.has(
-                    m.ShipRequest.carts.any(
-                        m.Cart.event.has(
-                            m.Event.product.has(
-                                m.Product.SKU.ilike(f"%{report_filter.q}%")
-                            )
-                        )
-                    )
-                )
                 | m.ReportEvent.user.has(m.User.username.ilike(f"%{report_filter.q}%"))
             )
 
@@ -53,6 +44,19 @@ class ReportDataEvents(ReportData):
                     )
                 )
             )
+
+        if report_filter.search_sku:
+            where_stmt = m.ReportEvent.ship_request.has(
+                m.ShipRequest.carts.any(
+                    m.Cart.event.has(
+                        m.Event.product.has(
+                            m.Product.SKU.ilike(f"%{report_filter.search_sku}%")
+                        )
+                    )
+                )
+            )
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
 
         if report_filter.start_date:
             query = query.where(

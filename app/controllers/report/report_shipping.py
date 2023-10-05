@@ -20,22 +20,23 @@ class ReportDataShipping(ReportData):
         count_query = sa.select(sa.func.count()).select_from(m.ReportShipping)
 
         if report_filter.q:
-            where_stmt = (
-                m.ReportShipping.ship_request.has(
-                    m.ShipRequest.store.has(
-                        m.Store.store_name.ilike(f"%{report_filter.q}%")
-                    )
+            where_stmt = m.ReportShipping.ship_request.has(
+                m.ShipRequest.store.has(
+                    m.Store.store_name.ilike(f"%{report_filter.q}%")
                 )
-                | m.ReportShipping.user.has(
-                    m.User.username.ilike(f"%{report_filter.q}%")
-                )
-                | m.ReportShipping.ship_request.has(
-                    m.ShipRequest.carts.any(
-                        m.Cart.product.has(m.Product.SKU.ilike(f"%{report_filter.q}%"))
+            ) | m.ReportShipping.user.has(m.User.username.ilike(f"%{report_filter.q}%"))
+
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
+
+        if report_filter.search_sku:
+            where_stmt = m.ReportShipping.ship_request.has(
+                m.ShipRequest.carts.any(
+                    m.Cart.product.has(
+                        m.Product.SKU.ilike(f"%{report_filter.search_sku}%")
                     )
                 )
             )
-
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)
 
