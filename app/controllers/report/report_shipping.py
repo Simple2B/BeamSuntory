@@ -31,7 +31,7 @@ class ReportDataShipping(ReportData):
 
         if report_filter.division:
             where_stmt = m.ReportShipping.user.has(
-                m.User.role == filter.division,
+                m.User.role == report_filter.division,
             )
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)
@@ -59,23 +59,27 @@ class ReportDataShipping(ReportData):
 
         if report_filter.target_group:
             where_stmt = m.ReportShipping.ship_request.has(
-                m.ShipRequest.carts.any(m.Cart.group == report_filter.target_group)
+                m.ShipRequest.carts.any(
+                    m.Cart.group.has((m.Group.name == report_filter.target_group))
+                )
             )
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)
 
-        for group_id in (
+        for group_name in (
             report_filter.brand,
             report_filter.language,
             report_filter.category,
             report_filter.premises,
         ):
-            if group_id:
+            if group_name:
                 where_stmt = m.ReportShipping.ship_request.has(
                     m.ShipRequest.carts.any(
                         m.Cart.product.has(
                             m.Product.product_groups.any(
-                                m.ProductGroup.group_id == group_id
+                                m.ProductGroup.parent.has(
+                                    m.GroupProduct.name == group_name
+                                )
                             )
                         )
                     )

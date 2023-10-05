@@ -28,7 +28,6 @@ class GroupProduct(db.Model, ModelMixin):
         sa.DateTime,
         default=datetime.utcnow,
     )
-
     master_group_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("master_groups_for_product.id")
     )
