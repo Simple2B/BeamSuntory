@@ -101,16 +101,16 @@ const fetchReportAPI = async (queryParams: URLSearchParams, callback: (data: Obj
 };
 
 const generateCSVEvents = async (queryParams: URLSearchParams) => {
-  const csvData = ['action_type,user,created_at,event_date_from,event_date_to,sku,product_name'];
+  const csvData = ['action_type,user,created_at,store,event_date_from,event_date_to,sku,product_name',];
   await fetchReportAPI(queryParams, (data: IEventsReportResponse) => {
     data.reports.forEach((report) => {
       report.shipRequest.carts.forEach((cart) => {
         csvData.push(
           [
-            report.createdAt,
-            report.shipRequest.store.storeName,
             report.type,
             report.user.username,
+            report.createdAt,
+            report.shipRequest.store.storeName,
             cart.event.dateFrom,
             cart.event.dateTo,
             cart.product.SKU,
@@ -246,7 +246,7 @@ const generateCSVInboundOrder = async (queryParams: URLSearchParams) => {
 const generateCSVShipping = async (queryParams: URLSearchParams) => {
   // CSV Headers
   const csvData = [
-    'action_type,user,created_at,history,current_ship_request_status,order_number,store_name,sku,product_name,group,quantity',
+    'action_type,user,created_at,current_ship_request_status,store_name,sku,product_name,group,quantity',
   ];
   await fetchReportAPI(queryParams, (data: IReportShippingResponse) => {
     data.reports.forEach((report) => {
@@ -256,9 +256,7 @@ const generateCSVShipping = async (queryParams: URLSearchParams) => {
             report.type,
             report.user.username,
             report.createdAt,
-            report.history,
             report.shipRequest.status,
-            report.shipRequest.orderNumb,
             report.shipRequest.store.storeName,
             cart.product.SKU,
             cart.product.name,
@@ -398,6 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     filtersQueryParams.append('q', searchQueryHTML.value);
     filtersQueryParams.append('report_type', reportTypeSelectHTML.value);
+
     const csvData = await csvDownloadMap[reportTypeSelectHTML.value](filtersQueryParams);
     const blob = new Blob([csvData.join('\n')], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
