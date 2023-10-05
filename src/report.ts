@@ -62,6 +62,7 @@ const filtersMap: IFilterMap = {
     'filter-group-brand',
     'filter-group-premises',
     'filter-group-category',
+    'filter-product-group',
   ],
   shipping: [
     'division-select',
@@ -348,6 +349,7 @@ const filtersIds = [
   'filter-group-premises',
   'filter-group-category',
   'filter-group-events',
+  'filter-product-group',
   'group-from',
   'group-to',
   'division-select',
