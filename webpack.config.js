@@ -312,26 +312,6 @@ const reportAdjustmentConfig = {
   },
 };
 
-const reportAssignConfig = {
-  entry: {
-    main: './src/report_assign.ts',
-  },
-  output: {
-    path: path.resolve(__dirname, './app/static'),
-    filename: 'js/report_assign.js', // <--- Will be compiled to this single file
-  },
-};
-
-const reportInboundOrderConfig = {
-  entry: {
-    main: './src/report_inbound_orders.ts',
-  },
-  output: {
-    path: path.resolve(__dirname, './app/static'),
-    filename: 'js/report_inbound_orders.js', // <--- Will be compiled to this single file
-  },
-};
-
 const reportShipping = {
   entry: {
     main: './src/report_shipping.ts',
@@ -393,10 +373,8 @@ const configs = [
   // TODO remove else reports
   reportEventConfig,
   reportRequestShareConfig,
-  reportAssignConfig,
   reportInventoryConfig,
   reportAdjustmentConfig,
-  reportInboundOrderConfig,
   reportShipping,
   reportSku,
 ].map((conf) => merge(defaultConfig, conf));
