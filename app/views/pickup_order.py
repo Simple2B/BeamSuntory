@@ -122,6 +122,14 @@ def save():
             user=current_user,
         )
         db.session.add(report_shipping)
+        # TODO should we report SKU on pickup??
+        # for cart in ship_request.carts:
+        # m.ReportSKU(
+        #         product_id=cart.product_id,
+        #         ship_request=ship_request,
+        #         type=s.ReportSKUType.ship_request.value,
+        #         status="Ship request created.",
+        #     ).save(False)
         ship_request.save()
 
         if form_edit.next_url.data:

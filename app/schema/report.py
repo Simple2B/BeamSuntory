@@ -25,6 +25,7 @@ class ReportType(Enum):
     ASSIGN: str = "assign"
     INBOUND_ORDER: str = "inbound_order"
     SHIPPING: str = "shipping"
+    SHELF_LIFE: str = "shelf_life"
 
 
 class CalendarFilters(BaseModel):
@@ -58,6 +59,7 @@ class ReportFilter(CalendarFilters, GroupFilters, ReportActionTypes):
     user: str | None = None
     events: str | None = None
     division: str | None = None
+    expire_in: str | None = None
 
 
 class ReportsBaseResponse(BaseModel):

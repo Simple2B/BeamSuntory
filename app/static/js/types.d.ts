@@ -1,4 +1,4 @@
-import { IWarehouseProduct } from "./inbound_order/types";
+import { IWarehouseProduct } from './inbound_order/types';
 interface IPagination {
     pages: number;
 }
@@ -217,5 +217,16 @@ export interface IReportAssign {
 export interface IReportAssignResponse {
     pagination: IPagination;
     reports: IReportAssign[];
+}
+export interface IReportShelfLife {
+    quantity: number;
+    quantityReceived: number;
+    shelfLifeStart: string;
+    shelfLifeEnd: string;
+    product: IProduct;
+}
+export interface IReportShelfLifeResponse {
+    pagination: IPagination;
+    reportShelfLifeList: IReportShelfLife[];
 }
 export {};
