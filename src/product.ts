@@ -730,10 +730,15 @@ viewProductButtonElements.forEach((e) =>
     }
     const product = JSON.parse(e.getAttribute('data-target'));
     const groupsMasterGroups = getGroupsMasterGroups(product);
-    const totalWarehouseQty = product.warehouse_products.reduce(
-      (acc: IWarehouseProduct, warehouseProduct: IWarehouseProduct) =>
-        acc.product_quantity + warehouseProduct.product_quantity, 0
-    );
+
+    let totalWarehouseQty = 0;
+    if (product.warehouse_products) {
+      const warehouseQuantity = product.warehouse_products.map(
+        (warehouseQty: IWarehouseProduct) => warehouseQty.product_quantity
+      );
+
+      totalWarehouseQty = warehouseQuantity.reduce((acc: number, quantity: number) => acc + quantity, 0);
+    }
 
     const productInfo = await getAdditionalProductInfo(product.id);
 
@@ -743,13 +748,17 @@ viewProductButtonElements.forEach((e) =>
     prodGroups.forEach((groupName) => {
       let isEqual = false;
       const mstrGroupName = groupsMasterGroups[groupName];
+
       const currentUserGroup = productInfo.current_user_groups.find(
         (userGroup: IMasterGroupGroupUser) => userGroup.master_group_name === mstrGroupName
       );
 
       if (currentUserGroup) {
-        const currentUserValue = currentUserGroup.groups[0].group_name;
-        if (currentUserValue.includes(groupName)) {
+        const isExistGroup = currentUserGroup.groups.find(
+          (group: { group_name: string }) => group.group_name === groupName
+        );
+
+        if (isExistGroup) {
           isEqual = true;
         }
       }
@@ -1089,8 +1098,8 @@ function assign(product: IProduct, group: string) {
 
   const assignProductGroupOptions = document.querySelectorAll('.product-assign-to-group');
   assignProductGroupOptions.forEach((option) => {
-    if(option.textContent===group){
-      option.classList.add('hidden')
+    if (option.textContent === group) {
+      option.classList.add('hidden');
     }
   });
 
@@ -1883,7 +1892,6 @@ showAllProductStocksCheckbox.addEventListener('change', async () => {
   getSortOwnByMe(showAllProductStocksCheckbox, '');
 });
 
-
 const showAllStocksInventoryCheckbox: HTMLInputElement = document.querySelector('#product-show-all-stocks-inventory');
 if (window.location.pathname + window.location.hash === '/product/stocks_in_inventory') {
   window.onload = (event) => {
@@ -1893,7 +1901,6 @@ if (window.location.pathname + window.location.hash === '/product/stocks_in_inve
 showAllStocksInventoryCheckbox.addEventListener('change', async () => {
   getSortOwnByMe(showAllStocksInventoryCheckbox, 'stocks_in_inventory');
 });
-
 
 document.querySelector('#product-assign-master-group').addEventListener('change', () => {
   const productAssignMasterGroupSelect: HTMLSelectElement = document.querySelector('#product-assign-master-group');
@@ -2038,7 +2045,7 @@ function getFilterValues(isChecked: boolean) {
   const eventSortToggleButton = document.querySelector('#product-show-events-toggle-btn');
 
   url.pathname = '/product';
-  
+
   isChecked ? url.searchParams.set('events', 'true') : url.searchParams.delete('events');
   window.location.href = `${url.href}`;
 }
