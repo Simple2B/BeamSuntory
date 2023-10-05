@@ -60,6 +60,7 @@ class ReportFilter(CalendarFilters, GroupFilters, ReportActionTypes):
     events: str | None = None
     division: str | None = None
     expire_in: str | None = None
+    product_group: str | None = None
 
 
 class ReportsBaseResponse(BaseModel):

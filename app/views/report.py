@@ -114,7 +114,7 @@ def index():
         product_premises=premises,
         users=users,
         master_groups=master_groups,
-        groups=groups,
+        groups=groups.all(),
         product_master_groups=product_master_groups,
         report_request_share_action_types=s.ReportRequestShareActionType,
         report_shipping_action_types=s.ReportShipRequestActionType,
