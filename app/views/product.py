@@ -411,6 +411,8 @@ def delete(id: int):
     db.session.execute(
         m.ProductAllocated.delete().where(m.ProductAllocated.product == product)
     )
+    # db.session.execute(m.Product.delete().where(m.Product.id == product.id))
+    db.session.commit()
     db.session.delete(product)
     db.session.commit()
     log(log.INFO, "Product deleted. Product: [%s]", product)
