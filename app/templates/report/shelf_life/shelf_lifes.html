@@ -171,14 +171,14 @@
         hx-include="{{all_includes}}"
         hx-get="{{ url_for('report_shelf_life.search_shelf_life_reports') }}" hx-indicator="#report-table-spinner"
         class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-        <option selected value="">Expire in (days)</option>
+        <option selected value="0">Expire in (days)</option>
         <option value="1">1</option>
-        <option value="1">5</option>
-        <option value="1">10</option>
-        <option value="1">15</option>
-        <option value="1">20</option>
-        <option value="1">30</option>
-        <option value="1">60</option>
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="15">15</option>
+        <option value="20">20</option>
+        <option value="30">30</option>
+        <option value="60">60</option>
       </select>
     </div>
   </div>
