@@ -1,36 +1,35 @@
-import { IWarehouseProduct } from "./inbound_order/types"
+import { IWarehouseProduct } from './inbound_order/types';
 
 interface IPagination {
-    pages: number
+  pages: number;
 }
 
 interface IProduct {
-    name: string
-    SKU: string
-    image: string
-    regularPrice: number
-    retailPrice: number
-    warehouseProducts: IWarehouseProduct[]
+  name: string;
+  SKU: string;
+  image: string;
+  regularPrice: number;
+  retailPrice: number;
+  warehouseProducts: IWarehouseProduct[];
 }
 
 interface IEvents {
-    id: number
-    product: IProduct
-    dateFrom: string
-    dateTo: string
-    comment: string
-    user: IUser
+  id: number;
+  product: IProduct;
+  dateFrom: string;
+  dateTo: string;
+  comment: string;
+  user: IUser;
 }
 
 interface IUser {
-    username: string
+  username: string;
 }
 
 export interface IEventsResponse {
-    pagination: IPagination
-    events: IEvents[]
+  pagination: IPagination;
+  events: IEvents[];
 }
-
 
 interface IStore {
   active: boolean;
@@ -97,8 +96,8 @@ interface IMasterGroup {
 }
 
 export interface IGroup {
-  id: number
-  name: string
+  id: number;
+  name: string;
   masterGroup: IMasterGroup;
 }
 
@@ -111,7 +110,7 @@ export interface IRequestShare {
 }
 
 export interface IReportRequestShare {
-  type: string
+  type: string;
   createdAt: string;
   history: string;
 
@@ -124,31 +123,29 @@ export interface IReportRequestShareResponse {
   reports: IReportRequestShare[];
 }
 
-
 export interface ISupplier {
-  id: number
-  name: string
-  address: string
+  id: number;
+  name: string;
+  address: string;
 }
 
 export interface IWarehouse {
-  id: number
-  name: string
+  id: number;
+  name: string;
 }
-
 
 export interface IInboundOrderBase {
   id: number;
-  orderId: string
-  status: string
-  title: string
-  activeDate: string
-  activeTime: string
-  deliveryDate: string
-  supplier: ISupplier
-  warehouse: IWarehouse
-  wmNotes: string
-  daNotes: string
+  orderId: string;
+  status: string;
+  title: string;
+  activeDate: string;
+  activeTime: string;
+  deliveryDate: string;
+  supplier: ISupplier;
+  warehouse: IWarehouse;
+  wmNotes: string;
+  daNotes: string;
 }
 
 interface IReportInventory {
@@ -175,7 +172,6 @@ export interface IInventoriesReportResponse {
   reports: IReportInventoryList[];
 }
 
-
 export interface IReportAdjustResponse {
   pagination: IPagination;
   reports: IAdjust[];
@@ -198,30 +194,29 @@ interface IAdjustGroupQty {
   quantityBefore: number;
 }
 
-
 export interface IReportInboundOrder {
-  createdAt: string
-  history: string
-  inboundOrder: IInboundOrder
-  user: IUser
-  type: string 
+  createdAt: string;
+  history: string;
+  inboundOrder: IInboundOrder;
+  user: IUser;
+  type: string;
 }
 
 interface IProductQuantityGroup {
-  group: IGroup
-  quantity: number
+  group: IGroup;
+  quantity: number;
 }
 
 interface IProductsAllocated {
-  product: IProduct
-  quantity: number
-  productQuantityGroups: IProductQuantityGroup[]
+  product: IProduct;
+  quantity: number;
+  productQuantityGroups: IProductQuantityGroup[];
 }
 
 interface IInboundOrder {
-  productsAllocated: IProductsAllocated[]
-  warehouse: IWarehouse
-  title: string  
+  productsAllocated: IProductsAllocated[];
+  warehouse: IWarehouse;
+  title: string;
 }
 
 export interface IReportInboundOrderResponse {
@@ -229,9 +224,8 @@ export interface IReportInboundOrderResponse {
   reports: IReportInboundOrder[];
 }
 
-
 export interface IReportShipping {
-  type: string
+  type: string;
   createdAt: string;
   history: string;
 
@@ -251,8 +245,8 @@ export interface IReportAssign {
   group: IGroup;
   groupId: number;
   productId: number;
-  product: IProduct ;
-  quantity: number
+  product: IProduct;
+  quantity: number;
   type: string;
   user: IUser;
 }
@@ -260,4 +254,21 @@ export interface IReportAssign {
 export interface IReportAssignResponse {
   pagination: IPagination;
   reports: IReportAssign[];
+}
+
+export interface IReportShelfLife {
+  quantity: number;
+  quantityReceived: number;
+  shelfLifeStart: string;
+  shelfLifeEnd: string;
+  product: IProduct;
+  // TODO do we need this?
+  // productQuantityGroups: list[ProductGroupOut] = Field(
+  //     alias="productQuantityGroups"
+  // )
+}
+
+export interface IReportShelfLifeResponse {
+  pagination: IPagination;
+  reportShelfLifeList: IReportShelfLife[];
 }

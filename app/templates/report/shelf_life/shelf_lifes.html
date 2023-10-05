@@ -47,28 +47,6 @@
         />
       </div>
     </div>
-    <div
-      class="flex flex-wrap py-4 bg-white dark:bg-gray-800"
-    >
-      <!-- prettier-ignore -->
-      <select
-        id="shelf-lifes-filter-status"
-        hx-trigger="change"
-        hx-swap="innerHTML"
-        hx-target="#reports-table"
-        name="username"
-        hx-include="{{all_includes}}"
-        hx-get="{{ url_for('report_shelf_life.search_shelf_life_reports') }}"
-        hx-indicator="#report-table-spinner"
-        class="shelf-lifes-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-      >
-        <option selected disabled value="">Select user</option>
-
-        {% for user in users %}
-        <option value="{{ user.username }}">{{ user.username }}</option>
-        {% endfor %}
-      </select>
-    </div>
     <div class="relative">
       <div
         class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-shelf-lifes-none"
@@ -85,7 +63,7 @@
         hx-target="#reports-table"
         hx-swap="innerHTML"
         type="text"
-        id="product-shelf-life-sort-created-from-datepicker"
+        id="filter-start-date"
         placeholder="Shelf life start"
         hx-indicator="#report-table-spinner"
         class="product-shelf-life-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -111,7 +89,7 @@
         hx-swap="innerHTML"
         type="text"
         placeholder="Shelf life end"
-        id="product-shelf-life-sort-created-to-datepicker"
+        id="filter-end-date"
         hx-indicator="#report-table-spinner"
         class="product-shelf-life-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
       />
@@ -139,7 +117,7 @@
       class="flex flex-wrap py-1 bg-white dark:bg-gray-800"
     >
       <!-- prettier-ignore -->
-      <select id="shelf-life-filter-master-group" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"
+      <select id="master-group" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"
         name="master_group"
         hx-include="{{all_includes}}"
         hx-get="{{ url_for('report_shelf_life.search_shelf_life_reports') }}" hx-indicator="#report-table-spinner"
@@ -154,7 +132,7 @@
       class="flex flex-wrap py-1 bg-white dark:bg-gray-800"
     >
       <!-- prettier-ignore -->
-      <select id="shelf-life-filter-group" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"
+      <select id="target-group" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"
         name="group"
         hx-include="{{all_includes}}"
         hx-get="{{ url_for('report_shelf_life.search_shelf_life_reports') }}" hx-indicator="#report-table-spinner"
@@ -171,7 +149,7 @@
       class="flex flex-wrap py-1 bg-white dark:bg-gray-800"
     >
       <!-- prettier-ignore -->
-      <select id="shelf-life-filter-product-master-group-{{prod_master_group.name}}" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"
+      <select id="filter-group-{{prod_master_group.name}}" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"
         name="group_{{prod_master_group.name.lower()}}"
         hx-include="{{all_includes}}"
         hx-get="{{ url_for('report_shelf_life.search_shelf_life_reports') }}" hx-indicator="#report-table-spinner"

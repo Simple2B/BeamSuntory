@@ -47,12 +47,8 @@ const formatDate = (date: string) => {
 const downloadCSV = async function () {
   // Filters
   const searchShelfLifeInput: HTMLInputElement = document.querySelector('#table-search-shelf-life');
-  const dateShelfLifeCreatedFromInput: HTMLInputElement = document.querySelector(
-    '#product-shelf-life-sort-created-from-datepicker'
-  );
-  const dateShelfLifeCreatedToInput: HTMLInputElement = document.querySelector(
-    '#product-shelf-life-sort-created-to-datepicker'
-  );
+  const dateShelfLifeCreatedFromInput: HTMLInputElement = document.querySelector('#filter-start-date');
+  const dateShelfLifeCreatedToInput: HTMLInputElement = document.querySelector('#filter-end-date');
 
   const filtersMap = {
     q: searchShelfLifeInput,
@@ -77,7 +73,6 @@ const downloadCSV = async function () {
 
     const res = await fetch(`${urlWithoutQueryParams}/${url}`);
     const data: IReportShelfLifeResponse = await res.json();
-    console.log(data);
 
     data.reportShelfLifeList.forEach((report: IReportShelfLife) => {
       let received;

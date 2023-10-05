@@ -43,9 +43,7 @@ ProductAllocatedList = RootModel[list[ProductAllocated]]
 class ReportShelfLifeResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
     pagination: PaginationOut
-    report_shelf_life_list: list[ProductAllocatedOut] = Field(
-        alias="reportShelfLifeList"
-    )
+    reports: list[ProductAllocatedOut] = Field(alias="reportShelfLifeList")
 
 
 ReportShelfLifeList = RootModel[list[ProductAllocatedOut]]
