@@ -195,18 +195,37 @@ const generateCSVAdjustments = async (queryParams: URLSearchParams) => {
 };
 
 const generateCSVInboundOrder = async (queryParams: URLSearchParams) => {
-  const csvData = ['created_at,username,type,order_title,history'];
+  const csvData = ['created_at,username,type,order_title,allocated_product,sku,group,quantity'];
   await fetchReportAPI(queryParams, (data: IReportInboundOrderResponse) => {
     data.reports.forEach((report) => {
-      csvData.push(
-        [
-          formatDate(report.createdAt),
-          report.user.username,
-          report.type,
-          report.inboundOrder.title,
-          report.history,
-        ].join(',')
-      );
+      report.inboundOrder.productsAllocated.forEach((productsAllocated) => {
+        productsAllocated.productQuantityGroups.forEach((productQuantityGroup) => {
+          csvData.push(
+            [
+              formatDate(report.createdAt),
+              report.user.username,
+              report.type,
+              report.inboundOrder.title,
+              productsAllocated.product.name,
+              productsAllocated.product.SKU,
+              productQuantityGroup.group.name,
+              productQuantityGroup.quantity,
+            ].join(',')
+          );
+        });
+        if (!productsAllocated.productQuantityGroups.length) {
+          csvData.push(
+            [
+              formatDate(report.createdAt),
+              report.user.username,
+              report.type,
+              report.inboundOrder.title,
+              productsAllocated.product.name,
+              productsAllocated.product.SKU,
+            ].join(',')
+          );
+        }
+      });
     });
   });
   return csvData;
@@ -244,7 +263,7 @@ const generateCSVShipping = async (queryParams: URLSearchParams) => {
 
 const generateCSVAssign = async (queryParams: URLSearchParams) => {
   // CSV Headers
-  const csvData = ['created_at,username,type,from_group,to_group,sku,product_name'];
+  const csvData = ['created_at,username,type,from_group,to_group,sku,product_name,quantity'];
 
   await fetchReportAPI(queryParams, (data: IReportAssignResponse) => {
     console.log(data);
@@ -258,6 +277,7 @@ const generateCSVAssign = async (queryParams: URLSearchParams) => {
           report.group.name,
           report.product.SKU,
           report.product.name,
+          report.quantity,
         ].join(',')
       );
     });
