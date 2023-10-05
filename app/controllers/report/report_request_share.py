@@ -21,22 +21,21 @@ class ReportDataShareRequests(ReportData):
         count_query = sa.select(sa.func.count()).select_from(m.ReportRequestShare)
 
         if report_filter.q:
-            where_stmt = (
-                m.ReportRequestShare.request_share.has(
-                    m.RequestShare.product.has(
-                        m.Product.name.ilike(f"%{report_filter.q}%")
-                    )
-                )
-                | m.ReportRequestShare.user.has(
-                    m.User.username.ilike(f"%{report_filter.q}%")
-                )
-                | m.ReportRequestShare.request_share.has(
-                    m.RequestShare.product.has(
-                        m.Product.SKU.ilike(f"%{report_filter.q}%")
-                    )
-                )
+            where_stmt = m.ReportRequestShare.request_share.has(
+                m.RequestShare.product.has(m.Product.name.ilike(f"%{report_filter.q}%"))
+            ) | m.ReportRequestShare.user.has(
+                m.User.username.ilike(f"%{report_filter.q}%")
             )
 
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
+
+        if report_filter.search_sku:
+            where_stmt = m.ReportRequestShare.request_share.has(
+                m.RequestShare.product.has(
+                    m.Product.SKU.ilike(f"%{report_filter.search_sku}%")
+                )
+            )
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)
 

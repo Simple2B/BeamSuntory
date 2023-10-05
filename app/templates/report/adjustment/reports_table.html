@@ -1,52 +1,99 @@
 <div id="adjustment-table">
   <!-- hidden input query params -->
   <div>
-    <input hidden type="text" name="" id="adjustment-filter-params-input" value="{{ filter_adjustments }}" />
+    <input
+      hidden
+      type="text"
+      name=""
+      id="adjustment-filter-params-input"
+      value="{{ filter_adjustments }}"
+    />
   </div>
 
-  <table class="w-full overflow-x-auto text-sm text-left text-gray-500 dark:text-gray-400">
-    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+  <table
+    class="w-full overflow-x-auto text-sm text-left text-gray-500 dark:text-gray-400"
+  >
+    <thead
+      class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
+    >
       <tr>
-        <th scope="col" class="px-6 py-3">
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
           #
         </th>
-        <th scope="col" class="px-6 py-3">
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
           Image
         </th>
-        <th scope="col" class="px-6 py-3">
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
           Product Name
         </th>
-        <th scope="col" class="px-6 py-3">
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
           SKU
         </th>
-        <th scope="col" class="px-6 py-3">
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
           User
         </th>
-        <th scope="col" class="px-6 py-3">
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
           Date
         </th>
-        <th scope="col" class="px-6 py-3">
-          Master<br>Group
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
+          Master<br />Group
         </th>
-        <th scope="col" class="px-6 py-3">
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
           Group
         </th>
-        <th scope="col" class="px-6 py-3">
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
           Warehouse
         </th>
-        <th scope="col" class="px-6 py-3">
-          Quantity<br>Before
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
+          Quantity<br />Before
         </th>
-        <th scope="col" class="px-6 py-3">
-          Quantity<br>After
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
+          Quantity<br />After
         </th>
-        <th scope="col" class="px-6 py-3">
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
           Notes
         </th>
       </tr>
     </thead>
     <tbody>
-      {% for report in reports %}
+      <!-- prettier-ignore -->
+      {% for report in reports if not request.args.get('search_sku') or request.args.get('search_sku') in report.product.SKU %}
       {% set report_index = loop.index %}
       {% for adjust in report.adjust_group_qty %}
       <!-- prettier-ignore -->
@@ -118,8 +165,7 @@
           </div>
         </td>
       </tr>
-      {% endfor %}
-      {% endfor %}
+      {% endfor %} {% endfor %}
     </tbody>
   </table>
   <!-- prettier-ignore -->

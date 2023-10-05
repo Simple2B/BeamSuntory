@@ -22,7 +22,6 @@ class ReportDataAdjustments(ReportData):
         if report_filter.q:
             query = query.where(
                 m.Adjust.product.has(m.Product.name.ilike(f"%{report_filter.q}%"))
-                | m.Adjust.product.has(m.Product.SKU.ilike(f"%{report_filter.q}%"))
                 | m.Adjust.user.has(m.User.username.ilike(f"%{report_filter.q}%"))
             )
 
@@ -37,6 +36,12 @@ class ReportDataAdjustments(ReportData):
                     )
                 )
             )
+        if report_filter.search_sku:
+            where_stmt = m.Adjust.product.has(
+                m.Product.SKU.ilike(f"%{report_filter.search_sku}%")
+            )
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
 
         if report_filter.start_date:
             query = query.where(

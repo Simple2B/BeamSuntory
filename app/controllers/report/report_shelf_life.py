@@ -26,19 +26,20 @@ class ReportDataShelfLife(ReportData):
                 m.ProductAllocated.product.has(
                     m.Product.name.ilike(f"%{report_filter.q}%")
                 )
-                | m.ProductAllocated.product.has(
-                    m.Product.SKU.ilike(f"%{report_filter.q}%")
-                )
             )
 
             count_query = count_query.where(
                 m.ProductAllocated.product.has(
                     m.Product.name.ilike(f"%{report_filter.q}%")
                 )
-                | m.ProductAllocated.product.has(
-                    m.Product.SKU.ilike(f"%{report_filter.q}%")
-                )
             )
+
+        if report_filter.search_sku:
+            where_stmt = m.ProductAllocated.product.has(
+                m.Product.SKU.ilike(f"%{report_filter.search_sku}%")
+            )
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
 
         if report_filter.start_date:
             query = query.where(
@@ -52,7 +53,7 @@ class ReportDataShelfLife(ReportData):
                 <= datetime.strptime(report_filter.created_to, "%m/%d/%Y")
             )
 
-        if report_filter.expire_in:
+        if report_filter.expire_in and int(report_filter.expire_in) > 0:
             query = query.where(
                 m.ProductAllocated.shelf_life_end
                 <= datetime.now() + timedelta(days=int(report_filter.expire_in))
