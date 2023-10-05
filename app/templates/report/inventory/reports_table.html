@@ -28,51 +28,88 @@
           scope="col"
           class="px-6 py-3"
         >
-          Date
+          Action Date
         </th>
         <th
           scope="col"
           class="px-6 py-3"
         >
-          Actions
+          SKU
+        </th>
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
+          Qty before
+        </th>
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
+          Qty after
+        </th>
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
+          Deliver to
         </th>
       </tr>
     </thead>
+    <!-- prettier-ignore -->
     <tbody>
-      {% for report in inventory_reports
-      %}
-      <!-- prettier-ignore -->
-      <tr class="table-inventory-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-        <td class="w-4 p-4">
-          <div class="flex items-center">{{ loop.index + page.skip }}</div>
-        </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.type }}</div>
-          </div>
-        </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.user.username }}</div>
-          </div>
-        </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.created_at.strftime('%m/%d/%Y, %H:%M:%S') }}</div>
-          </div>
-        </td>
-        
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="text-base font-semibold">
-              <button type="button" data-target="{{report.json}}" class="report-inventory-view-btn inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-              {% include "icon/view.html" %}
-                View
-              </button>
-            </div>
-          </div>
-        </td>
-      </tr>
+      {% for report in inventory_reports %}
+        {% set loop_index = loop.index %}
+        {% for report_details in report.report_inventories %}
+          <tr class="table-inventory-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+            <td class="w-4 p-4">
+              <div class="flex items-center">{{ loop_index + page.skip }}</div>
+            </td>
+            <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+              <div class="pl-3">
+                <div class="text-base font-semibold">{{ report.type }}</div>
+              </div>
+            </td>
+            <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+              <div class="pl-3">
+                <div class="text-base font-semibold">{{ report.user.username }}</div>
+              </div>
+            </td>
+            <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+              <div class="pl-3">
+                <div class="text-base font-semibold">{{ report.created_at.strftime('%m/%d/%Y, %H:%M:%S') }}</div>
+              </div>
+            </td>
+            <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+              <div class="pl-3">
+                <div class="text-base font-semibold">{{ report_details.product.SKU }}</div>
+              </div>
+            </td>
+            <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+              <div class="pl-3">
+                <div class="text-base font-semibold">{{ report_details.qty_before }}</div>
+              </div>
+            </td>
+            <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+              <div class="pl-3">
+                <div class="text-base font-semibold">{{ report_details.qty_after }}</div>
+              </div>
+            </td>
+            <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+              <div class="pl-3">
+                <div class="text-base font-semibold">
+                  {% if report.warehouse %}
+                    {{ report.warehouse.name }}
+                  {% elif report.store %}
+                    {{ report.store.name }}
+                  {% else %}
+                    Internal action
+                  {% endif %}
+                </div>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
       {% endfor %}
     </tbody>
   </table>
