@@ -59,7 +59,7 @@ class ReportDataShipping(ReportData):
 
         if report_filter.target_group:
             where_stmt = m.ReportShipping.ship_request.has(
-                m.ShipRequest.carts.any(m.Cart.group == filter.target_group)
+                m.ShipRequest.carts.any(m.Cart.group == report_filter.target_group)
             )
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)
