@@ -1,80 +1,61 @@
 <div id="adjustment-table">
   <!-- hidden input query params -->
   <div>
-    <input
-      hidden
-      type="text"
-      name=""
-      id="adjustment-filter-params-input"
-      value="{{ filter_adjustments }}"
-    />
+    <input hidden type="text" name="" id="adjustment-filter-params-input" value="{{ filter_adjustments }}" />
   </div>
 
-  <table
-    class="w-full text-sm text-left text-gray-500 dark:text-gray-400"
-  >
-    <thead
-      class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
-    >
+  <table class="w-full overflow-x-auto text-sm text-left text-gray-500 dark:text-gray-400">
+    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
       <tr>
-        <th
-          scope="col"
-          class="px-6 py-3"
-        >
+        <th scope="col" class="px-6 py-3">
           #
         </th>
-        <th
-          scope="col"
-          class="px-6 py-3"
-        >
+        <th scope="col" class="px-6 py-3">
           Image
         </th>
-        <th
-          scope="col"
-          class="px-6 py-3"
-        >
+        <th scope="col" class="px-6 py-3">
           Product Name
         </th>
-        <th
-          scope="col"
-          class="px-6 py-3"
-        >
+        <th scope="col" class="px-6 py-3">
           SKU
         </th>
-        <th
-          scope="col"
-          class="px-6 py-3"
-        >
+        <th scope="col" class="px-6 py-3">
           User
         </th>
-        <th
-          scope="col"
-          class="px-6 py-3"
-        >
+        <th scope="col" class="px-6 py-3">
           Date
         </th>
-        <th
-          scope="col"
-          class="px-6 py-3"
-        >
-          Notes
+        <th scope="col" class="px-6 py-3">
+          Master<br>Group
         </th>
-        <th
-          scope="col"
-          class="px-6 py-3"
-        >
-          Actions
+        <th scope="col" class="px-6 py-3">
+          Group
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Warehouse
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Quantity<br>Before
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Quantity<br>After
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Notes
         </th>
       </tr>
     </thead>
     <tbody>
       {% for report in reports %}
+      {% set report_index = loop.index %}
+      {% for adjust in report.adjust_group_qty %}
       <!-- prettier-ignore -->
       <tr
         class="table-event-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
         <td class="w-4 p-4">
-          <div class="flex items-center">{{ loop.index + page.skip }}</div>
+          <div class="flex items-center">{{ report_index + page.skip }}</div>
         </td>
+        <!-- TODO: ask client about image -->
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
             {% if report.product.image|length > 100 %}
@@ -103,7 +84,32 @@
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.created_at.strftime('%m/%d/%Y, %H:%M:%S') }}</div>
+            <div class="text-base font-semibold">{{ report.created_at.strftime('%m/%d/%Y') }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ adjust.group.master_group.name }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ adjust.group.name }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ adjust.warehouse.name }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ adjust.quantity_before }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ adjust.quantity_after }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
@@ -111,18 +117,8 @@
             <div class="text-base font-semibold">{{ report.note if report.note else "-" }}</div>
           </div>
         </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="text-base font-semibold">
-              <button type="button" data-target="{{report.json}}"
-                class="report-adjustment-view-btn inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                {% include "icon/view.html" %}
-                View
-              </button>
-            </div>
-          </div>
-        </td>
       </tr>
+      {% endfor %}
       {% endfor %}
     </tbody>
   </table>
