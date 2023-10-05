@@ -275,7 +275,7 @@
     </div>
 
     <!-- From/To groups -->
-     <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800" id="group-from" >
+     <div class="flex hidden flex-wrap py-1 bg-white dark:bg-gray-800" id="group-from" >
       <!-- prettier-ignore -->
       <select 
         hx-trigger="change" 
@@ -285,7 +285,7 @@
         hx-include="[name='division'], [name='group_to'], [name='report_type'], [name='q'], [name='user'], [name='target_group'], [name='action_type_shipping'], [name='action_type_request_share'], [name='start_date'], [name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events'], [name='product-group']"
         hx-get="{{ url_for('report.search') }}" 
         hx-indicator="#report-table-spinner"
-        class="group-range hidden mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+        class="group-range mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
         <option selected value="">Group from</option>
         {% for group in groups %}
         <option value="{{ group.name }}">{{ group.name }}</option>
@@ -312,7 +312,7 @@
       </select>
     </div>
 
-    <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800" id="group-to">
+    <div class="flex hidden flex-wrap py-1 bg-white dark:bg-gray-800" id="group-to">
       <!-- prettier-ignore -->
       <select 
         hx-trigger="change" 
@@ -322,7 +322,7 @@
         hx-include="[name='division'], [name='report_type'], [name='q'], [name='target_group'], [name='user'], [name='action_type_shipping'], [name='action_type_request_share'], [name='start_date'], [name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events'], [name='product-group']"
         hx-get="{{ url_for('report.search') }}" 
         hx-indicator="#report-table-spinner"
-        class="group-range hidden mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+        class="group-range mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
         <option selected value="">Group to</option>
         {% for group in groups %}
         <option value="{{ group.name }}">{{ group.name }}</option>
