@@ -104,6 +104,10 @@ def accept():
     report_inventory_list.save(False)
 
     for allocated_product in products_info_json:
+        full_product_qty_received = 0
+        allocated_product_obj = db.session.get(
+            m.ProductAllocated, allocated_product.allocated_product_id
+        )
         for new_package_info in allocated_product.packages:
             product_quantity_group: m.ProductQuantityGroup = db.session.scalar(
                 m.ProductQuantityGroup.select().where(
@@ -142,6 +146,7 @@ def accept():
             product_quantity_group.quantity_received = (
                 new_package_info.quantity_received
             )
+            full_product_qty_received += new_package_info.quantity_received
 
             # update or create package info
             if product_quantity_group.package_info_id:
@@ -205,6 +210,9 @@ def accept():
                 status="Inbound order accepted",
                 warehouse_product=warehouse_product,
             ).save(False)
+
+        allocated_product_obj.quantity_received = full_product_qty_received
+        allocated_product_obj.save(False)
 
     inbound_order.status = s.InboundOrderStatus.delivered
     log(log.INFO, "Inbound order accepted. Inbound order: [%s]", inbound_order)
@@ -297,7 +305,7 @@ def sort():
         form_edit=form_edit,
         form_sort=form_sort,
         filtered=filtered,
-        inbound_orders_status=s.ShipRequestStatus,
+        inbound_orders_status=s.InboundOrderStatus,
     )
 
 

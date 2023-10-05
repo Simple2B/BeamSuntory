@@ -5,51 +5,30 @@
     <thead
       class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
     >
+      <!-- prettier-ignore -->
       <tr>
-        <th
-          scope="col"
-          class="px-6 py-3"
-        >
-          #
-        </th>
-        <th
-          scope="col"
-          class="px-6 py-3"
-        >
-          Action
-        </th>
-        <th
-          scope="col"
-          class="px-6 py-3"
-        >
-          User
-        </th>
-        <th
-          scope="col"
-          class="px-6 py-3"
-        >
-          History
-        </th>
-        <th
-          scope="col"
-          class="px-6 py-3"
-        >
-          Date
-        </th>
-        <th
-          scope="col"
-          class="px-6 py-3"
-        >
-          Actions
-        </th>
+        <th scope="col" class="px-6 py-3">#</th>
+        <th scope="col" class="px-6 py-3">Action</th>
+        <th scope="col" class="px-6 py-3">User</th>
+        <th scope="col" class="px-6 py-3">Date</th>
+        <th scope="col" class="px-6 py-3">Status</th>
+        <th scope="col" class="px-6 py-3">Store</th>
+        <th scope="col" class="px-6 py-3">SKU</th>
+        <th scope="col" class="px-6 py-3">Group</th>
+        <th scope="col" class="px-6 py-3">Quantity</th>
+        <!-- <th scope="col" class="px-6 py-3">Actions</th> -->
       </tr>
     </thead>
     <tbody>
       {% for report in reports %}
       <!-- prettier-ignore -->
+      {% set report_index = loop.index + page.skip%}
+      <!-- prettier-ignore -->
+      {% for cart in report.ship_request.carts %}
+      <!-- prettier-ignore -->
       <tr class="table-event-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
         <td class="w-4 p-4">
-          <div class="flex items-center">{{ loop.index + page.skip }}</div>
+          <div class="flex items-center">{{ report_index }}</div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
@@ -63,25 +42,47 @@
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.history }}</div>
+            <div class="text-base font-semibold">{{ report.created_at.strftime('%m/%d/%Y') }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.created_at.strftime('%m/%d/%Y, %H:%M:%S') }}</div>
+            <div class="text-base font-semibold">{{ report.ship_request.status.value }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.ship_request.store.store_name }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ cart.product.SKU }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ cart.group.name }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ cart.quantity }}</div>
+          </div>
+        </td>
+        <!-- <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
             <div class="text-base font-semibold">
               <button type="button" data-target="{{report.json}}" class="report-shipping-table-report-view-btn inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-              {% include "icon/view.html" %}
+              {# % include "icon/view.html" % #}
                 View
               </button>
             </div>
           </div>
-        </td>
+        </td> -->
       </tr>
+      <!-- prettier-ignore -->
+      {% endfor %}
       {% endfor %}
     </tbody>
   </table>

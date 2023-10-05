@@ -129,3 +129,17 @@ const addDateRangePicker = () => {
     const datepickerStart = new Datepicker(currentShelfLifeStart, {})
     const datepickerEnd = new Datepicker(currentShelfLifeEnd, {})
 }  
+
+// filter flow
+const filterButton = document.querySelector('#inbound-order-filter-button') as HTMLButtonElement;
+const orderFilterInputs = document.querySelectorAll('.inbound-order-filter-input');
+const hiddenInput = document.querySelector('#sort_by') as HTMLInputElement;
+
+filterButton.addEventListener('click', () => {
+    orderFilterInputs.forEach((input: HTMLInputElement) => {    
+        if (input.checked && input.nextElementSibling.textContent.trim()!='Default Value') {            
+            hiddenInput.value = input.nextElementSibling.textContent.trim();
+        }        
+    })
+})
+

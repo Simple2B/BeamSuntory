@@ -33,7 +33,6 @@ htmxLoader.onLoad('events-table', (target) => {
   const reportViewButtons: NodeListOf<HTMLButtonElement> = target.querySelectorAll('.report-event-view-btn');
     reportViewButtons.forEach((btn) => {
       btn.addEventListener('click', () => {
-        console.log('click');
         const reportEvent: IReportEvent = JSON.parse(btn.getAttribute('data-target'));
         const createAt = new Date(reportEvent.createdAt);
         const year = createAt.getFullYear();

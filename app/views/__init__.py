@@ -34,6 +34,7 @@ from .report_shipping import report_shipping_blueprint
 from .report_inbound_orders import report_inbound_orders_blueprint
 from .report import report_blueprint
 from .report_sku import report_sku_blueprint
+from .report_shelf_life import report_shelf_life_blueprint
 
 BLUEPRINTS = (
     main_blueprint,
@@ -71,4 +72,5 @@ BLUEPRINTS = (
     report_event_blueprint,
     report_blueprint,
     report_sku_blueprint,
+    report_shelf_life_blueprint,
 )

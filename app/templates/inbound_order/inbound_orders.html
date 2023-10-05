@@ -2,8 +2,76 @@
 {% extends 'base.html' %}
 {% from '_macros.html' import render_inbound_order %}
 {% block content %}
-<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-  <div class="flex items-center justify-center py-4 bg-white dark:bg-gray-800 flex-wrap gap-4">
+<div class="relative overflow-x-auto shadow-md sm:rounded-lg min-h-half">
+  <div class="flex items-center justify-center py-4 bg-white dark:bg-gray-800 flex-wrap gap-4"> 
+    <form id="inbound-order-filter-form" action="{{url_for('inbound_order.sort')}}" method="post"
+    class="flex flex-wrap py-4 gap-3 bg-white dark:bg-gray-800">
+    {{ form_sort.hidden_tag() }}
+    <input id="sort_by" hidden type="text" value="" name="sort_by"
+      class="inbound-order-filter-input w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+      <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800">
+      <div>
+        <button id="dropdownRadioButton-inbound-order-status"
+          data-dropdown-toggle="dropdownRadio-inbound-order-status"
+          class="inbound-order-filter-radio-button inline-flex items-center w-48 text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+          type="button">
+          {% if selected_status %}
+            {{ selected_status }}
+          {% else %}
+            Status
+          {% endif %}
+          <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 10 6">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="m1 1 4 4 4-4" />
+          </svg>
+        </button>
+        <!-- Dropdown menu -->
+        <div id="dropdownRadio-inbound-order-status"
+          class="z-10 hidden w-48 bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600"
+          data-popper-reference-hidden="" data-popper-escaped="" data-popper-placement="top"
+          style="position: absolute; inset: auto auto 0px 0px; margin: 0px; transform: translate3d(522.5px, 3847.5px, 0px);">
+          <ul class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownRadioButton">
+            <li>
+              <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">                             
+                <input id="inbound-order-filter-input-default-value-status" type="radio" value=""
+                  data-target="{{master_group_search_no_space, master_group_search_no_space }}" name="filter-radio"
+                  class="inbound-order-filter-input w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
+                  <label for="inbound-order-filter-input-default-value-status"
+                  class="w-full ml-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300 cursor-pointer">
+                  Default Value
+                </label>
+              </div>
+            </li>
+            {% for status in inbound_order_statuses %}
+            <li>
+              <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
+                <input id="inbound-order-filter-input-{{ status }}" type="radio" value="{{ status }}"
+                  class="inbound-order-filter-input w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
+                <label for="inbound-order-filter-input-{{ status }}"
+                  class="w-full ml-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300 cursor-pointer">
+                  {{ status.value }}
+                </label>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2 sm:space-x-3">
+      <button type="submit" id="inbound-order-filter-button" name="submit"
+        class="inline-flex items-center justify-center  px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-blue-300 sm:w-auto dark:bg-yellow-400 dark:hover:bg-yellow-500 dark:focus:ring-blue-800">
+        <svg class="w-3 h-3 mr-2 -ml-1" fill="currentColor" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd"
+            d="M137.4 41.4c12.5-12.5 32.8-12.5 45.3 0l128 128c9.2 9.2 11.9 22.9 6.9 34.9s-16.6 19.8-29.6 19.8H32c-12.9 0-24.6-7.8-29.6-19.8s-2.2-25.7 6.9-34.9l128-128zm0 429.3l-128-128c-9.2-9.2-11.9-22.9-6.9-34.9s16.6-19.8 29.6-19.8H288c12.9 0 24.6 7.8 29.6 19.8s2.2 25.7-6.9 34.9l-128 128c-12.5 12.5-32.8 12.5-45.3 0z"
+            clip-rule="evenodd">
+          </path>
+        </svg>
+        Filter
+      </button>
+    </div>
+  </form>
     <label for="table-search" class="sr-only">Search</label>
     <div class="relative">
       <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">

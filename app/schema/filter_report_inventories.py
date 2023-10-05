@@ -3,7 +3,7 @@ from pydantic import BaseModel, ConfigDict
 
 class FilterReportInventories(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-
+    # TODO make universal
     q: str | None = None
     username: str | None = None
     created_from: str | None = None
@@ -16,3 +16,4 @@ class FilterReportInventories(BaseModel):
     group_premises: str | None = None
     group_event: str | None = None
     report_type: str | None = None
+    expire_in: str | None = None

@@ -72,6 +72,8 @@ class ReportDataInboundOrders(ReportData):
 
         if master_groups.count(None) != len(master_groups):
             for group in master_groups:
+                if not group:
+                    continue
                 query = query.where(
                     m.ReportInboundOrder.inbound_order.has(
                         m.InboundOrder.products_allocated.any(

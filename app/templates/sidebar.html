@@ -365,27 +365,11 @@
       <!-- Reports -->
       <li>
         <!-- prettier-ignore -->
-        <a href="#"
-          class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dropdown-btn">
+        <a href="{{ url_for('report.index') }}"
+          class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
           {% include "icon/report.html" %}
           <span class="flex-1 ml-3 whitespace-nowrap">Reports</span>
-          <div class="dropdown-arrow">{% include "icon/right_arrow.html" %}</div>
         </a>
-        <div
-          class="dropdown-container dropdown-close"
-        >
-          <ul
-            class="text-white flex flex-col"
-          >
-            <li>
-              <!-- prettier-ignore -->
-              <a href="{{ url_for('report.index') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700" >                
-                {% include "icon/circle.html" %}
-                <span class="flex-1 ml-4 whitespace-nowrap">Reports all</span>
-              </a>
-            </li>
-          </ul>
-        </div>
       </li>
     </ul>
   </div>

@@ -40,7 +40,13 @@
         scope="col"
         class="px-6 py-3"
         >
-        Product
+        Product name
+        </th>
+        <th
+        scope="col"
+        class="px-6 py-3"
+        >
+        Product sku
         </th>
         <th
           scope="col"
@@ -76,7 +82,7 @@
                 <div class="text-base font-semibold">{{ report.type }}</div>
                 </div>
               </td>
-              <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+              <td scope="row" class="p-4 text-base font-normal text-gray-900 dark:text-white">
                 <div class="pl-3">
                   <div class="text-base font-semibold">{{ report.user.username }}</div>
                 </div>
@@ -91,7 +97,12 @@
                   <div class="text-base font-semibold" id="report-inbound-order-product">{{ product_allocated.product.name }}</div>
                 </div>
               </td>
-              <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+              <td scope="row" class="p-4 text-base font-normal text-gray-900 dark:text-white">
+                <div class="pl-3">
+                  <div class="text-base font-semibold" id="report-inbound-order-sku">{{ product_allocated.product.SKU }}</div>
+                </div>
+              </td>
+              <td scope="row" class="p-4 text-base font-normal text-gray-900 dark:text-white">
                 <div class="pl-3">
                   <div class="text-base font-semibold" id="report-inbound-order-group">{{ quantity_group.group.name }}</div>
                 </div>
@@ -119,7 +130,7 @@
               <div class="text-base font-semibold">{{ report.type }}</div>
               </div>
             </td>
-            <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+            <td scope="row" class="p-4 text-base font-normal text-gray-900 dark:text-white">
               <div class="pl-3">
                 <div class="text-base font-semibold">{{ report.user.username }}</div>
               </div>
@@ -132,6 +143,11 @@
             <td scope="row" class="p-4 text-base font-normal text-gray-900 dark:text-white">
               <div class="pl-3">
                 <div class="text-base font-semibold" id="report-inbound-order-product">{{ product_allocated.product.name }}</div>
+              </div>
+            </td>
+            <td scope="row" class="p-4 text-base font-normal text-gray-900 dark:text-white">
+              <div class="pl-3">
+                <div class="text-base font-semibold" id="report-inbound-order-product">{{ product_allocated.product.SKU }}</div>
               </div>
             </td>
             <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
