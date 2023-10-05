@@ -106,6 +106,7 @@ export interface IRequestShare {
   desireQuantity: number;
 
   product: IProduct;
+  fromGroup: IGroup;
   group: IGroup;
 }
 

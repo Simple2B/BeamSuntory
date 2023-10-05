@@ -23,10 +23,7 @@ class ReportDataShelfLife(ReportData):
 
         if report_filter.q:
             query = query.where(
-                m.ProductAllocated.shelf_life_start.ilike(f"%{report_filter.q}%")
-                | m.ProductAllocated.shelf_life_end.ilike(f"%{report_filter.q}%")
-                # | m.ProductAllocated.user.has(m.User.username.ilike(f"%{report_filter.q}%"))
-                | m.ProductAllocated.product.has(
+                m.ProductAllocated.product.has(
                     m.Product.name.ilike(f"%{report_filter.q}%")
                 )
                 | m.ProductAllocated.product.has(
@@ -35,10 +32,7 @@ class ReportDataShelfLife(ReportData):
             )
 
             count_query = count_query.where(
-                m.ProductAllocated.shelf_life_start.ilike(f"%{report_filter.q}%")
-                | m.ProductAllocated.shelf_life_end.ilike(f"%{report_filter.q}%")
-                # | m.ProductAllocated.user.has(m.User.username.ilike(f"%{report_filter.q}%"))
-                | m.ProductAllocated.product.has(
+                m.ProductAllocated.product.has(
                     m.Product.name.ilike(f"%{report_filter.q}%")
                 )
                 | m.ProductAllocated.product.has(

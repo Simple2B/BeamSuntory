@@ -91,6 +91,7 @@ export interface IRequestShare {
     status: string;
     desireQuantity: number;
     product: IProduct;
+    fromGroup: IGroup;
     group: IGroup;
 }
 export interface IReportRequestShare {
