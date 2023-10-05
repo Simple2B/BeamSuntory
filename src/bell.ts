@@ -8,13 +8,11 @@ async function getNotification() {
   });
   if (response.status == 200) {
     const userRequests = await response.json();
-    const bellContainer = document.getElementById(
-      'bell-notification-container',
-    );
+    const bellContainer = document.getElementById('bell-notification-container');
     userRequests.forEach((request: any) => {
       const notificationItem = document.createElement('div');
       notificationItem.classList.add('bell-notification-item');
-      const shareRequestLink = `/request_share/?q=${request.order_number}`
+      const shareRequestLink = `/request_share/?q=${request.order_number}`;
       notificationItem.innerHTML = `
         <a href="${shareRequestLink}" class="flex px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700">
           <div class="flex-shrink-0">
@@ -26,18 +24,14 @@ async function getNotification() {
             <div class="text-gray-500 text-sm mb-1.5 dark:text-gray-400">
               New
               <span class="font-semibold text-gray-900 dark:text-white">request share</span>: product - <span
-                class="font-semibold text-gray-900 dark:text-white">"${
-                  request.product_name
-                }"</span>,
+                class="font-semibold text-gray-900 dark:text-white">"${request.product_name}"</span>,
               SKU - <span class="font-semibold text-gray-900 dark:text-white">"${
                 request.SKU
               }"</span>, desired quantity -
               <span class="font-semibold text-gray-900 dark:text-white">"${
                 request.desire_quantity
               }"</span>, target_group - <span
-                class="font-semibold text-gray-900 dark:text-white">"${
-                  request.target_group
-                }"</span>
+                class="font-semibold text-gray-900 dark:text-white">"${request.target_group}"</span>
             </div>
             <div class="text-xs text-blue-600 dark:text-blue-500">
               ${getTimeFormat(request.created_at)}
@@ -46,23 +40,16 @@ async function getNotification() {
         </a>
       `;
 
-      const productImage: HTMLImageElement = notificationItem.querySelector(
-        '#bell-notification-product-image',
-      );
+      const productImage: HTMLImageElement = notificationItem.querySelector('#bell-notification-product-image');
 
       request.product_image.length > 100
         ? (productImage.src = `data:image/png;base64, ${request.product_image}`)
         : (productImage.src = defaultBrandImage);
 
-      const firstNotification = bellContainer.querySelector(
-        '.bell-notification-item',
-      );
+      const firstNotification = bellContainer.querySelector('.bell-notification-item');
 
       if (firstNotification) {
-        firstNotification.insertAdjacentElement(
-          'beforebegin',
-          notificationItem,
-        );
+        firstNotification.insertAdjacentElement('beforebegin', notificationItem);
       } else {
         bellContainer.appendChild(notificationItem);
       }
@@ -72,9 +59,7 @@ async function getNotification() {
 
 async function limitNotification() {
   await getNotification();
-  const bellNotificationItems = document.querySelectorAll(
-    '.bell-notification-item',
-  );
+  const bellNotificationItems = document.querySelectorAll('.bell-notification-item');
 
   if (bellNotificationItems.length > 8) {
     for (let i = 8; i < bellNotificationItems.length; i++) {
@@ -89,7 +74,6 @@ async function limitNotification() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('bell.ts');
   limitNotification();
 });
 
@@ -104,14 +88,9 @@ function getTimeFormat(created_at: string) {
       second: '2-digit',
     },
     formatted = new Date(date_str).toLocaleDateString('en-US', options),
-    date_parts = formatted
-      .substring(0, formatted.indexOf(','))
-      .split(' ')
-      .reverse()
-      .join(' ');
+    date_parts = formatted.substring(0, formatted.indexOf(',')).split(' ').reverse().join(' ');
 
-  const formatted_date =
-    date_parts + formatted.substr(formatted.indexOf(',') + 1);
+  const formatted_date = date_parts + formatted.substr(formatted.indexOf(',') + 1);
 
   return formatted_date;
 }

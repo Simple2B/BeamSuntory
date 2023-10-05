@@ -125,15 +125,17 @@ const generateCSVEvents = async (queryParams: URLSearchParams) => {
 };
 
 const generateCSVRequestShare = async (queryParams: URLSearchParams) => {
-  const csvData = ['action_type,user,created_at,current_share_request_status,group,desired_quantity,sku,product_name'];
+  const csvData = ['action_type,user,created_at,current_share_request_status,group_from,group_to,desired_quantity,sku,product_name'];
   await fetchReportAPI(queryParams, (data: IReportRequestShareResponse) => {
     data.reports.forEach((report) => {
+      console.log(report.requestShare)
       csvData.push(
         [
           report.type,
           report.user.username,
           report.createdAt,
           report.requestShare.status,
+          report.requestShare.fromGroup.name,
           report.requestShare.group.name,
           report.requestShare.desireQuantity,
           report.requestShare.product.SKU,

@@ -13,3 +13,4 @@ class RequestShare(BaseModel):
     status: str
     product: Product
     group: Group
+    from_group: Group = Field(alias="fromGroup")
