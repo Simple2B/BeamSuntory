@@ -10,7 +10,7 @@ from flask import (
 )
 from flask_login import login_required, current_user
 import sqlalchemy as sa
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import models as m, db
 
@@ -25,12 +25,24 @@ cart_blueprint = Blueprint("cart", __name__, url_prefix="/cart")
 
 @cart_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+        s.UserRole.MANAGER.value,
+    ]
+)
 def get_all():
     form = f.CartForm()
 
     q = request.args.get("q", type=str, default=None)
     # TODO what if couple users make carts simulteniously???
-    query = m.Cart.select().where(m.Cart.status == "pending").order_by(m.Cart.id)
+    query = (
+        m.Cart.select()
+        .where(m.Cart.status == "pending", m.Cart.user_id == current_user.id)
+        .order_by(m.Cart.id)
+    )
     count_query = sa.select(sa.func.count()).select_from(m.Cart)
     if q:
         query = (
@@ -165,6 +177,7 @@ def get_all():
 
 @cart_blueprint.route("/create", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.MANAGER.value])
 def create():
     form: f.NewCartForm = f.NewCartForm()
     url = request.referrer
@@ -199,6 +212,7 @@ def create():
 
 @cart_blueprint.route("/edit", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.MANAGER.value])
 def save():
     form: f.CartForm = f.CartForm()
     if form.validate_on_submit():
@@ -219,6 +233,7 @@ def save():
 
 @cart_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.MANAGER.value])
 def delete(id: int):
     c = db.session.scalar(m.Cart.select().where(m.Cart.id == id))
     if not c:

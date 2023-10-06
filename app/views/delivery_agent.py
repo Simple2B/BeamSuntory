@@ -8,9 +8,10 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import models as m, db
+from app import schema as s
 from app import forms as f
 from app.logger import log
 
@@ -22,6 +23,7 @@ delivery_agent_blueprint = Blueprint(
 
 @delivery_agent_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def get_all():
     form_create: f.NewDeliveryAgentForm = f.NewDeliveryAgentForm()
     form_edit: f.DeliveryAgentForm = f.DeliveryAgentForm()
@@ -65,6 +67,7 @@ def get_all():
 
 @delivery_agent_blueprint.route("/save", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def save():
     form: f.DeliveryAgentForm = f.DeliveryAgentForm()
     if form.validate_on_submit():
@@ -101,6 +104,7 @@ def save():
 
 @delivery_agent_blueprint.route("/create", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def create():
     form: f.NewDeliveryAgentForm = f.NewDeliveryAgentForm()
     if not form.validate_on_submit():
@@ -128,6 +132,7 @@ def create():
 
 @delivery_agent_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def delete(id: int):
     da = db.session.scalar(m.DeliveryAgent.select().where(m.DeliveryAgent.id == id))
     if not da:

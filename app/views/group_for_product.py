@@ -9,9 +9,10 @@ from flask import (
 from flask_login import login_required
 import sqlalchemy as sa
 from sqlalchemy.orm import aliased
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import models as m, db
+from app import schema as s
 from app import forms as f
 from app.logger import log
 
@@ -23,6 +24,7 @@ group_for_product_blueprint = Blueprint(
 
 @group_for_product_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def get_all():
     form_create: f.NewGroupProductForm = f.NewGroupProductForm()
     form_edit: f.GroupProductForm = f.GroupProductForm()
@@ -72,6 +74,7 @@ def get_all():
 
 @group_for_product_blueprint.route("/create", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def create():
     form: f.NewGroupProductForm = f.NewGroupProductForm()
     if form.validate_on_submit():
@@ -96,6 +99,7 @@ def create():
 
 @group_for_product_blueprint.route("/edit", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def save():
     form: f.GroupProductForm = f.GroupProductForm()
     if form.validate_on_submit():
@@ -125,6 +129,7 @@ def save():
 
 @group_for_product_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def delete(id: int):
     u = db.session.scalar(m.GroupProduct.select().where(m.GroupProduct.id == id))
     if not u:

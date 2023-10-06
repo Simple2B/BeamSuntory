@@ -6,7 +6,7 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import schema as s
 from app import models as m, db
@@ -99,6 +99,7 @@ def get_shipping_report():
 
 @report_shipping_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def index():
     divisions = db.session.scalars(m.Division.select())
     target_groups = db.session.scalars(m.Group.select())

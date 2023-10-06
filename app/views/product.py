@@ -17,7 +17,7 @@ from flask_login import login_required, current_user
 from flask_mail import Message
 from sqlalchemy.dialects.postgresql import insert
 import sqlalchemy as sa
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import models as m, db
 from app import schema as s
@@ -189,6 +189,15 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
 
 @product_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.DELIVERY_AGENT.value,
+    ]
+)
 def get_all():
     products_object = get_all_products(request)
     form_sort: f.SortByGroupProductForm = f.SortByGroupProductForm()
@@ -233,6 +242,7 @@ def get_all():
 
 @product_blueprint.route("/create", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def create():
     form: f.NewProductForm = f.NewProductForm()
     if form.validate_on_submit():
@@ -295,6 +305,7 @@ def create():
 
 @product_blueprint.route("/edit", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def save():
     form: f.ProductForm = f.ProductForm()
     if form.validate_on_submit():
@@ -388,6 +399,7 @@ def save():
 # TODO brainstorm
 @product_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def delete(id: int):
     product: m.Product = db.session.get(m.Product, id)
     if not product:
@@ -422,6 +434,15 @@ def delete(id: int):
 # TODO refactor
 @product_blueprint.route("/sort", methods=["GET", "POST"])
 @login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.DELIVERY_AGENT.value,
+    ]
+)
 def sort():
     if request.method == "GET":
         return redirect(url_for("product.get_all"))
@@ -524,6 +545,12 @@ def sort():
 
 @product_blueprint.route("/assign", methods=["POST"])
 @login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.MANAGER.value,
+    ]
+)
 def assign():
     form: f.AssignProductForm = f.AssignProductForm()
     if form.validate_on_submit():
@@ -631,6 +658,15 @@ def assign():
 
 @product_blueprint.route("/request_share", methods=["POST"])
 @login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.DELIVERY_AGENT.value,
+    ]
+)
 def request_share():
     form: f.RequestShareProductForm = f.RequestShareProductForm()
     if form.validate_on_submit():
@@ -730,6 +766,7 @@ def request_share():
 
 @product_blueprint.route("/adjust", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def adjust():
     form: f.AdjustProductForm = f.AdjustProductForm()
 
@@ -873,6 +910,7 @@ def adjust():
 
 @product_blueprint.route("/upload", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def upload():
     form: f.UploadProductForm = f.UploadProductForm()
     if form.validate_on_submit():
@@ -1052,6 +1090,15 @@ class DoNothingConflict:
 
 @product_blueprint.route("/stocks_owned_by_me", methods=["GET"])
 @login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.DELIVERY_AGENT.value,
+    ]
+)
 def stocks_owned_by_me():
     is_events = request.args.get("events", type=bool, default=False)
     if is_events:
@@ -1148,6 +1195,15 @@ def stocks_owned_by_me():
 
 @product_blueprint.route("/events_stocks_owned_by_me", methods=["GET"])
 @login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.DELIVERY_AGENT.value,
+    ]
+)
 def events_stocks_owned_by_me():
     is_events = request.args.get("events", type=bool, default=False)
     if is_events:
@@ -1249,6 +1305,15 @@ def events_stocks_owned_by_me():
 
 @product_blueprint.route("/full_image/<int:id>", methods=["GET"])
 @login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.DELIVERY_AGENT.value,
+    ]
+)
 def full_image(id: int):
     product: m.Product = db.session.execute(
         m.Product.select().where(m.Product.id == id)
@@ -1263,6 +1328,15 @@ def full_image(id: int):
 
 @product_blueprint.route("/get_additional_info/<int:product_id>", methods=["GET"])
 @login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.DELIVERY_AGENT.value,
+    ]
+)
 def get_additional_info(product_id):
     current_user_groups_rows = db.session.scalars(
         m.UserGroup.select().where(m.UserGroup.left_id == current_user.id)
@@ -1342,6 +1416,15 @@ def get_additional_info(product_id):
 
 @product_blueprint.route("/stocks_in_inventory", methods=["GET"])
 @login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.DELIVERY_AGENT.value,
+    ]
+)
 def stocks_in_inventory():
     curr_user_groups_ids = [
         i.right_id

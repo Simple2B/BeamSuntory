@@ -13,7 +13,7 @@ from flask_login import login_required, current_user
 from flask_mail import Message
 import sqlalchemy as sa
 from sqlalchemy.orm import aliased
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import schema as s
 
@@ -29,6 +29,7 @@ bp = Blueprint("user", __name__, url_prefix="/user")
 
 @bp.route("/", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def get_all():
     form_create: f.NewUserForm = f.NewUserForm()
     form_edit: f.UserForm = f.UserForm()
@@ -83,6 +84,7 @@ def get_all():
 
 @bp.route("/save", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def save():
     form = f.UserForm()
     if form.validate_on_submit():
@@ -154,6 +156,7 @@ def save():
 
 @bp.route("/create", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def create():
     form = f.NewUserForm()
     if not form.validate_on_submit():
@@ -254,6 +257,7 @@ def create():
 
 @bp.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def delete(id: int):
     u: m.User = db.session.scalar(m.User.select().where(m.User.id == id))
     if not u:
@@ -286,6 +290,15 @@ def delete(id: int):
 
 @bp.route("/notification", methods=["GET"])
 @login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.DELIVERY_AGENT.value,
+    ]
+)
 def notification():
     user_requests = []
     user_requests_ids = [

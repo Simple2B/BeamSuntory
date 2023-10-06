@@ -15,7 +15,7 @@ import sqlalchemy as sa
 from sqlalchemy import desc
 from pydantic import ValidationError
 
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import models as m, db
 from app import schema as s
@@ -30,6 +30,7 @@ inbound_order_blueprint = Blueprint(
 
 @inbound_order_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN])
 def get_all():
     form_create = f.InboundOrderUpdateForm()
     form_edit = f.InboundOrderUpdateForm()
@@ -100,6 +101,7 @@ def get_all():
 
 @inbound_order_blueprint.route("/create", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN])
 def create():
     form = f.InboundOrderCreateForm()
 
@@ -194,6 +196,7 @@ def create():
 
 @inbound_order_blueprint.route("/save", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN])
 def save():
     form = f.InboundOrderUpdateForm()
     if form.validate_on_submit():
@@ -413,6 +416,7 @@ def save():
 
 @inbound_order_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
+@role_required([s.UserRole.ADMIN])
 def delete(id: int):
     inbound_order: m.InboundOrder = db.session.get(m.InboundOrder, id)
 

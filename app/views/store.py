@@ -9,9 +9,10 @@ from flask import (
 from flask_login import login_required, current_user
 import sqlalchemy as sa
 from sqlalchemy.orm import aliased
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import models as m, db
+from app import schema as s
 from app import forms as f
 from app.logger import log
 
@@ -21,6 +22,9 @@ store_blueprint = Blueprint("store", __name__, url_prefix="/store")
 
 @store_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
+)
 def get_all():
     form_create: f.NewStoreForm = f.NewStoreForm()
     form_edit: f.StoreForm = f.StoreForm()
@@ -95,6 +99,9 @@ def get_all():
 
 @store_blueprint.route("/save", methods=["POST"])
 @login_required
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
+)
 def save():
     form: f.StoreForm = f.StoreForm()
     if form.validate_on_submit():
@@ -133,6 +140,9 @@ def save():
 
 @store_blueprint.route("/create", methods=["POST"])
 @login_required
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
+)
 def create():
     form: f.NewStoreForm = f.NewStoreForm()
     if form.validate_on_submit():
@@ -167,6 +177,9 @@ def create():
 
 @store_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
+)
 def delete(id: int):
     s = db.session.scalar(m.Store.select().where(m.Store.id == id))
     if not s:
@@ -184,6 +197,9 @@ def delete(id: int):
 
 @store_blueprint.route("/add-favorite", methods=["POST"])
 @login_required
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
+)
 def add_favorite():
     store_user_ids = request.json
     favorite_user_store: m.FavoriteStoreUser = db.session.execute(

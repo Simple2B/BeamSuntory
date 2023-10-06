@@ -8,9 +8,10 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import models as m, db
+from app import schema as s
 from app import forms as f
 from app.logger import log
 
@@ -20,6 +21,7 @@ supplier_blueprint = Blueprint("supplier", __name__, url_prefix="/supplier")
 
 @supplier_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def get_all():
     form_create: f.NewSupplierForm = f.NewSupplierForm()
     form_edit: f.SupplierForm = f.SupplierForm()
@@ -57,6 +59,7 @@ def get_all():
 
 @supplier_blueprint.route("/save", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def save():
     form: f.SupplierForm = f.SupplierForm()
     if form.validate_on_submit():
@@ -93,6 +96,7 @@ def save():
 
 @supplier_blueprint.route("/create", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def create():
     form: f.NewSupplierForm = f.NewSupplierForm()
     if not form.validate_on_submit():
@@ -122,6 +126,7 @@ def create():
 
 @supplier_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def delete(id: int):
     s = db.session.scalar(m.Supplier.select().where(m.Supplier.id == id))
     if not s:

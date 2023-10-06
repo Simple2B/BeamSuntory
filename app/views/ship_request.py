@@ -11,7 +11,7 @@ from flask_login import login_required, current_user
 import sqlalchemy as sa
 from sqlalchemy import desc
 from sqlalchemy.orm import aliased
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import schema as s
 from app import models as m, db
@@ -23,6 +23,9 @@ ship_request_blueprint = Blueprint("ship_request", __name__, url_prefix="/ship_r
 
 @ship_request_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
+)
 def get_all():
     # TODO: refactor or delete comments in queries
     form_create: f.NewShipRequestForm = f.NewShipRequestForm()
@@ -103,6 +106,7 @@ def get_all():
 
 @ship_request_blueprint.route("/create", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.MANAGER.value])
 def create():
     form_create: f.NewShipRequestForm = f.NewShipRequestForm()
     if not form_create.validate_on_submit():
@@ -260,6 +264,7 @@ def create():
 
 @ship_request_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def delete(id: int):
     ship_request: m.ShipRequest = db.session.scalar(
         m.ShipRequest.select().where(m.ShipRequest.id == id)

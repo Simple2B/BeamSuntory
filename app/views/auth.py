@@ -20,6 +20,7 @@ def login():
         log(log.INFO, "Form submitted. User: [%s]", user)
         if user:
             login_user(user)
+            app.jinja_env.globals["user_role"] = current_user.role_obj.role_name
             log(log.INFO, "Login successful.")
             flash("Login successful.", "success")
             return redirect(url_for("main.index"))

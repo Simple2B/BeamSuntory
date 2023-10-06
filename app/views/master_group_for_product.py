@@ -8,7 +8,7 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import models as m, db
 from app import schema as s
@@ -23,6 +23,7 @@ master_group_for_product_blueprint = Blueprint(
 
 @master_group_for_product_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def get_all():
     form_create: f.NewMasterGroupProductForm = f.NewMasterGroupProductForm()
     form_edit: f.MasterGroupProductForm = f.MasterGroupProductForm()
@@ -64,6 +65,7 @@ def get_all():
 
 @master_group_for_product_blueprint.route("/create", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def create():
     form: f.NewMasterGroupProductForm = f.NewMasterGroupProductForm()
     if form.validate_on_submit():
@@ -89,6 +91,7 @@ def create():
 
 @master_group_for_product_blueprint.route("/edit", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def save():
     form: f.MasterGroupProductForm = f.MasterGroupProductForm()
     if form.validate_on_submit():
@@ -117,6 +120,7 @@ def save():
 
 @master_group_for_product_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def delete(id: int):
     master_groups_mandatory = [group.value for group in s.ProductMasterGroupMandatory]
     master_group = db.session.get(m.MasterGroupProduct, id)

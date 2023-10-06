@@ -94,7 +94,8 @@ class User(db.Model, UserMixin, ModelMixin):
     phone_number: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=True)
 
     # Relations
-    role_obj: orm.Mapped[Division] = orm.relationship()
+    role_obj: orm.Mapped[Division] = orm.relationship(lazy="joined")
+    user_groups: orm.Mapped[list[Group]] = orm.relationship()
 
     @hybrid_property
     def password(self):

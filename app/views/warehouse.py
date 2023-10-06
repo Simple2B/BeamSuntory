@@ -8,7 +8,7 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import schema as s
 from app import models as m, db
@@ -21,6 +21,7 @@ warehouse_blueprint = Blueprint("warehouse", __name__, url_prefix="/warehouse")
 
 @warehouse_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def get_all():
     form_create: f.NewWarehouseForm = f.NewWarehouseForm()
     form_edit: f.WarehouseForm = f.WarehouseForm()
@@ -76,6 +77,7 @@ def get_all():
 
 @warehouse_blueprint.route("/create", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN, s.UserRole.WAREHOUSE_MANAGER.value])
 def create():
     form: f.NewWarehouseForm = f.NewWarehouseForm()
     if form.validate_on_submit():
@@ -123,6 +125,7 @@ def create():
 
 @warehouse_blueprint.route("/edit", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN, s.UserRole.WAREHOUSE_MANAGER.value])
 def save():
     form = f.WarehouseForm()
     if form.validate_on_submit():
@@ -176,6 +179,7 @@ def save():
 
 @warehouse_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
+@role_required([s.UserRole.ADMIN, s.UserRole.WAREHOUSE_MANAGER.value])
 def delete(id: int):
     warehouse: m.Warehouse = db.session.get(m.Warehouse, id)
     if not warehouse:

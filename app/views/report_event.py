@@ -6,7 +6,7 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import schema as s
 from app import models as m, db
@@ -119,6 +119,7 @@ def get_events_report():
 
 @report_event_blueprint.route("/event", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def events():
     users = db.session.scalars(sa.select(m.User))
 
@@ -130,6 +131,7 @@ def events():
 
 @report_event_blueprint.route("event/search")
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def search_report_events():
     pagination, reports = get_events_report()
 
