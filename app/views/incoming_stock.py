@@ -212,6 +212,7 @@ def accept():
             ).save(False)
 
         allocated_product_obj.quantity_received = full_product_qty_received
+        allocated_product_obj.quantity_remains = full_product_qty_received
         allocated_product_obj.save(False)
 
     inbound_order.status = s.InboundOrderStatus.delivered
