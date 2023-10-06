@@ -16,19 +16,13 @@
           scope="col"
           class="px-6 py-3"
         >
-          Action
-        </th>
-        <th
-          scope="col"
-          class="px-6 py-3"
-        >
           User
         </th>
         <th
           scope="col"
           class="px-6 py-3"
         >
-          Date
+          Created at
         </th>
         <th
           scope="col"
@@ -36,6 +30,18 @@
         >
           Store
         </th>
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
+          Date from
+        </th>
+        <th
+        scope="col"
+        class="px-6 py-3"
+      >
+        Date to
+      </th>
         <th
           scope="col"
           class="px-6 py-3"
@@ -63,11 +69,6 @@
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.type }}</div>
-          </div>
-        </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
             <div class="text-base font-semibold">{{ report.user.username }}</div>
           </div>
         </td>
@@ -80,6 +81,18 @@
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
             <div class="text-base font-semibold">{{report.ship_request.store.store_name}} </div>
+          </div>
+        </td>
+
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{cart.event.date_from.strftime('%m/%d/%Y')}} </div>
+          </div>
+        </td>
+        
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{cart.event.date_from.strftime('%m/%d/%Y')}} </div>
           </div>
         </td>
 
