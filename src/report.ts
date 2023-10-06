@@ -229,10 +229,14 @@ const generateCSVAdjustments = async (queryParams: URLSearchParams) => {
 const generateCSVInboundOrder = async (queryParams: URLSearchParams) => {
   const csvData = ['created_at,username,type,order_title,allocated_product,sku,group,quantity'];
   await fetchReportAPI(queryParams, (data: IReportInboundOrderResponse) => {
+    const searchingGroup = queryParams.get('product_group');
     data.reports.forEach((report) => {
       report.inboundOrder.productsAllocated.forEach((productsAllocated) => {
         productsAllocated.productQuantityGroups.forEach((productQuantityGroup) => {
           if (searchSKUInput.value && !productsAllocated.product.SKU.includes(searchSKUInput.value) ){
+            return;
+          }
+          if (searchingGroup && !productQuantityGroup.group.name.includes(searchingGroup)) {
             return;
           }
           csvData.push(
@@ -396,6 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const tableLoader = document.getElementById('table-report-loader') as HTMLButtonElement;
   const clearFiltersButton = document.getElementById('filter-clear-button') as HTMLButtonElement;
   const searchQueryHTML = document.getElementById('search-query') as HTMLInputElement;
+  const searchSkuHTML = document.getElementById('search-sku') as HTMLInputElement;
   const downloadCSVButton = document.getElementById('button-csv-download') as HTMLButtonElement;
 
   for (const [reportType, filters] of Object.entries(filtersMap)) {
@@ -419,6 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
       input.value = '';
     });
     searchQueryHTML.value = '';
+    searchSkuHTML.value = '';
     tableLoader.click();
   });
   // Download csv button
