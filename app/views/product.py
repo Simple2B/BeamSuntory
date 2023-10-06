@@ -2,6 +2,8 @@ from io import BytesIO
 import base64
 import json
 from datetime import datetime
+from pathlib import Path
+from PIL import Image
 import pandas
 from flask import (
     Blueprint,
@@ -244,8 +246,6 @@ def create():
 
         supplier: m.Supplier = db.session.scalar(m.Supplier.select())
 
-        # TODO: use this original image in the future
-        # image = request.files["image"]
         low_image = request.files["low_image"]
         low_image_string = base64.b64encode(low_image.read()).decode()
         product: m.Product = m.Product(
@@ -900,6 +900,14 @@ def upload():
 
         conn = db.get_engine()
 
+        df_img = pandas.read_csv(
+            Path("app") / "static" / "img" / "item_image.csv",
+            usecols=[
+                "SKU",
+                "Image",
+            ],
+        )
+
         new_groups = []
 
         # NOTE write master groups and stock groups to DB
@@ -931,7 +939,6 @@ def upload():
                 con=conn,
                 if_exists="append",
                 index=False,
-                # method="multi",
                 method=do_nothing_conflict_name.insert_do_nothing_on_conflicts,
             )
 
@@ -948,11 +955,29 @@ def upload():
         )
         file_io.seek(0)
         df = df.drop_duplicates()
-        df["image"] = ""
         df["Description"] = df["Description"].fillna("")
         df["SKU"] = df["SKU"].fillna("")
         df["Regular Price"] = df["Regular Price"].fillna(0)
         df["Retail Price"] = df["Retail Price"].fillna(0)
+
+        df = pandas.merge(df, df_img, on="SKU", how="inner")
+        for image_name in df["Image"]:
+            try:
+                if not isinstance(image_name, str):
+                    raise FileNotFoundError
+                original_image = Image.open(
+                    Path("app") / "static" / "img" / "product" / image_name
+                ).resize((400, 400))
+            except FileNotFoundError:
+                original_image = Image.open(
+                    Path("app") / "static" / "img" / "product" / " 2 Glasses_12387.jpg"
+                ).resize((400, 400))
+            with BytesIO() as png_bytes:
+                original_image.save(png_bytes, format="PNG")
+                png_bytes.seek(0)
+                img_bytes = base64.b64encode(png_bytes.read()).decode()
+
+            df["Image"] = df["Image"].replace(image_name, img_bytes)
 
         df.rename(
             columns=dict(
