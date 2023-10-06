@@ -3078,6 +3078,10 @@ input:checked + .toggle-bg {
   padding-top: 5rem;
 }
 
+.pt-4 {
+  padding-top: 1rem;
+}
+
 .pt-5 {
   padding-top: 1.25rem;
 }

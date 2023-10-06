@@ -16,9 +16,23 @@
   <!-- From -> TO calendars -->
   <!-- prettier-ignore -->
   <div class="flex items-center gap-3 p-3 flex-wrap">
+    <div class="flex gap-4 items-center justify-start pt-4 bg-white dark:bg-gray-800 px-4">
+      <button type="button" id="filter-clear-button" class=" px-3 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">{% include "icon/mop.html" %}Clear filters</button>
+    </div>
+    <!-- prettier-ignore -->
+    <div class="flex gap-4 items-center justify-start pt-4 bg-white dark:bg-gray-800 px-4">
+      <div class="flex w-full justify-end">
+      <button type="button" id="button-csv-download" class=" px-3 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+        {% include "icon/download.html" %}
+        &nbsp Download CSV
+      </button>  
+    </div>
+  </div>
+
+  <div class="flex items-center gap-3 px-3 flex-wrap">
     <!-- search bar -->
     <!-- prettier-ignore -->
-    <div class="flex gap-4 items-center justify-start py-4 bg-white dark:bg-gray-800 px-4">
+    <div class="flex gap-4 items-center justify-start py-4 bg-white dark:bg-gray-800 ">
       <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800">
       <select
         name="report_type"
@@ -204,17 +218,7 @@
       />
     </div>
     <!-- prettier-ignore -->
-    <div class="flex gap-4 items-center justify-start py-4 bg-white dark:bg-gray-800 px-4">
-      <button type="button" id="filter-clear-button" class=" px-3 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">{% include "icon/mop.html" %}Clear filters</button>
-    </div>
-    <!-- prettier-ignore -->
-    <div class="flex gap-4 items-center justify-start py-4 bg-white dark:bg-gray-800 px-4">
-      <div class="flex w-full justify-end">
-      <button type="button" id="button-csv-download" class=" px-3 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-        {% include "icon/download.html" %}
-        &nbsp Download CSV
-      </button>  
-    </div>
+
     </div>
   </div>
 
