@@ -68,6 +68,7 @@
       <!-- prettier-ignore -->
       {% for product_allocated in report.inbound_order.products_allocated if not request.args.get('search_sku') or request.args.get('search_sku') in product_allocated.product.SKU %}
           {% for quantity_group in product_allocated.product_quantity_groups %}
+            {% if not request.args.get('product_group') or request.args.get('product_group') == quantity_group.group.name %}
       <!-- prettier-ignore -->
       <tr class="table-event-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
               <td class="w-4 p-4">
@@ -114,6 +115,7 @@
                 </div>
               </td>       
             </tr>
+            {% endif %}     
       {% endfor %} {% if
       product_allocated.product_quantity_groups|length==0
       %}
