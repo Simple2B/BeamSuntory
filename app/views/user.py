@@ -179,6 +179,22 @@ def create():
             phone_number=form.phone_number.data,
         )
 
+        if (
+            current_user.role_obj.role_name == s.UserRole.WAREHOUSE_MANAGER.value
+            and user.role_obj.role_name != s.UserRole.WAREHOUSE_MANAGER.value
+        ):
+            log(
+                log.ERROR,
+                "Warehouse manager can not create user with role: [%s]",
+                user.role_obj.role_name,
+            )
+            flash(
+                "Warehouse manager can not create user with role: [%s]"
+                % user.role_obj.role_name,
+                "danger",
+            )
+            return redirect(url_for("user.get_all"))
+
         user.save()
         sales_rep_role_id = (
             db.session.execute(

@@ -265,6 +265,8 @@
           </ul>
         </div>
       </li>
+      {% endif %}
+      {% if user_role in admin_warehouse_roles %}
       <li>
         <!-- prettier-ignore -->
         <a href="#"
@@ -275,6 +277,7 @@
         </a>
         <div class="dropdown-container dropdown-close">
           <ul class="text-white flex flex-col">
+            {% if user_role in admin_roles %}
             <li>
               <!-- prettier-ignore -->
               <a href="{{ url_for('division.get_all') }}"
@@ -283,6 +286,8 @@
                 <span class="flex-1 ml-4 whitespace-nowrap">All Roles/Division</span>
               </a>
             </li>
+            {% endif %}
+            {% if user_role in admin_warehouse_roles %}
             <li>
               <!-- prettier-ignore -->
               <a href="{{ url_for('user.get_all') }}"
@@ -291,9 +296,12 @@
                 <span class="flex-1 ml-4 whitespace-nowrap">All Users</span>
               </a>
             </li>
+            {% endif %}
           </ul>
         </div>
       </li>
+      {% endif %}
+      {% if user_role in admin_roles %}
       <li>
         <!-- prettier-ignore -->
         <a href="#"

@@ -95,7 +95,10 @@ class User(db.Model, UserMixin, ModelMixin):
 
     # Relations
     role_obj: orm.Mapped[Division] = orm.relationship(lazy="joined")
-    user_groups: orm.Mapped[list[Group]] = orm.relationship()
+    # TODO: add separate table for user groups
+    user_groups: orm.Mapped[list[Group]] = orm.relationship(
+        secondary=UserGroup.__table__
+    )
 
     @hybrid_property
     def password(self):
