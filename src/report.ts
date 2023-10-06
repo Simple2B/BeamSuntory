@@ -400,6 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const tableLoader = document.getElementById('table-report-loader') as HTMLButtonElement;
   const clearFiltersButton = document.getElementById('filter-clear-button') as HTMLButtonElement;
   const searchQueryHTML = document.getElementById('search-query') as HTMLInputElement;
+  const searchSkuHTML = document.getElementById('search-sku') as HTMLInputElement;
   const downloadCSVButton = document.getElementById('button-csv-download') as HTMLButtonElement;
 
   for (const [reportType, filters] of Object.entries(filtersMap)) {
@@ -423,6 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
       input.value = '';
     });
     searchQueryHTML.value = '';
+    searchSkuHTML.value = '';
     tableLoader.click();
   });
   // Download csv button
