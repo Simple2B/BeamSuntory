@@ -1929,10 +1929,11 @@ document.querySelector('#product-assign-master-group').addEventListener('change'
 });
 
 // ---image compressor----
-document.getElementById('product-add-image').addEventListener('change', async (e) => {
+async function imageCompressor(action: string, element: Event) {
   const desiredImageSize = 300 * 1024;
-  const lowImageInput = document.querySelector<HTMLInputElement>('#product-add-low-image');
-  const initialImage = (e.target as HTMLInputElement).files[0];
+  const lowImageInput = document.querySelector<HTMLInputElement>(`#product-${action}-low-image`);
+  const highImageInput = document.querySelector<HTMLInputElement>(`#product-${action}-high-image`);
+  const initialImage = (element.target as HTMLInputElement).files[0];
 
   if (initialImage.size > desiredImageSize) {
     const compressedImage = await compressImage(initialImage);
@@ -1944,6 +1945,7 @@ document.getElementById('product-add-image').addEventListener('change', async (e
   } else {
     lowImageInput.files = setFileInput(initialImage);
   }
+  highImageInput.files = setFileInput(initialImage);
 
   async function compressImage(file: File) {
     const maxFileSize = desiredImageSize;
@@ -1997,6 +1999,13 @@ document.getElementById('product-add-image').addEventListener('change', async (e
     fileList.items.add(file);
     return fileList.files;
   }
+}
+
+document.getElementById('product-add-image').addEventListener('change', (e) => {
+  imageCompressor('add', e);
+});
+document.getElementById('product-edit-image').addEventListener('change', (e) => {
+  imageCompressor('edit', e);
 });
 
 // productBookingButtons.forEach((button) =>

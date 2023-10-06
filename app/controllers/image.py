@@ -8,7 +8,7 @@ from app import models as m
 BASE_IMAGE_PATH = Path("app/static/img/")
 
 
-def save_image(image: BytesIO, path: str):
+def save_image(image: BytesIO, path: str, image_model: m.Image = None):
     """Save image to disk and return the image obj."""
     kind = filetype.guess(image)
     if kind is None:
@@ -22,8 +22,14 @@ def save_image(image: BytesIO, path: str):
     with open(BASE_IMAGE_PATH / file_path, "wb") as f:
         f.write(image.read())
 
-    return m.Image(
-        name=path.split("/")[-1],
-        path=f"{path}.{kind.extension}",
-        extension=kind.extension,
-    )
+    image_path = f"{path}.{kind.extension}"
+    image_extension = kind.extension
+
+    if not image_model:
+        return m.Image(
+            name=path.split("/")[-1],
+            path=image_path,
+            extension=image_extension,
+        )
+
+    return image_path, image_extension

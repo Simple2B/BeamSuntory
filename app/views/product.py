@@ -279,7 +279,9 @@ def create():
         log(log.INFO, "Form submitted. Product: [%s]", product)
         product.save()
 
-        file_image = save_image(low_image, f"products/{form.SKU.data}")
+        file_image = save_image(
+            request.files["high_image"], f"products/{form.SKU.data}"
+        )
         file_image.save(False)
 
         product_master_groups_ids = json.loads(form.product_groups.data)
@@ -310,7 +312,7 @@ def save():
 
         supplier: m.Supplier = db.session.scalar(m.Supplier.select())
 
-        image = request.files["image"]
+        image = request.files["low_image"]
         image_string = base64.b64encode(image.read()).decode()
         u.name = str(form.name.data).strip(" ")
         u.supplier_id = form.supplier.data if form.supplier.data else supplier.id
@@ -345,6 +347,18 @@ def save():
         u.length = form.length.data if form.length.data else 0
         u.width = form.width.data if form.width.data else 0
         u.height = form.height.data if form.height.data else 0
+
+        if u.image_obj:
+            image_path, image_extension = save_image(
+                request.files["high_image"], f"products/{form.SKU.data}", u.image_obj
+            )
+            u.image_obj.path = image_path
+            u.image_obj.extension = image_extension
+        else:
+            file_image = save_image(
+                request.files["high_image"], f"products/{form.SKU.data}"
+            )
+            file_image.save(False)
         u.save()
 
         product_master_groups_ids = json.loads(form.product_groups.data)
