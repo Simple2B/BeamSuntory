@@ -10,6 +10,7 @@ from .utils import ModelMixin
 from .product_group import ProductGroup
 from .warehouse_product import WarehouseProduct
 from .warehouse import Warehouse
+from .image import Image
 
 if TYPE_CHECKING:
     from .supplier import Supplier
@@ -24,6 +25,9 @@ class Product(db.Model, ModelMixin):
     supplier_id: orm.Mapped[str] = orm.mapped_column(
         sa.ForeignKey("suppliers.id"), nullable=True
     )  # NOTE vendor = supplier
+    image_id: orm.Mapped[str] = orm.mapped_column(
+        sa.ForeignKey("images.id"), nullable=True
+    )
 
     # Columns
     name: orm.Mapped[str] = orm.mapped_column(
@@ -60,6 +64,7 @@ class Product(db.Model, ModelMixin):
     height: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
 
     # Relationships
+    image_obj: orm.Mapped["Image"] = orm.relationship()
     supplier: orm.Mapped["Supplier"] = orm.relationship()
     warehouse_products: orm.Mapped[list[WarehouseProduct]] = orm.relationship(
         viewonly=True

@@ -18,6 +18,8 @@ class ProductAllocated(db.Model, ModelMixin):
     product: orm.Mapped[Product] = orm.relationship()
     quantity: orm.Mapped[int] = orm.mapped_column()
     quantity_received: orm.Mapped[int] = orm.mapped_column(nullable=True)
+    # TODO add another field to deplete from??
+    # quantity_deplete: orm.Mapped[int] = orm.mapped_column(nullable=True)
     inbound_order_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("inbound_orders.id", ondelete="CASCADE")
     )

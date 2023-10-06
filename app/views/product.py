@@ -17,7 +17,7 @@ from flask_login import login_required, current_user
 from flask_mail import Message
 from sqlalchemy.dialects.postgresql import insert
 import sqlalchemy as sa
-from app.controllers import create_pagination
+from app.controllers import create_pagination, save_image
 
 from app import models as m, db
 from app import schema as s
@@ -279,11 +279,15 @@ def create():
         log(log.INFO, "Form submitted. Product: [%s]", product)
         product.save()
 
+        file_image = save_image(low_image, f"products/{form.SKU.data}")
+        file_image.save(False)
+
         product_master_groups_ids = json.loads(form.product_groups.data)
 
         for group_id in product_master_groups_ids:
             product_group = m.ProductGroup(product_id=product.id, group_id=group_id)
-            product_group.save()
+            product_group.save(False)
+        db.session.commit()
 
         flash("Product added!", "success")
         return redirect(url_for("product.get_all"))
