@@ -5,7 +5,7 @@ import filetype
 from app import models as m
 
 
-BASE_IMAGE_PATH = Path("app/static/img/")
+BASE_IMAGE_PATH = Path("app/static/img/products/")
 
 
 def save_image(image: BytesIO, path: str, image_model: m.Image = None):

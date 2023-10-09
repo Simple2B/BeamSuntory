@@ -970,7 +970,7 @@ def upload():
                 ).resize((400, 400))
             except FileNotFoundError:
                 original_image = Image.open(
-                    Path("app") / "static" / "img" / "product" / " 2 Glasses_12387.jpg"
+                    Path("app") / "static" / "img" / "logo-mini.png"
                 ).resize((400, 400))
             with BytesIO() as png_bytes:
                 original_image.save(png_bytes, format="PNG")
