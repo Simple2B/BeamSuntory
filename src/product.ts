@@ -1064,6 +1064,9 @@ function booking(product: IProduct, group: string) {
             const span = dayContainerShadow.querySelector('.day-price') ?? document.createElement('span');
             span.className = 'day-price';
             span.innerHTML = quantity.toString();
+            if(quantity <= 0) {
+              dayContainerShadow.classList.add('locked');
+            }
             dayContainerShadow.append(span);
           });
         });
