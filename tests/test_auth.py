@@ -1,5 +1,5 @@
 from app import mail
-from app import models as m
+from app import models as m, schema as s
 from app import db
 from tests.utils import register, login, logout
 
@@ -26,11 +26,15 @@ def test_forgot(client):
     )
     assert b"No registered user with this e-mail" in response.data
 
+    role_admin = db.session.scalar(
+        m.Division.select().where(m.Division.role_name == s.UserRole.ADMIN.value)
+    )
+
     user = m.User(
         username="sam",
         email=TEST_EMAIL,
         password="password",
-        role="MANAGER",
+        role_obj=role_admin,
         activated=True,
         approval_permission=True,
         street_address="street",
@@ -58,6 +62,7 @@ def test_forgot(client):
         user: m.User = db.session.scalar(
             m.User.select().where(m.User.email == TEST_EMAIL)
         )
+
         assert user
 
         assert len(outbox) == 1

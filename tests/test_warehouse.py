@@ -76,13 +76,11 @@ def test_delete_warehouse(mg_g_populate: FlaskClient):
 
 def test_edit_warehouse(mg_g_populate: FlaskClient):
     login(mg_g_populate)
-    role_sales = db.session.execute(
+    role_sales = db.session.scalar(
         m.Division.select().where(m.Division.role_name == s.UserRole.SALES_REP.value)
-    ).scalar()
+    )
     register("samm", "samm@test.com", role=role_sales)
-    cur_user = db.session.execute(
-        m.User.select().where(m.User.role == role_sales.id)
-    ).scalar()
+    cur_user = db.session.scalar(m.User.select().where(m.User.role_obj == role_sales))
     response = mg_g_populate.post(
         "/warehouse/edit",
         data=dict(

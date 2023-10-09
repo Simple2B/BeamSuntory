@@ -31,7 +31,9 @@ def role_required(required_role, hasApprovalPermission=False):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            # TODO: Implement check for user approval permission
+            if not current_user:
+                log(log.ERROR, "User is not authenticated")
+                abort(401)
             if current_user.role_obj.role_name not in required_role:
                 log(
                     log.ERROR,
