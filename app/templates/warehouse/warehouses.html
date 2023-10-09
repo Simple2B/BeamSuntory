@@ -176,7 +176,6 @@
           </svg>
         </a>
       </li>
-      {% if user_role.role in ["admin"]%}
       <li>
         <!-- prettier-ignore -->
         <a href="{{ url_for('warehouse.get_all') }}?page={{page.pages}}&q={{page.query}}"
@@ -193,7 +192,6 @@
           </svg>
         </a>
       </li>
-      {% endif %}
     </ul>
   </nav>
 </div>

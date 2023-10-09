@@ -102,7 +102,6 @@ def get_all():
         ship_requests=ship_requests,
         current_order_carts=current_order_carts,
         page=pagination,
-        # search_query=q,
         form_create=form_create,
         form_edit=form_edit,
         warehouses=warehouses,
