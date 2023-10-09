@@ -14,6 +14,23 @@ services:
       PGPASSWORD: ${POSTGRES_PASSWORD:-passwd}
       PGUSER: ${POSTGRES_USER:-postgres}
 
+  backup:
+    image: simple2b/pg-backup
+    links:
+      - db
+    volumes:
+      - ./backup:/backup
+    environment:
+      SCHEDULE_HOUR: ${SCHEDULE_HOUR:-0}
+      SCHEDULE_MINUTE: ${SCHEDULE_MINUTE:-0}
+      SCHEDULE_SECOND: ${SCHEDULE_SECOND:-0}
+      POSTGRES_HOST: db
+      POSTGRES_DATABASE: db
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-passwd}
+      POSTGRES_EXTRA_OPTS: '--schema=public --blobs'
+      DAYS_HISTORY: 30
+
   app:
     image: simple2b/beam-suntory-app:latest
     restart: always
@@ -26,7 +43,6 @@ services:
         - "traefik.http.routers.beamsuntory_app.rule=Host(`beam.jlidistribution.com`)"
         - "traefik.http.routers.beamsuntory_app.tls=true"
         - "traefik.http.routers.beamsuntory_app.tls.certresolver=myresolver"
-
 
 networks:
   default:
