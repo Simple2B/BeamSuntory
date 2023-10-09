@@ -177,7 +177,9 @@ def get_all():
 
 @cart_blueprint.route("/create", methods=["POST"])
 @login_required
-@role_required([s.UserRole.ADMIN.value, s.UserRole.MANAGER.value])
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
+)
 def create():
     form: f.NewCartForm = f.NewCartForm()
     url = request.referrer

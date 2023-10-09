@@ -18,7 +18,7 @@ from .product_allocated import (
     ReportShelfLifeResponse,
     ReportShelfLifeList,
 )
-from .ship_request import ShipRequest, ShipRequestStatus
+from .ship_request import ShipRequest, ShipRequestStatus, FilterShipRequest
 from .store import Store
 from .supplier import Supplier
 from .property import Property

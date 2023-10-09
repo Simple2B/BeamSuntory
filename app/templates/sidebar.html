@@ -72,22 +72,6 @@
                 <span class="flex-1 ml-4 whitespace-nowrap">All Products</span>
               </a>
             </li>
-            <li>
-              <!-- prettier-ignore -->
-              <a href="#"
-                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
-                {% include "icon/circle.html" %}
-                <span class="flex-1 ml-4 whitespace-nowrap">Product Categories</span>
-              </a>
-            </li>
-            <li>
-              <!-- prettier-ignore -->
-              <a href="#"
-                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
-                {% include "icon/circle.html" %}
-                <span class="flex-1 ml-4 whitespace-nowrap">Attributes</span>
-              </a>
-            </li>
             {% if user_role in admin_roles %}
             <li>
               <!-- prettier-ignore -->
@@ -98,6 +82,7 @@
               </a>
             </li>
             {% endif %}
+            {% if user_role in admin_warehouse_roles %}
             <li>
               <!-- prettier-ignore -->
               <a href="{{ url_for('event.get_all') }}"
@@ -106,6 +91,7 @@
                 <span class="flex-1 ml-4 whitespace-nowrap">Event products</span>
               </a>
             </li>
+            {% endif %}
           </ul>
         </div>
       </li>
@@ -142,7 +128,7 @@
         </div>
       </li>
       {% endif %}
-      {% if user_role in admin_warehouse_manager_roles %}
+      {% if user_role in admin_manager_roles %}
       <li>
         <!-- prettier-ignore -->
         <a href="#"

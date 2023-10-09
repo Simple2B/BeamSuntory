@@ -10,7 +10,6 @@ from flask import (
 from flask_login import login_required, current_user
 import sqlalchemy as sa
 from sqlalchemy import desc
-from sqlalchemy.orm import aliased
 from app.controllers import create_pagination, role_required
 
 from app import schema as s
@@ -21,51 +20,46 @@ from app.logger import log
 ship_request_blueprint = Blueprint("ship_request", __name__, url_prefix="/ship_request")
 
 
-@ship_request_blueprint.route("/", methods=["GET"])
-@login_required
-@role_required(
-    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
-)
-def get_all():
-    # TODO: refactor or delete comments in queries
-    form_create: f.NewShipRequestForm = f.NewShipRequestForm()
-    form_edit: f.ShipRequestForm = f.ShipRequestForm()
-
-    store_category = aliased(m.StoreCategory)
-    store = aliased(m.Store)
-    q = request.args.get("q", type=str, default=None)
+def get_ship_request():
+    filter_ship_request = s.FilterShipRequest.model_validate(dict(request.args))
     query = m.ShipRequest.select().order_by(desc(m.ShipRequest.id))
     count_query = sa.select(sa.func.count()).select_from(m.ShipRequest)
-    if q:
+    if filter_ship_request.q:
         query = (
             m.ShipRequest.select()
-            .join(store, m.ShipRequest.store_id == store.id)
-            .join(
-                store_category,
-                m.ShipRequest.store_category_id == store_category.id,
-            )
             .where(
-                m.ShipRequest.order_numb.ilike(f"%{q}%")
-                | m.ShipRequest.order_type.ilike(f"%{q}%")
-                | store_category.name.ilike(f"%{q}%")
-                | store.store_name.ilike(f"%{q}%")
+                m.ShipRequest.order_numb.ilike(f"%{filter_ship_request.q}%")
+                | m.ShipRequest.order_type.ilike(f"%{filter_ship_request.q}%")
+                | m.ShipRequest.store_category.has(
+                    m.StoreCategory.name.ilike(f"%{filter_ship_request.q}%")
+                )
+                | m.ShipRequest.store.has(
+                    m.Store.store_name.ilike(f"%{filter_ship_request.q}%")
+                )
             )
             .order_by(m.ShipRequest.id)
         )
         count_query = (
             sa.select(sa.func.count())
-            .join(store, m.ShipRequest.store_id == store.id)
-            .join(
-                store_category,
-                m.ShipRequest.store_category_id == store_category.id,
-            )
             .where(
-                m.ShipRequest.order_numb.ilike(f"%{q}%")
-                | m.ShipRequest.order_type.ilike(f"%{q}%")
-                | store_category.name.ilike(f"%{q}%")
-                | store.store_name.ilike(f"%{q}%")
+                m.ShipRequest.order_numb.ilike(f"%{filter_ship_request.q}%")
+                | m.ShipRequest.order_type.ilike(f"%{filter_ship_request.q}%")
+                | m.ShipRequest.store_category.has(
+                    m.StoreCategory.name.ilike(f"%{filter_ship_request.q}%")
+                )
+                | m.ShipRequest.store.has(
+                    m.Store.store_name.ilike(f"%{filter_ship_request.q}%")
+                )
             )
             .select_from(m.ShipRequest)
+        )
+
+    if filter_ship_request.ship_request_sort_locker:
+        query = query.where(
+            m.ShipRequest.user_id == current_user.id,
+            m.ShipRequest.store.has(
+                m.Store.store_category.has(m.StoreCategory.name == "Locker")
+            ),
         )
 
     pagination = create_pagination(total=db.session.scalar(count_query))
@@ -87,16 +81,28 @@ def get_all():
     }
     warehouses_rows = db.session.execute(sa.select(m.Warehouse)).scalars()
     warehouses = [{"name": w.name, "id": w.id} for w in warehouses_rows]
-    store_categories = [
-        sc for sc in db.session.execute(m.StoreCategory.select()).scalars()
-    ]
+
+    return pagination, ship_requests, current_order_carts, warehouses
+
+
+@ship_request_blueprint.route("/", methods=["GET"])
+@login_required
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
+)
+def get_all():
+    # TODO: refactor or delete comments in queries
+    form_create: f.NewShipRequestForm = f.NewShipRequestForm()
+    form_edit: f.ShipRequestForm = f.ShipRequestForm()
+    ship_requests, current_order_carts, pagination, warehouses = get_ship_request()
+    store_categories = db.session.scalars((m.StoreCategory.select()))
 
     return render_template(
         "ship_request/ship_requests.html",
         ship_requests=ship_requests,
         current_order_carts=current_order_carts,
         page=pagination,
-        search_query=q,
+        # search_query=q,
         form_create=form_create,
         form_edit=form_edit,
         warehouses=warehouses,
@@ -106,7 +112,9 @@ def get_all():
 
 @ship_request_blueprint.route("/create", methods=["POST"])
 @login_required
-@role_required([s.UserRole.ADMIN.value, s.UserRole.MANAGER.value])
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
+)
 def create():
     form_create: f.NewShipRequestForm = f.NewShipRequestForm()
     if not form_create.validate_on_submit():
@@ -288,3 +296,20 @@ def delete(id: int):
     log(log.INFO, "Ship Request deleted. Ship Request: [%s]", ship_request)
     flash("Ship Request deleted!", "success")
     return "ok", 200
+
+
+@ship_request_blueprint.route(
+    "/sort", methods=["GET"]
+)  # TODO move pickup inbound sort to GET with params
+@login_required
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
+)
+def sort():
+    pagination, ship_requests, _, _ = get_ship_request()
+
+    return render_template(
+        "ship_request/ship_requests_table.html",
+        page=pagination,
+        ship_requests=ship_requests,
+    )

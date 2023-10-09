@@ -18,7 +18,11 @@ assign_blueprint = Blueprint("assign", __name__, url_prefix="/assign")
 @assign_blueprint.route("/", methods=["GET"])
 @login_required
 @role_required(
-    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.SALES_REP.value,
+    ]
 )
 def get_all():
     product = aliased(m.Product)

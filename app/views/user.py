@@ -29,7 +29,7 @@ bp = Blueprint("user", __name__, url_prefix="/user")
 
 @bp.route("/", methods=["GET"])
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def get_all():
     form_create: f.NewUserForm = f.NewUserForm()
     form_edit: f.UserForm = f.UserForm()
@@ -84,7 +84,7 @@ def get_all():
 
 @bp.route("/save", methods=["POST"])
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def save():
     form = f.UserForm()
     if form.validate_on_submit():
@@ -108,6 +108,18 @@ def save():
         u.phone_number = form.phone_number.data
         if form.password.data.strip("*\n "):
             u.password = form.password.data
+
+        if (
+            current_user.role_obj.role_name == s.UserRole.WAREHOUSE_MANAGER.value
+            and u.role_obj.role_name != s.UserRole.WAREHOUSE_MANAGER.value
+        ):
+            log(
+                log.ERROR,
+                "Warehouse manager can not edit user with role: [%s]",
+                u.role_obj.role_name,
+            )
+            flash("Warehouse manager can create only warehouse managers", "danger")
+            return redirect(url_for("user.get_all"))
         u.save()
 
         # and add new groups to user_group relational table
@@ -156,7 +168,7 @@ def save():
 
 @bp.route("/create", methods=["POST"])
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def create():
     form = f.NewUserForm()
     if not form.validate_on_submit():
@@ -178,6 +190,7 @@ def create():
             sales_rep=form.sales_rep.data,
             phone_number=form.phone_number.data,
         )
+        user.save()
 
         if (
             current_user.role_obj.role_name == s.UserRole.WAREHOUSE_MANAGER.value
@@ -188,14 +201,11 @@ def create():
                 "Warehouse manager can not create user with role: [%s]",
                 user.role_obj.role_name,
             )
-            flash(
-                "Warehouse manager can not create user with role: [%s]"
-                % user.role_obj.role_name,
-                "danger",
-            )
+            flash("Warehouse manager can create only warehouse managers", "danger")
+            db.session.delete(user)
+            db.session.commit()
             return redirect(url_for("user.get_all"))
 
-        user.save()
         sales_rep_role_id = (
             db.session.execute(
                 m.Division.select().where(

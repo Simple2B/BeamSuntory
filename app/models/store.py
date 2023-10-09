@@ -12,10 +12,16 @@ class Store(db.Model, ModelMixin):
     __tablename__ = "stores"
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
+
+    # Foreign keys
+    user_id: orm.Mapped[int] = orm.mapped_column(
+        sa.ForeignKey("users.id"), nullable=True
+    )
     store_category_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("store_categories.id")
     )
-    store_category = orm.relationship("StoreCategory")
+
+    # Columns
     store_name: orm.Mapped[str] = orm.mapped_column(
         sa.String(64),
         unique=True,
@@ -39,14 +45,14 @@ class Store(db.Model, ModelMixin):
     address: orm.Mapped[str] = orm.mapped_column(sa.String(64))
     zip: orm.Mapped[str] = orm.mapped_column(sa.String(64))
     active: orm.Mapped[bool] = orm.mapped_column(sa.Boolean())
-    user_id: orm.Mapped[int] = orm.mapped_column(
-        sa.ForeignKey("users.id"), nullable=True
-    )
 
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
         default=datetime.utcnow,
     )
+
+    # Relationships
+    store_category = orm.relationship("StoreCategory")
 
     def __repr__(self):
         return f"<{self.id}: {self.store_name}>"
