@@ -988,6 +988,8 @@ def upload():
                     Path("app") / "static" / "img" / "logo-mini.png"
                 ).resize((400, 400))
             with BytesIO() as png_bytes:
+                if original_image.mode in ["CMYK"]:
+                    continue
                 original_image.save(png_bytes, format="PNG")
                 png_bytes.seek(0)
                 img_bytes = base64.b64encode(png_bytes.read()).decode()
@@ -1054,7 +1056,9 @@ def upload():
             file_io.seek(0)
             write_df = write_df.dropna()
 
-            write_df.rename(
+            write_df[
+                pandas.to_numeric(write_df["Name"], errors="coerce").notnull()
+            ].rename(
                 columns=dict(zip(write_df.columns, ["product_id", "group_id"]))
             ).to_sql(
                 "product_group",
