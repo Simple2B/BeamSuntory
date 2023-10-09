@@ -1,7 +1,7 @@
 <!-- prettier-ignore -->
 {% extends 'base.html' %}
 {% block content %}
-{% set all_includes = "[name='search_sku'], [name='q'], [name='division'], [name='group_to'], [name='report_type'], [name='action_type_request_share'], [name='user'], [name='action_type_shipping'], [name='start_date'], [name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='target_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events'], [name='expire_in'], [name='product-group']" %}
+{% set all_includes = "[name='search_sku'], [name='q'], [name='division'], [name='group_to'], [name='report_type'], [name='action_type_request_share'], [name='user'], [name='action_type_shipping'], [name='start_date'], [name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='target_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events'], [name='expire_in'], [name='product-group'], [name='search-sku']" %}
 <!-- prettier-ignore -->
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
   <button
@@ -16,9 +16,23 @@
   <!-- From -> TO calendars -->
   <!-- prettier-ignore -->
   <div class="flex items-center gap-3 p-3 flex-wrap">
+    <div class="flex gap-4 items-center justify-start pt-4 bg-white dark:bg-gray-800 px-4">
+      <button type="button" id="filter-clear-button" class=" px-3 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">{% include "icon/mop.html" %}Clear filters</button>
+    </div>
+    <!-- prettier-ignore -->
+    <div class="flex gap-4 items-center justify-start pt-4 bg-white dark:bg-gray-800 px-4">
+      <div class="flex w-full justify-end">
+      <button type="button" id="button-csv-download" class=" px-3 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+        {% include "icon/download.html" %}
+        &nbsp Download CSV
+      </button>  
+    </div>
+  </div>
+
+  <div class="flex items-center gap-3 px-3 flex-wrap">
     <!-- search bar -->
     <!-- prettier-ignore -->
-    <div class="flex gap-4 items-center justify-start py-4 bg-white dark:bg-gray-800 px-4">
+    <div class="flex gap-4 items-center justify-start bg-white dark:bg-gray-800 ">
       <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800">
       <select
         name="report_type"
@@ -26,7 +40,7 @@
         hx-trigger="change"
         hx-swap="innerHTML"
         hx-target="#reports-table"
-        hx-include="[name='search_sku'], [name='division'], [name='q'], [name='group_from'], [name='group_to'], [name='request_share_type'], [name='action_type_shipping'], [name='user'], [name='start_date'], [name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='target_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events'], [name='product-group']"
+        hx-include="{{all_includes}}"
         hx-get="{{ url_for('report.search') }}"
         hx-indicator="#report-table-spinner"
         class="inventories-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -47,7 +61,7 @@
         hx-trigger="change"
         hx-swap="innerHTML"
         hx-target="#reports-table"
-        hx-include="[name='search_sku'], [name='report_type'], [name='q'], [name='group_to'], [name='action_type_request_share'], [name='user'], [name='action_type_shipping'], [name='start_date'], [name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='target_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events'], [name='product-group']"
+        hx-include="{{all_includes}}"
         hx-get="{{ url_for('report.search') }}"
         hx-indicator="#report-table-spinner"
         class="inventories-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -70,7 +84,7 @@
         hx-trigger="keyup changed delay:500ms"
         hx-target="#reports-table"
         hx-swap="innerHTML"
-        hx-include="[name='division'], [name='group_to'], [name='report_type'], [name='action_type_request_share'], [name='user'], [name='action_type_shipping'], [name='start_date'], [name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='target_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events']"
+        hx-include="{{all_includes}}"
         hx-get="{{ url_for('report.search') }}"
         hx-indicator="#report-table-spinner"
         type="search"
@@ -90,7 +104,7 @@
         hx-trigger="keyup changed delay:500ms"
         hx-target="#reports-table"
         hx-swap="innerHTML"
-        hx-include="[name='search_sku'], [name='division'], [name='group_to'], [name='report_type'], [name='action_type_request_share'], [name='user'], [name='action_type_shipping'], [name='start_date'], [name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='target_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events'], [name='product-group']"
+        hx-include="{{all_includes}}"
         hx-get="{{ url_for('report.search') }}"
         hx-indicator="#report-table-spinner"
         type="search"
@@ -107,7 +121,7 @@
         hx-trigger="change"
         hx-swap="innerHTML"
         hx-target="#reports-table"
-        hx-include="[name='search_sku'], [name='division'], [name='group_to'], [name='report_type'], [name='q'], [name='action_type_request_share'], [name='action_type_shipping'], [name='start_date'], [name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='target_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events'], [name='product-group']"
+        hx-include="{{all_includes}}"
         hx-get="{{ url_for('report.search') }}"
         hx-indicator="#report-table-spinner"
         class="inventories-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -125,7 +139,9 @@
         {% endfor %}
       </select>
     </div>
-
+  </div>
+  
+  <div class="flex items-center gap-3 p-3 flex-wrap">  
     <!-- Calendars -->
     <!-- prettier-ignore -->
     <div class="relative" id="filter-start-date">
@@ -138,7 +154,7 @@
         hx-swap="innerHTML"
         hx-trigger="changeDate"
         hx-target="#reports-table"
-        hx-include="[name='search_sku'], [name='division'], [name='group_to'], [name='report_type'], [name='q'], [name='start_date_to'], [name='action_type_shipping'], [name='action_type_request_share'], [name='user'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='target_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events'], [name='product-group']"
+        hx-include="{{all_includes}}"
         hx-get="{{ url_for('report.search') }}"
         type="text"
         placeholder="Start date"
@@ -156,7 +172,7 @@
         hx-swap="innerHTML"
         hx-trigger="changeDate"
         hx-target="#reports-table"
-        hx-include="[name='search_sku'], [name='division'], [name='group_to'], [name='report_type'], [name='q'], [name='user'], [name='action_type_shipping'], [name='action_type_request_share'], [name='start_date'], [name='end_date'], [name='end_date_to'] [name='master_group'], [name='target_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events'], [name='product-group']"
+        hx-include="{{all_includes}}"
         hx-get="{{ url_for('report.search') }}"
         type="text"
         placeholder="Start date to"
@@ -175,7 +191,7 @@
         datepicker
         name="end_date"
         hx-trigger="changeDate"
-        hx-include="[name='search_sku'], [name='division'], [name='group_to'], [name='report_type'], [name='q'], [name='user'], [name='start_date'], [name='action_type_shipping'], [name='action_type_request_share'], [name='start_date_to'], [name='end_date_to'] [name='master_group'], [name='target_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events'], [name='product-group']"
+        hx-include="{{all_includes}}"
         hx-get="{{ url_for('report.search') }}"
         type="text"
         placeholder="End date"
@@ -193,7 +209,7 @@
         datepicker
         name="end_date_to"
         hx-trigger="changeDate"
-        hx-include="[name='search_sku'], [name='division'], [name='group_to'], [name='report_type'], [name='q'], [name='user'], [name='start_date'], [name='action_type_shipping'], [name='action_type_request_share'], [name='start_date_to'], [name='end_date'], [name='master_group'], [name='target_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events'], [name='product-group']"
+        hx-include="{{all_includes}}"
         hx-get="{{ url_for('report.search') }}"
         type="text"
         placeholder="End date to"
@@ -204,17 +220,7 @@
       />
     </div>
     <!-- prettier-ignore -->
-    <div class="flex gap-4 items-center justify-start py-4 bg-white dark:bg-gray-800 px-4">
-      <button type="button" id="filter-clear-button" class=" px-3 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">{% include "icon/mop.html" %}Clear filters</button>
-    </div>
-    <!-- prettier-ignore -->
-    <div class="flex gap-4 items-center justify-start py-4 bg-white dark:bg-gray-800 px-4">
-      <div class="flex w-full justify-end">
-      <button type="button" id="button-csv-download" class=" px-3 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-        {% include "icon/download.html" %}
-        &nbsp Download CSV
-      </button>  
-    </div>
+
     </div>
   </div>
 
@@ -229,7 +235,7 @@
         hx-swap="innerHTML" 
         hx-target="#reports-table"
         name="action_type_request_share"
-        hx-include="[name='search_sku'], [name='division'], [name='group_to'], [name='report_type'], [name='target_group'], [name='q'], [name='user'], [name='start_date'], [name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events'], [name='product-group']"
+        hx-include="{{all_includes}}"
         hx-get="{{ url_for('report.search') }}" 
         hx-indicator="#report-table-spinner"
         class="group-range hidden mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
@@ -246,7 +252,7 @@
         hx-swap="innerHTML" 
         hx-target="#reports-table"
         name="action_type_shipping"
-        hx-include="[name='search_sku'], [name='division'], [name='group_to'], [name='report_type'], [name='target_group'], [name='q'], [name='user'], [name='start_date'], [name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events'], [name='product-group']"
+        hx-include="{{all_includes}}"
         hx-get="{{ url_for('report.search') }}" 
         hx-indicator="#report-table-spinner"
         class="group-range hidden mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
@@ -264,7 +270,7 @@
         hx-trigger="change" 
         hx-swap="innerHTML"
         hx-target="#reports-table"
-        hx-include="[name='search_sku'], [name='division'], [name='report_type'], [name='group_to'], [name='q'], [name='user'], [name='start_date'], [name='action_type_shipping'], [name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='target_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events'], [name='product-group']"
+        hx-include="{{all_includes}}"
         hx-get="{{ url_for('report.search') }}"
         hx-indicator="#report-table-spinner"
         class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -283,7 +289,7 @@
         hx-swap="innerHTML" 
         hx-target="#reports-table"
         name="target_group"
-        hx-include="[name='search_sku'], [name='division'], [name='report_type'], [name='group_to'], [name='action_type_request_share'], [name='q'], [name='action_type_shipping'], [name='user'], [name='start_date'], [name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events'], [name='product-group']"
+        hx-include="{{all_includes}}"
         hx-get="{{ url_for('report.search') }}" 
         hx-indicator="#report-table-spinner"
         class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
@@ -302,7 +308,7 @@
         hx-swap="innerHTML" 
         hx-target="#reports-table"
         name="group_from"
-        hx-include="[name='search_sku'], [name='division'], [name='group_to'], [name='report_type'], [name='q'], [name='user'], [name='target_group'], [name='action_type_shipping'], [name='action_type_request_share'], [name='start_date'], [name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events'], [name='product-group']"
+        hx-include="{{all_includes}}"
         hx-get="{{ url_for('report.search') }}" 
         hx-indicator="#report-table-spinner"
         class="group-range mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
@@ -321,7 +327,7 @@
         hx-swap="innerHTML" 
         hx-target="#reports-table"
         name="product_group"
-        hx-include="[name='division'], [name='group_to'], [name='report_type'], [name='q'], [name='user'], [name='target_group'], [name='action_type_shipping'], [name='action_type_request_share'], [name='start_date'], [name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events']"
+        hx-include="{{all_includes}}"
         hx-get="{{ url_for('report.search') }}" 
         hx-indicator="#report-table-spinner"
         class="group-range mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
@@ -339,7 +345,7 @@
         hx-swap="innerHTML" 
         hx-target="#reports-table"
         name="group_to"
-        hx-include="[name='search_sku'], [name='division'], [name='report_type'], [name='q'], [name='target_group'], [name='user'], [name='action_type_shipping'], [name='action_type_request_share'], [name='start_date'], [name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events'], [name='product-group']"
+        hx-include="{{all_includes}}"
         hx-get="{{ url_for('report.search') }}" 
         hx-indicator="#report-table-spinner"
         class="group-range mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
@@ -362,7 +368,7 @@
         hx-swap="innerHTML"
         hx-target="#reports-table"
         name="{{prod_master_group.name.lower()}}"
-        hx-include="[name='search_sku'], [name='division'], [name='group_to'], [name='report_type'], [name='q'], [name='user'], [name='action_type_shipping'], [name='start_date'], [name='action_type_request_share'], [name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='target_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events'], [name='product-group']"
+        hx-include="{{all_includes}}"
         hx-get="{{ url_for('report.search') }}"
         hx-indicator="#report-table-spinner"
         class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">

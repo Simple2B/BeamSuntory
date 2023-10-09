@@ -1,6 +1,7 @@
 import { ModalOptions, Modal } from 'flowbite'
 import HTMXDispatcher from './htmx'
 import { IInboundOrderBase } from './types';
+import { IInboundOrderOut } from './inbound_order/types';
 
 
 // initialize htmx listener
@@ -19,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
     closable: true,
     onHide: () => {
-      const productItems = document.querySelectorAll('.product-item-view') as NodeListOf<HTMLTableColElement>
+      const productItems = document.querySelectorAll('.product-item') as NodeListOf<HTMLTableColElement>
       productItems.forEach((productItem) => productItem.remove());
     },
   }
@@ -50,7 +51,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const reportViewButtons: NodeListOf<HTMLButtonElement> = target.querySelectorAll('.pickup-inbound-view-button');
     reportViewButtons.forEach((btn) => {
       btn.addEventListener('click', () => {
-        const reportAssign: IInboundOrderBase = JSON.parse(btn.getAttribute('data-target'));
+        const orderProductContainerView = document.getElementById('product-items-container') as HTMLDivElement;  
+        const orderProductAllocatedBaseView = document.getElementById('product-allocated-container') as HTMLDivElement;
+
+
+        const reportAssign: IInboundOrderOut = JSON.parse(btn.getAttribute('data-target'));
 
         orderId.value = reportAssign.id.toString();
         orderTitleId.innerHTML = reportAssign.orderId;
@@ -65,7 +70,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         deliverAgentNotes.innerHTML = reportAssign.daNotes;
         warehouseManagerNotes.innerHTML = reportAssign.wmNotes;
-        
+
+
+        reportAssign.productsAllocated.forEach((productsAllocated) => {                
+          const productAllocatedContainer = orderProductAllocatedBaseView.cloneNode(true) as HTMLDivElement;
+          productAllocatedContainer.classList.remove('hidden');
+          productAllocatedContainer.classList.add('grid');
+          productAllocatedContainer.classList.add('product-item');
+           
+          const orderProductNamesView: HTMLDivElement = productAllocatedContainer.querySelector('#pickup-inbound-view-product-name');
+          const orderProductQuantitiesView: HTMLDivElement = productAllocatedContainer.querySelector('#pickup-inbound-view-product-quantity');
+          const orderProductSkuView: HTMLDivElement = productAllocatedContainer.querySelector('#pickup-inbound-view-product-sku');
+
+          orderProductNamesView.innerHTML = productsAllocated.product.name;
+          orderProductQuantitiesView.innerHTML = productsAllocated.quantity.toString();
+          orderProductSkuView.innerHTML = productsAllocated.product.SKU;
+                    
+          orderProductContainerView.appendChild(productAllocatedContainer);          
+        })      
+
         pickupInboundButton.classList.add('hidden');
 
         if (reportAssign.status == 'Assigned to pickup') {
