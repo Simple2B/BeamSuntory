@@ -35,3 +35,4 @@ networks:
 
 volumes:
   db_data:
+  product_images:
