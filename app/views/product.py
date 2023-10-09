@@ -189,15 +189,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
 
 @product_blueprint.route("/", methods=["GET"])
 @login_required
-@role_required(
-    [
-        s.UserRole.ADMIN.value,
-        s.UserRole.WAREHOUSE_MANAGER.value,
-        s.UserRole.SALES_REP.value,
-        s.UserRole.MANAGER.value,
-        s.UserRole.DELIVERY_AGENT.value,
-    ]
-)
 def get_all():
     products_object = get_all_products(request)
     form_sort: f.SortByGroupProductForm = f.SortByGroupProductForm()
@@ -434,15 +425,6 @@ def delete(id: int):
 # TODO refactor
 @product_blueprint.route("/sort", methods=["GET", "POST"])
 @login_required
-@role_required(
-    [
-        s.UserRole.ADMIN.value,
-        s.UserRole.WAREHOUSE_MANAGER.value,
-        s.UserRole.SALES_REP.value,
-        s.UserRole.MANAGER.value,
-        s.UserRole.DELIVERY_AGENT.value,
-    ]
-)
 def sort():
     if request.method == "GET":
         return redirect(url_for("product.get_all"))
@@ -658,15 +640,6 @@ def assign():
 
 @product_blueprint.route("/request_share", methods=["POST"])
 @login_required
-@role_required(
-    [
-        s.UserRole.ADMIN.value,
-        s.UserRole.WAREHOUSE_MANAGER.value,
-        s.UserRole.SALES_REP.value,
-        s.UserRole.MANAGER.value,
-        s.UserRole.DELIVERY_AGENT.value,
-    ]
-)
 def request_share():
     form: f.RequestShareProductForm = f.RequestShareProductForm()
     if form.validate_on_submit():
@@ -1090,15 +1063,6 @@ class DoNothingConflict:
 
 @product_blueprint.route("/stocks_owned_by_me", methods=["GET"])
 @login_required
-@role_required(
-    [
-        s.UserRole.ADMIN.value,
-        s.UserRole.WAREHOUSE_MANAGER.value,
-        s.UserRole.SALES_REP.value,
-        s.UserRole.MANAGER.value,
-        s.UserRole.DELIVERY_AGENT.value,
-    ]
-)
 def stocks_owned_by_me():
     is_events = request.args.get("events", type=bool, default=False)
     if is_events:
@@ -1328,15 +1292,6 @@ def full_image(id: int):
 
 @product_blueprint.route("/get_additional_info/<int:product_id>", methods=["GET"])
 @login_required
-@role_required(
-    [
-        s.UserRole.ADMIN.value,
-        s.UserRole.WAREHOUSE_MANAGER.value,
-        s.UserRole.SALES_REP.value,
-        s.UserRole.MANAGER.value,
-        s.UserRole.DELIVERY_AGENT.value,
-    ]
-)
 def get_additional_info(product_id):
     current_user_groups_rows = db.session.scalars(
         m.UserGroup.select().where(m.UserGroup.left_id == current_user.id)

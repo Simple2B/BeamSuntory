@@ -253,7 +253,6 @@ def save():
                         product.quantity_remains = 0
                         product.save(False)
 
-                warehouse_product.product_quantity -= cart.quantity
                 if warehouse_product.product_quantity < cart.quantity:
                     log(
                         log.WARNING,
@@ -267,6 +266,8 @@ def save():
                         "danger",
                     )
                     return redirect(url_for("outgoing_stock.get_all"))
+
+                warehouse_product.product_quantity -= cart.quantity
 
                 warehouse_product.save(False)
                 report_inventory = m.ReportInventory(
