@@ -1,3 +1,4 @@
+import { IGroup } from './types';
 interface IEvent {
     dateFrom: string;
     dateTo: string;
@@ -14,7 +15,7 @@ interface IStore {
 }
 interface ICart {
     product: IProduct;
-    group: string;
+    group: IGroup;
     quantity: number;
     event?: IEvent;
     warehouse?: IWarehouse;

@@ -6,7 +6,7 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import schema as s
 from app import models as m, db
@@ -129,6 +129,7 @@ def get_shelf_life_reports():
 
 @report_shelf_life_blueprint.route("/shelf_life/api", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def get_shelf_lifes_json():
     pagination, shelf_life_reports = get_shelf_life_reports()
     report_list_schema = s.ReportShelfLifeList.model_validate(shelf_life_reports)
@@ -140,6 +141,7 @@ def get_shelf_lifes_json():
 
 @report_shelf_life_blueprint.route("/shelf_life", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def shelf_lifes():
     users = db.session.scalars(sa.select(m.User))
 
@@ -164,6 +166,7 @@ def shelf_lifes():
 
 @report_shelf_life_blueprint.route("shelf_life/search")
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def search_shelf_life_reports():
     pagination, shelf_life_reports = get_shelf_life_reports()
 

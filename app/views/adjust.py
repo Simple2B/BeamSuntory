@@ -6,8 +6,9 @@ from flask import (
 from flask_login import login_required
 import sqlalchemy as sa
 from sqlalchemy.orm import aliased
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
+from app import schema as s
 from app import models as m, db
 
 adjust_blueprint = Blueprint("adjust", __name__, url_prefix="/adjust")
@@ -15,6 +16,7 @@ adjust_blueprint = Blueprint("adjust", __name__, url_prefix="/adjust")
 
 @adjust_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def get_all():
     product = aliased(m.Product)
     q = request.args.get("q", type=str, default=None)

@@ -12,7 +12,7 @@ from flask_login import login_required, current_user
 from flask_mail import Message
 import sqlalchemy as sa
 from sqlalchemy.orm import aliased
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import models as m, db
 from app import schema as s
@@ -27,6 +27,9 @@ request_share_blueprint = Blueprint(
 
 @request_share_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
+)
 def get_all():
     form_edit: f.RequestShareForm = f.RequestShareForm()
 
@@ -73,12 +76,14 @@ def get_all():
         page=pagination,
         search_query=q,
         form_edit=form_edit,
-        user=current_user,
     )
 
 
 @request_share_blueprint.route("/edit", methods=["POST"])
 @login_required
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value], True
+)
 def save():
     form: f.RequestShareForm = f.RequestShareForm()
     if form.validate_on_submit():
@@ -118,6 +123,7 @@ def save():
 
 @request_share_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def delete(id: int):
     rs: m.RequestShare = db.session.scalar(
         m.RequestShare.select().where(m.RequestShare.id == id)
@@ -138,6 +144,9 @@ def delete(id: int):
 
 @request_share_blueprint.route("/share/<int:id>", methods=["GET"])
 @login_required
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
+)
 def share(id: int):
     request_share: m.RequestShare = db.session.scalar(
         m.RequestShare.select().where(m.RequestShare.id == id)
@@ -250,6 +259,9 @@ def share(id: int):
 
 @request_share_blueprint.route("/decline/<int:id>", methods=["GET"])
 @login_required
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
+)
 def decline(id: int):
     request_share: m.RequestShare = db.session.get(m.RequestShare, id)
     if not request_share:

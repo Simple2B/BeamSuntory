@@ -5,7 +5,7 @@ import functools
 from flask import Blueprint, jsonify, request, render_template, redirect, url_for, flash
 from flask_login import login_required
 import sqlalchemy as sa
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import schema as s
 from app import models as m, db
@@ -67,6 +67,7 @@ def get_events():
 
 @event_blueprint.route("/api", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def get_events_json():
     pagination, events = get_events()
     return s.EventsApiOut(pagination=pagination, events=events.all()).model_dump_json(
@@ -76,6 +77,7 @@ def get_events_json():
 
 @event_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def get_all():
     form_edit = f.InboundOrderUpdateForm()
 
@@ -102,6 +104,14 @@ def get_all():
 
 @event_blueprint.route("/get_available_quantity", methods=["GET"])
 @login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.MANAGER.value,
+    ]
+)
 def get_available_quantity():
     timestamps: list[str] = json.loads(request.args.get("dates"))
     product_id = request.args.get("product_id", type=int, default=None)
@@ -155,6 +165,14 @@ def get_available_quantity():
 
 @event_blueprint.route("/get_available_quantity_by_date", methods=["GET"])
 @login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.MANAGER.value,
+    ]
+)
 def get_available_quantity_by_date():
     date_from = request.args.get("date_from", type=str, default=None)
     date_to = request.args.get("date_to", type=str, default=None)
@@ -229,6 +247,12 @@ def get_available_quantity_by_date():
 
 @event_blueprint.route("/save_reserved_days_amount", methods=["POST"])
 @login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ]
+)
 def save_reserved_days_amount():
     form: f.EventUpdateReservedDaysAmount = f.EventUpdateReservedDaysAmount()
     if form.validate_on_submit():
