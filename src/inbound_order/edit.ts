@@ -61,6 +61,7 @@ export const initEditOrderModal = () => {
     const orderEditButtons = document.querySelectorAll('.inbound-order-edit-button') as NodeListOf<HTMLButtonElement>;
     const orderUuidInput = document.querySelector('#inbound-order-uuid') as HTMLInputElement;
     const orderStatusSelect = document.querySelector('#inbound-order-edit-status') as HTMLSelectElement;
+    const orderStatusDiv = document.querySelector('#inbound-order-edit-status-div') as HTMLDivElement;
     const orderTitleInput = document.querySelector('#inbound-order-edit-order-title') as HTMLInputElement;
     const orderActiveDateInput = document.querySelector('#inbound-order-edit-active-date') as HTMLInputElement;
     const orderActiveTimeInput = document.querySelector('#inbound-order-edit-active-time') as HTMLInputElement;
@@ -68,6 +69,7 @@ export const initEditOrderModal = () => {
     const orderSupplierIdSelect = document.querySelector('#inbound-order-edit-supplier-id') as HTMLSelectElement;
     const orderWarehouseIdSelect = document.querySelector('#inbound-order-edit-warehouse-id') as HTMLSelectElement;
     const orderEditAddGroupButtonTemplate = document.querySelector('.inbound-order-add-product-group-btn');
+    const saveButton = document.querySelector('#inbound-order-save-products-btn') as HTMLButtonElement;
 
     const modalEditOptions: ModalOptions = {
         placement: 'bottom-right',
@@ -150,6 +152,16 @@ export const initEditOrderModal = () => {
           setNewQuantityView(currentProductAllocatedContainer as HTMLDivElement);
         });
 
+        if(inboundOrderData.status !== 'Assigned to pickup' && inboundOrderData.status !== 'Draft') {
+          saveButton.classList.add('hidden');
+          orderStatusDiv.classList.remove('hidden');
+          orderStatusDiv.innerHTML = inboundOrderData.status;
+          orderStatusSelect.classList.add('hidden');          
+        }else{
+          saveButton.classList.remove('hidden');  
+          orderStatusDiv.classList.add('hidden');
+          orderStatusSelect.classList.remove('hidden');
+        }
         orderEditModal.show();
       });
     });
