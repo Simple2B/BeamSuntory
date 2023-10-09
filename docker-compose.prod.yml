@@ -1,4 +1,4 @@
-version: "3.8"
+version: '3.8'
 
 services:
   db:
@@ -17,21 +17,21 @@ services:
   app:
     image: simple2b/beam-suntory-app:latest
     restart: always
+    volumes:
+      - product_images/img/products:/app/static/img/products
     env_file:
       - .env
     depends_on:
       - db
     labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.beamsuntory_app.rule=Host(`beam.jlidistribution.com`)"
-        - "traefik.http.routers.beamsuntory_app.tls=true"
-        - "traefik.http.routers.beamsuntory_app.tls.certresolver=myresolver"
-
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.beamsuntory_app.rule=Host(`beam.jlidistribution.com`)'
+      - 'traefik.http.routers.beamsuntory_app.tls=true'
+      - 'traefik.http.routers.beamsuntory_app.tls.certresolver=myresolver'
 
 networks:
   default:
-      name: beamsuntory_network
-
+    name: beamsuntory_network
 
 volumes:
   db_data:
