@@ -279,10 +279,17 @@ def create():
         log(log.INFO, "Form submitted. Product: [%s]", product)
         product.save()
 
-        file_image = save_image(
-            request.files["high_image"], f"products/{form.SKU.data}"
-        )
-        file_image.save(False)
+        if "image" in request.files["high_image"].mimetype:
+            file_image = save_image(
+                request.files["high_image"], f"products/{form.SKU.data}"
+            )
+            if "Cannot guess file type!" in file_image:
+                flash("Product added! Cannot guess image file type!", "danger")
+            elif "Unsupported file type!" in file_image:
+                flash("Product added! Unsupported image file type!", "danger")
+            else:
+                flash("Product added!", "success")
+                file_image.save(False)
 
         product_master_groups_ids = json.loads(form.product_groups.data)
 
@@ -291,7 +298,6 @@ def create():
             product_group.save(False)
         db.session.commit()
 
-        flash("Product added!", "success")
         return redirect(url_for("product.get_all"))
     else:
         log(log.ERROR, "Product creation errors: [%s]", form.errors)
@@ -355,10 +361,20 @@ def save():
             u.image_obj.path = image_path
             u.image_obj.extension = image_extension
         else:
-            file_image = save_image(
-                request.files["high_image"], f"products/{form.SKU.data}"
-            )
-            file_image.save(False)
+            if "image" in request.files["high_image"].mimetype:
+                file_image = save_image(
+                    request.files["high_image"], f"products/{form.SKU.data}"
+                )
+                if "Cannot guess file type!" in file_image:
+                    flash("Product added! Cannot guess image file type!", "danger")
+                elif "Unsupported file type!" in file_image:
+                    flash("Product added! Unsupported image file type!", "danger")
+                else:
+                    flash("Product edited successfully", "success")
+                    db.session.execute(
+                        m.Image.delete().where(m.Image.name == file_image.name)
+                    )
+                    file_image.save(False)
         u.save()
 
         product_master_groups_ids = json.loads(form.product_groups.data)
@@ -392,7 +408,6 @@ def save():
                 )
                 product_group.save()
 
-        flash("Product edited successfully", "success")
         if form.next_url.data:
             return redirect(form.next_url.data)
         return redirect(url_for("product.get_all"))
