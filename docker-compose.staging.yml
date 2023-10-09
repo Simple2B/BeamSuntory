@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:14
+    restart: always
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-passwd}
+      POSTGRES_DB: db
+      PGDATABASE: db
+      PGPASSWORD: ${POSTGRES_PASSWORD:-passwd}
+      PGUSER: ${POSTGRES_USER:-postgres}
+
+  app:
+    image: simple2b/beam-suntory-app:latest
+    restart: always
+    volumes:
+      - product_images:/app/static/img/product
+    env_file:
+      - .env
+    depends_on:
+      - db
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.beamsuntory_app.rule=Host(`devbeam.jlidistribution.com`)'
+      - 'traefik.http.routers.beamsuntory_app.tls=true'
+      - 'traefik.http.routers.beamsuntory_app.tls.certresolver=myresolver'
+
+networks:
+  default:
+    name: beamsuntory_network_staging
+
+volumes:
+  db_data:
+  product_images:
