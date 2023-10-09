@@ -52,7 +52,6 @@ def create_app(environment="development"):
     login_manager.anonymous_user = m.AnonymousUser
 
     app.jinja_env.globals["form_product_upload"] = forms.UploadProductForm
-    # app.jinja_env.globals["user_role"] = None
     app.jinja_env.globals["admin_roles"] = [s.UserRole.ADMIN.value]
     app.jinja_env.globals["admin_warehouse_roles"] = [
         s.UserRole.ADMIN.value,

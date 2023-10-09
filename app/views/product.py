@@ -2,6 +2,8 @@ from io import BytesIO
 import base64
 import json
 from datetime import datetime
+from pathlib import Path
+from PIL import Image
 import pandas
 from flask import (
     Blueprint,
@@ -17,7 +19,7 @@ from flask_login import login_required, current_user
 from flask_mail import Message
 from sqlalchemy.dialects.postgresql import insert
 import sqlalchemy as sa
-from app.controllers import create_pagination, role_required
+from app.controllers import create_pagination, save_image, role_required
 
 from app import models as m, db
 from app import schema as s
@@ -245,8 +247,6 @@ def create():
 
         supplier: m.Supplier = db.session.scalar(m.Supplier.select())
 
-        # TODO: use this original image in the future
-        # image = request.files["image"]
         low_image = request.files["low_image"]
         low_image_string = base64.b64encode(low_image.read()).decode()
         product: m.Product = m.Product(
@@ -280,13 +280,25 @@ def create():
         log(log.INFO, "Form submitted. Product: [%s]", product)
         product.save()
 
+        if "image" in request.files["high_image"].mimetype:
+            file_image = save_image(
+                request.files["high_image"], f"products/{form.SKU.data}"
+            )
+            if "Cannot guess file type!" in file_image:
+                flash("Product added! Cannot guess image file type!", "danger")
+            elif "Unsupported file type!" in file_image:
+                flash("Product added! Unsupported image file type!", "danger")
+            else:
+                flash("Product added!", "success")
+                file_image.save(False)
+
         product_master_groups_ids = json.loads(form.product_groups.data)
 
         for group_id in product_master_groups_ids:
             product_group = m.ProductGroup(product_id=product.id, group_id=group_id)
-            product_group.save()
+            product_group.save(False)
+        db.session.commit()
 
-        flash("Product added!", "success")
         return redirect(url_for("product.get_all"))
     else:
         log(log.ERROR, "Product creation errors: [%s]", form.errors)
@@ -308,7 +320,7 @@ def save():
 
         supplier: m.Supplier = db.session.scalar(m.Supplier.select())
 
-        image = request.files["image"]
+        image = request.files["low_image"]
         image_string = base64.b64encode(image.read()).decode()
         u.name = str(form.name.data).strip(" ")
         u.supplier_id = form.supplier.data if form.supplier.data else supplier.id
@@ -343,6 +355,28 @@ def save():
         u.length = form.length.data if form.length.data else 0
         u.width = form.width.data if form.width.data else 0
         u.height = form.height.data if form.height.data else 0
+
+        if u.image_obj:
+            image_path, image_extension = save_image(
+                request.files["high_image"], f"products/{form.SKU.data}", u.image_obj
+            )
+            u.image_obj.path = image_path
+            u.image_obj.extension = image_extension
+        else:
+            if "image" in request.files["high_image"].mimetype:
+                file_image = save_image(
+                    request.files["high_image"], f"products/{form.SKU.data}"
+                )
+                if "Cannot guess file type!" in file_image:
+                    flash("Product added! Cannot guess image file type!", "danger")
+                elif "Unsupported file type!" in file_image:
+                    flash("Product added! Unsupported image file type!", "danger")
+                else:
+                    flash("Product edited successfully", "success")
+                    db.session.execute(
+                        m.Image.delete().where(m.Image.name == file_image.name)
+                    )
+                    file_image.save(False)
         u.save()
 
         product_master_groups_ids = json.loads(form.product_groups.data)
@@ -376,7 +410,6 @@ def save():
                 )
                 product_group.save()
 
-        flash("Product edited successfully", "success")
         if form.next_url.data:
             return redirect(form.next_url.data)
         return redirect(url_for("product.get_all"))
@@ -893,6 +926,14 @@ def upload():
 
         conn = db.get_engine()
 
+        df_img = pandas.read_csv(
+            Path("app") / "static" / "img" / "item_image.csv",
+            usecols=[
+                "SKU",
+                "Image",
+            ],
+        )
+
         new_groups = []
 
         # NOTE write master groups and stock groups to DB
@@ -924,7 +965,6 @@ def upload():
                 con=conn,
                 if_exists="append",
                 index=False,
-                # method="multi",
                 method=do_nothing_conflict_name.insert_do_nothing_on_conflicts,
             )
 
@@ -941,11 +981,31 @@ def upload():
         )
         file_io.seek(0)
         df = df.drop_duplicates()
-        df["image"] = ""
         df["Description"] = df["Description"].fillna("")
         df["SKU"] = df["SKU"].fillna("")
         df["Regular Price"] = df["Regular Price"].fillna(0)
         df["Retail Price"] = df["Retail Price"].fillna(0)
+
+        df = pandas.merge(df, df_img, on="SKU", how="inner")
+        for image_name in df["Image"]:
+            try:
+                if not isinstance(image_name, str):
+                    raise FileNotFoundError
+                original_image = Image.open(
+                    Path("app") / "static" / "img" / "product" / image_name
+                ).resize((400, 400))
+            except FileNotFoundError:
+                original_image = Image.open(
+                    Path("app") / "static" / "img" / "logo-mini.png"
+                ).resize((400, 400))
+            with BytesIO() as png_bytes:
+                if original_image.mode in ["CMYK"]:
+                    continue
+                original_image.save(png_bytes, format="PNG")
+                png_bytes.seek(0)
+                img_bytes = base64.b64encode(png_bytes.read()).decode()
+
+            df["Image"] = df["Image"].replace(image_name, img_bytes)
 
         df.rename(
             columns=dict(
@@ -1007,7 +1067,9 @@ def upload():
             file_io.seek(0)
             write_df = write_df.dropna()
 
-            write_df.rename(
+            write_df[
+                pandas.to_numeric(write_df["Name"], errors="coerce").notnull()
+            ].rename(
                 columns=dict(zip(write_df.columns, ["product_id", "group_id"]))
             ).to_sql(
                 "product_group",
