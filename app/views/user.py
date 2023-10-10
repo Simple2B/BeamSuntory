@@ -316,15 +316,6 @@ def delete(id: int):
 
 @bp.route("/notification", methods=["GET"])
 @login_required
-@role_required(
-    [
-        s.UserRole.ADMIN.value,
-        s.UserRole.SALES_REP.value,
-        s.UserRole.WAREHOUSE_MANAGER.value,
-        s.UserRole.MANAGER.value,
-        s.UserRole.DELIVERY_AGENT.value,
-    ]
-)
 def notification():
     user_requests = []
     user_requests_ids = [
