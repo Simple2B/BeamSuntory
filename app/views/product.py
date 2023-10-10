@@ -30,39 +30,54 @@ product_blueprint = Blueprint("product", __name__, url_prefix="/product")
 
 # TODO: needs refactor FIRST!!
 def get_all_products(request, query=None, count_query=None, my_stocks=False):
-    q = request.args.get("q", type=str, default=None)
-    is_events = request.args.get("events", type=bool, default=False)
+    is_events = request.args.get("is_events", type=bool, default=False)
+    is_all_stocks_in_inventory = request.args.get(
+        "is_all_stocks_in_inventory", type=bool, default=False
+    )
+    is_stocks_own_by_me = request.args.get(
+        "is_stocks_own_by_me", type=bool, default=False
+    )
+    is_events_stocks_own_by_me = request.args.get(
+        "is_events_stocks_own_by_me", type=bool, default=False
+    )
+    brand = request.args.get("brand", type=str, default="")
+    language = request.args.get("language", type=str, default="")
+    premises = request.args.get("premises", type=str, default="")
+    category = request.args.get("category", type=str, default="")
+    events = request.args.get("events", type=str, default="")
+    categories = request.args.get("categories", type=str, default="")
 
-    if query is None or count_query is None:
-        reverse_event_filter = ~m.Product.warehouse_products.any(
-            m.WarehouseProduct.group.has(
-                m.Group.master_group.has(
-                    m.MasterGroup.name == s.MasterGroupMandatory.events.value
-                )
+    q = request.args.get("q", type=str, default="")
+
+    reverse_event_filter = ~m.Product.warehouse_products.any(
+        m.WarehouseProduct.group.has(
+            m.Group.master_group.has(
+                m.MasterGroup.name == s.MasterGroupMandatory.events.value
             )
         )
-        query = m.Product.select().where(reverse_event_filter).order_by(m.Product.id)
+    )
+
+    if query is None or count_query is None:
+        query = m.Product.select().order_by(m.Product.id)
 
         count_query = sa.select(sa.func.count()).select_from(m.Product)
-        if q:
-            query = (
-                m.Product.select()
-                .where(
-                    m.Product.name.ilike(f"%{q}%")
-                    | m.Product.SKU.ilike(f"%{q}%")
-                    | m.Product.description.ilike(f"%{q}%")
-                )
-                .order_by(m.Product.id)
+
+    master_groups = [
+        brand,
+        language,
+        category,
+        premises,
+        events,
+        categories,
+    ]
+
+    if master_groups.count(None) != len(master_groups):
+        for group in master_groups:
+            master_group_filter = m.Product.product_groups.any(
+                m.ProductGroup.parent.has(m.GroupProduct.name.ilike(f"%{group}%"))
             )
-            count_query = (
-                sa.select(sa.func.count())
-                .where(
-                    m.Product.name.ilike(f"%{q}%")
-                    | m.Product.SKU.ilike(f"%{q}%")
-                    | m.Product.description.ilike(f"%{q}%")
-                )
-                .select_from(m.Product)
-            )
+            query = query.where(master_group_filter)
+            count_query = count_query.where(master_group_filter)
 
     if is_events:
         event_filter = m.Product.warehouse_products.any(
@@ -73,7 +88,80 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
             )
         )
 
-        query = m.Product.select().where(event_filter).order_by(m.Product.id)
+        query = query.where(event_filter)
+        count_query = count_query.where(event_filter)
+
+    if is_all_stocks_in_inventory:
+        is_all_stocks_in_inventory_filter = m.Product.warehouse_products.any(
+            m.WarehouseProduct.product_quantity > 0
+        )
+
+        query = query.where(is_all_stocks_in_inventory_filter)
+        count_query = count_query.where(is_all_stocks_in_inventory_filter)
+
+    if is_stocks_own_by_me:
+        curr_user_groups_ids = [
+            i.right_id
+            for i in db.session.execute(
+                m.UserGroup.select().where(
+                    m.UserGroup.left_id == current_user.id,
+                )
+            ).scalars()
+        ]
+        curr_user_products_ids = [
+            i.product_id
+            for i in db.session.execute(
+                m.WarehouseProduct.select().where(
+                    m.WarehouseProduct.group_id.in_(curr_user_groups_ids),
+                )
+            ).scalars()
+        ]
+
+        query = query.where(
+            m.Product.id.in_(curr_user_products_ids), reverse_event_filter
+        )
+        count_query = count_query.where(
+            m.Product.id.in_(curr_user_products_ids), reverse_event_filter
+        )
+
+    if is_events_stocks_own_by_me:
+        event_filter = m.Product.warehouse_products.any(
+            m.WarehouseProduct.group.has(
+                m.Group.master_group.has(
+                    m.MasterGroup.name == s.MasterGroupMandatory.events.value
+                )
+            )
+        )
+        curr_user_groups_ids = [
+            i.right_id
+            for i in db.session.execute(
+                m.UserGroup.select().where(
+                    m.UserGroup.left_id == current_user.id,
+                    m.UserGroup.parent.has(
+                        m.Group.master_group.has(
+                            m.MasterGroup.name == s.MasterGroupMandatory.events.value
+                        )
+                    ),
+                )
+            ).scalars()
+        ]
+        curr_user_products_ids = [
+            i.product_id
+            for i in db.session.execute(
+                m.WarehouseProduct.select().where(
+                    m.WarehouseProduct.group_id.in_(curr_user_groups_ids),
+                    event_filter,
+                )
+            ).scalars()
+        ]
+        query = query.where(
+            m.Product.id.in_(curr_user_products_ids),
+        )
+        count_query = count_query.where(m.Product.id.in_(curr_user_products_ids))
+
+    if q:
+        query = query.where(m.Product.name.ilike(f"%{q}%"))
+        count_query = count_query.where(m.Product.name.ilike(f"%{q}%"))
 
     groups_for_products_obj = db.session.execute(m.GroupProduct.select()).all()
 
@@ -167,12 +255,21 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     return {
         "query": query,
         "pagination": pagination,
-        "q": q,
         "is_events": is_events,
         "master_groups": master_groups,
         "product_groups": product_groups,
         "current_user_groups_rows": current_user_groups_rows,
         "mastr_for_prods_groups_for_prods": mastr_for_prods_groups_for_prods,
+        "brand": brand,
+        "language": language,
+        "category": category,
+        "premises": premises,
+        "events": events,
+        "categories": categories,
+        "q": q,
+        "is_events_stocks_own_by_me": is_events_stocks_own_by_me,
+        "is_stocks_own_by_me": is_stocks_own_by_me,
+        "is_all_stocks_in_inventory": is_all_stocks_in_inventory,
         "master_groups_search": master_groups_search,
         "master_product_groups_name": master_group_product_name,
         "suppliers": [s for s in suppliers],
@@ -191,7 +288,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
 @login_required
 def get_all():
     products_object = get_all_products(request)
-    form_sort: f.SortByGroupProductForm = f.SortByGroupProductForm()
     form_create: f.NewProductForm = f.NewProductForm()
     form_edit: f.ProductForm = f.ProductForm()
 
@@ -207,6 +303,15 @@ def get_all():
         ).scalars(),
         page=products_object["pagination"],
         search_query=products_object["q"],
+        brand=products_object["brand"],
+        language=products_object["language"],
+        category=products_object["category"],
+        premises=products_object["premises"],
+        categories=products_object["categories"],
+        events=products_object["events"],
+        is_all_stocks_in_inventory=products_object["is_all_stocks_in_inventory"],
+        is_stocks_own_by_me=products_object["is_stocks_own_by_me"],
+        is_events_stocks_own_by_me=products_object["is_events_stocks_own_by_me"],
         is_events=products_object["is_events"],
         main_master_groups=products_object["master_groups"],
         product_groups=products_object["product_groups"],
@@ -225,7 +330,6 @@ def get_all():
             "mstr_prod_grps_prod_grps_names"
         ],
         warehouse_product_qty=products_object["warehouse_product_qty"],
-        form_sort=form_sort,
         form_create=form_create,
         form_edit=form_edit,
     )
@@ -418,11 +522,10 @@ def delete(id: int):
     flash("Product deleted!", "success")
     return "ok", 200
 
-
-# TODO refactor
-@product_blueprint.route("/sort", methods=["GET", "POST"])
-@login_required
-def sort():
+    # TODO refactor
+    # @product_blueprint.route("/sort", methods=["GET", "POST"])
+    # @login_required
+    # def sort():
     if request.method == "GET":
         return redirect(url_for("product.get_all"))
     form: f.SortByGroupProductForm = f.SortByGroupProductForm()
@@ -458,7 +561,6 @@ def sort():
             #     pid for pid in product_to_group if len(product_to_group[pid]) == len(groups)
             # ]
 
-            q = request.args.get("q", type=str, default=None)
             query = (
                 m.Product.select()
                 .where(m.Product.id.in_(product_to_group))
@@ -469,23 +571,6 @@ def sort():
                 .where(m.Product.id.in_(product_to_group))
                 .select_from(m.Product)
             )
-            if q:
-                query = (
-                    m.Product.select()
-                    .where(
-                        m.Product.name.ilike(f"%{q}%")
-                        | m.Product.id.in_(product_to_group)
-                    )
-                    .order_by(m.Product.id)
-                )
-                count_query = (
-                    sa.select(sa.func.count())
-                    .where(
-                        m.Product.name.ilike(f"%{q}%")
-                        | m.Product.id.in_(product_to_group)
-                    )
-                    .select_from(m.Product)
-                )
 
         reverse_event_filter = ~m.Product.warehouse_products.any(
             m.WarehouseProduct.group.has(
@@ -552,6 +637,10 @@ def sort():
                 )
             )
 
+        if form.q.data:
+            query = query.where(m.Product.name.ilike(f"%{form.q.data}%"))
+            count_query = count_query.where(m.Product.name.ilike(f"%{form.q.data}%"))
+
         if form.events_stocks_own_by_me.data:
             event_filter = m.Product.warehouse_products.any(
                 m.WarehouseProduct.group.has(
@@ -601,7 +690,7 @@ def sort():
                 .limit(products_object["pagination"].per_page)
             ).scalars(),
             page=products_object["pagination"],
-            search_query=products_object["q"],
+            search_query=form.q.data,
             is_events=form.events.data,
             is_all_stocks_in_inventory=form.all_stocks_in_inventory.data,
             is_stocks_own_by_me=form.stocks_own_by_me.data,

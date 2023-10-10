@@ -6,13 +6,11 @@ from wtforms import (
     IntegerField,
     FloatField,
     FileField,
-    BooleanField,
 )
 from wtforms.validators import DataRequired, Optional
 
 from app import models as m
 from app import db
-from .utils import JSONField
 
 
 class ProductForm(FlaskForm):
@@ -90,15 +88,6 @@ class NewProductForm(FlaskForm):
         query = m.Product.select().where(m.Product.name == field.data)
         if db.session.scalar(query) is not None:
             raise ValidationError("This product name is taken.")
-
-
-class SortByGroupProductForm(FlaskForm):
-    sort_by = JSONField("Sort by", [Optional()])
-    submit = SubmitField("Submit")
-    all_stocks_in_inventory = BooleanField("all_stocks_in_inventory", [Optional()])
-    stocks_own_by_me = BooleanField("stocks_own_by_me", [Optional()])
-    events_stocks_own_by_me = BooleanField("events_stocks_own_by_me", [Optional()])
-    events = BooleanField("events", [Optional()])
 
 
 class AssignProductForm(FlaskForm):

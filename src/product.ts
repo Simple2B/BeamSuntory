@@ -107,15 +107,12 @@ interface IProductGroupMasterGroup {
 const eventCheckbox: HTMLInputElement = document.querySelector('#product-show-events-toggle-btn');
 const eventStockOwnByMeCheckbox: HTMLInputElement = document.querySelector('#product-show-events-stocks-own-by-me-btn');
 
-// mark checkbox as checked if we are on event stock own by me route
-// if (window.location.pathname + window.location.hash === '/product/events_stocks_owned_by_me') {
-//   eventStockOwnByMeCheckbox.checked = true;
-// }
 
-const productStocksInInventoryToggles = document.querySelector('#all_stocks_in_inventory');
-const productStocksOwnByMeToggles = document.querySelector('#stocks_own_by_me');
-const productEventsStocksOwnByMeToggles = document.querySelector('#events_stocks_own_by_me');
-const productEventsToggles = document.querySelector('#events');
+const allStocksToggle = document.querySelector('#product-show-all-stocks') as HTMLInputElement;
+const allStocksInInventoryToggle = document.querySelector('#product-show-all-stocks-inventory') as HTMLInputElement;
+const stocksByMeToggle = document.querySelector('#product-show-stocks-own-by-me-btn') as HTMLInputElement;
+const eventStocksOwnByMeToggle = document.querySelector('#product-show-events-stocks-own-by-me-btn') as HTMLInputElement;
+const eventToggle = document.querySelector('#product-show-events-toggle-btn') as HTMLInputElement;
 
 
 const isEvent = eventCheckbox.checked || eventStockOwnByMeCheckbox.checked;
@@ -505,14 +502,53 @@ async function getEventAvailableQuantity(product_id: number, group: string, cale
 
 // search flow
 const searchInput: HTMLInputElement = document.querySelector('#table-search-products');
-const searchInputButton = document.querySelector('#table-search-product-button');
-if (searchInputButton && searchInput) {
-  searchInputButton.addEventListener('click', () => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('q', searchInput.value);
-    window.location.href = `${url.href}`;
-  });
-}
+const searchInputButton = document.querySelector('#table-search-product-button') as HTMLButtonElement;
+
+searchInputButton.addEventListener('click', () => {
+  const url = new URL(window.location.href);
+  url.searchParams.delete('q');
+  url.searchParams.delete('is_all_stocks_in_inventory')
+  url.searchParams.delete('is_stocks_own_by_me')
+  url.searchParams.delete('is_events_stocks_own_by_me')
+  url.searchParams.delete('is_events')
+  url.searchParams.delete('brand')
+  url.searchParams.delete('language')
+  url.searchParams.delete('premises')
+  url.searchParams.delete('category')
+  url.searchParams.delete('events')
+  url.searchParams.delete('categories')
+
+
+  url.searchParams.set('q', searchInput.value);
+  allStocksInInventoryToggle.checked ? url.searchParams.set('is_all_stocks_in_inventory', 'true') : null;
+  stocksByMeToggle.checked ? url.searchParams.set('is_stocks_own_by_me', 'true') : null;
+  eventStocksOwnByMeToggle.checked ? url.searchParams.set('is_events_stocks_own_by_me', 'true') : null;
+  eventToggle.checked ? url.searchParams.set('is_events', 'true') : null;
+
+  const brandSelector = document.querySelector('#dropdownRadioButton-Brand');
+  const languageSelector = document.querySelector('#dropdownRadioButton-Language');
+  const premisesSelector = document.querySelector('#dropdownRadioButton-Premises');
+  const categorySelector = document.querySelector('#dropdownRadioButton-Category');
+  const eventsSelector = document.querySelector('#dropdownRadioButton-Events');
+  const categoriesSelector = document.querySelector('#dropdownRadioButton-Categories');
+
+  const brand = brandSelector.textContent.trim().replace(/\n/g, '');
+  const language = languageSelector.textContent.trim().replace(/\n/g, '');
+  const premises = premisesSelector.textContent.trim().replace(/\n/g, '');
+  const category = categorySelector.textContent.trim().replace(/\n/g, '');
+  const events = eventsSelector.textContent.trim().replace(/\n/g, '');
+  const categories = categoriesSelector.textContent.trim().replace(/\n/g, '');
+
+  brand !== 'Brand' ? url.searchParams.set('brand', brand) : null;
+  language !== 'Language' ? url.searchParams.set('language', language) : null;
+  premises !== 'Premises' ? url.searchParams.set('premises', premises) : null;
+  category !== 'Category' ? url.searchParams.set('category', category) : null;
+  events !== 'Events group' ? url.searchParams.set('events', events) : null;
+  categories !== 'Categories' ? url.searchParams.set('categories', categories) : null;
+
+  window.location.href = `${url.origin}${url.pathname}${url.search}`;
+});
+
 const deleteButtons = document.querySelectorAll('.delete-product-btn');
 
 deleteButtons.forEach((e) => {
@@ -1346,14 +1382,15 @@ productFilterInputs.forEach((input: HTMLInputElement) => {
 });
 
 filterProductButton.addEventListener('click', (e) => {
-  const hiddenInput = document.querySelector('#sort_by') as HTMLInputElement;
-  const filterJsonDataStorage = sessionStorage.getItem('filterJsonData');
-  const filterDataObject = JSON.parse(filterJsonDataStorage);
-  filterJsonData = filterDataObject;
-  hiddenInput.value = JSON.stringify(filterJsonData);
-  sessionStorage.setItem('filterJsonData', JSON.stringify(filterJsonData));
-  const isVisibleFilter = true;
-  sessionStorage.setItem('isVisibleFilter', JSON.stringify(isVisibleFilter));
+  searchInputButton.click();
+  // const hiddenInput = document.querySelector('#sort_by') as HTMLInputElement;
+  // const filterJsonDataStorage = sessionStorage.getItem('filterJsonData');
+  // const filterDataObject = JSON.parse(filterJsonDataStorage);
+  // filterJsonData = filterDataObject;
+  // hiddenInput.value = JSON.stringify(filterJsonData);
+  // sessionStorage.setItem('filterJsonData', JSON.stringify(filterJsonData));
+  // const isVisibleFilter = true;
+  // sessionStorage.setItem('isVisibleFilter', JSON.stringify(isVisibleFilter));
 });
 
 function getSessionStorageObject(
@@ -1962,79 +1999,43 @@ document.getElementById('product-add-image').addEventListener('change', async (e
   }
 });
 
-
-const allStocksToggle = document.querySelector('#product-show-all-stocks') as HTMLInputElement;
-const allStocksInInventoryToggle = document.querySelector('#product-show-all-stocks-inventory') as HTMLInputElement;
-const stocksByMeToggle = document.querySelector('#product-show-stocks-own-by-me-btn') as HTMLInputElement;
-const eventStocksOwnByMeToggle = document.querySelector('#product-show-events-stocks-own-by-me-btn') as HTMLInputElement;
-const eventToggle = document.querySelector('#product-show-events-toggle-btn') as HTMLInputElement;
-
-
-const allStocksInInventoryInput = document.querySelector('#all_stocks_in_inventory') as HTMLInputElement;
-const stocksByMeInput = document.querySelector('#stocks_own_by_me') as HTMLInputElement;
-const eventStocksOwnByMeInput = document.querySelector('#events_stocks_own_by_me') as HTMLInputElement;
-const eventInput = document.querySelector('#events') as HTMLInputElement;
-
-
 const autoswitchAllStocksToggle = () => {
   if(!allStocksInInventoryToggle.checked && !stocksByMeToggle.checked && ! eventStocksOwnByMeToggle.checked){
-
     allStocksInInventoryToggle.checked = false;
-    allStocksInInventoryInput.value = '';
-
     stocksByMeToggle.checked = false;
-    stocksByMeInput.value = '';
-
     eventStocksOwnByMeToggle.checked = false;
-    eventStocksOwnByMeInput.value = '';
-
     allStocksToggle.checked=true;
-    filterProductButton.click();
+    searchInputButton.click();
   }
 }
 
 
 allStocksInInventoryToggle.addEventListener('change', () => {
-  allStocksInInventoryInput.value =  allStocksInInventoryToggle.checked ? 'true' : 'false';
   if(allStocksInInventoryToggle.checked){
     stocksByMeToggle.checked = false;
-    stocksByMeInput.value = '';
-
     eventStocksOwnByMeToggle.checked = false;
-    eventStocksOwnByMeInput.value = '';
-
     allStocksToggle.checked = false;
-    filterProductButton.click();
+    searchInputButton.click();
   }
   autoswitchAllStocksToggle();
 })
 
 stocksByMeToggle.addEventListener('change', () => {
-  stocksByMeInput.value=  stocksByMeToggle.checked ? 'true' : 'false';
   if(stocksByMeToggle.checked){
     allStocksInInventoryToggle.checked = false;
-    allStocksInInventoryInput.value = '';
-
     eventStocksOwnByMeToggle.checked = false;
-    eventStocksOwnByMeInput.value = '';
-
     allStocksToggle.checked = false;
-    filterProductButton.click();
+    searchInputButton.click();
   }
   autoswitchAllStocksToggle();
 })  
 
-eventStocksOwnByMeToggle.addEventListener('change', () => {
-  eventStocksOwnByMeInput.value=  eventStocksOwnByMeToggle.checked ? 'true' : 'false';
+eventStocksOwnByMeToggle.addEventListener('change', () => {  
   if(eventStocksOwnByMeToggle.checked){
     allStocksInInventoryToggle.checked = false;
-    allStocksInInventoryInput.value = '';
-
     stocksByMeToggle.checked = false;
-    stocksByMeInput.value = '';
-
-    allStocksToggle.checked = false;
-    filterProductButton.click();
+    allStocksToggle.checked = false;    
+    searchInputButton.click();
   }
   autoswitchAllStocksToggle();
 })
@@ -2044,12 +2045,11 @@ allStocksToggle.addEventListener('change', () => {
     allStocksInInventoryToggle.checked = false;
     stocksByMeToggle.checked = false;
     eventStocksOwnByMeToggle.checked = false;
-    filterProductButton.click();
+    searchInputButton.click();
   }
   autoswitchAllStocksToggle();
 });
 
 eventToggle.addEventListener('change', () => {
-  eventInput.value=  eventToggle.checked ? 'true' : 'false';
-  filterProductButton.click();
+  searchInputButton.click();
 });
