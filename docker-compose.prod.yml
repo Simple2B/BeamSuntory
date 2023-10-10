@@ -18,7 +18,7 @@ services:
     image: simple2b/beam-suntory-app:latest
     restart: always
     volumes:
-      - product_images:/app/static/img/product
+      - ./product_images:/app/static/img/product
     env_file:
       - .env
     depends_on:
@@ -35,4 +35,3 @@ networks:
 
 volumes:
   db_data:
-  product_images:
