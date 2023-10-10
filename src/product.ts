@@ -108,9 +108,15 @@ const eventCheckbox: HTMLInputElement = document.querySelector('#product-show-ev
 const eventStockOwnByMeCheckbox: HTMLInputElement = document.querySelector('#product-show-events-stocks-own-by-me-btn');
 
 // mark checkbox as checked if we are on event stock own by me route
-if (window.location.pathname + window.location.hash === '/product/events_stocks_owned_by_me') {
-  eventStockOwnByMeCheckbox.checked = true;
-}
+// if (window.location.pathname + window.location.hash === '/product/events_stocks_owned_by_me') {
+//   eventStockOwnByMeCheckbox.checked = true;
+// }
+
+const productStocksInInventoryToggles = document.querySelector('#all_stocks_in_inventory');
+const productStocksOwnByMeToggles = document.querySelector('#stocks_own_by_me');
+const productEventsStocksOwnByMeToggles = document.querySelector('#events_stocks_own_by_me');
+const productEventsToggles = document.querySelector('#events');
+
 
 const isEvent = eventCheckbox.checked || eventStockOwnByMeCheckbox.checked;
 const eventsWarehouse = 'Warehouse Events';
@@ -1276,7 +1282,7 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
 
 // function to filter products by group
 const productFilterInputs = document.querySelectorAll('.product-filter-input');
-const filterProductButton = document.querySelector('#product-filter-button');
+const filterProductButton = document.querySelector('#product-filter-button') as HTMLButtonElement;
 const filterRadioButtons = document.querySelectorAll('.product-filter-radio-button');
 
 filterRadioButtons.forEach((btn) => {
@@ -1858,49 +1864,6 @@ async function getSortOwnByMe(checkbox: HTMLInputElement, sortRoute: string) {
   }
 }
 
-// ----product show stocks own by me----
-const showProductByUserGroupCheckbox: HTMLInputElement = document.querySelector('#product-show-stocks-own-by-me-btn');
-if (window.location.pathname + window.location.hash === '/product/stocks_owned_by_me') {
-  window.onload = (event) => {
-    showProductByUserGroupCheckbox.setAttribute('checked', 'checked');
-  };
-}
-showProductByUserGroupCheckbox.addEventListener('change', async () => {
-  getSortOwnByMe(showProductByUserGroupCheckbox, 'stocks_owned_by_me');
-});
-
-// ----product events show stocks own by me----
-const showEventsProductByUserGroupCheckbox: HTMLInputElement = document.querySelector(
-  '#product-show-events-stocks-own-by-me-btn'
-);
-if (window.location.pathname + window.location.hash === '/product/events_stocks_owned_by_me') {
-  window.onload = (event) => {
-    showEventsProductByUserGroupCheckbox.setAttribute('checked', 'checked');
-  };
-}
-showEventsProductByUserGroupCheckbox.addEventListener('change', async () => {
-  getSortOwnByMe(showEventsProductByUserGroupCheckbox, 'events_stocks_owned_by_me');
-});
-
-const showAllProductStocksCheckbox: HTMLInputElement = document.querySelector('#product-show-all-stocks');
-if (window.location.pathname + window.location.hash === '/product/' && !window.location.href.includes('events')) {
-  window.onload = (event) => {
-    showAllProductStocksCheckbox.setAttribute('checked', 'checked');
-  };
-}
-showAllProductStocksCheckbox.addEventListener('change', async () => {
-  getSortOwnByMe(showAllProductStocksCheckbox, '');
-});
-
-const showAllStocksInventoryCheckbox: HTMLInputElement = document.querySelector('#product-show-all-stocks-inventory');
-if (window.location.pathname + window.location.hash === '/product/stocks_in_inventory') {
-  window.onload = (event) => {
-    showAllStocksInventoryCheckbox.setAttribute('checked', 'checked');
-  };
-}
-showAllStocksInventoryCheckbox.addEventListener('change', async () => {
-  getSortOwnByMe(showAllStocksInventoryCheckbox, 'stocks_in_inventory');
-});
 
 document.querySelector('#product-assign-master-group').addEventListener('change', () => {
   const productAssignMasterGroupSelect: HTMLSelectElement = document.querySelector('#product-assign-master-group');
@@ -1999,58 +1962,94 @@ document.getElementById('product-add-image').addEventListener('change', async (e
   }
 });
 
-// productBookingButtons.forEach((button) =>
-//     button.addEventListener('click', () => {
-//         const product = JSON.parse(button.getAttribute('data-target'))
-//         console.log(product)
 
-//         let div: HTMLDivElement = document.querySelector('#product-event-name')
-//         div.innerHTML = product.name
-//         const img: HTMLImageElement = document.querySelector('#product-event-image')
-//         const fullImageAnchor = img.closest('.product-full-image-anchor')
-//         fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
-//         product.image.length > 100
-//             ? (img.src = `data:image/png;base64, ${product.image}`)
-//             : (img.src = defaultBrandImage)
-//         div = document.querySelector('#product-event-SKU')
-//         div.innerHTML = product.SKU
-//         div = document.querySelector('#product-event-next_url')
-//         div.innerHTML = window.location.href
+const allStocksToggle = document.querySelector('#product-show-all-stocks') as HTMLInputElement;
+const allStocksInInventoryToggle = document.querySelector('#product-show-all-stocks-inventory') as HTMLInputElement;
+const stocksByMeToggle = document.querySelector('#product-show-stocks-own-by-me-btn') as HTMLInputElement;
+const eventStocksOwnByMeToggle = document.querySelector('#product-show-events-stocks-own-by-me-btn') as HTMLInputElement;
+const eventToggle = document.querySelector('#product-show-events-toggle-btn') as HTMLInputElement;
 
-//         const productIdInput: HTMLInputElement = document.querySelector('#product-event-product-id')
-//         productIdInput.value = product.id.toString()
 
-//         // datepicker
-//         const eventDatepickers = document.querySelectorAll('.product-event-datepicker')
-//         const dateCurrent = new Date()
-//         const dateEvent = new Date(dateCurrent.getFullYear(), dateCurrent.getMonth(), dateCurrent.getDate() + 5)
+const allStocksInInventoryInput = document.querySelector('#all_stocks_in_inventory') as HTMLInputElement;
+const stocksByMeInput = document.querySelector('#stocks_own_by_me') as HTMLInputElement;
+const eventStocksOwnByMeInput = document.querySelector('#events_stocks_own_by_me') as HTMLInputElement;
+const eventInput = document.querySelector('#events') as HTMLInputElement;
 
-//         const option = {
-//             todayHighlight: true,
-//             minDate: dateEvent,
-//         }
 
-//         eventDatepickers.forEach((datepicker: HTMLDivElement, index) => {
-//             const eventDatePicker = new Datepicker(datepicker)
-//             eventDatePicker.setOptions(option)
-//             if (index === 0) {
-//                 eventDatePicker.setDate(dateEvent)
-//             }
-//         })
-//     })
-// )
+const autoswitchAllStocksToggle = () => {
+  if(!allStocksInInventoryToggle.checked && !stocksByMeToggle.checked && ! eventStocksOwnByMeToggle.checked){
 
-function getFilterValues(isChecked: boolean) {
-  const url = new URL(window.location.href);
-  const eventSortToggleButton = document.querySelector('#product-show-events-toggle-btn');
+    allStocksInInventoryToggle.checked = false;
+    allStocksInInventoryInput.value = '';
 
-  url.pathname = '/product';
+    stocksByMeToggle.checked = false;
+    stocksByMeInput.value = '';
 
-  isChecked ? url.searchParams.set('events', 'true') : url.searchParams.delete('events');
-  window.location.href = `${url.href}`;
+    eventStocksOwnByMeToggle.checked = false;
+    eventStocksOwnByMeInput.value = '';
+
+    allStocksToggle.checked=true;
+    filterProductButton.click();
+  }
 }
 
-const eventSortToggleButton: HTMLInputElement = document.querySelector('#product-show-events-toggle-btn');
-eventSortToggleButton.addEventListener('change', () => {
-  getFilterValues(eventSortToggleButton.checked);
+
+allStocksInInventoryToggle.addEventListener('change', () => {
+  allStocksInInventoryInput.value =  allStocksInInventoryToggle.checked ? 'true' : 'false';
+  if(allStocksInInventoryToggle.checked){
+    stocksByMeToggle.checked = false;
+    stocksByMeInput.value = '';
+
+    eventStocksOwnByMeToggle.checked = false;
+    eventStocksOwnByMeInput.value = '';
+
+    allStocksToggle.checked = false;
+    filterProductButton.click();
+  }
+  autoswitchAllStocksToggle();
+})
+
+stocksByMeToggle.addEventListener('change', () => {
+  stocksByMeInput.value=  stocksByMeToggle.checked ? 'true' : 'false';
+  if(stocksByMeToggle.checked){
+    allStocksInInventoryToggle.checked = false;
+    allStocksInInventoryInput.value = '';
+
+    eventStocksOwnByMeToggle.checked = false;
+    eventStocksOwnByMeInput.value = '';
+
+    allStocksToggle.checked = false;
+    filterProductButton.click();
+  }
+  autoswitchAllStocksToggle();
+})  
+
+eventStocksOwnByMeToggle.addEventListener('change', () => {
+  eventStocksOwnByMeInput.value=  eventStocksOwnByMeToggle.checked ? 'true' : 'false';
+  if(eventStocksOwnByMeToggle.checked){
+    allStocksInInventoryToggle.checked = false;
+    allStocksInInventoryInput.value = '';
+
+    stocksByMeToggle.checked = false;
+    stocksByMeInput.value = '';
+
+    allStocksToggle.checked = false;
+    filterProductButton.click();
+  }
+  autoswitchAllStocksToggle();
+})
+
+allStocksToggle.addEventListener('change', () => {
+  if(allStocksToggle.checked){
+    allStocksInInventoryToggle.checked = false;
+    stocksByMeToggle.checked = false;
+    eventStocksOwnByMeToggle.checked = false;
+    filterProductButton.click();
+  }
+  autoswitchAllStocksToggle();
+});
+
+eventToggle.addEventListener('change', () => {
+  eventInput.value=  eventToggle.checked ? 'true' : 'false';
+  filterProductButton.click();
 });

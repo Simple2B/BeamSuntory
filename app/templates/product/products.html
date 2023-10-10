@@ -6,9 +6,19 @@
   <form id="product-filter-form" action="{{url_for('product.sort')}}" method="post"
     class="flex flex-wrap py-4 gap-5 bg-white dark:bg-gray-800">
     {{ form_sort.hidden_tag() }}
+    
     <input id="sort_by" hidden type="text" value="test" name="sort_by"
       class="product-filter-input w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-    <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800 gap-4">
+    <input id="all_stocks_in_inventory" hidden type="text" {% if is_all_stocks_in_inventory %}value="true"{%else%}value=""{% endif %}  name="all_stocks_in_inventory"
+      class="product-filter-input w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+    <input id="stocks_own_by_me" hidden type="text" {% if is_stocks_own_by_me %}value="true"{%else%}value=""{% endif %} name="stocks_own_by_me"
+      class="product-filter-input w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+    <input id="events_stocks_own_by_me" hidden type="text" {% if is_events_stocks_own_by_me %}value="true"{%else%}value=""{% endif %} name="events_stocks_own_by_me"
+      class="product-filter-input w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+    <input id="events" hidden type="text" {% if is_events %}value="true"{%else%}value=""{% endif %} name="events"
+      class="product-filter-input w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+    
+      <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800 gap-4">
       {% for master_group_search in master_groups_search %}
       {% set master_group_search_no_space = master_group_search.replace(' ', '_') %}
       <div>
@@ -61,6 +71,16 @@
         </div>
       </div>
       {% endfor %}
+      <button type="submit" id="product-filter-button" name="submit"
+        class="inline-flex items-center justify-center  px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-blue-300 sm:w-auto dark:bg-yellow-400 dark:hover:bg-yellow-500 dark:focus:ring-blue-800">
+        <svg class="w-3 h-3 mr-2 -ml-1" fill="currentColor" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd"
+            d="M137.4 41.4c12.5-12.5 32.8-12.5 45.3 0l128 128c9.2 9.2 11.9 22.9 6.9 34.9s-16.6 19.8-29.6 19.8H32c-12.9 0-24.6-7.8-29.6-19.8s-2.2-25.7 6.9-34.9l128-128zm0 429.3l-128-128c-9.2-9.2-11.9-22.9-6.9-34.9s16.6-19.8 29.6-19.8H288c12.9 0 24.6 7.8 29.6 19.8s2.2 25.7-6.9 34.9l-128 128c-12.5 12.5-32.8 12.5-45.3 0z"
+            clip-rule="evenodd">
+          </path>
+        </svg>
+        Filter
+      </button>
     </div>
     <!-- TODO: uncomment when product master group filter will be changed to query filter params  -->
     <!-- <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800">
@@ -74,48 +94,38 @@
       </select>
       {% endfor %}
     </div> -->
-    <div class="flex items-center space-x-2 sm:space-x-3 flex-wrap">
-      <button type="submit" id="product-filter-button" name="submit"
-        class="inline-flex items-center justify-center  px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-blue-300 sm:w-auto dark:bg-yellow-400 dark:hover:bg-yellow-500 dark:focus:ring-blue-800">
-        <svg class="w-3 h-3 mr-2 -ml-1" fill="currentColor" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-          <path fill-rule="evenodd"
-            d="M137.4 41.4c12.5-12.5 32.8-12.5 45.3 0l128 128c9.2 9.2 11.9 22.9 6.9 34.9s-16.6 19.8-29.6 19.8H32c-12.9 0-24.6-7.8-29.6-19.8s-2.2-25.7 6.9-34.9l128-128zm0 429.3l-128-128c-9.2-9.2-11.9-22.9-6.9-34.9s16.6-19.8 29.6-19.8H288c12.9 0 24.6 7.8 29.6 19.8s2.2 25.7-6.9 34.9l-128 128c-12.5 12.5-32.8 12.5-45.3 0z"
-            clip-rule="evenodd">
-          </path>
-        </svg>
-        Filter
-      </button>
+    <div class="flex items-center space-x-2 sm:space-x-3 flex-wrap">      
       <label class="ml-7 relative inline-flex items-center cursor-pointer">
-        <input id="product-show-all-stocks" type="checkbox" value="" class="sr-only peer">
+        <input id="product-show-all-stocks" type="checkbox" value="" class="sr-only peer product-sorting-toggle" {% if not is_all_stocks_in_inventory and not is_stocks_own_by_me and not is_events_stocks_own_by_me %}checked{% endif %}>
         <div
           class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-400">
         </div>
         <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">All stocks</span>
       </label>
       <label class="ml-7 relative inline-flex items-center cursor-pointer">
-        <input id="product-show-all-stocks-inventory" type="checkbox" value="" class="sr-only peer">
+        <input id="product-show-all-stocks-inventory" name="product-show-all-stocks-inventory" {% if is_all_stocks_in_inventory %}checked{% endif %} type="checkbox" value="" class="sr-only peer product-sorting-toggle">
         <div
           class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-400">
         </div>
         <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">All stocks in inventory</span>
       </label>
       <label class="ml-7 relative inline-flex items-center cursor-pointer">
-        <input id="product-show-stocks-own-by-me-btn" type="checkbox" value="" class="sr-only peer">
+        <input id="product-show-stocks-own-by-me-btn" name="product-show-stocks-own-by-me-btn" {% if is_stocks_own_by_me %}checked{% endif %} type="checkbox" value="" class="sr-only peer product-sorting-toggle">
         <div
           class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-400">
         </div>
         <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Stocks Own By Me</span>
       </label>
       <label class="ml-7 relative inline-flex items-center cursor-pointer">
-        <input id="product-show-events-stocks-own-by-me-btn" type="checkbox" value="" class="sr-only peer">
+        <input id="product-show-events-stocks-own-by-me-btn" name="product-show-events-stocks-own-by-me-btn" {% if is_events_stocks_own_by_me %}checked{% endif %} type="checkbox" value="" class="sr-only peer product-sorting-toggle">
         <div
           class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-400">
         </div>
         <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Events Stocks Own By Me</span>
       </label>
       <label class="ml-13 relative inline-flex items-center cursor-pointer">
-        <input id="product-show-events-toggle-btn" {% if is_events %}checked{% endif %} type="checkbox" value=""
-          class="sr-only peer">
+        <input id="product-show-events-toggle-btn" name="" {% if is_events %}checked{% endif %} type="checkbox" value=""
+          class="sr-only peer product-sorting-toggle">
         <div
           class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-400">
         </div>
@@ -149,6 +159,8 @@
         <path stroke-linecap="round" stroke-linejoin="round"
           d="M15.75 15.75l-2.489-2.489m0 0a3.375 3.375 0 10-4.773-4.773 3.375 3.375 0 004.774 4.774zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>Search</button>
+      
+      
     <button id="dropdownBgHoverButton" data-dropdown-toggle="dropdownBgHover"
       class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
       type="button">

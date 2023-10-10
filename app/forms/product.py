@@ -6,6 +6,7 @@ from wtforms import (
     IntegerField,
     FloatField,
     FileField,
+    BooleanField,
 )
 from wtforms.validators import DataRequired, Optional
 
@@ -92,8 +93,12 @@ class NewProductForm(FlaskForm):
 
 
 class SortByGroupProductForm(FlaskForm):
-    sort_by = JSONField("Sort by", [DataRequired()])
+    sort_by = JSONField("Sort by", [Optional()])
     submit = SubmitField("Submit")
+    all_stocks_in_inventory = BooleanField("all_stocks_in_inventory", [Optional()])
+    stocks_own_by_me = BooleanField("stocks_own_by_me", [Optional()])
+    events_stocks_own_by_me = BooleanField("events_stocks_own_by_me", [Optional()])
+    events = BooleanField("events", [Optional()])
 
 
 class AssignProductForm(FlaskForm):
