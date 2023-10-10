@@ -9,7 +9,7 @@ from flask import (
 from flask_login import login_required, current_user
 import sqlalchemy as sa
 from sqlalchemy import desc
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import schema as s
 from app import models as m, db
@@ -24,6 +24,7 @@ incoming_stock_blueprint = Blueprint(
 
 @incoming_stock_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def get_all():
     form_sort: f.SortByStatusInboundOrderForm = f.SortByStatusInboundOrderForm()
     form_create = f.InboundOrderCreateForm()
@@ -68,6 +69,7 @@ def get_all():
 
 @incoming_stock_blueprint.route("/accept", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def accept():
     form_edit: f.PackageInfoForm = f.PackageInfoForm()
 
@@ -225,6 +227,7 @@ def accept():
 
 @incoming_stock_blueprint.route("/cancel/<int:id>", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def cancel(id: int):
     io: m.InboundOrder = db.session.scalar(
         m.InboundOrder.select().where(m.InboundOrder.id == id)
@@ -243,6 +246,7 @@ def cancel(id: int):
 
 @incoming_stock_blueprint.route("/sort", methods=["GET", "POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def sort():
     # TODO: move to incoming stocks get request
     if (
@@ -312,6 +316,7 @@ def sort():
 
 @incoming_stock_blueprint.route("/notes", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def notes():
     form_note: f.InboundOrderPickupForm = f.InboundOrderPickupForm()
 

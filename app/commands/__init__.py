@@ -78,6 +78,12 @@ def init(app: Flask):
             ],
         }
 
+        m.Image(
+            name="logo-mini",
+            path="product/logo-mini.png",
+            extension="png",
+        ).save(False)
+
         for mg in stock_master_groups:
             master_group = db.session.execute(
                 m.MasterGroup.select().where(m.MasterGroup.name == mg)

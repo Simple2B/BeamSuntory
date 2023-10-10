@@ -22,7 +22,8 @@ class ProductForm(FlaskForm):
     regular_price = FloatField("Regular price", validators=[Optional()])
     retail_price = FloatField("Retail price", validators=[Optional()])
     image = FileField("Image", validators=[Optional()])
-    low_image = FileField("Image", validators=[Optional()])
+    low_image = FileField("Low Image", validators=[Optional()])
+    high_image = FileField("High Image", validators=[Optional()])
     description = StringField("Description", [DataRequired()])
     # General Info ->
     SKU = StringField("SKU", [DataRequired()])
@@ -60,7 +61,8 @@ class NewProductForm(FlaskForm):
     regular_price = FloatField("Regular price", validators=[Optional()])
     retail_price = FloatField("Retail price", validators=[Optional()])
     image = FileField("Image", validators=[Optional()])
-    low_image = FileField("Image", validators=[Optional()])
+    low_image = FileField("Low Image", validators=[Optional()])
+    high_image = FileField("High Image", validators=[Optional()])
     description = StringField("Description", [DataRequired()])
     # General Info ->
     SKU = StringField("SKU", [DataRequired()])

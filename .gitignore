@@ -4,6 +4,9 @@ env/
 .venv/
 .pytest_cache/
 node_modules/
+product_images/
+products/
+product/
 
 # ignore files
 .env

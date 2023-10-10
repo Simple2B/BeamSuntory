@@ -1,10 +1,12 @@
 from functools import wraps
-from flask import abort
+from flask import abort, request
 from flask_login import current_user
 
 from app import db
 from app import schema as s
 from app import models as m
+
+from app.logger import log
 
 
 def create_admin(admin_data: s.AdminCreate):
@@ -25,12 +27,30 @@ def create_admin(admin_data: s.AdminCreate):
     db.session.commit()
 
 
-def role_required(required_role):
+def role_required(required_role, hasApprovalPermission=False):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            if current_user.role not in required_role:
-                abort(403)  # Forbidden status code
+            if not current_user:
+                log(log.ERROR, "User is not authenticated")
+                abort(401)
+            if current_user.role_obj.role_name not in required_role:
+                log(
+                    log.ERROR,
+                    "User with role :[%s] does not have permission to access route: [%s]",
+                    current_user.role_obj.role_name,
+                    request.path,
+                )
+                abort(403)
+            if hasApprovalPermission:
+                if not current_user.approval_permission:
+                    log(
+                        log.ERROR,
+                        "User with role :[%s] does not have approval permission to access route: [%s]",
+                        current_user.approval_permission,
+                        request.path,
+                    )
+                    abort(403)
             return func(*args, **kwargs)
 
         return wrapper

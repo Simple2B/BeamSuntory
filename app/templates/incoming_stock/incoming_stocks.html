@@ -142,7 +142,8 @@
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold status-{{inbound_order.status.name}}">{{ inbound_order.status.value }}</div>
+            <div class="text-base font-semibold status-{{inbound_order.status.name}}">{{ inbound_order.status.value }}
+            </div>
           </div>
         </td>
         <td class="p-4 space-x-2 whitespace-nowrap">
@@ -169,9 +170,8 @@
             Accept goods
           </button> -->
           {% endif %}
-          {% if inbound_order.status != inbound_orders_status.cancelled and inbound_order.status !=
-          inbound_orders_status.delivered
-          %}
+          {% if inbound_order.status not in [inbound_orders_status.cancelled,
+          inbound_orders_status.delivered, inbound_orders_status.in_transit] %}
           <button data-cancel-incoming-stock-id={{ inbound_order.id }} type="button"
             class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900 cancel-incoming-stock-btn">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">

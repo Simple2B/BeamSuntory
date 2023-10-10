@@ -19,6 +19,7 @@ def create_app(environment="development"):
     from config import config
     from app.views import BLUEPRINTS
     from app import models as m, forms
+    from app import schema as s
 
     # Instantiate app.
     app = Flask(__name__)
@@ -51,6 +52,32 @@ def create_app(environment="development"):
     login_manager.anonymous_user = m.AnonymousUser
 
     app.jinja_env.globals["form_product_upload"] = forms.UploadProductForm
+    app.jinja_env.globals["admin_roles"] = [s.UserRole.ADMIN.value]
+    app.jinja_env.globals["admin_warehouse_roles"] = [
+        s.UserRole.ADMIN.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ]
+    app.jinja_env.globals["warehouse_roles"] = [
+        # TODO: delete admin role after testing
+        s.UserRole.ADMIN.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ]
+    app.jinja_env.globals["admin_manager_roles"] = [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.MANAGER.value,
+    ]
+    app.jinja_env.globals["admin_warehouse_manager_roles"] = [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ]
+    app.jinja_env.globals["delivery_agent_roles"] = [
+        # TODO: delete admin role after testing
+        s.UserRole.ADMIN.value,
+        s.UserRole.DELIVERY_AGENT.value,
+    ]
 
     # Error handlers.
     @app.errorhandler(HTTPException)

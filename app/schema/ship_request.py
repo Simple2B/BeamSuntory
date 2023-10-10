@@ -28,3 +28,10 @@ class ShipRequest(BaseModel):
     carts: list[Cart]
 
     created_at: datetime = Field(alias="createdAt")
+
+
+class FilterShipRequest(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    q: str | None = None
+    ship_request_sort_locker: bool = False

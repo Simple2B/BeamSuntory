@@ -7,7 +7,7 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import schema as s
 from app import models as m, db
@@ -75,6 +75,7 @@ def get_request_share_report():
 
 @report_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def index():
     brands = db.session.scalars(
         sa.select(m.MasterGroupProduct)
@@ -124,11 +125,13 @@ def index():
 
 @report_blueprint.route("/api", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def report_json():
     return jsonify(c.get_reports())
 
 
 @report_blueprint.route("search")
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def search():
     return c.get_reports(render=True)

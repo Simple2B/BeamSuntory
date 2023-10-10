@@ -45,6 +45,7 @@ def test_create_product(client):
     )
     data["image"] = (io.BytesIO(b"abcdef"), "test.png")
     data["low_image"] = (io.BytesIO(b"abcdef"), "test.png")
+    data["high_image"] = (io.BytesIO(b"abcdef"), "test.png")
     response = client.post(
         "/product/create",
         data=data,
@@ -92,6 +93,8 @@ def test_edit_product(mg_g_populate: FlaskClient):
         product_groups="[1,2,3]",
     )
     data["image"] = (io.BytesIO(b"abcdef"), "test.png")
+    data["low_image"] = (io.BytesIO(b"abcdeaaa"), "test.png")
+    data["high_image"] = (io.BytesIO(b"abcdeaaa"), "test.png")
 
     response = mg_g_populate.post(
         "/product/edit",

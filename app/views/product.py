@@ -2,6 +2,8 @@ from io import BytesIO
 import base64
 import json
 from datetime import datetime
+from pathlib import Path
+from PIL import Image
 import pandas
 from flask import (
     Blueprint,
@@ -17,7 +19,7 @@ from flask_login import login_required, current_user
 from flask_mail import Message
 from sqlalchemy.dialects.postgresql import insert
 import sqlalchemy as sa
-from app.controllers import create_pagination
+from app.controllers import create_pagination, save_image, role_required
 
 from app import models as m, db
 from app import schema as s
@@ -337,6 +339,7 @@ def get_all():
 
 @product_blueprint.route("/create", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def create():
     form: f.NewProductForm = f.NewProductForm()
     if form.validate_on_submit():
@@ -348,8 +351,6 @@ def create():
 
         supplier: m.Supplier = db.session.scalar(m.Supplier.select())
 
-        # TODO: use this original image in the future
-        # image = request.files["image"]
         low_image = request.files["low_image"]
         low_image_string = base64.b64encode(low_image.read()).decode()
         product: m.Product = m.Product(
@@ -381,15 +382,30 @@ def create():
             height=form.height.data if form.height.data else 0,
         )
         log(log.INFO, "Form submitted. Product: [%s]", product)
-        product.save()
+        product.save(False)
+
+        if "image" in request.files["high_image"].mimetype:
+            file_image = save_image(
+                request.files["high_image"], f"product/{form.SKU.data}"
+            )
+            if isinstance(file_image, str):
+                if "Cannot guess file type!" in file_image:
+                    flash("Product added! Cannot guess image file type!", "danger")
+                elif "Unsupported file type!" in file_image:
+                    flash("Product added! Unsupported image file type!", "danger")
+            else:
+                flash("Product added!", "success")
+                file_image.save(False)
+                product.image_obj = file_image
+        db.session.commit()
 
         product_master_groups_ids = json.loads(form.product_groups.data)
 
         for group_id in product_master_groups_ids:
             product_group = m.ProductGroup(product_id=product.id, group_id=group_id)
-            product_group.save()
+            product_group.save(False)
+        db.session.commit()
 
-        flash("Product added!", "success")
         return redirect(url_for("product.get_all"))
     else:
         log(log.ERROR, "Product creation errors: [%s]", form.errors)
@@ -399,6 +415,7 @@ def create():
 
 @product_blueprint.route("/edit", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def save():
     form: f.ProductForm = f.ProductForm()
     if form.validate_on_submit():
@@ -410,7 +427,7 @@ def save():
 
         supplier: m.Supplier = db.session.scalar(m.Supplier.select())
 
-        image = request.files["image"]
+        image = request.files["low_image"]
         image_string = base64.b64encode(image.read()).decode()
         u.name = str(form.name.data).strip(" ")
         u.supplier_id = form.supplier.data if form.supplier.data else supplier.id
@@ -445,7 +462,32 @@ def save():
         u.length = form.length.data if form.length.data else 0
         u.width = form.width.data if form.width.data else 0
         u.height = form.height.data if form.height.data else 0
-        u.save()
+
+        if u.image_obj:
+            image_path, image_extension = save_image(
+                request.files["high_image"], f"product/{form.SKU.data}", u.image_obj
+            )
+            u.image_obj.path = image_path
+            u.image_obj.extension = image_extension
+        else:
+            if "image" in request.files["high_image"].mimetype:
+                file_image = save_image(
+                    request.files["high_image"], f"product/{form.SKU.data}"
+                )
+                if isinstance(file_image, str):
+                    if "Cannot guess file type!" in file_image:
+                        flash("Product edited! Cannot guess image file type!", "danger")
+                    elif "Unsupported file type!" in file_image:
+                        flash("Product edited! Unsupported image file type!", "danger")
+                else:
+                    flash("Product edited successfully", "success")
+                    db.session.execute(
+                        m.Image.delete().where(m.Image.name == file_image.name)
+                    )
+                    file_image.save(False)
+                    u.image_obj = file_image
+        u.save(False)
+        db.session.commit()
 
         product_master_groups_ids = json.loads(form.product_groups.data)
 
@@ -478,7 +520,6 @@ def save():
                 )
                 product_group.save()
 
-        flash("Product edited successfully", "success")
         if form.next_url.data:
             return redirect(form.next_url.data)
         return redirect(url_for("product.get_all"))
@@ -492,6 +533,7 @@ def save():
 # TODO brainstorm
 @product_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def delete(id: int):
     product: m.Product = db.session.get(m.Product, id)
     if not product:
@@ -525,6 +567,12 @@ def delete(id: int):
 
 @product_blueprint.route("/assign", methods=["POST"])
 @login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.MANAGER.value,
+    ]
+)
 def assign():
     form: f.AssignProductForm = f.AssignProductForm()
     if form.validate_on_submit():
@@ -731,6 +779,7 @@ def request_share():
 
 @product_blueprint.route("/adjust", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def adjust():
     form: f.AdjustProductForm = f.AdjustProductForm()
 
@@ -874,6 +923,7 @@ def adjust():
 
 @product_blueprint.route("/upload", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def upload():
     form: f.UploadProductForm = f.UploadProductForm()
     if form.validate_on_submit():
@@ -882,6 +932,14 @@ def upload():
         file_io = BytesIO(csv_file.read())
 
         conn = db.get_engine()
+
+        df_img = pandas.read_csv(
+            Path("app") / "static" / "img" / "item_image.csv",
+            usecols=[
+                "SKU",
+                "Image",
+            ],
+        )
 
         new_groups = []
 
@@ -914,7 +972,6 @@ def upload():
                 con=conn,
                 if_exists="append",
                 index=False,
-                # method="multi",
                 method=do_nothing_conflict_name.insert_do_nothing_on_conflicts,
             )
 
@@ -931,11 +988,49 @@ def upload():
         )
         file_io.seek(0)
         df = df.drop_duplicates()
-        df["image"] = ""
         df["Description"] = df["Description"].fillna("")
         df["SKU"] = df["SKU"].fillna("")
         df["Regular Price"] = df["Regular Price"].fillna(0)
         df["Retail Price"] = df["Retail Price"].fillna(0)
+
+        df = pandas.merge(df, df_img, on="SKU", how="inner")
+        df["Image"] = df["Image"].fillna("logo-mini.png")
+        logo_mini = db.session.scalar(
+            m.Image.select().where(m.Image.name == "logo-mini")
+        )
+        img_name_img_obj = {"logo-mini.png": logo_mini}
+        for image_name in df["Image"]:
+            try:
+                if not isinstance(image_name, str):
+                    raise FileNotFoundError
+                original_image = Image.open(
+                    Path("app") / "static" / "img" / "product" / image_name
+                ).resize((200, 200))
+            except FileNotFoundError:
+                original_image = Image.open(
+                    Path("app") / "static" / "img" / "logo-mini.png"
+                ).resize((200, 200))
+            with BytesIO() as png_bytes:
+                if original_image.mode in ["CMYK"]:
+                    continue
+                original_image.save(png_bytes, format="PNG")
+                png_bytes.seek(0)
+                img_bytes = base64.b64encode(png_bytes.read()).decode()
+                image_exists = db.session.scalar(
+                    m.Image.select().where(m.Image.name == image_name.split(".")[0])
+                )
+                if not image_exists:
+                    img_obj = m.Image(
+                        name=image_name.split(".")[0],
+                        path=f"product/{image_name}",
+                        extension=image_name.split(".")[-1],
+                    )
+                    img_obj.save(False)
+                    img_name_img_obj[image_name] = img_obj
+
+            df["Image"] = df["Image"].replace(image_name, img_bytes)
+
+        db.session.commit()
 
         df.rename(
             columns=dict(
@@ -960,16 +1055,13 @@ def upload():
         )
 
         # NOTE write product-groups relations to DB
-        new_products_obj: list[m.Product] = db.session.execute(
+        new_products_obj: list[m.Product] = db.session.scalars(
             m.Product.select().where(m.Product.name.in_(df["Name"].to_list()))
-        ).scalars()
+        )
 
-        new_groups_obj: list[m.GroupProduct] = [
-            gr
-            for gr in db.session.execute(
-                m.GroupProduct.select().where(m.GroupProduct.name.in_(new_groups))
-            ).scalars()
-        ]
+        new_groups_obj: list[m.GroupProduct] = db.session.scalars(
+            m.GroupProduct.select().where(m.GroupProduct.name.in_(new_groups))
+        ).all()
 
         product_group_df = pandas.read_csv(
             file_io,
@@ -981,10 +1073,24 @@ def upload():
             ],
         )
 
+        df_img["Image"] = df_img["Image"].fillna("logo-mini.png")
         for product in new_products_obj:
             product_group_df.loc[
                 product_group_df["Name"] == product.name, "Name"
             ] = product.id
+            try:
+                product.image_id = img_name_img_obj[
+                    df_img.loc[df_img["SKU"] == product.SKU, "Image"].values[0]
+                ].id
+                product.save(False)
+            except KeyError:
+                log(
+                    log.ERROR,
+                    "Image [%s] not found for product: [%s]",
+                    df_img.loc[df_img["SKU"] == product.SKU, "Image"].values[0],
+                    product.name,
+                )
+        db.session.commit()
 
         for mastr_grp in master_product_groups:
             for group in new_groups_obj:
@@ -997,7 +1103,9 @@ def upload():
             file_io.seek(0)
             write_df = write_df.dropna()
 
-            write_df.rename(
+            write_df[
+                pandas.to_numeric(write_df["Name"], errors="coerce").notnull()
+            ].rename(
                 columns=dict(zip(write_df.columns, ["product_id", "group_id"]))
             ).to_sql(
                 "product_group",
@@ -1053,14 +1161,35 @@ class DoNothingConflict:
 
 @product_blueprint.route("/full_image/<int:id>", methods=["GET"])
 @login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.DELIVERY_AGENT.value,
+    ]
+)
 def full_image(id: int):
     product: m.Product = db.session.execute(
         m.Product.select().where(m.Product.id == id)
     ).scalar()
 
+    original_image = Image.open(
+        Path("app")
+        / "static"
+        / "img"
+        / "product"
+        / f"{product.image_obj.name}.{product.image_obj.extension}"
+    )
+    with BytesIO() as png_bytes:
+        original_image.save(png_bytes, format="PNG")
+        png_bytes.seek(0)
+        img_bytes = base64.b64encode(png_bytes.read()).decode()
+
     data = {
         "name": product.name,
-        "image": product.image if product.image else app.config["DEFAULT_IMAGE"],
+        "image": img_bytes,
     }
     return jsonify(data)
 

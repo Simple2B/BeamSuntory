@@ -6,7 +6,7 @@ from flask import (
 from flask_login import login_required
 from sqlalchemy import desc
 import sqlalchemy as sa
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import schema as s
 from app import models as m, db
@@ -132,6 +132,7 @@ def get_inbound_order_report():
 
 @report_inbound_orders_blueprint.route("/inbound_orders")
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def inbound_orders():
     product_master_group_brand = db.session.scalars(
         sa.select(m.MasterGroupProduct)
