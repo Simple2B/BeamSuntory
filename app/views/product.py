@@ -278,19 +278,22 @@ def create():
             height=form.height.data if form.height.data else 0,
         )
         log(log.INFO, "Form submitted. Product: [%s]", product)
-        product.save()
+        product.save(False)
 
         if "image" in request.files["high_image"].mimetype:
             file_image = save_image(
-                request.files["high_image"], f"products/{form.SKU.data}"
+                request.files["high_image"], f"product/{form.SKU.data}"
             )
-            if "Cannot guess file type!" in file_image:
-                flash("Product added! Cannot guess image file type!", "danger")
-            elif "Unsupported file type!" in file_image:
-                flash("Product added! Unsupported image file type!", "danger")
+            if isinstance(file_image, str):
+                if "Cannot guess file type!" in file_image:
+                    flash("Product added! Cannot guess image file type!", "danger")
+                elif "Unsupported file type!" in file_image:
+                    flash("Product added! Unsupported image file type!", "danger")
             else:
                 flash("Product added!", "success")
                 file_image.save(False)
+                product.image_obj = file_image
+        db.session.commit()
 
         product_master_groups_ids = json.loads(form.product_groups.data)
 
@@ -358,26 +361,29 @@ def save():
 
         if u.image_obj:
             image_path, image_extension = save_image(
-                request.files["high_image"], f"products/{form.SKU.data}", u.image_obj
+                request.files["high_image"], f"product/{form.SKU.data}", u.image_obj
             )
             u.image_obj.path = image_path
             u.image_obj.extension = image_extension
         else:
             if "image" in request.files["high_image"].mimetype:
                 file_image = save_image(
-                    request.files["high_image"], f"products/{form.SKU.data}"
+                    request.files["high_image"], f"product/{form.SKU.data}"
                 )
-                if "Cannot guess file type!" in file_image:
-                    flash("Product added! Cannot guess image file type!", "danger")
-                elif "Unsupported file type!" in file_image:
-                    flash("Product added! Unsupported image file type!", "danger")
+                if isinstance(file_image, str):
+                    if "Cannot guess file type!" in file_image:
+                        flash("Product edited! Cannot guess image file type!", "danger")
+                    elif "Unsupported file type!" in file_image:
+                        flash("Product edited! Unsupported image file type!", "danger")
                 else:
                     flash("Product edited successfully", "success")
                     db.session.execute(
                         m.Image.delete().where(m.Image.name == file_image.name)
                     )
                     file_image.save(False)
-        u.save()
+                    u.image_obj = file_image
+        u.save(False)
+        db.session.commit()
 
         product_master_groups_ids = json.loads(form.product_groups.data)
 
@@ -1345,9 +1351,21 @@ def full_image(id: int):
         m.Product.select().where(m.Product.id == id)
     ).scalar()
 
+    original_image = Image.open(
+        Path("app")
+        / "static"
+        / "img"
+        / "product"
+        / f"{product.image_obj.name}.{product.image_obj.extension}"
+    )
+    with BytesIO() as png_bytes:
+        original_image.save(png_bytes, format="PNG")
+        png_bytes.seek(0)
+        img_bytes = base64.b64encode(png_bytes.read()).decode()
+
     data = {
         "name": product.name,
-        "image": product.image if product.image else app.config["DEFAULT_IMAGE"],
+        "image": img_bytes,
     }
     return jsonify(data)
 

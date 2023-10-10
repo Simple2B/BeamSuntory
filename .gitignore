@@ -6,6 +6,7 @@ env/
 node_modules/
 product_images/
 products/
+product/
 
 # ignore files
 .env
