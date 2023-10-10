@@ -994,7 +994,10 @@ def upload():
 
         df = pandas.merge(df, df_img, on="SKU", how="inner")
         df["Image"] = df["Image"].fillna("logo-mini.png")
-        img_name_img_obj = {}
+        logo_mini = db.session.scalar(
+            m.Image.select().where(m.Image.name == "logo-mini")
+        )
+        img_name_img_obj = {"logo-mini.png": logo_mini}
         for image_name in df["Image"]:
             try:
                 if not isinstance(image_name, str):
@@ -1074,10 +1077,18 @@ def upload():
             product_group_df.loc[
                 product_group_df["Name"] == product.name, "Name"
             ] = product.id
-            product.image_id = img_name_img_obj[
-                df_img.loc[df_img["SKU"] == product.SKU, "Image"].values[0]
-            ].id
-            product.save(False)
+            try:
+                product.image_id = img_name_img_obj[
+                    df_img.loc[df_img["SKU"] == product.SKU, "Image"].values[0]
+                ].id
+                product.save(False)
+            except KeyError:
+                log(
+                    log.ERROR,
+                    "Image [%s] not found for product: [%s]",
+                    df_img.loc[df_img["SKU"] == product.SKU, "Image"].values[0],
+                    product.name,
+                )
         db.session.commit()
 
         for mastr_grp in master_product_groups:
