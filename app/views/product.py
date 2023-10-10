@@ -993,25 +993,36 @@ def upload():
         df["Retail Price"] = df["Retail Price"].fillna(0)
 
         df = pandas.merge(df, df_img, on="SKU", how="inner")
+        df["Image"] = df["Image"].fillna("logo-mini.png")
+        img_name_img_obj = {}
         for image_name in df["Image"]:
             try:
                 if not isinstance(image_name, str):
                     raise FileNotFoundError
                 original_image = Image.open(
                     Path("app") / "static" / "img" / "product" / image_name
-                ).resize((400, 400))
+                ).resize((200, 200))
             except FileNotFoundError:
                 original_image = Image.open(
                     Path("app") / "static" / "img" / "logo-mini.png"
-                ).resize((400, 400))
+                ).resize((200, 200))
             with BytesIO() as png_bytes:
                 if original_image.mode in ["CMYK"]:
                     continue
                 original_image.save(png_bytes, format="PNG")
                 png_bytes.seek(0)
                 img_bytes = base64.b64encode(png_bytes.read()).decode()
+                img_obj = m.Image(
+                    name=image_name.split(".")[0],
+                    path=f"product/{image_name}",
+                    extension=image_name.split(".")[-1],
+                )
+                img_obj.save(False)
+                img_name_img_obj[image_name] = img_obj
 
             df["Image"] = df["Image"].replace(image_name, img_bytes)
+
+        db.session.commit()
 
         df.rename(
             columns=dict(
@@ -1036,16 +1047,13 @@ def upload():
         )
 
         # NOTE write product-groups relations to DB
-        new_products_obj: list[m.Product] = db.session.execute(
+        new_products_obj: list[m.Product] = db.session.scalars(
             m.Product.select().where(m.Product.name.in_(df["Name"].to_list()))
-        ).scalars()
+        )
 
-        new_groups_obj: list[m.GroupProduct] = [
-            gr
-            for gr in db.session.execute(
-                m.GroupProduct.select().where(m.GroupProduct.name.in_(new_groups))
-            ).scalars()
-        ]
+        new_groups_obj: list[m.GroupProduct] = db.session.scalars(
+            m.GroupProduct.select().where(m.GroupProduct.name.in_(new_groups))
+        ).all()
 
         product_group_df = pandas.read_csv(
             file_io,
@@ -1057,10 +1065,16 @@ def upload():
             ],
         )
 
+        df_img["Image"] = df_img["Image"].fillna("logo-mini.png")
         for product in new_products_obj:
             product_group_df.loc[
                 product_group_df["Name"] == product.name, "Name"
             ] = product.id
+            product.image_id = img_name_img_obj[
+                df_img.loc[df_img["SKU"] == product.SKU, "Image"].values[0]
+            ].id
+            product.save(False)
+        db.session.commit()
 
         for mastr_grp in master_product_groups:
             for group in new_groups_obj:

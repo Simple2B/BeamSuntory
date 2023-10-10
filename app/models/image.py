@@ -11,7 +11,7 @@ class Image(db.Model, ModelMixin):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
 
     name: orm.Mapped[str] = orm.mapped_column(
-        sa.String(128),
+        sa.String(256),
         unique=True,
         nullable=False,
     )
