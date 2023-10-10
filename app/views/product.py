@@ -1012,13 +1012,17 @@ def upload():
                 original_image.save(png_bytes, format="PNG")
                 png_bytes.seek(0)
                 img_bytes = base64.b64encode(png_bytes.read()).decode()
-                img_obj = m.Image(
-                    name=image_name.split(".")[0],
-                    path=f"product/{image_name}",
-                    extension=image_name.split(".")[-1],
+                image_exists = db.session.scalar(
+                    m.Image.select().where(m.Image.name == image_name.split(".")[0])
                 )
-                img_obj.save(False)
-                img_name_img_obj[image_name] = img_obj
+                if not image_exists:
+                    img_obj = m.Image(
+                        name=image_name.split(".")[0],
+                        path=f"product/{image_name}",
+                        extension=image_name.split(".")[-1],
+                    )
+                    img_obj.save(False)
+                    img_name_img_obj[image_name] = img_obj
 
             df["Image"] = df["Image"].replace(image_name, img_bytes)
 
