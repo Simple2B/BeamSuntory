@@ -114,7 +114,7 @@ def get_inventory_reports():
     master_groups = [
         filter_inventories.group_brand,
         filter_inventories.group_language,
-        filter_inventories.group_category,
+        filter_inventories.group_categories,
         filter_inventories.group_premises,
         filter_inventories.group_event,
     ]
@@ -174,7 +174,7 @@ def inventories():
     product_master_groups = db.session.scalars(
         m.MasterGroupProduct.select().where(
             m.MasterGroupProduct.name.in_(
-                ["Brand", "Language", "Category", "Premises", "Events"]
+                ["Brand", "Language", "categories", "Premises", "Events"]
             )
         )
     )

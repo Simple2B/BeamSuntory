@@ -71,7 +71,7 @@ def get_inbound_order_report():
 
     master_groups = [
         filter_inbound_order.brand,
-        filter_inbound_order.category,
+        filter_inbound_order.categories,
         filter_inbound_order.premises,
     ]
 
@@ -140,9 +140,9 @@ def inbound_orders():
         .order_by(m.MasterGroupProduct.id)
     ).all()
 
-    product_master_group_category = db.session.scalars(
+    product_master_group_categories = db.session.scalars(
         sa.select(m.MasterGroupProduct)
-        .where(m.MasterGroupProduct.name == "Category")
+        .where(m.MasterGroupProduct.name == "categories")
         .order_by(m.MasterGroupProduct.id)
     ).all()
 
@@ -155,6 +155,6 @@ def inbound_orders():
     return render_template(
         "report/inbound_order/inbound_orders.html",
         product_master_group_brand=product_master_group_brand,
-        product_master_group_category=product_master_group_category,
+        product_master_group_categories=product_master_group_categories,
         product_master_group_premises=product_master_group_premises,
     )

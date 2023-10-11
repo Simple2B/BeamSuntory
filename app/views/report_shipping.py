@@ -71,7 +71,7 @@ def get_shipping_report():
     for group_id in (
         filter.brand,
         filter.language,
-        filter.category,
+        filter.categories,
         filter.premise,
     ):
         if group_id:
@@ -123,7 +123,7 @@ def index():
     categories = db.session.scalars(
         m.GroupProduct.select().where(
             m.GroupProduct.master_groups_for_product.has(
-                m.MasterGroupProduct.name == "Category"
+                m.MasterGroupProduct.name == "categories"
             )
         )
     )

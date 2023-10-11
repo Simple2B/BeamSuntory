@@ -47,7 +47,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     brand = request.args.get("brand", type=str, default="")
     language = request.args.get("language", type=str, default="")
     premises = request.args.get("premises", type=str, default="")
-    category = request.args.get("category", type=str, default="")
     events = request.args.get("events", type=str, default="")
     categories = request.args.get("categories", type=str, default="")
 
@@ -69,7 +68,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     master_groups = [
         brand,
         language,
-        category,
         premises,
         events,
         categories,
@@ -284,7 +282,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         "mastr_for_prods_groups_for_prods": mastr_for_prods_groups_for_prods,
         "brand": brand,
         "language": language,
-        "category": category,
         "premises": premises,
         "events": events,
         "categories": categories,
@@ -326,7 +323,6 @@ def get_all():
         search_query=products_object["q"],
         brand=products_object["brand"],
         language=products_object["language"],
-        category=products_object["category"],
         premises=products_object["premises"],
         categories=products_object["categories"],
         events=products_object["events"],

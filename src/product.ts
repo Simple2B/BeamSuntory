@@ -508,7 +508,6 @@ const searchInputButton = document.querySelector('#table-search-product-button')
 const brandSelector = document.querySelector('#product-search-master-group-Brand') as HTMLSelectElement;
 const languageSelector = document.querySelector('#product-search-master-group-Language') as HTMLSelectElement;
 const premisesSelector = document.querySelector('#product-search-master-group-Premises') as HTMLSelectElement;
-const categorySelector = document.querySelector('#product-search-master-group-Category') as HTMLSelectElement;
 const eventsSelector = document.querySelector('#product-search-master-group-Events') as HTMLSelectElement;
 const categoriesSelector = document.querySelector('#product-search-master-group-Categories') as HTMLSelectElement;
 
@@ -518,7 +517,6 @@ const searchParams = {
   brand: brandSelector,
   language: languageSelector,
   premises: premisesSelector,
-  category: categorySelector,
   events: eventsSelector,
   categories: categoriesSelector,
 };
@@ -541,7 +539,6 @@ searchInputButton.addEventListener('click', () => {
     'brand',
     'language',
     'premises',
-    'category',
     'events',
     'categories',
   ];
@@ -556,7 +553,6 @@ searchInputButton.addEventListener('click', () => {
   brandSelector.value && url.searchParams.set('brand', brandSelector.value);
   languageSelector.value && url.searchParams.set('language', languageSelector.value);
   premisesSelector.value && url.searchParams.set('premises', premisesSelector.value);
-  categorySelector.value && url.searchParams.set('category', categorySelector.value);
   eventsSelector.value && url.searchParams.set('events', eventsSelector.value);
   categoriesSelector.value && url.searchParams.set('categories', categoriesSelector.value);
 
@@ -567,9 +563,6 @@ searchInputButton.addEventListener('click', () => {
   premisesSelector.value
     ? sessionStorage.setItem('premises', premisesSelector.value)
     : sessionStorage.removeItem('premises');
-  categorySelector.value
-    ? sessionStorage.setItem('category', categorySelector.value)
-    : sessionStorage.removeItem('category');
   eventsSelector.value ? sessionStorage.setItem('events', eventsSelector.value) : sessionStorage.removeItem('events');
   categoriesSelector.value
     ? sessionStorage.setItem('categories', categoriesSelector.value)
@@ -586,7 +579,6 @@ searchInputButton.addEventListener('click', () => {
 brandSelector.value = sessionStorage.getItem('brand') ?? '';
 languageSelector.value = sessionStorage.getItem('language') ?? '';
 premisesSelector.value = sessionStorage.getItem('premises') ?? '';
-categorySelector.value = sessionStorage.getItem('category') ?? '';
 eventsSelector.value = sessionStorage.getItem('events') ?? '';
 categoriesSelector.value = sessionStorage.getItem('categories') ?? '';
 

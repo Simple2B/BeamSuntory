@@ -12,6 +12,6 @@ class FilterReportAdjustments(BaseModel):
     group: str | None = None
     group_brand: str | None = None
     group_language: str | None = None
-    group_category: str | None = None
+    group_categories: str | None = None
     group_premises: str | None = None
     group_event: str | None = None
