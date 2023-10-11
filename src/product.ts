@@ -107,13 +107,13 @@ interface IProductGroupMasterGroup {
 const eventCheckbox: HTMLInputElement = document.querySelector('#product-show-events-toggle-btn');
 const eventStockOwnByMeCheckbox: HTMLInputElement = document.querySelector('#product-show-events-stocks-own-by-me-btn');
 
-
 const allStocksToggle = document.querySelector('#product-show-all-stocks') as HTMLInputElement;
 const allStocksInInventoryToggle = document.querySelector('#product-show-all-stocks-inventory') as HTMLInputElement;
 const stocksByMeToggle = document.querySelector('#product-show-stocks-own-by-me-btn') as HTMLInputElement;
-const eventStocksOwnByMeToggle = document.querySelector('#product-show-events-stocks-own-by-me-btn') as HTMLInputElement;
+const eventStocksOwnByMeToggle = document.querySelector(
+  '#product-show-events-stocks-own-by-me-btn'
+) as HTMLInputElement;
 const eventToggle = document.querySelector('#product-show-events-toggle-btn') as HTMLInputElement;
-
 
 const isEvent = eventCheckbox.checked || eventStockOwnByMeCheckbox.checked;
 const eventsWarehouse = 'Warehouse Events';
@@ -467,6 +467,7 @@ function formatDate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+// TODO remove if not used
 // function getFirstAndLastDate() {
 //   const today = new Date();
 //   const fifthDayBefore = new Date(today);
@@ -529,7 +530,6 @@ for (const [key, value] of Object.entries(searchParams)) {
   }
 }
 
-
 searchInputButton.addEventListener('click', () => {
   const url = new URL(window.location.href);
   const searchParamsToDelete = [
@@ -564,8 +564,9 @@ searchInputButton.addEventListener('click', () => {
   languageSelector.value
     ? sessionStorage.setItem('language', languageSelector.value)
     : sessionStorage.removeItem('language');
-  premisesSelector.value ? 
-    sessionStorage.setItem('premises', premisesSelector.value) : sessionStorage.removeItem('premises');
+  premisesSelector.value
+    ? sessionStorage.setItem('premises', premisesSelector.value)
+    : sessionStorage.removeItem('premises');
   categorySelector.value
     ? sessionStorage.setItem('category', categorySelector.value)
     : sessionStorage.removeItem('category');
@@ -576,7 +577,7 @@ searchInputButton.addEventListener('click', () => {
   sessionStorage.setItem('is_all_stocks_in_inventory', allStocksInInventoryToggle.checked.toString());
   sessionStorage.setItem('is_stocks_own_by_me', stocksByMeToggle.checked.toString());
   sessionStorage.setItem('is_events_stocks_own_by_me', eventStocksOwnByMeToggle.checked.toString());
-  sessionStorage.setItem('is_events', eventToggle.checked.toString()); 
+  sessionStorage.setItem('is_events', eventToggle.checked.toString());
 
   window.location.href = `${url.origin}${url.pathname}${url.search}`;
 });
@@ -1169,7 +1170,7 @@ function booking(product: IProduct, group: string) {
             const span = dayContainerShadow.querySelector('.day-price') ?? document.createElement('span');
             span.className = 'day-price';
             span.innerHTML = quantity.toString();
-            if(quantity <= 0) {
+            if (quantity <= 0) {
               dayContainerShadow.classList.add('locked');
             }
             dayContainerShadow.append(span);
@@ -1382,14 +1383,11 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
   productViewTypeContainer.parentNode.insertBefore(productMasterGroupContainer, productViewTypeContainer.nextSibling);
 }
 
-
-
 const filterProductButton = document.querySelector('#product-filter-button') as HTMLButtonElement;
 
 filterProductButton.addEventListener('click', (e) => {
   searchInputButton.click();
 });
-
 
 async function createAdjustAction(isEqual: boolean, masterGroup: string, group: string, productParam: IProduct) {
   const productInWarehouses = sessionStorage.setItem(
@@ -1950,52 +1948,51 @@ document.getElementById('product-edit-image').addEventListener('change', (e) => 
 });
 
 const autoswitchAllStocksToggle = () => {
-  if(!allStocksInInventoryToggle.checked && !stocksByMeToggle.checked && ! eventStocksOwnByMeToggle.checked){
+  if (!allStocksInInventoryToggle.checked && !stocksByMeToggle.checked && !eventStocksOwnByMeToggle.checked) {
     allStocksInInventoryToggle.checked = false;
     stocksByMeToggle.checked = false;
     eventStocksOwnByMeToggle.checked = false;
-    eventToggle.checked = false; 
-    allStocksToggle.checked=true;    
+    eventToggle.checked = false;
+    allStocksToggle.checked = true;
     searchInputButton.click();
   }
-}
-
+};
 
 allStocksInInventoryToggle.addEventListener('change', () => {
-  if(allStocksInInventoryToggle.checked){
+  if (allStocksInInventoryToggle.checked) {
     stocksByMeToggle.checked = false;
     eventStocksOwnByMeToggle.checked = false;
     allStocksToggle.checked = false;
-    eventToggle.checked = false; 
+    eventToggle.checked = false;
     searchInputButton.click();
   }
   autoswitchAllStocksToggle();
-})
+});
 
 stocksByMeToggle.addEventListener('change', () => {
-  if(stocksByMeToggle.checked){
+  if (stocksByMeToggle.checked) {
     allStocksInInventoryToggle.checked = false;
     eventStocksOwnByMeToggle.checked = false;
     allStocksToggle.checked = false;
-    eventToggle.checked = false; 
+    eventToggle.checked = false;
     searchInputButton.click();
   }
   autoswitchAllStocksToggle();
-})  
+});
 
-eventStocksOwnByMeToggle.addEventListener('change', () => {  
-  if(eventStocksOwnByMeToggle.checked){
+eventStocksOwnByMeToggle.addEventListener('change', () => {
+  if (eventStocksOwnByMeToggle.checked) {
     allStocksInInventoryToggle.checked = false;
     stocksByMeToggle.checked = false;
-    allStocksToggle.checked = false;   
-    eventToggle.checked = false; 
+    allStocksToggle.checked = false;
+    eventToggle.checked = false;
     searchInputButton.click();
   }
   autoswitchAllStocksToggle();
-})
+});
 
 allStocksToggle.addEventListener('change', () => {
-  if(allStocksToggle.checked){
+  if (allStocksToggle.checked) {
     allStocksInInventoryToggle.checked = false;
     stocksByMeToggle.checked = false;
     eventStocksOwnByMeToggle.checked = false;
@@ -2005,11 +2002,11 @@ allStocksToggle.addEventListener('change', () => {
 });
 
 eventToggle.addEventListener('change', () => {
-  if(eventToggle.checked){
+  if (eventToggle.checked) {
     allStocksInInventoryToggle.checked = false;
     stocksByMeToggle.checked = false;
     eventStocksOwnByMeToggle.checked = false;
-    allStocksToggle.checked = false;    
+    allStocksToggle.checked = false;
   }
   searchInputButton.click();
 });
