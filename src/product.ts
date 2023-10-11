@@ -467,23 +467,23 @@ function formatDate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-function getFirstAndLastDate() {
-  const today = new Date();
-  const fifthDayBefore = new Date(today);
-  fifthDayBefore.setDate(today.getDate() - 5);
-  const fifthDayAfter = new Date(today);
-  fifthDayAfter.setDate(today.getDate() + 6);
-  return [formatDate(fifthDayBefore), formatDate(fifthDayAfter)];
-}
+// function getFirstAndLastDate() {
+//   const today = new Date();
+//   const fifthDayBefore = new Date(today);
+//   fifthDayBefore.setDate(today.getDate() - 5);
+//   const fifthDayAfter = new Date(today);
+//   fifthDayAfter.setDate(today.getDate() + 6);
+//   return [formatDate(fifthDayBefore), formatDate(fifthDayAfter)];
+// }
 
-const bookedDates = [getFirstAndLastDate()].map((d) => {
-  if (d instanceof Array) {
-    const start = new Date(d[0]);
-    const end = new Date(d[1]);
-    return [start, end];
-  }
-  return new DateTime(d, 'YYYY-MM-DD');
-});
+// const bookedDates = [getFirstAndLastDate()].map((d) => {
+//   if (d instanceof Array) {
+//     const start = new Date(d[0]);
+//     const end = new Date(d[1]);
+//     return [start, end];
+//   }
+//   return new DateTime(d, 'YYYY-MM-DD');
+// });
 
 let fetchedAmountByDate = [] as { date: string; quantity: number }[];
 
@@ -560,8 +560,34 @@ searchInputButton.addEventListener('click', () => {
   eventsSelector.value && url.searchParams.set('events', eventsSelector.value);
   categoriesSelector.value && url.searchParams.set('categories', categoriesSelector.value);
 
+  brandSelector.value ? sessionStorage.setItem('brand', brandSelector.value) : sessionStorage.removeItem('brand');
+  languageSelector.value
+    ? sessionStorage.setItem('language', languageSelector.value)
+    : sessionStorage.removeItem('language');
+  premisesSelector.value ? 
+    sessionStorage.setItem('premises', premisesSelector.value) : sessionStorage.removeItem('premises');
+  categorySelector.value
+    ? sessionStorage.setItem('category', categorySelector.value)
+    : sessionStorage.removeItem('category');
+  eventsSelector.value ? sessionStorage.setItem('events', eventsSelector.value) : sessionStorage.removeItem('events');
+  categoriesSelector.value
+    ? sessionStorage.setItem('categories', categoriesSelector.value)
+    : sessionStorage.removeItem('categories');
+  sessionStorage.setItem('is_all_stocks_in_inventory', allStocksInInventoryToggle.checked.toString());
+  sessionStorage.setItem('is_stocks_own_by_me', stocksByMeToggle.checked.toString());
+  sessionStorage.setItem('is_events_stocks_own_by_me', eventStocksOwnByMeToggle.checked.toString());
+  sessionStorage.setItem('is_events', eventToggle.checked.toString()); 
+
   window.location.href = `${url.origin}${url.pathname}${url.search}`;
 });
+
+//set filter values from sessionStorage
+brandSelector.value = sessionStorage.getItem('brand') ?? '';
+languageSelector.value = sessionStorage.getItem('language') ?? '';
+premisesSelector.value = sessionStorage.getItem('premises') ?? '';
+categorySelector.value = sessionStorage.getItem('category') ?? '';
+eventsSelector.value = sessionStorage.getItem('events') ?? '';
+categoriesSelector.value = sessionStorage.getItem('categories') ?? '';
 
 const deleteButtons = document.querySelectorAll('.delete-product-btn');
 
@@ -1333,106 +1359,14 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
   productViewTypeContainer.parentNode.insertBefore(productMasterGroupContainer, productViewTypeContainer.nextSibling);
 }
 
-// function to filter products by group
-const productFilterInputs = document.querySelectorAll('.product-filter-input');
+
+
 const filterProductButton = document.querySelector('#product-filter-button') as HTMLButtonElement;
-const filterRadioButtons = document.querySelectorAll('.product-filter-radio-button');
-
-filterRadioButtons.forEach((btn) => {
-  const filterButtonId = btn.getAttribute('id');
-  const filterJsonDataStorage = sessionStorage.getItem('filterJsonData');
-  const filterJsonDataObject = JSON.parse(filterJsonDataStorage);
-
-  for (const key in filterJsonDataObject) {
-    if (filterButtonId.includes(key)) {
-      btn.innerHTML = `
-        ${filterJsonDataObject[key]}
-        <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-          viewBox="0 0 10 6">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="m1 1 4 4 4-4" />
-        </svg>`;
-    }
-  }
-});
-
-productFilterInputs.forEach((input: HTMLInputElement) => {
-  input.addEventListener('change', () => {
-    const filterInputDataTarget = input.getAttribute('data-target');
-    const masterGroup = filterInputDataTarget
-      .split(',')[1]
-      .replace(/[^a-zA-Z0-9\s\_]/g, '')
-      .trim();
-    const filterInputId = filterInputDataTarget.split(',')[0].replace(/[^a-zA-Z0-9\s\_]/g, '');
-    const filterInputIdString = `#product-filter-input-${filterInputId}`;
-    const filterButtonId = filterInputDataTarget
-      .split(',')[1]
-      .trim()
-      .replace(/[^a-zA-Z0-9\s\_]/g, '');
-    const filterInput = document.querySelector(filterInputIdString) as HTMLInputElement;
-    const filterRadioBtn = document.querySelector(`#dropdownRadioButton-${filterButtonId}`);
-
-    if (filterInputIdString.includes(filterButtonId) && input.value === masterGroup) {
-      filterRadioBtn.innerHTML = `
-        ${filterButtonId.split('_').join(' ')}
-        <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-          viewBox="0 0 10 6">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="m1 1 4 4 4-4" />
-        </svg>
-      `;
-      getSessionStorageObject(filterJsonData, 'filterJsonData', 'remove', filterButtonId);
-      return;
-    }
-
-    filterRadioBtn.innerHTML = `
-      ${filterInput.value.split('_').join(' ')}
-      <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-        viewBox="0 0 10 6">
-        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="m1 1 4 4 4-4" />
-      </svg>
-      `;
-    filterJsonData[filterButtonId] = filterInput.value.split('_').join(' ');
-    getSessionStorageObject(filterJsonData, 'filterJsonData', 'add');
-  });
-});
 
 filterProductButton.addEventListener('click', (e) => {
   searchInputButton.click();
-  // const hiddenInput = document.querySelector('#sort_by') as HTMLInputElement;
-  // const filterJsonDataStorage = sessionStorage.getItem('filterJsonData');
-  // const filterDataObject = JSON.parse(filterJsonDataStorage);
-  // filterJsonData = filterDataObject;
-  // hiddenInput.value = JSON.stringify(filterJsonData);
-  // sessionStorage.setItem('filterJsonData', JSON.stringify(filterJsonData));
-  // const isVisibleFilter = true;
-  // sessionStorage.setItem('isVisibleFilter', JSON.stringify(isVisibleFilter));
 });
 
-function getSessionStorageObject(
-  localObject: FilterJsonData,
-  sessionObject: string,
-  method = 'none',
-  objectKey = 'none'
-) {
-  const jsonDataObject = sessionStorage.getItem(sessionObject);
-  const dataObject = JSON.parse(jsonDataObject);
-  switch (method) {
-    case 'add':
-      const newDataObject = { ...dataObject, ...localObject };
-      const newJsonData = JSON.stringify(newDataObject);
-      sessionStorage.setItem(sessionObject, newJsonData);
-      break;
-    case 'remove':
-      delete dataObject[objectKey];
-      const newJsonDataObject = JSON.stringify(dataObject);
-      sessionStorage.setItem(sessionObject, newJsonDataObject);
-      break;
-    default:
-      break;
-  }
-}
 
 async function createAdjustAction(isEqual: boolean, masterGroup: string, group: string, productParam: IProduct) {
   const productInWarehouses = sessionStorage.setItem(
@@ -1885,39 +1819,6 @@ function clearProductGroupContainer() {
   }
   const productGroupEditSelects = document.querySelectorAll('.product-group-edit-add-item');
 }
-
-async function getSortOwnByMe(checkbox: HTMLInputElement, sortRoute: string) {
-  if (checkbox.checked) {
-    try {
-      const response = await fetch(`/product/${sortRoute}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (response.status === 200) {
-        window.location.href = response.url;
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  } else {
-    try {
-      const response = await fetch(`/product/`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (response.status === 200) {
-        window.location.href = response.url;
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
-}
-
 
 document.querySelector('#product-assign-master-group').addEventListener('change', () => {
   const productAssignMasterGroupSelect: HTMLSelectElement = document.querySelector('#product-assign-master-group');
