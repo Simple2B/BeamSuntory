@@ -170,6 +170,7 @@
         </td>
         <td scope="row" data-target-product-id="{{ product.id }}"
           class="product-full-image-anchor   text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <input type="hidden" name="check-time" id="check-products-time" value="{{ datetime.now() }}" />
           <div class="pl-3">
             {% if product.image|length > 100 %}
             <img src="data:image/png;base64, {{ product.image }}" alt="{{ product.name }}" class="w-14 object-cover">
