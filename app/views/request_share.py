@@ -11,7 +11,6 @@ from flask import (
 from flask_login import login_required, current_user
 from flask_mail import Message
 import sqlalchemy as sa
-from sqlalchemy.orm import aliased
 from app.controllers import create_pagination, role_required
 
 from app import models as m, db
@@ -33,38 +32,30 @@ request_share_blueprint = Blueprint(
 def get_all():
     form_edit: f.RequestShareForm = f.RequestShareForm()
 
-    product = aliased(m.Product)
-    group = aliased(m.Group)
     q = request.args.get("q", type=str, default=None)
+    status = request.args.get("status", type=str, default=None)
     query = m.RequestShare.select().order_by(m.RequestShare.id)
     count_query = sa.select(sa.func.count()).select_from(m.RequestShare)
     if q:
-        query = (
-            m.RequestShare.select()
-            .join(product, m.RequestShare.product_id == product.id)
-            .join(group, m.RequestShare.group_id == group.id)
-            .where(
-                product.name.ilike(f"%{q}%")
-                | m.RequestShare.status.ilike(f"%{q}%")
-                | m.RequestShare.order_numb.ilike(f"%{q}%")
-                | group.name.ilike(f"%{q}%")
-            )
-            .order_by(m.RequestShare.id)
-        )
-        count_query = (
-            sa.select(sa.func.count())
-            .join(product, m.RequestShare.product_id == product.id)
-            .join(group, m.RequestShare.group_id == group.id)
-            .where(
-                product.name.ilike(f"%{q}%")
-                | m.RequestShare.status.ilike(f"%{q}%")
-                | m.RequestShare.order_numb.ilike(f"%{q}%")
-                | group.name.ilike(f"%{q}%")
-            )
-            .select_from(m.RequestShare)
+        search_by_q = (
+            (m.RequestShare.product.has(m.Product.name.ilike(f"%{q}%")))
+            | m.RequestShare.order_numb.ilike(f"%{q}%")
+            | m.RequestShare.group.has(m.Group.name.ilike(f"%{q}%"))
+            | m.RequestShare.from_group.has(m.Group.name.ilike(f"%{q}%"))
         )
 
+        query = query.where(search_by_q)
+        count_query = count_query.where(search_by_q)
+
+    if status:
+        query = query.where(m.RequestShare.status == status)
+        count_query = count_query.where(m.RequestShare.status == status)
+
     pagination = create_pagination(total=db.session.scalar(count_query))
+
+    statuses = [
+        status[0] for status in db.session.query(m.RequestShare.status).distinct().all()
+    ]
 
     return render_template(
         "request_share/request_shares.html",
@@ -76,6 +67,8 @@ def get_all():
         page=pagination,
         search_query=q,
         form_edit=form_edit,
+        statuses=statuses,
+        search_status=status,
     )
 
 
