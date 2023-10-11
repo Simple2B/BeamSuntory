@@ -11,7 +11,6 @@ from flask import (
 from flask_login import login_required, current_user
 from flask_mail import Message
 import sqlalchemy as sa
-from sqlalchemy.orm import aliased
 from app.controllers import create_pagination, role_required
 
 from app import models as m, db
@@ -34,6 +33,7 @@ def get_all():
     form_edit: f.RequestShareForm = f.RequestShareForm()
 
     q = request.args.get("q", type=str, default=None)
+    status = request.args.get("status", type=str, default=None)
     query = m.RequestShare.select().order_by(m.RequestShare.id)
     count_query = sa.select(sa.func.count()).select_from(m.RequestShare)
     if q:
@@ -47,7 +47,15 @@ def get_all():
         query = query.where(search_by_q)
         count_query = count_query.where(search_by_q)
 
+    if status:
+        query = query.where(m.RequestShare.status == status)
+        count_query = count_query.where(m.RequestShare.status == status)
+
     pagination = create_pagination(total=db.session.scalar(count_query))
+
+    statuses = [
+        status[0] for status in db.session.query(m.RequestShare.status).distinct().all()
+    ]
 
     return render_template(
         "request_share/request_shares.html",
@@ -59,6 +67,8 @@ def get_all():
         page=pagination,
         search_query=q,
         form_edit=form_edit,
+        statuses=statuses,
+        search_status=status,
     )
 
 
