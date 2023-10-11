@@ -544,6 +544,7 @@ searchInputButton.addEventListener('click', () => {
   premises !== 'Premises' ? url.searchParams.set('premises', premises) : null;
   category !== 'Category' ? url.searchParams.set('category', category) : null;
   events !== 'Events group' ? url.searchParams.set('events', events) : null;
+
   categories !== 'Categories' ? url.searchParams.set('categories', categories) : null;
 
   window.location.href = `${url.origin}${url.pathname}${url.search}`;
@@ -2016,7 +2017,8 @@ const autoswitchAllStocksToggle = () => {
     allStocksInInventoryToggle.checked = false;
     stocksByMeToggle.checked = false;
     eventStocksOwnByMeToggle.checked = false;
-    allStocksToggle.checked=true;
+    eventToggle.checked = false; 
+    allStocksToggle.checked=true;    
     searchInputButton.click();
   }
 }
@@ -2027,6 +2029,7 @@ allStocksInInventoryToggle.addEventListener('change', () => {
     stocksByMeToggle.checked = false;
     eventStocksOwnByMeToggle.checked = false;
     allStocksToggle.checked = false;
+    eventToggle.checked = false; 
     searchInputButton.click();
   }
   autoswitchAllStocksToggle();
@@ -2037,6 +2040,7 @@ stocksByMeToggle.addEventListener('change', () => {
     allStocksInInventoryToggle.checked = false;
     eventStocksOwnByMeToggle.checked = false;
     allStocksToggle.checked = false;
+    eventToggle.checked = false; 
     searchInputButton.click();
   }
   autoswitchAllStocksToggle();
@@ -2046,7 +2050,8 @@ eventStocksOwnByMeToggle.addEventListener('change', () => {
   if(eventStocksOwnByMeToggle.checked){
     allStocksInInventoryToggle.checked = false;
     stocksByMeToggle.checked = false;
-    allStocksToggle.checked = false;    
+    allStocksToggle.checked = false;   
+    eventToggle.checked = false; 
     searchInputButton.click();
   }
   autoswitchAllStocksToggle();
@@ -2063,5 +2068,11 @@ allStocksToggle.addEventListener('change', () => {
 });
 
 eventToggle.addEventListener('change', () => {
+  if(eventToggle.checked){
+    allStocksInInventoryToggle.checked = false;
+    stocksByMeToggle.checked = false;
+    eventStocksOwnByMeToggle.checked = false;
+    allStocksToggle.checked = false;    
+  }
   searchInputButton.click();
 });
