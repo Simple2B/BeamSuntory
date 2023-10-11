@@ -18,16 +18,16 @@ services:
     image: simple2b/beam-suntory-app:latest
     restart: always
     volumes:
-      - ./product:/app/static/img/product
+      - ./product:/home/app/app/static/img/product
     env_file:
       - .env
     depends_on:
       - db
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.routers.beamsuntory_app.rule=Host(`devbeam.jlidistribution.com`)'
-      - 'traefik.http.routers.beamsuntory_app.tls=true'
-      - 'traefik.http.routers.beamsuntory_app.tls.certresolver=myresolver'
+      - 'traefik.http.routers.beamsuntory_app_staging.rule=Host(`devbeam.jlidistribution.com`)'
+      - 'traefik.http.routers.beamsuntory_app_staging.tls=true'
+      - 'traefik.http.routers.beamsuntory_app_staging.tls.certresolver=myresolver'
 
 networks:
   default:
@@ -35,4 +35,4 @@ networks:
 
 volumes:
   db_data:
-  product_images:
+  product:

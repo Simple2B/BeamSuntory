@@ -32,6 +32,8 @@ product_blueprint = Blueprint("product", __name__, url_prefix="/product")
 
 # TODO: needs refactor FIRST!!
 def get_all_products(request, query=None, count_query=None, my_stocks=False):
+    get_all_start = datetime.now()
+    log(log.DEBUG, "Product get_all started: [%s]", get_all_start)
     is_events = request.args.get("is_events", type=bool, default=False)
     is_all_stocks_in_inventory = request.args.get(
         "is_all_stocks_in_inventory", type=bool, default=False
@@ -165,75 +167,87 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         query = query.where(m.Product.name.ilike(f"%{q}%"))
         count_query = count_query.where(m.Product.name.ilike(f"%{q}%"))
 
-    groups_for_products_obj = db.session.execute(m.GroupProduct.select()).all()
+    log(
+        log.DEBUG,
+        "Product get_all filters finished in [%s]",
+        datetime.now() - get_all_start,
+    )
+    get_all_filters_time = datetime.now()
+
+    groups_for_products_obj = db.session.scalars(m.GroupProduct.select()).all()
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
-    master_groups = [
-        row for row in db.session.execute(m.MasterGroup.select()).scalars()
-    ]
+    master_groups = db.session.scalars(m.MasterGroup.select()).all()
+
+    log(
+        log.DEBUG,
+        "Product get_all groups query and pagination finished in [%s]",
+        datetime.now() - get_all_filters_time,
+    )
+    get_all_groups_time = datetime.now()
 
     mastr_for_prods_groups_for_prods = {}
     mstr_prod_grps_prod_grps_names = {}
     for group in groups_for_products_obj:
-        if (
-            group[0].master_groups_for_product.name
-            not in mastr_for_prods_groups_for_prods
-        ):
-            mastr_for_prods_groups_for_prods[
-                group[0].master_groups_for_product.name
-            ] = [group[0]]
-            mstr_prod_grps_prod_grps_names[group[0].master_groups_for_product.name] = [
-                {"group_name": group[0].name, "group_id": group[0].id}
+        if group.master_groups_for_product.name not in mastr_for_prods_groups_for_prods:
+            mastr_for_prods_groups_for_prods[group.master_groups_for_product.name] = [
+                group
+            ]
+            mstr_prod_grps_prod_grps_names[group.master_groups_for_product.name] = [
+                {"group_name": group.name, "group_id": group.id}
             ]
         else:
             mastr_for_prods_groups_for_prods[
-                group[0].master_groups_for_product.name
-            ].append(group[0])
-            mstr_prod_grps_prod_grps_names[
-                group[0].master_groups_for_product.name
-            ].append({"group_name": group[0].name, "group_id": group[0].id})
+                group.master_groups_for_product.name
+            ].append(group)
+            mstr_prod_grps_prod_grps_names[group.master_groups_for_product.name].append(
+                {"group_name": group.name, "group_id": group.id}
+            )
+
+    log(
+        log.DEBUG,
+        "Product get_all mastr_for_prods_groups_for_prods finished in [%s]",
+        datetime.now() - get_all_groups_time,
+    )
+    get_all_mastr_grps_names = datetime.now()
 
     # get all product_groups to list and compare in view.html
-    product_groups: list[m.ProductGroup] = [
-        row for row in db.session.execute(m.ProductGroup.select()).scalars()
-    ]
+    product_groups: list[m.ProductGroup] = db.session.scalars(
+        m.ProductGroup.select()
+    ).all()
 
     # TODO: consider using a join instead of two queries <- Copilot
     # get all groups ids for current user to compare with product groups ids in view.html
-    current_user_groups_rows = db.session.execute(
+    current_user_groups_rows = db.session.scalars(
         m.UserGroup.select().where(m.UserGroup.left_id == current_user.id)
     ).all()
 
     master_groups_search = {}
     for group in groups_for_products_obj:
-        if group[0].master_groups_for_product.name not in master_groups_search:
-            master_groups_search[group[0].master_groups_for_product.name] = [
-                group[0].name
-            ]
+        if group.master_groups_for_product.name not in master_groups_search:
+            master_groups_search[group.master_groups_for_product.name] = [group.name]
         else:
-            master_groups_search[group[0].master_groups_for_product.name].append(
-                group[0].name
+            master_groups_search[group.master_groups_for_product.name].append(
+                group.name
             )
 
+    log(
+        log.DEBUG,
+        "Product get_all master_groups_search finished in [%s]",
+        datetime.now() - get_all_mastr_grps_names,
+    )
+    get_all_master_groups_search = datetime.now()
+
     master_group_product_name = [
-        mgp[0].name for mgp in db.session.execute(m.MasterGroupProduct.select()).all()
+        mgp.name for mgp in db.session.scalars(m.MasterGroupProduct.select())
     ]
 
-    suppliers = [i for i in db.session.execute(m.Supplier.select()).scalars()]
+    suppliers = db.session.scalars(m.Supplier.select()).all()
 
-    warehouse_product_query: list[m.WarehouseProduct] = [
-        i
-        for i in db.session.execute(
-            m.WarehouseProduct.select().order_by(m.WarehouseProduct.id)
-        ).scalars()
-    ]
-    db.session.execute(
-        m.Product.select()
-        .order_by(m.Product.id)
-        .offset((pagination.page - 1) * pagination.per_page)
-        .limit(pagination.per_page)
-    ).scalars()
+    warehouse_product_query: list[m.WarehouseProduct] = db.session.scalars(
+        m.WarehouseProduct.select().order_by(m.WarehouseProduct.id)
+    ).all()
 
     warehouse_product_qty = dict()
 
@@ -253,6 +267,12 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
                 )
             else:
                 warehouse_product_qty[wpq.product.name] = str(wpq.product_quantity)
+
+    log(
+        log.DEBUG,
+        "Product get_all warehouse_products finished in [%s]",
+        datetime.now() - get_all_master_groups_search,
+    )
 
     return {
         "query": query,
@@ -278,11 +298,10 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         "all_product_groups": {
             i.name: i for i in db.session.execute(m.Group.select()).scalars()
         },
-        "current_user_groups_names": [
-            i[0].parent.name for i in current_user_groups_rows
-        ],
+        "current_user_groups_names": [i.parent.name for i in current_user_groups_rows],
         "mstr_prod_grps_prod_grps_names": json.dumps(mstr_prod_grps_prod_grps_names),
         "warehouse_product_qty": warehouse_product_qty,
+        "datetime": datetime,
     }
 
 
@@ -318,9 +337,7 @@ def get_all():
         main_master_groups=products_object["master_groups"],
         product_groups=products_object["product_groups"],
         all_product_groups=products_object["all_product_groups"],
-        current_user_groups=[
-            row[0] for row in products_object["current_user_groups_rows"]
-        ],
+        current_user_groups=products_object["current_user_groups_rows"],
         current_user_groups_names=products_object["current_user_groups_names"],
         master_groups_groups_available=products_object[
             "mastr_for_prods_groups_for_prods"
@@ -332,6 +349,7 @@ def get_all():
             "mstr_prod_grps_prod_grps_names"
         ],
         warehouse_product_qty=products_object["warehouse_product_qty"],
+        datetime=products_object["datetime"],
         form_create=form_create,
         form_edit=form_edit,
     )
@@ -491,21 +509,21 @@ def save():
 
         product_master_groups_ids = json.loads(form.product_groups.data)
 
-        product_groups_obj = db.session.execute(
+        product_groups_obj = db.session.scalars(
             m.ProductGroup.select().where(
                 m.ProductGroup.product_id == int(form.product_id.data)
             )
         ).all()
-        product_groups_ids = [group_row[0].group_id for group_row in product_groups_obj]
+        product_groups_ids = [group_row.group_id for group_row in product_groups_obj]
 
         for group_row in product_groups_obj:
-            if group_row[0].group_id in product_master_groups_ids:
+            if group_row.group_id in product_master_groups_ids:
                 continue
             else:
                 delete_gp = db.session.execute(
                     m.ProductGroup.select().where(
                         m.ProductGroup.product_id == int(form.product_id.data),
-                        m.ProductGroup.group_id == group_row[0].group_id,
+                        m.ProductGroup.group_id == group_row.group_id,
                     )
                 ).scalar()
                 db.session.delete(delete_gp)
