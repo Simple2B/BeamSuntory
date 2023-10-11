@@ -589,6 +589,29 @@ categorySelector.value = sessionStorage.getItem('category') ?? '';
 eventsSelector.value = sessionStorage.getItem('events') ?? '';
 categoriesSelector.value = sessionStorage.getItem('categories') ?? '';
 
+const filters = document.querySelectorAll('[id^="product-search-master-group"]');
+
+function changeFilterColor(filter: HTMLSelectElement) {
+  const filterOptions = filter.querySelectorAll('option');
+  if (!filter.value) {
+    filter.classList.add('text-gray-500');
+    filter.classList.remove('text-gray-900');
+    filterOptions.forEach((option) => {
+      option.classList.add('text-gray-900');
+    });
+  } else {
+    filter.classList.remove('text-gray-500');
+    filter.classList.add('text-gray-900');
+  }
+}
+
+filters.forEach((filter: HTMLSelectElement) => {
+  changeFilterColor(filter);
+  filter.addEventListener('change', () => {
+    changeFilterColor(filter);
+  });
+});
+
 const deleteButtons = document.querySelectorAll('.delete-product-btn');
 
 deleteButtons.forEach((e) => {
