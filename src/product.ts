@@ -107,10 +107,13 @@ interface IProductGroupMasterGroup {
 const eventCheckbox: HTMLInputElement = document.querySelector('#product-show-events-toggle-btn');
 const eventStockOwnByMeCheckbox: HTMLInputElement = document.querySelector('#product-show-events-stocks-own-by-me-btn');
 
-// mark checkbox as checked if we are on event stock own by me route
-if (window.location.pathname + window.location.hash === '/product/events_stocks_owned_by_me') {
-  eventStockOwnByMeCheckbox.checked = true;
-}
+const allStocksToggle = document.querySelector('#product-show-all-stocks') as HTMLInputElement;
+const allStocksInInventoryToggle = document.querySelector('#product-show-all-stocks-inventory') as HTMLInputElement;
+const stocksByMeToggle = document.querySelector('#product-show-stocks-own-by-me-btn') as HTMLInputElement;
+const eventStocksOwnByMeToggle = document.querySelector(
+  '#product-show-events-stocks-own-by-me-btn'
+) as HTMLInputElement;
+const eventToggle = document.querySelector('#product-show-events-toggle-btn') as HTMLInputElement;
 
 const isEvent = eventCheckbox.checked || eventStockOwnByMeCheckbox.checked;
 const eventsWarehouse = 'Warehouse Events';
@@ -464,23 +467,24 @@ function formatDate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-function getFirstAndLastDate() {
-  const today = new Date();
-  const fifthDayBefore = new Date(today);
-  fifthDayBefore.setDate(today.getDate() - 5);
-  const fifthDayAfter = new Date(today);
-  fifthDayAfter.setDate(today.getDate() + 6);
-  return [formatDate(fifthDayBefore), formatDate(fifthDayAfter)];
-}
+// TODO remove if not used
+// function getFirstAndLastDate() {
+//   const today = new Date();
+//   const fifthDayBefore = new Date(today);
+//   fifthDayBefore.setDate(today.getDate() - 5);
+//   const fifthDayAfter = new Date(today);
+//   fifthDayAfter.setDate(today.getDate() + 6);
+//   return [formatDate(fifthDayBefore), formatDate(fifthDayAfter)];
+// }
 
-const bookedDates = [getFirstAndLastDate()].map((d) => {
-  if (d instanceof Array) {
-    const start = new Date(d[0]);
-    const end = new Date(d[1]);
-    return [start, end];
-  }
-  return new DateTime(d, 'YYYY-MM-DD');
-});
+// const bookedDates = [getFirstAndLastDate()].map((d) => {
+//   if (d instanceof Array) {
+//     const start = new Date(d[0]);
+//     const end = new Date(d[1]);
+//     return [start, end];
+//   }
+//   return new DateTime(d, 'YYYY-MM-DD');
+// });
 
 let fetchedAmountByDate = [] as { date: string; quantity: number }[];
 
@@ -499,14 +503,116 @@ async function getEventAvailableQuantity(product_id: number, group: string, cale
 
 // search flow
 const searchInput: HTMLInputElement = document.querySelector('#table-search-products');
-const searchInputButton = document.querySelector('#table-search-product-button');
-if (searchInputButton && searchInput) {
-  searchInputButton.addEventListener('click', () => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('q', searchInput.value);
-    window.location.href = `${url.href}`;
-  });
+const searchInputButton = document.querySelector('#table-search-product-button') as HTMLButtonElement;
+
+const brandSelector = document.querySelector('#product-search-master-group-Brand') as HTMLSelectElement;
+const languageSelector = document.querySelector('#product-search-master-group-Language') as HTMLSelectElement;
+const premisesSelector = document.querySelector('#product-search-master-group-Premises') as HTMLSelectElement;
+const categorySelector = document.querySelector('#product-search-master-group-Category') as HTMLSelectElement;
+const eventsSelector = document.querySelector('#product-search-master-group-Events') as HTMLSelectElement;
+const categoriesSelector = document.querySelector('#product-search-master-group-Categories') as HTMLSelectElement;
+
+const currentUrl = new URL(window.location.href);
+
+const searchParams = {
+  brand: brandSelector,
+  language: languageSelector,
+  premises: premisesSelector,
+  category: categorySelector,
+  events: eventsSelector,
+  categories: categoriesSelector,
+};
+
+for (const [key, value] of Object.entries(searchParams)) {
+  const param = currentUrl.searchParams.get(key);
+  if (param) {
+    value.value = param;
+  }
 }
+
+searchInputButton.addEventListener('click', () => {
+  const url = new URL(window.location.href);
+  const searchParamsToDelete = [
+    'q',
+    'is_all_stocks_in_inventory',
+    'is_stocks_own_by_me',
+    'is_events_stocks_own_by_me',
+    'is_events',
+    'brand',
+    'language',
+    'premises',
+    'category',
+    'events',
+    'categories',
+  ];
+  searchParamsToDelete.forEach((param) => url.searchParams.delete(param));
+
+  url.searchParams.set('q', searchInput.value);
+  allStocksInInventoryToggle.checked && url.searchParams.set('is_all_stocks_in_inventory', 'true');
+  stocksByMeToggle.checked && url.searchParams.set('is_stocks_own_by_me', 'true');
+  eventStocksOwnByMeToggle.checked && url.searchParams.set('is_events_stocks_own_by_me', 'true');
+  eventToggle.checked && url.searchParams.set('is_events', 'true');
+
+  brandSelector.value && url.searchParams.set('brand', brandSelector.value);
+  languageSelector.value && url.searchParams.set('language', languageSelector.value);
+  premisesSelector.value && url.searchParams.set('premises', premisesSelector.value);
+  categorySelector.value && url.searchParams.set('category', categorySelector.value);
+  eventsSelector.value && url.searchParams.set('events', eventsSelector.value);
+  categoriesSelector.value && url.searchParams.set('categories', categoriesSelector.value);
+
+  brandSelector.value ? sessionStorage.setItem('brand', brandSelector.value) : sessionStorage.removeItem('brand');
+  languageSelector.value
+    ? sessionStorage.setItem('language', languageSelector.value)
+    : sessionStorage.removeItem('language');
+  premisesSelector.value
+    ? sessionStorage.setItem('premises', premisesSelector.value)
+    : sessionStorage.removeItem('premises');
+  categorySelector.value
+    ? sessionStorage.setItem('category', categorySelector.value)
+    : sessionStorage.removeItem('category');
+  eventsSelector.value ? sessionStorage.setItem('events', eventsSelector.value) : sessionStorage.removeItem('events');
+  categoriesSelector.value
+    ? sessionStorage.setItem('categories', categoriesSelector.value)
+    : sessionStorage.removeItem('categories');
+  sessionStorage.setItem('is_all_stocks_in_inventory', allStocksInInventoryToggle.checked.toString());
+  sessionStorage.setItem('is_stocks_own_by_me', stocksByMeToggle.checked.toString());
+  sessionStorage.setItem('is_events_stocks_own_by_me', eventStocksOwnByMeToggle.checked.toString());
+  sessionStorage.setItem('is_events', eventToggle.checked.toString());
+
+  window.location.href = `${url.origin}${url.pathname}${url.search}`;
+});
+
+//set filter values from sessionStorage
+brandSelector.value = sessionStorage.getItem('brand') ?? '';
+languageSelector.value = sessionStorage.getItem('language') ?? '';
+premisesSelector.value = sessionStorage.getItem('premises') ?? '';
+categorySelector.value = sessionStorage.getItem('category') ?? '';
+eventsSelector.value = sessionStorage.getItem('events') ?? '';
+categoriesSelector.value = sessionStorage.getItem('categories') ?? '';
+
+const filters = document.querySelectorAll('[id^="product-search-master-group"]');
+
+function changeFilterColor(filter: HTMLSelectElement) {
+  const filterOptions = filter.querySelectorAll('option');
+  if (!filter.value) {
+    filter.classList.add('text-gray-500');
+    filter.classList.remove('text-gray-900');
+    filterOptions.forEach((option) => {
+      option.classList.add('text-gray-900');
+    });
+  } else {
+    filter.classList.remove('text-gray-500');
+    filter.classList.add('text-gray-900');
+  }
+}
+
+filters.forEach((filter: HTMLSelectElement) => {
+  changeFilterColor(filter);
+  filter.addEventListener('change', () => {
+    changeFilterColor(filter);
+  });
+});
+
 const deleteButtons = document.querySelectorAll('.delete-product-btn');
 
 deleteButtons.forEach((e) => {
@@ -1064,7 +1170,7 @@ function booking(product: IProduct, group: string) {
             const span = dayContainerShadow.querySelector('.day-price') ?? document.createElement('span');
             span.className = 'day-price';
             span.innerHTML = quantity.toString();
-            if(quantity <= 0) {
+            if (quantity <= 0) {
               dayContainerShadow.classList.add('locked');
             }
             dayContainerShadow.append(span);
@@ -1277,105 +1383,11 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
   productViewTypeContainer.parentNode.insertBefore(productMasterGroupContainer, productViewTypeContainer.nextSibling);
 }
 
-// function to filter products by group
-const productFilterInputs = document.querySelectorAll('.product-filter-input');
-const filterProductButton = document.querySelector('#product-filter-button');
-const filterRadioButtons = document.querySelectorAll('.product-filter-radio-button');
-
-filterRadioButtons.forEach((btn) => {
-  const filterButtonId = btn.getAttribute('id');
-  const filterJsonDataStorage = sessionStorage.getItem('filterJsonData');
-  const filterJsonDataObject = JSON.parse(filterJsonDataStorage);
-
-  for (const key in filterJsonDataObject) {
-    if (filterButtonId.includes(key)) {
-      btn.innerHTML = `
-        ${filterJsonDataObject[key]}
-        <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-          viewBox="0 0 10 6">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="m1 1 4 4 4-4" />
-        </svg>`;
-    }
-  }
-});
-
-productFilterInputs.forEach((input: HTMLInputElement) => {
-  input.addEventListener('change', () => {
-    const filterInputDataTarget = input.getAttribute('data-target');
-    const masterGroup = filterInputDataTarget
-      .split(',')[1]
-      .replace(/[^a-zA-Z0-9\s\_]/g, '')
-      .trim();
-    const filterInputId = filterInputDataTarget.split(',')[0].replace(/[^a-zA-Z0-9\s\_]/g, '');
-    const filterInputIdString = `#product-filter-input-${filterInputId}`;
-    const filterButtonId = filterInputDataTarget
-      .split(',')[1]
-      .trim()
-      .replace(/[^a-zA-Z0-9\s\_]/g, '');
-    const filterInput = document.querySelector(filterInputIdString) as HTMLInputElement;
-    const filterRadioBtn = document.querySelector(`#dropdownRadioButton-${filterButtonId}`);
-
-    if (filterInputIdString.includes(filterButtonId) && input.value === masterGroup) {
-      filterRadioBtn.innerHTML = `
-        ${filterButtonId.split('_').join(' ')}
-        <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-          viewBox="0 0 10 6">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="m1 1 4 4 4-4" />
-        </svg>
-      `;
-      getSessionStorageObject(filterJsonData, 'filterJsonData', 'remove', filterButtonId);
-      return;
-    }
-
-    filterRadioBtn.innerHTML = `
-      ${filterInput.value.split('_').join(' ')}
-      <svg class="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-        viewBox="0 0 10 6">
-        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="m1 1 4 4 4-4" />
-      </svg>
-      `;
-    filterJsonData[filterButtonId] = filterInput.value.split('_').join(' ');
-    getSessionStorageObject(filterJsonData, 'filterJsonData', 'add');
-  });
-});
+const filterProductButton = document.querySelector('#product-filter-button') as HTMLButtonElement;
 
 filterProductButton.addEventListener('click', (e) => {
-  const hiddenInput = document.querySelector('#sort_by') as HTMLInputElement;
-  const filterJsonDataStorage = sessionStorage.getItem('filterJsonData');
-  const filterDataObject = JSON.parse(filterJsonDataStorage);
-  filterJsonData = filterDataObject;
-  hiddenInput.value = JSON.stringify(filterJsonData);
-  sessionStorage.setItem('filterJsonData', JSON.stringify(filterJsonData));
-  const isVisibleFilter = true;
-  sessionStorage.setItem('isVisibleFilter', JSON.stringify(isVisibleFilter));
+  searchInputButton.click();
 });
-
-function getSessionStorageObject(
-  localObject: FilterJsonData,
-  sessionObject: string,
-  method = 'none',
-  objectKey = 'none'
-) {
-  const jsonDataObject = sessionStorage.getItem(sessionObject);
-  const dataObject = JSON.parse(jsonDataObject);
-  switch (method) {
-    case 'add':
-      const newDataObject = { ...dataObject, ...localObject };
-      const newJsonData = JSON.stringify(newDataObject);
-      sessionStorage.setItem(sessionObject, newJsonData);
-      break;
-    case 'remove':
-      delete dataObject[objectKey];
-      const newJsonDataObject = JSON.stringify(dataObject);
-      sessionStorage.setItem(sessionObject, newJsonDataObject);
-      break;
-    default:
-      break;
-  }
-}
 
 async function createAdjustAction(isEqual: boolean, masterGroup: string, group: string, productParam: IProduct) {
   const productInWarehouses = sessionStorage.setItem(
@@ -1829,82 +1841,6 @@ function clearProductGroupContainer() {
   const productGroupEditSelects = document.querySelectorAll('.product-group-edit-add-item');
 }
 
-async function getSortOwnByMe(checkbox: HTMLInputElement, sortRoute: string) {
-  if (checkbox.checked) {
-    try {
-      const response = await fetch(`/product/${sortRoute}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (response.status === 200) {
-        window.location.href = response.url;
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  } else {
-    try {
-      const response = await fetch(`/product/`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (response.status === 200) {
-        window.location.href = response.url;
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
-}
-
-// ----product show stocks own by me----
-const showProductByUserGroupCheckbox: HTMLInputElement = document.querySelector('#product-show-stocks-own-by-me-btn');
-if (window.location.pathname + window.location.hash === '/product/stocks_owned_by_me') {
-  window.onload = (event) => {
-    showProductByUserGroupCheckbox.setAttribute('checked', 'checked');
-  };
-}
-showProductByUserGroupCheckbox.addEventListener('change', async () => {
-  getSortOwnByMe(showProductByUserGroupCheckbox, 'stocks_owned_by_me');
-});
-
-// ----product events show stocks own by me----
-const showEventsProductByUserGroupCheckbox: HTMLInputElement = document.querySelector(
-  '#product-show-events-stocks-own-by-me-btn'
-);
-if (window.location.pathname + window.location.hash === '/product/events_stocks_owned_by_me') {
-  window.onload = (event) => {
-    showEventsProductByUserGroupCheckbox.setAttribute('checked', 'checked');
-  };
-}
-showEventsProductByUserGroupCheckbox.addEventListener('change', async () => {
-  getSortOwnByMe(showEventsProductByUserGroupCheckbox, 'events_stocks_owned_by_me');
-});
-
-const showAllProductStocksCheckbox: HTMLInputElement = document.querySelector('#product-show-all-stocks');
-if (window.location.pathname + window.location.hash === '/product/' && !window.location.href.includes('events')) {
-  window.onload = (event) => {
-    showAllProductStocksCheckbox.setAttribute('checked', 'checked');
-  };
-}
-showAllProductStocksCheckbox.addEventListener('change', async () => {
-  getSortOwnByMe(showAllProductStocksCheckbox, '');
-});
-
-const showAllStocksInventoryCheckbox: HTMLInputElement = document.querySelector('#product-show-all-stocks-inventory');
-if (window.location.pathname + window.location.hash === '/product/stocks_in_inventory') {
-  window.onload = (event) => {
-    showAllStocksInventoryCheckbox.setAttribute('checked', 'checked');
-  };
-}
-showAllStocksInventoryCheckbox.addEventListener('change', async () => {
-  getSortOwnByMe(showAllStocksInventoryCheckbox, 'stocks_in_inventory');
-});
-
 document.querySelector('#product-assign-master-group').addEventListener('change', () => {
   const productAssignMasterGroupSelect: HTMLSelectElement = document.querySelector('#product-assign-master-group');
   const productAssignGroupSelect: HTMLSelectElement = document.querySelector('#product-assign-group');
@@ -2011,58 +1947,66 @@ document.getElementById('product-edit-image').addEventListener('change', (e) => 
   imageCompressor('edit', e);
 });
 
-// productBookingButtons.forEach((button) =>
-//     button.addEventListener('click', () => {
-//         const product = JSON.parse(button.getAttribute('data-target'))
-//         console.log(product)
+const autoswitchAllStocksToggle = () => {
+  if (!allStocksInInventoryToggle.checked && !stocksByMeToggle.checked && !eventStocksOwnByMeToggle.checked) {
+    allStocksInInventoryToggle.checked = false;
+    stocksByMeToggle.checked = false;
+    eventStocksOwnByMeToggle.checked = false;
+    eventToggle.checked = false;
+    allStocksToggle.checked = true;
+    searchInputButton.click();
+  }
+};
 
-//         let div: HTMLDivElement = document.querySelector('#product-event-name')
-//         div.innerHTML = product.name
-//         const img: HTMLImageElement = document.querySelector('#product-event-image')
-//         const fullImageAnchor = img.closest('.product-full-image-anchor')
-//         fullImageAnchor.setAttribute('data-target-product-id', product.id.toString())
-//         product.image.length > 100
-//             ? (img.src = `data:image/png;base64, ${product.image}`)
-//             : (img.src = defaultBrandImage)
-//         div = document.querySelector('#product-event-SKU')
-//         div.innerHTML = product.SKU
-//         div = document.querySelector('#product-event-next_url')
-//         div.innerHTML = window.location.href
+allStocksInInventoryToggle.addEventListener('change', () => {
+  if (allStocksInInventoryToggle.checked) {
+    stocksByMeToggle.checked = false;
+    eventStocksOwnByMeToggle.checked = false;
+    allStocksToggle.checked = false;
+    eventToggle.checked = false;
+    searchInputButton.click();
+  }
+  autoswitchAllStocksToggle();
+});
 
-//         const productIdInput: HTMLInputElement = document.querySelector('#product-event-product-id')
-//         productIdInput.value = product.id.toString()
+stocksByMeToggle.addEventListener('change', () => {
+  if (stocksByMeToggle.checked) {
+    allStocksInInventoryToggle.checked = false;
+    eventStocksOwnByMeToggle.checked = false;
+    allStocksToggle.checked = false;
+    eventToggle.checked = false;
+    searchInputButton.click();
+  }
+  autoswitchAllStocksToggle();
+});
 
-//         // datepicker
-//         const eventDatepickers = document.querySelectorAll('.product-event-datepicker')
-//         const dateCurrent = new Date()
-//         const dateEvent = new Date(dateCurrent.getFullYear(), dateCurrent.getMonth(), dateCurrent.getDate() + 5)
+eventStocksOwnByMeToggle.addEventListener('change', () => {
+  if (eventStocksOwnByMeToggle.checked) {
+    allStocksInInventoryToggle.checked = false;
+    stocksByMeToggle.checked = false;
+    allStocksToggle.checked = false;
+    eventToggle.checked = false;
+    searchInputButton.click();
+  }
+  autoswitchAllStocksToggle();
+});
 
-//         const option = {
-//             todayHighlight: true,
-//             minDate: dateEvent,
-//         }
+allStocksToggle.addEventListener('change', () => {
+  if (allStocksToggle.checked) {
+    allStocksInInventoryToggle.checked = false;
+    stocksByMeToggle.checked = false;
+    eventStocksOwnByMeToggle.checked = false;
+    searchInputButton.click();
+  }
+  autoswitchAllStocksToggle();
+});
 
-//         eventDatepickers.forEach((datepicker: HTMLDivElement, index) => {
-//             const eventDatePicker = new Datepicker(datepicker)
-//             eventDatePicker.setOptions(option)
-//             if (index === 0) {
-//                 eventDatePicker.setDate(dateEvent)
-//             }
-//         })
-//     })
-// )
-
-function getFilterValues(isChecked: boolean) {
-  const url = new URL(window.location.href);
-  const eventSortToggleButton = document.querySelector('#product-show-events-toggle-btn');
-
-  url.pathname = '/product';
-
-  isChecked ? url.searchParams.set('events', 'true') : url.searchParams.delete('events');
-  window.location.href = `${url.href}`;
-}
-
-const eventSortToggleButton: HTMLInputElement = document.querySelector('#product-show-events-toggle-btn');
-eventSortToggleButton.addEventListener('change', () => {
-  getFilterValues(eventSortToggleButton.checked);
+eventToggle.addEventListener('change', () => {
+  if (eventToggle.checked) {
+    allStocksInInventoryToggle.checked = false;
+    stocksByMeToggle.checked = false;
+    eventStocksOwnByMeToggle.checked = false;
+    allStocksToggle.checked = false;
+  }
+  searchInputButton.click();
 });

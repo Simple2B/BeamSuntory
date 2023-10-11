@@ -5,7 +5,6 @@ from .group import GroupForm, NewGroupForm, MasterGroupForm, NewMasterGroupForm
 from .product import (
     ProductForm,
     NewProductForm,
-    SortByGroupProductForm,
     AssignProductForm,
     RequestShareProductForm,
     UploadProductForm,
