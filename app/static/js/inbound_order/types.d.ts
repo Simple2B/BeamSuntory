@@ -1,4 +1,4 @@
-import { IGroup, IInboundOrderBase, ISupplier, IWarehouse } from '../types';
+import { IGroup, IInboundOrderBase, ISupplier, IWarehouse } from "../types";
 export interface IProductAllocatedGroup {
     groupId: number;
     quantity: number;
