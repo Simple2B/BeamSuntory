@@ -504,48 +504,61 @@ async function getEventAvailableQuantity(product_id: number, group: string, cale
 const searchInput: HTMLInputElement = document.querySelector('#table-search-products');
 const searchInputButton = document.querySelector('#table-search-product-button') as HTMLButtonElement;
 
+const brandSelector = document.querySelector('#product-search-master-group-Brand') as HTMLSelectElement;
+const languageSelector = document.querySelector('#product-search-master-group-Language') as HTMLSelectElement;
+const premisesSelector = document.querySelector('#product-search-master-group-Premises') as HTMLSelectElement;
+const categorySelector = document.querySelector('#product-search-master-group-Category') as HTMLSelectElement;
+const eventsSelector = document.querySelector('#product-search-master-group-Events') as HTMLSelectElement;
+const categoriesSelector = document.querySelector('#product-search-master-group-Categories') as HTMLSelectElement;
+
+const currentUrl = new URL(window.location.href);
+
+const searchParams = {
+  brand: brandSelector,
+  language: languageSelector,
+  premises: premisesSelector,
+  category: categorySelector,
+  events: eventsSelector,
+  categories: categoriesSelector,
+};
+
+for (const [key, value] of Object.entries(searchParams)) {
+  const param = currentUrl.searchParams.get(key);
+  if (param) {
+    value.value = param;
+  }
+}
+
+
 searchInputButton.addEventListener('click', () => {
   const url = new URL(window.location.href);
-  url.searchParams.delete('q');
-  url.searchParams.delete('is_all_stocks_in_inventory')
-  url.searchParams.delete('is_stocks_own_by_me')
-  url.searchParams.delete('is_events_stocks_own_by_me')
-  url.searchParams.delete('is_events')
-  url.searchParams.delete('brand')
-  url.searchParams.delete('language')
-  url.searchParams.delete('premises')
-  url.searchParams.delete('category')
-  url.searchParams.delete('events')
-  url.searchParams.delete('categories')
-
+  const searchParamsToDelete = [
+    'q',
+    'is_all_stocks_in_inventory',
+    'is_stocks_own_by_me',
+    'is_events_stocks_own_by_me',
+    'is_events',
+    'brand',
+    'language',
+    'premises',
+    'category',
+    'events',
+    'categories',
+  ];
+  searchParamsToDelete.forEach((param) => url.searchParams.delete(param));
 
   url.searchParams.set('q', searchInput.value);
-  allStocksInInventoryToggle.checked ? url.searchParams.set('is_all_stocks_in_inventory', 'true') : null;
-  stocksByMeToggle.checked ? url.searchParams.set('is_stocks_own_by_me', 'true') : null;
-  eventStocksOwnByMeToggle.checked ? url.searchParams.set('is_events_stocks_own_by_me', 'true') : null;
-  eventToggle.checked ? url.searchParams.set('is_events', 'true') : null;
+  allStocksInInventoryToggle.checked && url.searchParams.set('is_all_stocks_in_inventory', 'true');
+  stocksByMeToggle.checked && url.searchParams.set('is_stocks_own_by_me', 'true');
+  eventStocksOwnByMeToggle.checked && url.searchParams.set('is_events_stocks_own_by_me', 'true');
+  eventToggle.checked && url.searchParams.set('is_events', 'true');
 
-  const brandSelector = document.querySelector('#dropdownRadioButton-Brand');
-  const languageSelector = document.querySelector('#dropdownRadioButton-Language');
-  const premisesSelector = document.querySelector('#dropdownRadioButton-Premises');
-  const categorySelector = document.querySelector('#dropdownRadioButton-Category');
-  const eventsSelector = document.querySelector('#dropdownRadioButton-Events');
-  const categoriesSelector = document.querySelector('#dropdownRadioButton-Categories');
-
-  const brand = brandSelector.textContent.trim().replace(/\n/g, '');
-  const language = languageSelector.textContent.trim().replace(/\n/g, '');
-  const premises = premisesSelector.textContent.trim().replace(/\n/g, '');
-  const category = categorySelector.textContent.trim().replace(/\n/g, '');
-  const events = eventsSelector.textContent.trim().replace(/\n/g, '');
-  const categories = categoriesSelector.textContent.trim().replace(/\n/g, '');
-
-  brand !== 'Brand' ? url.searchParams.set('brand', brand) : null;
-  language !== 'Language' ? url.searchParams.set('language', language) : null;
-  premises !== 'Premises' ? url.searchParams.set('premises', premises) : null;
-  category !== 'Category' ? url.searchParams.set('category', category) : null;
-  events !== 'Events group' ? url.searchParams.set('events', events) : null;
-
-  categories !== 'Categories' ? url.searchParams.set('categories', categories) : null;
+  brandSelector.value && url.searchParams.set('brand', brandSelector.value);
+  languageSelector.value && url.searchParams.set('language', languageSelector.value);
+  premisesSelector.value && url.searchParams.set('premises', premisesSelector.value);
+  categorySelector.value && url.searchParams.set('category', categorySelector.value);
+  eventsSelector.value && url.searchParams.set('events', eventsSelector.value);
+  categoriesSelector.value && url.searchParams.set('categories', categoriesSelector.value);
 
   window.location.href = `${url.origin}${url.pathname}${url.search}`;
 });
