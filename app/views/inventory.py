@@ -16,7 +16,7 @@ inventory_blueprint = Blueprint("inventory", __name__, url_prefix="/inventory")
 
 @inventory_blueprint.route("/", methods=["GET"])
 @login_required
-@role_required([s.UserRole.WAREHOUSE_MANAGER.value])
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def get_all():
     warehouse = aliased(m.Warehouse)
     product = aliased(m.Product)

@@ -1,5 +1,4 @@
 from typing import TYPE_CHECKING
-import json
 import sqlalchemy as sa
 from sqlalchemy import orm
 
@@ -86,32 +85,4 @@ class Product(db.Model, ModelMixin):
 
     @property
     def json(self):
-        # TODO refactor
-        ujs = s.Product.model_validate(self).model_dump_json()
-        mg_dict = json.loads(ujs)
-
-        # here we get dict of current product group_name:master_group_name
-        # example: {'Brand': 'Martini', 'Fr': 'Language', 'Country': 'US'}
-        warehouse_products = [
-            wp
-            for wp in db.session.execute(
-                WarehouseProduct.select().where(
-                    WarehouseProduct.product_id == mg_dict["id"]
-                )
-            ).scalars()
-        ]
-
-        # TODO: move it to schema
-        mg_dict["product_in_warehouses"] = {}
-
-        for wp in warehouse_products:
-            if wp.group.name in mg_dict["product_in_warehouses"]:
-                mg_dict["product_in_warehouses"][wp.group.name][
-                    f"{wp.warehouse_id}"
-                ] = wp.product_quantity
-            else:
-                mg_dict["product_in_warehouses"][wp.group.name] = {
-                    f"{wp.warehouse_id}": wp.product_quantity
-                }
-
-        return json.dumps(mg_dict)
+        return s.Product.model_validate(self).model_dump_json(by_alias=True)

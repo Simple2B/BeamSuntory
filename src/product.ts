@@ -35,32 +35,31 @@ interface IProduct {
       [index: string]: number | string;
     }
   ];
-  product_in_warehouses: { [index: string]: { [index: string]: number } };
-  warehouse_products: IWarehouseProduct[];
-  product_groups: IProductGroup[];
+  warehouseProducts: IWarehouseProduct[];
+  productGroups: IProductGroup[];
 }
 
 interface IProductAdditionalInfo {
-  all_warehouses: IWarehouse[];
-  current_master_product_groups: IMasterGroupGroup[];
-  current_user_groups: IMasterGroupGroupUser[];
-  master_groups_groups: IMasterGroupGroup[];
+  allWarehouses: IWarehouse[];
+  currentMasterProductGroups: IMasterGroupGroup[];
+  currentUserGroups: IMasterGroupGroupUser[];
+  masterGroupsGroups: IMasterGroupGroup[];
 }
 
 interface IMasterGroupGroup {
-  master_group: string;
-  groups: { group_name: string; group_id: number }[];
+  masterGroup: string;
+  groups: { groupName: string; groupId: number }[];
 }
 
 interface IMasterGroupGroupUser {
-  master_group_name: string;
-  groups: { group_name: string; group_id: number }[];
+  masterGroupName: string;
+  groups: { groupName: string; groupId?: number }[];
 }
 
 interface IProductGroup {
   id: number;
-  product_id: number;
-  group_id: number;
+  productId: number;
+  groupId: number;
   parent: IGroup;
 }
 interface FilterJsonData {
@@ -74,9 +73,13 @@ interface IProductMasterGroupGroup {
 interface IGroup {
   id: number;
   name: string;
-  master_group: IMasterGroup;
-  master_group_id: number;
-  master_groups_for_product: IMasterGroup;
+  masterGroup: IMasterGroup;
+  masterGroupId: number;
+}
+
+interface IGroupAdditionalInfo {
+  groupId?: number;
+  groupName: string;
 }
 
 interface IMasterGroup {
@@ -87,9 +90,9 @@ interface IMasterGroup {
 
 interface IWarehouseProduct {
   id: number;
-  product_id: number;
-  warehouse_id: number;
-  product_quantity: number;
+  productId: number;
+  warehouseId: number;
+  productQuantity: number;
   warehouse: IWarehouse;
   group: IGroup;
 }
@@ -99,8 +102,10 @@ interface IWarehouse {
   name: string;
 }
 
-interface IProductGroupMasterGroup {
-  [index: string]: { [key: string]: string };
+interface IEventProductPromise {
+  productId: number;
+  error?: string;
+  status: boolean;
 }
 
 // global variable for mandatory event instance
@@ -177,9 +182,9 @@ if (filterData !== null || filterData !== undefined) {
 function getGroupsMasterGroups(product: IProduct) {
   const groupsMasterGroups = {} as { [group: string]: string };
 
-  product.warehouse_products.forEach((warehouseProduct: IWarehouseProduct) => {
+  product.warehouseProducts.forEach((warehouseProduct: IWarehouseProduct) => {
     const group = warehouseProduct.group.name;
-    const masterGroup = warehouseProduct.group.master_group.name;
+    const masterGroup = warehouseProduct.group.masterGroup.name;
     if (!groupsMasterGroups.hasOwnProperty(group)) {
       groupsMasterGroups[group] = masterGroup;
     }
@@ -203,12 +208,12 @@ function createCustomizeViewColumn(masterGroupName: string) {
 
   productItemTrs.forEach((productItem: HTMLTableRowElement) => {
     const productItemReference = productItem.children[positionInTable];
-    const productSKU = productItem.getAttribute('data-target-product-sku');
     const productItemTd = productItemReference.cloneNode(true) as HTMLElement;
     productItemTd.classList.add(`product-table-item-td-${masterGroupName}`);
-    const product = JSON.parse(productItem.getAttribute('data-target-product'));
-    const group = product.product_groups.find(
-      (group: IProductGroup) => group.parent.master_groups_for_product.name === masterGroupName
+    const product: IProduct = JSON.parse(productItem.getAttribute('data-target-product'));
+
+    const group = product.productGroups.find(
+      (group: IProductGroup) => group.parent.masterGroup.name === masterGroupName
     );
     group ? (productItemTd.innerHTML = group.parent.name) : (productItemTd.innerHTML = '-');
 
@@ -487,7 +492,7 @@ let fetchedAmountByDate = [] as { date: string; quantity: number }[];
 async function getEventAvailableQuantity(product_id: number, group: string, calendarFilter: string[]) {
   const response = await fetch(
     `/event/get_available_quantity?group_name=${group.replace(
-      '_',
+      /_/g,
       ' '
     )}&product_id=${product_id}&dates=${JSON.stringify(calendarFilter)}`
   );
@@ -563,7 +568,7 @@ function addProduct(groups: IProductMasterGroupGroup) {
 
 async function editProduct(product: IProduct) {
   sessionStorage.setItem('product', JSON.stringify(product));
-  const productAdditionalInfo = await getAdditionalProductInfo(product.id);
+  const productAdditionalInfo: IProductAdditionalInfo = await getAdditionalProductInfo(product.id);
 
   const img: HTMLImageElement = document.querySelector('#product-edit-show-image');
   const fullImageAnchor = img.closest('.product-full-image-anchor');
@@ -618,56 +623,56 @@ async function editProduct(product: IProduct) {
     '#product-master-group-edit-add-product-1'
   );
   const options = productMasterGroupEditSelect.querySelectorAll('option');
-  const productMasterGroups = product.product_groups.map(
-    (group: IProductGroup) => group.parent.master_groups_for_product.name as string
+  const productMasterGroups = product.productGroups.map(
+    (group: IProductGroup) => group.parent.masterGroup.name as string
   );
 
   if (productMasterGroups.length > 0) {
     const productGroupsEditSelects = document.querySelectorAll<HTMLSelectElement>('.product-group-edit-item');
 
     for (let i = 0; i < productMasterGroups.length; i++) {
-      const currentProductMasterGroup = productAdditionalInfo.current_master_product_groups.find(
-        (masterGroupItem: IMasterGroupGroup) => masterGroupItem.master_group === productMasterGroups[i]
+      const currentProductMasterGroup = productAdditionalInfo.currentMasterProductGroups.find(
+        (masterGroupItem: IMasterGroupGroup) => masterGroupItem.masterGroup === productMasterGroups[i]
       );
       if (i === 0) {
         const productGroupsEditSelect = productGroupsEditSelects[i];
 
         productMasterGroupEditSelect.value = productMasterGroups[i];
 
-        const masterGroupGroup = productAdditionalInfo.master_groups_groups.find(
-          (masterGroup: IMasterGroupGroup) => masterGroup.master_group === productMasterGroups[i]
+        const masterGroupGroup = productAdditionalInfo.masterGroupsGroups.find(
+          (masterGroup: IMasterGroupGroup) => masterGroup.masterGroup === productMasterGroups[i]
         );
 
-        masterGroupGroup.groups.forEach((group: { group_name: string; group_id: number }) => {
+        masterGroupGroup.groups.forEach((group: IGroupAdditionalInfo) => {
           const storeSelectOption = document.createElement('option');
-          storeSelectOption.setAttribute('value', group.group_id.toString());
-          storeSelectOption.textContent = group.group_name;
+          storeSelectOption.setAttribute('value', group.groupId.toString());
+          storeSelectOption.textContent = group.groupName;
           productGroupsEditSelect.appendChild(storeSelectOption);
         });
         // TODO: always select first option
-        const currentProductGroup = product.product_groups.find(
-          (group: IProductGroup) => group.parent.master_groups_for_product.name === productMasterGroups[i]
+        const currentProductGroup = product.productGroups.find(
+          (group: IProductGroup) => group.parent.masterGroup.name === productMasterGroups[i]
         );
 
-        productGroupsEditSelect.value = currentProductGroup.group_id.toString();
+        productGroupsEditSelect.value = currentProductGroup.groupId.toString();
         productMasterGroupEditSelect.addEventListener('change', () => {
           options.forEach((e) => {
             if (
               e.textContent === productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
             ) {
               const groupSelect = document.querySelector('#product-group-edit-item-1');
-              const optionCategory = productAdditionalInfo.master_groups_groups.find(
+              const optionCategory = productAdditionalInfo.masterGroupsGroups.find(
                 (masteGroup: IMasterGroupGroup) =>
-                  masteGroup.master_group ===
+                  masteGroup.masterGroup ===
                   productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
               )?.groups;
 
               groupSelect.innerHTML = '';
               if (optionCategory) {
-                optionCategory.forEach((group: { group_name: string; group_id: number }) => {
+                optionCategory.forEach((group: IGroupAdditionalInfo) => {
                   const storeSelectOption = document.createElement('option');
-                  storeSelectOption.setAttribute('value', group.group_id.toString());
-                  storeSelectOption.textContent = group.group_name;
+                  storeSelectOption.setAttribute('value', group.groupId.toString());
+                  storeSelectOption.textContent = group.groupName;
                   groupSelect.appendChild(storeSelectOption);
                 });
               }
@@ -701,18 +706,18 @@ async function editProduct(product: IProduct) {
     options.forEach((e) => {
       if (e.textContent === productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text) {
         const groupSelect = document.querySelector('#product-group-edit-item-1');
-        const optionCategory = productAdditionalInfo.master_groups_groups.find(
+        const optionCategory = productAdditionalInfo.masterGroupsGroups.find(
           (masterGroup: IMasterGroupGroup) =>
-            masterGroup.master_group ===
+            masterGroup.masterGroup ===
             productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
         )?.groups;
 
         groupSelect.innerHTML = '';
         if (optionCategory) {
-          optionCategory.forEach((group: { group_name: string; group_id: number }) => {
+          optionCategory.forEach((group: IGroupAdditionalInfo) => {
             const storeSelectOption = document.createElement('option');
-            storeSelectOption.setAttribute('value', group.group_id.toString());
-            storeSelectOption.textContent = group.group_name;
+            storeSelectOption.setAttribute('value', group.groupId.toString());
+            storeSelectOption.textContent = group.groupName;
             groupSelect.appendChild(storeSelectOption);
           });
         }
@@ -728,35 +733,34 @@ viewProductButtonElements.forEach((e) =>
     if (bookingButton) {
       bookingButton.setAttribute('data-target', e.getAttribute('data-target'));
     }
-    const product = JSON.parse(e.getAttribute('data-target'));
+    const product: IProduct = JSON.parse(e.getAttribute('data-target'));
     const groupsMasterGroups = getGroupsMasterGroups(product);
 
     let totalWarehouseQty = 0;
-    if (product.warehouse_products) {
-      const warehouseQuantity = product.warehouse_products.map(
-        (warehouseQty: IWarehouseProduct) => warehouseQty.product_quantity
+    if (product.warehouseProducts) {
+      const warehouseQuantity = product.warehouseProducts.map(
+        (warehouseQty: IWarehouseProduct) => warehouseQty.productQuantity
       );
 
       totalWarehouseQty = warehouseQuantity.reduce((acc: number, quantity: number) => acc + quantity, 0);
     }
 
-    const productInfo = await getAdditionalProductInfo(product.id);
-
+    const productInfo: IProductAdditionalInfo = await getAdditionalProductInfo(product.id);
     sessionStorage.setItem('product', JSON.stringify(product));
     const prodGroups = Object.keys(groupsMasterGroups);
 
-    prodGroups.forEach((groupName) => {
+    prodGroups.forEach((groupName: string) => {
       let isEqual = false;
       const mstrGroupName = groupsMasterGroups[groupName];
 
-      const currentUserGroup = productInfo.current_user_groups.find(
-        (userGroup: IMasterGroupGroupUser) => userGroup.master_group_name === mstrGroupName
+      const currentUserGroup = productInfo.currentUserGroups.find(
+        (userGroup: IMasterGroupGroupUser) => userGroup.masterGroupName === mstrGroupName
       );
 
       if (currentUserGroup) {
-        const isExistGroup = currentUserGroup.groups.find(
-          (group: { group_name: string }) => group.group_name === groupName
-        );
+        const isExistGroup = currentUserGroup.groups.find((group: IGroupAdditionalInfo) => {
+          return group.groupName === groupName;
+        });
 
         if (isExistGroup) {
           isEqual = true;
@@ -801,7 +805,7 @@ viewProductButtonElements.forEach((e) =>
     div = document.querySelector('#product-view-next_url');
     div.innerHTML = window.location.href;
 
-    product.warehouse_products.forEach((warehouseProduct: IWarehouseProduct) => {
+    product.warehouseProducts.forEach((warehouseProduct: IWarehouseProduct) => {
       const productViewContainer = document.querySelector('#product-view-grid-container');
       const warehouseTemplate = document.querySelector('#product-view-warehouse-template');
       const availableQuantityTemplate = document.querySelector('#product-view-available-quantity-template');
@@ -818,7 +822,7 @@ viewProductButtonElements.forEach((e) =>
       );
 
       warehouseName.innerHTML = warehouseProduct.warehouse.name;
-      warehouseAvailableQuantity.innerHTML = warehouseProduct.product_quantity.toString();
+      warehouseAvailableQuantity.innerHTML = warehouseProduct.productQuantity.toString();
 
       productViewContainer.appendChild(warehouseDiv);
       productViewContainer.appendChild(availableQuantityDiv);
@@ -834,24 +838,33 @@ adjustProductButtonElements.forEach((e) =>
     const product = JSON.parse(e.getAttribute('data-target'));
     sessionStorage.setItem('product', JSON.stringify(product));
     const groupsMasterGroups = getGroupsMasterGroups(product);
-    const productInfo = await getAdditionalProductInfo(product.id);
+    const productInfo: IProductAdditionalInfo = await getAdditionalProductInfo(product.id);
 
     const prodGroups = Object.keys(groupsMasterGroups);
 
     prodGroups.forEach((groupName) => {
       let isEqual = false;
-      const currentUserGroup = productInfo.current_user_groups.find(
-        (userGroup: IMasterGroupGroupUser) => userGroup.master_group_name === mstrGroupName
+      const currentUserGroup = productInfo.currentUserGroups.find(
+        (userGroup: IMasterGroupGroupUser) => userGroup.masterGroupName === mstrGroupName
       );
 
       const mstrGroupName = groupsMasterGroups[groupName];
       if (currentUserGroup) {
-        const currentUserValue = currentUserGroup.groups[0].group_name;
+        const currentUserValue = currentUserGroup.groups[0].groupName;
         if (currentUserValue.includes(groupName)) {
           isEqual = true;
         }
       }
-      createAdjustAction(isEqual, mstrGroupName, groupName, product);
+
+      if (isEvent) {
+        if (mstrGroupName === eventMasterGroup) {
+          createAdjustAction(isEqual, mstrGroupName, groupName, product);
+        }
+      } else {
+        if (mstrGroupName !== eventMasterGroup) {
+          createAdjustAction(isEqual, mstrGroupName, groupName, product);
+        }
+      }
     });
 
     let div: HTMLDivElement = document.querySelector('#product-adjust-name');
@@ -873,8 +886,8 @@ adjustProductButtonElements.forEach((e) =>
 // function to request share
 // TODO refactor !!!
 function requestShare(product: IProduct, group: string) {
-  const warehouseGroupProduct = product.warehouse_products.find(
-    (warehouseProduct) => warehouseProduct.group.name === group.replace('_', ' ')
+  const warehouseGroupProduct = product.warehouseProducts.find(
+    (warehouseProduct) => warehouseProduct.group.name === group.replace(/_/g, ' ')
   );
   const img: HTMLImageElement = document.querySelector('#product-request-share-image');
   const fullImageAnchor = img.closest('.product-full-image-anchor');
@@ -889,31 +902,31 @@ function requestShare(product: IProduct, group: string) {
   productSKUInput.value = product.SKU;
 
   div = document.querySelector('#product-request-share-available-quantity');
-  div.innerHTML = warehouseGroupProduct.product_quantity.toString();
+  div.innerHTML = warehouseGroupProduct.productQuantity.toString();
   div = document.querySelector('#product-request-share-owner');
   // TODO change to something not hardcoded here and in rest funcs
   div.innerHTML = 'Mike';
   div = document.querySelector('#product-request-share-role');
   div.innerHTML = 'ADMIN';
   div = document.querySelector('#product-request-share-total-available-items');
-  div.innerHTML = warehouseGroupProduct.product_quantity.toString();
+  div.innerHTML = warehouseGroupProduct.productQuantity.toString();
   let input: HTMLInputElement = document.querySelector('#product-request-share-quantity');
-  input.max = warehouseGroupProduct.product_quantity.toString();
+  input.max = warehouseGroupProduct.productQuantity.toString();
   input.min = '1';
   input = document.querySelector('#product-request-share-name-hidden-input');
   input.value = product.name;
   input = document.querySelector('#product-request-share-SKU-hidden-input');
   input.value = product.SKU;
   input = document.querySelector('#product-request-share-available-quantity-hidden-input');
-  input.value = warehouseGroupProduct.product_quantity.toString();
+  input.value = warehouseGroupProduct.productQuantity.toString();
 
   const groupNameView = document.querySelector('#product-request-share-from-group');
-  groupNameView.innerHTML = group.replace('_', ' ');
+  groupNameView.innerHTML = group.replace(/_/g, ' ');
 
   const fromGroupId = document.querySelector('#from-group-id') as HTMLInputElement;
   const groupsIds = getGroupsIds(product);
 
-  fromGroupId.value = groupsIds[group.replace('_', ' ')].toString();
+  fromGroupId.value = groupsIds[group.replace(/_/g, ' ')].toString();
 
   requestShareModal.show();
 }
@@ -921,7 +934,7 @@ function requestShare(product: IProduct, group: string) {
 function getGroupsIds(product: IProduct) {
   const groupsIds = {} as { [group: string]: number };
 
-  product.warehouse_products.forEach((warehouseProduct: IWarehouseProduct) => {
+  product.warehouseProducts.forEach((warehouseProduct: IWarehouseProduct) => {
     const group = warehouseProduct.group.name;
     const id = warehouseProduct.group.id;
     if (!groupsIds.hasOwnProperty(group)) {
@@ -934,8 +947,8 @@ function getGroupsIds(product: IProduct) {
 
 // function to ship
 function ship(product: IProduct, group: string) {
-  const warehouseGroupProduct = product.warehouse_products.find(
-    (warehouseProduct) => warehouseProduct.group.name === group.replace('_', ' ')
+  const warehouseGroupProduct = product.warehouseProducts.find(
+    (warehouseProduct) => warehouseProduct.group.name === group.replace(/_/g, ' ')
   );
   const img: HTMLImageElement = document.querySelector('#product-ship-image');
   const fullImageAnchor = img.closest('.product-full-image-anchor');
@@ -946,32 +959,32 @@ function ship(product: IProduct, group: string) {
   div = document.querySelector('#product-ship-sku');
   div.innerHTML = product.SKU;
   div = document.querySelector('#product-ship-available-quantity');
-  div.innerHTML = warehouseGroupProduct.product_quantity.toString();
+  div.innerHTML = warehouseGroupProduct.productQuantity.toString();
   div = document.querySelector('#product-ship-total-available-items');
-  div.innerHTML = warehouseGroupProduct.product_quantity.toString();
+  div.innerHTML = warehouseGroupProduct.productQuantity.toString();
 
   let input: HTMLInputElement = document.querySelector('#product-ship-product-id');
   input.value = product.id.toString();
   input = document.querySelector('#product-ship-desire-quantity');
-  input.max = warehouseGroupProduct.product_quantity.toString();
+  input.max = warehouseGroupProduct.productQuantity.toString();
   input.min = '1';
   input = document.querySelector('#product-ship-group');
-  input.value = group.replace('_', ' ');
+  input.value = group.replace(/_/g, ' ');
 
   shipModal.show();
 
   // -----count rest quantity in ship request product modal------
   const desiredQuantityInput: HTMLInputElement = document.querySelector('#product-ship-desire-quantity');
-  desiredQuantityInput.setAttribute('max', warehouseGroupProduct.product_quantity.toString());
+  desiredQuantityInput.setAttribute('max', warehouseGroupProduct.productQuantity.toString());
   desiredQuantityInput.addEventListener('change', () => {
     const availableQuantityDiv = document.querySelector('#product-ship-available-quantity');
-    availableQuantityDiv.textContent = warehouseGroupProduct.product_quantity.toString();
+    availableQuantityDiv.textContent = warehouseGroupProduct.productQuantity.toString();
     let desiredQuantity = parseInt(desiredQuantityInput.value);
     const availableQuantity = parseInt(availableQuantityDiv.textContent);
     if (desiredQuantity < 0) {
       desiredQuantityInput.value = '0';
     } else if (desiredQuantity > availableQuantity) {
-      desiredQuantityInput.value = warehouseGroupProduct.product_quantity.toString();
+      desiredQuantityInput.value = warehouseGroupProduct.productQuantity.toString();
       availableQuantityDiv.textContent = '0';
     } else if (desiredQuantity) {
       availableQuantityDiv.textContent = (availableQuantity - desiredQuantity).toString();
@@ -985,9 +998,9 @@ let calendarFilter: string[] = [];
 
 // function to booking
 function booking(product: IProduct, group: string) {
-  const warehouseGroupProduct = product.warehouse_products.find(
-    (warehouseProduct) => warehouseProduct.group.name === group.replace('_', ' ')
-  );
+  const warehouseGroupProduct = product.warehouseProducts.find((warehouseProduct) => {
+    return warehouseProduct.group.name === group.replace(/_/g, ' ');
+  });
   const img: HTMLImageElement = document.querySelector('#product-event-image');
   const fullImageAnchor = img.closest('.product-full-image-anchor');
   fullImageAnchor.setAttribute('data-target-product-id', product.id.toString());
@@ -998,12 +1011,12 @@ function booking(product: IProduct, group: string) {
   div.innerHTML = product.SKU;
 
   let input: HTMLInputElement = document.querySelector('#product-event-group-hidden');
-  input.value = group.replace('_', ' ');
+  input.value = group.replace(/_/g, ' ');
   input = document.querySelector('#product-event-product-id');
   input.value = product.id.toString();
   input = document.querySelector('#product-event-quantity');
   input.min = '1';
-  input.max = warehouseGroupProduct.product_quantity.toString();
+  input.max = warehouseGroupProduct.productQuantity.toString();
 
   const currentDate = new Date();
 
@@ -1064,7 +1077,7 @@ function booking(product: IProduct, group: string) {
             const span = dayContainerShadow.querySelector('.day-price') ?? document.createElement('span');
             span.className = 'day-price';
             span.innerHTML = quantity.toString();
-            if(quantity <= 0) {
+            if (quantity <= 0) {
               dayContainerShadow.classList.add('locked');
             }
             dayContainerShadow.append(span);
@@ -1082,15 +1095,15 @@ function booking(product: IProduct, group: string) {
 
 // function to assign
 function assign(product: IProduct, group: string) {
-  const warehouseGroupProduct = product.warehouse_products.find(
-    (warehouseProduct) => warehouseProduct.group.name === group.replace('_', ' ')
+  const warehouseGroupProduct = product.warehouseProducts.find(
+    (warehouseProduct) => warehouseProduct.group.name === group.replace(/_/g, ' ')
   );
   let input: HTMLInputElement = document.querySelector('#product-assign-name');
   input.value = product.name;
   input = document.querySelector('#product-assign-amount');
-  input.max = warehouseGroupProduct.product_quantity.toString();
+  input.max = warehouseGroupProduct.productQuantity.toString();
   input.min = '1';
-  const groupName = group.replace('_', ' ');
+  const groupName = group.replace(/_/g, ' ');
   const groupIds = getGroupsIds(product);
   const group_id = groupIds[groupName];
   input = document.querySelector('#product-assign-from-group');
@@ -1127,8 +1140,8 @@ function deleteShipAssignButton(nameGroup: string, nameGroupValue: string) {
 
 // function to add ship, assign, button to view product modal
 function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: string, productParam: IProduct) {
-  const warehouseGroupProduct = productParam.warehouse_products.find(
-    (warehouseProduct) => warehouseProduct.group.name === group.replace('_', ' ')
+  const warehouseGroupProduct = productParam.warehouseProducts.find(
+    (warehouseProduct) => warehouseProduct.group.name === group
   );
   const isEventItem = isEvent && masterGroup === eventMasterGroup;
   const groupUnderScore = group.replace(/ /g, '_');
@@ -1144,7 +1157,7 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
       <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available</label>
         <div id="ship-product-quantity"
           class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-      ${warehouseGroupProduct.product_quantity || 0}</div>
+      ${warehouseGroupProduct.productQuantity || 0}</div>
     </div>
     <div>
       <label for="product_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Action</label >
@@ -1187,7 +1200,7 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
       <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available</label>
         <div id="ship-product-quantity"
           class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-      ${warehouseGroupProduct.product_quantity || 0}</div>
+      ${warehouseGroupProduct.productQuantity || 0}</div>
     </div>
     <div>
       <label for="product_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Action</label >
@@ -1200,7 +1213,7 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
 
   const shareProductBtn = shareContainer.querySelector(`#share-product-button-${groupUnderScore}`);
 
-  if (warehouseGroupProduct.product_quantity === 0 || !warehouseGroupProduct) {
+  if (warehouseGroupProduct.productQuantity === 0 || !warehouseGroupProduct) {
     if (shipProductBtn && assignProductBtn) {
       shipProductBtn.classList.add('invisible');
       assignProductBtn.classList.add('invisible');
@@ -1216,7 +1229,8 @@ function addShipAssignShareButton(isEqual: boolean, masterGroup: string, group: 
   }
 
   if (isEventItem) {
-    const bookingButtons = document.querySelectorAll('.booking-product-button');
+    const bookingButtons = shipAssignContainer.querySelectorAll('.booking-product-button');
+
     bookingButtons.forEach((e) =>
       e.addEventListener('click', () => {
         let shipGroup = e.getAttribute('ship-group-data');
@@ -1378,13 +1392,12 @@ function getSessionStorageObject(
 }
 
 async function createAdjustAction(isEqual: boolean, masterGroup: string, group: string, productParam: IProduct) {
-  const productInWarehouses = sessionStorage.setItem(
-    'productInWarehouses',
-    JSON.stringify(productParam.product_in_warehouses)
-  );
-  const productInfo = await getAdditionalProductInfo(productParam.id);
+  sessionStorage.setItem('productInWarehousesSchema', JSON.stringify(productParam.warehouseProducts));
+
+  const productInfo: IProductAdditionalInfo = await getAdditionalProductInfo(productParam.id);
   const groupUnderScore = group.replace(/ /g, '_');
   const groupProductIds = getGroupsIds(productParam);
+
   const productTypeContainer = document.querySelector(`#product-adjust-product-name-container`);
   const adjustContainer = document.createElement('div');
   adjustContainer.classList.add('sm:col-span-2', 'flex', 'gap-4');
@@ -1435,8 +1448,11 @@ async function createAdjustAction(isEqual: boolean, masterGroup: string, group: 
     `#adjust-product-quantity-${groupUnderScore}`
   );
 
-  for (const warehouse of productInfo.all_warehouses) {
+  for (const warehouse of productInfo.allWarehouses) {
     if (isEvent && warehouse.name !== eventsWarehouse) {
+      continue;
+    }
+    if (!isEvent && warehouse.name === eventsWarehouse) {
       continue;
     }
     const option = document.createElement('option');
@@ -1445,25 +1461,91 @@ async function createAdjustAction(isEqual: boolean, masterGroup: string, group: 
     selectWarehouse.appendChild(option);
   }
 
-  const productQuantityValue = productParam.product_in_warehouses[group][selectWarehouse.value] || 0;
+  const warehouseProduct = productParam.warehouseProducts.find((item: IWarehouseProduct) => {
+    return item.group.name === group && item.warehouse.id === Number(selectWarehouse.value);
+  });
 
-  productQuantity.value = String(productQuantityValue);
+  if (!warehouseProduct) {
+    console.log('warehouseProduct product not found', warehouseProduct);
+    return;
+  }
+
+  productQuantity.value = warehouseProduct.productQuantity.toString();
 
   productViewTypeContainer.parentNode.insertBefore(masterGroupWarehouseContainer, productViewTypeContainer.nextSibling);
 
   selectWarehouse.addEventListener('change', () => {
-    const productInWarehouses = JSON.parse(sessionStorage.getItem('productInWarehouses'));
-    const availableQuantity = productInWarehouses[group][selectWarehouse.value] || 0;
+    const productInWarehousesSchema = JSON.parse(sessionStorage.getItem('productInWarehousesSchema'));
+    if (!productInWarehousesSchema) {
+      console.log('productInWarehousesSchema not found', productInWarehousesSchema);
+      return;
+    }
+    const warehouseProduct: IWarehouseProduct = productInWarehousesSchema.find((item: IWarehouseProduct) => {
+      return item.group.name === group && item.warehouse.id === Number(selectWarehouse.value);
+    });
+
+    if (!warehouseProduct) {
+      console.log('warehouseProduct product not found', warehouseProduct);
+      return;
+    }
+
+    const availableQuantity = warehouseProduct.productQuantity.toString();
     productQuantity.value = String(availableQuantity);
-    productInWarehouses[group][selectWarehouse.value] = Number(productQuantity.value);
-    sessionStorage.setItem('productInWarehouses', JSON.stringify(productInWarehouses));
+
+    warehouseProduct.productQuantity = Number(productQuantity.value);
+    sessionStorage.setItem('productInWarehousesSchema', JSON.stringify(productInWarehousesSchema));
   });
 
   productQuantity.addEventListener('change', () => {
-    const productInWarehouses = JSON.parse(sessionStorage.getItem('productInWarehouses'));
-    productInWarehouses[group][selectWarehouse.value] = Number(productQuantity.value);
-    sessionStorage.setItem('productInWarehouses', JSON.stringify(productInWarehouses));
+    const productInWarehousesSchema = JSON.parse(sessionStorage.getItem('productInWarehousesSchema'));
+    const warehouseProduct: IWarehouseProduct = productInWarehousesSchema.find((item: IWarehouseProduct) => {
+      return item.group.name === group && item.warehouse.id === Number(selectWarehouse.value);
+    });
+
+    if (!warehouseProduct) {
+      console.log('warehouseProduct product not found', warehouseProduct);
+      return;
+    }
+
+    warehouseProduct.productQuantity = Number(productQuantity.value);
+    sessionStorage.setItem('productInWarehousesSchema', JSON.stringify(productInWarehousesSchema));
   });
+}
+
+async function checkAdjustEventQuantity(warehouseProducts: IWarehouseProduct[]) {
+  const fetchPromises = warehouseProducts.map(async (product: IWarehouseProduct) => {
+    const response = await fetch(
+      `/event/get_adjust_available_quantity?group_id=${product.group.id}&product_id=${product.productId}&quantity=${product.productQuantity}`
+    );
+
+    if (response.status !== 200) {
+      const message = await response.json();
+
+      const data = {
+        productId: product.productId,
+        error: message,
+        status: false,
+      };
+      return data;
+    }
+    const data = {
+      productId: product.productId,
+      status: true,
+    };
+
+    return data;
+  });
+
+  const resultAllPromises: IEventProductPromise[] = [];
+
+  const results = await Promise.all(fetchPromises);
+  results.forEach((result) => {
+    if (result.status !== true) {
+      return resultAllPromises.push(result);
+    }
+  });
+
+  return resultAllPromises;
 }
 
 const adjustButton = document.querySelector(`#product-adjust-submit-btn`);
@@ -1476,32 +1558,50 @@ adjustButton.addEventListener('click', () => {
 
 async function adjustProduct(productParam: IProduct, csrfToken: string) {
   const adjustNote: HTMLInputElement = document.querySelector('#product-adjust-note');
-  const productInWarehouses = JSON.parse(sessionStorage.getItem('productInWarehouses'));
+  const productInWarehousesSchema = JSON.parse(sessionStorage.getItem('productInWarehousesSchema'));
 
   const data = {
     product_id: productParam.id,
-    groups_quantity: JSON.stringify(productInWarehouses),
+    warehouses_groups_quantity: {
+      product_warehouses: JSON.stringify({ product_warehouses: productInWarehousesSchema }),
+    },
     note: adjustNote.value,
     csrf_token: csrfToken,
   };
 
-  const base_url = window.location.origin;
+  const adjustProductQuantity = async () => {
+    const response = await fetch(`/product/adjust`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
 
-  const response = await fetch(`/product/adjust`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+    if (response.status === 200) {
+      location.reload();
+      sessionStorage.removeItem('productInWarehouses');
+    } else {
+      location.reload();
+      alert('Something went wrong, the product was not adjusted. Please try again.');
+      sessionStorage.removeItem('productInWarehouses');
+    }
+  };
 
-  // NOTE: If we do not notify user about adjust, delete if else statement
-  if (response.status === 201) {
-    location.reload();
-    sessionStorage.removeItem('productInWarehouses');
+  if (isEvent) {
+    const eventsProducts = productInWarehousesSchema.filter((product: IWarehouseProduct) => {
+      return product.group.masterGroup.name === eventMasterGroup;
+    });
+    const availableEventQuantity = await checkAdjustEventQuantity(eventsProducts);
+
+    if (availableEventQuantity.length !== 0) {
+      const errorMessages = availableEventQuantity.map((e) => e.error);
+      alert('Maximum quantity exceeded!' + '\n' + errorMessages.join('\n'));
+    } else {
+      adjustProductQuantity();
+    }
   } else {
-    location.reload();
-    sessionStorage.removeItem('productInWarehouses');
+    adjustProductQuantity();
   }
 }
 
@@ -1589,7 +1689,7 @@ async function createProductGroupEditItem(
   `;
 
   const productGroupEditSelect: HTMLSelectElement = productGroupEditItem.querySelector('.product-group-edit-item');
-  const availableMasterGroups = [...productInfo.master_groups_groups.map((e) => e.master_group)];
+  const availableMasterGroups = [...productInfo.masterGroupsGroups.map((e) => e.masterGroup)];
   const productMasterGroupEditSelect: HTMLSelectElement = productGroupEditItem.querySelector(
     `#product-master-group-edit-item-${index}`
   );
@@ -1602,43 +1702,43 @@ async function createProductGroupEditItem(
   });
   if (masterGroup) {
     productMasterGroupEditSelect.value = masterGroup;
-    const currentMasterGroup = productInfo.master_groups_groups.find(
-      (masterGroupItem) => masterGroupItem.master_group === masterGroup
+    const currentMasterGroup = productInfo.masterGroupsGroups.find(
+      (masterGroupItem) => masterGroupItem.masterGroup === masterGroup
     );
 
-    currentMasterGroup.groups.forEach((group: { group_name: string; group_id: number }) => {
+    currentMasterGroup.groups.forEach((group: IGroupAdditionalInfo) => {
       const productGroupSelectOption = document.createElement('option');
-      productGroupSelectOption.setAttribute('value', group.group_id.toString());
-      productGroupSelectOption.textContent = group.group_name;
+      productGroupSelectOption.setAttribute('value', group.groupId.toString());
+      productGroupSelectOption.textContent = group.groupName;
       productGroupEditSelect.appendChild(productGroupSelectOption);
     });
     // TODO: always select first option
     if (!itemIndex) {
       itemIndex = 0;
     }
-    const currentProductMasterGroup = productInfo.current_master_product_groups.find(
-      (masterGroupItem) => masterGroupItem.master_group === masterGroup
+    const currentProductMasterGroup = productInfo.currentMasterProductGroups.find(
+      (masterGroupItem) => masterGroupItem.masterGroup === masterGroup
     );
 
-    productGroupEditSelect.value = currentProductMasterGroup.groups[itemIndex].group_id.toString();
+    productGroupEditSelect.value = currentProductMasterGroup.groups[itemIndex].groupId.toString();
   }
 
   const options = productMasterGroupEditSelect.querySelectorAll('option');
   productMasterGroupEditSelect.addEventListener('change', () => {
     options.forEach((e) => {
       if (e.textContent === productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text) {
-        const optionCategory = productInfo.master_groups_groups.find(
-          (masteGroup) =>
-            masteGroup.master_group ===
+        const optionCategory = productInfo.masterGroupsGroups.find(
+          (masterGroup) =>
+            masterGroup.masterGroup ===
             productMasterGroupEditSelect.options[productMasterGroupEditSelect.selectedIndex].text
         )?.groups;
 
         document.getElementById(`product-group-edit-item-${index}`).innerHTML = '';
         if (optionCategory) {
-          optionCategory.forEach((group: { group_name: string; group_id: number }) => {
+          optionCategory.forEach((group: IGroupAdditionalInfo) => {
             const storeSelectOption = document.createElement('option');
-            storeSelectOption.setAttribute('value', group.group_id.toString());
-            storeSelectOption.textContent = group.group_name;
+            storeSelectOption.setAttribute('value', group.groupId.toString());
+            storeSelectOption.textContent = group.groupName;
             productGroupEditSelect.appendChild(storeSelectOption);
           });
         }

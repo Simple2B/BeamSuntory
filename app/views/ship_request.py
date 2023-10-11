@@ -235,6 +235,7 @@ def create():
                     cart_id=cart.id,
                     comment=form_create.event_comment.data,
                     user=current_user,
+                    group_id=cart.group_id,
                 )
                 db.session.add(event)
                 db.session.add(report_event)

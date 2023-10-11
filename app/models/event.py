@@ -18,25 +18,29 @@ class Event(db.Model, ModelMixin):
     __tablename__ = "events"
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
+
+    # Foreign Keys
+    product_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("products.id"))
+    cart_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("carts.id"))
+    user_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("users.id"))
+    group_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("groups.id"))
+
+    # Columns
     date_from: orm.Mapped[date] = orm.mapped_column(sa.Date, nullable=True)
     date_to: orm.Mapped[date] = orm.mapped_column(sa.Date, nullable=True)
     date_reserve_from: orm.Mapped[date] = orm.mapped_column(sa.Date, nullable=True)
     date_reserve_to: orm.Mapped[date] = orm.mapped_column(sa.Date, nullable=True)
     quantity: orm.Mapped[int] = orm.mapped_column()
     comment: orm.Mapped[str] = orm.mapped_column(sa.Text(), nullable=True)
-    product_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("products.id"))
-
-    cart_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("carts.id"))
-    cart: orm.Mapped["Cart"] = orm.relationship(viewonly=True)
-
-    product: orm.Mapped["Product"] = orm.relationship()
-    user_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("users.id"))
-    user: orm.Mapped["User"] = orm.relationship()
-
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
         default=datetime.utcnow,
     )
+
+    # Relationships
+    product: orm.Mapped["Product"] = orm.relationship()
+    cart: orm.Mapped["Cart"] = orm.relationship(viewonly=True)
+    user: orm.Mapped["User"] = orm.relationship()
 
     def __repr__(self):
         return f"<{self.id}: {self.product_id}>"

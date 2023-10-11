@@ -42,3 +42,11 @@ class EventsDateQuantity(BaseModel):
 
 
 EventsCalendar = RootModel[list[EventsDateQuantity]]
+
+
+class FilterEvents(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    product_id: int | None = None
+    group_id: int | None = None
+    quantity: int | None = None
