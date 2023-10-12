@@ -30,7 +30,7 @@ const filtersMap: IFilterMap = {
     'filter-group-brand',
     'filter-group-language',
     'filter-group-premises',
-    'filter-group-category',
+    'filter-group-categories',
     'filter-group-events',
   ],
   adjustment: [
@@ -42,7 +42,7 @@ const filtersMap: IFilterMap = {
     'filter-group-brand',
     'filter-group-language',
     'filter-group-premises',
-    'filter-group-category',
+    'filter-group-categories',
     'filter-group-events',
   ],
   assign: [
@@ -54,14 +54,14 @@ const filtersMap: IFilterMap = {
     'filter-group-brand',
     'filter-group-language',
     'filter-group-premises',
-    'filter-group-category',
+    'filter-group-categories',
   ],
   inbound_order: [
     'filter-start-date',
     'filter-end-date',
     'filter-group-brand',
     'filter-group-premises',
-    'filter-group-category',
+    'filter-group-categories',
     'filter-product-group',
   ],
   shipping: [
@@ -71,7 +71,7 @@ const filtersMap: IFilterMap = {
     'filter-end-date',
     'filter-group-brand',
     'filter-group-language',
-    'filter-group-category',
+    'filter-group-categories',
     'filter-group-premises',
   ],
   shelf_life: [
@@ -82,7 +82,7 @@ const filtersMap: IFilterMap = {
     'filter-group-brand',
     'filter-group-language',
     'filter-group-premises',
-    'filter-group-category',
+    'filter-group-categories',
     'shelf-life-filter-expire-in',
   ],
 };
@@ -384,7 +384,7 @@ const filtersIds = [
   'filter-group-brand',
   'filter-group-language',
   'filter-group-premises',
-  'filter-group-category',
+  'filter-group-categories',
   'filter-group-events',
   'filter-product-group',
   'group-from',

@@ -112,8 +112,8 @@
     <div class="flex gap-4 items-center justify-start py-4 bg-white dark:bg-gray-800 px-4">
       <select
         type="text"
-        name="category"
-        id="category-select"
+        name="categories"
+        id="categories-select"
         class="report-filter shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
         placeholder="Action type"
         hx-trigger="change"
@@ -122,9 +122,9 @@
         hx-get="{{ url_for('report_shipping.search') }}"
         hx-indicator="#report-table-spinner"
       >
-        <option value="" disabled selected>Select category</option>
-        {% for category in categories %}
-        <option value="{{ category.id }}">{{ category.name }}</option>
+        <option value="" disabled selected>Select categories</option>
+        {% for categories in categories %}
+        <option value="{{ categories.id }}">{{ categories.name }}</option>
         {% endfor %}
       </select>
     </div>

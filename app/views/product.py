@@ -44,12 +44,9 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     is_events_stocks_own_by_me = request.args.get(
         "is_events_stocks_own_by_me", type=bool, default=False
     )
-    brand = request.args.get("brand", type=str, default="")
-    language = request.args.get("language", type=str, default="")
-    premises = request.args.get("premises", type=str, default="")
-    category = request.args.get("category", type=str, default="")
-    events = request.args.get("events", type=str, default="")
-    categories = request.args.get("categories", type=str, default="")
+
+    master_groups = request.args.get("master_groups", type=str, default="")
+    master_groups_list = master_groups.split(",")
 
     q = request.args.get("q", type=str, default="")
 
@@ -66,17 +63,8 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
 
         count_query = sa.select(sa.func.count()).select_from(m.Product)
 
-    master_groups = [
-        brand,
-        language,
-        category,
-        premises,
-        events,
-        categories,
-    ]
-
-    if master_groups.count(None) != len(master_groups):
-        for group in master_groups:
+    if master_groups:
+        for group in master_groups_list:
             master_group_filter = m.Product.product_groups.any(
                 m.ProductGroup.parent.has(m.GroupProduct.name.ilike(f"%{group}%"))
             )
@@ -282,12 +270,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         "product_groups": product_groups,
         "current_user_groups_rows": current_user_groups_rows,
         "mastr_for_prods_groups_for_prods": mastr_for_prods_groups_for_prods,
-        "brand": brand,
-        "language": language,
-        "category": category,
-        "premises": premises,
-        "events": events,
-        "categories": categories,
+        "master_groups_list": master_groups_list,
         "q": q,
         "is_events_stocks_own_by_me": is_events_stocks_own_by_me,
         "is_stocks_own_by_me": is_stocks_own_by_me,
@@ -324,12 +307,7 @@ def get_all():
         ).scalars(),
         page=products_object["pagination"],
         search_query=products_object["q"],
-        brand=products_object["brand"],
-        language=products_object["language"],
-        category=products_object["category"],
-        premises=products_object["premises"],
-        categories=products_object["categories"],
-        events=products_object["events"],
+        master_groups_list=products_object["master_groups_list"],
         is_all_stocks_in_inventory=products_object["is_all_stocks_in_inventory"],
         is_stocks_own_by_me=products_object["is_stocks_own_by_me"],
         is_events_stocks_own_by_me=products_object["is_events_stocks_own_by_me"],

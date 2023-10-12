@@ -51,7 +51,7 @@ def get_assigns_report():
 
     master_groups = [
         filter_assign.brand,
-        filter_assign.category,
+        filter_assign.categories,
         filter_assign.language,
         filter_assign.premises,
     ]
@@ -130,9 +130,9 @@ def assigns():
         .order_by(m.MasterGroupProduct.id)
     ).all()
 
-    product_master_group_category = db.session.scalars(
+    product_master_group_categories = db.session.scalars(
         sa.select(m.MasterGroupProduct)
-        .where(m.MasterGroupProduct.name == "Category")
+        .where(m.MasterGroupProduct.name == "Categories")
         .order_by(m.MasterGroupProduct.id)
     ).all()
 
@@ -149,7 +149,7 @@ def assigns():
         users=users,
         product_master_group_brand=product_master_group_brand,
         product_master_group_language=product_master_group_language,
-        product_master_group_category=product_master_group_category,
+        product_master_group_categories=product_master_group_categories,
         product_master_group_premises=product_master_group_premises,
         product_groups=product_groups,
     )

@@ -111,7 +111,7 @@ def test_sort_product(mg_g_populate: FlaskClient):
 
     brand = "JB"
     response = mg_g_populate.get(
-        f"""/product?brand={brand}""",
+        f"""/product?master_groups={brand}""",
         follow_redirects=True,
     )
 
@@ -121,7 +121,7 @@ def test_sort_product(mg_g_populate: FlaskClient):
 
     brand = "Canada"
     response = mg_g_populate.get(
-        f"""/product?brand={brand}""",
+        f"""/product?master_groups={brand}""",
         follow_redirects=True,
     )
 
