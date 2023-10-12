@@ -70,7 +70,7 @@ interface IStore {
   id: number;
   phoneNumb: string;
   region: string;
-  storecategoriesId: number;
+  storeCategoryId: number;
   storeName: string;
   zip: string;
 }
