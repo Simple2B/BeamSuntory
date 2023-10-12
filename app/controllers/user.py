@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import abort
+from flask import abort, request
 from flask_login import current_user
 
 from app import db
@@ -37,16 +37,18 @@ def role_required(required_role, hasApprovalPermission=False):
             if current_user.role_obj.role_name not in required_role:
                 log(
                     log.ERROR,
-                    "User with role :[%s] does not have permission to access this route",
+                    "User with role :[%s] does not have permission to access route: [%s]",
                     current_user.role_obj.role_name,
+                    request.path,
                 )
                 abort(403)
             if hasApprovalPermission:
                 if not current_user.approval_permission:
                     log(
                         log.ERROR,
-                        "User with role :[%s] does not have approval permission to access this route",
+                        "User with role :[%s] does not have approval permission to access route: [%s]",
                         current_user.approval_permission,
+                        request.path,
                     )
                     abort(403)
             return func(*args, **kwargs)

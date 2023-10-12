@@ -11,7 +11,6 @@ from wtforms.validators import DataRequired, Optional
 
 from app import models as m
 from app import db
-from .utils import JSONField
 
 
 class ProductForm(FlaskForm):
@@ -93,11 +92,6 @@ class NewProductForm(FlaskForm):
             raise ValidationError("This product name is taken.")
 
 
-class SortByGroupProductForm(FlaskForm):
-    sort_by = JSONField("Sort by", [DataRequired()])
-    submit = SubmitField("Submit")
-
-
 class AssignProductForm(FlaskForm):
     name = StringField("Name", [DataRequired()])
     master_group = IntegerField("Master group", [DataRequired()])
@@ -127,5 +121,6 @@ class AdjustProductForm(FlaskForm):
 
 class UploadProductForm(FlaskForm):
     upload_csv = FileField("CSV", [DataRequired()])
+    target_group_upload = IntegerField("Target Group")
 
     submit = SubmitField("Submit")

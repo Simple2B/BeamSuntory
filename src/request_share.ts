@@ -16,13 +16,14 @@ interface IRequestShareDepricated extends IRequestShare {
 // search flow
 const searchShareInput: HTMLInputElement = document.querySelector('#table-search-request-share')
 const searchShareInputButton = document.querySelector('#table-search-request-share-button')
-if (searchShareInputButton && searchShareInput) {
-    searchShareInputButton.addEventListener('click', () => {
-        const url = new URL(window.location.href)
-        url.searchParams.set('q', searchShareInput.value)
-        window.location.href = `${url.href}`
-    })
-}
+const searchByStatusSelector = document.getElementById('filter-by-status-request-share') as HTMLSelectElement
+searchShareInputButton.addEventListener('click', () => {
+    const url = new URL(window.location.href)
+    url.searchParams.set('q', searchShareInput.value)
+    url.searchParams.set('status', searchByStatusSelector.value)
+    window.location.href = `${url.href}`
+})
+
 const shareButtons = document.querySelectorAll('.request-share-share-button')
 
 shareButtons.forEach((e) => {

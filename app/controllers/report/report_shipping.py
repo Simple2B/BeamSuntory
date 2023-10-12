@@ -80,7 +80,7 @@ class ReportDataShipping(ReportData):
         for group_name in (
             report_filter.brand,
             report_filter.language,
-            report_filter.category,
+            report_filter.categories,
             report_filter.premises,
         ):
             if group_name:

@@ -82,7 +82,7 @@ def get_adjustment_report():
     master_groups = [
         filter_adjustments.group_brand,
         filter_adjustments.group_language,
-        filter_adjustments.group_category,
+        filter_adjustments.group_categories,
         filter_adjustments.group_premises,
         filter_adjustments.group_event,
     ]
@@ -139,7 +139,7 @@ def adjustments():
     product_master_groups = db.session.scalars(
         m.MasterGroupProduct.select().where(
             m.MasterGroupProduct.name.in_(
-                ["Brand", "Language", "Category", "Premises", "Events"]
+                ["Brand", "Language", "Categories", "Premises", "Events"]
             )
         )
     )

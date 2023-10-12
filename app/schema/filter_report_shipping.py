@@ -8,5 +8,5 @@ class FilterReportShipping(QueryFilterBase):
     target_group: str | None = None
     language: int | None = None
     brand: int | None = None
-    category: int | None = None
+    categories: int | None = None
     premise: int | None = None

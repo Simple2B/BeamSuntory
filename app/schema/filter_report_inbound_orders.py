@@ -8,5 +8,5 @@ class FilterReportInboundOrder(BaseModel):
     start_date: str | None = None
     end_date: str | None = None
     brand: str | None = None
-    category: str | None = None
+    categories: str | None = None
     premises: str | None = None

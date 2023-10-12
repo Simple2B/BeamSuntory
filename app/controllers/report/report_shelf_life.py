@@ -90,7 +90,7 @@ class ReportDataShelfLife(ReportData):
         master_groups = [
             report_filter.brand,
             report_filter.language,
-            report_filter.category,
+            report_filter.categories,
             report_filter.premises,
         ]
 

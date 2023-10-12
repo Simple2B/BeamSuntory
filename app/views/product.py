@@ -33,39 +33,44 @@ product_blueprint = Blueprint("product", __name__, url_prefix="/product")
 
 # TODO: needs refactor FIRST!!
 def get_all_products(request, query=None, count_query=None, my_stocks=False):
-    q = request.args.get("q", type=str, default=None)
-    is_events = request.args.get("events", type=bool, default=False)
+    get_all_start = datetime.now()
+    log(log.DEBUG, "Product get_all started: [%s]", get_all_start)
+    is_events = request.args.get("is_events", type=bool, default=False)
+    is_all_stocks_in_inventory = request.args.get(
+        "is_all_stocks_in_inventory", type=bool, default=False
+    )
+    is_stocks_own_by_me = request.args.get(
+        "is_stocks_own_by_me", type=bool, default=False
+    )
+    is_events_stocks_own_by_me = request.args.get(
+        "is_events_stocks_own_by_me", type=bool, default=False
+    )
 
-    if query is None or count_query is None:
-        reverse_event_filter = ~m.Product.warehouse_products.any(
-            m.WarehouseProduct.group.has(
-                m.Group.master_group.has(
-                    m.MasterGroup.name == s.MasterGroupMandatory.events.value
-                )
+    master_groups = request.args.get("master_groups", type=str, default="")
+    master_groups_list = master_groups.split(",")
+
+    q = request.args.get("q", type=str, default="")
+
+    reverse_event_filter = ~m.Product.warehouse_products.any(
+        m.WarehouseProduct.group.has(
+            m.Group.master_group.has(
+                m.MasterGroup.name == s.MasterGroupMandatory.events.value
             )
         )
-        query = m.Product.select().where(reverse_event_filter).order_by(m.Product.id)
+    )
+
+    if query is None or count_query is None:
+        query = m.Product.select().order_by(m.Product.id)
 
         count_query = sa.select(sa.func.count()).select_from(m.Product)
-        if q:
-            query = (
-                m.Product.select()
-                .where(
-                    m.Product.name.ilike(f"%{q}%")
-                    | m.Product.SKU.ilike(f"%{q}%")
-                    | m.Product.description.ilike(f"%{q}%")
-                )
-                .order_by(m.Product.id)
+
+    if master_groups:
+        for group in master_groups_list:
+            master_group_filter = m.Product.product_groups.any(
+                m.ProductGroup.parent.has(m.GroupProduct.name.ilike(f"%{group}%"))
             )
-            count_query = (
-                sa.select(sa.func.count())
-                .where(
-                    m.Product.name.ilike(f"%{q}%")
-                    | m.Product.SKU.ilike(f"%{q}%")
-                    | m.Product.description.ilike(f"%{q}%")
-                )
-                .select_from(m.Product)
-            )
+            query = query.where(master_group_filter)
+            count_query = count_query.where(master_group_filter)
 
     if is_events:
         event_filter = m.Product.warehouse_products.any(
@@ -76,77 +81,162 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
             )
         )
 
-        query = m.Product.select().where(event_filter).order_by(m.Product.id)
+        query = query.where(event_filter)
+        count_query = count_query.where(event_filter)
 
-    groups_for_products_obj = db.session.execute(m.GroupProduct.select()).all()
+    if is_all_stocks_in_inventory:
+        is_all_stocks_in_inventory_filter = m.Product.warehouse_products.any(
+            m.WarehouseProduct.product_quantity > 0
+        )
+
+        query = query.where(is_all_stocks_in_inventory_filter)
+        count_query = count_query.where(is_all_stocks_in_inventory_filter)
+
+    if is_stocks_own_by_me:
+        curr_user_groups_ids = [
+            i.right_id
+            for i in db.session.execute(
+                m.UserGroup.select().where(
+                    m.UserGroup.left_id == current_user.id,
+                )
+            ).scalars()
+        ]
+        curr_user_products_ids = [
+            i.product_id
+            for i in db.session.execute(
+                m.WarehouseProduct.select().where(
+                    m.WarehouseProduct.group_id.in_(curr_user_groups_ids),
+                )
+            ).scalars()
+        ]
+
+        query = query.where(
+            m.Product.id.in_(curr_user_products_ids), reverse_event_filter
+        )
+        count_query = count_query.where(
+            m.Product.id.in_(curr_user_products_ids), reverse_event_filter
+        )
+
+    if is_events_stocks_own_by_me:
+        event_filter = m.Product.warehouse_products.any(
+            m.WarehouseProduct.group.has(
+                m.Group.master_group.has(
+                    m.MasterGroup.name == s.MasterGroupMandatory.events.value
+                )
+            )
+        )
+        curr_user_groups_ids = [
+            i.right_id
+            for i in db.session.execute(
+                m.UserGroup.select().where(
+                    m.UserGroup.left_id == current_user.id,
+                    m.UserGroup.parent.has(
+                        m.Group.master_group.has(
+                            m.MasterGroup.name == s.MasterGroupMandatory.events.value
+                        )
+                    ),
+                )
+            ).scalars()
+        ]
+        curr_user_products_ids = [
+            i.product_id
+            for i in db.session.execute(
+                m.WarehouseProduct.select().where(
+                    m.WarehouseProduct.group_id.in_(curr_user_groups_ids),
+                    event_filter,
+                )
+            ).scalars()
+        ]
+        query = query.where(
+            m.Product.id.in_(curr_user_products_ids),
+        )
+        count_query = count_query.where(m.Product.id.in_(curr_user_products_ids))
+
+    if q:
+        query = query.where(m.Product.name.ilike(f"%{q}%"))
+        count_query = count_query.where(m.Product.name.ilike(f"%{q}%"))
+
+    log(
+        log.DEBUG,
+        "Product get_all filters finished in [%s]",
+        datetime.now() - get_all_start,
+    )
+    get_all_filters_time = datetime.now()
+
+    groups_for_products_obj = db.session.scalars(m.GroupProduct.select()).all()
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
-    master_groups = [
-        row for row in db.session.execute(m.MasterGroup.select()).scalars()
-    ]
+    master_groups = db.session.scalars(m.MasterGroup.select()).all()
+
+    log(
+        log.DEBUG,
+        "Product get_all groups query and pagination finished in [%s]",
+        datetime.now() - get_all_filters_time,
+    )
+    get_all_groups_time = datetime.now()
 
     mastr_for_prods_groups_for_prods = {}
     mstr_prod_grps_prod_grps_names = {}
     for group in groups_for_products_obj:
-        if (
-            group[0].master_groups_for_product.name
-            not in mastr_for_prods_groups_for_prods
-        ):
-            mastr_for_prods_groups_for_prods[
-                group[0].master_groups_for_product.name
-            ] = [group[0]]
-            mstr_prod_grps_prod_grps_names[group[0].master_groups_for_product.name] = [
-                {"group_name": group[0].name, "group_id": group[0].id}
+        if group.master_groups_for_product.name not in mastr_for_prods_groups_for_prods:
+            mastr_for_prods_groups_for_prods[group.master_groups_for_product.name] = [
+                group
+            ]
+            mstr_prod_grps_prod_grps_names[group.master_groups_for_product.name] = [
+                {"group_name": group.name, "group_id": group.id}
             ]
         else:
             mastr_for_prods_groups_for_prods[
-                group[0].master_groups_for_product.name
-            ].append(group[0])
-            mstr_prod_grps_prod_grps_names[
-                group[0].master_groups_for_product.name
-            ].append({"group_name": group[0].name, "group_id": group[0].id})
+                group.master_groups_for_product.name
+            ].append(group)
+            mstr_prod_grps_prod_grps_names[group.master_groups_for_product.name].append(
+                {"group_name": group.name, "group_id": group.id}
+            )
+
+    log(
+        log.DEBUG,
+        "Product get_all mastr_for_prods_groups_for_prods finished in [%s]",
+        datetime.now() - get_all_groups_time,
+    )
+    get_all_mastr_grps_names = datetime.now()
 
     # get all product_groups to list and compare in view.html
-    product_groups: list[m.ProductGroup] = [
-        row for row in db.session.execute(m.ProductGroup.select()).scalars()
-    ]
+    product_groups: list[m.ProductGroup] = db.session.scalars(
+        m.ProductGroup.select()
+    ).all()
 
     # TODO: consider using a join instead of two queries <- Copilot
     # get all groups ids for current user to compare with product groups ids in view.html
-    current_user_groups_rows = db.session.execute(
+    current_user_groups_rows = db.session.scalars(
         m.UserGroup.select().where(m.UserGroup.left_id == current_user.id)
     ).all()
 
     master_groups_search = {}
     for group in groups_for_products_obj:
-        if group[0].master_groups_for_product.name not in master_groups_search:
-            master_groups_search[group[0].master_groups_for_product.name] = [
-                group[0].name
-            ]
+        if group.master_groups_for_product.name not in master_groups_search:
+            master_groups_search[group.master_groups_for_product.name] = [group.name]
         else:
-            master_groups_search[group[0].master_groups_for_product.name].append(
-                group[0].name
+            master_groups_search[group.master_groups_for_product.name].append(
+                group.name
             )
 
+    log(
+        log.DEBUG,
+        "Product get_all master_groups_search finished in [%s]",
+        datetime.now() - get_all_mastr_grps_names,
+    )
+    get_all_master_groups_search = datetime.now()
+
     master_group_product_name = [
-        mgp[0].name for mgp in db.session.execute(m.MasterGroupProduct.select()).all()
+        mgp.name for mgp in db.session.scalars(m.MasterGroupProduct.select())
     ]
 
-    suppliers = [i for i in db.session.execute(m.Supplier.select()).scalars()]
+    suppliers = db.session.scalars(m.Supplier.select()).all()
 
-    warehouse_product_query: list[m.WarehouseProduct] = [
-        i
-        for i in db.session.execute(
-            m.WarehouseProduct.select().order_by(m.WarehouseProduct.id)
-        ).scalars()
-    ]
-    db.session.execute(
-        m.Product.select()
-        .order_by(m.Product.id)
-        .offset((pagination.page - 1) * pagination.per_page)
-        .limit(pagination.per_page)
-    ).scalars()
+    warehouse_product_query: list[m.WarehouseProduct] = db.session.scalars(
+        m.WarehouseProduct.select().order_by(m.WarehouseProduct.id)
+    ).all()
 
     warehouse_product_qty = dict()
 
@@ -167,26 +257,39 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
             else:
                 warehouse_product_qty[wpq.product.name] = str(wpq.product_quantity)
 
+    log(
+        log.DEBUG,
+        "Product get_all warehouse_products finished in [%s]",
+        datetime.now() - get_all_master_groups_search,
+    )
+
+    target_groups = db.session.scalars(m.Group.select())
+
     return {
         "query": query,
         "pagination": pagination,
-        "q": q,
         "is_events": is_events,
         "master_groups": master_groups,
         "product_groups": product_groups,
         "current_user_groups_rows": current_user_groups_rows,
         "mastr_for_prods_groups_for_prods": mastr_for_prods_groups_for_prods,
+        "master_groups_list": master_groups_list,
+        "q": q,
+        "is_events_stocks_own_by_me": is_events_stocks_own_by_me,
+        "is_stocks_own_by_me": is_stocks_own_by_me,
+        "is_all_stocks_in_inventory": is_all_stocks_in_inventory,
         "master_groups_search": master_groups_search,
         "master_product_groups_name": master_group_product_name,
         "suppliers": [s for s in suppliers],
         "all_product_groups": {
             i.name: i for i in db.session.execute(m.Group.select()).scalars()
         },
-        "current_user_groups_names": [
-            i[0].parent.name for i in current_user_groups_rows
-        ],
+        "current_user_groups_names": [i.parent.name for i in current_user_groups_rows],
         "mstr_prod_grps_prod_grps_names": json.dumps(mstr_prod_grps_prod_grps_names),
         "warehouse_product_qty": warehouse_product_qty,
+        "target_groups": target_groups,
+        # TODO remove when testing is done
+        "datetime": datetime,
     }
 
 
@@ -194,7 +297,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
 @login_required
 def get_all():
     products_object = get_all_products(request)
-    form_sort: f.SortByGroupProductForm = f.SortByGroupProductForm()
     form_create: f.NewProductForm = f.NewProductForm()
     form_edit: f.ProductForm = f.ProductForm()
 
@@ -210,13 +312,15 @@ def get_all():
         ).scalars(),
         page=products_object["pagination"],
         search_query=products_object["q"],
+        master_groups_list=products_object["master_groups_list"],
+        is_all_stocks_in_inventory=products_object["is_all_stocks_in_inventory"],
+        is_stocks_own_by_me=products_object["is_stocks_own_by_me"],
+        is_events_stocks_own_by_me=products_object["is_events_stocks_own_by_me"],
         is_events=products_object["is_events"],
         main_master_groups=products_object["master_groups"],
         product_groups=products_object["product_groups"],
         all_product_groups=products_object["all_product_groups"],
-        current_user_groups=[
-            row[0] for row in products_object["current_user_groups_rows"]
-        ],
+        current_user_groups=products_object["current_user_groups_rows"],
         current_user_groups_names=products_object["current_user_groups_names"],
         master_groups_groups_available=products_object[
             "mastr_for_prods_groups_for_prods"
@@ -228,7 +332,8 @@ def get_all():
             "mstr_prod_grps_prod_grps_names"
         ],
         warehouse_product_qty=products_object["warehouse_product_qty"],
-        form_sort=form_sort,
+        target_groups=products_object["target_groups"],
+        datetime=products_object["datetime"],
         form_create=form_create,
         form_edit=form_edit,
     )
@@ -279,19 +384,22 @@ def create():
             height=form.height.data if form.height.data else 0,
         )
         log(log.INFO, "Form submitted. Product: [%s]", product)
-        product.save()
+        product.save(False)
 
         if "image" in request.files["high_image"].mimetype:
             file_image = save_image(
-                request.files["high_image"], f"products/{form.SKU.data}"
+                request.files["high_image"], f"product/{form.SKU.data}"
             )
-            if "Cannot guess file type!" in file_image:
-                flash("Product added! Cannot guess image file type!", "danger")
-            elif "Unsupported file type!" in file_image:
-                flash("Product added! Unsupported image file type!", "danger")
+            if isinstance(file_image, str):
+                if "Cannot guess file type!" in file_image:
+                    flash("Product added! Cannot guess image file type!", "danger")
+                elif "Unsupported file type!" in file_image:
+                    flash("Product added! Unsupported image file type!", "danger")
             else:
                 flash("Product added!", "success")
                 file_image.save(False)
+                product.image_obj = file_image
+        db.session.commit()
 
         product_master_groups_ids = json.loads(form.product_groups.data)
 
@@ -357,46 +465,49 @@ def save():
         u.width = form.width.data if form.width.data else 0
         u.height = form.height.data if form.height.data else 0
 
-        if u.image_obj:
-            image_path, image_extension = save_image(
-                request.files["high_image"], f"products/{form.SKU.data}", u.image_obj
-            )
-            u.image_obj.path = image_path
-            u.image_obj.extension = image_extension
-        else:
-            if "image" in request.files["high_image"].mimetype:
-                file_image = save_image(
-                    request.files["high_image"], f"products/{form.SKU.data}"
+        if "image" in request.files["high_image"].mimetype:
+            if u.image_obj:
+                image_path, image_extension = save_image(
+                    request.files["high_image"], f"product/{form.SKU.data}", u.image_obj
                 )
-                if "Cannot guess file type!" in file_image:
-                    flash("Product added! Cannot guess image file type!", "danger")
-                elif "Unsupported file type!" in file_image:
-                    flash("Product added! Unsupported image file type!", "danger")
+                u.image_obj.path = image_path
+                u.image_obj.extension = image_extension
+            else:
+                file_image = save_image(
+                    request.files["high_image"], f"product/{form.SKU.data}"
+                )
+                if isinstance(file_image, str):
+                    if "Cannot guess file type!" in file_image:
+                        flash("Product edited! Cannot guess image file type!", "danger")
+                    elif "Unsupported file type!" in file_image:
+                        flash("Product edited! Unsupported image file type!", "danger")
                 else:
                     flash("Product edited successfully", "success")
                     db.session.execute(
                         m.Image.delete().where(m.Image.name == file_image.name)
                     )
                     file_image.save(False)
-        u.save()
+                    u.image_obj = file_image
+        u.save(False)
+        db.session.commit()
 
         product_master_groups_ids = json.loads(form.product_groups.data)
 
-        product_groups_obj = db.session.execute(
+        product_groups_obj = db.session.scalars(
             m.ProductGroup.select().where(
                 m.ProductGroup.product_id == int(form.product_id.data)
             )
         ).all()
-        product_groups_ids = [group_row[0].group_id for group_row in product_groups_obj]
+        product_groups_ids = [group_row.group_id for group_row in product_groups_obj]
 
         for group_row in product_groups_obj:
-            if group_row[0].group_id in product_master_groups_ids:
+            if group_row.group_id in product_master_groups_ids:
                 continue
             else:
                 delete_gp = db.session.execute(
                     m.ProductGroup.select().where(
                         m.ProductGroup.product_id == int(form.product_id.data),
-                        m.ProductGroup.group_id == group_row[0].group_id,
+                        m.ProductGroup.group_id == group_row.group_id,
                     )
                 ).scalar()
                 db.session.delete(delete_gp)
@@ -454,109 +565,6 @@ def delete(id: int):
     log(log.INFO, "Product deleted. Product: [%s]", product)
     flash("Product deleted!", "success")
     return "ok", 200
-
-
-# TODO refactor
-@product_blueprint.route("/sort", methods=["GET", "POST"])
-@login_required
-def sort():
-    if request.method == "GET":
-        return redirect(url_for("product.get_all"))
-    form: f.SortByGroupProductForm = f.SortByGroupProductForm()
-    form_create: f.NewProductForm = f.NewProductForm()
-    form_edit: f.ProductForm = f.ProductForm()
-    if form.validate_on_submit():
-        group_names: list = form.sort_by.data.values()
-        groups = [
-            grp[0].id
-            for grp in db.session.execute(
-                m.GroupProduct.select().where(m.GroupProduct.name.in_(group_names))
-            ).all()
-        ]
-
-        product_groups = [
-            prg[0]
-            for prg in db.session.execute(
-                m.ProductGroup.select().where(m.ProductGroup.group_id.in_(groups))
-            ).all()
-        ]
-        product_to_group = {
-            pg.product_id: [
-                t.group_id for t in product_groups if t.product_id == pg.product_id
-            ]
-            for pg in product_groups
-        }
-        # TODO remove if unused
-        # product_ids_to_return = [
-        #     pid for pid in product_to_group if len(product_to_group[pid]) == len(groups)
-        # ]
-
-        q = request.args.get("q", type=str, default=None)
-        query = (
-            m.Product.select()
-            .where(m.Product.id.in_(product_to_group))
-            .order_by(m.Product.id)
-        )
-        count_query = (
-            sa.select(sa.func.count())
-            .where(m.Product.id.in_(product_to_group))
-            .select_from(m.Product)
-        )
-        if q:
-            query = (
-                m.Product.select()
-                .where(
-                    m.Product.name.ilike(f"%{q}%") | m.Product.id.in_(product_to_group)
-                )
-                .order_by(m.Product.id)
-            )
-            count_query = (
-                sa.select(sa.func.count())
-                .where(
-                    m.Product.name.ilike(f"%{q}%") | m.Product.id.in_(product_to_group)
-                )
-                .select_from(m.Product)
-            )
-        products_object = get_all_products(request, query, count_query)
-
-        return render_template(
-            "product/products.html",
-            products=db.session.execute(
-                products_object["query"]
-                .offset(
-                    (products_object["pagination"].page - 1)
-                    * products_object["pagination"].per_page
-                )
-                .limit(products_object["pagination"].per_page)
-            ).scalars(),
-            page=products_object["pagination"],
-            search_query=products_object["q"],
-            is_events=products_object["is_events"],
-            main_master_groups=products_object["master_groups"],
-            product_groups=products_object["product_groups"],
-            all_product_groups=products_object["all_product_groups"],
-            current_user_groups=[
-                row[0] for row in products_object["current_user_groups_rows"]
-            ],
-            current_user_groups_names=products_object["current_user_groups_names"],
-            master_groups_groups_available=products_object[
-                "mastr_for_prods_groups_for_prods"
-            ],
-            master_groups_search=products_object["master_groups_search"],
-            master_group_product_name=products_object["master_product_groups_name"],
-            suppliers=products_object["suppliers"],
-            mstr_prod_grps_prod_grps_names=products_object[
-                "mstr_prod_grps_prod_grps_names"
-            ],
-            warehouse_product_qty=products_object["warehouse_product_qty"],
-            form_sort=form,
-            form_create=form_create,
-            form_edit=form_edit,
-        )
-
-    log(log.INFO, "Wrong sort")
-    flash("Wrong sort", "danger")
-    return redirect(url_for("product.get_all"))
 
 
 @product_blueprint.route("/assign", methods=["POST"])
@@ -785,9 +793,6 @@ def adjust():
         )
         db.session.add(adjust_item)
         is_adjust_products = False
-        # warehouses_groups_qty = json.loads(
-        #     form.warehouses_groups_quantity.data["product_warehouses"]
-        # )
         warehouses_groups_qty = s.ProductWarehouses.model_validate_json(
             form.warehouses_groups_quantity.data["product_warehouses"]
         )
@@ -817,7 +822,6 @@ def adjust():
         report_inventory_list.save(False)
 
         for warehouse_group_qty in warehouses_groups_qty.product_warehouses:
-            ...
             if (
                 warehouse_group_qty.group.master_group.name
                 == s.MasterGroupMandatory.events.value
@@ -951,15 +955,20 @@ def upload():
             )
 
         # NOTE write products to DB
+        columns_to_use = [
+            "Name",
+            "Description",
+            "SKU",
+            "Regular Price",
+            "Retail Price",
+        ]
+
+        if form.target_group_upload.data:
+            columns_to_use.append("Available Quantity")
+
         df = pandas.read_csv(
             file_io,
-            usecols=[
-                "Name",
-                "Description",
-                "SKU",
-                "Regular Price",
-                "Retail Price",
-            ],
+            usecols=columns_to_use,
         )
         file_io.seek(0)
         df = df.drop_duplicates()
@@ -969,27 +978,45 @@ def upload():
         df["Retail Price"] = df["Retail Price"].fillna(0)
 
         df = pandas.merge(df, df_img, on="SKU", how="inner")
+        df["Image"] = df["Image"].fillna("logo-mini.png")
+        logo_mini = db.session.scalar(
+            m.Image.select().where(m.Image.name == "logo-mini")
+        )
+        img_name_img_obj = {"logo-mini.png": logo_mini}
         for image_name in df["Image"]:
             try:
                 if not isinstance(image_name, str):
                     raise FileNotFoundError
                 original_image = Image.open(
                     Path("app") / "static" / "img" / "product" / image_name
-                ).resize((400, 400))
+                ).resize((200, 200))
             except FileNotFoundError:
                 original_image = Image.open(
                     Path("app") / "static" / "img" / "logo-mini.png"
-                ).resize((400, 400))
+                ).resize((200, 200))
             with BytesIO() as png_bytes:
                 if original_image.mode in ["CMYK"]:
                     continue
                 original_image.save(png_bytes, format="PNG")
                 png_bytes.seek(0)
                 img_bytes = base64.b64encode(png_bytes.read()).decode()
+                image_exists = db.session.scalar(
+                    m.Image.select().where(m.Image.name == image_name.split(".")[0])
+                )
+                if not image_exists:
+                    img_obj = m.Image(
+                        name=image_name.split(".")[0],
+                        path=f"product/{image_name}",
+                        extension=image_name.split(".")[-1],
+                    )
+                    img_obj.save(False)
+                    img_name_img_obj[image_name] = img_obj
 
             df["Image"] = df["Image"].replace(image_name, img_bytes)
 
-        df.rename(
+        db.session.commit()
+
+        df[columns_to_use].rename(
             columns=dict(
                 zip(
                     df.columns,
@@ -1012,16 +1039,29 @@ def upload():
         )
 
         # NOTE write product-groups relations to DB
-        new_products_obj: list[m.Product] = db.session.execute(
+        new_products_obj: list[m.Product] = db.session.scalars(
             m.Product.select().where(m.Product.name.in_(df["Name"].to_list()))
-        ).scalars()
+        ).all()
 
-        new_groups_obj: list[m.GroupProduct] = [
-            gr
-            for gr in db.session.execute(
-                m.GroupProduct.select().where(m.GroupProduct.name.in_(new_groups))
-            ).scalars()
-        ]
+        new_groups_obj: list[m.GroupProduct] = db.session.scalars(
+            m.GroupProduct.select().where(m.GroupProduct.name.in_(new_groups))
+        ).all()
+
+        warehouse_products: list[m.WarehouseProduct] = db.session.scalars(
+            m.WarehouseProduct.select().where(
+                m.WarehouseProduct.product_id.in_(
+                    [prod.id for prod in new_products_obj]
+                )
+            )
+        )
+        # NOTE until we do not select warehouse in form,
+        # warehouse_product could rewrite each other if product_id is the same
+        product_warehouse_product = {
+            warehouse_product.product.SKU: warehouse_product
+            for warehouse_product in warehouse_products
+        }
+        # TODO consider which warehouse to use as default
+        default_warehouse: m.Warehouse = db.session.scalar(m.Warehouse.select())
 
         product_group_df = pandas.read_csv(
             file_io,
@@ -1033,10 +1073,47 @@ def upload():
             ],
         )
 
+        df_img["Image"] = df_img["Image"].fillna("logo-mini.png")
         for product in new_products_obj:
             product_group_df.loc[
                 product_group_df["Name"] == product.name, "Name"
             ] = product.id
+            try:
+                product.image_id = img_name_img_obj[
+                    df_img.loc[df_img["SKU"] == product.SKU, "Image"].values[0]
+                ].id
+                product.save(False)
+            except KeyError:
+                log(
+                    log.ERROR,
+                    "Image [%s] not found for product: [%s]",
+                    df_img.loc[df_img["SKU"] == product.SKU, "Image"].values[0],
+                    product.name,
+                )
+
+            if form.target_group_upload.data:
+                available_quantity = (
+                    int(
+                        df.loc[df["SKU"] == product.SKU, "Available Quantity"].values[0]
+                    )
+                    if str(
+                        df.loc[df["SKU"] == product.SKU, "Available Quantity"].values[0]
+                    ).isdigit()
+                    else 0
+                )
+                if product.SKU in product_warehouse_product:
+                    warehouse_product = product_warehouse_product[product.SKU]
+                    warehouse_product.product_quantity += available_quantity
+                    warehouse_product.save(False)
+                else:
+                    m.WarehouseProduct(
+                        product_id=product.id,
+                        group_id=form.target_group_upload.data,
+                        product_quantity=available_quantity,
+                        warehouse_id=default_warehouse.id,
+                    ).save(False)
+
+        db.session.commit()
 
         for mastr_grp in master_product_groups:
             for group in new_groups_obj:
@@ -1105,212 +1182,6 @@ class DoNothingConflict:
         conn.execute(do_nothing_stmt)
 
 
-@product_blueprint.route("/stocks_owned_by_me", methods=["GET"])
-@login_required
-def stocks_owned_by_me():
-    is_events = request.args.get("events", type=bool, default=False)
-    if is_events:
-        log(log.INFO, "Redirect to events product: [%s]", is_events)
-        return redirect(url_for("product.get_all", events=True))
-    curr_user_groups_ids = [
-        i.right_id
-        for i in db.session.execute(
-            m.UserGroup.select().where(
-                m.UserGroup.left_id == current_user.id,
-            )
-        ).scalars()
-    ]
-    curr_user_products_ids = [
-        i.product_id
-        for i in db.session.execute(
-            m.WarehouseProduct.select().where(
-                m.WarehouseProduct.group_id.in_(curr_user_groups_ids),
-            )
-        ).scalars()
-    ]
-    q = request.args.get("q", type=str, default=None)
-    reverse_event_filter = ~m.Product.warehouse_products.any(
-        m.WarehouseProduct.group.has(
-            m.Group.master_group.has(
-                m.MasterGroup.name == s.MasterGroupMandatory.events.value
-            )
-        )
-    )
-    query = (
-        m.Product.select()
-        .where(m.Product.id.in_(curr_user_products_ids), reverse_event_filter)
-        .order_by(m.Product.id)
-    )
-    count_query = sa.select(sa.func.count()).select_from(m.Product)
-    if q:
-        query = (
-            m.Product.select()
-            .where(
-                m.Product.name.ilike(f"%{q}%"), m.Product.id.in_(curr_user_products_ids)
-            )
-            .order_by(m.Product.id)
-        )
-        count_query = (
-            sa.select(sa.func.count())
-            .where(
-                m.Product.name.ilike(f"%{q}%"), m.Product.id.in_(curr_user_products_ids)
-            )
-            .select_from(m.Product)
-        )
-
-    products_object = get_all_products(
-        request, query, count_query, my_stocks=curr_user_groups_ids
-    )
-    form_sort: f.SortByGroupProductForm = f.SortByGroupProductForm()
-    form_create: f.NewProductForm = f.NewProductForm()
-    form_edit: f.ProductForm = f.ProductForm()
-
-    return render_template(
-        "product/products.html",
-        products=db.session.execute(
-            products_object["query"]
-            .offset(
-                (products_object["pagination"].page - 1)
-                * products_object["pagination"].per_page
-            )
-            .limit(products_object["pagination"].per_page)
-        ).scalars(),
-        page=products_object["pagination"],
-        search_query=products_object["q"],
-        # search_query=products_object["is_events"],
-        main_master_groups=products_object["master_groups"],
-        product_groups=products_object["product_groups"],
-        all_product_groups=products_object["all_product_groups"],
-        current_user_groups=[
-            row[0] for row in products_object["current_user_groups_rows"]
-        ],
-        current_user_groups_names=products_object["current_user_groups_names"],
-        master_groups_groups_available=products_object[
-            "mastr_for_prods_groups_for_prods"
-        ],
-        master_groups_search=products_object["master_groups_search"],
-        master_group_product_name=products_object["master_product_groups_name"],
-        suppliers=products_object["suppliers"],
-        mstr_prod_grps_prod_grps_names=products_object[
-            "mstr_prod_grps_prod_grps_names"
-        ],
-        warehouse_product_qty=products_object["warehouse_product_qty"],
-        form_sort=form_sort,
-        form_create=form_create,
-        form_edit=form_edit,
-    )
-
-
-@product_blueprint.route("/events_stocks_owned_by_me", methods=["GET"])
-@login_required
-@role_required(
-    [
-        s.UserRole.ADMIN.value,
-        s.UserRole.WAREHOUSE_MANAGER.value,
-        s.UserRole.SALES_REP.value,
-        s.UserRole.MANAGER.value,
-        s.UserRole.DELIVERY_AGENT.value,
-    ]
-)
-def events_stocks_owned_by_me():
-    is_events = request.args.get("events", type=bool, default=False)
-    if is_events:
-        log(log.INFO, "Redirect to events product: [%s]", is_events)
-        return redirect(url_for("product.get_all", events=True))
-    event_filter = m.Product.warehouse_products.any(
-        m.WarehouseProduct.group.has(
-            m.Group.master_group.has(
-                m.MasterGroup.name == s.MasterGroupMandatory.events.value
-            )
-        )
-    )
-    curr_user_groups_ids = [
-        i.right_id
-        for i in db.session.execute(
-            m.UserGroup.select().where(
-                m.UserGroup.left_id == current_user.id,
-                m.UserGroup.parent.has(
-                    m.Group.master_group.has(
-                        m.MasterGroup.name == s.MasterGroupMandatory.events.value
-                    )
-                ),
-            )
-        ).scalars()
-    ]
-    curr_user_products_ids = [
-        i.product_id
-        for i in db.session.execute(
-            m.WarehouseProduct.select().where(
-                m.WarehouseProduct.group_id.in_(curr_user_groups_ids), event_filter
-            )
-        ).scalars()
-    ]
-    q = request.args.get("q", type=str, default=None)
-
-    query = (
-        m.Product.select()
-        .where(m.Product.id.in_(curr_user_products_ids))
-        .order_by(m.Product.id)
-    )
-    count_query = sa.select(sa.func.count()).select_from(m.Product)
-    if q:
-        query = (
-            m.Product.select()
-            .where(
-                m.Product.name.ilike(f"%{q}%"), m.Product.id.in_(curr_user_products_ids)
-            )
-            .order_by(m.Product.id)
-        )
-        count_query = (
-            sa.select(sa.func.count())
-            .where(
-                m.Product.name.ilike(f"%{q}%"), m.Product.id.in_(curr_user_products_ids)
-            )
-            .select_from(m.Product)
-        )
-
-    products_object = get_all_products(
-        request, query, count_query, my_stocks=curr_user_groups_ids
-    )
-    form_sort: f.SortByGroupProductForm = f.SortByGroupProductForm()
-    form_create: f.NewProductForm = f.NewProductForm()
-    form_edit: f.ProductForm = f.ProductForm()
-
-    return render_template(
-        "product/products.html",
-        products=db.session.execute(
-            products_object["query"]
-            .offset(
-                (products_object["pagination"].page - 1)
-                * products_object["pagination"].per_page
-            )
-            .limit(products_object["pagination"].per_page)
-        ).scalars(),
-        page=products_object["pagination"],
-        search_query=products_object["q"],
-        main_master_groups=products_object["master_groups"],
-        product_groups=products_object["product_groups"],
-        all_product_groups=products_object["all_product_groups"],
-        current_user_groups=[
-            row[0] for row in products_object["current_user_groups_rows"]
-        ],
-        current_user_groups_names=products_object["current_user_groups_names"],
-        master_groups_groups_available=products_object[
-            "mastr_for_prods_groups_for_prods"
-        ],
-        master_groups_search=products_object["master_groups_search"],
-        master_group_product_name=products_object["master_product_groups_name"],
-        suppliers=products_object["suppliers"],
-        mstr_prod_grps_prod_grps_names=products_object[
-            "mstr_prod_grps_prod_grps_names"
-        ],
-        warehouse_product_qty=products_object["warehouse_product_qty"],
-        form_sort=form_sort,
-        form_create=form_create,
-        form_edit=form_edit,
-    )
-
-
 @product_blueprint.route("/full_image/<int:id>", methods=["GET"])
 @login_required
 @role_required(
@@ -1327,9 +1198,21 @@ def full_image(id: int):
         m.Product.select().where(m.Product.id == id)
     ).scalar()
 
+    original_image = Image.open(
+        Path("app")
+        / "static"
+        / "img"
+        / "product"
+        / f"{product.image_obj.name}.{product.image_obj.extension}"
+    )
+    with BytesIO() as png_bytes:
+        original_image.save(png_bytes, format="PNG")
+        png_bytes.seek(0)
+        img_bytes = base64.b64encode(png_bytes.read()).decode()
+
     data = {
         "name": product.name,
-        "image": product.image if product.image else app.config["DEFAULT_IMAGE"],
+        "image": img_bytes,
     }
     return jsonify(data)
 

@@ -43,7 +43,7 @@ class GroupFilters(BaseModel):
     brand: str | None = None
     language: str | None = None
     premises: str | None = None
-    category: str | None = None
+    categories: str | None = None
 
 
 class ReportActionTypes(BaseModel):
