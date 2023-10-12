@@ -988,10 +988,6 @@ def upload():
         if form.target_group_upload.data:
             columns_to_use.append("Available Quantity")
 
-        renamed_columns_to_use = [
-            i.lower().replace(" ", "_") for i in columns_to_use if i != "SKU"
-        ]
-
         df = pandas.read_csv(
             file_io,
             usecols=columns_to_use,
