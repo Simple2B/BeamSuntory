@@ -121,5 +121,6 @@ class AdjustProductForm(FlaskForm):
 
 class UploadProductForm(FlaskForm):
     upload_csv = FileField("CSV", [DataRequired()])
+    target_group_upload = IntegerField("Target Group")
 
     submit = SubmitField("Submit")
