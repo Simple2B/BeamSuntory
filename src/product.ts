@@ -505,29 +505,6 @@ async function getEventAvailableQuantity(product_id: number, group: string, cale
 const searchInput: HTMLInputElement = document.querySelector('#table-search-products');
 const searchInputButton = document.querySelector('#table-search-product-button') as HTMLButtonElement;
 
-const brandSelector = document.querySelector('#product-search-master-group-Brand') as HTMLSelectElement;
-const languageSelector = document.querySelector('#product-search-master-group-Language') as HTMLSelectElement;
-const premisesSelector = document.querySelector('#product-search-master-group-Premises') as HTMLSelectElement;
-const eventsSelector = document.querySelector('#product-search-master-group-Events') as HTMLSelectElement;
-const categoriesSelector = document.querySelector('#product-search-master-group-Categories') as HTMLSelectElement;
-
-const currentUrl = new URL(window.location.href);
-
-const searchParams = {
-  brand: brandSelector,
-  language: languageSelector,
-  premises: premisesSelector,
-  events: eventsSelector,
-  categories: categoriesSelector,
-};
-
-for (const [key, value] of Object.entries(searchParams)) {
-  const param = currentUrl.searchParams.get(key);
-  if (param) {
-    value.value = param;
-  }
-}
-
 searchInputButton.addEventListener('click', () => {
   const url = new URL(window.location.href);
   const searchParamsToDelete = [
@@ -536,11 +513,7 @@ searchInputButton.addEventListener('click', () => {
     'is_stocks_own_by_me',
     'is_events_stocks_own_by_me',
     'is_events',
-    'brand',
-    'language',
-    'premises',
-    'events',
-    'categories',
+    'master_groups'
   ];
   searchParamsToDelete.forEach((param) => url.searchParams.delete(param));
 
@@ -548,39 +521,36 @@ searchInputButton.addEventListener('click', () => {
   allStocksInInventoryToggle.checked && url.searchParams.set('is_all_stocks_in_inventory', 'true');
   stocksByMeToggle.checked && url.searchParams.set('is_stocks_own_by_me', 'true');
   eventStocksOwnByMeToggle.checked && url.searchParams.set('is_events_stocks_own_by_me', 'true');
+
+
+  const masterGroupsVales: string[]= []
+  filters.forEach((selector: HTMLSelectElement) => {
+    if (selector.value) {
+      masterGroupsVales.push(selector.value);
+    }
+  });
+  const masterGroupValues: {[key: string]: string} = {};
+  filters.forEach((selector: HTMLSelectElement) => {
+    if (selector.value) {
+      masterGroupValues[selector.id] = selector.value;
+    }
+  });
+  sessionStorage.setItem('masterGroupValues', JSON.stringify(masterGroupValues));
+
   eventToggle.checked && url.searchParams.set('is_events', 'true');
-
-  brandSelector.value && url.searchParams.set('brand', brandSelector.value);
-  languageSelector.value && url.searchParams.set('language', languageSelector.value);
-  premisesSelector.value && url.searchParams.set('premises', premisesSelector.value);
-  eventsSelector.value && url.searchParams.set('events', eventsSelector.value);
-  categoriesSelector.value && url.searchParams.set('categories', categoriesSelector.value);
-
-  brandSelector.value ? sessionStorage.setItem('brand', brandSelector.value) : sessionStorage.removeItem('brand');
-  languageSelector.value
-    ? sessionStorage.setItem('language', languageSelector.value)
-    : sessionStorage.removeItem('language');
-  premisesSelector.value
-    ? sessionStorage.setItem('premises', premisesSelector.value)
-    : sessionStorage.removeItem('premises');
-  eventsSelector.value ? sessionStorage.setItem('events', eventsSelector.value) : sessionStorage.removeItem('events');
-  categoriesSelector.value
-    ? sessionStorage.setItem('categories', categoriesSelector.value)
-    : sessionStorage.removeItem('categories');
-  sessionStorage.setItem('is_all_stocks_in_inventory', allStocksInInventoryToggle.checked.toString());
-  sessionStorage.setItem('is_stocks_own_by_me', stocksByMeToggle.checked.toString());
-  sessionStorage.setItem('is_events_stocks_own_by_me', eventStocksOwnByMeToggle.checked.toString());
-  sessionStorage.setItem('is_events', eventToggle.checked.toString());
+  masterGroupsVales.length && url.searchParams.set('master_groups', masterGroupsVales.join(','));
 
   window.location.href = `${url.origin}${url.pathname}${url.search}`;
 });
 
 //set filter values from sessionStorage
-brandSelector.value = sessionStorage.getItem('brand') ?? '';
-languageSelector.value = sessionStorage.getItem('language') ?? '';
-premisesSelector.value = sessionStorage.getItem('premises') ?? '';
-eventsSelector.value = sessionStorage.getItem('events') ?? '';
-categoriesSelector.value = sessionStorage.getItem('categories') ?? '';
+if (sessionStorage.getItem('masterGroupValues')) {
+  const masterGroupValues = JSON.parse(sessionStorage.getItem('masterGroupValues')) as {[key: string]: string};
+  for (const [key, value] of Object.entries(masterGroupValues)) {
+    const selector = document.querySelector(`#${key}`) as HTMLSelectElement as HTMLSelectElement
+    selector.value = value;
+  }
+}
 
 const filters = document.querySelectorAll('[id^="product-search-master-group"]');
 
