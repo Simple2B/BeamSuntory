@@ -459,14 +459,14 @@ def save():
         u.width = form.width.data if form.width.data else 0
         u.height = form.height.data if form.height.data else 0
 
-        if u.image_obj:
-            image_path, image_extension = save_image(
-                request.files["high_image"], f"product/{form.SKU.data}", u.image_obj
-            )
-            u.image_obj.path = image_path
-            u.image_obj.extension = image_extension
-        else:
-            if "image" in request.files["high_image"].mimetype:
+        if "image" in request.files["high_image"].mimetype:
+            if u.image_obj:
+                image_path, image_extension = save_image(
+                    request.files["high_image"], f"product/{form.SKU.data}", u.image_obj
+                )
+                u.image_obj.path = image_path
+                u.image_obj.extension = image_extension
+            else:
                 file_image = save_image(
                     request.files["high_image"], f"product/{form.SKU.data}"
                 )
