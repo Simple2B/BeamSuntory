@@ -142,7 +142,7 @@ def inbound_orders():
 
     product_master_group_categories = db.session.scalars(
         sa.select(m.MasterGroupProduct)
-        .where(m.MasterGroupProduct.name == "categories")
+        .where(m.MasterGroupProduct.name == "Categories")
         .order_by(m.MasterGroupProduct.id)
     ).all()
 

@@ -21,11 +21,11 @@
               placeholder="Store" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="store_categories" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store
-              categories</label>
-            <option value="" disabled selected>Select store categories</option>
-            {% for store_categories in store_categories %}
-            <option value="{{ store_categories.id }}">{{ store_categories.name }}</option>
+            <label for="store_category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store
+              Category</label>
+            <option value="" disabled selected>Select store category</option>
+            {% for store_category in store_categories %}
+            <option value="{{ store_category.id }}">{{ store_category.name }}</option>
             {% endfor %}
           </div>
           <div class="col-span-6 sm:col-span-3">

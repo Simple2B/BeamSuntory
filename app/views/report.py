@@ -85,7 +85,7 @@ def index():
 
     categories = db.session.scalars(
         sa.select(m.MasterGroupProduct)
-        .where(m.MasterGroupProduct.name == "categories")
+        .where(m.MasterGroupProduct.name == "Categories")
         .order_by(m.MasterGroupProduct.id)
     ).all()
 
@@ -102,7 +102,7 @@ def index():
     product_master_groups = db.session.scalars(
         m.MasterGroupProduct.select().where(
             m.MasterGroupProduct.name.in_(
-                ["Brand", "Language", "categories", "Premises", "Events"]
+                ["Brand", "Language", "Categories", "Premises", "Events"]
             )
         )
     )
@@ -111,7 +111,7 @@ def index():
         "report/index.html",
         report_types=s.ReportRequestShareActionType,
         master_groups_brand=brands,
-        master_group_categories=categories,
+        master_group_category=categories,
         product_premises=premises,
         users=users,
         master_groups=master_groups,

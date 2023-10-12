@@ -123,7 +123,7 @@ def index():
     categories = db.session.scalars(
         m.GroupProduct.select().where(
             m.GroupProduct.master_groups_for_product.has(
-                m.MasterGroupProduct.name == "categories"
+                m.MasterGroupProduct.name == "Categories"
             )
         )
     )

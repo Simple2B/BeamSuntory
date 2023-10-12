@@ -174,7 +174,7 @@ def inventories():
     product_master_groups = db.session.scalars(
         m.MasterGroupProduct.select().where(
             m.MasterGroupProduct.name.in_(
-                ["Brand", "Language", "categories", "Premises", "Events"]
+                ["Brand", "Language", "Categories", "Premises", "Events"]
             )
         )
     )
