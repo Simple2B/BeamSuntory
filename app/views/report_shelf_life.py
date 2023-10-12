@@ -95,7 +95,7 @@ def get_shelf_life_reports():
     master_groups = [
         filter_shelf_lifes.group_brand,
         filter_shelf_lifes.group_language,
-        filter_shelf_lifes.group_category,
+        filter_shelf_lifes.group_categories,
         filter_shelf_lifes.group_premises,
     ]
 
@@ -148,7 +148,9 @@ def shelf_lifes():
     # TODO maybe move default master product groups to config
     product_master_groups = db.session.scalars(
         m.MasterGroupProduct.select().where(
-            m.MasterGroupProduct.name.in_(["Brand", "Language", "Category", "Premises"])
+            m.MasterGroupProduct.name.in_(
+                ["Brand", "Language", "Categories", "Premises"]
+            )
         )
     )
     master_groups = db.session.scalars(m.MasterGroup.select())

@@ -23,7 +23,7 @@
           hx-trigger="keyup changed delay:500ms"
           hx-target="#reports-table"
           hx-swap="innerHTML"
-          hx-include="[name='start_date'], [name='end_date'], [name='username'], [name='language'], [name='category'], [name='premises'], [name='brand'], [name='from_group'], [name='to_group']"
+          hx-include="[name='start_date'], [name='end_date'], [name='username'], [name='language'], [name='categories'], [name='premises'], [name='brand'], [name='from_group'], [name='to_group']"
           hx-get="{{ url_for('report_assign.search_report_assigns') }}"
           hx-indicator="#report-table-spinner"
           type="search"
@@ -42,7 +42,7 @@
         hx-swap="innerHTML"
         hx-target="#reports-table"
         name="from_group"
-        hx-include="[name='q'], [name='start_date'], [name='end_date'], [name='username'], [name='language'], [name='category'], [name='premises'], [name='to_group'], [name='brand']"
+        hx-include="[name='q'], [name='start_date'], [name='end_date'], [name='username'], [name='language'], [name='categories'], [name='premises'], [name='to_group'], [name='brand']"
         hx-get="{{ url_for('report_assign.search_report_assigns') }}"
         hx-indicator="#report-table-spinner"
         class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -62,7 +62,7 @@
         hx-swap="innerHTML"
         hx-target="#reports-table"
         name="to_group"
-        hx-include="[name='q'], [name='start_date'], [name='end_date'], [name='username'], [name='language'], [name='category'], [name='premises'], [name='from_group'], [name='brand']"
+        hx-include="[name='q'], [name='start_date'], [name='end_date'], [name='username'], [name='language'], [name='categories'], [name='premises'], [name='from_group'], [name='brand']"
         hx-get="{{ url_for('report_assign.search_report_assigns') }}"
         hx-indicator="#report-table-spinner"
         class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -83,7 +83,7 @@
           hx-swap="innerHTML"
           hx-target="#reports-table"
           name="brand"
-          hx-include="[name='q'], [name='start_date'], [name='end_date'], [name='username'], [name='language'], [name='category'], [name='premises'], [name='from_group'], [name='to_group']"
+          hx-include="[name='q'], [name='start_date'], [name='end_date'], [name='username'], [name='language'], [name='categories'], [name='premises'], [name='from_group'], [name='to_group']"
           hx-get="{{ url_for('report_assign.search_report_assigns') }}"
           hx-indicator="#report-table-spinner"
           class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -105,7 +105,7 @@
           hx-swap="innerHTML"
           hx-target="#reports-table"
           name="language"
-          hx-include="[name='q'], [name='start_date'], [name='end_date'], [name='username'], [name='brand'], [name='category'], [name='premises'], [name='from_group'], [name='to_group']"
+          hx-include="[name='q'], [name='start_date'], [name='end_date'], [name='username'], [name='brand'], [name='categories'], [name='premises'], [name='from_group'], [name='to_group']"
           hx-get="{{ url_for('report_assign.search_report_assigns') }}"
           hx-indicator="#report-table-spinner"
           class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -118,23 +118,23 @@
       </div> 
     {% endfor %}
 
-    {% for categories in product_master_group_category %}
+    {% for categories in product_master_group_categories %}
       <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800">
         <!-- prettier-ignore -->
         <select
-          id="report-assigns-category"
+          id="report-assigns-categories"
           hx-trigger="change"
           hx-swap="innerHTML"
           hx-target="#reports-table"
-          name="category"
+          name="categories"
           hx-include="[name='q'], [name='start_date'], [name='end_date'], [name='username'], [name='language'], [name='brand'], [name='premises'], [name='from_group'], [name='to_group']"
           hx-get="{{ url_for('report_assign.search_report_assigns') }}"
           hx-indicator="#report-table-spinner"
           class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
         >
           <option selected disabled value="">{{ categories.name }}</option>
-          {% for category in categories.groups_for_product %}
-            <option value="{{ category.name }}">{{ category.name }}</option>
+          {% for categories in categories.groups_for_product %}
+            <option value="{{ categories.name }}">{{ categories.name }}</option>
           {% endfor %}
         </select>
       </div> 
@@ -149,7 +149,7 @@
           hx-swap="innerHTML"
           hx-target="#reports-table"
           name="premises"
-          hx-include="[name='q'], [name='start_date'], [name='end_date'], [name='username'], [name='language'], [name='category'], [name='brand'], [name='from_group'], [name='to_group']"
+          hx-include="[name='q'], [name='start_date'], [name='end_date'], [name='username'], [name='language'], [name='categories'], [name='brand'], [name='from_group'], [name='to_group']"
           hx-get="{{ url_for('report_assign.search_report_assigns') }}"
           hx-indicator="#report-table-spinner"
           class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -170,7 +170,7 @@
         hx-swap="innerHTML"
         hx-target="#reports-table"
         name="username"
-        hx-include="[name='q'], [name='start_date'], [name='end_date'], [name='brand'], [name='language'], [name='category'], [name='premises'], [name='from_group'], [name='to_group']"
+        hx-include="[name='q'], [name='start_date'], [name='end_date'], [name='brand'], [name='language'], [name='categories'], [name='premises'], [name='from_group'], [name='to_group']"
         hx-get="{{ url_for('report_assign.search_report_assigns') }}"
         hx-indicator="#report-table-spinner"
         class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -193,7 +193,7 @@
         hx-swap="innerHTML"
         hx-trigger="changeDate"
         hx-target="#reports-table"
-        hx-include="[name='q'], [name='brand'], [name='end_date'], [name='username'], [name='language'], [name='category'], [name='premises'], [name='from_group'], [name='to_group']"
+        hx-include="[name='q'], [name='brand'], [name='end_date'], [name='username'], [name='language'], [name='categories'], [name='premises'], [name='from_group'], [name='to_group']"
         hx-get="{{ url_for('report_assign.search_report_assigns') }}"
         type="text"
         id="report-assigns-start-date"
@@ -212,7 +212,7 @@
         datepicker
         name="end_date"
         hx-trigger="changeDate"       
-        hx-include="[name='q'], [name='start_date'], [name='brand'], [name='username'], [name='language'], [name='category'], [name='premises'], [name='from_group'], [name='to_group']"
+        hx-include="[name='q'], [name='start_date'], [name='brand'], [name='username'], [name='language'], [name='categories'], [name='premises'], [name='from_group'], [name='to_group']"
         hx-get="{{ url_for('report_assign.search_report_assigns') }}"
         type="text"
         placeholder="End date"

@@ -72,7 +72,7 @@ def init(app: Flask):
             "Brand": ["Brugal", "Banff Ice", "Alberta Springs"],
             "Language": ["English", "French"],
             "Premises": ["On Premises", "Off Premises"],
-            "Category": ["NLVA", "GWP", "Kit", "Bareware", "Signage"],
+            "Categories": ["NLVA", "GWP", "Kit", "Bareware", "Signage"],
             s.ProductMasterGroupMandatory.events.value: [
                 s.ProductMasterGroupMandatory.events.value
             ],

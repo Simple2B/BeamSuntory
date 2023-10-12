@@ -63,7 +63,7 @@ class ReportDataInboundOrders(ReportData):
 
         master_groups = [
             report_filter.brand,
-            report_filter.category,
+            report_filter.categories,
             report_filter.premises,
         ]
 
