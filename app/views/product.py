@@ -793,9 +793,10 @@ def adjust():
         )
         db.session.add(adjust_item)
         is_adjust_products = False
-        warehouses_groups_qty = s.ProductWarehouses.model_validate_json(
-            form.warehouses_groups_quantity.data["product_warehouses"]
+        model_root = s.ProductWarehouseRoot.model_validate_json(
+            form.warehouses_groups_quantity.data
         )
+        warehouses_groups_qty = model_root.root
         product = db.session.get(m.Product, form.product_id.data)
         warehouse_event: m.Warehouse = db.session.scalar(
             m.Warehouse.select().where(
@@ -821,7 +822,7 @@ def adjust():
         )
         report_inventory_list.save(False)
 
-        for warehouse_group_qty in warehouses_groups_qty.product_warehouses:
+        for warehouse_group_qty in warehouses_groups_qty:
             if (
                 warehouse_group_qty.group.master_group.name
                 == s.MasterGroupMandatory.events.value
