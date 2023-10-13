@@ -23,6 +23,10 @@ class GroupProductForm(FlaskForm):
         if db.session.scalar(query) is not None:
             raise ValidationError("This group_for_product name is taken.")
 
+    def validate_name(self, field):
+        if field.data:
+            self.name.data = self.name.data.replace("_", "-")
+
 
 class NewGroupProductForm(FlaskForm):
     name = StringField("Name", [DataRequired()])
@@ -34,6 +38,10 @@ class NewGroupProductForm(FlaskForm):
         query = m.GroupProduct.select().where(m.GroupProduct.name == field.data)
         if db.session.scalar(query) is not None:
             raise ValidationError("This group_for_product name is taken.")
+
+    def validate_name(self, field):
+        if field.data:
+            self.name.data = self.name.data.replace("_", "-")
 
 
 class MasterGroupProductForm(FlaskForm):
@@ -50,6 +58,10 @@ class MasterGroupProductForm(FlaskForm):
         if db.session.scalar(query) is not None:
             raise ValidationError("This master group_for_product name is taken.")
 
+    def validate_name(self, field):
+        if field.data:
+            self.name.data = self.name.data.replace("_", "-")
+
 
 class NewMasterGroupProductForm(FlaskForm):
     name = StringField("Name", [DataRequired()])
@@ -62,3 +74,7 @@ class NewMasterGroupProductForm(FlaskForm):
         )
         if db.session.scalar(query) is not None:
             raise ValidationError("This master group_for_product name is taken.")
+
+    def validate_name(self, field):
+        if field.data:
+            self.name.data = self.name.data.replace("_", "-")

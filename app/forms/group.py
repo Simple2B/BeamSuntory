@@ -23,6 +23,10 @@ class GroupForm(FlaskForm):
         if db.session.scalar(query) is not None:
             raise ValidationError("This group name is taken.")
 
+    def validate_name(self, field):
+        if field.data:
+            self.name.data = self.name.data.replace("_", "-")
+
 
 class NewGroupForm(FlaskForm):
     name = StringField("Name", [DataRequired()])
@@ -34,6 +38,10 @@ class NewGroupForm(FlaskForm):
         query = m.Group.select().where(m.Group.name == field.data)
         if db.session.scalar(query) is not None:
             raise ValidationError("This group name is taken.")
+
+    def validate_name(self, field):
+        if field.data:
+            self.name.data = self.name.data.replace("_", "-")
 
 
 class MasterGroupForm(FlaskForm):
@@ -48,6 +56,10 @@ class MasterGroupForm(FlaskForm):
         if db.session.scalar(query) is not None:
             raise ValidationError("This master group name is taken.")
 
+    def validate_name(self, field):
+        if field.data:
+            self.name.data = self.name.data.replace("_", "-")
+
 
 class NewMasterGroupForm(FlaskForm):
     name = StringField("Name", [DataRequired()])
@@ -58,3 +70,7 @@ class NewMasterGroupForm(FlaskForm):
         query = m.MasterGroup.select().where(m.MasterGroup.name == field.data)
         if db.session.scalar(query) is not None:
             raise ValidationError("This master group name is taken.")
+
+    def validate_name(self, field):
+        if field.data:
+            self.name.data = self.name.data.replace("_", "-")
