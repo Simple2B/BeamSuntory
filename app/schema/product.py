@@ -1,5 +1,5 @@
 from enum import Enum
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, RootModel
 from .supplier import Supplier
 from .warehouse import Warehouse
 from .warehouse_product import WarehouseProduct
@@ -54,14 +54,21 @@ class Product(CustomBase):
     height: float | None
 
 
+ProductWarehouseRoot = RootModel[list[WarehouseProduct]]
+
+
+class ProductWarehouses(BaseModel):
+    product_warehouses: ProductWarehouseRoot
+
+
 class UserGroup(BaseModel):
-    group_name: str
+    group_name: str = Field(serialization_alias="groupName")
 
 
 class UserGroups(BaseModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
-    master_group_name: str
+    master_group_name: str = Field(serialization_alias="masterGroupName")
     groups: list[UserGroup]
 
 
@@ -75,21 +82,27 @@ class WarehouseNameId(BaseModel):
 class ProductGroups(BaseModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
-    group_id: int | None = None
-    group_name: str | None = None
+    group_id: int | None = Field(serialization_alias="groupId")
+    group_name: str | None = Field(serialization_alias="groupName")
 
 
 class MasterGroupsGroups(BaseModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
-    master_group: str
+    master_group: str = Field(serialization_alias="masterGroup")
     groups: list[ProductGroups]
 
 
-class ProductAdditionalInfo(CustomBase):
+class ProductAdditionalInfo(BaseModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
-    current_user_groups: list[UserGroups]
-    all_warehouses: list[WarehouseNameId]
-    master_groups_groups: list[MasterGroupsGroups]
-    current_master_product_groups: list[MasterGroupsGroups]
+    current_user_groups: list[UserGroups] = Field(
+        serialization_alias="currentUserGroups"
+    )
+    all_warehouses: list[WarehouseNameId] = Field(serialization_alias="allWarehouses")
+    master_groups_groups: list[MasterGroupsGroups] = Field(
+        serialization_alias="masterGroupsGroups"
+    )
+    current_master_product_groups: list[MasterGroupsGroups] = Field(
+        serialization_alias="currentMasterProductGroups"
+    )

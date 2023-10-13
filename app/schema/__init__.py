@@ -4,7 +4,13 @@ from .user import User, UserRole, AdminCreate
 from .master_group import MasterGroup, MasterGroupMandatory
 from .group import Group
 from .warehouse import Warehouse, WarehouseMandatory, WarehouseList
-from .product import Product, Currency, ProductAdditionalInfo
+from .product import (
+    Product,
+    Currency,
+    ProductAdditionalInfo,
+    ProductWarehouses,
+    ProductWarehouseRoot,
+)
 from .inbound_order import InboundOrder, InboundOrderStatus, FilterInboundOrder
 from .product_category import ProductCategory
 from .product_quantity_group import (
@@ -46,6 +52,7 @@ from .event import (
     EventsApiOut,
     EventsDateQuantity,
     EventsCalendar,
+    FilterEvents,
 )
 from .report_event import (
     ReportEventType,
