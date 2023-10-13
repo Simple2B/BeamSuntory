@@ -1,5 +1,7 @@
 <!-- View outgoing stock modal -->
 <!-- prettier-ignore-->
+{% extends 'base.html' %}
+{% block content %}
 
 <div
   id="view-report-events-modal"
@@ -104,4 +106,9 @@
   </div>
 </div>
 <!-- prettier-ignore -->
+
+{% endblock %}
+<!-- prettier-ignore -->
+{% block scripts %}
 <script src="{{ url_for('static', filename='js/report_event.js') }}" type="text/javascript" defer></script>
+{% endblock %}

@@ -1,6 +1,7 @@
 <!-- View outgoing stock modal -->
 <!-- prettier-ignore-->
-
+{% extends 'base.html' %}
+{% block content %}
 <div
   id="report-shipping-view-modal"
   tabindex="-1"
@@ -91,5 +92,9 @@
     </form>
   </div>
 </div>
+
+{% endblock %}
+{% block scripts %}
 <!-- prettier-ignore -->
 <script src="{{ url_for('static', filename='js/report_shipping.js') }}" type="text/javascript" defer></script>
+{% endblock %}
