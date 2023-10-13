@@ -41,8 +41,10 @@ def test_create_division(client):
 
 def test_delete_division(mg_g_populate: FlaskClient):
     login(mg_g_populate)
+    role = m.Division(role_name="default_manager")
+    role.save()
     divisions_count = db.session.scalar(sa.func.count(m.Division.id))
-    response = mg_g_populate.delete("/division/delete/1")
+    response = mg_g_populate.delete(f"/division/delete/{role.id}")
     assert response.status_code == 200
     assert "ok" in response.text
     assert divisions_count - 1 == db.session.scalar(sa.func.count(m.Division.id))

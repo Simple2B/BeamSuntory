@@ -75,6 +75,12 @@ def save():
         if not d:
             log(log.ERROR, "Not found role by id : [%s]", form.division_id.data)
             flash("Cannot save role", "danger")
+            return redirect(url_for("division.get_all"))
+
+        if d.role_name in s.UserRole.list():
+            log(log.ERROR, "Cannot edit role with name: [%s]", d.role_name)
+            flash(f"Cannot edit role: {d.role_name}", "danger")
+            return redirect(url_for("division.get_all"))
 
         d.role_name = form.role_name.data
         d.activated = form.activated.data
@@ -128,6 +134,11 @@ def delete(id: int):
         log(log.INFO, "There is no role with id: [%s]", id)
         flash("There is no such role", "danger")
         return "no role", 404
+
+    if division.role_name in s.UserRole.list():
+        log(log.ERROR, "Cannot delete role with name: [%s]", division.role_name)
+        flash(f"Cannot delete role: {division.role_name}", "danger")
+        return redirect(url_for("division.get_all"))
 
     db.session.delete(division)
     db.session.commit()

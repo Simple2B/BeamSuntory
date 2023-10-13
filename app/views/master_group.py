@@ -72,9 +72,7 @@ def create():
         if mgr:
             flash("This master group name is already taken.", "danger")
             return redirect(url_for("master_group.get_all"))
-        master_group = m.MasterGroup(
-            name=form.name.data,
-        )
+        master_group = m.MasterGroup(name=form.name.data)
         log(log.INFO, "Form submitted. master_group: [%s]", master_group)
         master_group.save()
         flash("Master group added!", "success")
