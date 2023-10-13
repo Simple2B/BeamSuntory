@@ -518,7 +518,7 @@ searchInputButton.addEventListener('click', () => {
     'is_stocks_own_by_me',
     'is_events_stocks_own_by_me',
     'is_events',
-    'master_groups'
+    'master_groups',
   ];
   searchParamsToDelete.forEach((param) => url.searchParams.delete(param));
 
@@ -527,14 +527,13 @@ searchInputButton.addEventListener('click', () => {
   stocksByMeToggle.checked && url.searchParams.set('is_stocks_own_by_me', 'true');
   eventStocksOwnByMeToggle.checked && url.searchParams.set('is_events_stocks_own_by_me', 'true');
 
-
-  const masterGroupsVales: string[]= []
+  const masterGroupsVales: string[] = [];
   filters.forEach((selector: HTMLSelectElement) => {
     if (selector.value) {
       masterGroupsVales.push(selector.value);
     }
   });
-  const masterGroupValues: {[key: string]: string} = {};
+  const masterGroupValues: { [key: string]: string } = {};
   filters.forEach((selector: HTMLSelectElement) => {
     if (selector.value) {
       masterGroupValues[selector.id] = selector.value;
@@ -550,9 +549,9 @@ searchInputButton.addEventListener('click', () => {
 
 //set filter values from sessionStorage
 if (sessionStorage.getItem('masterGroupValues')) {
-  const masterGroupValues = JSON.parse(sessionStorage.getItem('masterGroupValues')) as {[key: string]: string};
+  const masterGroupValues = JSON.parse(sessionStorage.getItem('masterGroupValues')) as { [key: string]: string };
   for (const [key, value] of Object.entries(masterGroupValues)) {
-    const selector = document.querySelector(`#${key}`) as HTMLSelectElement as HTMLSelectElement
+    const selector = document.querySelector(`#${key}`) as HTMLSelectElement as HTMLSelectElement;
     selector.value = value;
   }
 }
@@ -1536,9 +1535,7 @@ async function adjustProduct(productParam: IProduct, csrfToken: string) {
 
   const data = {
     product_id: productParam.id,
-    warehouses_groups_quantity: {
-      product_warehouses: JSON.stringify({ product_warehouses: productInWarehousesSchema }),
-    },
+    warehouses_groups_quantity: JSON.stringify(productInWarehousesSchema),
     note: adjustNote.value,
     csrf_token: csrfToken,
   };

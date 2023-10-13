@@ -298,9 +298,7 @@ def delete(id: int):
     return "ok", 200
 
 
-@ship_request_blueprint.route(
-    "/sort", methods=["GET"]
-)  # TODO move pickup inbound sort to GET with params
+@ship_request_blueprint.route("/sort", methods=["GET"])
 @login_required
 @role_required(
     [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
