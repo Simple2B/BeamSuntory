@@ -84,7 +84,7 @@ def create():
             flash("This group_for_product name is already taken.", "danger")
             return redirect(url_for("group_product.get_all"))
         group = m.GroupProduct(
-            name=form.name.data,
+            name=form.name.data.replace("_", "-"),
             master_group_id=form.master_group.data,
         )
         log(log.INFO, "Form submitted. Group for product: [%s]", group)
@@ -114,7 +114,7 @@ def save():
                 form.group_product_id.data,
             )
             flash("Cannot save group_for_product data", "danger")
-        u.name = form.name.data
+        u.name = form.name.data.replace("_", "-")
         u.master_group_id = form.master_group.data
         u.save()
         if form.next_url.data:

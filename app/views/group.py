@@ -80,7 +80,7 @@ def create():
             flash("This group name is already taken.", "danger")
             return redirect(url_for("stock_target_group.get_all"))
         group = m.Group(
-            name=form.name.data,
+            name=form.name.data.replace("_", "-"),
             master_group_id=form.master_group.data,
         )
         log(log.INFO, "Form submitted. Group: [%s]", group)
@@ -114,7 +114,7 @@ def save():
         if not u:
             log(log.ERROR, "Not found group by id : [%s]", form.group_id.data)
             flash("Cannot save group data", "danger")
-        u.name = form.name.data
+        u.name = form.name.data.replace("_", "-")
         u.master_group_id = form.master_group.data
         u.save()
         if form.next_url.data:
