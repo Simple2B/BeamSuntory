@@ -1,5 +1,5 @@
 from enum import Enum
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, RootModel
 from .supplier import Supplier
 from .warehouse import Warehouse
 from .warehouse_product import WarehouseProduct
@@ -54,12 +54,11 @@ class Product(CustomBase):
     height: float | None
 
 
-class ProductWarehouses(BaseModel):
-    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+ProductWarehouseRoot = RootModel[list[WarehouseProduct]]
 
-    product_warehouses: list[WarehouseProduct] = Field(
-        serialization_alias="productWarehouses"
-    )
+
+class ProductWarehouses(BaseModel):
+    product_warehouses: ProductWarehouseRoot
 
 
 class UserGroup(BaseModel):
