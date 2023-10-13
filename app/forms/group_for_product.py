@@ -6,6 +6,7 @@ from wtforms import (
 )
 from wtforms.validators import DataRequired
 
+from app.controllers.utils import replace_underscore
 from app import models as m
 from app import db
 
@@ -24,8 +25,7 @@ class GroupProductForm(FlaskForm):
             raise ValidationError("This group_for_product name is taken.")
 
     def validate_name(self, field):
-        if field.data:
-            self.name.data = self.name.data.replace("_", "-")
+        replace_underscore(self, field)
 
 
 class NewGroupProductForm(FlaskForm):
@@ -40,8 +40,7 @@ class NewGroupProductForm(FlaskForm):
             raise ValidationError("This group_for_product name is taken.")
 
     def validate_name(self, field):
-        if field.data:
-            self.name.data = self.name.data.replace("_", "-")
+        replace_underscore(self, field)
 
 
 class MasterGroupProductForm(FlaskForm):
@@ -59,8 +58,7 @@ class MasterGroupProductForm(FlaskForm):
             raise ValidationError("This master group_for_product name is taken.")
 
     def validate_name(self, field):
-        if field.data:
-            self.name.data = self.name.data.replace("_", "-")
+        replace_underscore(self, field)
 
 
 class NewMasterGroupProductForm(FlaskForm):
@@ -76,5 +74,4 @@ class NewMasterGroupProductForm(FlaskForm):
             raise ValidationError("This master group_for_product name is taken.")
 
     def validate_name(self, field):
-        if field.data:
-            self.name.data = self.name.data.replace("_", "-")
+        replace_underscore(self, field)

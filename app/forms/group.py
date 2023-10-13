@@ -6,6 +6,7 @@ from wtforms import (
 )
 from wtforms.validators import DataRequired
 
+from app.controllers.utils import replace_underscore
 from app import models as m
 from app import db
 
@@ -24,8 +25,7 @@ class GroupForm(FlaskForm):
             raise ValidationError("This group name is taken.")
 
     def validate_name(self, field):
-        if field.data:
-            self.name.data = self.name.data.replace("_", "-")
+        replace_underscore(self, field)
 
 
 class NewGroupForm(FlaskForm):
@@ -40,8 +40,7 @@ class NewGroupForm(FlaskForm):
             raise ValidationError("This group name is taken.")
 
     def validate_name(self, field):
-        if field.data:
-            self.name.data = self.name.data.replace("_", "-")
+        replace_underscore(self, field)
 
 
 class MasterGroupForm(FlaskForm):
@@ -57,8 +56,7 @@ class MasterGroupForm(FlaskForm):
             raise ValidationError("This master group name is taken.")
 
     def validate_name(self, field):
-        if field.data:
-            self.name.data = self.name.data.replace("_", "-")
+        replace_underscore(self, field)
 
 
 class NewMasterGroupForm(FlaskForm):
@@ -72,5 +70,4 @@ class NewMasterGroupForm(FlaskForm):
             raise ValidationError("This master group name is taken.")
 
     def validate_name(self, field):
-        if field.data:
-            self.name.data = self.name.data.replace("_", "-")
+        replace_underscore(self, field)
