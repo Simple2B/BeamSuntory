@@ -73,6 +73,13 @@ def create_app(environment="development"):
         s.UserRole.MANAGER.value,
         s.UserRole.WAREHOUSE_MANAGER.value,
     ]
+    app.jinja_env.globals["all_main_user_roles"] = [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+        s.UserRole.DELIVERY_AGENT.value,
+    ]
     app.jinja_env.globals["delivery_agent_roles"] = [
         # TODO: delete admin role after testing
         s.UserRole.ADMIN.value,
