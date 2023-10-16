@@ -18,13 +18,12 @@ def save_image(image: BytesIO, path: str, image_model: m.Image = None):
         return "Unsupported file type!"
 
     file_path = f"{path}.{kind.extension}"
+    image_path = f"{path}.{kind.extension}"
+    image_extension = kind.extension
 
     try:
         with open(BASE_IMAGE_PATH / file_path, "wb") as f:
             f.write(image.read())
-
-        image_path = f"{path}.{kind.extension}"
-        image_extension = kind.extension
 
         if not image_model:
             return m.Image(
