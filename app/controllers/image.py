@@ -3,6 +3,7 @@ from pathlib import Path
 import filetype
 
 from app import models as m
+from app.logger import log
 
 
 BASE_IMAGE_PATH = Path("app/static/img/")
@@ -18,17 +19,20 @@ def save_image(image: BytesIO, path: str, image_model: m.Image = None):
 
     file_path = f"{path}.{kind.extension}"
 
-    with open(BASE_IMAGE_PATH / file_path, "wb") as f:
-        f.write(image.read())
+    try:
+        with open(BASE_IMAGE_PATH / file_path, "wb") as f:
+            f.write(image.read())
 
-    image_path = f"{path}.{kind.extension}"
-    image_extension = kind.extension
+        image_path = f"{path}.{kind.extension}"
+        image_extension = kind.extension
 
-    if not image_model:
-        return m.Image(
-            name=path.split("/")[-1],
-            path=image_path,
-            extension=image_extension,
-        )
+        if not image_model:
+            return m.Image(
+                name=path.split("/")[-1],
+                path=image_path,
+                extension=image_extension,
+            )
+    except PermissionError as e:
+        log(log.ERROR, "Can't save product image. Error: [%s]", e)
 
     return image_path, image_extension

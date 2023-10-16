@@ -404,6 +404,8 @@ def create():
                 flash("Product added! Cannot guess image file type!", "danger")
             elif "Unsupported file type!" in file_image:
                 flash("Product added! Unsupported image file type!", "danger")
+            else:
+                flash("Product added! Can't save product image!", "danger")
         else:
             flash("Product added!", "success")
             file_image.save(False)
@@ -491,6 +493,8 @@ def save():
                         flash("Product edited! Cannot guess image file type!", "danger")
                     elif "Unsupported file type!" in file_image:
                         flash("Product edited! Unsupported image file type!", "danger")
+                    else:
+                        flash("Product edited! Can't save product image!", "danger")
                 else:
                     flash("Product edited successfully", "success")
                     db.session.execute(
