@@ -18,7 +18,6 @@ def save_image(image: BytesIO, path: str, image_model: m.Image = None):
 
     file_path = f"{path}.{kind.extension}"
 
-    # TODO: check if file exists. delete it if it does
     with open(BASE_IMAGE_PATH / file_path, "wb") as f:
         f.write(image.read())
 
