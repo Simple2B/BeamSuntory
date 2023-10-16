@@ -399,17 +399,17 @@ def create():
                 png_bytes.seek(0)
                 file_image = save_image(png_bytes, f"product/{form.SKU.data}")
 
-        if isinstance(file_image, str):
+        if isinstance(file_image, m.Image):
+            flash("Product added!", "success")
+            file_image.save(False)
+            product.image_obj = file_image
+        else:
             if "Cannot guess file type!" in file_image:
                 flash("Product added! Cannot guess image file type!", "danger")
             elif "Unsupported file type!" in file_image:
                 flash("Product added! Unsupported image file type!", "danger")
             else:
                 flash("Product added! Can't save product image!", "danger")
-        else:
-            flash("Product added!", "success")
-            file_image.save(False)
-            product.image_obj = file_image
 
         db.session.commit()
 
@@ -488,20 +488,20 @@ def save():
                 file_image = save_image(
                     request.files["high_image"], f"product/{form.SKU.data}"
                 )
-                if isinstance(file_image, str):
-                    if "Cannot guess file type!" in file_image:
-                        flash("Product edited! Cannot guess image file type!", "danger")
-                    elif "Unsupported file type!" in file_image:
-                        flash("Product edited! Unsupported image file type!", "danger")
-                    else:
-                        flash("Product edited! Can't save product image!", "danger")
-                else:
+                if isinstance(file_image, m.Image):
                     flash("Product edited successfully", "success")
                     db.session.execute(
                         m.Image.delete().where(m.Image.name == file_image.name)
                     )
                     file_image.save(False)
                     u.image_obj = file_image
+                else:
+                    if "Cannot guess file type!" in file_image:
+                        flash("Product edited! Cannot guess image file type!", "danger")
+                    elif "Unsupported file type!" in file_image:
+                        flash("Product edited! Unsupported image file type!", "danger")
+                    else:
+                        flash("Product edited! Can't save product image!", "danger")
         u.save(False)
         db.session.commit()
 
