@@ -1,5 +1,6 @@
 import 'flowbite';
-export declare const defaultBrandImage = "https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png";
+export declare const defaultBrandImage =
+  'https://raw.githubusercontent.com/Simple2B/BeamSuntory/develop/app/static/img/no_picture_default.png';
 import HTMXDispatcher from './htmx';
 export declare function getFullImage(id: string): Promise<void>;
 export declare const htmxLoader: HTMXDispatcher;
