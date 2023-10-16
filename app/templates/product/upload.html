@@ -29,7 +29,7 @@
             <select type="text" name="target_group_upload" id="product-target-group-upload"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Select group if required">
-              <option value="">No group</option>
+              <option value="0">No group</option>
               {% for group in target_groups %}
                 <option value="{{group.id}}">{{group.name}}</option>
               {% endfor %}

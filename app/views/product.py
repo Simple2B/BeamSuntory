@@ -390,15 +390,25 @@ def create():
             file_image = save_image(
                 request.files["high_image"], f"product/{form.SKU.data}"
             )
-            if isinstance(file_image, str):
-                if "Cannot guess file type!" in file_image:
-                    flash("Product added! Cannot guess image file type!", "danger")
-                elif "Unsupported file type!" in file_image:
-                    flash("Product added! Unsupported image file type!", "danger")
-            else:
-                flash("Product added!", "success")
-                file_image.save(False)
-                product.image_obj = file_image
+        else:
+            no_picture_default = Image.open(
+                Path("app") / "static" / "img" / "no_picture_default.png"
+            )
+            with BytesIO() as png_bytes:
+                no_picture_default.save(png_bytes, format="PNG")
+                png_bytes.seek(0)
+                file_image = save_image(png_bytes, f"product/{form.SKU.data}")
+
+        if isinstance(file_image, str):
+            if "Cannot guess file type!" in file_image:
+                flash("Product added! Cannot guess image file type!", "danger")
+            elif "Unsupported file type!" in file_image:
+                flash("Product added! Unsupported image file type!", "danger")
+        else:
+            flash("Product added!", "success")
+            file_image.save(False)
+            product.image_obj = file_image
+
         db.session.commit()
 
         product_master_groups_ids = json.loads(form.product_groups.data)
@@ -981,7 +991,7 @@ def upload():
         "Retail Price",
     ]
 
-    if form.target_group_upload.data:
+    if form.target_group_upload.data != 0:
         columns_to_use.append("Available Quantity")
 
     df = pandas.read_csv(
@@ -996,9 +1006,11 @@ def upload():
     df["Retail Price"] = df["Retail Price"].fillna(0)
 
     df = pandas.merge(df, df_img, on="SKU", how="inner")
-    df["Image"] = df["Image"].fillna("logo-mini.png")
-    logo_mini = db.session.scalar(m.Image.select().where(m.Image.name == "logo-mini"))
-    img_name_img_obj = {"logo-mini.png": logo_mini}
+    df["Image"] = df["Image"].fillna("no_picture_default.png")
+    logo_mini = db.session.scalar(
+        m.Image.select().where(m.Image.name == "no_picture_default")
+    )
+    img_name_img_obj = {"no_picture_default.png": logo_mini}
 
     # TODO this takes 10 seconds with around 150 products. Optimize #1
     for image_name in df["Image"]:
@@ -1010,7 +1022,7 @@ def upload():
             ).resize((200, 200))
         except FileNotFoundError:
             original_image = Image.open(
-                Path("app") / "static" / "img" / "logo-mini.png"
+                Path("app") / "static" / "img" / "no_picture_default.png"
             ).resize((200, 200))
         with BytesIO() as png_bytes:
             if original_image.mode in ["CMYK"]:
@@ -1090,7 +1102,7 @@ def upload():
         ],
     )
 
-    df_img["Image"] = df_img["Image"].fillna("logo-mini.png")
+    df_img["Image"] = df_img["Image"].fillna("no_picture_default.png")
     # TODO this takes 10 seconds with around 150 products. Optimize #2
     for product in new_products_obj:
         product_group_df.loc[
@@ -1109,7 +1121,7 @@ def upload():
                 product.name,
             )
 
-        if form.target_group_upload.data:
+        if form.target_group_upload.data != 0:
             available_quantity = (
                 int(df.loc[df["SKU"] == product.SKU, "Available Quantity"].values[0])
                 if str(
