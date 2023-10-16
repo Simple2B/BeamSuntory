@@ -1051,6 +1051,7 @@ def upload():
     db.session.commit()
     # # # #1
 
+    columns_to_use.append("Image")
     df[columns_to_use].rename(
         columns=dict(
             zip(
