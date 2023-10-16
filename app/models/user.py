@@ -18,14 +18,6 @@ from app.logger import log
 from app import schema as s
 
 
-# NOTE or alternative to Enum
-# from typing import Literal
-# UserRole = Literal["admin", "manager", "sales rep"]
-# there are more at
-# https://docs.sqlalchemy.org/en/20/orm/declarative_tables.html
-# TODO remove the comments in future
-
-
 def gen_password_reset_id() -> str:
     return str(uuid4())
 
@@ -65,7 +57,7 @@ class User(db.Model, UserMixin, ModelMixin):
         sa.String(64),
         default=gen_password_reset_id,
     )
-    # TODO deside use link to some storage or png base64
+    # NOTE thumbnail saved as base64 png string
     image: orm.Mapped[str] = orm.mapped_column(
         sa.String(255), nullable=True, default="png"
     )
@@ -95,7 +87,6 @@ class User(db.Model, UserMixin, ModelMixin):
 
     # Relations
     role_obj: orm.Mapped[Division] = orm.relationship(lazy="joined")
-    # TODO: add separate table for user groups
     user_groups: orm.Mapped[list[Group]] = orm.relationship(
         secondary=UserGroup.__table__
     )

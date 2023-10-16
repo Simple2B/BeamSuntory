@@ -37,7 +37,6 @@ def get_all():
     form = f.CartForm()
 
     q = request.args.get("q", type=str, default=None)
-    # TODO what if couple users make carts simulteniously???
     query = (
         m.Cart.select()
         .where(m.Cart.status == "pending", m.Cart.user_id == current_user.id)

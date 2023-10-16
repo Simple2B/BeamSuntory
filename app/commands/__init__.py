@@ -79,8 +79,8 @@ def init(app: Flask):
         }
 
         m.Image(
-            name="logo-mini",
-            path="product/logo-mini.png",
+            name="no_picture_default",
+            path="no_picture_default.png",
             extension="png",
         ).save(False)
 
