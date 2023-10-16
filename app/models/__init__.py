@@ -2,7 +2,6 @@
 from .user import User, AnonymousUser, gen_password_reset_id
 from .group import Group
 from .master_group import MasterGroup
-from .values import IntValue, FloatValue, StrValue, BoolValue, DateValue
 
 from .product import Product
 from .product_group import ProductGroup
