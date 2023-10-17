@@ -131,11 +131,9 @@ export async function getFullImage(id: string) {
     const response = await fetch(`/product/full_image/${id}`);
 
     const data = await response.json();
-    console.log(data);
 
     spinnerModal.hide();
     viewModal.show();
-    console.log('spinnerModal hide');
 
     const image = document.querySelector('#product-image-full-img');
     const productName = document.querySelector('#product-image-name');

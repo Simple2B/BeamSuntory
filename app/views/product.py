@@ -1255,17 +1255,6 @@ def full_image(id: int):
         m.Product.select().where(m.Product.id == id)
     ).scalar()
 
-    # original_image = Image.open(
-    #     Path("app")
-    #     / "static"
-    #     / "img"
-    #     / "product"
-    #     / f"{product.image_obj.name}.{product.image_obj.extension}"
-    # )
-    # with BytesIO() as png_bytes:
-    #     original_image.save(png_bytes, format="PNG")
-    #     png_bytes.seek(0)
-    #     img_bytes = base64.b64encode(png_bytes.read()).decode()
     with open(
         Path("app")
         / "static"
