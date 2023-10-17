@@ -1051,11 +1051,21 @@ def upload():
     db.session.commit()
     # # # #1
 
-    columns_to_use.append("Image")
-    df[columns_to_use].rename(
+    df_products = df[
+        [
+            "Name",
+            "Description",
+            "SKU",
+            "Regular Price",
+            "Retail Price",
+            "Image",
+        ]
+    ]
+
+    df_products.rename(
         columns=dict(
             zip(
-                df.columns,
+                df_products.columns,
                 [
                     "name",
                     "description",
