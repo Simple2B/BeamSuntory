@@ -4,6 +4,7 @@
   class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
   <div class="relative w-full max-w-sm max-h-full">
     <!-- Modal content -->
+    {% set target_groups = get_all_groups() %}
     <form action="{{url_for('product.upload')}}" method="post" enctype="multipart/form-data"
       class="relative bg-white rounded-lg shadow dark:bg-gray-700">
       {{ form_product_upload().hidden_tag() }}
@@ -23,7 +24,6 @@
               placeholder="Products CSV file" />
           </div>
         </div>
-        {% if "product" in request.path %}
           <div class="col-span-6 sm:col-span-6">
             <label for="target_group_upload" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Target Group</label>
             <select type="text" name="target_group_upload" id="product-target-group-upload"
@@ -35,8 +35,8 @@
               {% endfor %}
             </select>
           </div>
-        {% endif %}
       </div>
+
       <!-- Modal footer -->
       <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
         <button id="product-upload-save-products-btn" name="submit" type="submit"

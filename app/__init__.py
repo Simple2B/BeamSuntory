@@ -18,6 +18,7 @@ mail = Mail()
 def create_app(environment="development"):
     from config import config
     from app.views import BLUEPRINTS
+    from app import controllers
     from app import models as m, forms
     from app import schema as s
 
@@ -50,6 +51,8 @@ def create_app(environment="development"):
     login_manager.login_view = "auth.login"
     login_manager.login_message_category = "info"
     login_manager.anonymous_user = m.AnonymousUser
+
+    app.jinja_env.globals["get_all_groups"] = controllers.get_all_groups
 
     app.jinja_env.globals["form_product_upload"] = forms.UploadProductForm
     app.jinja_env.globals["admin_roles"] = [s.UserRole.ADMIN.value]
