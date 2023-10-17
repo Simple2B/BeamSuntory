@@ -986,6 +986,25 @@ def upload():
                 method=do_nothing_conflict_name.insert_do_nothing_on_conflicts,
             )
 
+            # NOTE relate admin to new groups
+            admin_user: m.User = db.session.scalar(
+                m.User.select().where(
+                    m.User.role_obj.has(m.Division.role_name == "admin")
+                )
+            )
+            admin_groups = admin_user.user_groups
+            new_groups_for_admin: list[m.Group] = db.session.scalars(
+                m.Group.select().where(m.Group.name.in_(df[table_name].to_list()))
+            )
+            for group in new_groups_for_admin:
+                if group in admin_groups:
+                    continue
+                m.UserGroup(
+                    left_id=admin_user.id,
+                    right_id=group.id,
+                ).save(False)
+            db.session.commit()
+
     # NOTE write products to DB
     columns_to_use = [
         "Name",
