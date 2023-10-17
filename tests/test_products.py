@@ -1,5 +1,9 @@
 import io
+from pathlib import Path
+
 from flask.testing import FlaskClient
+import sqlalchemy as sa
+
 from app import models as m, db
 from tests.utils import login, register, logout
 
@@ -201,3 +205,61 @@ def test_assign_product(mg_g_populate: FlaskClient):
 
     assert len(assign_objs) == 2
     assert len(report_assign_objs) == 2
+
+
+def test_upload_product(mg_g_populate: FlaskClient):
+    login(mg_g_populate)
+
+    CSV_NAME = "All Products part 5.csv"
+    CSV_PATH = Path("tests") / "data" / CSV_NAME
+
+    with open(CSV_PATH, "rb") as f:
+        file_csv = (io.BytesIO(f.read()), CSV_NAME)
+
+    response_no_group = mg_g_populate.post(
+        "/product/upload",
+        data=dict(
+            upload_csv=file_csv,
+            target_group_upload=0,
+        ),
+    )
+
+    assert response_no_group.status_code == 302
+
+    all_products = db.session.scalar(sa.select(sa.func.count()).select_from(m.Product))
+    all_warehouse_products = db.session.scalar(
+        sa.select(sa.func.count()).select_from(m.WarehouseProduct)
+    )
+
+    assert all_products > 170
+    assert all_warehouse_products < 100
+
+    group_upload_to: m.Group = db.session.scalar(
+        m.Group.select().where(m.Group.name == "On the Rocks")
+    )
+
+    assert group_upload_to
+
+    with open(CSV_PATH, "rb") as f:
+        file_csv = (io.BytesIO(f.read()), CSV_NAME)
+
+    response_with_group = mg_g_populate.post(
+        "/product/upload",
+        data=dict(
+            upload_csv=file_csv,
+            target_group_upload=group_upload_to.id,
+        ),
+    )
+
+    assert response_with_group.status_code == 302
+
+    all_products_with_groups = db.session.scalar(
+        sa.select(sa.func.count()).select_from(m.Product)
+    )
+    all_warehouse_products_with_groups = db.session.scalar(
+        sa.select(sa.func.count()).select_from(m.WarehouseProduct)
+    )
+
+    assert all_products_with_groups == all_products
+    assert all_warehouse_products_with_groups > all_warehouse_products
+    assert all_warehouse_products_with_groups > 170
