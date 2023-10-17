@@ -92,7 +92,6 @@ jobs:
             mv docker-compose.staging.yml docker-compose.yml &&
             docker compose pull &&
             docker compose up -d &&
-            docker system prune -f
 
   deploy-prod:
     name: Deploy to prod
