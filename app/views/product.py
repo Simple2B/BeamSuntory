@@ -153,8 +153,16 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         count_query = count_query.where(m.Product.id.in_(curr_user_products_ids))
 
     if q:
-        query = query.where(m.Product.name.ilike(f"%{q}%"))
-        count_query = count_query.where(m.Product.name.ilike(f"%{q}%"))
+        query = query.where(
+            m.Product.name.ilike(f"%{q}%")
+            | m.Product.SKU.ilike(f"%{q}%")
+            | m.Product.description.ilike(f"%{q}%")
+        )
+        count_query = count_query.where(
+            m.Product.name.ilike(f"%{q}%")
+            | m.Product.SKU.ilike(f"%{q}%")
+            | m.Product.description.ilike(f"%{q}%")
+        )
 
     log(
         log.DEBUG,

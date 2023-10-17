@@ -42,7 +42,9 @@ class ReportInventory(db.Model, ModelMixin):
     # Relationships
     product: orm.Mapped["Product"] = orm.relationship()
     warehouse_product: orm.Mapped["WarehouseProduct"] = orm.relationship()
-    report_inventory_list: orm.Mapped["ReportInventoryList"] = orm.relationship()
+    report_inventory_list: orm.Mapped["ReportInventoryList"] = orm.relationship(
+        overlaps="report_inventory_list"
+    )
 
     @property
     def json(self):

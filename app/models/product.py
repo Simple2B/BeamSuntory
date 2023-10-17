@@ -71,8 +71,7 @@ class Product(db.Model, ModelMixin):
     # TODO remove relationships in WarehouseProduct (product, warehouse, etc...)
     # TODO use only as secondary
     warehouses: orm.Mapped[list[Warehouse]] = orm.relationship(
-        secondary=WarehouseProduct.__table__,
-        overlaps="warehouse",
+        secondary=WarehouseProduct.__table__, overlaps="product"
     )
 
     # TODO is overlaps="user_obj" correct decision? remove it to see the warning

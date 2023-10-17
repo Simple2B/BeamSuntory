@@ -62,7 +62,7 @@ class InboundOrder(db.Model, ModelMixin):
     supplier: orm.Mapped[Supplier] = orm.relationship()
     warehouse: orm.Mapped[Warehouse] = orm.relationship()
     products_allocated: orm.Mapped[list[ProductAllocated]] = orm.relationship(
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan", overlaps="inbound_order"
     )
     report_inventory_list: orm.Mapped["ReportInventoryList"] = orm.relationship(
         back_populates="inbound_order"
