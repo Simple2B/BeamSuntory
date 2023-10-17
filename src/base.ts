@@ -100,6 +100,7 @@ if ($targetEl && $triggerEl) {
 
 // -------full product image modal-------
 const $viewImageModalElement: HTMLElement = document.querySelector('#product-image-modal');
+const $spinnerModalElement: HTMLElement = document.querySelector('#spinner-modal');
 const modalOptions: ModalOptions = {
   placement: 'bottom-right',
   backdrop: 'dynamic',
@@ -114,6 +115,7 @@ const modalOptions: ModalOptions = {
   },
 };
 const viewModal: ModalInterface = new Modal($viewImageModalElement, modalOptions);
+const spinnerModal: ModalInterface = new Modal($spinnerModalElement, modalOptions);
 
 const productImageAnchors = document.querySelectorAll('.product-full-image-anchor');
 productImageAnchors.forEach((e) => {
@@ -124,24 +126,24 @@ productImageAnchors.forEach((e) => {
 });
 
 export async function getFullImage(id: string) {
-  viewModal.show();
+  spinnerModal.show();
   try {
-    const response = await fetch(`/product/full_image/${id}`, {
-      method: 'GET',
-    });
-    if (response.status === 200) {
-      const data = await response.json();
+    const response = await fetch(`/product/full_image/${id}`);
 
-      const image = document.querySelector('#product-image-full-img');
-      const productName = document.querySelector('#product-image-name');
-      image.setAttribute('src', `data:image/png;base64, ${data.image}`);
-      productName.innerHTML = data.name;
-      document.querySelector('#product-image-spinner').classList.add('hidden');
-      document.querySelector('#product-image-full-img').classList.remove('hidden');
-    }
+    const data = await response.json();
+
+    spinnerModal.hide();
+    viewModal.show();
+
+    const image = document.querySelector('#product-image-full-img');
+    const productName = document.querySelector('#product-image-name');
+
+    image.setAttribute('src', `data:image/${data.imageType};base64, ${data.image}`);
+    productName.innerHTML = data.name;
+    document.querySelector('#product-image-full-img').classList.remove('hidden');
   } catch (error) {
-    console.log(error);
-    document.querySelector('#product-image-spinner').classList.add('hidden');
+    spinnerModal.hide();
+    viewModal.show();
     document.querySelector('#product-image-not-found-img').classList.remove('hidden');
   }
 }
