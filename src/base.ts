@@ -125,65 +125,27 @@ productImageAnchors.forEach((e) => {
   });
 });
 
-let controller = null;
-
-const getFullImageAbortController = async (url) => {
-  if (controller) {
-    controller.abort();
-  }
-  controller = new AbortController();
-
-  try {
-    const response = await fetch(url, { signal: controller.signal });
-    console.log('response abort controller', response);
-
-    if (controller.signal.aborted) {
-      console.log('aborted');
-
-      return null;
-    }
-
-    const data = await response.json();
-
-    console.log('data abort controller', data);
-
-    return data;
-  } catch (error) {
-    if (controller.signal.aborted) {
-      console.log('aborted');
-      return null;
-    } else {
-      console.log(error);
-      throw error;
-    }
-  }
-};
-
 export async function getFullImage(id: string) {
+  spinnerModal.show();
   try {
-    console.log('show modal');
-
     const response = await fetch(`/product/full_image/${id}`);
-    console.log(response);
-
-    console.log(response);
 
     const data = await response.json();
-    viewModal.show();
     console.log(data);
+
+    spinnerModal.hide();
+    viewModal.show();
+    console.log('spinnerModal hide');
 
     const image = document.querySelector('#product-image-full-img');
     const productName = document.querySelector('#product-image-name');
-    console.log(productName);
 
     image.setAttribute('src', `data:image/${data.imageType};base64, ${data.image}`);
     productName.innerHTML = data.name;
-    document.querySelector('#product-image-spinner').classList.add('hidden');
     document.querySelector('#product-image-full-img').classList.remove('hidden');
-    console.log('full image');
   } catch (error) {
-    console.log(error);
-    document.querySelector('#product-image-spinner').classList.add('hidden');
+    spinnerModal.hide();
+    viewModal.show();
     document.querySelector('#product-image-not-found-img').classList.remove('hidden');
   }
 }
