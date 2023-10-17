@@ -353,6 +353,10 @@ const adjustModalOptions: ModalOptions = {
     const product = JSON.parse(sessionStorage.product);
     const groupsMasterGroups = getGroupsMasterGroups(product);
     const mstrGroupsEntries = Object.entries(groupsMasterGroups);
+    const adjustButtons = document.querySelectorAll('.product-adjust-button');
+    adjustButtons.forEach((e) => {
+      e.removeAttribute('disabled');
+    });
 
     mstrGroupsEntries.forEach(([key, value]: [string, string]) => {
       deleteAdjustContainer(value.replace(/\s/g, '_'), key);
@@ -900,12 +904,14 @@ viewProductButtonElements.forEach((e) =>
 );
 
 const adjustProductButtonElements = document.querySelectorAll('.product-adjust-button');
-adjustProductButtonElements.forEach((e) =>
+adjustProductButtonElements.forEach((e) => {
   e.addEventListener('click', async () => {
+    e.setAttribute('disabled', 'true');
     const product = JSON.parse(e.getAttribute('data-target'));
     sessionStorage.setItem('product', JSON.stringify(product));
     const groupsMasterGroups = getGroupsMasterGroups(product);
     const productInfo: IProductAdditionalInfo = await getAdditionalProductInfo(product.id);
+    const mstrGroupsEntries = Object.entries(groupsMasterGroups);
 
     const prodGroups = Object.keys(groupsMasterGroups);
 
@@ -925,10 +931,16 @@ adjustProductButtonElements.forEach((e) =>
 
       if (isEvent) {
         if (mstrGroupName === eventMasterGroup) {
+          mstrGroupsEntries.forEach(([key, value]: [string, string]) => {
+            deleteAdjustContainer(value.replace(/\s/g, '_'), key);
+          });
           createAdjustAction(isEqual, mstrGroupName, groupName, product);
         }
       } else {
         if (mstrGroupName !== eventMasterGroup) {
+          mstrGroupsEntries.forEach(([key, value]: [string, string]) => {
+            deleteAdjustContainer(value.replace(/\s/g, '_'), key);
+          });
           createAdjustAction(isEqual, mstrGroupName, groupName, product);
         }
       }
@@ -947,8 +959,8 @@ adjustProductButtonElements.forEach((e) =>
     div = document.querySelector('#product-adjust-next_url');
     div.innerHTML = window.location.href;
     adjustModal.show();
-  })
-);
+  });
+});
 
 // function to request share
 // TODO refactor !!!
@@ -1521,13 +1533,19 @@ async function checkAdjustEventQuantity(warehouseProducts: IWarehouseProduct[]) 
   return resultAllPromises;
 }
 
+// add dom content loaded event listener
 const adjustButton = document.querySelector(`#product-adjust-submit-btn`);
-adjustButton.addEventListener('click', () => {
-  const product = JSON.parse(sessionStorage.getItem('product'));
-  const csrfTokenInput = document.querySelector<HTMLInputElement>('#csrf_token');
-  const csrfToken = csrfTokenInput ? csrfTokenInput.value : '';
-  adjustProduct(product, csrfToken);
-});
+adjustButton.addEventListener(
+  'click',
+  () => {
+    adjustButton.setAttribute('disabled', 'true');
+    const product = JSON.parse(sessionStorage.getItem('product'));
+    const csrfTokenInput = document.querySelector<HTMLInputElement>('#csrf_token');
+    const csrfToken = csrfTokenInput ? csrfTokenInput.value : '';
+    adjustProduct(product, csrfToken);
+  },
+  { once: true }
+);
 
 async function adjustProduct(productParam: IProduct, csrfToken: string) {
   const adjustNote: HTMLInputElement = document.querySelector('#product-adjust-note');
