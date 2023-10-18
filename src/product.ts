@@ -212,7 +212,8 @@ function createCustomizeViewColumn(masterGroupName: string) {
   productItemTrs.forEach((productItem: HTMLTableRowElement) => {
     const productItemReference = productItem.children[positionInTable];
     const productItemTd = productItemReference.cloneNode(true) as HTMLElement;
-    productItemTd.classList.add(`product-table-item-td-${masterGroupName}`);
+    productItemTd.classList.add(`px-3`);    
+    productItemTd.classList.add(`product-table-item-td-${masterGroupName}`);    
     const product: IProduct = JSON.parse(productItem.getAttribute('data-target-product'));
 
     const group = product.productGroups.find(
@@ -581,6 +582,23 @@ filters.forEach((filter: HTMLSelectElement) => {
   filter.addEventListener('change', () => {
     changeFilterColor(filter);
   });
+});
+
+const clearFilterButton = document.getElementById('product-clear-button');
+
+clearFilterButton.addEventListener('click', () => {
+  filters.forEach((filterHTML: HTMLSelectElement) => {
+    filterHTML.value = '';   
+    changeFilterColor(filterHTML);
+  });
+  searchInput.value = '';
+  allStocksToggle.checked = true
+  allStocksInInventoryToggle.checked= false
+  stocksByMeToggle.checked= false
+  eventStocksOwnByMeToggle.checked= false
+  eventToggle.checked= false 
+  sessionStorage.removeItem('masterGroupValues');  
+  searchInputButton.click();
 });
 
 const deleteButtons = document.querySelectorAll('.delete-product-btn');

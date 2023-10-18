@@ -30,8 +30,9 @@
         </svg>
         Filter
       </button>
-    </div>
-    
+      <!-- prettier-ignore -->
+      <button type="button" id="product-clear-button" class="px-3 h-10 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">{% include "icon/mop.html" %}Clear</button>
+    </div>    
     <div class="flex items-center space-x-2 sm:space-x-3 flex-wrap">      
       <label class="ml-7 relative inline-flex items-center cursor-pointer">
         <input id="product-show-all-stocks" type="checkbox" value="" class="sr-only peer product-sorting-toggle" {% if not is_all_stocks_in_inventory and not is_stocks_own_by_me and not is_events_stocks_own_by_me and not is_events%}checked{% endif %}>
@@ -144,18 +145,18 @@
       {% endif %}
     </div>
   </div>
-  <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+  <table class="product-table w-full text-sm text-left text-gray-500 dark:text-gray-400">
     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
       <tr id="product-table-header-tr">
-        <th scope="col" class="product-table-header-item px-6 py-3">#</th>
-        <th scope="col" class="product-table-header-item px-6 py-3">Image</th>
-        <th scope="col" class="product-table-header-item px-6 py-3">Name</th>
-        <th scope="col" class="product-table-header-item px-6 py-3">SKU</th>
-        <th scope="col" id="product-table-th-product-type" class="product-table-header-item px-6 py-3">Description</th>
-        <th scope="col" class="product-table-header-item px-6 py-3 max-width-100">Regular price</th>
-        <th scope="col" class="product-table-header-item px-6 py-3 max-width-100">Retail price</th>
-        <th scope="col" class="product-table-header-item px-6 py-3 max-width-100">Available Qty</th>
-        <th scope="col" class="product-table-header-item px-6 py-3 text-center">Actions</th>
+        <th scope="col" class="product-table-header-item px-3 py-3">#</th>
+        <th scope="col" class="product-table-header-item px-3 py-3">Image</th>
+        <th scope="col" class="product-table-header-item px-3 py-3">Name</th>
+        <th scope="col" class="product-table-header-item px-3 py-3">SKU</th>
+        <th scope="col" id="product-table-th-product-type" class="product-table-header-item px-3 py-3">Description</th>
+        <th scope="col" class="product-table-header-item px-3 py-3 max-width-100">Regular price</th>
+        <th scope="col" class="product-table-header-item px-3 py-3 max-width-100">Retail price</th>
+        <th scope="col" class="product-table-header-item px-3 py-3 max-width-100">Available Qty</th>
+        <th scope="col" class="product-table-header-item px-3 py-3 text-center">Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -181,32 +182,32 @@
           </div>
         </td>
         <td scope="row" class="text-base font-normal text-gray-900   dark:text-white">
-          <div class="pl-3">
+          <div class="px-3">
             <div class="text-sm">{{ product.name }}</div>
           </div>
         </td>
         <td scope="row" class="  text-base font-normal text-gray-900   dark:text-white">
-          <div class="pl-3">
+          <div class="px-3">
             <div class="text-sm">{{ product.SKU }}</div>
           </div>
         </td>
         <td class="text-base font-normal text-gray-900 dark:text-white">
-          <div class="pl-3">
+          <div class="px-3">
             <div class="text-sm">{{ product.description }}</div>
           </div>
         </td>
         <td class="text-base font-normal text-gray-900  dark:text-white max-width-100">
-          <div class="pl-3">
+          <div class="px-3">
             <div class="text-sm">{{ product.regular_price }}</div>
           </div>
         </td>
         <td class=" text-base font-normal text-gray-900  dark:text-white max-width-100">
-          <div class="pl-3">
+          <div class="px-3">
             <div class="text-sm">{{ product.retail_price }}</div>
           </div>
         </td>
         <td class=" text-base font-normal text-gray-900 dark:text-white max-width-100">
-          <div class="pl-3">
+          <div class="px-3">
             <div class="text-sm">{{ warehouse_product_qty[product.name] if product.name in
               warehouse_product_qty else 0 }}</div>
           </div>
