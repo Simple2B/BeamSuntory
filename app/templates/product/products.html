@@ -30,8 +30,9 @@
         </svg>
         Filter
       </button>
-    </div>
-    
+      <!-- prettier-ignore -->
+      <button type="button" id="product-clear-button" class="px-3 h-10 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">{% include "icon/mop.html" %}Clear</button>
+    </div>    
     <div class="flex items-center space-x-2 sm:space-x-3 flex-wrap">      
       <label class="ml-7 relative inline-flex items-center cursor-pointer">
         <input id="product-show-all-stocks" type="checkbox" value="" class="sr-only peer product-sorting-toggle" {% if not is_all_stocks_in_inventory and not is_stocks_own_by_me and not is_events_stocks_own_by_me and not is_events%}checked{% endif %}>

@@ -584,6 +584,23 @@ filters.forEach((filter: HTMLSelectElement) => {
   });
 });
 
+const clearFilterButton = document.getElementById('product-clear-button');
+
+clearFilterButton.addEventListener('click', () => {
+  filters.forEach((filterHTML: HTMLSelectElement) => {
+    filterHTML.value = '';   
+    changeFilterColor(filterHTML);
+  });
+  searchInput.value = '';
+  allStocksToggle.checked = true
+  allStocksInInventoryToggle.checked= false
+  stocksByMeToggle.checked= false
+  eventStocksOwnByMeToggle.checked= false
+  eventToggle.checked= false 
+  sessionStorage.removeItem('masterGroupValues');  
+  searchInputButton.click();
+});
+
 const deleteButtons = document.querySelectorAll('.delete-product-btn');
 
 deleteButtons.forEach((e) => {
