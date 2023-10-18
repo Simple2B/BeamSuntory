@@ -174,110 +174,107 @@ def create():
     if not form.validate_on_submit():
         flash("This username or email is already taken.", "danger")
         return redirect(url_for("user.get_all"))
-    if form.validate_on_submit():
-        user = m.User(
-            username=form.username.data,
-            email=form.email.data,
-            role=form.role.data,
-            password=form.password.data,
-            activated=form.activated.data,
-            country=form.country.data,
-            region=form.region.data,
-            city=form.city.data,
-            zip_code=form.zip_code.data,
-            street_address=form.street_address.data,
-            approval_permission=form.approval_permission.data,
-            sales_rep=form.sales_rep.data,
-            phone_number=form.phone_number.data,
+
+    user = m.User(
+        username=form.username.data,
+        email=form.email.data,
+        role=form.role.data,
+        password=form.password.data,
+        activated=form.activated.data,
+        country=form.country.data,
+        region=form.region.data,
+        city=form.city.data,
+        zip_code=form.zip_code.data,
+        street_address=form.street_address.data,
+        approval_permission=form.approval_permission.data,
+        sales_rep=form.sales_rep.data,
+        phone_number=form.phone_number.data,
+    )
+    user.save()
+
+    if (
+        current_user.role_obj.role_name == s.UserRole.WAREHOUSE_MANAGER.value
+        and user.role_obj.role_name != s.UserRole.WAREHOUSE_MANAGER.value
+    ):
+        log(
+            log.ERROR,
+            "Warehouse manager can not create user with role: [%s]",
+            user.role_obj.role_name,
         )
-        user.save()
-
-        if (
-            current_user.role_obj.role_name == s.UserRole.WAREHOUSE_MANAGER.value
-            and user.role_obj.role_name != s.UserRole.WAREHOUSE_MANAGER.value
-        ):
-            log(
-                log.ERROR,
-                "Warehouse manager can not create user with role: [%s]",
-                user.role_obj.role_name,
-            )
-            flash("Warehouse manager can create only warehouse managers", "danger")
-            db.session.delete(user)
-            db.session.commit()
-            return redirect(url_for("user.get_all"))
-
-        sales_rep_role_id = (
-            db.session.execute(
-                m.Division.select().where(
-                    m.Division.role_name == s.UserRole.SALES_REP.value
-                )
-            )
-            .scalar()
-            .id
-        )
-        if user.role == sales_rep_role_id:
-            store_category: m.StoreCategory = db.session.execute(
-                m.StoreCategory.select().where(
-                    m.StoreCategory.name == SALES_REP_LOCKER_NAME
-                )
-            ).scalar()
-            store = m.Store(
-                store_category_id=store_category.id,
-                store_name=f"{user.username}_{SALES_REP_LOCKER_NAME}",
-                contact_person=user.username,
-                email=user.email,
-                phone_numb=user.phone_number,
-                country=user.country if user.sales_rep else form.locker_country.data,
-                region=user.region if user.sales_rep else form.locker_region.data,
-                city=user.city if user.sales_rep else form.locker_city.data,
-                address=user.street_address
-                if user.sales_rep
-                else form.locker_street_address.data,
-                zip=user.zip_code if user.sales_rep else form.locker_zip_code.data,
-                active=True,
-                user_id=user.id,
-            )
-            store.save()
-        log(log.INFO, "Form submitted. User: [%s]", user)
-        flash("User added!", "success")
-
-        if user.role == s.UserRole.ADMIN.value:
-            g_query = m.Group.select()
-            group_obj: m.Group | None = db.session.scalars(g_query)
-            group_ids: List[m.Group] = [g.id for g in group_obj]
-            for group_id in group_ids:
-                m.UserGroup(left_id=user.id, right_id=group_id).save()
-        else:
-            g_query = m.Group.select().where(
-                m.Group.name.in_(str(form.group.data).split(", "))
-            )
-            group_obj: m.Group | None = db.session.scalars(g_query)
-            group_ids: List[m.Group] = [g.id for g in group_obj]
-            for group_id in group_ids:
-                m.UserGroup(left_id=user.id, right_id=group_id).save()
-
-        # create e-mail message
-        msg = Message(
-            subject="New password",
-            sender=app.config["MAIL_DEFAULT_SENDER"],
-            recipients=[user.email],
-        )
-        url = url_for(
-            "auth.password_recovery",
-            reset_password_uid=user.unique_id,
-            _external=True,
-        )
-
-        msg.html = render_template(
-            "email/set.html",
-            user=user,
-            url=url,
-        )
-        # mail.send(msg)
-
+        flash("Warehouse manager can create only warehouse managers", "danger")
+        db.session.delete(user)
+        db.session.commit()
         return redirect(url_for("user.get_all"))
 
-    flash("Something went wrong!", "danger")
+    sales_rep_role_id = (
+        db.session.execute(
+            m.Division.select().where(
+                m.Division.role_name == s.UserRole.SALES_REP.value
+            )
+        )
+        .scalar()
+        .id
+    )
+    if user.role == sales_rep_role_id:
+        store_category: m.StoreCategory = db.session.execute(
+            m.StoreCategory.select().where(
+                m.StoreCategory.name == SALES_REP_LOCKER_NAME
+            )
+        ).scalar()
+        store = m.Store(
+            store_category_id=store_category.id,
+            store_name=f"{user.username}_{SALES_REP_LOCKER_NAME}",
+            contact_person=user.username,
+            email=user.email,
+            phone_numb=user.phone_number,
+            country=user.country if user.sales_rep else form.locker_country.data,
+            region=user.region if user.sales_rep else form.locker_region.data,
+            city=user.city if user.sales_rep else form.locker_city.data,
+            address=user.street_address
+            if user.sales_rep
+            else form.locker_street_address.data,
+            zip=user.zip_code if user.sales_rep else form.locker_zip_code.data,
+            active=True,
+            user_id=user.id,
+        )
+        store.save()
+    log(log.INFO, "Form submitted. User: [%s]", user)
+    flash("User added!", "success")
+
+    if user.role == s.UserRole.ADMIN.value:
+        g_query = m.Group.select()
+        group_obj: m.Group | None = db.session.scalars(g_query)
+        group_ids: List[m.Group] = [g.id for g in group_obj]
+        for group_id in group_ids:
+            m.UserGroup(left_id=user.id, right_id=group_id).save()
+    else:
+        g_query = m.Group.select().where(
+            m.Group.name.in_(str(form.group.data).split(", "))
+        )
+        group_obj: m.Group | None = db.session.scalars(g_query)
+        group_ids: List[m.Group] = [g.id for g in group_obj]
+        for group_id in group_ids:
+            m.UserGroup(left_id=user.id, right_id=group_id).save()
+
+    # create e-mail message
+    msg = Message(
+        subject="New password",
+        sender=app.config["MAIL_DEFAULT_SENDER"],
+        recipients=[user.email],
+    )
+    url = url_for(
+        "auth.password_recovery",
+        reset_password_uid=user.unique_id,
+        _external=True,
+    )
+
+    msg.html = render_template(
+        "email/set.html",
+        user=user,
+        url=url,
+    )
+    # mail.send(msg)
+
     return redirect(url_for("user.get_all"))
 
 

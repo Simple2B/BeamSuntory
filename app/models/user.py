@@ -88,7 +88,7 @@ class User(db.Model, UserMixin, ModelMixin):
     # Relations
     role_obj: orm.Mapped[Division] = orm.relationship(lazy="joined")
     user_groups: orm.Mapped[list[Group]] = orm.relationship(
-        secondary=UserGroup.__table__, overlaps="parent,user_obj"
+        secondary=UserGroup.__table__, overlaps="parent,user_obj,child"
     )
 
     @hybrid_property
@@ -153,4 +153,6 @@ class User(db.Model, UserMixin, ModelMixin):
 
 
 class AnonymousUser(AnonymousUserMixin):
+    role_obj = "anonymous"
+
     pass
