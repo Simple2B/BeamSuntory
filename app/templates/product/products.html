@@ -144,18 +144,18 @@
       {% endif %}
     </div>
   </div>
-  <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+  <table class="product-table w-full text-sm text-left text-gray-500 dark:text-gray-400">
     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
       <tr id="product-table-header-tr">
-        <th scope="col" class="product-table-header-item px-6 py-3">#</th>
-        <th scope="col" class="product-table-header-item px-6 py-3">Image</th>
-        <th scope="col" class="product-table-header-item px-6 py-3">Name</th>
-        <th scope="col" class="product-table-header-item px-6 py-3">SKU</th>
-        <th scope="col" id="product-table-th-product-type" class="product-table-header-item px-6 py-3">Description</th>
-        <th scope="col" class="product-table-header-item px-6 py-3 max-width-100">Regular price</th>
-        <th scope="col" class="product-table-header-item px-6 py-3 max-width-100">Retail price</th>
-        <th scope="col" class="product-table-header-item px-6 py-3 max-width-100">Available Qty</th>
-        <th scope="col" class="product-table-header-item px-6 py-3 text-center">Actions</th>
+        <th scope="col" class="product-table-header-item px-3 py-3">#</th>
+        <th scope="col" class="product-table-header-item px-3 py-3">Image</th>
+        <th scope="col" class="product-table-header-item px-3 py-3">Name</th>
+        <th scope="col" class="product-table-header-item px-3 py-3">SKU</th>
+        <th scope="col" id="product-table-th-product-type" class="product-table-header-item px-3 py-3">Description</th>
+        <th scope="col" class="product-table-header-item px-3 py-3 max-width-100">Regular price</th>
+        <th scope="col" class="product-table-header-item px-3 py-3 max-width-100">Retail price</th>
+        <th scope="col" class="product-table-header-item px-3 py-3 max-width-100">Available Qty</th>
+        <th scope="col" class="product-table-header-item px-3 py-3 text-center">Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -181,32 +181,32 @@
           </div>
         </td>
         <td scope="row" class="text-base font-normal text-gray-900   dark:text-white">
-          <div class="pl-3">
+          <div class="px-3">
             <div class="text-sm">{{ product.name }}</div>
           </div>
         </td>
         <td scope="row" class="  text-base font-normal text-gray-900   dark:text-white">
-          <div class="pl-3">
+          <div class="px-3">
             <div class="text-sm">{{ product.SKU }}</div>
           </div>
         </td>
         <td class="text-base font-normal text-gray-900 dark:text-white">
-          <div class="pl-3">
+          <div class="px-3">
             <div class="text-sm">{{ product.description }}</div>
           </div>
         </td>
         <td class="text-base font-normal text-gray-900  dark:text-white max-width-100">
-          <div class="pl-3">
+          <div class="px-3">
             <div class="text-sm">{{ product.regular_price }}</div>
           </div>
         </td>
         <td class=" text-base font-normal text-gray-900  dark:text-white max-width-100">
-          <div class="pl-3">
+          <div class="px-3">
             <div class="text-sm">{{ product.retail_price }}</div>
           </div>
         </td>
         <td class=" text-base font-normal text-gray-900 dark:text-white max-width-100">
-          <div class="pl-3">
+          <div class="px-3">
             <div class="text-sm">{{ warehouse_product_qty[product.name] if product.name in
               warehouse_product_qty else 0 }}</div>
           </div>

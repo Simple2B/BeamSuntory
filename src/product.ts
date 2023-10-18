@@ -212,7 +212,8 @@ function createCustomizeViewColumn(masterGroupName: string) {
   productItemTrs.forEach((productItem: HTMLTableRowElement) => {
     const productItemReference = productItem.children[positionInTable];
     const productItemTd = productItemReference.cloneNode(true) as HTMLElement;
-    productItemTd.classList.add(`product-table-item-td-${masterGroupName}`);
+    productItemTd.classList.add(`px-3`);    
+    productItemTd.classList.add(`product-table-item-td-${masterGroupName}`);    
     const product: IProduct = JSON.parse(productItem.getAttribute('data-target-product'));
 
     const group = product.productGroups.find(

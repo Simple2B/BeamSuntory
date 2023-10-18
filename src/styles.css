@@ -150,3 +150,7 @@ button[disabled]{
 .min-h-half{
     min-height: 50vh;
 }
+
+.product-table td, .product-table th, .product-table td * { 
+    text-align: center;
+}

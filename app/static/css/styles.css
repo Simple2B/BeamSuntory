@@ -3890,6 +3890,10 @@ button[disabled]{
   min-height: 50vh;
 }
 
+.product-table td, .product-table th, .product-table td * {
+  text-align: center;
+}
+
 .selection\:bg-transparent *::-moz-selection {
   background-color: transparent;
 }
