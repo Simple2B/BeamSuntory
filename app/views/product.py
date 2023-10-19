@@ -25,6 +25,7 @@ from app.controllers import (
     save_image,
     role_required,
     sort_user_groups,
+    get_query_params_from_headers,
 )
 
 from app import models as m, db
@@ -40,6 +41,7 @@ product_blueprint = Blueprint("product", __name__, url_prefix="/product")
 def get_all_products(request, query=None, count_query=None, my_stocks=False):
     get_all_start = datetime.now()
     log(log.DEBUG, "Product get_all started: [%s]", get_all_start)
+    total_query_params = None
     is_events = request.args.get("is_events", type=bool, default=False)
     is_all_stocks_in_inventory = request.args.get(
         "is_all_stocks_in_inventory", type=bool, default=False
@@ -78,6 +80,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
             count_query = count_query.where(master_group_filter)
 
     if is_events:
+        total_query_params += is_events
         event_filter = m.Product.warehouse_products.any(
             m.WarehouseProduct.group.has(
                 m.Group.master_group.has(
@@ -90,6 +93,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         count_query = count_query.where(event_filter)
 
     if is_all_stocks_in_inventory:
+        # total_query_params += is_all_stocks_in_inventory
         is_all_stocks_in_inventory_filter = m.Product.warehouse_products.any(
             m.WarehouseProduct.product_quantity > 0
         )
@@ -98,6 +102,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         count_query = count_query.where(is_all_stocks_in_inventory_filter)
 
     if is_stocks_own_by_me:
+        # total_query_params += is_stocks_own_by_me
         curr_user_groups_ids = [
             i.right_id
             for i in db.session.execute(
@@ -123,6 +128,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         )
 
     if is_events_stocks_own_by_me:
+        # total_query_params += is_events_stocks_own_by_me
         event_filter = m.Product.warehouse_products.any(
             m.WarehouseProduct.group.has(
                 m.Group.master_group.has(
@@ -158,6 +164,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         count_query = count_query.where(m.Product.id.in_(curr_user_products_ids))
 
     if q:
+        # total_query_params += q
         query = query.where(
             m.Product.name.ilike(f"%{q}%")
             | m.Product.SKU.ilike(f"%{q}%")
@@ -283,6 +290,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     current_user_groups_rows.sort(key=sort_user_groups)
 
     return {
+        # "total_query_params": total_query_params,
         "query": query,
         "pagination": pagination,
         "is_events": is_events,
@@ -320,6 +328,9 @@ def get_all():
     form_create: f.NewProductForm = f.NewProductForm()
     form_edit: f.ProductForm = f.ProductForm()
 
+    name = request.args.get("is_stocks_own_by_me", type=bool, default=False)
+    url_with_params = url_for("product.get_all", name=name)
+
     return render_template(
         "product/products.html",
         products=db.session.execute(
@@ -356,6 +367,7 @@ def get_all():
         datetime=products_object["datetime"],
         form_create=form_create,
         form_edit=form_edit,
+        url_with_params=url_with_params,
     )
 
 
@@ -365,11 +377,12 @@ def get_all():
 def create():
     form: f.NewProductForm = f.NewProductForm()
     if form.validate_on_submit():
+        query_params = get_query_params_from_headers()
         query = m.Product.select().where(m.Product.name == form.name.data)
         gr: m.Product | None = db.session.scalar(query)
         if gr:
             flash("This product name is already taken.", "danger")
-            return redirect(url_for("product.get_all"))
+            return redirect(url_for("product.get_all", **query_params))
 
         supplier: m.Supplier = db.session.scalar(m.Supplier.select())
 
@@ -440,11 +453,11 @@ def create():
             product_group.save(False)
         db.session.commit()
 
-        return redirect(url_for("product.get_all"))
+        return redirect(url_for("product.get_all", **query_params))
     else:
         log(log.ERROR, "Product creation errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
-        return redirect(url_for("product.get_all"))
+        return redirect(url_for("product.get_all", **query_params))
 
 
 @product_blueprint.route("/edit", methods=["POST"])
@@ -453,9 +466,11 @@ def create():
 def save():
     form: f.ProductForm = f.ProductForm()
     if form.validate_on_submit():
+        query_params = get_query_params_from_headers()
         query = m.Product.select().where(m.Product.id == int(form.product_id.data))
         u: m.Product = db.session.scalar(query)
         if not u:
+            # TODO: is there need to return from function?
             log(log.ERROR, "Not found product by id : [%s]", form.product_id.data)
             flash("Cannot save product data", "danger")
 
@@ -558,12 +573,12 @@ def save():
 
         if form.next_url.data:
             return redirect(form.next_url.data)
-        return redirect(url_for("product.get_all"))
+        return redirect(url_for("product.get_all", **query_params))
 
     else:
         log(log.ERROR, "product save errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
-        return redirect(url_for("product.get_all"))
+        return redirect(url_for("product.get_all", **query_params))
 
 
 # TODO brainstorm
@@ -611,7 +626,9 @@ def delete(id: int):
 )
 def assign():
     form: f.AssignProductForm = f.AssignProductForm()
+
     if form.validate_on_submit():
+        query_params = get_query_params_from_headers()
         query = m.Product.select().where(m.Product.name == form.name.data)
         p: m.Product | None = db.session.scalar(query)
         if not p:
@@ -631,7 +648,7 @@ def assign():
                 f"Cannot assign from {product_from_group.name} to {product_to_group.name}",
                 "danger",
             )
-            return redirect(url_for("product.get_all"))
+            return redirect(url_for("product.get_all", **query_params))
 
         report_inventory_list = m.ReportInventoryList(
             type="Product Assigned",
@@ -706,12 +723,12 @@ def assign():
 
         db.session.commit()
 
-        return redirect(url_for("product.get_all"))
+        return redirect(url_for("product.get_all", **query_params))
 
     else:
         log(log.ERROR, "product assign errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
-        return redirect(url_for("product.get_all"))
+        return redirect(url_for("product.get_all", **query_params))
 
 
 @product_blueprint.route("/request_share", methods=["POST"])
@@ -719,6 +736,7 @@ def assign():
 def request_share():
     form: f.RequestShareProductForm = f.RequestShareProductForm()
     if form.validate_on_submit():
+        query_params = get_query_params_from_headers()
         warehouse_product = db.session.scalar(
             m.WarehouseProduct.select().where(
                 m.WarehouseProduct.product.has(m.Product.SKU == form.sku.data),
@@ -734,7 +752,7 @@ def request_share():
                 form.from_group_id.data,
             )
             flash("Cannot save product data", "danger")
-            return redirect(url_for("product.get_all"))
+            return redirect(url_for("product.get_all", **query_params))
 
         to_group: m.Group = db.session.get(m.Group, form.to_group_id.data)
         if not to_group:
@@ -744,7 +762,7 @@ def request_share():
                 form.to_group_id.data,
             )
             flash("Cannot save product data", "danger")
-            return redirect(url_for("product.get_all"))
+            return redirect(url_for("product.get_all", **query_params))
 
         request_share: m.RequestShare = m.RequestShare(
             product_id=warehouse_product.product.id,
@@ -805,12 +823,12 @@ def request_share():
         db.session.commit()
 
         flash("Share request created!", "success")
-        return redirect(url_for("product.get_all"))
+        return redirect(url_for("product.get_all", **query_params))
 
     else:
         log(log.ERROR, "product assign errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
-        return redirect(url_for("product.get_all"))
+        return redirect(url_for("product.get_all", **query_params))
 
 
 @product_blueprint.route("/adjust", methods=["POST"])
@@ -820,6 +838,7 @@ def adjust():
     form: f.AdjustProductForm = f.AdjustProductForm()
 
     if form.validate_on_submit():
+        query_params = get_query_params_from_headers()
         adjust_item: m.Adjust = m.Adjust(
             product_id=form.product_id.data,
             note=form.note.data,
@@ -844,11 +863,11 @@ def adjust():
                 "Not found warehouse event, product_id: [%s]",
                 form.product_id.data,
             )
-            return redirect(url_for("product.get_all"))
+            return redirect(url_for("product.get_all", **query_params))
         if not product:
             flash("Cannot save product data", "danger")
             log(log.ERROR, "Not found product by id : [%s]", form.product_id.data)
-            return redirect(url_for("product.get_all"))
+            return redirect(url_for("product.get_all", **query_params))
 
         report_inventory_list = m.ReportInventoryList(
             type="Products Adjusted",
@@ -873,7 +892,7 @@ def adjust():
             if not product_warehouse:
                 log(log.ERROR, "Not found warehouse product: [%s]", warehouse_group_qty)
                 flash("Cannot save product data", "danger")
-                return redirect(url_for("product.get_all"))
+                return redirect(url_for("product.get_all", **query_params))
 
             if (
                 product_warehouse.product_quantity
@@ -932,7 +951,7 @@ def adjust():
 
     log(log.ERROR, "Adjust item save errors: [%s]", form.errors)
     flash(f"{form.errors}", "danger")
-    return redirect(url_for("outgoing_stock.get_all"))
+    return redirect(url_for("product.get_all", **query_params))
 
 
 @product_blueprint.route("/upload", methods=["POST"])
@@ -940,10 +959,11 @@ def adjust():
 @role_required([s.UserRole.ADMIN.value])
 def upload():
     form: f.UploadProductForm = f.UploadProductForm()
+    query_params = get_query_params_from_headers()
     if not form.validate_on_submit():
         log(log.ERROR, "Product creation errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
-        return redirect(url_for("product.get_all"))
+        return redirect(url_for("product.get_all", **query_params))
 
     # NOTE Use large number if no group selected. Impossible to reach that number in prod.
     # Used to avoid wrong validation in backend wtform when pass 0 and get None
@@ -1225,7 +1245,7 @@ def upload():
         )
 
     flash("Product added!", "success")
-    return redirect(url_for("product.get_all"))
+    return redirect(url_for("product.get_all", **query_params))
 
 
 class DoNothingConflict:
