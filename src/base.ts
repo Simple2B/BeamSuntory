@@ -149,3 +149,19 @@ export async function getFullImage(id: string) {
 }
 
 export const htmxLoader = new HTMXDispatcher();
+
+document.querySelector('#product-upload-save-products-btn').addEventListener('click', () => {
+  const uploadGroupInput = document.querySelector('#product-target-group-upload') as HTMLInputElement;
+  const option = uploadGroupInput.list.querySelector('option[value="' + uploadGroupInput.value + '"]') as HTMLElement;
+  // NOTE Use large number if no group selected. Impossible to reach that number in prod.
+  // Used to avoid wrong validation in backend wtform when pass 0 and get None
+  let groupId;
+  if (uploadGroupInput.value) {
+    groupId = option.getAttribute('data-group-id') ?? 999999999;
+  } else {
+    groupId = 999999999;
+  }
+
+  const hiddenInput = document.getElementById('product-target-group-upload-hidden') as HTMLInputElement;
+  hiddenInput.value = groupId.toString();
+});

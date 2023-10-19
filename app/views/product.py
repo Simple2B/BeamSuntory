@@ -933,6 +933,11 @@ def upload():
         flash(f"{form.errors}", "danger")
         return redirect(url_for("product.get_all"))
 
+    # NOTE Use large number if no group selected. Impossible to reach that number in prod.
+    # Used to avoid wrong validation in backend wtform when pass 0 and get None
+    if form.target_group_upload.data == 999999999:
+        form.target_group_upload.data = 0
+
     master_product_groups = ["Language", "Categories", "Brand"]
     csv_file = request.files["upload_csv"]
     file_io = BytesIO(csv_file.read())
