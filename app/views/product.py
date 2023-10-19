@@ -41,7 +41,6 @@ product_blueprint = Blueprint("product", __name__, url_prefix="/product")
 def get_all_products(request, query=None, count_query=None, my_stocks=False):
     get_all_start = datetime.now()
     log(log.DEBUG, "Product get_all started: [%s]", get_all_start)
-    total_query_params = None
     is_events = request.args.get("is_events", type=bool, default=False)
     is_all_stocks_in_inventory = request.args.get(
         "is_all_stocks_in_inventory", type=bool, default=False
@@ -80,7 +79,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
             count_query = count_query.where(master_group_filter)
 
     if is_events:
-        total_query_params += is_events
         event_filter = m.Product.warehouse_products.any(
             m.WarehouseProduct.group.has(
                 m.Group.master_group.has(
@@ -93,7 +91,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         count_query = count_query.where(event_filter)
 
     if is_all_stocks_in_inventory:
-        # total_query_params += is_all_stocks_in_inventory
         is_all_stocks_in_inventory_filter = m.Product.warehouse_products.any(
             m.WarehouseProduct.product_quantity > 0
         )
@@ -102,7 +99,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         count_query = count_query.where(is_all_stocks_in_inventory_filter)
 
     if is_stocks_own_by_me:
-        # total_query_params += is_stocks_own_by_me
         curr_user_groups_ids = [
             i.right_id
             for i in db.session.execute(
@@ -128,7 +124,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         )
 
     if is_events_stocks_own_by_me:
-        # total_query_params += is_events_stocks_own_by_me
         event_filter = m.Product.warehouse_products.any(
             m.WarehouseProduct.group.has(
                 m.Group.master_group.has(
@@ -164,7 +159,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         count_query = count_query.where(m.Product.id.in_(curr_user_products_ids))
 
     if q:
-        # total_query_params += q
         query = query.where(
             m.Product.name.ilike(f"%{q}%")
             | m.Product.SKU.ilike(f"%{q}%")
@@ -290,7 +284,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     current_user_groups_rows.sort(key=sort_user_groups)
 
     return {
-        # "total_query_params": total_query_params,
         "query": query,
         "pagination": pagination,
         "is_events": is_events,
