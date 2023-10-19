@@ -18,4 +18,8 @@ def get_all_groups():
     Returns:
         List: list of groups
     """
-    return db.session.scalars(m.Group.select()).all()
+    return db.session.scalars(m.Group.select().order_by(m.Group.name)).all()
+
+
+def sort_user_groups(e: m.UserGroup):
+    return e.parent.name

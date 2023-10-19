@@ -61,10 +61,6 @@ def get_all():
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
-    groups_rows = db.session.execute(sa.select(m.Group)).all()
-    master_groups_rows = db.session.execute(sa.select(m.MasterGroup)).all()
-    divisions = [i for i in db.session.execute(m.Division.select()).scalars()]
-
     return render_template(
         "user/users.html",
         users=db.session.execute(
@@ -74,11 +70,13 @@ def get_all():
         ).scalars(),
         page=pagination,
         search_query=q,
-        groups=[i[0] for i in groups_rows],
-        main_master_groups=[i[0] for i in master_groups_rows],
+        groups=list(db.session.scalars(m.Group.select().order_by(m.Group.name))),
+        main_master_groups=list(
+            db.session.scalars(m.MasterGroup.select().order_by(m.MasterGroup.name))
+        ),
         form_create=form_create,
         form_edit=form_edit,
-        divisions=divisions,
+        divisions=list(db.session.scalars(m.Division.select())),
     )
 
 
@@ -129,9 +127,9 @@ def save():
         group_obj: m.Group | None = db.session.scalars(g_query)
         group_ids = [g.id for g in group_obj]
 
-        user_groups_obj: m.UserGroup = db.session.execute(
+        user_groups_obj: m.UserGroup = db.session.scalars(
             m.UserGroup.select().where(m.UserGroup.left_id == u.id)
-        ).scalars()
+        )
         user_group_group_ids = [ug.right_id for ug in user_groups_obj]
 
         for user_group_id in user_group_group_ids:

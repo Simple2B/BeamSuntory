@@ -20,7 +20,12 @@ from flask_login import login_required, current_user
 from flask_mail import Message
 from sqlalchemy.dialects.postgresql import insert
 import sqlalchemy as sa
-from app.controllers import create_pagination, save_image, role_required
+from app.controllers import (
+    create_pagination,
+    save_image,
+    role_required,
+    sort_user_groups,
+)
 
 from app import models as m, db
 from app import schema as s
@@ -171,7 +176,9 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     )
     get_all_filters_time = datetime.now()
 
-    groups_for_products_obj = db.session.scalars(m.GroupProduct.select()).all()
+    groups_for_products_obj = db.session.scalars(
+        m.GroupProduct.select().order_by(m.GroupProduct.name)
+    ).all()
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
@@ -271,7 +278,9 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         datetime.now() - get_all_master_groups_search,
     )
 
-    target_groups = db.session.scalars(m.Group.select())
+    target_groups = db.session.scalars(m.Group.select().order_by(m.Group.name))
+
+    current_user_groups_rows.sort(key=sort_user_groups)
 
     return {
         "query": query,
@@ -290,7 +299,10 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         "master_product_groups_name": master_group_product_name,
         "suppliers": [s for s in suppliers],
         "all_product_groups": {
-            i.name: i for i in db.session.execute(m.Group.select()).scalars()
+            i.name: i
+            for i in db.session.execute(
+                m.Group.select().order_by(m.Group.name)
+            ).scalars()
         },
         "current_user_groups_names": [i.parent.name for i in current_user_groups_rows],
         "mstr_prod_grps_prod_grps_names": json.dumps(mstr_prod_grps_prod_grps_names),

@@ -19,4 +19,6 @@ class UserGroup(db.Model, ModelMixin):
     right_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("groups.id"))
     child: orm.Mapped["User"] = orm.relationship(overlaps="child")
     # TODO is overlaps="user_obj" correct decision? remove it to see the warning
-    parent: orm.Mapped["Group"] = orm.relationship(overlaps="user_obj")
+    parent: orm.Mapped["Group"] = orm.relationship(
+        overlaps="user_obj", order_by="Group.name.desc()"
+    )
