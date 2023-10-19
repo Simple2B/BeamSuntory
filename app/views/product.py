@@ -793,7 +793,7 @@ def request_share():
                 if not u.child.approval_permission:
                     continue
                 msg = Message(
-                    subject="New request share",
+                    subject=f"New request share {request_share.order_numbs}",
                     sender=app.config["MAIL_DEFAULT_SENDER"],
                     recipients=[u.child.email],
                 )

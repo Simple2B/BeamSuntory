@@ -286,7 +286,7 @@ def decline(id: int):
             if not u.child.approval_permission:
                 continue
             msg = Message(
-                subject="Declined request share",
+                subject=f"Declined request share {request_share.order_numb}",
                 sender=app.config["MAIL_DEFAULT_SENDER"],
                 recipients=[u.child.email],
             )
