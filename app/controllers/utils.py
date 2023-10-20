@@ -1,3 +1,5 @@
+from urllib.parse import urlparse, parse_qs
+from flask import request
 from app import db, models as m
 
 
@@ -23,3 +25,16 @@ def get_all_groups():
 
 def sort_user_groups(e: m.UserGroup):
     return e.parent.name
+
+
+def get_query_params_from_headers():
+    """create query params dict from request headers
+
+    Returns:
+        {query_name: str, query_value: str}
+    """
+    referer_url = request.headers.get("Referer")
+    parsed_url = urlparse(referer_url)
+    parsed_query_params = parse_qs(parsed_url.query)
+    query_params = {key: value[0] for key, value in parsed_query_params.items()}
+    return query_params

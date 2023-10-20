@@ -212,8 +212,8 @@ function createCustomizeViewColumn(masterGroupName: string) {
   productItemTrs.forEach((productItem: HTMLTableRowElement) => {
     const productItemReference = productItem.children[positionInTable];
     const productItemTd = productItemReference.cloneNode(true) as HTMLElement;
-    productItemTd.classList.add(`px-3`);    
-    productItemTd.classList.add(`product-table-item-td-${masterGroupName}`);    
+    productItemTd.classList.add(`px-3`);
+    productItemTd.classList.add(`product-table-item-td-${masterGroupName}`);
     const product: IProduct = JSON.parse(productItem.getAttribute('data-target-product'));
 
     const group = product.productGroups.find(
@@ -588,16 +588,16 @@ const clearFilterButton = document.getElementById('product-clear-button');
 
 clearFilterButton.addEventListener('click', () => {
   filters.forEach((filterHTML: HTMLSelectElement) => {
-    filterHTML.value = '';   
+    filterHTML.value = '';
     changeFilterColor(filterHTML);
   });
   searchInput.value = '';
-  allStocksToggle.checked = true
-  allStocksInInventoryToggle.checked= false
-  stocksByMeToggle.checked= false
-  eventStocksOwnByMeToggle.checked= false
-  eventToggle.checked= false 
-  sessionStorage.removeItem('masterGroupValues');  
+  allStocksToggle.checked = true;
+  allStocksInInventoryToggle.checked = false;
+  stocksByMeToggle.checked = false;
+  eventStocksOwnByMeToggle.checked = false;
+  eventToggle.checked = false;
+  sessionStorage.removeItem('masterGroupValues');
   searchInputButton.click();
 });
 
@@ -1195,6 +1195,8 @@ function assign(product: IProduct, group: string) {
   const warehouseGroupProduct = product.warehouseProducts.find(
     (warehouseProduct) => warehouseProduct.group.name === group.replace(/_/g, ' ')
   );
+  let div: HTMLDivElement = document.querySelector('#product-assign-available-quantity');
+  div.innerHTML = warehouseGroupProduct.productQuantity.toString();
   let input: HTMLInputElement = document.querySelector('#product-assign-name');
   input.value = product.name;
   input = document.querySelector('#product-assign-amount');
