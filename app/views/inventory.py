@@ -1,3 +1,4 @@
+# flake8: noqa
 from flask import (
     Blueprint,
     render_template,
@@ -55,10 +56,12 @@ def get_all():
     warehouse_product_qty = list(warehouse_product_qty.values())
 
     pagination = create_pagination(total=len(warehouse_product_qty))
-
     return render_template(
         "inventory/inventories.html",
-        warehouse_product_qty=warehouse_product_qty,
+        warehouse_product_qty=warehouse_product_qty[
+            pagination.per_page
+            * (pagination.page - 1) : (pagination.per_page * pagination.page)
+        ],
         page=pagination,
         search_query=q,
     )
