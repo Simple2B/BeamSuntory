@@ -64,7 +64,6 @@ from .filter_report_events import FilterReportEvents
 from .report_inventory import (
     ReportInventoryType,
     ReportInventory,
-    ReportInventoryList,
     ReportInventoryListArray,
     ReportInventoryListResponse,
 )
