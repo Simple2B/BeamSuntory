@@ -10,8 +10,8 @@ from app import schema as s
 class InboundOrderBaseForm(FlaskForm):
     next_url = StringField("next_url")
     order_title = StringField("Order title", [DataRequired()])
-    delivery_date = DateField("Delivery date", [DataRequired()], format="%m/%d/%Y")
-    active_date = DateField("Active date", [DataRequired()], format="%m/%d/%Y")
+    delivery_date = DateField("Delivery date", [DataRequired()], format="%Y-%m-%d")
+    active_date = DateField("Active date", [DataRequired()], format="%Y-%m-%d")
     active_time = StringField(
         "Active time",
         [
