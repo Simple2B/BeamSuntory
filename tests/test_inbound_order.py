@@ -25,15 +25,15 @@ def test_create_inbound_order(mg_g_populate: FlaskClient):
     response = mg_g_populate.post(
         "/inbound_order/create",
         data=dict(
-            active_date="08/19/2999",
+            active_date="2999-08-19",
             active_time="12:00 AM",
             order_title="Inbound Order 1",
             quantity=5,
-            delivery_date="07/19/2999",
+            delivery_date="2999-07-19",
             status=s.InboundOrderStatus.draft.value,
             supplier_id=1,
             warehouse_id=1,
-            products="""[{"id": 1, "quantity": 5, "shelf_life_start": "07/22/2023", "shelf_life_end": "07/24/2023"}]""",
+            products="""[{"id": 1, "quantity": 5, "shelf_life_start": "2023-07-22", "shelf_life_end": "2023-07-24"}]""",
         ),
         follow_redirects=True,
     )
@@ -67,11 +67,11 @@ def test_edit_inbound_order(mg_g_populate: FlaskClient):
         "/inbound_order/save",
         data=dict(
             inbound_order_uuid=inbound_order.uuid,
-            active_date="07/24/2998",
+            active_date="2998-07-24",
             active_time="12:00 AM",
             order_title="Inbound Order 111",
             quantity=5,
-            delivery_date="07/22/2998",
+            delivery_date="2998-07-22",
             status=s.InboundOrderStatus.draft.value,
             supplier_id=1,
             warehouse_id=1,
