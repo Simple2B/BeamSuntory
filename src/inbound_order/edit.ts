@@ -25,6 +25,23 @@ const createProductGroup = (allocatedProductContainer: HTMLDivElement) => {
   const groupQuantityItemNew = groupItemTemplate.cloneNode(true) as HTMLDivElement;
   groupQuantityItemNew.classList.remove('invisible');
 
+  groupQuantityItemNew.querySelector('#inbound-order-edit-add-group').addEventListener('change', (e) => {
+    // const uploadGroupInput = document.querySelector('#product-assign-group') as HTMLInputElement;
+    const uploadGroupInput = e.target as HTMLInputElement;
+    const option = uploadGroupInput.list.querySelector('option[value="' + uploadGroupInput.value + '"]') as HTMLElement;
+    // NOTE Use large number if no group selected. Impossible to reach that number in prod.
+    // Used to avoid wrong validation in backend wtform when pass 0 and get None
+    let groupId;
+    if (uploadGroupInput.value) {
+      groupId = option.getAttribute('inbound-order-edit-add-group-id');
+    } else {
+      groupId = '';
+    }
+
+    const hiddenInput = groupQuantityItemNew.querySelector('#inbound-order-edit-add-group-hidden') as HTMLInputElement;
+    hiddenInput.value = groupId.toString();
+  });
+
   const buttonDeleteQuantityGroup = groupQuantityItemNew.querySelector(
     '.quantity-group-delete-button'
   ) as HTMLButtonElement;
@@ -169,14 +186,16 @@ export const initEditOrderModal = () => {
 
         productAllocated.productQuantityGroups.forEach((quantityGroup) => {
           const quantityGroupContainer = createProductGroup(currentProductAllocatedContainer as HTMLDivElement);
-          const groupSelect = quantityGroupContainer.querySelector(
-            '.inbound-order-edit-add-group'
-          ) as HTMLSelectElement;
+          const groupSelect = quantityGroupContainer.querySelector('#inbound-order-edit-add-group') as HTMLInputElement;
+          const groupSelectHidden = quantityGroupContainer.querySelector(
+            '#inbound-order-edit-add-group-hidden'
+          ) as HTMLInputElement;
           const groupQuantityInput = quantityGroupContainer.querySelector(
             '.inbound-order-edit-add-quantity'
           ) as HTMLInputElement;
 
-          groupSelect.value = quantityGroup.group.id.toString();
+          groupSelect.value = quantityGroup.group.name.toString();
+          groupSelectHidden.value = quantityGroup.group.name.toString();
           groupQuantityInput.value = quantityGroup.quantity.toString();
         });
 
@@ -233,11 +252,14 @@ export const initEditOrderModal = () => {
         '.group-quantity-item'
       ) as NodeListOf<HTMLDivElement>;
       groupQuantityItems.forEach((quantityItem) => {
-        const groupIdSelect = quantityItem.querySelector('.inbound-order-edit-add-group') as HTMLSelectElement;
+        const groupIdSelect = quantityItem.querySelector('#inbound-order-edit-add-group') as HTMLSelectElement;
+        const groupIdSelectHidden = quantityItem.querySelector(
+          '#inbound-order-edit-add-group-hidden'
+        ) as HTMLSelectElement;
         const groupQuantityInput = quantityItem.querySelector('.inbound-order-edit-add-quantity') as HTMLInputElement;
 
-        if (groupIdSelect.value && groupQuantityInput.value) {
-          const groupId = parseInt(groupIdSelect.value);
+        if (groupIdSelectHidden.value && groupQuantityInput.value) {
+          const groupId = parseInt(groupIdSelectHidden.value);
           const groupQuantity = parseInt(groupQuantityInput.value);
 
           productGroupCreate.productAllocatedGroups.push({
