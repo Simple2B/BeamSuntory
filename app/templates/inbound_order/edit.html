@@ -18,13 +18,16 @@
       </div>
       <div class="col-span-6">
         <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label>
-        <select type="text" name="add_group" placeholder="Group" required
-          class="inbound-order-edit-add-group shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-          <option value="" disabled selected>Select group</option>
-          {% for group in groups %}
-          <option value="{{ group.id }}">{{ group.name }}</option>
-          {% endfor %}
-        </select>
+        <input list="inbound-order-edit-add-group-list" id="inbound-order-edit-add-group" placeholder="Select group" class="inbound-order-edit-add-group shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+          <datalist id="inbound-order-edit-add-group-list">
+            <!-- NOTE Use large number if no group selected. Impossible to reach that number in prod.
+            Used to avoid wrong validation in backend wtform when pass 0 and get None -->
+            <option value="" inbound-order-edit-add-group-id="" selected disabled>Group</option>
+            {% for group in groups %}
+            <option value="{{ group.name }}" inbound-order-edit-add-group-id="{{ group.id }}">{{ group.name }}</option>
+            {% endfor %}
+          </datalist>
+        <input type="hidden" name="add_group" id="inbound-order-edit-add-group-hidden">
       </div>
       <div class="col-span-6">
         <label for="status" id="inbound-order-edit-add-quantity-label"

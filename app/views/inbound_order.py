@@ -86,12 +86,14 @@ def get_all():
         inbound_orders_json=inbound_orders_json,
         page=pagination,
         search_query=q,
-        suppliers=db.session.scalars(m.Supplier.select().order_by(m.Supplier.id)).all(),
-        warehouses=db.session.scalars(
-            m.Warehouse.select().order_by(m.Warehouse.id)
+        suppliers=db.session.scalars(
+            m.Supplier.select().order_by(m.Supplier.name)
         ).all(),
-        products=db.session.scalars(m.Product.select().order_by(m.Product.id)).all(),
-        groups=db.session.scalars(m.Group.select().order_by(m.Group.id)).all(),
+        warehouses=db.session.scalars(
+            m.Warehouse.select().order_by(m.Warehouse.name)
+        ).all(),
+        products=db.session.scalars(m.Product.select().order_by(m.Product.name)).all(),
+        groups=db.session.scalars(m.Group.select().order_by(m.Group.name)).all(),
         form_create=form_create,
         form_edit=form_edit,
         form_sort=form_sort,

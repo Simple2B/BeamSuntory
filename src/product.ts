@@ -1940,7 +1940,7 @@ function clearProductGroupContainer() {
 
 document.querySelector('#product-assign-master-group').addEventListener('change', () => {
   const productAssignMasterGroupSelect: HTMLSelectElement = document.querySelector('#product-assign-master-group');
-  const productAssignGroupSelect: HTMLSelectElement = document.querySelector('#product-assign-group');
+  const productAssignGroupSelect: HTMLDataListElement = document.querySelector('#assign-group-list');
   const groups: IMasterGroup = JSON.parse(
     productAssignMasterGroupSelect[productAssignMasterGroupSelect.selectedIndex].getAttribute('data-target')
   );
@@ -1955,13 +1955,30 @@ document.querySelector('#product-assign-master-group').addEventListener('change'
       if (optionCategory) {
         optionCategory.forEach((group: { group_name: string; group_id: number }) => {
           const storeSelectOption = document.createElement('option');
-          storeSelectOption.setAttribute('value', group.group_id.toString());
+          storeSelectOption.setAttribute('value', group.group_name);
+          storeSelectOption.setAttribute('assign-data-group-id', group.group_id.toString());
           storeSelectOption.textContent = group.group_name;
           productAssignGroupSelect.appendChild(storeSelectOption);
         });
       }
     }
   });
+});
+
+document.querySelector('#product-assign-group-submit-btn').addEventListener('click', () => {
+  const uploadGroupInput = document.querySelector('#product-assign-group') as HTMLInputElement;
+  const option = uploadGroupInput.list.querySelector('option[value="' + uploadGroupInput.value + '"]') as HTMLElement;
+  // NOTE Use large number if no group selected. Impossible to reach that number in prod.
+  // Used to avoid wrong validation in backend wtform when pass 0 and get None
+  let groupId;
+  if (uploadGroupInput.value) {
+    groupId = option.getAttribute('assign-data-group-id');
+  } else {
+    groupId = '';
+  }
+
+  const hiddenInput = document.getElementById('product-assign-group-hidden') as HTMLInputElement;
+  hiddenInput.value = groupId.toString();
 });
 
 // ---image compressor----

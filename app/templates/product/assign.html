@@ -33,14 +33,16 @@
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label>
-            <select type="text" name="group" id="product-assign-group"
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Brand" required>
-              <option value="" selected disabled>Group</option>
-              {% for g in all_product_groups %}
-              <option value="{{ all_product_groups[g].id }}" class="product-assign-to-group">{{ g }}</option>
-              {% endfor %}
-            </select>
+            <input list="assign-group-list" id="product-assign-group" placeholder="Select group" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                <datalist id="assign-group-list">
+                  <!-- NOTE Use large number if no group selected. Impossible to reach that number in prod.
+                  Used to avoid wrong validation in backend wtform when pass 0 and get None -->
+                  <option value="" data-group-id="" selected disabled>Group</option>
+                  {% for g in all_product_groups %}
+                  <option value="{{ g }}" assign-data-group-id="{{ all_product_groups[g].id }}" class="product-assign-to-group">{{ g }}</option>
+                  {% endfor %}
+                </datalist>
+            <input type="hidden" name="group" id="product-assign-group-hidden">
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="product-assign-available-quantity"
@@ -66,7 +68,7 @@
       </div>
       <!-- Modal footer -->
       <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
-        <button name="submit" type="submit"
+        <button name="submit" type="submit" id="product-assign-group-submit-btn"
           class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Assign</button>
       </div>
     </form>
