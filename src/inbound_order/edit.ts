@@ -26,7 +26,6 @@ const createProductGroup = (allocatedProductContainer: HTMLDivElement) => {
   groupQuantityItemNew.classList.remove('invisible');
 
   groupQuantityItemNew.querySelector('#inbound-order-edit-add-group').addEventListener('change', (e) => {
-    // const uploadGroupInput = document.querySelector('#product-assign-group') as HTMLInputElement;
     const uploadGroupInput = e.target as HTMLInputElement;
     const option = uploadGroupInput.list.querySelector('option[value="' + uploadGroupInput.value + '"]') as HTMLElement;
     // NOTE Use large number if no group selected. Impossible to reach that number in prod.
