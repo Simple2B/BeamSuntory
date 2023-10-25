@@ -44,6 +44,7 @@ interface IProductAdditionalInfo {
   currentMasterProductGroups: IMasterGroupGroup[];
   currentUserGroups: IMasterGroupGroupUser[];
   masterGroupsGroups: IMasterGroupGroup[];
+  currentUserRole: string;
 }
 
 interface IMasterGroupGroup {
@@ -109,6 +110,7 @@ interface IEventProductPromise {
 }
 
 // global variable for mandatory event instance
+const adminRole = 'admin';
 const eventCheckbox: HTMLInputElement = document.querySelector('#product-show-events-toggle-btn');
 const eventStockOwnByMeCheckbox: HTMLInputElement = document.querySelector('#product-show-events-stocks-own-by-me-btn');
 
@@ -846,6 +848,9 @@ viewProductButtonElements.forEach((e) =>
         (userGroup: IMasterGroupGroupUser) => userGroup.masterGroupName === mstrGroupName
       );
 
+      console.log('currentUserGroup', currentUserGroup);
+      console.log('adminRole', productInfo.currentUserRole);
+
       if (currentUserGroup) {
         const isExistGroup = currentUserGroup.groups.find((group: IGroupAdditionalInfo) => {
           return group.groupName === groupName;
@@ -854,6 +859,10 @@ viewProductButtonElements.forEach((e) =>
         if (isExistGroup) {
           isEqual = true;
         }
+      }
+      // NOTE: If user is admin, allow ship/assign for every group
+      if (productInfo.currentUserRole === adminRole) {
+        isEqual = true;
       }
       if (mstrGroupName !== eventMasterGroup || isEvent) {
         addShipAssignShareButton(isEqual, mstrGroupName, groupName, product);

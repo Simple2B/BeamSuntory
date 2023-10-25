@@ -99,6 +99,8 @@ class ProductAdditionalInfo(BaseModel):
     current_user_groups: list[UserGroups] = Field(
         serialization_alias="currentUserGroups"
     )
+
+    current_user_role: str = Field(serialization_alias="currentUserRole")
     all_warehouses: list[WarehouseNameId] = Field(serialization_alias="allWarehouses")
     master_groups_groups: list[MasterGroupsGroups] = Field(
         serialization_alias="masterGroupsGroups"

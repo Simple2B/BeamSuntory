@@ -1387,4 +1387,5 @@ def get_additional_info(product_id):
         all_warehouses=all_warehouses,
         master_groups_groups=master_groups_groups,
         current_master_product_groups=current_master_product_groups,
+        current_user_role=current_user.role_obj.role_name,
     ).model_dump_json(by_alias=True)
