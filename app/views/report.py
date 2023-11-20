@@ -107,6 +107,11 @@ def index():
         )
     )
 
+    product_master_groups = list(product_master_groups)
+
+    for master_group_product in product_master_groups:
+        master_group_product.groups_for_product.sort(key=lambda x: x.name)
+
     return render_template(
         "report/index.html",
         report_types=s.ReportRequestShareActionType,
