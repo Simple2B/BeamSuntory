@@ -1243,6 +1243,10 @@ input:checked + .toggle-bg {
   z-index: 1080;
 }
 
+.z-\[500\] {
+  z-index: 500;
+}
+
 .z-\[60\] {
   z-index: 60;
 }
@@ -3892,6 +3896,10 @@ button[disabled]{
 
 .product-table td, .product-table th, .product-table td * {
   text-align: center;
+}
+
+.toast-position{
+  z-index: 500 !important;
 }
 
 .selection\:bg-transparent *::-moz-selection {

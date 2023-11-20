@@ -154,3 +154,7 @@ button[disabled]{
 .product-table td, .product-table th, .product-table td * { 
     text-align: center;
 }
+
+.toast-position{
+    z-index: 500 !important;
+}
