@@ -1243,10 +1243,6 @@ input:checked + .toggle-bg {
   z-index: 1080;
 }
 
-.z-\[500\] {
-  z-index: 500;
-}
-
 .z-\[60\] {
   z-index: 60;
 }
@@ -3467,6 +3463,10 @@ input:checked + .toggle-bg {
   color: rgb(227 160 8 / var(--tw-text-opacity));
 }
 
+.text-transparent {
+  color: transparent;
+}
+
 .underline {
   text-decoration-line: underline;
 }
@@ -3916,6 +3916,14 @@ button[disabled]{
 
 .selection\:bg-transparent::selection {
   background-color: transparent;
+}
+
+.placeholder\:opacity-100::-moz-placeholder {
+  opacity: 1;
+}
+
+.placeholder\:opacity-100::placeholder {
+  opacity: 1;
 }
 
 .before\:pointer-events-none::before {
@@ -5336,6 +5344,15 @@ button[disabled]{
 :is(.dark .dark\:text-yellow-400) {
   --tw-text-opacity: 1;
   color: rgb(227 160 8 / var(--tw-text-opacity));
+}
+
+:is(.dark .dark\:text-red-500) {
+  --tw-text-opacity: 1;
+  color: rgb(240 82 82 / var(--tw-text-opacity));
+}
+
+:is(.dark .dark\:text-transparent) {
+  color: transparent;
 }
 
 :is(.dark .dark\:placeholder-gray-400)::-moz-placeholder {
