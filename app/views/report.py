@@ -83,11 +83,17 @@ def index():
         .order_by(m.MasterGroupProduct.id)
     ).all()
 
+    for brand in brands:
+        brand.groups_for_product.sort(key=lambda x: x.name)
+
     categories = db.session.scalars(
         sa.select(m.MasterGroupProduct)
         .where(m.MasterGroupProduct.name == "Categories")
         .order_by(m.MasterGroupProduct.id)
     ).all()
+
+    for category in categories:
+        category.groups_for_product.sort(key=lambda x: x.name)
 
     premises = db.session.scalars(
         sa.select(m.MasterGroupProduct)
@@ -97,8 +103,10 @@ def index():
 
     users = db.session.scalars(sa.select(m.User))
     divisions = db.session.scalars(m.Division.select())
-    master_groups = db.session.scalars(m.MasterGroup.select())
-    groups = db.session.scalars(m.Group.select())
+    master_groups = db.session.scalars(
+        m.MasterGroup.select().order_by(m.MasterGroup.name)
+    )
+    groups = db.session.scalars(m.Group.select().order_by(m.Group.name))
     product_master_groups = db.session.scalars(
         m.MasterGroupProduct.select().where(
             m.MasterGroupProduct.name.in_(
