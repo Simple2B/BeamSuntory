@@ -148,8 +148,20 @@ filterButton.addEventListener('click', () => {
   });
 });
 
+const todayDateTime = new Date().toISOString();
+const activeTimeInput = document.querySelector('#inbound-order-add-active_time') as HTMLInputElement;
+
+const currentTime = new Date().toLocaleTimeString();
+const hours = parseInt(currentTime.split(':')[0]);
+const minutes = parseInt(currentTime.split(':')[1]);
+const amOrPm = hours >= 12 ? 'PM' : 'AM';
+const formattedHours = hours % 12 === 0 ? 12 : hours % 12;
+const formattedMinutes = minutes.toString().padStart(2, '0');
+activeTimeInput.value = `${formattedHours}:${formattedMinutes} ${amOrPm}`;
+
 const datePickers = document.querySelectorAll('.inbound-order-datepicker');
-datePickers.forEach((datePicker) => {
+datePickers.forEach((datePicker: HTMLInputElement) => {
+  datePicker.value = todayDateTime.split('T')[0];
   const picker = new easepick.create({
     element: datePicker,
     css: [

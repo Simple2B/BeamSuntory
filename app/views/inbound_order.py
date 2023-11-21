@@ -225,7 +225,7 @@ def save():
                 "Not found supplier with id : [%s]",
                 form.supplier_id.data,
             )
-            flash("Cannot save inbound order data", "danger")
+            flash("Cannot save inbound order data, no supplier found", "danger")
             return redirect(url_for("inbound_order.get_all"))
 
         # check warehouse
@@ -236,7 +236,7 @@ def save():
                 "Not found warehouse with id : [%s]",
                 form.warehouse_id.data,
             )
-            flash("Cannot save inbound order data", "danger")
+            flash("Cannot save inbound order data, no warehouse found", "danger")
             return redirect(url_for("inbound_order.get_all"))
 
         history_pure = []
@@ -284,7 +284,7 @@ def save():
                 "Wrong quantity groups json format: [%s]",
                 form.product_groups.data,
             )
-            flash("Cannot save inbound order data", "danger")
+            flash("Cannot save inbound order data, wrong quantity groups ", "danger")
             return redirect(
                 url_for(
                     "inbound_order.get_all",
@@ -314,7 +314,10 @@ def save():
                     inbound_order.id,
                     product_quantity_group.product_allocated_id,
                 )
-                flash("Cannot save inbound order data", "danger")
+                flash(
+                    "Cannot save inbound order data, Inbound order's allocated product not found",
+                    "danger",
+                )
                 return redirect(url_for("inbound_order.get_all"))
 
             db.session.execute(
@@ -338,7 +341,7 @@ def save():
                         "Group not found: [%s]",
                         quantity_group.group_id,
                     )
-                    flash("Cannot save inbound order data", "danger")
+                    flash("Cannot save inbound order data, group not found", "danger")
                     return redirect(
                         url_for(
                             "inbound_order.get_all",
@@ -411,9 +414,24 @@ def save():
         return redirect(url_for("inbound_order.get_all"))
 
     else:
-        log(log.ERROR, "inbound_order save errors: [%s]", form.errors)
-        flash(f"{form.errors}", "danger")
-        return redirect(url_for("inbound_order.get_all"))
+        if form.inbound_order_uuid.data:
+            inbound_order: m.InboundOrder = db.session.scalar(
+                m.InboundOrder.select().where(
+                    m.InboundOrder.uuid == form.inbound_order_uuid.data
+                )
+            )
+            log(log.ERROR, "inbound_order save errors: [%s]", form.errors)
+            flash(f"{form.errors}", "danger")
+            return redirect(
+                url_for(
+                    "inbound_order.get_all",
+                    current_order_uuid=inbound_order.uuid,
+                )
+            )
+        else:
+            log(log.ERROR, "inbound_order save errors: [%s]", form.errors)
+            flash(f"{form.errors}", "danger")
+            return redirect(url_for("inbound_order.get_all"))
 
 
 @inbound_order_blueprint.route("/delete/<int:id>", methods=["DELETE"])
