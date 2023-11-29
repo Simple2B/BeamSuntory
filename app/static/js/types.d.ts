@@ -128,9 +128,9 @@ export interface IInboundOrderBase {
     daNotes: string;
 }
 interface IReportInventory {
-    qtyBefore: number;
-    qtyAfter: number;
     product: IProduct;
+    group: IGroup;
+    warehouse: IWarehouse;
     warehouseProductId: number;
     createdAt: string;
 }
@@ -146,7 +146,7 @@ export interface IReportInventoryList {
 }
 export interface IInventoriesReportResponse {
     pagination: IPagination;
-    reports: IReportInventoryList[];
+    reports: IReportInventory[];
 }
 export interface IReportAdjustResponse {
     pagination: IPagination;

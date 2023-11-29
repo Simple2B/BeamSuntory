@@ -3453,6 +3453,10 @@ input:checked + .toggle-bg {
   color: rgb(3 102 114 / var(--tw-text-opacity));
 }
 
+.text-transparent {
+  color: transparent;
+}
+
 .text-white {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));
@@ -3461,10 +3465,6 @@ input:checked + .toggle-bg {
 .text-yellow-400 {
   --tw-text-opacity: 1;
   color: rgb(227 160 8 / var(--tw-text-opacity));
-}
-
-.text-transparent {
-  color: transparent;
 }
 
 .underline {
@@ -3916,14 +3916,6 @@ button[disabled]{
 
 .selection\:bg-transparent::selection {
   background-color: transparent;
-}
-
-.placeholder\:opacity-100::-moz-placeholder {
-  opacity: 1;
-}
-
-.placeholder\:opacity-100::placeholder {
-  opacity: 1;
 }
 
 .before\:pointer-events-none::before {
@@ -5336,6 +5328,10 @@ button[disabled]{
   color: rgb(251 213 213 / var(--tw-text-opacity));
 }
 
+:is(.dark .dark\:text-transparent) {
+  color: transparent;
+}
+
 :is(.dark .dark\:text-white) {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));
@@ -5344,15 +5340,6 @@ button[disabled]{
 :is(.dark .dark\:text-yellow-400) {
   --tw-text-opacity: 1;
   color: rgb(227 160 8 / var(--tw-text-opacity));
-}
-
-:is(.dark .dark\:text-red-500) {
-  --tw-text-opacity: 1;
-  color: rgb(240 82 82 / var(--tw-text-opacity));
-}
-
-:is(.dark .dark\:text-transparent) {
-  color: transparent;
 }
 
 :is(.dark .dark\:placeholder-gray-400)::-moz-placeholder {

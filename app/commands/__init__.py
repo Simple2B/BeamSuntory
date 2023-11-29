@@ -273,3 +273,8 @@ def init(app: Flask):
     def clear_report_events():
         db.session.execute(m.ReportEvent.delete())
         db.session.commit()
+
+    @app.cli.command()
+    def clear_all_events():
+        db.session.execute(m.Event.delete())
+        db.session.commit()

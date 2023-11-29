@@ -30,8 +30,8 @@ class Cart(db.Model, ModelMixin):
     warehouse_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("warehouses.id"), nullable=True
     )
-    ship_request_id: orm.Mapped[int] = orm.mapped_column(
-        sa.ForeignKey("ship_requests.id"), nullable=True
+    ship_request_id: orm.Mapped[int | None] = orm.mapped_column(
+        sa.ForeignKey("ship_requests.id")
     )
     group_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("groups.id"))
 
