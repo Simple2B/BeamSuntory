@@ -14,7 +14,7 @@ class ReportInventoryType(Enum):
 
 class ReportInventory(BaseModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
-    created_at: datetime = Field(alias="createdAt")
+    created_at: datetime | None = Field(None, alias="createdAt")
     product: Product
     warehouse_id: int = Field(alias="warehouseProductId")
     warehouse: Warehouse | None = None

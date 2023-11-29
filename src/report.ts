@@ -161,35 +161,25 @@ const generateCSVRequestShare = async (queryParams: URLSearchParams) => {
 
 const generateCSVInventories = async (queryParams: URLSearchParams) => {
   // CSV Headers
-  const csvData = ['created_at,store_name,type,username,qty_before,qty_after,sku,product_name'];
+  const csvData = ['product_name,sku,group,quantity,created_at'];
   await fetchReportAPI(queryParams, (data: IInventoriesReportResponse) => {
     data.reports.forEach((report) => {
-      let reportTarget: string;
-      if (report.store) {
-        reportTarget = report.store.storeName;
-      } else if (report.warehouse) {
-        reportTarget = report.warehouse.name;
-      } else {
-        reportTarget = 'Internal action';
-      }
 
-      report.reportInventories.forEach((inventory) => {
-          if (searchSKUInput.value && !inventory.product.SKU.includes(searchSKUInput.value) ){
-            return;
+      for (let i = 0; i < report.product.warehouseProducts.length; i++) {
+        const warehouseProduct = report.product.warehouseProducts[i];
+
+        if (warehouseProduct.group.name === report.group.name) {
+          csvData.push(
+            [
+              report.product.name,
+              report.product.SKU,
+              report.group.name,
+              warehouseProduct.productQuantity,
+              formatDate(report.createdAt),
+            ].join(',')
+          );
         }
-        csvData.push(
-          [
-            formatDate(report.createdAt),
-            reportTarget,
-            report.type,
-            report.user.username,
-            inventory.qtyBefore.toString(),
-            inventory.qtyAfter.toString(),
-            inventory.product.SKU,
-            inventory.product.name,
-          ].join(',')
-        );
-      });
+      }
     });
   });
   return csvData;
