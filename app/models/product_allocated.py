@@ -27,8 +27,8 @@ class ProductAllocated(db.Model, ModelMixin):
     inbound_order_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("inbound_orders.id", ondelete="CASCADE")
     )
-    shelf_life_start: orm.Mapped[date] = orm.mapped_column(sa.Date)
-    shelf_life_end: orm.Mapped[date] = orm.mapped_column(sa.Date)
+    shelf_life_start: orm.Mapped[date] = orm.mapped_column()
+    shelf_life_end: orm.Mapped[date] = orm.mapped_column()
 
     product_quantity_groups: orm.Mapped[list[ProductQuantityGroup]] = orm.relationship(
         back_populates="product_allocated",
