@@ -226,15 +226,6 @@ def save():
             )
             if warehouse_product and not is_group_in_master_group:
                 # TODO what if warehouse product not found?
-                products_to_deplete = db.session.scalars(
-                    m.ProductAllocated.select()
-                    .where(
-                        m.ProductAllocated.product_id == cart.product_id,
-                        m.ProductAllocated.shelf_life_end >= cart.quantity,
-                    )
-                    .order_by(m.ProductAllocated.shelf_life_end.asc())
-                )
-
                 products_to_deplete: list[m.ProductAllocated] = db.session.scalars(
                     m.ProductAllocated.select()
                     .where(
