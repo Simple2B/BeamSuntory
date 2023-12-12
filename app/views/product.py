@@ -1296,7 +1296,7 @@ def full_image(id: int):
 
     if not product.image_obj:
         abort(404, HTTPStatus.NOT_FOUND)
-    
+
     with open(
         Path("app")
         / "static"
