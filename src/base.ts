@@ -128,19 +128,24 @@ productImageAnchors.forEach((e) => {
 export async function getFullImage(id: string) {
   spinnerModal.show();
   try {
-    const response = await fetch(`/product/full_image/${id}`);
+    const image = document.querySelector('#product-image-full-img');
 
+    image.classList.add('hidden');
+
+    const response = await fetch(`/product/full_image/${id}`);
     const data = await response.json();
 
     spinnerModal.hide();
     viewModal.show();
 
-    const image = document.querySelector('#product-image-full-img');
+    
     const productName = document.querySelector('#product-image-name');
 
     image.setAttribute('src', `data:image/${data.imageType};base64, ${data.image}`);
+    image.classList.remove('hidden');
     productName.innerHTML = data.name;
     document.querySelector('#product-image-full-img').classList.remove('hidden');
+    document.querySelector('#product-image-not-found-img').classList.add('hidden');
   } catch (error) {
     spinnerModal.hide();
     viewModal.show();

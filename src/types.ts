@@ -150,8 +150,8 @@ export interface IInboundOrderBase {
 }
 
 interface IReportInventory {
-  // qtyBefore: number;
-  // qtyAfter: number;
+  qtyBefore: number;
+  qtyAfter: number;
   product: IProduct;
   group: IGroup;
   warehouse: IWarehouse;

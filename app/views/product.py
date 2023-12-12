@@ -15,6 +15,7 @@ from flask import (
     redirect,
     url_for,
     current_app as app,
+    abort,
 )
 from flask_login import login_required, current_user
 from flask_mail import Message
@@ -1292,6 +1293,9 @@ def full_image(id: int):
     product: m.Product = db.session.execute(
         m.Product.select().where(m.Product.id == id)
     ).scalar()
+
+    if not product.image_obj:
+        abort(404, HTTPStatus.NOT_FOUND)
 
     with open(
         Path("app")
