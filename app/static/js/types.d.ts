@@ -128,6 +128,8 @@ export interface IInboundOrderBase {
     daNotes: string;
 }
 interface IReportInventory {
+    qtyBefore: number;
+    qtyAfter: number;
     product: IProduct;
     group: IGroup;
     warehouse: IWarehouse;
