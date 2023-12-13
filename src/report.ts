@@ -104,14 +104,11 @@ const fetchReportAPI = async (queryParams: URLSearchParams, callback: (data: Obj
 };
 
 const generateCSVEvents = async (queryParams: URLSearchParams) => {
-  const csvData = ['action_type,user,created_at,store,event_date_from,event_date_to,sku,product_name',];
+  const csvData = ['action_type,user,created_at,store,event_date_from,event_date_to,sku,product_name'];
   await fetchReportAPI(queryParams, (data: IEventsReportResponse) => {
     data.reports.forEach((report) => {
-      
-
       report.shipRequest.carts.forEach((cart) => {
-        console.log(searchSKUInput.value, cart.product.SKU)
-        if (searchSKUInput.value && !cart.product.SKU.includes(searchSKUInput.value) ){
+        if (searchSKUInput.value && !cart.product.SKU.includes(searchSKUInput.value)) {
           return;
         }
 
@@ -134,11 +131,13 @@ const generateCSVEvents = async (queryParams: URLSearchParams) => {
 };
 
 const generateCSVRequestShare = async (queryParams: URLSearchParams) => {
-  const csvData = ['action_type,user,created_at,current_share_request_status,group_from,group_to,desired_quantity,sku,product_name'];
+  const csvData = [
+    'action_type,user,created_at,current_share_request_status,group_from,group_to,desired_quantity,sku,product_name',
+  ];
   await fetchReportAPI(queryParams, (data: IReportRequestShareResponse) => {
     data.reports.forEach((report) => {
-      if (searchSKUInput.value && !report.requestShare.product.SKU.includes(searchSKUInput.value) ){
-          return;
+      if (searchSKUInput.value && !report.requestShare.product.SKU.includes(searchSKUInput.value)) {
+        return;
       }
 
       csvData.push(
@@ -164,7 +163,6 @@ const generateCSVInventories = async (queryParams: URLSearchParams) => {
   const csvData = ['product_name,sku,group,quantity,created_at'];
   await fetchReportAPI(queryParams, (data: IInventoriesReportResponse) => {
     data.reports.forEach((report) => {
-
       for (let i = 0; i < report.product.warehouseProducts.length; i++) {
         const warehouseProduct = report.product.warehouseProducts[i];
 
@@ -188,12 +186,12 @@ const generateCSVInventories = async (queryParams: URLSearchParams) => {
 const generateCSVAdjustments = async (queryParams: URLSearchParams) => {
   // CSV Headers
   const csvData = [
-    'created_at,product_name,sku,username,master_group,group,warehouse,quantity_before,quantity_after,note',
+    'created_at,product_name,sku,username,master_group,group,warehouse,quantity_before,quantity_after,quantity_delta,note',
   ];
   await fetchReportAPI(queryParams, (data: IReportAdjustResponse) => {
     data.reports.forEach((adjust) => {
       adjust.adjustGroupQty.forEach((reportAdjust) => {
-        if (searchSKUInput.value && !adjust.product.SKU.includes(searchSKUInput.value) ){
+        if (searchSKUInput.value && !adjust.product.SKU.includes(searchSKUInput.value)) {
           return;
         }
         csvData.push(
@@ -207,6 +205,7 @@ const generateCSVAdjustments = async (queryParams: URLSearchParams) => {
             reportAdjust.warehouse.name,
             reportAdjust.quantityBefore,
             reportAdjust.quantityAfter,
+            reportAdjust.delta,
             adjust.note,
           ].join(',')
         );
@@ -223,7 +222,7 @@ const generateCSVInboundOrder = async (queryParams: URLSearchParams) => {
     data.reports.forEach((report) => {
       report.inboundOrder.productsAllocated.forEach((productsAllocated) => {
         productsAllocated.productQuantityGroups.forEach((productQuantityGroup) => {
-          if (searchSKUInput.value && !productsAllocated.product.SKU.includes(searchSKUInput.value) ){
+          if (searchSKUInput.value && !productsAllocated.product.SKU.includes(searchSKUInput.value)) {
             return;
           }
           if (searchingGroup && !productQuantityGroup.group.name.includes(searchingGroup)) {
@@ -268,8 +267,8 @@ const generateCSVShipping = async (queryParams: URLSearchParams) => {
   await fetchReportAPI(queryParams, (data: IReportShippingResponse) => {
     data.reports.forEach((report) => {
       report.shipRequest.carts.forEach((cart) => {
-        if (searchSKUInput.value && !cart.product.SKU.includes(searchSKUInput.value) ){
-            return;
+        if (searchSKUInput.value && !cart.product.SKU.includes(searchSKUInput.value)) {
+          return;
         }
         csvData.push(
           [
@@ -297,7 +296,7 @@ const generateCSVAssign = async (queryParams: URLSearchParams) => {
 
   await fetchReportAPI(queryParams, (data: IReportAssignResponse) => {
     data.reports.forEach((report) => {
-      if (searchSKUInput.value && !report.product.SKU.includes(searchSKUInput.value) ){
+      if (searchSKUInput.value && !report.product.SKU.includes(searchSKUInput.value)) {
         return;
       }
       csvData.push(
@@ -330,9 +329,7 @@ const generateCSVShelfLife = async (queryParams: URLSearchParams) => {
         received = report.quantityReceived.toString();
       }
 
-      
-
-      if (searchSKUInput.value.length && !report.product.SKU.includes(searchSKUInput.value) ){
+      if (searchSKUInput.value.length && !report.product.SKU.includes(searchSKUInput.value)) {
         return;
       }
 

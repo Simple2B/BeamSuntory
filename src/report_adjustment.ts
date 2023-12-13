@@ -3,7 +3,6 @@ import { defaultBrandImage, htmxLoader } from './base';
 import { formatDate } from './utils';
 import { IAdjust } from './types';
 
-
 // initialize modal
 const viewReportEventsModal = document.getElementById('view-report-adjustment-modal') as HTMLDivElement;
 const viewModalOptions: ModalOptions = {
@@ -12,7 +11,9 @@ const viewModalOptions: ModalOptions = {
   backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
   closable: true,
   onHide: () => {
-    const productItems = document.querySelectorAll('.report-adjustment-product-item-view') as NodeListOf<HTMLTableColElement>;
+    const productItems = document.querySelectorAll(
+      '.report-adjustment-product-item-view'
+    ) as NodeListOf<HTMLTableColElement>;
     productItems.forEach((productItem) => productItem.remove());
   },
 };
@@ -25,7 +26,9 @@ closingViewModalButton.addEventListener('click', () => {
 
 // DOM
 const reportViewProductTbody = document.querySelector('#report-adjustment-table-products') as HTMLTableElement;
-const productItemTemplate = document.querySelector('#report-adjustment-view-product-item-template') as HTMLTableRowElement;
+const productItemTemplate = document.querySelector(
+  '#report-adjustment-view-product-item-template'
+) as HTMLTableRowElement;
 const reportViewUser = document.getElementById('report-adjustment-user') as HTMLDivElement;
 const reportProductName = document.getElementById('report-adjustment-product-name') as HTMLDivElement;
 const reportProductSKU = document.getElementById('report-adjustment-product-sku') as HTMLDivElement;
@@ -50,6 +53,8 @@ htmxLoader.onLoad('adjustment-table', (target) => {
         : (reportProductImage.src = defaultBrandImage);
 
       reportAdjust.adjustGroupQty.forEach((adjust, i) => {
+        console.log('adjust', adjust);
+
         // Render event
         const newAdjustItem = productItemTemplate.cloneNode(true) as HTMLElement;
         newAdjustItem.removeAttribute('id');
@@ -80,5 +85,4 @@ htmxLoader.onLoad('adjustment-table', (target) => {
       });
     });
   });
-
 });
