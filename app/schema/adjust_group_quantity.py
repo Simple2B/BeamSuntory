@@ -18,5 +18,5 @@ class AdjustGroupQty(BaseModel):
         quantity_after = values["quantity_after"]
         quantity_before = values["quantity_before"]
 
-        if quantity_after and quantity_before:
+        if quantity_after is not None and quantity_before is not None:
             return quantity_after - quantity_before
