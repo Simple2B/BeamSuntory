@@ -168,6 +168,7 @@ interface IAdjustGroupQty {
     warehouse: IWarehouse;
     quantityAfter: number;
     quantityBefore: number;
+    delta: number;
 }
 export interface IReportInboundOrder {
     createdAt: string;
