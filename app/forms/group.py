@@ -3,6 +3,7 @@ from wtforms import (
     StringField,
     SubmitField,
     ValidationError,
+    IntegerField,
 )
 from wtforms.validators import DataRequired
 
@@ -70,4 +71,30 @@ class NewMasterGroupForm(FlaskForm):
             raise ValidationError("This master group name is taken.")
 
     def validate_name(self, field):
+        replace_underscore(self, field)
+
+
+class SubGroupForm(FlaskForm):
+    next_url = StringField("next_url")
+    group_id = StringField("Group", [DataRequired()])
+    sub_group_name = StringField("Name", [DataRequired()])
+    parent_group_id = StringField("Parent Group", [DataRequired()])
+
+    def validate_sub_group_name(self, field):
+        query = m.Group.select().where(m.Group.name == field.data)
+        if db.session.scalar(query) is not None:
+            raise ValidationError("This sub group name is taken.")
+
+        replace_underscore(self, field)
+
+
+class NewSubGroupForm(FlaskForm):
+    sub_group_name = StringField("Name", [DataRequired()])
+    group_id = IntegerField("Group", [DataRequired()])
+
+    def validate_sub_group_name(self, field):
+        query = m.Group.select().where(m.Group.name == field.data)
+        if db.session.scalar(query) is not None:
+            raise ValidationError("This sub group name is taken.")
+
         replace_underscore(self, field)
