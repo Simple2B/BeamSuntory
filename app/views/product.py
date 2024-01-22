@@ -303,7 +303,9 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         "all_product_groups": {
             i.name: i
             for i in db.session.execute(
-                m.Group.select().order_by(m.Group.name)
+                m.Group.select()
+                .where(m.Group.parent_group_id.is_(None))
+                .order_by(m.Group.name)
             ).scalars()
         },
         "current_user_groups_names": [i.parent.name for i in current_user_groups_rows],
@@ -620,9 +622,9 @@ def delete(id: int):
 )
 def assign():
     form: f.AssignProductForm = f.AssignProductForm()
+    query_params = get_query_params_from_headers()
 
     if form.validate_on_submit():
-        query_params = get_query_params_from_headers()
         query = m.Product.select().where(m.Product.name == form.name.data)
         p: m.Product | None = db.session.scalar(query)
         if not p:

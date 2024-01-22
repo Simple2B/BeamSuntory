@@ -7,6 +7,7 @@ from flask import (
     url_for,
 )
 from flask_login import login_required
+from pydantic import ValidationError
 import sqlalchemy as sa
 from sqlalchemy.orm import aliased
 from app.controllers import create_pagination, role_required
@@ -88,7 +89,7 @@ def create():
             return redirect(url_for("sub_stock_target_group.get_all"))
 
         group = m.Group(
-            name=form.sub_group_name.data,
+            name=form.name.data,
             master_group_id=parent_group.master_group_id,
             parent_group_id=parent_group.id,
         )
@@ -132,7 +133,7 @@ def save():
             flash("Cannot save group data", "danger")
             return redirect(url_for("sub_stock_target_group.get_all"))
 
-        group.name = form.sub_group_name.data
+        group.name = form.name.data
         group.master_group_id = parent_group.master_group_id
         group.parent_group_id = parent_group.id
         group.save()
@@ -161,3 +162,28 @@ def delete(id: int):
     log(log.INFO, "Group deleted. Group: [%s]", group)
     flash("Group deleted!", "success")
     return "ok", 200
+
+
+@sub_stock_target_group_blueprint.route("/get_sub_group", methods=["GET"])
+@login_required
+def get_sub_group():
+    try:
+        params = s.SubGroupParams.model_validate(dict(request.args))
+    except ValidationError as e:
+        log(log.ERROR, "Validation error: [%s]", e)
+        return "Validation error", 400
+
+    group = db.session.get(m.Group, params.group_id)
+
+    if not group:
+        log(log.INFO, "There is no group with id: [%s]", params.group_id)
+        return "no group", 404
+
+    sub_groups = db.session.scalars(
+        sa.select(m.Group).where(m.Group.parent_group_id == params.group_id)
+    ).all()
+
+    return render_template(
+        "sub_stock_target_group/sub_group_select.html",
+        sub_groups=sub_groups,
+    )

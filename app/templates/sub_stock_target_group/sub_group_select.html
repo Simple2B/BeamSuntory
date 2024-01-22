@@ -1,0 +1,16 @@
+<input list="assign-sub-group-list" id="product-assign-sub-group" {% if not sub_groups %}
+  placeholder="Group does not have sub group" disabled {% else %} placeholder="Select sub group" {% endif %}
+  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+<datalist id="assign-sub-group-list">
+  <!-- NOTE Use large number if no group selected. Impossible to reach that number in prod.
+                    Used to avoid wrong validation in backend wtform when pass 0 and get None -->
+  <option value="" data-group-id="" selected disabled>Group</option>
+  {% for sub_group in sub_groups %}
+  <option value="{{ sub_group.name }}" assign-data-sub-group-id="{{ sub_group.id }}" class="product-assign-to-group">{{
+    sub_group.name }}
+  </option>
+  {% endfor %}
+</datalist>
+<input type="hidden" name="sub-group" id="product-assign-sub-group-hidden">
+
+<script src="{{ url_for('static', filename='js/product.js') }}" type="text/javascript" defer></script>

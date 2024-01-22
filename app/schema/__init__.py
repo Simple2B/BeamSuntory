@@ -97,3 +97,4 @@ from .report import (
     ReportShipRequestActionType,
 )
 from .report_sku import ReportSKU, ReportSKUList, ReportSKUResponse, ReportSKUType
+from .sub_group import SubGroup, SubGroupParams

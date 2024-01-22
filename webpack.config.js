@@ -46,6 +46,16 @@ const groupConfig = {
   },
 };
 
+const subGroupConfig = {
+  entry: {
+    main: './src/sub_group.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/sub_group.js', // <--- Will be compiled to this single file
+  },
+};
+
 const masterGroupConfig = {
   entry: {
     main: './src/master_group.ts',
@@ -387,6 +397,7 @@ const configs = [
   reportShipping,
   reportSku,
   reportShelfLife,
+  subGroupConfig,
 ].map((conf) => merge(defaultConfig, conf));
 
 module.exports = configs;
