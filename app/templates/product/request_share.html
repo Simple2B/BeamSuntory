@@ -29,8 +29,11 @@
             </div>
           </div>
           <div class="col-span-6 sm:col-span-4">
-            <label for="product-request-share-sku" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">SKU</label>
-            <div id="product-request-share-sku" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></div>
+            <label for="product-request-share-sku"
+              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">SKU</label>
+            <div id="product-request-share-sku"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
           </div>
           <div class="col-span-6 sm:col-span-2">
             <label for="product-request-share-available-quantity"
@@ -56,23 +59,16 @@
           <div class="col-span-6 sm:col-span-6">
             <label for="product-request-share-batch-no"
               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">From Group</label>
-            <div type="text" id="product-request-share-from-group" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" ></div>
+            <div type="text" id="product-request-share-from-group"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            </div>
           </div>
 
           <!-- Hidden fields SKU/From group id -->
-          <div>
-            <input id="product-sku" name="sku" hidden>
-            <input id="from-group-id" name="from_group_id" hidden>
-          </div>
+          <input id="product-sku" name="sku" hidden>
+          <input id="from-group-id" name="from_group_id" hidden>
 
-          <div class="col-span-6 sm:col-span-6">
-            <label for="product-request-share-batch-no"
-              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Desire Quantity</label>
-            <input type="number" name="desire_quantity" id="product-request-share-quantity"
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Quantity" required />
-          </div>
-          <div class="col-span-6 sm:col-span-6">
+          <div class="col-span-6 sm:col-span-3">
             <label for="product-request-share-define-brand"
               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Define Your Group the Item will
               Appear in if Accepted</label>
@@ -86,7 +82,28 @@
               {% endfor %}
             </select>
           </div>
-          <div class="col-span-6 sm:col-span-6">
+          <div class="col-span-6 sm:col-span-3">
+            <label for="product-request-share-define-brand"
+              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Define Your Group the Item will
+              Appear in if Accepted</label>
+            <select type="text" name="to_group_id" id="product-request-share-define-brand"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="Group" required>
+              {% for g in all_product_groups %}
+              {% if g in current_user_groups_names%}
+              <option value="{{ all_product_groups[g].id }}">{{ all_product_groups[g].name }}</option>
+              {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="product-request-share-batch-no"
+              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Desire Quantity</label>
+            <input type="number" name="desire_quantity" id="product-request-share-quantity"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="Quantity" required />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
             <label for="product-request-share-total-available-items"
               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Total Available Items</label>
             <div id="product-request-share-total-available-items"
