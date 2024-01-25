@@ -100,14 +100,24 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         count_query = count_query.where(is_all_stocks_in_inventory_filter)
 
     if is_stocks_own_by_me:
-        curr_user_groups_ids = [
-            i.right_id
-            for i in db.session.execute(
-                m.UserGroup.select().where(
-                    m.UserGroup.left_id == current_user.id,
-                )
-            ).scalars()
-        ]
+        if current_user.role_obj.role_name == s.UserRole.ADMIN.value:
+            curr_user_groups_ids = [
+                i.id
+                for i in db.session.execute(
+                    m.Group.select().where(
+                        m.Group.name.ilike("admin"),
+                    )
+                ).scalars()
+            ]
+        else:
+            curr_user_groups_ids = [
+                i.right_id
+                for i in db.session.execute(
+                    m.UserGroup.select().where(
+                        m.UserGroup.left_id == current_user.id,
+                    )
+                ).scalars()
+            ]
         curr_user_products_ids = [
             i.product_id
             for i in db.session.execute(
