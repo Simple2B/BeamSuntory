@@ -100,14 +100,24 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         count_query = count_query.where(is_all_stocks_in_inventory_filter)
 
     if is_stocks_own_by_me:
-        curr_user_groups_ids = [
-            i.right_id
-            for i in db.session.execute(
-                m.UserGroup.select().where(
-                    m.UserGroup.left_id == current_user.id,
-                )
-            ).scalars()
-        ]
+        if current_user.role_obj.role_name == s.UserRole.ADMIN.value:
+            curr_user_groups_ids = [
+                i.id
+                for i in db.session.execute(
+                    m.Group.select().where(
+                        m.Group.name.ilike("admin"),
+                    )
+                ).scalars()
+            ]
+        else:
+            curr_user_groups_ids = [
+                i.right_id
+                for i in db.session.execute(
+                    m.UserGroup.select().where(
+                        m.UserGroup.left_id == current_user.id,
+                    )
+                ).scalars()
+            ]
         curr_user_products_ids = [
             i.product_id
             for i in db.session.execute(
@@ -303,7 +313,9 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         "all_product_groups": {
             i.name: i
             for i in db.session.execute(
-                m.Group.select().order_by(m.Group.name)
+                m.Group.select()
+                .where(m.Group.parent_group_id.is_(None))
+                .order_by(m.Group.name)
             ).scalars()
         },
         "current_user_groups_names": [i.parent.name for i in current_user_groups_rows],
@@ -620,9 +632,9 @@ def delete(id: int):
 )
 def assign():
     form: f.AssignProductForm = f.AssignProductForm()
+    query_params = get_query_params_from_headers()
 
     if form.validate_on_submit():
-        query_params = get_query_params_from_headers()
         query = m.Product.select().where(m.Product.name == form.name.data)
         p: m.Product | None = db.session.scalar(query)
         if not p:

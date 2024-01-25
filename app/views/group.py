@@ -31,7 +31,9 @@ def get_all():
 
     master_group = aliased(m.MasterGroup)
     q = request.args.get("q", type=str, default=None)
-    query = m.Group.select().order_by(m.Group.id)
+    query = (
+        m.Group.select().where(m.Group.parent_group_id.is_(None)).order_by(m.Group.id)
+    )
     count_query = sa.select(sa.func.count()).select_from(m.Group)
     if q:
         query = (

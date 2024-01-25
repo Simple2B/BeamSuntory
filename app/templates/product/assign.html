@@ -2,7 +2,7 @@
 <!-- prettier-ignore-->
 <div id="assign-product-modal" tabindex="-1" aria-hidden="true"
   class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
-  <div class="relative w-full max-w-2xl max-h-full">
+  <div class="relative w-full max-w-3xl max-h-full">
     <!-- Modal content -->
     <form action="{{ url_for('product.assign')}}" method="post"
       class="relative bg-white rounded-lg shadow dark:bg-gray-700">
@@ -20,7 +20,7 @@
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               required />
           </div>
-          <div class="col-span-6 sm:col-span-3">
+          <div class="col-span-6 sm:col-span-2">
             <label for="master_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Master
               Group</label>
             <select type="text" name="master_group" id="product-assign-master-group"
@@ -31,18 +31,37 @@
               {% endfor %}
             </select>
           </div>
-          <div class="col-span-6 sm:col-span-3">
+          <div class="col-span-6 sm:col-span-2">
             <label for="group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label>
-            <input list="assign-group-list" id="product-assign-group" placeholder="Select group" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                <datalist id="assign-group-list">
-                  <!-- NOTE Use large number if no group selected. Impossible to reach that number in prod.
+            <input type="hidden" name="group_id" id="product-assign-group-id-hidden">
+            <input list="assign-group-list" id="product-assign-group" placeholder="Select group"
+              hx-trigger="change delay:500ms" hx-target="#sub-group-datalist-container" hx-swap="innerHTML"
+              hx-include="[name='group_id']" hx-get="{{ url_for('sub_stock_target_group.get_sub_group') }}"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            <datalist id="assign-group-list">
+              <!-- NOTE Use large number if no group selected. Impossible to reach that number in prod.
                   Used to avoid wrong validation in backend wtform when pass 0 and get None -->
-                  <option value="" data-group-id="" selected disabled>Group</option>
-                  {% for g in all_product_groups %}
-                  <option value="{{ g }}" assign-data-group-id="{{ all_product_groups[g].id }}" class="product-assign-to-group">{{ g }}</option>
-                  {% endfor %}
-                </datalist>
+              <option value="" data-group-id="" selected disabled>Group</option>
+              {% for g in all_product_groups %}
+              <option value="{{ g }}" assign-data-group-id="{{ all_product_groups[g].id }}"
+                class="product-assign-to-group">{{ g }}</option>
+              {% endfor %}
+            </datalist>
             <input type="hidden" name="group" id="product-assign-group-hidden">
+          </div>
+          <div class="col-span-6 sm:col-span-2">
+            <label for="group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Sub Group</label>
+            <div id="sub-group-datalist-container">
+              <input list="assign-sub-group-list" id="product-assign-sub-group" placeholder="Choose group first"
+                disabled
+                class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              <datalist id="assign-sub-group-list">
+                <!-- NOTE Use large number if no group selected. Impossible to reach that number in prod.
+                    Used to avoid wrong validation in backend wtform when pass 0 and get None -->
+                <option value="" data-group-id="" selected disabled>Group</option>
+              </datalist>
+              <input type="hidden" name="group" id="product-assign-sub-group-hidden">
+            </div>
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="product-assign-available-quantity"

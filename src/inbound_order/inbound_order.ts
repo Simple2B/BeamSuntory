@@ -74,10 +74,8 @@ const deleteAllocatedProduct = (e: MouseEvent) => {
   const productsAllocatedContainer = productAllocatedContainer.parentNode as HTMLDivElement;
 
   productAllocatedContainer.remove();
-  console.log(productsAllocatedContainer.children.length);
   if (productsAllocatedContainer.children.length == 2) {
     const productAllocatedDeleteButton = productsAllocatedContainer.querySelector('.product-allocated-delete-button');
-    console.log(productAllocatedDeleteButton);
     productAllocatedDeleteButton.classList.add('invisible');
   }
 };

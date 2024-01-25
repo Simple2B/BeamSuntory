@@ -234,6 +234,14 @@
             </li>
             <li>
               <!-- prettier-ignore -->
+              <a href="{{ url_for('sub_stock_target_group.get_all') }}"
+                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+                {% include "icon/circle.html" %}
+                <span class="flex-1 ml-4 whitespace-nowrap">Sub Stock Target Groups</span>
+              </a>
+            </li>
+            <li>
+              <!-- prettier-ignore -->
               <a href="{{ url_for('master_group_product.get_all') }}"
                 class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
                 {% include "icon/circle.html" %}
@@ -361,7 +369,4 @@
   </div>
 </aside>
 
-{% include 'product/upload.html' %} {%
-block scripts %}
-<script src="{{ url_for('static', filename='js/dropdown.js') }}" type="text/javascript" defer></script>
-{% endblock %}
+{% include 'product/upload.html' %}

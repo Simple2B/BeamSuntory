@@ -2,7 +2,7 @@
 from .pagination import Pagination, PaginationOut
 from .user import User, UserRole, AdminCreate
 from .master_group import MasterGroup, MasterGroupMandatory
-from .group import Group
+from .group import Group, GroupRoot
 from .warehouse import Warehouse, WarehouseMandatory, WarehouseList
 from .product import (
     Product,
@@ -97,3 +97,4 @@ from .report import (
     ReportShipRequestActionType,
 )
 from .report_sku import ReportSKU, ReportSKUList, ReportSKUResponse, ReportSKUType
+from .sub_group import SubGroup, SubGroupParams

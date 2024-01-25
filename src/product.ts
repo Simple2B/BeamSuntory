@@ -1974,14 +1974,32 @@ document.querySelector('#product-assign-master-group').addEventListener('change'
   });
 });
 
+const uploadGroupInput = document.querySelector('#product-assign-group') as HTMLInputElement;
+const uploadSubGroupInput = document.querySelector('#product-assign-sub-group') as HTMLInputElement;
+const uploadGroupIdInputHidden = document.querySelector('#product-assign-group-id-hidden') as HTMLInputElement;
+if (uploadGroupInput) {
+  uploadGroupInput.addEventListener('change', () => {
+    const option = uploadGroupInput.list.querySelector('option[value="' + uploadGroupInput.value + '"]') as HTMLElement;
+    uploadGroupIdInputHidden.value = option.getAttribute('assign-data-group-id');
+  });
+}
+
 document.querySelector('#product-assign-group-submit-btn').addEventListener('click', () => {
-  const uploadGroupInput = document.querySelector('#product-assign-group') as HTMLInputElement;
-  const option = uploadGroupInput.list.querySelector('option[value="' + uploadGroupInput.value + '"]') as HTMLElement;
+  const optionGroup = uploadGroupInput.list.querySelector(
+    'option[value="' + uploadGroupInput.value + '"]'
+  ) as HTMLElement;
+  const optionSubGroup = uploadSubGroupInput.list.querySelector(
+    'option[value="' + uploadSubGroupInput.value + '"]'
+  ) as HTMLElement;
   // NOTE Use large number if no group selected. Impossible to reach that number in prod.
   // Used to avoid wrong validation in backend wtform when pass 0 and get None
+  console.log('uploadSubGroupInput', uploadSubGroupInput.value);
+
   let groupId;
-  if (uploadGroupInput.value) {
-    groupId = option.getAttribute('assign-data-group-id');
+  if (uploadSubGroupInput.value) {
+    groupId = optionSubGroup.getAttribute('assign-data-sub-group-id');
+  } else if (uploadGroupInput.value) {
+    groupId = optionGroup.getAttribute('assign-data-group-id');
   } else {
     groupId = '';
   }

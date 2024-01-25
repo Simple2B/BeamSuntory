@@ -138,7 +138,6 @@ export async function getFullImage(id: string) {
     spinnerModal.hide();
     viewModal.show();
 
-    
     const productName = document.querySelector('#product-image-name');
 
     image.setAttribute('src', `data:image/${data.imageType};base64, ${data.image}`);
@@ -169,4 +168,49 @@ document.querySelector('#product-upload-save-products-btn').addEventListener('cl
 
   const hiddenInput = document.getElementById('product-target-group-upload-hidden') as HTMLInputElement;
   hiddenInput.value = groupId.toString();
+});
+
+const dropdownSidebar = document.querySelectorAll('.dropdown-btn');
+
+dropdownSidebar.forEach((btn) => {
+  const btnElement = btn as HTMLElement;
+
+  btnElement.addEventListener('click', () => {
+    const dropdownContent = btnElement.nextElementSibling as HTMLElement;
+    const dropdownArrow = btnElement.lastElementChild as HTMLElement;
+    const isClose = dropdownContent.classList.contains('dropdown-close');
+
+    btnElement.classList.toggle('bg-red-600');
+
+    dropdownSidebar.forEach((otherBtn) => {
+      const otherBtnElement = otherBtn as HTMLElement;
+
+      if (otherBtn !== btn) {
+        const otherContent = otherBtnElement.nextElementSibling as HTMLElement;
+        const otherArrow = otherBtnElement.lastElementChild as HTMLElement;
+
+        otherContent.classList.remove('dropdown-open');
+        otherContent.classList.add('dropdown-close');
+        otherBtnElement.classList.add('dark:hover:bg-gray-700');
+        otherBtnElement.classList.add('hover:bg-gray-100');
+        otherBtnElement.classList.remove('bg-red-600');
+        otherArrow.style.transform = 'rotate(0)';
+      }
+    });
+
+    if (isClose) {
+      dropdownContent.classList.remove('dropdown-close');
+      dropdownContent.classList.add('dropdown-open');
+      btnElement.classList.remove('dark:hover:bg-gray-700');
+      btnElement.classList.remove('hover:bg-gray-100');
+      dropdownArrow.style.transition = 'all 0.5s';
+      dropdownArrow.style.transform = 'rotate(90deg)';
+    } else {
+      dropdownContent.classList.remove('dropdown-open');
+      dropdownContent.classList.add('dropdown-close');
+      btnElement.classList.add('dark:hover:bg-gray-700');
+      btnElement.classList.add('hover:bg-gray-100');
+      dropdownArrow.style.transform = 'rotate(0)';
+    }
+  });
 });

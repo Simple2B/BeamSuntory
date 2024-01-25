@@ -27,6 +27,7 @@ const filtersMap: IFilterMap = {
     'filter-end-date',
     'master-group',
     'target-group',
+    'target-sub-group',
     'filter-group-brand',
     'filter-group-language',
     'filter-group-premises',
@@ -39,6 +40,7 @@ const filtersMap: IFilterMap = {
     'filter-end-date',
     'master-group',
     'target-group',
+    'target-sub-group',
     'filter-group-brand',
     'filter-group-language',
     'filter-group-premises',
@@ -67,6 +69,7 @@ const filtersMap: IFilterMap = {
   shipping: [
     'division-select',
     'target-group',
+    'target-sub-group',
     'filter-start-date',
     'filter-end-date',
     'filter-group-brand',
@@ -79,6 +82,7 @@ const filtersMap: IFilterMap = {
     'filter-end-date',
     'master-group',
     'target-group',
+    'target-sub-group',
     'filter-group-brand',
     'filter-group-language',
     'filter-group-premises',
@@ -368,6 +372,7 @@ const filtersIds = [
   'filter-end-date-to',
   'master-group',
   'target-group',
+  'target-sub-group',
   'filter-group-brand',
   'filter-group-language',
   'filter-group-premises',
@@ -400,6 +405,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     allFiltersHTML.forEach((filterHTML) => filterHTML.classList.add('hidden'));
     const visibleFilters = filtersMap[selectHTML.value] as HTMLElement[];
+    console.log('visibleFilters', visibleFilters);
+    console.log('filtersMap', filtersMap);
+    console.log('allFiltersHTML', allFiltersHTML);
 
     visibleFilters.forEach((filterHTML) => filterHTML.classList.remove('hidden'));
   });
@@ -433,5 +441,16 @@ document.addEventListener('DOMContentLoaded', () => {
     a.setAttribute('download', 'report.csv');
     a.click();
     a.remove();
+  });
+
+  const groupSelect = document.getElementById('report-target-group-select') as HTMLSelectElement;
+  const groupIdInput = document.getElementById('report-group-id-hidden') as HTMLInputElement;
+  groupSelect.addEventListener('change', (e) => {
+    const option = groupSelect.querySelector(`option[value="${groupSelect.value}"]`);
+    if (!option) {
+      return;
+    }
+    groupIdInput.value = option.getAttribute('data-target-group-id');
+    groupIdInput.click();
   });
 });
