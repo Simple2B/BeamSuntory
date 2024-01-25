@@ -75,6 +75,10 @@ def get_all():
         else None
     )
 
+    groups = db.session.scalars(
+        m.Group.select().where(m.Group.parent_group_id.is_(None)).order_by(m.Group.name)
+    ).all()
+
     return render_template(
         "inbound_order/inbound_orders.html",
         current_inbound_order=current_inbound_order,
@@ -93,7 +97,7 @@ def get_all():
             m.Warehouse.select().order_by(m.Warehouse.name)
         ).all(),
         products=db.session.scalars(m.Product.select().order_by(m.Product.name)).all(),
-        groups=db.session.scalars(m.Group.select().order_by(m.Group.name)).all(),
+        groups=groups,
         form_create=form_create,
         form_edit=form_edit,
         form_sort=form_sort,

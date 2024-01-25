@@ -1984,12 +1984,6 @@ if (uploadGroupInput) {
   });
 }
 
-if (uploadSubGroupInput) {
-  uploadSubGroupInput.addEventListener('change', () => {
-    console.log('uploadSubGroupInput', uploadSubGroupInput.value);
-  });
-}
-
 document.querySelector('#product-assign-group-submit-btn').addEventListener('click', () => {
   const optionGroup = uploadGroupInput.list.querySelector(
     'option[value="' + uploadGroupInput.value + '"]'

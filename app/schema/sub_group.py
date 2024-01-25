@@ -17,3 +17,5 @@ class SubGroupParams(BaseModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
     group_id: int = Field(alias="groupId")
+    type_select: bool = Field(False, alias="typeSelect")
+    inbound_order: bool = Field(False, alias="inboundOrder")

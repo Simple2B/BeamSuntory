@@ -157,15 +157,14 @@ def delete(id: int):
         flash("There is no such group", "danger")
         return "no group", 404
 
-    db.session.delete(group)
+    group.parent_group_id = None
     db.session.commit()
-    log(log.INFO, "Group deleted. Group: [%s]", group)
-    flash("Group deleted!", "success")
+    log(log.INFO, "Sub Group was moved to Group. Group: [%s]", group)
+    flash("Sub Group deleted!", "success")
     return "ok", 200
 
 
 @sub_stock_target_group_blueprint.route("/get_sub_group", methods=["GET"])
-@login_required
 def get_sub_group():
     try:
         params = s.SubGroupParams.model_validate(dict(request.args))
@@ -183,7 +182,20 @@ def get_sub_group():
         sa.select(m.Group).where(m.Group.parent_group_id == params.group_id)
     ).all()
 
+    template = "sub_stock_target_group/sub_group_datalist.html"
+
+    if params.inbound_order:
+        template = "sub_stock_target_group/sub_group_datalist_inbound_order.html"
+        model_root = s.GroupRoot.model_validate(sub_groups)
+
+        return s.Group.model_dump_json(model_root)
+
+    if params.type_select:
+        template = "sub_stock_target_group/sub_group_select.html"
+
+    model_root = s.GroupRoot.model_validate(sub_groups)
+
     return render_template(
-        "sub_stock_target_group/sub_group_select.html",
+        template,
         sub_groups=sub_groups,
     )

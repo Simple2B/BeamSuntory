@@ -99,6 +99,7 @@ export interface IGroup {
   id: number;
   name: string;
   masterGroup: IMasterGroup;
+  parentGroup: IGroup | null;
 }
 
 export interface IRequestShare {

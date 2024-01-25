@@ -1,6 +1,7 @@
 import { ModalOptions, Modal } from 'flowbite';
 import { IInboundOrderOut, IProductGroupCreate } from './types';
 import { getDatepickerDateFormat } from './utils';
+import { IGroup } from '../types';
 
 const setNewQuantityView = (quantityGroupContainer: HTMLDivElement) => {
   const quantitiesPerGroup = quantityGroupContainer.querySelectorAll(
@@ -20,25 +21,75 @@ const setNewQuantityView = (quantityGroupContainer: HTMLDivElement) => {
   quantityView.innerHTML = (quantityAvailable - quantityTotal).toString();
 };
 
+async function fetchSubGroups(selectElement: HTMLSelectElement, groupId: string) {
+  const response = await fetch(`/sub_stock_target_group/get_sub_group?group_id=${groupId}&inbound_order=True`, {
+    method: 'GET',
+  });
+
+  if (response.status == 200) {
+    const groups = await response.json();
+    selectElement.innerHTML = '';
+    const option = document.createElement('option');
+    option.value = '';
+    option.innerHTML = 'Sub Group';
+    selectElement.appendChild(option);
+    groups.forEach((group: IGroup) => {
+      const option = document.createElement('option');
+      option.value = group.id.toString();
+      option.innerHTML = group.name;
+
+      selectElement.appendChild(option);
+    });
+  }
+}
+
 const createProductGroup = (allocatedProductContainer: HTMLDivElement) => {
   const groupItemTemplate = document.querySelector('.group-quantity-item') as HTMLDivElement;
   const groupQuantityItemNew = groupItemTemplate.cloneNode(true) as HTMLDivElement;
   groupQuantityItemNew.classList.remove('invisible');
 
-  groupQuantityItemNew.querySelector('#inbound-order-edit-add-group').addEventListener('change', (e) => {
+  groupQuantityItemNew.querySelector('#inbound-order-edit-add-group').addEventListener('change', async (e) => {
+    const uploadGroupIdInputHidden = document.querySelector('#inbound-order-edit-group-id-hidden') as HTMLInputElement;
+    const subGroupInput = groupQuantityItemNew.querySelector(
+      '#inbound-order-edit-add-sub-group-list'
+    ) as HTMLInputElement;
+    const subGroupList = groupQuantityItemNew.querySelector('#inbound-order-edit-add-sub-group-list');
+
+    subGroupInput.value = '';
     const uploadGroupInput = e.target as HTMLInputElement;
     const option = uploadGroupInput.list.querySelector('option[value="' + uploadGroupInput.value + '"]') as HTMLElement;
     // NOTE Use large number if no group selected. Impossible to reach that number in prod.
     // Used to avoid wrong validation in backend wtform when pass 0 and get None
+
+    uploadGroupIdInputHidden.value = option.getAttribute('inbound-order-edit-add-group-id');
+    uploadGroupIdInputHidden.click();
     let groupId;
     if (uploadGroupInput.value) {
       groupId = option.getAttribute('inbound-order-edit-add-group-id');
+      await fetchSubGroups(subGroupList as HTMLSelectElement, groupId);
     } else {
       groupId = '';
     }
 
     const hiddenInput = groupQuantityItemNew.querySelector('#inbound-order-edit-add-group-hidden') as HTMLInputElement;
     hiddenInput.value = groupId.toString();
+  });
+
+  const subGroupList = groupQuantityItemNew.querySelector(
+    '#inbound-order-edit-add-sub-group-list'
+  ) as HTMLSelectElement;
+
+  subGroupList.addEventListener('change', () => {
+    const hiddenInput = groupQuantityItemNew.querySelector('#inbound-order-edit-add-group-hidden') as HTMLInputElement;
+
+    if (!subGroupList.value) {
+      const groupInputList = groupQuantityItemNew.querySelector('#inbound-order-edit-add-group') as HTMLInputElement;
+      const option = groupInputList.list.querySelector('option[value="' + groupInputList.value + '"]') as HTMLElement;
+      hiddenInput.value = option.getAttribute('inbound-order-edit-add-group-id');
+      return;
+    }
+
+    hiddenInput.value = subGroupList.value;
   });
 
   const buttonDeleteQuantityGroup = groupQuantityItemNew.querySelector(
@@ -99,7 +150,6 @@ export const initEditOrderModal = () => {
     backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
     closable: true,
     onHide: () => {
-      console.log(orderEditProductsAllocatedContainer);
       while (orderEditProductsAllocatedContainer.children.length > 1) {
         orderEditProductsAllocatedContainer.removeChild(orderEditProductsAllocatedContainer.lastElementChild);
       }
@@ -183,18 +233,33 @@ export const initEditOrderModal = () => {
         (productAllocatedShelfLifeToDiv.parentNode.parentNode as HTMLDivElement).after(buttonAddNewGroup);
         buttonAddNewGroup.classList.remove('invisible');
 
-        productAllocated.productQuantityGroups.forEach((quantityGroup) => {
+        productAllocated.productQuantityGroups.forEach(async (quantityGroup) => {
           const quantityGroupContainer = createProductGroup(currentProductAllocatedContainer as HTMLDivElement);
           const groupSelect = quantityGroupContainer.querySelector('#inbound-order-edit-add-group') as HTMLInputElement;
-          const groupSelectHidden = quantityGroupContainer.querySelector(
+          const groupIdHidden = quantityGroupContainer.querySelector(
             '#inbound-order-edit-add-group-hidden'
           ) as HTMLInputElement;
+          const subGroupSelect = quantityGroupContainer.querySelector(
+            '#inbound-order-edit-add-sub-group'
+          ) as HTMLInputElement;
+          const subGroupList = quantityGroupContainer.querySelector(
+            '#inbound-order-edit-add-sub-group-list'
+          ) as HTMLSelectElement;
           const groupQuantityInput = quantityGroupContainer.querySelector(
             '.inbound-order-edit-add-quantity'
           ) as HTMLInputElement;
 
-          groupSelect.value = quantityGroup.group.name.toString();
-          groupSelectHidden.value = quantityGroup.group.name.toString();
+          if (quantityGroup.group.parentGroup) {
+            const groupId = quantityGroup.group.parentGroup.id;
+            await fetchSubGroups(subGroupList as HTMLSelectElement, groupId.toString());
+
+            subGroupList.value = quantityGroup.group.id.toString();
+            groupSelect.value = quantityGroup.group.parentGroup.name.toString();
+            groupIdHidden.value = quantityGroup.group.id.toString();
+          } else {
+            groupSelect.value = quantityGroup.group.name.toString();
+            groupIdHidden.value = quantityGroup.group.id.toString();
+          }
           groupQuantityInput.value = quantityGroup.quantity.toString();
         });
 
