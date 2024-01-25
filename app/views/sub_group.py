@@ -37,7 +37,11 @@ def get_all():
         .where(m.Group.parent_group_id.isnot(None))
         .order_by(m.Group.id)
     )
-    count_query = sa.select(sa.func.count()).select_from(m.Group)
+    count_query = (
+        sa.select(sa.func.count())
+        .where(m.Group.parent_group_id.isnot(None))
+        .select_from(m.Group)
+    )
     if q:
         query = (
             m.Group.select()
