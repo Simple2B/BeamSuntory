@@ -1,4 +1,4 @@
-<div>
+<div {% if not sub_groups %} class="invisible" {% endif %}>
   <label for="group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Sub Group</label>
   <!-- TODO: remove after accept milestone -->
   <!-- <input list="assign-sub-group-list" id="product-assign-sub-group" {% if not sub_groups %}
