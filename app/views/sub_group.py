@@ -35,7 +35,7 @@ def get_all():
     query = (
         sa.select(m.Group)
         .where(m.Group.parent_group_id.isnot(None))
-        .order_by(m.Group.id)
+        .order_by(m.Group.name)
     )
     count_query = (
         sa.select(sa.func.count())
@@ -47,7 +47,7 @@ def get_all():
             m.Group.select()
             .join(master_group, m.Group.master_group_id == master_group.id)
             .where(m.Group.name.ilike(f"%{q}%") | master_group.name.ilike(f"%{q}%"))
-            .order_by(m.Group.id)
+            .order_by(m.Group.name)
         )
         count_query = (
             sa.select(sa.func.count())

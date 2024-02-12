@@ -27,13 +27,13 @@ def get_all():
     form_edit = f.MasterGroupForm()
 
     q = request.args.get("q", type=str, default=None)
-    query = m.MasterGroup.select().order_by(m.MasterGroup.id)
+    query = m.MasterGroup.select().order_by(m.MasterGroup.name)
     count_query = sa.select(sa.func.count()).select_from(m.MasterGroup)
     if q:
         query = (
             m.MasterGroup.select()
             .where(m.MasterGroup.name.ilike(f"%{q}%"))
-            .order_by(m.MasterGroup.id)
+            .order_by(m.MasterGroup.name)
         )
         count_query = (
             sa.select(sa.func.count())

@@ -32,7 +32,7 @@ def get_all():
     master_group = aliased(m.MasterGroup)
     q = request.args.get("q", type=str, default=None)
     query = (
-        m.Group.select().where(m.Group.parent_group_id.is_(None)).order_by(m.Group.id)
+        m.Group.select().where(m.Group.parent_group_id.is_(None)).order_by(m.Group.name)
     )
     count_query = sa.select(sa.func.count()).select_from(m.Group)
     if q:
@@ -40,7 +40,7 @@ def get_all():
             m.Group.select()
             .join(master_group, m.Group.master_group_id == master_group.id)
             .where(m.Group.name.ilike(f"%{q}%") | master_group.name.ilike(f"%{q}%"))
-            .order_by(m.Group.id)
+            .order_by(m.Group.name)
         )
         count_query = (
             sa.select(sa.func.count())
