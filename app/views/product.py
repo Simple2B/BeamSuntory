@@ -404,17 +404,21 @@ def create():
             description=form.description.data,
             # General Info ->
             SKU=form.SKU.data,
-            low_stock_level=form.low_stock_level.data
-            if form.low_stock_level.data
-            else 0,
+            low_stock_level=(
+                form.low_stock_level.data if form.low_stock_level.data else 0
+            ),
             program_year=form.program_year.data if form.program_year.data else 2023,
             package_qty=form.package_qty.data if form.package_qty.data else 0,
-            numb_of_items_per_case=form.numb_of_items_per_case.data
-            if form.numb_of_items_per_case.data
-            else 0,
-            numb_of_cases_per_outer_case=form.numb_of_cases_per_outer_case.data
-            if form.numb_of_cases_per_outer_case.data
-            else 0,
+            numb_of_items_per_case=(
+                form.numb_of_items_per_case.data
+                if form.numb_of_items_per_case.data
+                else 0
+            ),
+            numb_of_cases_per_outer_case=(
+                form.numb_of_cases_per_outer_case.data
+                if form.numb_of_cases_per_outer_case.data
+                else 0
+            ),
             comments=form.comments.data if form.comments.data else "no comment",
             # shipping
             weight=form.weight.data if form.weight.data else 0,
@@ -439,6 +443,12 @@ def create():
                 file_image = save_image(png_bytes, f"product/{form.SKU.data}")
 
         if isinstance(file_image, m.Image):
+            log(
+                log.INFO,
+                "Product image added. Image: [%s], request file: [%s]",
+                file_image,
+                request.files["high_image"],
+            )
             flash("Product added!", "success")
             file_image.save(False)
             product.image_obj = file_image
@@ -448,6 +458,11 @@ def create():
             elif "Unsupported file type!" in file_image:
                 flash("Product added! Unsupported image file type!", "danger")
             else:
+                log(
+                    log.ERROR,
+                    "Can not save product image, file image: [%s], request file: [%s]",
+                    file_image, request.files["high_image"],
+                )
                 flash("Product added! Can't save product image!", "danger")
 
         db.session.commit()
@@ -1190,9 +1205,9 @@ def upload():
     df_img["Image"] = df_img["Image"].fillna("no_picture_default.png")
     # TODO this takes 10 seconds with around 150 products. Optimize #2
     for product in new_products_obj:
-        product_group_df.loc[
-            product_group_df["Name"] == product.name, "Name"
-        ] = product.id
+        product_group_df.loc[product_group_df["Name"] == product.name, "Name"] = (
+            product.id
+        )
         try:
             product.image_id = img_name_img_obj[
                 df_img.loc[df_img["SKU"] == product.SKU, "Image"].values[0]
