@@ -178,6 +178,8 @@ def create():
             ).save(False)
 
         inbound_order.save()
+        inbound_order.set_order_id()
+        db.session.commit()
 
         report_inbound_order = m.ReportInboundOrder(
             type=s.ReportEventType.created.value,

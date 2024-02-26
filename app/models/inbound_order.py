@@ -12,10 +12,6 @@ from .product_allocated import ProductAllocated
 from .report_inventory import ReportInventoryList
 
 
-def generate_order_id_timestamp():
-    return f"IO-BEAM-{int(datetime.now().timestamp())}"
-
-
 class InboundOrder(db.Model, ModelMixin):
     __tablename__ = "inbound_orders"
 
@@ -38,10 +34,8 @@ class InboundOrder(db.Model, ModelMixin):
         sa.String(64),
         nullable=False,
     )
-    order_id: orm.Mapped[str] = orm.mapped_column(
+    order_id: orm.Mapped[str | None] = orm.mapped_column(
         sa.String(64),
-        nullable=False,
-        default=generate_order_id_timestamp,
     )
     active_date: orm.Mapped[date] = orm.mapped_column(sa.Date)
     active_time: orm.Mapped[str] = orm.mapped_column(sa.String(64))
@@ -67,6 +61,9 @@ class InboundOrder(db.Model, ModelMixin):
     report_inventory_list: orm.Mapped["ReportInventoryList"] = orm.relationship(
         back_populates="inbound_order"
     )
+
+    def set_order_id(self):
+        self.order_id = f"IO-BEAM-{1000 + self.id}"
 
     def __repr__(self):
         return f"<{self.id}: {self.order_id}>"
