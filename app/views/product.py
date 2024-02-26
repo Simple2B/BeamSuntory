@@ -123,6 +123,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
             for i in db.session.execute(
                 m.WarehouseProduct.select().where(
                     m.WarehouseProduct.group_id.in_(curr_user_groups_ids),
+                    m.WarehouseProduct.product_quantity > 0,
                 )
             ).scalars()
         ]
@@ -461,7 +462,8 @@ def create():
                 log(
                     log.ERROR,
                     "Can not save product image, file image: [%s], request file: [%s]",
-                    file_image, request.files["high_image"],
+                    file_image,
+                    request.files["high_image"],
                 )
                 flash("Product added! Can't save product image!", "danger")
 
