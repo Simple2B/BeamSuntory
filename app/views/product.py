@@ -1,4 +1,6 @@
-from io import BytesIO
+from io import BytesIO, StringIO
+import csv
+import codecs
 from http import HTTPStatus
 import base64
 import json
@@ -19,6 +21,7 @@ from flask import (
 )
 from flask_login import login_required, current_user
 from flask_mail import Message
+from pydantic import ValidationError
 from sqlalchemy.dialects.postgresql import insert
 import sqlalchemy as sa
 from app.controllers import (
@@ -123,6 +126,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
             for i in db.session.execute(
                 m.WarehouseProduct.select().where(
                     m.WarehouseProduct.group_id.in_(curr_user_groups_ids),
+                    m.WarehouseProduct.product_quantity > 0,
                 )
             ).scalars()
         ]
@@ -461,7 +465,8 @@ def create():
                 log(
                     log.ERROR,
                     "Can not save product image, file image: [%s], request file: [%s]",
-                    file_image, request.files["high_image"],
+                    file_image,
+                    request.files["high_image"],
                 )
                 flash("Product added! Can't save product image!", "danger")
 
@@ -486,8 +491,9 @@ def create():
 @role_required([s.UserRole.ADMIN.value])
 def save():
     form: f.ProductForm = f.ProductForm()
+    query_params = get_query_params_from_headers()
+
     if form.validate_on_submit():
-        query_params = get_query_params_from_headers()
         query = m.Product.select().where(m.Product.id == int(form.product_id.data))
         u: m.Product = db.session.scalar(query)
         if not u:
@@ -992,317 +998,235 @@ def upload():
         form.target_group_upload.data = 0
 
     master_product_groups = ["Language", "Categories", "Brand"]
+    language_master_group = db.session.scalar(
+        sa.select(m.MasterGroupProduct).where(m.MasterGroupProduct.name == "Language")
+    )
+    brand_master_group = db.session.scalar(
+        sa.select(m.MasterGroupProduct).where(m.MasterGroupProduct.name == "Brand")
+    )
+    categories_master_group = db.session.scalar(
+        sa.select(m.MasterGroupProduct).where(m.MasterGroupProduct.name == "Categories")
+    )
+
+    if not language_master_group:
+        log(
+            log.ERROR,
+            "Not found product master group Language while upload CSV with products",
+        )
+        flash("No Language product master group", "danger")
+        return url_for("product.get_all", **query_params)
+
+    if not brand_master_group:
+        log(
+            log.ERROR,
+            "Not found product master group Brand while upload CSV with products",
+        )
+        flash("No Brand product master group", "danger")
+        return url_for("product.get_all", **query_params)
+
+    if not categories_master_group:
+        log(
+            log.ERROR,
+            "Not found product master group Categories while upload CSV with products",
+        )
+        flash("No Categories product master group", "danger")
+        return url_for("product.get_all", **query_params)
+
     csv_file = request.files["upload_csv"]
-    file_io = BytesIO(csv_file.read())
 
-    conn = db.get_engine()
-
-    df_img = pandas.read_csv(
-        Path("app") / "static" / "img" / "item_image.csv",
-        usecols=[
-            "SKU",
-            "Image",
-        ],
+    csv_sku_image_file = None
+    defult_image = db.session.scalar(
+        sa.select(m.Image).where(m.Image.name == "no_picture_default.png")
     )
 
-    new_groups = []
+    stream = codecs.iterdecode(csv_file.stream, "utf-8")
+    csv_reader = csv.reader(stream)
+    next(csv_reader)
 
-    # NOTE write master groups and stock groups to DB
-    for table_name in master_product_groups:
-        master_group_obj = db.session.execute(
-            m.MasterGroupProduct.select().where(m.MasterGroupProduct.name == table_name)
-        ).scalar()
+    for i, row in enumerate(csv_reader):
+        try:
+            product_item_data = s.ProductCSVItem(*row)
+        except ValidationError:
+            log(log.ERROR, "SCV product upload validation error: %s", row)
+            flash(f"Invalid product item: {i + 1}", "danger")
+            return redirect(url_for("product.get_all", **query_params))
 
-        if not master_group_obj:
-            master_group_obj = m.MasterGroupProduct(name=table_name)
-            master_group_obj.save()
-
-        df = pandas.read_csv(file_io, usecols=[table_name])
-        file_io.seek(0)
-        df = df.drop_duplicates().dropna()
-        df["master_group_id"] = master_group_obj.id
-        df["created_at"] = datetime.now()
-
-        new_groups.extend(df[table_name].to_list())
-
-        do_nothing_conflict_name = DoNothingConflict(["name"])
-
-        df.rename(
-            columns=dict(zip(df.columns, ["name", "master_group_id", "created_at"]))
-        ).to_sql(
-            "groups_for_product",
-            con=conn,
-            if_exists="append",
-            index=False,
-            method=do_nothing_conflict_name.insert_do_nothing_on_conflicts,
+        product = db.session.scalar(
+            sa.select(m.Product).where(m.Product.SKU == product_item_data.sku)
+        )
+        language_product_group = db.session.scalar(
+            sa.select(m.GroupProduct).where(
+                m.GroupProduct.master_groups_for_product.has(
+                    m.MasterGroupProduct.name == language_master_group.name
+                ),
+                m.GroupProduct.name == product_item_data.language,
+            )
+        )
+        brand_product_group = db.session.scalar(
+            sa.select(m.GroupProduct).where(
+                m.GroupProduct.master_groups_for_product.has(
+                    m.MasterGroupProduct.name == brand_master_group.name
+                ),
+                m.GroupProduct.name == product_item_data.brand,
+            )
+        )
+        category_product_group = db.session.scalar(
+            sa.select(m.GroupProduct).where(
+                m.GroupProduct.master_groups_for_product.has(
+                    m.MasterGroupProduct.name == categories_master_group.name
+                ),
+                m.GroupProduct.name == product_item_data.categories,
+            )
         )
 
-        if table_name == "Brand":
-            brand_master_group: m.MasterGroup = db.session.scalar(
-                m.MasterGroup.select().where(m.MasterGroup.name == "Marketing")
+        if not language_product_group:
+            language_product_group = m.GroupProduct(
+                master_product_groups=language_master_group,
             )
-            df["master_group_id"] = brand_master_group.id
-            df.rename(
-                columns=dict(zip(df.columns, ["name", "master_group_id", "created_at"]))
-            ).to_sql(
-                "groups",
-                con=conn,
-                if_exists="append",
-                index=False,
-                method=do_nothing_conflict_name.insert_do_nothing_on_conflicts,
+            db.session.add(language_product_group)
+        language_product_group.name = product_item_data.language
+
+        if not brand_product_group:
+            brand_product_group = m.GroupProduct(
+                master_product_groups=brand_master_group,
             )
+            db.session.add(brand_product_group)
+        brand_product_group.name = product_item_data.brand
 
-            # NOTE relate admin to new groups
-            admin_user: m.User = db.session.scalar(
-                m.User.select().where(
-                    m.User.role_obj.has(m.Division.role_name == "admin")
-                )
+        if not category_product_group:
+            category_product_group = m.GroupProduct(
+                master_product_groups=categories_master_group,
             )
-            admin_groups = admin_user.user_groups
-            new_groups_for_admin: list[m.Group] = db.session.scalars(
-                m.Group.select().where(m.Group.name.in_(df[table_name].to_list()))
+            db.session.add(category_product_group)
+        category_product_group.name = product_item_data.categories
+
+        if not product:
+            product = m.Product(
+                SKU=product_item_data.sku,
+                name=product_item_data.name,
+                description=product_item_data.description,
+                regular_price=product_item_data.regular_price,
+                retail_price=product_item_data.retail_price,
+                image="default.png",
             )
-            for group in new_groups_for_admin:
-                if group in admin_groups:
-                    continue
-                m.UserGroup(
-                    left_id=admin_user.id,
-                    right_id=group.id,
-                ).save(False)
-            db.session.commit()
+            db.session.add(product)
 
-    # NOTE write products to DB
-    columns_to_use = [
-        "Name",
-        "Description",
-        "SKU",
-        "Regular Price",
-        "Retail Price",
-    ]
-
-    if form.target_group_upload.data != 0:
-        columns_to_use.append("Available Quantity")
-
-    df = pandas.read_csv(
-        file_io,
-        usecols=columns_to_use,
-    )
-    file_io.seek(0)
-    df = df.drop_duplicates()
-    df["Description"] = df["Description"].fillna("")
-    df["SKU"] = df["SKU"].fillna("")
-    df["Regular Price"] = df["Regular Price"].fillna(0)
-    df["Retail Price"] = df["Retail Price"].fillna(0)
-
-    df = pandas.merge(df, df_img, on="SKU", how="inner")
-    df["Image"] = df["Image"].fillna("no_picture_default.png")
-    logo_mini = db.session.scalar(
-        m.Image.select().where(m.Image.name == "no_picture_default")
-    )
-    img_name_img_obj = {"no_picture_default.png": logo_mini}
-
-    # TODO this takes 10 seconds with around 150 products. Optimize #1
-    for image_name in df["Image"]:
-        try:
-            if not isinstance(image_name, str):
-                raise FileNotFoundError
-            original_image = Image.open(
-                Path("app") / "static" / "img" / "product" / image_name
-            ).resize((200, 200))
-        except FileNotFoundError:
-            original_image = Image.open(
-                Path("app") / "static" / "img" / "no_picture_default.png"
-            ).resize((200, 200))
-        with BytesIO() as png_bytes:
-            if original_image.mode in ["CMYK"]:
-                continue
-            original_image.save(png_bytes, format="PNG")
-            png_bytes.seek(0)
-            img_bytes = base64.b64encode(png_bytes.read()).decode()
-            image_exists = db.session.scalar(
-                m.Image.select().where(m.Image.name == image_name.split(".")[0])
+        if not db.session.scalar(
+            sa.select(m.Product.id).where(
+                m.Product.SKU == product_item_data.sku,
+                m.Product.groups.any(
+                    sa.and_(
+                        m.GroupProduct.name == product_item_data.language,
+                        m.GroupProduct.master_groups_for_product.has(
+                            m.MasterGroupProduct.name == language_master_group.name,
+                        ),
+                    ),
+                ),
             )
-            if not image_exists:
-                img_obj = m.Image(
-                    name=image_name.split(".")[0],
-                    path=f"product/{image_name}",
-                    extension=image_name.split(".")[-1],
-                )
-                img_obj.save(False)
-                img_name_img_obj[image_name] = img_obj
+        ):
+            product.groups.append(language_product_group)
 
-        df["Image"] = df["Image"].replace(image_name, img_bytes)
+        if not db.session.scalar(
+            sa.select(m.Product.id).where(
+                m.Product.SKU == product_item_data.sku,
+                m.Product.groups.any(
+                    sa.and_(
+                        m.GroupProduct.name == product_item_data.brand,
+                        m.GroupProduct.master_groups_for_product.has(
+                            m.MasterGroupProduct.name == brand_master_group.name
+                        ),
+                    )
+                ),
+            )
+        ):
+            product.groups.append(brand_product_group)
+
+        if not db.session.scalar(
+            sa.select(m.Product.id).where(
+                m.Product.SKU == product_item_data.sku,
+                m.Product.groups.any(
+                    sa.and_(
+                        m.GroupProduct.name == product_item_data.categories,
+                        m.GroupProduct.master_groups_for_product.has(
+                            m.MasterGroupProduct.name == categories_master_group.name
+                        ),
+                    ),
+                ),
+            )
+        ):
+            product.groups.append(category_product_group)
+
+        if language_product_group not in product.groups:
+            product.groups.append(language_product_group)
+
+        if brand_product_group not in product.groups:
+            product.groups.append(brand_product_group)
+
+        if category_product_group not in product.groups:
+            product.groups.append(category_product_group)
+
+        product.name = product_item_data.name
+        product.description = product_item_data.description
+        product.regular_price = product_item_data.regular_price
+        product.retail_price = product_item_data.retail_price
+
+        image = db.session.scalar(
+            sa.select(m.Image).where(m.Image.name == product_item_data.sku)
+        )
+        if not image:
+            image = m.Image(
+                name=product_item_data.sku,
+                path=f"product/{product_item_data.sku}",
+                extension="png",
+            )
+            image.save(False)
+
+        if product.image_obj:
+            db.session.delete(product.image_obj)
+
+        product.image_obj = image
+        product.image = image.get_base64().decode()
 
     db.session.commit()
-    # # # #1
-
-    df_products = df[
-        [
-            "Name",
-            "Description",
-            "SKU",
-            "Regular Price",
-            "Retail Price",
-            "Image",
-        ]
-    ]
-
-    df_products.rename(
-        columns=dict(
-            zip(
-                df_products.columns,
-                [
-                    "name",
-                    "description",
-                    "SKU",
-                    "regular_price",
-                    "retail_price",
-                    "image",
-                ],
-            )
-        )
-    ).to_sql(
-        "products",
-        con=conn,
-        if_exists="append",
-        index=False,
-        method=do_nothing_conflict_name.insert_do_nothing_on_conflicts,
-    )
-
-    # NOTE write product-groups relations to DB
-    new_products_obj: list[m.Product] = db.session.scalars(
-        m.Product.select().where(m.Product.name.in_(df["Name"].to_list()))
-    ).all()
-
-    new_groups_obj: list[m.GroupProduct] = db.session.scalars(
-        m.GroupProduct.select().where(m.GroupProduct.name.in_(new_groups))
-    ).all()
-
-    warehouse_products: list[m.WarehouseProduct] = db.session.scalars(
-        m.WarehouseProduct.select().where(
-            m.WarehouseProduct.product_id.in_([prod.id for prod in new_products_obj])
-        )
-    )
-    # NOTE until we do not select warehouse in form,
-    # warehouse_product could rewrite each other if product_id is the same
-    product_warehouse_product = {
-        warehouse_product.product.SKU: warehouse_product
-        for warehouse_product in warehouse_products
-    }
-    # TODO consider which warehouse to use as default
-    default_warehouse: m.Warehouse = db.session.scalar(m.Warehouse.select())
-
-    product_group_df = pandas.read_csv(
-        file_io,
-        usecols=[
-            "Name",
-            "Language",
-            "Brand",
-            "Categories",
-        ],
-    )
-
-    df_img["Image"] = df_img["Image"].fillna("no_picture_default.png")
-    # TODO this takes 10 seconds with around 150 products. Optimize #2
-    for product in new_products_obj:
-        product_group_df.loc[product_group_df["Name"] == product.name, "Name"] = (
-            product.id
-        )
-        try:
-            product.image_id = img_name_img_obj[
-                df_img.loc[df_img["SKU"] == product.SKU, "Image"].values[0]
-            ].id
-            product.save(False)
-        except KeyError:
-            log(
-                log.ERROR,
-                "Image [%s] not found for product: [%s]",
-                df_img.loc[df_img["SKU"] == product.SKU, "Image"].values[0],
-                product.name,
-            )
-
-        if form.target_group_upload.data != 0:
-            available_quantity = (
-                int(df.loc[df["SKU"] == product.SKU, "Available Quantity"].values[0])
-                if str(
-                    df.loc[df["SKU"] == product.SKU, "Available Quantity"].values[0]
-                ).isdigit()
-                else 0
-            )
-            if product.SKU in product_warehouse_product:
-                warehouse_product = product_warehouse_product[product.SKU]
-                warehouse_product.product_quantity += available_quantity
-                warehouse_product.save(False)
-            else:
-                m.WarehouseProduct(
-                    product_id=product.id,
-                    group_id=form.target_group_upload.data,
-                    product_quantity=available_quantity,
-                    warehouse_id=default_warehouse.id,
-                ).save(False)
-
-    db.session.commit()
-    # # # #2
-
-    for mastr_grp in master_product_groups:
-        for group in new_groups_obj:
-            product_group_df.loc[
-                product_group_df[mastr_grp] == group.name, mastr_grp
-            ] = group.id
-
-    for table_name in master_product_groups:
-        write_df = product_group_df[["Name", table_name]]
-        file_io.seek(0)
-        write_df = write_df.dropna()
-
-        write_df[pandas.to_numeric(write_df["Name"], errors="coerce").notnull()].rename(
-            columns=dict(zip(write_df.columns, ["product_id", "group_id"]))
-        ).to_sql(
-            "product_group",
-            con=conn,
-            if_exists="append",
-            index=False,
-            method=DoNothingConflict(None).insert_do_nothing_on_conflicts,
-        )
 
     flash("Product added!", "success")
     return redirect(url_for("product.get_all", **query_params))
 
 
-class DoNothingConflict:
-    def __init__(self, unique_constraint: list[str]):
-        self.unique_constraint = unique_constraint
+# class DoNothingConflict:
+#     def __init__(self, unique_constraint: list[str]):
+#         self.unique_constraint = unique_constraint
 
-    def insert_do_nothing_on_conflicts(self, sqltable, conn, keys, data_iter):
-        """
-        Execute SQL statement inserting data
+#     def insert_do_nothing_on_conflicts(self, sqltable, conn, keys, data_iter):
+#         """
+#         Execute SQL statement inserting data
 
-        Parameters
-        ----------
-        sqltable : pandas.io.sql.SQLTable
-        conn : sqlalchemy.engine.Engine or sqlalchemy.engine.Connection
-        keys : list of str
-            Column names
-        data_iter : Iterable that iterates the values to be inserted
-        """
-        columns = []
-        for c in keys:
-            columns.append(sa.column(c))
+#         Parameters
+#         ----------
+#         sqltable : pandas.io.sql.SQLTable
+#         conn : sqlalchemy.engine.Engine or sqlalchemy.engine.Connection
+#         keys : list of str
+#             Column names
+#         data_iter : Iterable that iterates the values to be inserted
+#         """
+#         columns = []
+#         for c in keys:
+#             columns.append(sa.column(c))
 
-        if sqltable.schema:
-            table_name = "{}.{}".format(sqltable.schema, sqltable.name)
-        else:
-            table_name = sqltable.name
+#         if sqltable.schema:
+#             table_name = "{}.{}".format(sqltable.schema, sqltable.name)
+#         else:
+#             table_name = sqltable.name
 
-        mytable = sa.table(table_name, *columns)
+#         mytable = sa.table(table_name, *columns)
 
-        insert_stmt = insert(mytable).values(list(data_iter))
-        # NOTE index_elements=["unique_code"] --- meaning unique constraint
-        do_nothing_stmt = insert_stmt.on_conflict_do_nothing(
-            index_elements=self.unique_constraint
-        )
+#         insert_stmt = insert(mytable).values(list(data_iter))
+#         # NOTE index_elements=["unique_code"] --- meaning unique constraint
+#         do_nothing_stmt = insert_stmt.on_conflict_do_nothing(
+#             index_elements=self.unique_constraint
+#         )
 
-        conn.execute(do_nothing_stmt)
+#         conn.execute(do_nothing_stmt)
 
 
 @product_blueprint.route("/full_image/<int:id>", methods=["GET"])
@@ -1325,11 +1249,7 @@ def full_image(id: int):
         abort(404, HTTPStatus.NOT_FOUND)
 
     with open(
-        Path("app")
-        / "static"
-        / "img"
-        / "product"
-        / f"{product.image_obj.name}.{product.image_obj.extension}",
+        Path("app") / "static" / "img" / "product" / product.image_obj.name,
         "rb",
     ) as original_image:
         img_bytes = base64.b64encode(original_image.read()).decode()

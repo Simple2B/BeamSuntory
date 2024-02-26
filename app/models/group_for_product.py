@@ -8,11 +8,13 @@ from app.database import db
 from .utils import ModelMixin
 from app import schema as s
 
+from .product_group import ProductGroup
+
 
 # avoid circular import during initialization
 if TYPE_CHECKING:
     from .master_group_for_product import MasterGroupProduct
-    from .product_group import ProductGroup
+    from .product import Product
 
 
 class GroupProduct(db.Model, ModelMixin):
@@ -36,6 +38,9 @@ class GroupProduct(db.Model, ModelMixin):
     )
     product_groups: orm.Mapped[list["ProductGroup"]] = orm.relationship(
         back_populates="parent"
+    )
+    products: orm.Mapped["Product"] = orm.relationship(
+        back_populates="groups", secondary=ProductGroup.__table__
     )
 
     def __repr__(self):

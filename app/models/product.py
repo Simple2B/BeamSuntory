@@ -8,6 +8,7 @@ from .utils import ModelMixin
 
 from .product_group import ProductGroup
 from .warehouse_product import WarehouseProduct
+from .group_for_product import GroupProduct
 from .warehouse import Warehouse
 from .image import Image
 
@@ -77,6 +78,9 @@ class Product(db.Model, ModelMixin):
     # TODO is overlaps="user_obj" correct decision? remove it to see the warning
     product_groups: orm.Mapped[list[ProductGroup]] = orm.relationship(
         cascade="all, delete-orphan", overlaps="child"
+    )
+    groups: orm.Mapped[list[GroupProduct]] = orm.relationship(
+        secondary=ProductGroup.__table__, back_populates="products"
     )
 
     def __repr__(self):
