@@ -1056,6 +1056,7 @@ def upload():
                 )
             )
         )
+        log(log.INFO, "Product: [%s]", product)
         language_product_group = db.session.scalar(
             sa.select(m.GroupProduct).where(
                 m.GroupProduct.master_groups_for_product.has(
