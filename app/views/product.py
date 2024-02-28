@@ -30,7 +30,7 @@ from app.controllers import (
     get_query_params_from_headers,
 )
 
-from app import models as m, db
+from app import models as m, db, mail
 from app import schema as s
 from app import forms as f
 from app.logger import log
@@ -812,7 +812,7 @@ def request_share():
             m.UserGroup.select().where(m.UserGroup.right_id == to_group.id)
         ).all()
 
-        if len(users) != 0:
+        if users:
             for u in users:
                 # TODO: ask client about users notification without approval permission
                 if not u.child.approval_permission:
@@ -842,8 +842,7 @@ def request_share():
                     request_share=request_share,
                 )
                 db.session.add(request_share_user)
-                # TODO uncomment when ready to notify
-                # mail.send(msg)
+                mail.send(msg)
 
         db.session.commit()
 
@@ -1094,6 +1093,11 @@ def upload():
                 master_groups_for_product=language_master_group,
             )
             db.session.add(language_product_group)
+            log(
+                log.INFO,
+                "Added Language product group: [%s]",
+                product_item_data.language,
+            )
 
         if not brand_product_group and product_item_data.brand != "":
             brand_product_group = m.GroupProduct(
@@ -1101,6 +1105,7 @@ def upload():
                 master_groups_for_product=brand_master_group,
             )
             db.session.add(brand_product_group)
+            log(log.INFO, "Added Brand product group: [%s]", product_item_data.brand)
 
         if not category_product_group and product_item_data.categories != "":
             category_product_group = m.GroupProduct(
@@ -1108,8 +1113,14 @@ def upload():
                 master_groups_for_product=categories_master_group,
             )
             db.session.add(category_product_group)
+            log(
+                log.INFO,
+                "Added Category product group: [%s]",
+                product_item_data.categories,
+            )
 
         if not product:
+            log(log.INFO, "Product not found")
             product = m.Product(
                 SKU=product_item_data.sku,
                 name=product_item_data.name,
@@ -1119,63 +1130,119 @@ def upload():
                 image="",
             )
             db.session.add(product)
+            log(log.INFO, "Added product: [%s]", product_item_data.sku)
 
-        if not db.session.scalar(
-            sa.select(m.Product.id).where(
-                m.Product.SKU == product_item_data.sku,
-                m.Product.groups.any(
-                    sa.and_(
-                        m.GroupProduct.name == product_item_data.language,
-                        m.GroupProduct.master_groups_for_product.has(
-                            m.MasterGroupProduct.name == language_master_group.name,
+        product_with_group_language = None
+        try:
+            product_with_group_language = db.session.scalar(
+                sa.select(m.Product.id).where(
+                    m.Product.SKU == product_item_data.sku,
+                    m.Product.groups.any(
+                        sa.and_(
+                            m.GroupProduct.name == product_item_data.language,
+                            m.GroupProduct.master_groups_for_product.has(
+                                m.MasterGroupProduct.name == language_master_group.name,
+                            ),
                         ),
                     ),
-                ),
+                )
             )
-        ):
+        except Exception as e:
+            log(log.ERROR, "Error: [%s]", e)
+            return redirect(url_for("product.get_all", **query_params))
+
+        if not product_with_group_language:
+            log(log.INFO, "Product with group not found")
             if language_product_group:
                 product.groups.append(language_product_group)
+                log(
+                    log.INFO,
+                    "Language product group added: [%s]",
+                    language_product_group,
+                )
 
-        if not db.session.scalar(
-            sa.select(m.Product.id).where(
-                m.Product.SKU == product_item_data.sku,
-                m.Product.groups.any(
-                    sa.and_(
-                        m.GroupProduct.name == product_item_data.brand,
-                        m.GroupProduct.master_groups_for_product.has(
-                            m.MasterGroupProduct.name == brand_master_group.name
-                        ),
-                    )
-                ),
+        product_with_group_brand = None
+        try:
+            product_with_group_brand = db.session.scalar(
+                sa.select(m.Product.id).where(
+                    m.Product.SKU == product_item_data.sku,
+                    m.Product.groups.any(
+                        sa.and_(
+                            m.GroupProduct.name == product_item_data.brand,
+                            m.GroupProduct.master_groups_for_product.has(
+                                m.MasterGroupProduct.name == brand_master_group.name
+                            ),
+                        )
+                    ),
+                )
             )
-        ):
+        except Exception as e:
+            log(log.ERROR, "Error: [%s]", e)
+            return redirect(url_for("product.get_all", **query_params))
+
+        if not product_with_group_brand:
+            log(log.INFO, "Product with group not found")
             if brand_product_group:
+                log(log.INFO, "Brand product group added: [%s]", brand_product_group)
                 product.groups.append(brand_product_group)
 
-        if not db.session.scalar(
-            sa.select(m.Product.id).where(
-                m.Product.SKU == product_item_data.sku,
-                m.Product.groups.any(
-                    sa.and_(
-                        m.GroupProduct.name == product_item_data.categories,
-                        m.GroupProduct.master_groups_for_product.has(
-                            m.MasterGroupProduct.name == categories_master_group.name
+        product_with_group_category = None
+        try:
+            product_with_group_category = db.session.scalar(
+                sa.select(m.Product.id).where(
+                    m.Product.SKU == product_item_data.sku,
+                    m.Product.groups.any(
+                        sa.and_(
+                            m.GroupProduct.name == product_item_data.categories,
+                            m.GroupProduct.master_groups_for_product.has(
+                                m.MasterGroupProduct.name
+                                == categories_master_group.name
+                            ),
                         ),
                     ),
-                ),
+                )
             )
-        ):
+        except Exception as e:
+            log(log.ERROR, "Error: [%s]", e)
+            return redirect(url_for("product.get_all", **query_params))
+
+        if not product_with_group_category:
+            log(
+                log.INFO,
+                "Category product group not found: [%s]",
+                category_product_group,
+            )
             if category_product_group:
                 product.groups.append(category_product_group)
+                log(
+                    log.INFO,
+                    "Category product group added: [%s]",
+                    category_product_group,
+                )
 
         if language_product_group and language_product_group not in product.groups:
             product.groups.append(language_product_group)
+            log(
+                log.INFO,
+                "Language product group added to product.groups: [%s]",
+                language_product_group,
+            )
 
         if brand_product_group and brand_product_group not in product.groups:
             product.groups.append(brand_product_group)
+            log(
+                log.INFO,
+                "Brand product group added to product.groups: [%s]",
+                brand_product_group,
+            )
 
         if category_product_group and category_product_group not in product.groups:
             product.groups.append(category_product_group)
+            log(
+                log.INFO,
+                "Category product group added to product.groups: [%s]",
+                category_product_group,
+            )
 
         product.name = product_item_data.name
         product.description = product_item_data.description
@@ -1195,6 +1262,7 @@ def upload():
         #     image.save(False)
 
         if not product.image_obj:
+            log(log.INFO, "Product image object not found")
             print(product_item_data.sku)
             default_picture = Image.open(
                 Path("app") / "static" / "img" / "no_picture_default.png"
@@ -1206,11 +1274,13 @@ def upload():
 
             file_image.save(False)
             product.image_obj = file_image
+            log(log.INFO, "Product image added: [%s]", file_image)
 
         product.save(False)
         # product.image = image.get_base64().decode()
 
         if form.target_group_upload.data:
+            log(log.INFO, "Target group: [%s]", form.target_group_upload.data)
             group = db.session.scalar(
                 sa.select(m.Group).where(m.Group.id == form.target_group_upload.data)
             )
@@ -1223,6 +1293,11 @@ def upload():
             )
 
             if warehouse_product and group and product_item_data.available_quantity:
+                log(
+                    log.INFO,
+                    "Warehouse product found: [%s]",
+                    warehouse_product,
+                )
                 warehouse_product.product_quantity += (
                     product_item_data.available_quantity
                 )
@@ -1231,6 +1306,7 @@ def upload():
                 default_warehouse = db.session.scalar(
                     sa.select(m.Warehouse).where(m.Warehouse.name != "Warehouse Events")
                 )
+                log(log.INFO, "Warehouse product not found. Default warehouse: [%s]")
 
                 warehouse_product = m.WarehouseProduct(
                     warehouse=default_warehouse,
@@ -1239,6 +1315,7 @@ def upload():
                     product_quantity=product_item_data.available_quantity,
                 )
                 db.session.add(warehouse_product)
+                log(log.INFO, "Warehouse_product added: [%s]", warehouse_product)
 
     try:
         db.session.commit()
