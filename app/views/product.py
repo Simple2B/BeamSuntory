@@ -1151,8 +1151,10 @@ def upload():
             log(log.ERROR, "Error: [%s]", e)
             return redirect(url_for("product.get_all", **query_params))
 
+        log(log.INFO, "Product with group language: [%s]", product_with_group_language)
         if not product_with_group_language:
             log(log.INFO, "Product with group not found")
+            print(product.groups)
             if language_product_group:
                 product.groups.append(language_product_group)
                 log(
