@@ -1263,7 +1263,8 @@ def upload():
         #         extension="png",
         #     )
         #     image.save(False)
-
+        log(log.INFO, "Next line 1267 Product image object")
+        log(log.INFO, "Product image object: [%s]", product.image_obj)
         if not product.image_obj:
             log(log.INFO, "Product image object not found")
             print(product_item_data.sku)
