@@ -1038,6 +1038,7 @@ def upload():
     stream = codecs.iterdecode(csv_file.stream, "utf-8")
     csv_reader = csv.reader(stream)
     next(csv_reader)
+    error_message = ""
 
     for i, row in enumerate(csv_reader):
         print(row)
@@ -1083,6 +1084,7 @@ def upload():
 
         # TODO: Add logic for creating product with group Events
         if product_item_data.categories == "Events":
+            error_message += f"Cannot upload product with group Events, product SKU: {product_item_data.sku}\n"
             log(log.ERROR, "Cannot upload product with group Events")
             continue
 
@@ -1241,7 +1243,10 @@ def upload():
     try:
         db.session.commit()
         log(log.INFO, "CSV file uploaded")
-        flash("Product added!", "success")
+        if not error_message:
+            flash("Products added!", "success")
+        else:
+            flash(f"Products added, but not all. \n {error_message}", "success")
     except Exception as e:
         log(log.ERROR, "CSV file uploaded error: [%s]", e)
         flash("Cannot save product data", "danger")
