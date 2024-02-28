@@ -1056,7 +1056,9 @@ def upload():
                 )
             )
         )
+
         log(log.INFO, "Product: [%s]", product)
+
         language_product_group = db.session.scalar(
             sa.select(m.GroupProduct).where(
                 m.GroupProduct.master_groups_for_product.has(
@@ -1249,9 +1251,13 @@ def upload():
 
         if product_item_data.name != product.name:
             log(log.INFO, "Product name: [%s]", product.name)
+            log(log.INFO, "Product item data name: [%s]", product_item_data.name)
+            log(log.INFO, "Product: [%s]", product.SKU)
             product.name = product_item_data.name
         else:
             log(log.INFO, "Product name not changed: [%s]", product.name)
+            log(log.INFO, "Product item data name: [%s]", product_item_data.name)
+            log(log.INFO, "Product: [%s]", product.SKU)
 
         product.description = product_item_data.description
         product.regular_price = product_item_data.regular_price
@@ -1325,6 +1331,7 @@ def upload():
                 )
                 db.session.add(warehouse_product)
                 log(log.INFO, "Warehouse_product added: [%s]", warehouse_product)
+        log(log.INFO, "Product added; name: [%s]", product.name)
 
     try:
         db.session.commit()
