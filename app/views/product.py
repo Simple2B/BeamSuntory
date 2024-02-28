@@ -1,4 +1,4 @@
-from io import BytesIO, StringIO
+from io import BytesIO
 import csv
 import codecs
 from http import HTTPStatus
@@ -7,7 +7,6 @@ import json
 from datetime import datetime
 from pathlib import Path
 from PIL import Image
-import pandas
 from flask import (
     Blueprint,
     jsonify,
@@ -22,7 +21,6 @@ from flask import (
 from flask_login import login_required, current_user
 from flask_mail import Message
 from pydantic import ValidationError
-from sqlalchemy.dialects.postgresql import insert
 import sqlalchemy as sa
 from app.controllers import (
     create_pagination,
@@ -997,7 +995,6 @@ def upload():
     if form.target_group_upload.data == 999999999:
         form.target_group_upload.data = 0
 
-    master_product_groups = ["Language", "Categories", "Brand"]
     language_master_group = db.session.scalar(
         sa.select(m.MasterGroupProduct).where(m.MasterGroupProduct.name == "Language")
     )
@@ -1034,16 +1031,16 @@ def upload():
 
     csv_file = request.files["upload_csv"]
 
-    csv_sku_image_file = None
-    defult_image = db.session.scalar(
-        sa.select(m.Image).where(m.Image.name == "no_picture_default.png")
-    )
+    # default_image = db.session.scalar(
+    #     sa.select(m.Image).where(m.Image.name == "no_picture_default.png")
+    # )
 
     stream = codecs.iterdecode(csv_file.stream, "utf-8")
     csv_reader = csv.reader(stream)
     next(csv_reader)
 
     for i, row in enumerate(csv_reader):
+        print(row)
         try:
             product_item_data = s.ProductCSVItem(*row)
         except ValidationError:
@@ -1052,7 +1049,12 @@ def upload():
             return redirect(url_for("product.get_all", **query_params))
 
         product = db.session.scalar(
-            sa.select(m.Product).where(m.Product.SKU == product_item_data.sku)
+            sa.select(m.Product).where(
+                sa.or_(
+                    m.Product.SKU == product_item_data.sku,
+                    m.Product.name == product_item_data.name,
+                )
+            )
         )
         language_product_group = db.session.scalar(
             sa.select(m.GroupProduct).where(
@@ -1079,26 +1081,31 @@ def upload():
             )
         )
 
-        if not language_product_group:
+        # TODO: Add logic for creating product with group Events
+        if product_item_data.categories == "Events":
+            log(log.ERROR, "Cannot upload product with group Events")
+            continue
+
+        if not language_product_group and product_item_data.language != "":
             language_product_group = m.GroupProduct(
-                master_product_groups=language_master_group,
+                name=product_item_data.language,
+                master_groups_for_product=language_master_group,
             )
             db.session.add(language_product_group)
-        language_product_group.name = product_item_data.language
 
-        if not brand_product_group:
+        if not brand_product_group and product_item_data.brand != "":
             brand_product_group = m.GroupProduct(
-                master_product_groups=brand_master_group,
+                name=product_item_data.brand,
+                master_groups_for_product=brand_master_group,
             )
             db.session.add(brand_product_group)
-        brand_product_group.name = product_item_data.brand
 
-        if not category_product_group:
+        if not category_product_group and product_item_data.categories != "":
             category_product_group = m.GroupProduct(
-                master_product_groups=categories_master_group,
+                name=product_item_data.categories,
+                master_groups_for_product=categories_master_group,
             )
             db.session.add(category_product_group)
-        category_product_group.name = product_item_data.categories
 
         if not product:
             product = m.Product(
@@ -1107,7 +1114,7 @@ def upload():
                 description=product_item_data.description,
                 regular_price=product_item_data.regular_price,
                 retail_price=product_item_data.retail_price,
-                image="default.png",
+                image="",
             )
             db.session.add(product)
 
@@ -1124,7 +1131,8 @@ def upload():
                 ),
             )
         ):
-            product.groups.append(language_product_group)
+            if language_product_group:
+                product.groups.append(language_product_group)
 
         if not db.session.scalar(
             sa.select(m.Product.id).where(
@@ -1139,7 +1147,8 @@ def upload():
                 ),
             )
         ):
-            product.groups.append(brand_product_group)
+            if brand_product_group:
+                product.groups.append(brand_product_group)
 
         if not db.session.scalar(
             sa.select(m.Product.id).where(
@@ -1154,15 +1163,16 @@ def upload():
                 ),
             )
         ):
-            product.groups.append(category_product_group)
+            if category_product_group:
+                product.groups.append(category_product_group)
 
-        if language_product_group not in product.groups:
+        if language_product_group and language_product_group not in product.groups:
             product.groups.append(language_product_group)
 
-        if brand_product_group not in product.groups:
+        if brand_product_group and brand_product_group not in product.groups:
             product.groups.append(brand_product_group)
 
-        if category_product_group not in product.groups:
+        if category_product_group and category_product_group not in product.groups:
             product.groups.append(category_product_group)
 
         product.name = product_item_data.name
@@ -1170,63 +1180,73 @@ def upload():
         product.regular_price = product_item_data.regular_price
         product.retail_price = product_item_data.retail_price
 
-        image = db.session.scalar(
-            sa.select(m.Image).where(m.Image.name == product_item_data.sku)
-        )
-        if not image:
-            image = m.Image(
-                name=product_item_data.sku,
-                path=f"product/{product_item_data.sku}",
-                extension="png",
+        # TODO: Add creating image from csv
+        # image = db.session.scalar(
+        #     sa.select(m.Image).where(m.Image.name == product_item_data.sku)
+        # )
+        # if not image:
+        #     image = m.Image(
+        #         name=product_item_data.sku,
+        #         path=f"product/{product_item_data.sku}",
+        #         extension="png",
+        #     )
+        #     image.save(False)
+
+        if not product.image_obj:
+            print(product_item_data.sku)
+            default_picture = Image.open(
+                Path("app") / "static" / "img" / "no_picture_default.png"
             )
-            image.save(False)
+            with BytesIO() as png_bytes:
+                default_picture.save(png_bytes, format="PNG")
+                png_bytes.seek(0)
+                file_image = save_image(png_bytes, f"product/{product_item_data.sku}")
 
-        if product.image_obj:
-            db.session.delete(product.image_obj)
+            file_image.save(False)
+            product.image_obj = file_image
 
-        product.image_obj = image
-        product.image = image.get_base64().decode()
+        product.save(False)
+        # product.image = image.get_base64().decode()
 
-    db.session.commit()
+        if form.target_group_upload.data:
+            group = db.session.scalar(
+                sa.select(m.Group).where(m.Group.id == form.target_group_upload.data)
+            )
 
-    flash("Product added!", "success")
+            warehouse_product = (
+                db.session.query(m.WarehouseProduct)
+                .filter(m.WarehouseProduct.product == product)
+                .filter(m.WarehouseProduct.group == group)
+                .first()
+            )
+
+            if warehouse_product and group and product_item_data.available_quantity:
+                warehouse_product.product_quantity += (
+                    product_item_data.available_quantity
+                )
+
+            if not warehouse_product and group and product_item_data.available_quantity:
+                default_warehouse = db.session.scalar(
+                    sa.select(m.Warehouse).where(m.Warehouse.name != "Warehouse Events")
+                )
+
+                warehouse_product = m.WarehouseProduct(
+                    warehouse=default_warehouse,
+                    product=product,
+                    group=group,
+                    product_quantity=product_item_data.available_quantity,
+                )
+                db.session.add(warehouse_product)
+
+    try:
+        db.session.commit()
+        log(log.INFO, "CSV file uploaded")
+        flash("Product added!", "success")
+    except Exception as e:
+        log(log.ERROR, "CSV file uploaded error: [%s]", e)
+        flash("Cannot save product data", "danger")
+
     return redirect(url_for("product.get_all", **query_params))
-
-
-# class DoNothingConflict:
-#     def __init__(self, unique_constraint: list[str]):
-#         self.unique_constraint = unique_constraint
-
-#     def insert_do_nothing_on_conflicts(self, sqltable, conn, keys, data_iter):
-#         """
-#         Execute SQL statement inserting data
-
-#         Parameters
-#         ----------
-#         sqltable : pandas.io.sql.SQLTable
-#         conn : sqlalchemy.engine.Engine or sqlalchemy.engine.Connection
-#         keys : list of str
-#             Column names
-#         data_iter : Iterable that iterates the values to be inserted
-#         """
-#         columns = []
-#         for c in keys:
-#             columns.append(sa.column(c))
-
-#         if sqltable.schema:
-#             table_name = "{}.{}".format(sqltable.schema, sqltable.name)
-#         else:
-#             table_name = sqltable.name
-
-#         mytable = sa.table(table_name, *columns)
-
-#         insert_stmt = insert(mytable).values(list(data_iter))
-#         # NOTE index_elements=["unique_code"] --- meaning unique constraint
-#         do_nothing_stmt = insert_stmt.on_conflict_do_nothing(
-#             index_elements=self.unique_constraint
-#         )
-
-#         conn.execute(do_nothing_stmt)
 
 
 @product_blueprint.route("/full_image/<int:id>", methods=["GET"])
@@ -1249,7 +1269,11 @@ def full_image(id: int):
         abort(404, HTTPStatus.NOT_FOUND)
 
     with open(
-        Path("app") / "static" / "img" / "product" / product.image_obj.name,
+        Path("app")
+        / "static"
+        / "img"
+        / "product"
+        / f"{product.image_obj.name}.{product.image_obj.extension}",
         "rb",
     ) as original_image:
         img_bytes = base64.b64encode(original_image.read()).decode()
