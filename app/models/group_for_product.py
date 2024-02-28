@@ -39,7 +39,7 @@ class GroupProduct(db.Model, ModelMixin):
     product_groups: orm.Mapped[list["ProductGroup"]] = orm.relationship(
         back_populates="parent"
     )
-    products: orm.Mapped["Product"] = orm.relationship(
+    products: orm.Mapped[list["Product"]] = orm.relationship(
         back_populates="groups", secondary=ProductGroup.__table__
     )
 

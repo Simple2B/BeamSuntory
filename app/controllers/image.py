@@ -37,8 +37,11 @@ def save_image(image: BytesIO, path: str, image_model: m.Image = None):
             if image:
                 log(log.INFO, "Image already exists. Deleting old image.")
                 db.session.delete(image)
-                db.session.commit()
-                log(log.INFO, "Old image deleted.")
+                try:
+                    db.session.commit()
+                    log(log.INFO, "Old image deleted.")
+                except Exception as e:
+                    log(log.ERROR, "Can't delete old image. Error: [%s]", e)
             return m.Image(
                 name=image_name,
                 path=image_path,

@@ -1050,12 +1050,22 @@ def upload():
 
         product = db.session.scalar(
             sa.select(m.Product).where(
-                sa.or_(
-                    m.Product.SKU == product_item_data.sku,
-                    m.Product.name == product_item_data.name,
-                )
+                m.Product.SKU == product_item_data.sku,
             )
         )
+
+        product_by_name = db.session.scalar(
+            sa.select(m.Product).where(m.Product.name == product_item_data.name)
+        )
+
+        if not product and product_by_name:
+            log(
+                log.ERROR,
+                "Product with SKU: [%s] already exists",
+                product_item_data.sku,
+            )
+            error_message += f"Product exist with the same name: {product_by_name.name}\n Product not added\n"
+            continue
 
         log(log.INFO, "Product: [%s]", product)
 
@@ -1124,6 +1134,7 @@ def upload():
 
         if not product:
             log(log.INFO, "Product not found")
+
             product = m.Product(
                 SKU=product_item_data.sku,
                 name=product_item_data.name,
@@ -1188,8 +1199,8 @@ def upload():
         if not product_with_group_brand:
             log(log.INFO, "Product with group not found")
             if brand_product_group:
-                log(log.INFO, "Brand product group added: [%s]", brand_product_group)
                 product.groups.append(brand_product_group)
+                log(log.INFO, "Brand product group added: [%s]", brand_product_group)
 
         product_with_group_category = None
         try:
@@ -1253,12 +1264,18 @@ def upload():
             log(log.INFO, "Product name: [%s]", product.name)
             log(log.INFO, "Product item data name: [%s]", product_item_data.name)
             log(log.INFO, "Product: [%s]", product.SKU)
-            product.name = product_item_data.name
         else:
             log(log.INFO, "Product name not changed: [%s]", product.name)
             log(log.INFO, "Product item data name: [%s]", product_item_data.name)
             log(log.INFO, "Product: [%s]", product.SKU)
 
+        if product_by_name and product != product_by_name:
+            log(log.INFO, "Product by name: [%s]", product_by_name)
+            log(log.INFO, "Product: [%s]", product)
+            error_message += f"Two different products exist with same SKU: {product.SKU}\n Product not added\n"
+            continue
+
+        product.name = product_item_data.name
         product.description = product_item_data.description
         product.regular_price = product_item_data.regular_price
         product.retail_price = product_item_data.retail_price
@@ -1274,11 +1291,9 @@ def upload():
         #         extension="png",
         #     )
         #     image.save(False)
-        log(log.INFO, "Next line 1267 Product image object")
         log(log.INFO, "Product image object: [%s]", product.image_obj)
         if not product.image_obj:
             log(log.INFO, "Product image object not found")
-            print(product_item_data.sku)
             default_picture = Image.open(
                 Path("app") / "static" / "img" / "no_picture_default.png"
             )
