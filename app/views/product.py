@@ -1247,7 +1247,12 @@ def upload():
                 category_product_group,
             )
 
-        product.name = product_item_data.name
+        if product_item_data.name != product.name:
+            log(log.INFO, "Product name: [%s]", product.name)
+            product.name = product_item_data.name
+        else:
+            log(log.INFO, "Product name not changed: [%s]", product.name)
+
         product.description = product_item_data.description
         product.regular_price = product_item_data.regular_price
         product.retail_price = product_item_data.retail_price
