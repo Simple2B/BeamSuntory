@@ -13,7 +13,7 @@ from flask_mail import Message
 import sqlalchemy as sa
 from app.controllers import create_pagination, role_required
 
-from app import models as m, db
+from app import models as m, db, mail
 from app import schema as s
 from app import forms as f
 from app.logger import log
@@ -305,8 +305,7 @@ def decline(id: int):
                 request_share=request_share,
                 url=url,
             )
-            # TODO uncomment when ready to notify
-            # mail.send(msg)
+            mail.send(msg)
 
     db.session.add(report_request_share)
     db.session.commit()

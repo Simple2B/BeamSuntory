@@ -17,8 +17,7 @@ from app.controllers import create_pagination, role_required
 
 from app import schema as s
 
-# TODO uncomment after mail server setup
-from app import models as m, db  # , mail
+from app import models as m, db, mail
 from app import forms as f
 from app.logger import log
 from config import SALES_REP_LOCKER_NAME
@@ -228,9 +227,11 @@ def create():
             country=user.country if user.sales_rep else form.locker_country.data,
             region=user.region if user.sales_rep else form.locker_region.data,
             city=user.city if user.sales_rep else form.locker_city.data,
-            address=user.street_address
-            if user.sales_rep
-            else form.locker_street_address.data,
+            address=(
+                user.street_address
+                if user.sales_rep
+                else form.locker_street_address.data
+            ),
             zip=user.zip_code if user.sales_rep else form.locker_zip_code.data,
             active=True,
             user_id=user.id,
@@ -271,7 +272,7 @@ def create():
         user=user,
         url=url,
     )
-    # mail.send(msg)
+    mail.send(msg)
 
     return redirect(url_for("user.get_all"))
 
