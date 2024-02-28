@@ -2,6 +2,7 @@ from io import BytesIO
 from pathlib import Path
 import filetype
 
+from app import db
 from app import models as m
 from app.logger import log
 
@@ -26,8 +27,15 @@ def save_image(image: BytesIO, path: str, image_model: m.Image = None):
             f.write(image.read())
 
         if not image_model:
+            image_name = path.split("/")[-1]
+            image = db.session.scalar(
+                m.Image.select().where(m.Image.name == image_name)
+            )
+            if image:
+                db.session.delete(image)
+                db.session.commit()
             return m.Image(
-                name=path.split("/")[-1],
+                name=image_name,
                 path=image_path,
                 extension=image_extension,
             )

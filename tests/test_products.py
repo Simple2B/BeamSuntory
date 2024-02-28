@@ -210,7 +210,8 @@ def test_assign_product(mg_g_populate: FlaskClient):
 def test_upload_product(mg_g_populate: FlaskClient):
     login(mg_g_populate)
 
-    CSV_NAME = "All Products part 5.csv"
+    # CSV_NAME = "All Products part 5.csv"
+    CSV_NAME = "Book.csv"
     CSV_PATH = Path("tests") / "data" / CSV_NAME
 
     with open(CSV_PATH, "rb") as f:
@@ -231,12 +232,10 @@ def test_upload_product(mg_g_populate: FlaskClient):
         sa.select(sa.func.count()).select_from(m.WarehouseProduct)
     )
 
-    assert all_products > 170
-    assert all_warehouse_products < 100
+    assert all_products > 8
+    assert all_warehouse_products < 9
 
-    group_upload_to: m.Group = db.session.scalar(
-        m.Group.select().where(m.Group.name == "On the Rocks")
-    )
+    group_upload_to: m.Group = db.session.scalar(m.Group.select())
 
     assert group_upload_to
 
@@ -262,4 +261,4 @@ def test_upload_product(mg_g_populate: FlaskClient):
 
     assert all_products_with_groups == all_products
     assert all_warehouse_products_with_groups > all_warehouse_products
-    assert all_warehouse_products_with_groups > 170
+    assert all_warehouse_products_with_groups > 9

@@ -109,6 +109,8 @@ def mg_g_populate(client: FlaskClient):
         "Country",
         "Brand",
         "Marketing",
+        "Language",
+        "Categories",
         s.ProductMasterGroupMandatory.events.value,
     ]
     groups = {

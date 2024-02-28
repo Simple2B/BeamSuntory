@@ -1,5 +1,6 @@
 from enum import Enum
 from pydantic import BaseModel, ConfigDict, Field, RootModel
+from pydantic.dataclasses import dataclass
 from .supplier import Supplier
 from .warehouse import Warehouse
 from .warehouse_product import WarehouseProduct
@@ -108,3 +109,16 @@ class ProductAdditionalInfo(BaseModel):
     current_master_product_groups: list[MasterGroupsGroups] = Field(
         serialization_alias="currentMasterProductGroups"
     )
+
+
+@dataclass
+class ProductCSVItem:
+    name: str
+    description: str
+    language: str
+    sku: str
+    brand: str
+    categories: str
+    regular_price: float
+    retail_price: float
+    available_quantity: int
