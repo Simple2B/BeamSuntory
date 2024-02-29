@@ -38,7 +38,11 @@ def get_all():
                 m.Assign.product_id == product.id,
             )
             .join(group, m.Assign.group_id == group.id)
-            .where(product.name.ilike(f"%{q}%") | group.name.ilike(f"%{q}%"))
+            .where(
+                product.name.ilike(f"%{q}%")
+                | group.name.ilike(f"%{q}%")
+                | m.Assign.uuid.ilike(f"%{q}%")
+            )
             .order_by(m.Assign.id)
         )
         count_query = (
@@ -48,7 +52,11 @@ def get_all():
                 m.Assign.product_id == product.id,
             )
             .join(group, m.Assign.group_id == group.id)
-            .where(product.name.ilike(f"%{q}%") | group.name.ilike(f"%{q}%"))
+            .where(
+                product.name.ilike(f"%{q}%")
+                | group.name.ilike(f"%{q}%")
+                | m.Assign.uuid.ilike(f"%{q}%")
+            )
             .select_from(m.Assign)
         )
 

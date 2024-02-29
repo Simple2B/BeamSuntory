@@ -278,23 +278,23 @@
                                                   width: 100%;
                                                   margin: 0;
                                                 " align="left">
-                                              Request share has been {{ action }}.
+                                              Ship request has been delivered.
                                             </p>
                                           </div>
                                           <table style="width: 100%; border-collapse: collapse; border: 1px solid #000">
                                             <thead>
                                               <tr>
                                                 <th style="border-collapse: collapse; border: 1px solid #000">
-                                                  Order ID
+                                                  User
                                                 </th>
                                                 <th style="border-collapse: collapse; border: 1px solid #000">
-                                                  Product Name
+                                                  Store Category
                                                 </th>
                                                 <th style="border-collapse: collapse; border: 1px solid #000">
-                                                  Group Name
+                                                  Store
                                                 </th>
                                                 <th style="border-collapse: collapse; border: 1px solid #000">
-                                                  Desired Quantity
+                                                  Status
                                                 </th>
                                                 <th style="border-collapse: collapse; border: 1px solid #000">
                                                   Created Date
@@ -308,35 +308,35 @@
                                                       border-collapse: collapse;
                                                       border: 1px solid #000;
                                                     ">
-                                                  {{ request_share.order_numb }}
+                                                  {{ ship_request.user.username }}
                                                 </td>
                                                 <td style="
                                                       text-align: center;
                                                       border-collapse: collapse;
                                                       border: 1px solid #000;
                                                     ">
-                                                  {{ request_share.product.name }}
+                                                  {{ ship_request.store_category.name }}
                                                 </td>
                                                 <td style="
                                                       text-align: center;
                                                       border-collapse: collapse;
                                                       border: 1px solid #000;
                                                     ">
-                                                  {{ request_share.group.name }}
+                                                  {{ ship_request.store.store_name }}
                                                 </td>
                                                 <td style="
                                                       text-align: center;
                                                       border-collapse: collapse;
                                                       border: 1px solid #000;
                                                     ">
-                                                  {{ request_share.desire_quantity }}
+                                                  {{ ship_request.status.value }}
                                                 </td>
                                                 <td style="
                                                       text-align: center;
                                                       border-collapse: collapse;
                                                       border: 1px solid #000;
                                                     ">
-                                                  {{ request_share.created_at.date() }}
+                                                  {{ ship_request.created_at.date() }}
                                                 </td>
                                               </tr>
                                             </tbody>
@@ -414,7 +414,7 @@
                                                         background-color: #0d6efd;
                                                         padding: 8px 12px;
                                                         border: 1px solid #0d6efd;
-                                                      ">View request share</a>
+                                                      ">View ship request</a>
                                                 </td>
                                               </tr>
                                             </tbody>

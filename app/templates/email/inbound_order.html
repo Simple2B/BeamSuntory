@@ -278,7 +278,7 @@
                                                   width: 100%;
                                                   margin: 0;
                                                 " align="left">
-                                              Request share has been {{ action }}.
+                                              Inbound order has been {{ action }}.
                                             </p>
                                           </div>
                                           <table style="width: 100%; border-collapse: collapse; border: 1px solid #000">
@@ -288,13 +288,7 @@
                                                   Order ID
                                                 </th>
                                                 <th style="border-collapse: collapse; border: 1px solid #000">
-                                                  Product Name
-                                                </th>
-                                                <th style="border-collapse: collapse; border: 1px solid #000">
-                                                  Group Name
-                                                </th>
-                                                <th style="border-collapse: collapse; border: 1px solid #000">
-                                                  Desired Quantity
+                                                  Order Name
                                                 </th>
                                                 <th style="border-collapse: collapse; border: 1px solid #000">
                                                   Created Date
@@ -308,35 +302,21 @@
                                                       border-collapse: collapse;
                                                       border: 1px solid #000;
                                                     ">
-                                                  {{ request_share.order_numb }}
+                                                  {{ inbound_order.order_id }}
                                                 </td>
                                                 <td style="
                                                       text-align: center;
                                                       border-collapse: collapse;
                                                       border: 1px solid #000;
                                                     ">
-                                                  {{ request_share.product.name }}
+                                                  {{ inbound_order.title }}
                                                 </td>
                                                 <td style="
                                                       text-align: center;
                                                       border-collapse: collapse;
                                                       border: 1px solid #000;
                                                     ">
-                                                  {{ request_share.group.name }}
-                                                </td>
-                                                <td style="
-                                                      text-align: center;
-                                                      border-collapse: collapse;
-                                                      border: 1px solid #000;
-                                                    ">
-                                                  {{ request_share.desire_quantity }}
-                                                </td>
-                                                <td style="
-                                                      text-align: center;
-                                                      border-collapse: collapse;
-                                                      border: 1px solid #000;
-                                                    ">
-                                                  {{ request_share.created_at.date() }}
+                                                  {{ inbound_order.created_at.date() }}
                                                 </td>
                                               </tr>
                                             </tbody>
@@ -414,7 +394,7 @@
                                                         background-color: #0d6efd;
                                                         padding: 8px 12px;
                                                         border: 1px solid #0d6efd;
-                                                      ">View request share</a>
+                                                      ">View inbound order</a>
                                                 </td>
                                               </tr>
                                             </tbody>

@@ -4,7 +4,7 @@ import sqlalchemy as sa
 from sqlalchemy import orm
 
 from app.database import db
-from .utils import ModelMixin
+from .utils import ModelMixin, generate_uuid
 from app import schema as s
 from .product import Product
 from .group import Group
@@ -27,6 +27,7 @@ class Assign(db.Model, ModelMixin):
         sa.DateTime,
         default=datetime.utcnow,
     )
+    uuid: orm.Mapped[str] = orm.mapped_column(sa.String(64), default=generate_uuid)
     # Relationships
     product: orm.Mapped[Product] = orm.relationship()
     from_group: orm.Mapped[Group] = orm.relationship(

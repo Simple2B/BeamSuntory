@@ -748,6 +748,41 @@ def assign():
 
         db.session.commit()
 
+        users: list[m.UserGroup] = db.session.scalars(
+            m.UserGroup.select().where(
+                sa.or_(
+                    m.UserGroup.right_id == product_to_group.id,
+                    m.UserGroup.right_id == product_from_group.id,
+                )
+            )
+        ).all()
+
+        if users:
+            for u in users:
+                # TODO: ask client about users notification without approval permission
+                if not u.child.approval_permission:
+                    continue
+                msg = Message(
+                    subject=f"Assign {assign_obj.product.name}",
+                    sender=app.config["MAIL_DEFAULT_SENDER"],
+                    recipients=[u.child.email],
+                )
+                url = (
+                    url_for(
+                        "assign.get_all",
+                        _external=True,
+                    )
+                    + f"?q={assign_obj.uuid}"
+                )
+
+                msg.html = render_template(
+                    "email/assign.html",
+                    user=u.child,
+                    assign=assign_obj,
+                    url=url,
+                )
+                mail.send(msg)
+
         return redirect(url_for("product.get_all", **query_params))
 
     else:

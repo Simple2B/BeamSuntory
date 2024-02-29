@@ -205,6 +205,28 @@ def share(id: int):
     warehouse_from_prod.product_quantity -= request_share.desire_quantity
     warehouse_from_prod.save(False)
 
+    msg = Message(
+        subject=f"Request share approved {request_share.order_numb}",
+        sender=app.config["MAIL_DEFAULT_SENDER"],
+        recipients=[request_share.user.email],
+    )
+    url = (
+        url_for(
+            "request_share.get_all",
+            _external=True,
+        )
+        + f"?q={request_share.order_numb}"
+    )
+
+    msg.html = render_template(
+        "email/request_share.html",
+        user=request_share.user,
+        request_share=request_share,
+        url=url,
+        action="approved",
+    )
+    mail.send(msg)
+
     m.ReportInventory(
         qty_before=warehouse_from_prod.product_quantity + request_share.desire_quantity,
         qty_after=warehouse_from_prod.product_quantity,
