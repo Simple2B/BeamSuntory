@@ -5,15 +5,17 @@ from flask import (
     flash,
     redirect,
     url_for,
+    current_app as app,
 )
 from flask_login import login_required, current_user
+from flask_mail import Message
 import sqlalchemy as sa
 from sqlalchemy import desc
 from sqlalchemy.orm import aliased
 from app.controllers import create_pagination, role_required
 
 from app import schema as s
-from app import models as m, db
+from app import models as m, db, mail
 from app import forms as f
 from app.logger import log
 
@@ -198,6 +200,27 @@ def deliver(id: int):
     )
     db.session.add(report_shipping)
     db.session.commit()
+
+    msg = Message(
+        subject=f"Ship request delivered {ship_request.order_numb}",
+        sender=app.config["MAIL_DEFAULT_SENDER"],
+        recipients=[ship_request.user.email],
+    )
+    url = (
+        url_for(
+            "ship_request.get_all",
+            _external=True,
+        )
+        + f"?q={ship_request.order_numb}"
+    )
+
+    msg.html = render_template(
+        "email/ship_request.html",
+        user=ship_request.user,
+        ship_request=ship_request,
+        url=url,
+    )
+    mail.send(msg)
 
     log(log.INFO, "Ship Request delivered. Ship Request: [%s]", ship_request)
     flash("Ship Request delivered!", "success")

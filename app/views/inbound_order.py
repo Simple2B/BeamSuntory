@@ -8,16 +8,18 @@ from flask import (
     flash,
     redirect,
     url_for,
+    current_app as app,
 )
 
 from flask_login import login_required, current_user
+from flask_mail import Message
 import sqlalchemy as sa
 from sqlalchemy import desc
 from pydantic import ValidationError
 
 from app.controllers import create_pagination, role_required
 
-from app import models as m, db
+from app import models as m, db, mail
 from app import schema as s
 from app import forms as f
 from app.logger import log
@@ -180,6 +182,28 @@ def create():
         inbound_order.save()
         inbound_order.set_order_id()
         db.session.commit()
+
+        msg = Message(
+            subject=f"New inbound order {inbound_order.order_id}",
+            sender=app.config["MAIL_DEFAULT_SENDER"],
+            recipients=[inbound_order.warehouse.manager.email],
+        )
+        url = (
+            url_for(
+                "inbound_order.get_all",
+                _external=True,
+            )
+            + f"?q={inbound_order.order_id}"
+        )
+
+        msg.html = render_template(
+            "email/inbound_order.html",
+            user=inbound_order.warehouse.manager,
+            inbound_order=inbound_order,
+            url=url,
+            action="created",
+        )
+        mail.send(msg)
 
         report_inbound_order = m.ReportInboundOrder(
             type=s.ReportEventType.created.value,
