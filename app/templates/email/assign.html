@@ -278,23 +278,26 @@
                                                   width: 100%;
                                                   margin: 0;
                                                 " align="left">
-                                              Request share has been {{ action }}.
+                                              Assign has been created.
                                             </p>
                                           </div>
                                           <table style="width: 100%; border-collapse: collapse; border: 1px solid #000">
                                             <thead>
                                               <tr>
                                                 <th style="border-collapse: collapse; border: 1px solid #000">
-                                                  Order ID
+                                                  User
                                                 </th>
                                                 <th style="border-collapse: collapse; border: 1px solid #000">
                                                   Product Name
                                                 </th>
                                                 <th style="border-collapse: collapse; border: 1px solid #000">
-                                                  Group Name
+                                                  Group From
                                                 </th>
                                                 <th style="border-collapse: collapse; border: 1px solid #000">
-                                                  Desired Quantity
+                                                  Group To
+                                                </th>
+                                                <th style="border-collapse: collapse; border: 1px solid #000">
+                                                  Quantity
                                                 </th>
                                                 <th style="border-collapse: collapse; border: 1px solid #000">
                                                   Created Date
@@ -308,35 +311,42 @@
                                                       border-collapse: collapse;
                                                       border: 1px solid #000;
                                                     ">
-                                                  {{ request_share.order_numb }}
+                                                  {{ assign.user.username }}
                                                 </td>
                                                 <td style="
                                                       text-align: center;
                                                       border-collapse: collapse;
                                                       border: 1px solid #000;
                                                     ">
-                                                  {{ request_share.product.name }}
+                                                  {{ assign.product.name }}
                                                 </td>
                                                 <td style="
                                                       text-align: center;
                                                       border-collapse: collapse;
                                                       border: 1px solid #000;
                                                     ">
-                                                  {{ request_share.group.name }}
+                                                  {{ assign.from_group.name }}
                                                 </td>
                                                 <td style="
                                                       text-align: center;
                                                       border-collapse: collapse;
                                                       border: 1px solid #000;
                                                     ">
-                                                  {{ request_share.desire_quantity }}
+                                                  {{ assign.group.name }}
                                                 </td>
                                                 <td style="
                                                       text-align: center;
                                                       border-collapse: collapse;
                                                       border: 1px solid #000;
                                                     ">
-                                                  {{ request_share.created_at.date() }}
+                                                  {{ assign.quantity }}
+                                                </td>
+                                                <td style="
+                                                      text-align: center;
+                                                      border-collapse: collapse;
+                                                      border: 1px solid #000;
+                                                    ">
+                                                  {{ assign.created_at.date() }}
                                                 </td>
                                               </tr>
                                             </tbody>
@@ -414,7 +424,7 @@
                                                         background-color: #0d6efd;
                                                         padding: 8px 12px;
                                                         border: 1px solid #0d6efd;
-                                                      ">View request share</a>
+                                                      ">View assign</a>
                                                 </td>
                                               </tr>
                                             </tbody>

@@ -205,6 +205,37 @@ def share(id: int):
     warehouse_from_prod.product_quantity -= request_share.desire_quantity
     warehouse_from_prod.save(False)
 
+    users: list[m.UserGroup] = db.session.scalars(
+        m.UserGroup.select().where(m.UserGroup.right_id == request_share.group_id)
+    ).all()
+
+    if users:
+        for u in users:
+            # TODO: ask client about users notification without approval permission
+            if not u.child.approval_permission:
+                continue
+            msg = Message(
+                subject=f"Request share approved {request_share.order_numb}",
+                sender=app.config["MAIL_DEFAULT_SENDER"],
+                recipients=[u.child.email],
+            )
+            url = (
+                url_for(
+                    "request_share.get_all",
+                    _external=True,
+                )
+                + f"?q={request_share.order_numb}"
+            )
+
+            msg.html = render_template(
+                "email/request_share.html",
+                user=u.child,
+                request_share=request_share,
+                url=url,
+                action="approved",
+            )
+            mail.send(msg)
+
     m.ReportInventory(
         qty_before=warehouse_from_prod.product_quantity + request_share.desire_quantity,
         qty_after=warehouse_from_prod.product_quantity,
