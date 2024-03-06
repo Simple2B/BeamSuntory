@@ -73,8 +73,8 @@ deleteButtons.forEach((e) => {
 });
 
 function editGroup(group: IGroup) {
-  let input: HTMLInputElement = document.querySelector('#group-edit-name');
-  input.value = group.name;
+  let input: HTMLInputElement = document.querySelector('#sub-group-edit');
+  input.value = group.id.toString();
   input = document.querySelector('#group-edit-id');
   input.value = group.id.toString();
   input = document.querySelector('#group-edit-master_group');

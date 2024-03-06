@@ -76,9 +76,9 @@ class NewMasterGroupForm(FlaskForm):
 
 class SubGroupForm(FlaskForm):
     next_url = StringField("next_url")
-    group_id = StringField("Group", [DataRequired()])
-    name = StringField("Name", [DataRequired()])
-    parent_group_id = StringField("Parent Group", [DataRequired()])
+    group_id = IntegerField("Group", [DataRequired()])
+    new_sub_group_id = IntegerField("Sub Group", [DataRequired()])
+    parent_group_id = IntegerField("Parent Group", [DataRequired()])
 
     def validate_name(self, field):
         query = m.Group.select().where(m.Group.name == field.data)
@@ -89,7 +89,7 @@ class SubGroupForm(FlaskForm):
 
 
 class NewSubGroupForm(FlaskForm):
-    name = StringField("Name", [DataRequired()])
+    sub_group_id = IntegerField("Sub Group", [DataRequired()])
     group_id = IntegerField("Group", [DataRequired()])
 
     def validate_name(self, field):
