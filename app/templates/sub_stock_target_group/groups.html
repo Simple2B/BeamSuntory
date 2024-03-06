@@ -44,8 +44,8 @@
     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
       <tr>
         <th scope="col" class="px-6 py-3">#</th>
-        <th scope="col" class="px-6 py-3">Name</th>
-        <th scope="col" class="px-6 py-3">Target group</th>
+        <th scope="col" class="px-6 py-3">Sub Target Group</th>
+        <th scope="col" class="px-6 py-3">Target Group</th>
         <th scope="col" class="px-6 py-3">Master Target group</th>
         <th scope="col" class="px-6 py-3">Actions</th>
       </tr>
@@ -74,6 +74,7 @@
           </div>
         </td>
         <td class="p-4 space-x-2 whitespace-nowrap">
+          <!-- TODO: remove if it will be approved by the client -->
           <button type="button" data-target="{{group.json}}"
             class="group-edit-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 sm:w-auto dark:bg-yellow-400 dark:hover:bg-yellow-500">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -180,6 +181,7 @@
 </div>
 {% endif %}
 </div>
+<!-- prettier-ignore -->
 {% include 'sub_stock_target_group/edit.html' %}
 {% include 'sub_stock_target_group/add.html' %}
 <!-- prettier-ignore -->
