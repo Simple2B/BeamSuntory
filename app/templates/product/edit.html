@@ -10,8 +10,6 @@
       <input type="hidden" name="product_id" id="product-edit-id" value="0" />
       <input type="hidden" name="next_url" id="product-edit-next_url" value="" />
       <input type="hidden" name="product_groups" id="product-edit-product-groups" value="" />
-      <input hidden type="file" name="low_image" id="product-edit-low-image" accept="image/png, image/gif, image/jpeg" />
-      <input hidden type="file" name="high_image" id="product-edit-high-image" accept="image/png, image/gif, image/jpeg" />
       <!-- Modal header -->
       <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Edit product </h3>
@@ -70,9 +68,7 @@
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="image" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Image</label>
-            <input type="file" name="image" id="product-edit-image" accept="image/png, image/gif, image/jpeg"
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Image" />
+            {{ form_edit.image }}
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="description"

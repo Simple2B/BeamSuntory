@@ -2,6 +2,7 @@ import datetime
 import os
 from pathlib import Path
 
+import filetype
 import pytest
 from flask import Flask
 from flask.testing import FlaskClient
@@ -103,8 +104,13 @@ def populate_one_user(client: FlaskClient):
 
 
 @pytest.fixture
-def mg_g_populate(client: FlaskClient):
+def mg_g_populate(client: FlaskClient, mocker):
     # TODO refactoring
+    mocker.patch(
+        "app.controllers.image.save_image",
+        return_value=("test", "test"),
+    )
+    mocker.patch.object(filetype, "is_image", return_value=True)
     master_groups = [
         "Country",
         "Brand",
