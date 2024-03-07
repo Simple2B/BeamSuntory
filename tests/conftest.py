@@ -29,7 +29,14 @@ def app():
 
 
 @pytest.fixture()
-def client(app: Flask):
+def client(app: Flask, mocker):
+    mocker.patch(
+        "app.views.product.save_image",
+        return_value=("test", "test"),
+    )
+    kind = filetype.guess("tests/data/no_picture_default.png")
+    mocker.patch.object(filetype, "guess", return_value=kind)
+    mocker.patch.object(filetype, "is_image", return_value=True)
     with app.test_client() as client:
         with app.app_context():
             db.drop_all()
@@ -106,11 +113,6 @@ def populate_one_user(client: FlaskClient):
 @pytest.fixture
 def mg_g_populate(client: FlaskClient, mocker):
     # TODO refactoring
-    mocker.patch(
-        "app.controllers.image.save_image",
-        return_value=("test", "test"),
-    )
-    mocker.patch.object(filetype, "is_image", return_value=True)
     master_groups = [
         "Country",
         "Brand",

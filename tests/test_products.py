@@ -23,7 +23,7 @@ def test_products_pages(mg_g_populate: FlaskClient):
     assert response.status_code == 405
 
 
-def test_create_product(client):
+def test_create_product(client: FlaskClient):
     register("samg", "samg@test.com")
     login(client, "samg")
     data = dict(
