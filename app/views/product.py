@@ -4,10 +4,10 @@ from http import HTTPStatus
 import base64
 import json
 from datetime import datetime
+from pathlib import Path
 import filetype
 from flask import (
     Blueprint,
-    jsonify,
     render_template,
     request,
     flash,
@@ -26,6 +26,7 @@ from app.controllers import (
     role_required,
     sort_user_groups,
     get_query_params_from_headers,
+    BASE_IMAGE_PATH,
 )
 
 from app import models as m, db, mail
@@ -1415,12 +1416,17 @@ def full_image(id: int):
     if not product.image_obj:
         log(log.ERROR, "Can't find product image object")
         abort(404, HTTPStatus.NOT_FOUND)
+
+    image_path: str = DEFUALT_IMAGE_PATH
+    if product.image_obj.id != DEFUALT_IMAGE_ID:
+        image_path = product.image_obj.path
+
+    if not image_path.startswith(str(BASE_IMAGE_PATH)):
+        image_path = str(BASE_IMAGE_PATH / Path(product.image_obj.path))
+
+    log(log.INFO, "Image path [%s]", image_path)
+
     try:
-        image_path = (
-            product.image_obj.path
-            if product.image_obj.id != DEFUALT_IMAGE_ID
-            else DEFUALT_IMAGE_PATH
-        )
         with open(
             image_path,
             "rb",
@@ -1429,15 +1435,14 @@ def full_image(id: int):
             img_bytes = base64.b64encode(original_image.read()).decode()
 
     except FileNotFoundError as e:
-        log(log.ERROR, "Image not found [%s]", e)
+        log(log.ERROR, "Image file not found [%s]", e)
         abort(404, HTTPStatus.NOT_FOUND)
 
-    data = {
-        "name": product.name,
-        "image": img_bytes,
-        "imageType": product.image_obj.extension.lower(),
-    }
-    return jsonify(data)
+    return s.ProductFullImage(
+        name=product.name,
+        image=img_bytes,
+        imageType=product.image_obj.extension.lower(),
+    ).model_dump_json()
 
 
 @product_blueprint.route("/get_additional_info/<int:product_id>", methods=["GET"])

@@ -122,3 +122,11 @@ class ProductCSVItem:
     regular_price: float
     retail_price: float
     available_quantity: int
+
+
+class ProductFullImage(BaseModel):
+    name: str
+    image: str
+    image_type: str = Field(alias="imageType")
+
+    model_config = ConfigDict(populate_by_name=True)
