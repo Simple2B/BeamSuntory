@@ -5,29 +5,38 @@ name: Beam Suntory CI/CD
 
 on:
   push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
+    tags:
+      - 'v*.*.*'
+
+env:
+  IMAGE_NAME: simple2b/beam-suntory-app
 
 jobs:
+  on-develop-branch-check:
+    runs-on: Linux
+    outputs:
+      on_develop: ${{ steps.contains_tag.outputs.retval }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: rickstaa/action-contains-tag@v1
+        id: contains_tag
+        with:
+          reference: 'develop'
+          tag: '${{ github.ref }}'
   tests:
-    strategy:
-      fail-fast: true
-      matrix:
-        python-version: [3.11]
-        poetry-version: [1.5.1]
-        os: [Linux]
-    runs-on: ${{ matrix.os }}
+    runs-on: Linux
     steps:
       - uses: actions/checkout@v3.5.2
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: 3.11
       - name: Set up Poetry
         uses: abatilo/actions-poetry@v2.3.0
         with:
-          poetry-version: ${{ matrix.poetry-version }}
+          poetry-version: 1.5.1
       - name: Install dependencies
         run: |
           poetry install
@@ -39,19 +48,24 @@ jobs:
         run: |
           poetry run pytest
   build:
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: [3.11]
-        poetry-version: [1.5.1]
-        os: [Linux]
-    runs-on: ${{ matrix.os }}
-
-    if: github.ref == 'refs/heads/develop'
+    name: Build and push
+    runs-on: Linux
     needs: tests
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            ${{ env.IMAGE_NAME }}
+          # generate Docker tags based on the following events/attributes
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Login to Docker Hub
@@ -59,16 +73,22 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build and push
+      - name: Build and push app
         uses: docker/build-push-action@v4
         with:
-          push: true
-          tags: simple2b/beam-suntory-app:latest
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
   deploy-staging:
     name: Deploy to staging
     runs-on: Linux
-    needs: build
+    needs: 
+      - build
+      - on-develop-branch-check
+    if: ${{ needs.on-develop-branch-check.outputs.on_develop == 'true' }}
     steps:
       - uses: actions/checkout@v3
       - name: copy file via ssh password
@@ -96,7 +116,10 @@ jobs:
   deploy-prod:
     name: Deploy to prod
     runs-on: Linux
-    needs: build
+    needs: 
+      - build
+      - on-develop-branch-check
+    if: ${{ needs.on-develop-branch-check.outputs.on_develop == 'true' }}
     steps:
       - uses: actions/checkout@v3
       - name: copy file via ssh password
