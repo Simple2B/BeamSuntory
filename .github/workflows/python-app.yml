@@ -8,6 +8,9 @@ on:
     tags:
       - 'v*.*.*'
 
+env:
+  IMAGE_NAME: simple2b/beam-suntory-app
+
 jobs:
   on-develop-branch-check:
     runs-on: Linux
