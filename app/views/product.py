@@ -428,7 +428,7 @@ def create():
         image = form.image.data
         if image:
             image_name = (
-                f"{form.SKU.data}-{'.'.join(image.filename.split('.')[:-1])}"
+                f"{form.SKU.data}{'.'.join(image.filename.split('.')[:-1])}"
                 if image.filename
                 else f"{form.SKU.data}"
             )
@@ -531,7 +531,7 @@ def save():
         image = form.image.data
         if image:
             image_name = (
-                f"{form.SKU.data}-{'.'.join(image.filename.split('.')[:-1])}"
+                f"{form.SKU.data}{'.'.join(image.filename.split('.')[:-1])}"
                 if image.filename
                 else f"{form.SKU.data}"
             )
