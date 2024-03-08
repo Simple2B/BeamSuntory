@@ -80,43 +80,39 @@ def get_all():
 @role_required([s.UserRole.ADMIN.value])
 def create():
     form = f.NewSubGroupForm()
-    if form.validate_on_submit():
-        # query = m.Group.select().where(m.Group.name == form.name.data)
-        # gr: m.Group | None = db.session.scalar(query)
-        # if gr:
-        #     flash("This group name is already taken.", "danger")
-        #     return redirect(url_for("sub_stock_target_group.get_all"))
-        parent_group = db.session.get(m.Group, form.group_id.data)
-        if not parent_group:
-            log(log.ERROR, "Not found group by id : [%s]", form.group_id.data)
-            flash("Cannot create group", "danger")
-            return redirect(url_for("sub_stock_target_group.get_all"))
-
-        group = m.Group(
-            name=form.name.data,
-            master_group_id=parent_group.master_group_id,
-            parent_group_id=parent_group.id,
-        )
-        log(log.INFO, "Form submitted. Group: [%s]", group)
-        group.save()
-
-        admin_users = db.session.scalars(
-            m.User.select().where(
-                m.User.role_obj.has(m.Division.role_name == s.UserRole.ADMIN.value)
-            )
-        )
-
-        for user in admin_users:
-            m.UserGroup(left_id=user.id, right_id=group.id)
-
-        db.session.commit()
-
-        flash("Group added!", "success")
-        return redirect(url_for("sub_stock_target_group.get_all"))
-    else:
+    if not form.validate_on_submit():
         log(log.ERROR, "Group creation errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("sub_stock_target_group.get_all"))
+
+    parent_group = db.session.get(m.Group, form.group_id.data)
+    if not parent_group:
+        log(log.ERROR, "Not found group by id : [%s]", form.group_id.data)
+        flash("Cannot create group", "danger")
+        return redirect(url_for("sub_stock_target_group.get_all"))
+
+    sub_group = db.session.get(m.Group, form.sub_group_id.data)
+
+    if not sub_group:
+        log(log.INFO, "There is no such sub group: [%s]", form.sub_group_id.data)
+        flash("There is no such sub group", "danger")
+        return redirect(url_for("sub_stock_target_group.get_all"))
+
+    if sub_group.parent_group_id is not None:
+        log(log.INFO, "Sub group already has parent group: [%s]", sub_group)
+        flash("Sub group already exist", "danger")
+        return redirect(url_for("sub_stock_target_group.get_all"))
+
+    if parent_group == sub_group:
+        log(log.INFO, "Group and sub group are the same: [%s]", sub_group)
+        flash("Group and sub group are the same", "danger")
+        return redirect(url_for("sub_stock_target_group.get_all"))
+
+    sub_group.parent_group_id = parent_group.id
+    sub_group.save()
+    log(log.INFO, "Sub group created. Group: [%s]", sub_group)
+    flash("Sub Group created!", "success")
+    return redirect(url_for("sub_stock_target_group.get_all"))
 
 
 @sub_stock_target_group_blueprint.route("/edit", methods=["POST"])
@@ -124,31 +120,51 @@ def create():
 @role_required([s.UserRole.ADMIN.value])
 def save():
     form = f.SubGroupForm()
-    if form.validate_on_submit():
-        query = m.Group.select().where(m.Group.id == int(form.group_id.data))
-        group: m.Group | None = db.session.scalar(query)
-        if not group:
-            log(log.ERROR, "Not found group by id : [%s]", form.group_id.data)
-            flash("Cannot save group data", "danger")
-
-        parent_group = db.session.get(m.Group, form.parent_group_id.data)
-        if not parent_group:
-            log(log.ERROR, "Not found group by id : [%s]", form.parent_group_id.data)
-            flash("Cannot save group data", "danger")
-            return redirect(url_for("sub_stock_target_group.get_all"))
-
-        group.name = form.name.data
-        group.master_group_id = parent_group.master_group_id
-        group.parent_group_id = parent_group.id
-        group.save()
-        if form.next_url.data:
-            return redirect(form.next_url.data)
-        return redirect(url_for("sub_stock_target_group.get_all"))
-
-    else:
+    if not form.validate_on_submit():
         log(log.ERROR, "group save errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("sub_stock_target_group.get_all"))
+
+    parent_group = db.session.get(m.Group, form.group_id.data)
+    if not parent_group:
+        log(log.ERROR, "Not found group by id : [%s]", form.group_id.data)
+        flash("Cannot create group", "danger")
+        return redirect(url_for("sub_stock_target_group.get_all"))
+
+    new_sub_group = db.session.get(m.Group, form.new_sub_group_id.data)
+
+    if not new_sub_group:
+        log(log.INFO, "There is no such sub group: [%s]", form.new_sub_group_id.data)
+        flash("There is no such sub group", "danger")
+        return redirect(url_for("sub_stock_target_group.get_all"))
+
+    current_sub_group = db.session.get(m.Group, form.group_id.data)
+
+    if not current_sub_group:
+        log(log.INFO, "There is no such sub group: [%s]", form.group_id.data)
+        flash("There is no such sub group", "danger")
+        return redirect(url_for("sub_stock_target_group.get_all"))
+
+    if new_sub_group.parent_group_id is not None:
+        log(log.INFO, "Sub group already has parent group: [%s]", new_sub_group)
+        flash("Sub group already exist", "danger")
+        return redirect(url_for("sub_stock_target_group.get_all"))
+
+    if parent_group == new_sub_group:
+        log(log.INFO, "Group and sub group are the same: [%s]", new_sub_group)
+        flash("Group and sub group are the same", "danger")
+        return redirect(url_for("sub_stock_target_group.get_all"))
+
+    new_sub_group.parent_group_id = parent_group.id
+    current_sub_group.parent_group_id = None
+
+    db.session.commit()
+
+    log(log.INFO, "Sub group created. Group: [%s]", new_sub_group)
+
+    if form.next_url.data:
+        return redirect(form.next_url.data)
+    return redirect(url_for("sub_stock_target_group.get_all"))
 
 
 @sub_stock_target_group_blueprint.route("/delete/<int:id>", methods=["DELETE"])
@@ -189,12 +205,14 @@ def get_sub_group():
     template = "sub_stock_target_group/sub_group_datalist.html"
 
     if params.inbound_order:
+        log(log.INFO, "Inbound order params")
         template = "sub_stock_target_group/sub_group_datalist_inbound_order.html"
         model_root = s.GroupRoot.model_validate(sub_groups)
 
         return s.Group.model_dump_json(model_root)
 
     if params.type_select:
+        log(log.INFO, "Type select params")
         template = "sub_stock_target_group/sub_group_select.html"
 
     model_root = s.GroupRoot.model_validate(sub_groups)

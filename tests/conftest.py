@@ -607,6 +607,8 @@ def mg_g_populate(client: FlaskClient, mocker):
     )
     group_jb: m.Group = db.session.scalar(m.Group.select().where(m.Group.name == "JB"))
 
+    group_canada.parent_group_id = group_jb.id  # Sub group
+
     m.Cart(
         product=populate_test_product,
         quantity=15,
