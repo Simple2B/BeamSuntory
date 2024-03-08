@@ -2,23 +2,24 @@ import { Modal } from 'flowbite';
 import type { ModalOptions, ModalInterface } from 'flowbite';
 import Datepicker from 'flowbite-datepicker/Datepicker';
 import { easepick } from '@easepick/bundle';
+import { log } from 'console';
 
 interface IProduct {
   id: number;
   name: string;
   supplier_id: number;
   currency: string;
-  regular_price: number;
-  retail_price: number;
+  regularPrice: number;
+  retailPrice: number;
   image: string;
   description: string;
   // General Info ->
   SKU: string;
-  low_stock_level: number;
-  program_year: number;
-  package_qty: number;
-  numb_of_items_per_case: number;
-  numb_of_cases_per_outer_case: number;
+  lowStockLevel: number;
+  programYear: number;
+  packageQty: number;
+  numbOfItemsPerCase: number;
+  numbOfCasesPerOuterCase: number;
   comments: string;
   notes_location: string;
   // shipping
@@ -600,6 +601,9 @@ clearFilterButton.addEventListener('click', () => {
   eventStocksOwnByMeToggle.checked = false;
   eventToggle.checked = false;
   sessionStorage.removeItem('masterGroupValues');
+  let url = new URL(window.location.href);
+  url.search = '';
+  window.history.pushState({}, '', url.toString());
   searchInputButton.click();
 });
 
@@ -673,27 +677,27 @@ async function editProduct(product: IProduct) {
   input = document.querySelector('#product-edit-currency');
   product.currency ? (input.value = product.currency) : (input.value = 'Choose Currency');
   input = document.querySelector('#product-edit-regular_price');
-  input.value = product.regular_price?.toString() ?? '0';
+  input.value = product.regularPrice?.toString() ?? '0';
   input = document.querySelector('#product-edit-retail_price');
-  input.value = product.retail_price?.toString() ?? '0';
+  console.log('input', input);
+  console.log('product', product);
+  input.value = product.retailPrice?.toString() ?? '0';
   input = document.querySelector('#product-edit-description');
   input.value = product.description;
   // General Info ->
   input = document.querySelector('#product-edit-SKU');
   input.value = product.SKU;
   input = document.querySelector('#product-edit-low_stock_level');
-  product.low_stock_level ? (input.value = product.low_stock_level.toString()) : (input.value = '0');
+  product.lowStockLevel ? (input.value = product.lowStockLevel.toString()) : (input.value = '0');
 
   input = document.querySelector('#product-edit-program_year');
-  product.program_year ? (input.value = product.program_year.toString()) : (input.value = '0');
+  product.programYear ? (input.value = product.programYear.toString()) : (input.value = '0');
   input = document.querySelector('#product-edit-package_qty');
-  product.package_qty ? (input.value = product.package_qty.toString()) : (input.value = '0');
+  product.packageQty ? (input.value = product.packageQty.toString()) : (input.value = '0');
   input = document.querySelector('#product-edit-numb_of_items_per_case');
-  product.numb_of_items_per_case ? (input.value = product.numb_of_items_per_case.toString()) : (input.value = '0');
+  product.numbOfItemsPerCase ? (input.value = product.numbOfItemsPerCase.toString()) : (input.value = '0');
   input = document.querySelector('#product-edit-numb_of_cases_per_outer_case');
-  product.numb_of_cases_per_outer_case
-    ? (input.value = product.numb_of_cases_per_outer_case.toString())
-    : (input.value = '0');
+  product.numbOfCasesPerOuterCase ? (input.value = product.numbOfCasesPerOuterCase.toString()) : (input.value = '0');
   input = document.querySelector('#product-edit-comments');
   product.comments ? (input.value = product.comments) : (input.value = 'No comments');
   input = document.querySelector('#product-edit-notes-location');
@@ -878,23 +882,21 @@ viewProductButtonElements.forEach((e) =>
     fullImageAnchor.setAttribute('data-target-product-id', product.id.toString());
     product.image.length > 100 ? (img.src = `data:image/png;base64, ${product.image}`) : (img.src = defaultBrandImage);
     div = document.querySelector('#product-view-regular_price');
-    div.innerHTML = product.regular_price?.toString() ?? '0';
+    div.innerHTML = product.regularPrice?.toString() ?? '0';
     div = document.querySelector('#product-view-retail_price');
-    div.innerHTML = product.retail_price?.toString() ?? '0';
+    div.innerHTML = product.retailPrice?.toString() ?? '0';
     div = document.querySelector('#product-view-warehouse-qty');
     div.innerHTML = totalWarehouseQty.toString();
     // General Info ->
     div = document.querySelector('#product-view-SKU');
     div.innerHTML = product.SKU;
     div = document.querySelector('#product-view-package_qty');
-    product.package_qty ? (div.innerHTML = product.package_qty.toString()) : (div.innerHTML = '0');
+    product.packageQty ? (div.innerHTML = product.packageQty.toString()) : (div.innerHTML = '0');
     div = document.querySelector('#product-view-numb_of_items_per_case');
-    product.numb_of_items_per_case
-      ? (div.innerHTML = product.numb_of_items_per_case.toString())
-      : (div.innerHTML = '0');
+    product.numbOfItemsPerCase ? (div.innerHTML = product.numbOfItemsPerCase.toString()) : (div.innerHTML = '0');
     div = document.querySelector('#product-view-numb_of_cases_per_outer_case');
-    product.numb_of_cases_per_outer_case
-      ? (div.innerHTML = product.numb_of_cases_per_outer_case.toString())
+    product.numbOfCasesPerOuterCase
+      ? (div.innerHTML = product.numbOfCasesPerOuterCase.toString())
       : (div.innerHTML = '0');
     div = document.querySelector('#product-view-comments');
     product.comments ? (div.innerHTML = product.comments.toString()) : (div.innerHTML = 'No comments');
@@ -2077,7 +2079,6 @@ async function imageCompressor(action: string, element: Event) {
     return fileList.files;
   }
 }
-
 
 const autoswitchAllStocksToggle = () => {
   if (!allStocksInInventoryToggle.checked && !stocksByMeToggle.checked && !eventStocksOwnByMeToggle.checked) {

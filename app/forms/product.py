@@ -54,8 +54,17 @@ class ProductForm(FlaskForm):
         if not is_file or not filetype.is_image(field.data):
             raise ValidationError("File must be an image")
 
-    def validate_product_name(self, field):
-        query = m.Product.select().where(m.Product.name == field.data)
+    def validate_SKU(self, field):
+        query = m.Product.select().where(
+            m.Product.SKU == field.data, m.Product.id != int(self.product_id.data)
+        )
+        if db.session.scalar(query) is not None:
+            raise ValidationError("This SKU is taken.")
+
+    def validate_name(self, field):
+        query = m.Product.select().where(
+            m.Product.name == field.data, m.Product.id != int(self.product_id.data)
+        )
         if db.session.scalar(query) is not None:
             raise ValidationError("This product name is taken.")
 
@@ -90,7 +99,12 @@ class NewProductForm(FlaskForm):
 
     submit = SubmitField("Add product")
 
-    def validate_product_name(self, field):
+    def validate_SKU(self, field):
+        query = m.Product.select().where(m.Product.SKU == field.data)
+        if db.session.scalar(query) is not None:
+            raise ValidationError("This SKU is taken.")
+
+    def validate_name(self, field):
         query = m.Product.select().where(m.Product.name == field.data)
         if db.session.scalar(query) is not None:
             raise ValidationError("This product name is taken.")
