@@ -29,7 +29,7 @@ services:
         - "traefik.http.routers.beamsuntory_app.tls=true"
         - "traefik.http.routers.beamsuntory_app.tls.certresolver=myresolver"
   backup:
-    image: simple2b/pg-backup
+    image: simple2b/pg-backup:1.0
     links:
       - db
     volumes:
