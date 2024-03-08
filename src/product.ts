@@ -15,11 +15,11 @@ interface IProduct {
   description: string;
   // General Info ->
   SKU: string;
-  low_stock_level: number;
-  program_year: number;
-  package_qty: number;
-  numb_of_items_per_case: number;
-  numb_of_cases_per_outer_case: number;
+  lowStockLevel: number;
+  programYear: number;
+  packageQty: number;
+  numbOfItemsPerCase: number;
+  numbOfCasesPerOuterCase: number;
   comments: string;
   notes_location: string;
   // shipping
@@ -688,18 +688,16 @@ async function editProduct(product: IProduct) {
   input = document.querySelector('#product-edit-SKU');
   input.value = product.SKU;
   input = document.querySelector('#product-edit-low_stock_level');
-  product.low_stock_level ? (input.value = product.low_stock_level.toString()) : (input.value = '0');
+  product.lowStockLevel ? (input.value = product.lowStockLevel.toString()) : (input.value = '0');
 
   input = document.querySelector('#product-edit-program_year');
-  product.program_year ? (input.value = product.program_year.toString()) : (input.value = '0');
+  product.programYear ? (input.value = product.programYear.toString()) : (input.value = '0');
   input = document.querySelector('#product-edit-package_qty');
-  product.package_qty ? (input.value = product.package_qty.toString()) : (input.value = '0');
+  product.packageQty ? (input.value = product.packageQty.toString()) : (input.value = '0');
   input = document.querySelector('#product-edit-numb_of_items_per_case');
-  product.numb_of_items_per_case ? (input.value = product.numb_of_items_per_case.toString()) : (input.value = '0');
+  product.numbOfItemsPerCase ? (input.value = product.numbOfItemsPerCase.toString()) : (input.value = '0');
   input = document.querySelector('#product-edit-numb_of_cases_per_outer_case');
-  product.numb_of_cases_per_outer_case
-    ? (input.value = product.numb_of_cases_per_outer_case.toString())
-    : (input.value = '0');
+  product.numbOfCasesPerOuterCase ? (input.value = product.numbOfCasesPerOuterCase.toString()) : (input.value = '0');
   input = document.querySelector('#product-edit-comments');
   product.comments ? (input.value = product.comments) : (input.value = 'No comments');
   input = document.querySelector('#product-edit-notes-location');
@@ -893,14 +891,12 @@ viewProductButtonElements.forEach((e) =>
     div = document.querySelector('#product-view-SKU');
     div.innerHTML = product.SKU;
     div = document.querySelector('#product-view-package_qty');
-    product.package_qty ? (div.innerHTML = product.package_qty.toString()) : (div.innerHTML = '0');
+    product.packageQty ? (div.innerHTML = product.packageQty.toString()) : (div.innerHTML = '0');
     div = document.querySelector('#product-view-numb_of_items_per_case');
-    product.numb_of_items_per_case
-      ? (div.innerHTML = product.numb_of_items_per_case.toString())
-      : (div.innerHTML = '0');
+    product.numbOfItemsPerCase ? (div.innerHTML = product.numbOfItemsPerCase.toString()) : (div.innerHTML = '0');
     div = document.querySelector('#product-view-numb_of_cases_per_outer_case');
-    product.numb_of_cases_per_outer_case
-      ? (div.innerHTML = product.numb_of_cases_per_outer_case.toString())
+    product.numbOfCasesPerOuterCase
+      ? (div.innerHTML = product.numbOfCasesPerOuterCase.toString())
       : (div.innerHTML = '0');
     div = document.querySelector('#product-view-comments');
     product.comments ? (div.innerHTML = product.comments.toString()) : (div.innerHTML = 'No comments');
