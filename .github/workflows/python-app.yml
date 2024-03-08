@@ -10,26 +10,20 @@ on:
 
 jobs:
   on-develop-branch-check:
-      runs-on: Linux
-      outputs:
-        on_develop: ${{ steps.contains_tag.outputs.retval }}
-      steps:
-        - uses: actions/checkout@v3
-          with:
-            fetch-depth: 0
-        - uses: rickstaa/action-contains-tag@v1
-          id: contains_tag
-          with:
-            reference: 'develop'
-            tag: '${{ github.ref }}'
+    runs-on: Linux
+    outputs:
+      on_develop: ${{ steps.contains_tag.outputs.retval }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: rickstaa/action-contains-tag@v1
+        id: contains_tag
+        with:
+          reference: 'develop'
+          tag: '${{ github.ref }}'
   tests:
-    strategy:
-      fail-fast: true
-      matrix:
-        python-version: [3.11]
-        poetry-version: [1.5.1]
-        os: [Linux]
-    runs-on: ${{ matrix.os }}
+    runs-on: Linux
     steps:
       - uses: actions/checkout@v3.5.2
       - name: Set up Python

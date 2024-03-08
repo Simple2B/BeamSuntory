@@ -8,13 +8,7 @@ on:
 
 jobs:
   tests:
-    strategy:
-      fail-fast: true
-      matrix:
-        python-version: [3.11]
-        poetry-version: [1.5.1]
-        os: [Linux]
-    runs-on: ${{ matrix.os }}
+    runs-on: Linux
     steps:
       - uses: actions/checkout@v3.5.2
       - name: Set up Python
