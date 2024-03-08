@@ -2,14 +2,15 @@ import { Modal } from 'flowbite';
 import type { ModalOptions, ModalInterface } from 'flowbite';
 import Datepicker from 'flowbite-datepicker/Datepicker';
 import { easepick } from '@easepick/bundle';
+import { log } from 'console';
 
 interface IProduct {
   id: number;
   name: string;
   supplier_id: number;
   currency: string;
-  regular_price: number;
-  retail_price: number;
+  regularPrice: number;
+  retailPrice: number;
   image: string;
   description: string;
   // General Info ->
@@ -673,9 +674,11 @@ async function editProduct(product: IProduct) {
   input = document.querySelector('#product-edit-currency');
   product.currency ? (input.value = product.currency) : (input.value = 'Choose Currency');
   input = document.querySelector('#product-edit-regular_price');
-  input.value = product.regular_price?.toString() ?? '0';
+  input.value = product.regularPrice?.toString() ?? '0';
   input = document.querySelector('#product-edit-retail_price');
-  input.value = product.retail_price?.toString() ?? '0';
+  console.log('input', input);
+  console.log('product', product);
+  input.value = product.retailPrice?.toString() ?? '0';
   input = document.querySelector('#product-edit-description');
   input.value = product.description;
   // General Info ->
@@ -878,9 +881,9 @@ viewProductButtonElements.forEach((e) =>
     fullImageAnchor.setAttribute('data-target-product-id', product.id.toString());
     product.image.length > 100 ? (img.src = `data:image/png;base64, ${product.image}`) : (img.src = defaultBrandImage);
     div = document.querySelector('#product-view-regular_price');
-    div.innerHTML = product.regular_price?.toString() ?? '0';
+    div.innerHTML = product.regularPrice?.toString() ?? '0';
     div = document.querySelector('#product-view-retail_price');
-    div.innerHTML = product.retail_price?.toString() ?? '0';
+    div.innerHTML = product.retailPrice?.toString() ?? '0';
     div = document.querySelector('#product-view-warehouse-qty');
     div.innerHTML = totalWarehouseQty.toString();
     // General Info ->
@@ -2077,7 +2080,6 @@ async function imageCompressor(action: string, element: Event) {
     return fileList.files;
   }
 }
-
 
 const autoswitchAllStocksToggle = () => {
   if (!allStocksInInventoryToggle.checked && !stocksByMeToggle.checked && !eventStocksOwnByMeToggle.checked) {
