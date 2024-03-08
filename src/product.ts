@@ -601,6 +601,9 @@ clearFilterButton.addEventListener('click', () => {
   eventStocksOwnByMeToggle.checked = false;
   eventToggle.checked = false;
   sessionStorage.removeItem('masterGroupValues');
+  let url = new URL(window.location.href);
+  url.search = '';
+  window.history.pushState({}, '', url.toString());
   searchInputButton.click();
 });
 
