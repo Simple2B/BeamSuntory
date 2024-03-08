@@ -23,7 +23,7 @@ def test_products_pages(mg_g_populate: FlaskClient):
     assert response.status_code == 405
 
 
-def test_create_product(client):
+def test_create_product(client: FlaskClient):
     register("samg", "samg@test.com")
     login(client, "samg")
     data = dict(
@@ -48,12 +48,11 @@ def test_create_product(client):
         product_groups="[1,2,3]",
     )
     data["image"] = (io.BytesIO(b"abcdef"), "test.png")
-    data["low_image"] = (io.BytesIO(b"abcdef"), "test.png")
-    data["high_image"] = (io.BytesIO(b"abcdef"), "test.png")
     response = client.post(
         "/product/create",
         data=data,
     )
+
     assert response.status_code == 302
     assert "product" in response.text
     products_rows_objs = db.session.execute(m.Product.select()).all()
@@ -97,9 +96,6 @@ def test_edit_product(mg_g_populate: FlaskClient):
         product_groups="[1,2,3]",
     )
     data["image"] = (io.BytesIO(b"abcdef"), "test.png")
-    data["low_image"] = (io.BytesIO(b"abcdeaaa"), "test.png")
-    data["high_image"] = (io.BytesIO(b"abcdeaaa"), "test.png")
-
     response = mg_g_populate.post(
         "/product/edit",
         data=data,

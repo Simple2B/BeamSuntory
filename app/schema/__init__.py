@@ -11,6 +11,7 @@ from .product import (
     ProductWarehouses,
     ProductWarehouseRoot,
     ProductCSVItem,
+    ProductFullImage,
 )
 from .inbound_order import InboundOrder, InboundOrderStatus, FilterInboundOrder
 from .product_category import ProductCategory

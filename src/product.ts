@@ -2078,12 +2078,6 @@ async function imageCompressor(action: string, element: Event) {
   }
 }
 
-document.getElementById('product-add-image').addEventListener('change', (e) => {
-  imageCompressor('add', e);
-});
-document.getElementById('product-edit-image').addEventListener('change', (e) => {
-  imageCompressor('edit', e);
-});
 
 const autoswitchAllStocksToggle = () => {
   if (!allStocksInInventoryToggle.checked && !stocksByMeToggle.checked && !eventStocksOwnByMeToggle.checked) {

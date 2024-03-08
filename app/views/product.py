@@ -1,4 +1,3 @@
-from io import BytesIO
 import csv
 import codecs
 from http import HTTPStatus
@@ -6,10 +5,9 @@ import base64
 import json
 from datetime import datetime
 from pathlib import Path
-from PIL import Image
+import filetype
 from flask import (
     Blueprint,
-    jsonify,
     render_template,
     request,
     flash,
@@ -28,6 +26,7 @@ from app.controllers import (
     role_required,
     sort_user_groups,
     get_query_params_from_headers,
+    BASE_IMAGE_PATH,
 )
 
 from app import models as m, db, mail
@@ -35,7 +34,8 @@ from app import schema as s
 from app import forms as f
 from app.logger import log
 
-
+DEFUALT_IMAGE_ID = 1
+DEFUALT_IMAGE_PATH = "app/static/img/no_picture_default.png"
 product_blueprint = Blueprint("product", __name__, url_prefix="/product")
 
 
@@ -384,8 +384,8 @@ def get_all():
 @role_required([s.UserRole.ADMIN.value])
 def create():
     form: f.NewProductForm = f.NewProductForm()
+    query_params = get_query_params_from_headers()
     if form.validate_on_submit():
-        query_params = get_query_params_from_headers()
         query = m.Product.select().where(m.Product.name == form.name.data)
         gr: m.Product | None = db.session.scalar(query)
         if gr:
@@ -394,15 +394,12 @@ def create():
 
         supplier: m.Supplier = db.session.scalar(m.Supplier.select())
 
-        low_image = request.files["low_image"]
-        low_image_string = base64.b64encode(low_image.read()).decode()
         product: m.Product = m.Product(
             name=str(form.name.data).strip(" "),
             supplier_id=form.supplier.data if form.supplier.data else supplier.id,
             currency=form.currency.data if form.currency.data else "CAD",
             regular_price=form.regular_price.data if form.regular_price.data else 0,
             retail_price=form.retail_price.data if form.retail_price.data else 0,
-            image=low_image_string,
             description=form.description.data,
             # General Info ->
             SKU=form.SKU.data,
@@ -428,46 +425,47 @@ def create():
             width=form.width.data if form.width.data else 0,
             height=form.height.data if form.height.data else 0,
         )
-        log(log.INFO, "Form submitted. Product: [%s]", product)
-        product.save(False)
+        image = form.image.data
+        if image:
+            image_name = (
+                f"{form.SKU.data}{'.'.join(image.filename.split('.')[:-1])}"
+                if image.filename
+                else f"{form.SKU.data}"
+            )
+            kind = filetype.guess(image)
 
-        if "image" in request.files["high_image"].mimetype:
-            file_image = save_image(
-                request.files["high_image"], f"product/{form.SKU.data}"
-            )
-        else:
-            no_picture_default = Image.open(
-                Path("app") / "static" / "img" / "no_picture_default.png"
-            )
-            with BytesIO() as png_bytes:
-                no_picture_default.save(png_bytes, format="PNG")
-                png_bytes.seek(0)
-                file_image = save_image(png_bytes, f"product/{form.SKU.data}")
+            if not kind:
+                log(log.ERROR, "Can't guess image type.")
+                flash("Can't guess image type.", "danger")
+                return redirect(url_for("product.get_all", **query_params))
 
-        if isinstance(file_image, m.Image):
-            log(
-                log.INFO,
-                "Product image added. Image: [%s], request file: [%s]",
-                file_image,
-                request.files["high_image"],
-            )
-            flash("Product added!", "success")
-            file_image.save(False)
-            product.image_obj = file_image
-        else:
-            if "Cannot guess file type!" in file_image:
-                flash("Product added! Cannot guess image file type!", "danger")
-            elif "Unsupported file type!" in file_image:
-                flash("Product added! Unsupported image file type!", "danger")
-            else:
-                log(
-                    log.ERROR,
-                    "Can not save product image, file image: [%s], request file: [%s]",
-                    file_image,
-                    request.files["high_image"],
+            if (
+                db.session.scalar(sa.select(m.Image).where(m.Image.name == image_name))
+                is not None
+            ):
+                flash("Image name already exist", "danger")
+                return redirect(url_for("product.get_all", **query_params))
+
+            try:
+                image_path, image_string = save_image(
+                    image=image, path=f"product/{image_name}.{kind.extension}"
                 )
-                flash("Product added! Can't save product image!", "danger")
+            except PermissionError as e:
+                log(log.ERROR, "Can't save product image. Error: [%s]", e)
+                flash("Can't save image some problems.", "danger")
+                return redirect(url_for("product.get_all", **query_params))
 
+            product.image = image_string
+            new_img = m.Image(
+                name=image_name,
+                path=image_path,
+                extension=kind.extension,
+            )
+            product.image_obj = new_img
+        else:
+            product.image_id = DEFUALT_IMAGE_ID
+            product.image = ""
+        db.session.add(product)
         db.session.commit()
 
         product_master_groups_ids = json.loads(form.product_groups.data)
@@ -477,6 +475,7 @@ def create():
             product_group.save(False)
         db.session.commit()
 
+        log(log.INFO, "Form submitted. Product: [%s]", product)
         return redirect(url_for("product.get_all", **query_params))
     else:
         log(log.ERROR, "Product creation errors: [%s]", form.errors)
@@ -501,18 +500,11 @@ def save():
 
         supplier: m.Supplier = db.session.scalar(m.Supplier.select())
 
-        image = request.files["low_image"]
-        image_string = base64.b64encode(image.read()).decode()
         u.name = str(form.name.data).strip(" ")
         u.supplier_id = form.supplier.data if form.supplier.data else supplier.id
         u.currency = form.currency.data if form.currency.data else "CAD"
         u.regular_price = form.regular_price.data if form.regular_price.data else 0
         u.retail_price = form.retail_price.data if form.retail_price.data else 0
-
-        if len(image_string) == 0:
-            image_string = u.image
-        else:
-            u.image = image_string
         u.description = form.description.data
         # General Info ->
         u.SKU = form.SKU.data
@@ -536,32 +528,48 @@ def save():
         u.length = form.length.data if form.length.data else 0
         u.width = form.width.data if form.width.data else 0
         u.height = form.height.data if form.height.data else 0
+        image = form.image.data
+        if image:
+            image_name = (
+                f"{form.SKU.data}{'.'.join(image.filename.split('.')[:-1])}"
+                if image.filename
+                else f"{form.SKU.data}"
+            )
+            kind = filetype.guess(image)
 
-        if "image" in request.files["high_image"].mimetype:
-            if u.image_obj:
-                image_path, image_extension = save_image(
-                    request.files["high_image"], f"product/{form.SKU.data}", u.image_obj
+            if not kind:
+                log(log.ERROR, "Can't guess image type.")
+                flash("Can't guess image type.", "danger")
+                return redirect(url_for("product.get_all", **query_params))
+
+            if (
+                db.session.scalar(sa.select(m.Image).where(m.Image.name == image_name))
+                is not None
+            ):
+                flash("Image name already exist", "danger")
+                return redirect(url_for("product.get_all", **query_params))
+
+            try:
+                image_path, image_string = save_image(
+                    image=image, path=f"product/{image_name}.{kind.extension}"
                 )
+            except PermissionError as e:
+                log(log.ERROR, "Can't save product image. Error: [%s]", e)
+                flash("Can't save image some problems.", "danger")
+                return redirect(url_for("product.get_all", **query_params))
+
+            u.image = image_string
+            if u.image_obj and u.image_obj.id != DEFUALT_IMAGE_ID:
+                u.image_obj.name = image_name
                 u.image_obj.path = image_path
-                u.image_obj.extension = image_extension
+                u.image_obj.extension = kind.extension
             else:
-                file_image = save_image(
-                    request.files["high_image"], f"product/{form.SKU.data}"
+                new_img = m.Image(
+                    name=image_name,
+                    path=image_path,
+                    extension=kind.extension,
                 )
-                if isinstance(file_image, m.Image):
-                    flash("Product edited successfully", "success")
-                    db.session.execute(
-                        m.Image.delete().where(m.Image.name == file_image.name)
-                    )
-                    file_image.save(False)
-                    u.image_obj = file_image
-                else:
-                    if "Cannot guess file type!" in file_image:
-                        flash("Product edited! Cannot guess image file type!", "danger")
-                    elif "Unsupported file type!" in file_image:
-                        flash("Product edited! Unsupported image file type!", "danger")
-                    else:
-                        flash("Product edited! Can't save product image!", "danger")
+                u.image_obj = new_img
         u.save(False)
         db.session.commit()
 
@@ -1329,17 +1337,8 @@ def upload():
         log(log.INFO, "Product image object: [%s]", product.image_obj)
         if not product.image_obj:
             log(log.INFO, "Product image object not found")
-            default_picture = Image.open(
-                Path("app") / "static" / "img" / "no_picture_default.png"
-            )
-            with BytesIO() as png_bytes:
-                default_picture.save(png_bytes, format="PNG")
-                png_bytes.seek(0)
-                file_image = save_image(png_bytes, f"product/{product_item_data.sku}")
-
-            file_image.save(False)
-            product.image_obj = file_image
-            log(log.INFO, "Product image added: [%s]", file_image)
+            product.image = ""
+            product.image_id = DEFUALT_IMAGE_ID
 
         product.save(False)
         # product.image = image.get_base64().decode()
@@ -1409,29 +1408,41 @@ def upload():
     ]
 )
 def full_image(id: int):
+    log(log.INFO, "Get full image [%d]", id)
     product: m.Product = db.session.execute(
         m.Product.select().where(m.Product.id == id)
     ).scalar()
 
     if not product.image_obj:
+        log(log.ERROR, "Can't find product image object")
         abort(404, HTTPStatus.NOT_FOUND)
 
-    with open(
-        Path("app")
-        / "static"
-        / "img"
-        / "product"
-        / f"{product.image_obj.name}.{product.image_obj.extension}",
-        "rb",
-    ) as original_image:
-        img_bytes = base64.b64encode(original_image.read()).decode()
+    image_path: str = DEFUALT_IMAGE_PATH
+    if product.image_obj.id != DEFUALT_IMAGE_ID:
+        image_path = product.image_obj.path
 
-    data = {
-        "name": product.name,
-        "image": img_bytes,
-        "imageType": product.image_obj.extension.lower(),
-    }
-    return jsonify(data)
+    if not image_path.startswith(str(BASE_IMAGE_PATH)):
+        image_path = str(BASE_IMAGE_PATH / Path(product.image_obj.path))
+
+    log(log.INFO, "Image path [%s]", image_path)
+
+    try:
+        with open(
+            image_path,
+            "rb",
+        ) as original_image:
+
+            img_bytes = base64.b64encode(original_image.read()).decode()
+
+    except FileNotFoundError as e:
+        log(log.ERROR, "Image file not found [%s]", e)
+        abort(404, HTTPStatus.NOT_FOUND)
+
+    return s.ProductFullImage(
+        name=product.name,
+        image=img_bytes,
+        imageType=product.image_obj.extension.lower(),
+    ).model_dump_json()
 
 
 @product_blueprint.route("/get_additional_info/<int:product_id>", methods=["GET"])
