@@ -17,13 +17,14 @@ def register(
     create_default_divisions()
 
     if not role:
-        role = db.session.execute(
+        role = db.session.scalar(
             Division.select().where(Division.role_name == s.UserRole.ADMIN.value)
-        ).scalar()
+        )
+
     user = User(
         username=username,
         email=email,
-        role=role.id,
+        role_obj=role,
         activated=True,
         approval_permission=True,
         street_address="street",

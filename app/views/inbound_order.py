@@ -8,16 +8,18 @@ from flask import (
     flash,
     redirect,
     url_for,
+    current_app as app,
 )
 
 from flask_login import login_required, current_user
+from flask_mail import Message
 import sqlalchemy as sa
 from sqlalchemy import desc
 from pydantic import ValidationError
 
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
-from app import models as m, db
+from app import models as m, db, mail
 from app import schema as s
 from app import forms as f
 from app.logger import log
@@ -30,6 +32,7 @@ inbound_order_blueprint = Blueprint(
 
 @inbound_order_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def get_all():
     form_create = f.InboundOrderUpdateForm()
     form_edit = f.InboundOrderUpdateForm()
@@ -74,6 +77,10 @@ def get_all():
         else None
     )
 
+    groups = db.session.scalars(
+        m.Group.select().where(m.Group.parent_group_id.is_(None)).order_by(m.Group.name)
+    ).all()
+
     return render_template(
         "inbound_order/inbound_orders.html",
         current_inbound_order=current_inbound_order,
@@ -85,12 +92,14 @@ def get_all():
         inbound_orders_json=inbound_orders_json,
         page=pagination,
         search_query=q,
-        suppliers=db.session.scalars(m.Supplier.select().order_by(m.Supplier.id)).all(),
-        warehouses=db.session.scalars(
-            m.Warehouse.select().order_by(m.Warehouse.id)
+        suppliers=db.session.scalars(
+            m.Supplier.select().order_by(m.Supplier.name)
         ).all(),
-        products=db.session.scalars(m.Product.select().order_by(m.Product.id)).all(),
-        groups=db.session.scalars(m.Group.select().order_by(m.Group.id)).all(),
+        warehouses=db.session.scalars(
+            m.Warehouse.select().order_by(m.Warehouse.name)
+        ).all(),
+        products=db.session.scalars(m.Product.select().order_by(m.Product.name)).all(),
+        groups=groups,
         form_create=form_create,
         form_edit=form_edit,
         form_sort=form_sort,
@@ -100,6 +109,7 @@ def get_all():
 
 @inbound_order_blueprint.route("/create", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def create():
     form = f.InboundOrderCreateForm()
 
@@ -170,6 +180,30 @@ def create():
             ).save(False)
 
         inbound_order.save()
+        inbound_order.set_order_id()
+        db.session.commit()
+
+        msg = Message(
+            subject=f"New inbound order {inbound_order.order_id}",
+            sender=app.config["MAIL_DEFAULT_SENDER"],
+            recipients=[inbound_order.warehouse.manager.email],
+        )
+        url = (
+            url_for(
+                "inbound_order.get_all",
+                _external=True,
+            )
+            + f"?q={inbound_order.order_id}"
+        )
+
+        msg.html = render_template(
+            "email/inbound_order.html",
+            user=inbound_order.warehouse.manager,
+            inbound_order=inbound_order,
+            url=url,
+            action="created",
+        )
+        mail.send(msg)
 
         report_inbound_order = m.ReportInboundOrder(
             type=s.ReportEventType.created.value,
@@ -194,6 +228,7 @@ def create():
 
 @inbound_order_blueprint.route("/save", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def save():
     form = f.InboundOrderUpdateForm()
     if form.validate_on_submit():
@@ -220,7 +255,7 @@ def save():
                 "Not found supplier with id : [%s]",
                 form.supplier_id.data,
             )
-            flash("Cannot save inbound order data", "danger")
+            flash("Cannot save inbound order data, no supplier found", "danger")
             return redirect(url_for("inbound_order.get_all"))
 
         # check warehouse
@@ -231,7 +266,7 @@ def save():
                 "Not found warehouse with id : [%s]",
                 form.warehouse_id.data,
             )
-            flash("Cannot save inbound order data", "danger")
+            flash("Cannot save inbound order data, no warehouse found", "danger")
             return redirect(url_for("inbound_order.get_all"))
 
         history_pure = []
@@ -279,7 +314,7 @@ def save():
                 "Wrong quantity groups json format: [%s]",
                 form.product_groups.data,
             )
-            flash("Cannot save inbound order data", "danger")
+            flash("Cannot save inbound order data, wrong quantity groups ", "danger")
             return redirect(
                 url_for(
                     "inbound_order.get_all",
@@ -309,7 +344,10 @@ def save():
                     inbound_order.id,
                     product_quantity_group.product_allocated_id,
                 )
-                flash("Cannot save inbound order data", "danger")
+                flash(
+                    "Cannot save inbound order data, Inbound order's allocated product not found",
+                    "danger",
+                )
                 return redirect(url_for("inbound_order.get_all"))
 
             db.session.execute(
@@ -333,7 +371,7 @@ def save():
                         "Group not found: [%s]",
                         quantity_group.group_id,
                     )
-                    flash("Cannot save inbound order data", "danger")
+                    flash("Cannot save inbound order data, group not found", "danger")
                     return redirect(
                         url_for(
                             "inbound_order.get_all",
@@ -406,13 +444,29 @@ def save():
         return redirect(url_for("inbound_order.get_all"))
 
     else:
-        log(log.ERROR, "inbound_order save errors: [%s]", form.errors)
-        flash(f"{form.errors}", "danger")
-        return redirect(url_for("inbound_order.get_all"))
+        if form.inbound_order_uuid.data:
+            inbound_order: m.InboundOrder = db.session.scalar(
+                m.InboundOrder.select().where(
+                    m.InboundOrder.uuid == form.inbound_order_uuid.data
+                )
+            )
+            log(log.ERROR, "inbound_order save errors: [%s]", form.errors)
+            flash(f"{form.errors}", "danger")
+            return redirect(
+                url_for(
+                    "inbound_order.get_all",
+                    current_order_uuid=inbound_order.uuid,
+                )
+            )
+        else:
+            log(log.ERROR, "inbound_order save errors: [%s]", form.errors)
+            flash(f"{form.errors}", "danger")
+            return redirect(url_for("inbound_order.get_all"))
 
 
 @inbound_order_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def delete(id: int):
     inbound_order: m.InboundOrder = db.session.get(m.InboundOrder, id)
 

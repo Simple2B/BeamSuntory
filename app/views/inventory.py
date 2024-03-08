@@ -1,3 +1,4 @@
+# flake8: noqa
 from flask import (
     Blueprint,
     render_template,
@@ -5,8 +6,9 @@ from flask import (
 )
 from flask_login import login_required
 from sqlalchemy.orm import aliased
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
+from app import schema as s
 from app import models as m, db
 
 
@@ -15,6 +17,7 @@ inventory_blueprint = Blueprint("inventory", __name__, url_prefix="/inventory")
 
 @inventory_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def get_all():
     warehouse = aliased(m.Warehouse)
     product = aliased(m.Product)
@@ -53,10 +56,12 @@ def get_all():
     warehouse_product_qty = list(warehouse_product_qty.values())
 
     pagination = create_pagination(total=len(warehouse_product_qty))
-
     return render_template(
         "inventory/inventories.html",
-        warehouse_product_qty=warehouse_product_qty,
+        warehouse_product_qty=warehouse_product_qty[
+            pagination.per_page
+            * (pagination.page - 1) : (pagination.per_page * pagination.page)
+        ],
         page=pagination,
         search_query=q,
     )

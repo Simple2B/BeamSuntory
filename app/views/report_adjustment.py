@@ -6,7 +6,7 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import schema as s
 from app import models as m, db
@@ -82,7 +82,7 @@ def get_adjustment_report():
     master_groups = [
         filter_adjustments.group_brand,
         filter_adjustments.group_language,
-        filter_adjustments.group_category,
+        filter_adjustments.group_categories,
         filter_adjustments.group_premises,
         filter_adjustments.group_event,
     ]
@@ -121,6 +121,7 @@ def get_adjustment_report():
 
 @report_adjustment_blueprint.route("/adjustment/api", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def get_adjustments_json():
     pagination, reports = get_adjustment_report()
     report_list_schema = s.AdjustList.model_validate(reports)
@@ -132,12 +133,13 @@ def get_adjustments_json():
 
 @report_adjustment_blueprint.route("/adjustment", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def adjustments():
     users = db.session.scalars(sa.select(m.User))
     product_master_groups = db.session.scalars(
         m.MasterGroupProduct.select().where(
             m.MasterGroupProduct.name.in_(
-                ["Brand", "Language", "Category", "Premises", "Events"]
+                ["Brand", "Language", "Categories", "Premises", "Events"]
             )
         )
     )
@@ -155,6 +157,7 @@ def adjustments():
 
 @report_adjustment_blueprint.route("adjustment/search")
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def search_report_adjustments():
     pagination, reports = get_adjustment_report()
     filter_adjustments = s.FilterReportAdjustments.model_validate(dict(request.args))

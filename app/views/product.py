@@ -1,68 +1,84 @@
-from io import BytesIO
+import csv
+import codecs
+from http import HTTPStatus
 import base64
 import json
 from datetime import datetime
-import pandas
+from pathlib import Path
+import filetype
 from flask import (
     Blueprint,
-    jsonify,
     render_template,
     request,
     flash,
     redirect,
     url_for,
     current_app as app,
+    abort,
 )
 from flask_login import login_required, current_user
 from flask_mail import Message
-from sqlalchemy.dialects.postgresql import insert
+from pydantic import ValidationError
 import sqlalchemy as sa
-from app.controllers import create_pagination
+from app.controllers import (
+    create_pagination,
+    save_image,
+    role_required,
+    sort_user_groups,
+    get_query_params_from_headers,
+    BASE_IMAGE_PATH,
+)
 
-from app import models as m, db
+from app import models as m, db, mail
 from app import schema as s
 from app import forms as f
 from app.logger import log
 
-
+DEFUALT_IMAGE_ID = 1
+DEFUALT_IMAGE_PATH = "app/static/img/no_picture_default.png"
 product_blueprint = Blueprint("product", __name__, url_prefix="/product")
 
 
 # TODO: needs refactor FIRST!!
 def get_all_products(request, query=None, count_query=None, my_stocks=False):
-    q = request.args.get("q", type=str, default=None)
-    is_events = request.args.get("events", type=bool, default=False)
+    get_all_start = datetime.now()
+    log(log.DEBUG, "Product get_all started: [%s]", get_all_start)
+    is_events = request.args.get("is_events", type=bool, default=False)
+    is_all_stocks_in_inventory = request.args.get(
+        "is_all_stocks_in_inventory", type=bool, default=False
+    )
+    is_stocks_own_by_me = request.args.get(
+        "is_stocks_own_by_me", type=bool, default=False
+    )
+    is_events_stocks_own_by_me = request.args.get(
+        "is_events_stocks_own_by_me", type=bool, default=False
+    )
 
-    if query is None or count_query is None:
-        reverse_event_filter = ~m.Product.warehouse_products.any(
-            m.WarehouseProduct.group.has(
-                m.Group.master_group.has(
-                    m.MasterGroup.name == s.MasterGroupMandatory.events.value
-                )
+    master_groups = request.args.get("master_groups", type=str, default="")
+    master_groups_list = master_groups.split(",")
+
+    q = request.args.get("q", type=str, default="")
+
+    reverse_event_filter = ~m.Product.warehouse_products.any(
+        m.WarehouseProduct.group.has(
+            m.Group.master_group.has(
+                m.MasterGroup.name == s.MasterGroupMandatory.events.value
             )
         )
-        query = m.Product.select().where(reverse_event_filter).order_by(m.Product.id)
+    )
+
+    if query is None or count_query is None:
+        query = m.Product.select().order_by(m.Product.id)
 
         count_query = sa.select(sa.func.count()).select_from(m.Product)
-        if q:
-            query = (
-                m.Product.select()
-                .where(
-                    m.Product.name.ilike(f"%{q}%")
-                    | m.Product.SKU.ilike(f"%{q}%")
-                    | m.Product.description.ilike(f"%{q}%")
-                )
-                .order_by(m.Product.id)
+
+    if master_groups:
+        for group in master_groups_list:
+            master_group_filter = m.Product.product_groups.any(
+                m.ProductGroup.parent.has(m.GroupProduct.name.ilike(f"%{group}%"))
             )
-            count_query = (
-                sa.select(sa.func.count())
-                .where(
-                    m.Product.name.ilike(f"%{q}%")
-                    | m.Product.SKU.ilike(f"%{q}%")
-                    | m.Product.description.ilike(f"%{q}%")
-                )
-                .select_from(m.Product)
-            )
+            query = query.where(master_group_filter)
+            count_query = count_query.where(master_group_filter)
 
     if is_events:
         event_filter = m.Product.warehouse_products.any(
@@ -73,77 +89,183 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
             )
         )
 
-        query = m.Product.select().where(event_filter).order_by(m.Product.id)
+        query = query.where(event_filter)
+        count_query = count_query.where(event_filter)
 
-    groups_for_products_obj = db.session.execute(m.GroupProduct.select()).all()
+    if is_all_stocks_in_inventory:
+        is_all_stocks_in_inventory_filter = m.Product.warehouse_products.any(
+            m.WarehouseProduct.product_quantity > 0
+        )
+
+        query = query.where(is_all_stocks_in_inventory_filter)
+        count_query = count_query.where(is_all_stocks_in_inventory_filter)
+
+    if is_stocks_own_by_me:
+        if current_user.role_obj.role_name == s.UserRole.ADMIN.value:
+            curr_user_groups_ids = [
+                i.id
+                for i in db.session.execute(
+                    m.Group.select().where(
+                        m.Group.name.ilike("admin"),
+                    )
+                ).scalars()
+            ]
+        else:
+            curr_user_groups_ids = [
+                i.right_id
+                for i in db.session.execute(
+                    m.UserGroup.select().where(
+                        m.UserGroup.left_id == current_user.id,
+                    )
+                ).scalars()
+            ]
+        curr_user_products_ids = [
+            i.product_id
+            for i in db.session.execute(
+                m.WarehouseProduct.select().where(
+                    m.WarehouseProduct.group_id.in_(curr_user_groups_ids),
+                    m.WarehouseProduct.product_quantity > 0,
+                )
+            ).scalars()
+        ]
+
+        query = query.where(
+            m.Product.id.in_(curr_user_products_ids), reverse_event_filter
+        )
+        count_query = count_query.where(
+            m.Product.id.in_(curr_user_products_ids), reverse_event_filter
+        )
+
+    if is_events_stocks_own_by_me:
+        event_filter = m.Product.warehouse_products.any(
+            m.WarehouseProduct.group.has(
+                m.Group.master_group.has(
+                    m.MasterGroup.name == s.MasterGroupMandatory.events.value
+                )
+            )
+        )
+        curr_user_groups_ids = [
+            i.right_id
+            for i in db.session.execute(
+                m.UserGroup.select().where(
+                    m.UserGroup.left_id == current_user.id,
+                    m.UserGroup.parent.has(
+                        m.Group.master_group.has(
+                            m.MasterGroup.name == s.MasterGroupMandatory.events.value
+                        )
+                    ),
+                )
+            ).scalars()
+        ]
+        curr_user_products_ids = [
+            i.product_id
+            for i in db.session.execute(
+                m.WarehouseProduct.select().where(
+                    m.WarehouseProduct.group_id.in_(curr_user_groups_ids),
+                    event_filter,
+                )
+            ).scalars()
+        ]
+        query = query.where(
+            m.Product.id.in_(curr_user_products_ids),
+        )
+        count_query = count_query.where(m.Product.id.in_(curr_user_products_ids))
+
+    if q:
+        query = query.where(
+            m.Product.name.ilike(f"%{q}%")
+            | m.Product.SKU.ilike(f"%{q}%")
+            | m.Product.description.ilike(f"%{q}%")
+        )
+        count_query = count_query.where(
+            m.Product.name.ilike(f"%{q}%")
+            | m.Product.SKU.ilike(f"%{q}%")
+            | m.Product.description.ilike(f"%{q}%")
+        )
+
+    log(
+        log.DEBUG,
+        "Product get_all filters finished in [%s]",
+        datetime.now() - get_all_start,
+    )
+    get_all_filters_time = datetime.now()
+
+    groups_for_products_obj = db.session.scalars(
+        m.GroupProduct.select().order_by(m.GroupProduct.name)
+    ).all()
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
-    master_groups = [
-        row for row in db.session.execute(m.MasterGroup.select()).scalars()
-    ]
+    master_groups = db.session.scalars(m.MasterGroup.select()).all()
+
+    log(
+        log.DEBUG,
+        "Product get_all groups query and pagination finished in [%s]",
+        datetime.now() - get_all_filters_time,
+    )
+    get_all_groups_time = datetime.now()
 
     mastr_for_prods_groups_for_prods = {}
     mstr_prod_grps_prod_grps_names = {}
     for group in groups_for_products_obj:
-        if (
-            group[0].master_groups_for_product.name
-            not in mastr_for_prods_groups_for_prods
-        ):
-            mastr_for_prods_groups_for_prods[
-                group[0].master_groups_for_product.name
-            ] = [group[0]]
-            mstr_prod_grps_prod_grps_names[group[0].master_groups_for_product.name] = [
-                {"group_name": group[0].name, "group_id": group[0].id}
+        if group.master_groups_for_product.name not in mastr_for_prods_groups_for_prods:
+            mastr_for_prods_groups_for_prods[group.master_groups_for_product.name] = [
+                group
+            ]
+            mstr_prod_grps_prod_grps_names[group.master_groups_for_product.name] = [
+                {"group_name": group.name, "group_id": group.id}
             ]
         else:
             mastr_for_prods_groups_for_prods[
-                group[0].master_groups_for_product.name
-            ].append(group[0])
-            mstr_prod_grps_prod_grps_names[
-                group[0].master_groups_for_product.name
-            ].append({"group_name": group[0].name, "group_id": group[0].id})
+                group.master_groups_for_product.name
+            ].append(group)
+            mstr_prod_grps_prod_grps_names[group.master_groups_for_product.name].append(
+                {"group_name": group.name, "group_id": group.id}
+            )
+
+    log(
+        log.DEBUG,
+        "Product get_all mastr_for_prods_groups_for_prods finished in [%s]",
+        datetime.now() - get_all_groups_time,
+    )
+    get_all_mastr_grps_names = datetime.now()
 
     # get all product_groups to list and compare in view.html
-    product_groups: list[m.ProductGroup] = [
-        row for row in db.session.execute(m.ProductGroup.select()).scalars()
-    ]
+    product_groups: list[m.ProductGroup] = db.session.scalars(
+        m.ProductGroup.select()
+    ).all()
 
     # TODO: consider using a join instead of two queries <- Copilot
     # get all groups ids for current user to compare with product groups ids in view.html
-    current_user_groups_rows = db.session.execute(
+    current_user_groups_rows = db.session.scalars(
         m.UserGroup.select().where(m.UserGroup.left_id == current_user.id)
     ).all()
 
     master_groups_search = {}
     for group in groups_for_products_obj:
-        if group[0].master_groups_for_product.name not in master_groups_search:
-            master_groups_search[group[0].master_groups_for_product.name] = [
-                group[0].name
-            ]
+        if group.master_groups_for_product.name not in master_groups_search:
+            master_groups_search[group.master_groups_for_product.name] = [group.name]
         else:
-            master_groups_search[group[0].master_groups_for_product.name].append(
-                group[0].name
+            master_groups_search[group.master_groups_for_product.name].append(
+                group.name
             )
 
+    log(
+        log.DEBUG,
+        "Product get_all master_groups_search finished in [%s]",
+        datetime.now() - get_all_mastr_grps_names,
+    )
+    get_all_master_groups_search = datetime.now()
+
     master_group_product_name = [
-        mgp[0].name for mgp in db.session.execute(m.MasterGroupProduct.select()).all()
+        mgp.name for mgp in db.session.scalars(m.MasterGroupProduct.select())
     ]
 
-    suppliers = [i for i in db.session.execute(m.Supplier.select()).scalars()]
+    suppliers = db.session.scalars(m.Supplier.select()).all()
 
-    warehouse_product_query: list[m.WarehouseProduct] = [
-        i
-        for i in db.session.execute(
-            m.WarehouseProduct.select().order_by(m.WarehouseProduct.id)
-        ).scalars()
-    ]
-    db.session.execute(
-        m.Product.select()
-        .order_by(m.Product.id)
-        .offset((pagination.page - 1) * pagination.per_page)
-        .limit(pagination.per_page)
-    ).scalars()
+    warehouse_product_query: list[m.WarehouseProduct] = db.session.scalars(
+        m.WarehouseProduct.select().order_by(m.WarehouseProduct.id)
+    ).all()
 
     warehouse_product_qty = dict()
 
@@ -164,26 +286,46 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
             else:
                 warehouse_product_qty[wpq.product.name] = str(wpq.product_quantity)
 
+    log(
+        log.DEBUG,
+        "Product get_all warehouse_products finished in [%s]",
+        datetime.now() - get_all_master_groups_search,
+    )
+
+    target_groups = db.session.scalars(m.Group.select().order_by(m.Group.name))
+
+    current_user_groups_rows.sort(key=sort_user_groups)
+
     return {
         "query": query,
         "pagination": pagination,
-        "q": q,
         "is_events": is_events,
         "master_groups": master_groups,
         "product_groups": product_groups,
         "current_user_groups_rows": current_user_groups_rows,
         "mastr_for_prods_groups_for_prods": mastr_for_prods_groups_for_prods,
+        "master_groups_list": master_groups_list,
+        "q": q,
+        "is_events_stocks_own_by_me": is_events_stocks_own_by_me,
+        "is_stocks_own_by_me": is_stocks_own_by_me,
+        "is_all_stocks_in_inventory": is_all_stocks_in_inventory,
         "master_groups_search": master_groups_search,
         "master_product_groups_name": master_group_product_name,
         "suppliers": [s for s in suppliers],
         "all_product_groups": {
-            i.name: i for i in db.session.execute(m.Group.select()).scalars()
+            i.name: i
+            for i in db.session.execute(
+                m.Group.select()
+                .where(m.Group.parent_group_id.is_(None))
+                .order_by(m.Group.name)
+            ).scalars()
         },
-        "current_user_groups_names": [
-            i[0].parent.name for i in current_user_groups_rows
-        ],
+        "current_user_groups_names": [i.parent.name for i in current_user_groups_rows],
         "mstr_prod_grps_prod_grps_names": json.dumps(mstr_prod_grps_prod_grps_names),
         "warehouse_product_qty": warehouse_product_qty,
+        "target_groups": target_groups,
+        # TODO remove when testing is done
+        "datetime": datetime,
     }
 
 
@@ -191,9 +333,11 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
 @login_required
 def get_all():
     products_object = get_all_products(request)
-    form_sort: f.SortByGroupProductForm = f.SortByGroupProductForm()
     form_create: f.NewProductForm = f.NewProductForm()
     form_edit: f.ProductForm = f.ProductForm()
+
+    name = request.args.get("is_stocks_own_by_me", type=bool, default=False)
+    url_with_params = url_for("product.get_all", name=name)
 
     return render_template(
         "product/products.html",
@@ -207,13 +351,15 @@ def get_all():
         ).scalars(),
         page=products_object["pagination"],
         search_query=products_object["q"],
+        master_groups_list=products_object["master_groups_list"],
+        is_all_stocks_in_inventory=products_object["is_all_stocks_in_inventory"],
+        is_stocks_own_by_me=products_object["is_stocks_own_by_me"],
+        is_events_stocks_own_by_me=products_object["is_events_stocks_own_by_me"],
         is_events=products_object["is_events"],
         main_master_groups=products_object["master_groups"],
         product_groups=products_object["product_groups"],
         all_product_groups=products_object["all_product_groups"],
-        current_user_groups=[
-            row[0] for row in products_object["current_user_groups_rows"]
-        ],
+        current_user_groups=products_object["current_user_groups_rows"],
         current_user_groups_names=products_object["current_user_groups_names"],
         master_groups_groups_available=products_object[
             "mastr_for_prods_groups_for_prods"
@@ -225,50 +371,53 @@ def get_all():
             "mstr_prod_grps_prod_grps_names"
         ],
         warehouse_product_qty=products_object["warehouse_product_qty"],
-        form_sort=form_sort,
+        target_groups=products_object["target_groups"],
+        datetime=products_object["datetime"],
         form_create=form_create,
         form_edit=form_edit,
+        url_with_params=url_with_params,
     )
 
 
 @product_blueprint.route("/create", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def create():
     form: f.NewProductForm = f.NewProductForm()
+    query_params = get_query_params_from_headers()
     if form.validate_on_submit():
         query = m.Product.select().where(m.Product.name == form.name.data)
         gr: m.Product | None = db.session.scalar(query)
         if gr:
             flash("This product name is already taken.", "danger")
-            return redirect(url_for("product.get_all"))
+            return redirect(url_for("product.get_all", **query_params))
 
         supplier: m.Supplier = db.session.scalar(m.Supplier.select())
 
-        # TODO: use this original image in the future
-        # image = request.files["image"]
-        low_image = request.files["low_image"]
-        low_image_string = base64.b64encode(low_image.read()).decode()
         product: m.Product = m.Product(
             name=str(form.name.data).strip(" "),
             supplier_id=form.supplier.data if form.supplier.data else supplier.id,
             currency=form.currency.data if form.currency.data else "CAD",
             regular_price=form.regular_price.data if form.regular_price.data else 0,
             retail_price=form.retail_price.data if form.retail_price.data else 0,
-            image=low_image_string,
             description=form.description.data,
             # General Info ->
             SKU=form.SKU.data,
-            low_stock_level=form.low_stock_level.data
-            if form.low_stock_level.data
-            else 0,
+            low_stock_level=(
+                form.low_stock_level.data if form.low_stock_level.data else 0
+            ),
             program_year=form.program_year.data if form.program_year.data else 2023,
             package_qty=form.package_qty.data if form.package_qty.data else 0,
-            numb_of_items_per_case=form.numb_of_items_per_case.data
-            if form.numb_of_items_per_case.data
-            else 0,
-            numb_of_cases_per_outer_case=form.numb_of_cases_per_outer_case.data
-            if form.numb_of_cases_per_outer_case.data
-            else 0,
+            numb_of_items_per_case=(
+                form.numb_of_items_per_case.data
+                if form.numb_of_items_per_case.data
+                else 0
+            ),
+            numb_of_cases_per_outer_case=(
+                form.numb_of_cases_per_outer_case.data
+                if form.numb_of_cases_per_outer_case.data
+                else 0
+            ),
             comments=form.comments.data if form.comments.data else "no comment",
             # shipping
             weight=form.weight.data if form.weight.data else 0,
@@ -276,48 +425,86 @@ def create():
             width=form.width.data if form.width.data else 0,
             height=form.height.data if form.height.data else 0,
         )
-        log(log.INFO, "Form submitted. Product: [%s]", product)
-        product.save()
+        image = form.image.data
+        if image:
+            image_name = (
+                f"{form.SKU.data}{'.'.join(image.filename.split('.')[:-1])}"
+                if image.filename
+                else f"{form.SKU.data}"
+            )
+            kind = filetype.guess(image)
+
+            if not kind:
+                log(log.ERROR, "Can't guess image type.")
+                flash("Can't guess image type.", "danger")
+                return redirect(url_for("product.get_all", **query_params))
+
+            if (
+                db.session.scalar(sa.select(m.Image).where(m.Image.name == image_name))
+                is not None
+            ):
+                flash("Image name already exist", "danger")
+                return redirect(url_for("product.get_all", **query_params))
+
+            try:
+                image_path, image_string = save_image(
+                    image=image, path=f"product/{image_name}.{kind.extension}"
+                )
+            except PermissionError as e:
+                log(log.ERROR, "Can't save product image. Error: [%s]", e)
+                flash("Can't save image some problems.", "danger")
+                return redirect(url_for("product.get_all", **query_params))
+
+            product.image = image_string
+            new_img = m.Image(
+                name=image_name,
+                path=image_path,
+                extension=kind.extension,
+            )
+            product.image_obj = new_img
+        else:
+            product.image_id = DEFUALT_IMAGE_ID
+            product.image = ""
+        db.session.add(product)
+        db.session.commit()
 
         product_master_groups_ids = json.loads(form.product_groups.data)
 
         for group_id in product_master_groups_ids:
             product_group = m.ProductGroup(product_id=product.id, group_id=group_id)
-            product_group.save()
+            product_group.save(False)
+        db.session.commit()
 
-        flash("Product added!", "success")
-        return redirect(url_for("product.get_all"))
+        log(log.INFO, "Form submitted. Product: [%s]", product)
+        return redirect(url_for("product.get_all", **query_params))
     else:
         log(log.ERROR, "Product creation errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
-        return redirect(url_for("product.get_all"))
+        return redirect(url_for("product.get_all", **query_params))
 
 
 @product_blueprint.route("/edit", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def save():
     form: f.ProductForm = f.ProductForm()
+    query_params = get_query_params_from_headers()
+
     if form.validate_on_submit():
         query = m.Product.select().where(m.Product.id == int(form.product_id.data))
         u: m.Product = db.session.scalar(query)
         if not u:
+            # TODO: is there need to return from function?
             log(log.ERROR, "Not found product by id : [%s]", form.product_id.data)
             flash("Cannot save product data", "danger")
 
         supplier: m.Supplier = db.session.scalar(m.Supplier.select())
 
-        image = request.files["image"]
-        image_string = base64.b64encode(image.read()).decode()
         u.name = str(form.name.data).strip(" ")
         u.supplier_id = form.supplier.data if form.supplier.data else supplier.id
         u.currency = form.currency.data if form.currency.data else "CAD"
         u.regular_price = form.regular_price.data if form.regular_price.data else 0
         u.retail_price = form.retail_price.data if form.retail_price.data else 0
-
-        if len(image_string) == 0:
-            image_string = u.image
-        else:
-            u.image = image_string
         u.description = form.description.data
         # General Info ->
         u.SKU = form.SKU.data
@@ -341,25 +528,68 @@ def save():
         u.length = form.length.data if form.length.data else 0
         u.width = form.width.data if form.width.data else 0
         u.height = form.height.data if form.height.data else 0
-        u.save()
+        image = form.image.data
+        if image:
+            image_name = (
+                f"{form.SKU.data}{'.'.join(image.filename.split('.')[:-1])}"
+                if image.filename
+                else f"{form.SKU.data}"
+            )
+            kind = filetype.guess(image)
+
+            if not kind:
+                log(log.ERROR, "Can't guess image type.")
+                flash("Can't guess image type.", "danger")
+                return redirect(url_for("product.get_all", **query_params))
+
+            if (
+                db.session.scalar(sa.select(m.Image).where(m.Image.name == image_name))
+                is not None
+            ):
+                flash("Image name already exist", "danger")
+                return redirect(url_for("product.get_all", **query_params))
+
+            try:
+                image_path, image_string = save_image(
+                    image=image, path=f"product/{image_name}.{kind.extension}"
+                )
+            except PermissionError as e:
+                log(log.ERROR, "Can't save product image. Error: [%s]", e)
+                flash("Can't save image some problems.", "danger")
+                return redirect(url_for("product.get_all", **query_params))
+
+            u.image = image_string
+            if u.image_obj and u.image_obj.id != DEFUALT_IMAGE_ID:
+                u.image_obj.name = image_name
+                u.image_obj.path = image_path
+                u.image_obj.extension = kind.extension
+            else:
+                new_img = m.Image(
+                    name=image_name,
+                    path=image_path,
+                    extension=kind.extension,
+                )
+                u.image_obj = new_img
+        u.save(False)
+        db.session.commit()
 
         product_master_groups_ids = json.loads(form.product_groups.data)
 
-        product_groups_obj = db.session.execute(
+        product_groups_obj = db.session.scalars(
             m.ProductGroup.select().where(
                 m.ProductGroup.product_id == int(form.product_id.data)
             )
         ).all()
-        product_groups_ids = [group_row[0].group_id for group_row in product_groups_obj]
+        product_groups_ids = [group_row.group_id for group_row in product_groups_obj]
 
         for group_row in product_groups_obj:
-            if group_row[0].group_id in product_master_groups_ids:
+            if group_row.group_id in product_master_groups_ids:
                 continue
             else:
                 delete_gp = db.session.execute(
                     m.ProductGroup.select().where(
                         m.ProductGroup.product_id == int(form.product_id.data),
-                        m.ProductGroup.group_id == group_row[0].group_id,
+                        m.ProductGroup.group_id == group_row.group_id,
                     )
                 ).scalar()
                 db.session.delete(delete_gp)
@@ -374,20 +604,20 @@ def save():
                 )
                 product_group.save()
 
-        flash("Product edited successfully", "success")
         if form.next_url.data:
             return redirect(form.next_url.data)
-        return redirect(url_for("product.get_all"))
+        return redirect(url_for("product.get_all", **query_params))
 
     else:
         log(log.ERROR, "product save errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
-        return redirect(url_for("product.get_all"))
+        return redirect(url_for("product.get_all", **query_params))
 
 
 # TODO brainstorm
 @product_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def delete(id: int):
     product: m.Product = db.session.get(m.Product, id)
     if not product:
@@ -419,113 +649,18 @@ def delete(id: int):
     return "ok", 200
 
 
-# TODO refactor
-@product_blueprint.route("/sort", methods=["GET", "POST"])
-@login_required
-def sort():
-    if request.method == "GET":
-        return redirect(url_for("product.get_all"))
-    form: f.SortByGroupProductForm = f.SortByGroupProductForm()
-    form_create: f.NewProductForm = f.NewProductForm()
-    form_edit: f.ProductForm = f.ProductForm()
-    if form.validate_on_submit():
-        group_names: list = form.sort_by.data.values()
-        groups = [
-            grp[0].id
-            for grp in db.session.execute(
-                m.GroupProduct.select().where(m.GroupProduct.name.in_(group_names))
-            ).all()
-        ]
-
-        product_groups = [
-            prg[0]
-            for prg in db.session.execute(
-                m.ProductGroup.select().where(m.ProductGroup.group_id.in_(groups))
-            ).all()
-        ]
-        product_to_group = {
-            pg.product_id: [
-                t.group_id for t in product_groups if t.product_id == pg.product_id
-            ]
-            for pg in product_groups
-        }
-        # TODO remove if unused
-        # product_ids_to_return = [
-        #     pid for pid in product_to_group if len(product_to_group[pid]) == len(groups)
-        # ]
-
-        q = request.args.get("q", type=str, default=None)
-        query = (
-            m.Product.select()
-            .where(m.Product.id.in_(product_to_group))
-            .order_by(m.Product.id)
-        )
-        count_query = (
-            sa.select(sa.func.count())
-            .where(m.Product.id.in_(product_to_group))
-            .select_from(m.Product)
-        )
-        if q:
-            query = (
-                m.Product.select()
-                .where(
-                    m.Product.name.ilike(f"%{q}%") | m.Product.id.in_(product_to_group)
-                )
-                .order_by(m.Product.id)
-            )
-            count_query = (
-                sa.select(sa.func.count())
-                .where(
-                    m.Product.name.ilike(f"%{q}%") | m.Product.id.in_(product_to_group)
-                )
-                .select_from(m.Product)
-            )
-        products_object = get_all_products(request, query, count_query)
-
-        return render_template(
-            "product/products.html",
-            products=db.session.execute(
-                products_object["query"]
-                .offset(
-                    (products_object["pagination"].page - 1)
-                    * products_object["pagination"].per_page
-                )
-                .limit(products_object["pagination"].per_page)
-            ).scalars(),
-            page=products_object["pagination"],
-            search_query=products_object["q"],
-            is_events=products_object["is_events"],
-            main_master_groups=products_object["master_groups"],
-            product_groups=products_object["product_groups"],
-            all_product_groups=products_object["all_product_groups"],
-            current_user_groups=[
-                row[0] for row in products_object["current_user_groups_rows"]
-            ],
-            current_user_groups_names=products_object["current_user_groups_names"],
-            master_groups_groups_available=products_object[
-                "mastr_for_prods_groups_for_prods"
-            ],
-            master_groups_search=products_object["master_groups_search"],
-            master_group_product_name=products_object["master_product_groups_name"],
-            suppliers=products_object["suppliers"],
-            mstr_prod_grps_prod_grps_names=products_object[
-                "mstr_prod_grps_prod_grps_names"
-            ],
-            warehouse_product_qty=products_object["warehouse_product_qty"],
-            form_sort=form,
-            form_create=form_create,
-            form_edit=form_edit,
-        )
-
-    log(log.INFO, "Wrong sort")
-    flash("Wrong sort", "danger")
-    return redirect(url_for("product.get_all"))
-
-
 @product_blueprint.route("/assign", methods=["POST"])
 @login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.MANAGER.value,
+    ]
+)
 def assign():
     form: f.AssignProductForm = f.AssignProductForm()
+    query_params = get_query_params_from_headers()
+
     if form.validate_on_submit():
         query = m.Product.select().where(m.Product.name == form.name.data)
         p: m.Product | None = db.session.scalar(query)
@@ -546,7 +681,7 @@ def assign():
                 f"Cannot assign from {product_from_group.name} to {product_to_group.name}",
                 "danger",
             )
-            return redirect(url_for("product.get_all"))
+            return redirect(url_for("product.get_all", **query_params))
 
         report_inventory_list = m.ReportInventoryList(
             type="Product Assigned",
@@ -621,12 +756,47 @@ def assign():
 
         db.session.commit()
 
-        return redirect(url_for("product.get_all"))
+        users: list[m.UserGroup] = db.session.scalars(
+            m.UserGroup.select().where(
+                sa.or_(
+                    m.UserGroup.right_id == product_to_group.id,
+                    m.UserGroup.right_id == product_from_group.id,
+                )
+            )
+        ).all()
+
+        if users:
+            for u in users:
+                # TODO: ask client about users notification without approval permission
+                if not u.child.approval_permission:
+                    continue
+                msg = Message(
+                    subject=f"Assign {assign_obj.product.name}",
+                    sender=app.config["MAIL_DEFAULT_SENDER"],
+                    recipients=[u.child.email],
+                )
+                url = (
+                    url_for(
+                        "assign.get_all",
+                        _external=True,
+                    )
+                    + f"?q={assign_obj.uuid}"
+                )
+
+                msg.html = render_template(
+                    "email/assign.html",
+                    user=u.child,
+                    assign=assign_obj,
+                    url=url,
+                )
+                mail.send(msg)
+
+        return redirect(url_for("product.get_all", **query_params))
 
     else:
         log(log.ERROR, "product assign errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
-        return redirect(url_for("product.get_all"))
+        return redirect(url_for("product.get_all", **query_params))
 
 
 @product_blueprint.route("/request_share", methods=["POST"])
@@ -634,6 +804,7 @@ def assign():
 def request_share():
     form: f.RequestShareProductForm = f.RequestShareProductForm()
     if form.validate_on_submit():
+        query_params = get_query_params_from_headers()
         warehouse_product = db.session.scalar(
             m.WarehouseProduct.select().where(
                 m.WarehouseProduct.product.has(m.Product.SKU == form.sku.data),
@@ -649,7 +820,7 @@ def request_share():
                 form.from_group_id.data,
             )
             flash("Cannot save product data", "danger")
-            return redirect(url_for("product.get_all"))
+            return redirect(url_for("product.get_all", **query_params))
 
         to_group: m.Group = db.session.get(m.Group, form.to_group_id.data)
         if not to_group:
@@ -659,7 +830,7 @@ def request_share():
                 form.to_group_id.data,
             )
             flash("Cannot save product data", "danger")
-            return redirect(url_for("product.get_all"))
+            return redirect(url_for("product.get_all", **query_params))
 
         request_share: m.RequestShare = m.RequestShare(
             product_id=warehouse_product.product.id,
@@ -684,13 +855,13 @@ def request_share():
             m.UserGroup.select().where(m.UserGroup.right_id == to_group.id)
         ).all()
 
-        if len(users) != 0:
+        if users:
             for u in users:
                 # TODO: ask client about users notification without approval permission
                 if not u.child.approval_permission:
                     continue
                 msg = Message(
-                    subject="New request share",
+                    subject=f"New request share {request_share.order_numb}",
                     sender=app.config["MAIL_DEFAULT_SENDER"],
                     recipients=[u.child.email],
                 )
@@ -714,26 +885,27 @@ def request_share():
                     request_share=request_share,
                 )
                 db.session.add(request_share_user)
-                # TODO uncomment when ready to notify
-                # mail.send(msg)
+                mail.send(msg)
 
         db.session.commit()
 
         flash("Share request created!", "success")
-        return redirect(url_for("product.get_all"))
+        return redirect(url_for("product.get_all", **query_params))
 
     else:
         log(log.ERROR, "product assign errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
-        return redirect(url_for("product.get_all"))
+        return redirect(url_for("product.get_all", **query_params))
 
 
 @product_blueprint.route("/adjust", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def adjust():
     form: f.AdjustProductForm = f.AdjustProductForm()
 
     if form.validate_on_submit():
+        query_params = get_query_params_from_headers()
         adjust_item: m.Adjust = m.Adjust(
             product_id=form.product_id.data,
             note=form.note.data,
@@ -741,17 +913,28 @@ def adjust():
         )
         db.session.add(adjust_item)
         is_adjust_products = False
-        groups = json.loads(form.groups_quantity.data)
+        model_root = s.ProductWarehouseRoot.model_validate_json(
+            form.warehouses_groups_quantity.data
+        )
+        warehouses_groups_qty = model_root.root
         product = db.session.get(m.Product, form.product_id.data)
         warehouse_event: m.Warehouse = db.session.scalar(
             m.Warehouse.select().where(
                 m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value
             )
         )
+        if not warehouse_event:
+            flash("Cannot save product data", "danger")
+            log(
+                log.ERROR,
+                "Not found warehouse event, product_id: [%s]",
+                form.product_id.data,
+            )
+            return redirect(url_for("product.get_all", **query_params))
         if not product:
             flash("Cannot save product data", "danger")
             log(log.ERROR, "Not found product by id : [%s]", form.product_id.data)
-            return redirect(url_for("product.get_all"))
+            return redirect(url_for("product.get_all", **query_params))
 
         report_inventory_list = m.ReportInventoryList(
             type="Products Adjusted",
@@ -759,506 +942,507 @@ def adjust():
         )
         report_inventory_list.save(False)
 
-        for group_name, warehouses in groups.items():
-            group_id = db.session.execute(
-                m.Group.select()
-                .where(m.Group.name == group_name)
-                .with_only_columns(m.Group.id)
-            ).scalar()
-            for warehouse_id, quantity in warehouses.items():
-                product_warehouse: m.WarehouseProduct = db.session.scalar(
-                    m.WarehouseProduct.select().where(
-                        m.WarehouseProduct.product_id == form.product_id.data,
-                        m.WarehouseProduct.group_id == group_id,
-                        m.WarehouseProduct.warehouse_id == warehouse_id,
-                    )
+        for warehouse_group_qty in warehouses_groups_qty:
+            if (
+                warehouse_group_qty.group.master_group.name
+                == s.MasterGroupMandatory.events.value
+                and warehouse_group_qty.warehouse.id != warehouse_event.id
+            ):
+                continue
+            product_warehouse: m.WarehouseProduct = db.session.scalar(
+                m.WarehouseProduct.select().where(
+                    m.WarehouseProduct.product_id == form.product_id.data,
+                    m.WarehouseProduct.group_id == warehouse_group_qty.group.id,
+                    m.WarehouseProduct.warehouse_id == warehouse_group_qty.warehouse.id,
                 )
-                if product_warehouse:
-                    if (
-                        group_name == s.MasterGroupMandatory.events.value
-                        and warehouse_event.id != int(warehouse_id)
-                    ):
-                        continue
-                    if product_warehouse.product_quantity != quantity:
-                        adjust_gr_qty: m.AdjustGroupQty = m.AdjustGroupQty(
-                            adjust_id=adjust_item.id,
-                            quantity_after=quantity,
-                            quantity_before=product_warehouse.product_quantity,
-                            group_id=group_id,
-                            warehouse_id=warehouse_id,
-                            product_id=form.product_id.data,
-                        )
-                        db.session.add(adjust_gr_qty)
+            )
+            if not product_warehouse:
+                log(log.ERROR, "Not found warehouse product: [%s]", warehouse_group_qty)
+                flash("Cannot save product data", "danger")
+                return redirect(url_for("product.get_all", **query_params))
 
-                        m.ReportInventory(
-                            qty_before=product_warehouse.product_quantity,
-                            qty_after=quantity,
-                            report_inventory_list_id=report_inventory_list.id,
-                            product_id=product_warehouse.product_id,
-                            warehouse_product=product_warehouse,
-                        ).save(False)
+            if (
+                product_warehouse.product_quantity
+                != warehouse_group_qty.product_quantity
+            ):
+                adjust_gr_qty: m.AdjustGroupQty = m.AdjustGroupQty(
+                    adjust_id=adjust_item.id,
+                    quantity_before=product_warehouse.product_quantity,
+                    quantity_after=warehouse_group_qty.product_quantity,
+                    group_id=warehouse_group_qty.group.id,
+                    warehouse_id=warehouse_group_qty.warehouse.id,
+                    product_id=form.product_id.data,
+                )
+                db.session.add(adjust_gr_qty)
 
-                        m.ReportSKU(
-                            product_id=product_warehouse.product_id,
-                            adjustment=adjust_gr_qty,
-                            type=s.ReportSKUType.adjustment.value,
-                            status="Adjusted quantity",
-                            qty_after=quantity,
-                            qty_before=product_warehouse.product_quantity,
-                            warehouse_product=product_warehouse,
-                        ).save(False)
+                m.ReportInventory(
+                    qty_before=product_warehouse.product_quantity,
+                    qty_after=warehouse_group_qty.product_quantity,
+                    report_inventory_list_id=report_inventory_list.id,
+                    product_id=product_warehouse.product_id,
+                    warehouse_product=product_warehouse,
+                ).save(False)
 
-                        is_adjust_products = True
+                m.ReportSKU(
+                    product_id=product_warehouse.product_id,
+                    adjustment=adjust_gr_qty,
+                    type=s.ReportSKUType.adjustment.value,
+                    status="Adjusted quantity",
+                    qty_after=warehouse_group_qty.product_quantity,
+                    qty_before=product_warehouse.product_quantity,
+                    warehouse_product=product_warehouse,
+                ).save(False)
 
-                    product_warehouse.product_quantity = quantity
-                    db.session.add(product_warehouse)
-                else:
-                    product_warehouse = m.WarehouseProduct(
-                        product_id=form.product_id.data,
-                        group_id=group_id,
-                        product_quantity=quantity,
-                        warehouse_id=warehouse_id,
-                    )
-                    db.session.add(product_warehouse)
+                product_warehouse.product_quantity = (
+                    warehouse_group_qty.product_quantity
+                )
+                db.session.add(product_warehouse)
 
-                    m.ReportInventory(
-                        qty_before=0,
-                        qty_after=product_warehouse.product_quantity,
-                        report_inventory_list_id=report_inventory_list.id,
-                        product_id=product_warehouse.product_id,
-                        warehouse_product=product_warehouse,
-                    ).save(False)
-
-                    adjust_gr_qty: m.AdjustGroupQty = m.AdjustGroupQty(
-                        adjust_id=adjust_item.id,
-                        quantity_after=quantity,
-                        quantity_before=0,
-                        group_id=group_id,
-                        warehouse_id=warehouse_id,
-                        product_id=form.product_id.data,
-                    )
-                    db.session.add(adjust_gr_qty)
-
-                    m.ReportSKU(
-                        product_id=product_warehouse.product_id,
-                        adjustment=adjust_gr_qty,
-                        type=s.ReportSKUType.adjustment.value,
-                        status="Adjusted quantity",
-                        qty_after=quantity,
-                        qty_before=0,
-                        warehouse_product=product_warehouse,
-                    ).save(False)
+                is_adjust_products = True
 
         if not is_adjust_products:
             db.session.delete(adjust_item)
             log(log.INFO, "Nothing to adjust: [%s]", form.product_id.data)
             flash("Nothing to adjust", "danger")
-            return redirect(url_for("product.get_all"))
+            return "not modified", HTTPStatus.NOT_MODIFIED
 
         db.session.commit()
 
         log(
             log.INFO,
-            "Adjust products: [%s][%s",
+            "Adjust product: [%s]",
             form.product_id.data,
-            form.groups_quantity.data,
         )
         flash(f"Product {product.name} was adjusted", "success")
-        return redirect(url_for("product.get_all"))
+        return "ok", HTTPStatus.OK
 
     log(log.ERROR, "Adjust item save errors: [%s]", form.errors)
     flash(f"{form.errors}", "danger")
-    return redirect(url_for("outgoing_stock.get_all"))
+    return redirect(url_for("product.get_all", **query_params))
 
 
 @product_blueprint.route("/upload", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def upload():
     form: f.UploadProductForm = f.UploadProductForm()
-    if form.validate_on_submit():
-        master_product_groups = ["Language", "Categories", "Brand"]
-        csv_file = request.files["upload_csv"]
-        file_io = BytesIO(csv_file.read())
-
-        conn = db.get_engine()
-
-        new_groups = []
-
-        # NOTE write master groups and stock groups to DB
-        for table_name in master_product_groups:
-            master_group_obj = db.session.execute(
-                m.MasterGroupProduct.select().where(
-                    m.MasterGroupProduct.name == table_name
-                )
-            ).scalar()
-
-            if not master_group_obj:
-                master_group_obj = m.MasterGroupProduct(name=table_name)
-                master_group_obj.save()
-
-            df = pandas.read_csv(file_io, usecols=[table_name])
-            file_io.seek(0)
-            df = df.drop_duplicates().dropna()
-            df["master_group_id"] = master_group_obj.id
-            df["created_at"] = datetime.now()
-
-            new_groups.extend(df[table_name].to_list())
-
-            do_nothing_conflict_name = DoNothingConflict(["name"])
-
-            df.rename(
-                columns=dict(zip(df.columns, ["name", "master_group_id", "created_at"]))
-            ).to_sql(
-                "groups_for_product",
-                con=conn,
-                if_exists="append",
-                index=False,
-                # method="multi",
-                method=do_nothing_conflict_name.insert_do_nothing_on_conflicts,
-            )
-
-        # NOTE write products to DB
-        df = pandas.read_csv(
-            file_io,
-            usecols=[
-                "Name",
-                "Description",
-                "SKU",
-                "Regular Price",
-                "Retail Price",
-            ],
-        )
-        file_io.seek(0)
-        df = df.drop_duplicates()
-        df["image"] = ""
-        df["Description"] = df["Description"].fillna("")
-        df["SKU"] = df["SKU"].fillna("")
-        df["Regular Price"] = df["Regular Price"].fillna(0)
-        df["Retail Price"] = df["Retail Price"].fillna(0)
-
-        df.rename(
-            columns=dict(
-                zip(
-                    df.columns,
-                    [
-                        "name",
-                        "description",
-                        "SKU",
-                        "regular_price",
-                        "retail_price",
-                        "image",
-                    ],
-                )
-            )
-        ).to_sql(
-            "products",
-            con=conn,
-            if_exists="append",
-            index=False,
-            method=do_nothing_conflict_name.insert_do_nothing_on_conflicts,
-        )
-
-        # NOTE write product-groups relations to DB
-        new_products_obj: list[m.Product] = db.session.execute(
-            m.Product.select().where(m.Product.name.in_(df["Name"].to_list()))
-        ).scalars()
-
-        new_groups_obj: list[m.GroupProduct] = [
-            gr
-            for gr in db.session.execute(
-                m.GroupProduct.select().where(m.GroupProduct.name.in_(new_groups))
-            ).scalars()
-        ]
-
-        product_group_df = pandas.read_csv(
-            file_io,
-            usecols=[
-                "Name",
-                "Language",
-                "Brand",
-                "Categories",
-            ],
-        )
-
-        for product in new_products_obj:
-            product_group_df.loc[
-                product_group_df["Name"] == product.name, "Name"
-            ] = product.id
-
-        for mastr_grp in master_product_groups:
-            for group in new_groups_obj:
-                product_group_df.loc[
-                    product_group_df[mastr_grp] == group.name, mastr_grp
-                ] = group.id
-
-        for table_name in master_product_groups:
-            write_df = product_group_df[["Name", table_name]]
-            file_io.seek(0)
-            write_df = write_df.dropna()
-
-            write_df.rename(
-                columns=dict(zip(write_df.columns, ["product_id", "group_id"]))
-            ).to_sql(
-                "product_group",
-                con=conn,
-                if_exists="append",
-                index=False,
-                method=DoNothingConflict(None).insert_do_nothing_on_conflicts,
-            )
-
-        flash("Product added!", "success")
-        return redirect(url_for("product.get_all"))
-    else:
+    query_params = get_query_params_from_headers()
+    if not form.validate_on_submit():
         log(log.ERROR, "Product creation errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
-        return redirect(url_for("product.get_all"))
+        return redirect(url_for("product.get_all", **query_params))
 
+    # NOTE Use large number if no group selected. Impossible to reach that number in prod.
+    # Used to avoid wrong validation in backend wtform when pass 0 and get None
+    if form.target_group_upload.data == 999999999:
+        form.target_group_upload.data = 0
 
-class DoNothingConflict:
-    def __init__(self, unique_constraint: list[str]):
-        self.unique_constraint = unique_constraint
-
-    def insert_do_nothing_on_conflicts(self, sqltable, conn, keys, data_iter):
-        """
-        Execute SQL statement inserting data
-
-        Parameters
-        ----------
-        sqltable : pandas.io.sql.SQLTable
-        conn : sqlalchemy.engine.Engine or sqlalchemy.engine.Connection
-        keys : list of str
-            Column names
-        data_iter : Iterable that iterates the values to be inserted
-        """
-        columns = []
-        for c in keys:
-            columns.append(sa.column(c))
-
-        if sqltable.schema:
-            table_name = "{}.{}".format(sqltable.schema, sqltable.name)
-        else:
-            table_name = sqltable.name
-
-        mytable = sa.table(table_name, *columns)
-
-        insert_stmt = insert(mytable).values(list(data_iter))
-        # NOTE index_elements=["unique_code"] --- meaning unique constraint
-        do_nothing_stmt = insert_stmt.on_conflict_do_nothing(
-            index_elements=self.unique_constraint
-        )
-
-        conn.execute(do_nothing_stmt)
-
-
-@product_blueprint.route("/stocks_owned_by_me", methods=["GET"])
-@login_required
-def stocks_owned_by_me():
-    is_events = request.args.get("events", type=bool, default=False)
-    if is_events:
-        log(log.INFO, "Redirect to events product: [%s]", is_events)
-        return redirect(url_for("product.get_all", events=True))
-    curr_user_groups_ids = [
-        i.right_id
-        for i in db.session.execute(
-            m.UserGroup.select().where(
-                m.UserGroup.left_id == current_user.id,
-            )
-        ).scalars()
-    ]
-    curr_user_products_ids = [
-        i.product_id
-        for i in db.session.execute(
-            m.WarehouseProduct.select().where(
-                m.WarehouseProduct.group_id.in_(curr_user_groups_ids),
-            )
-        ).scalars()
-    ]
-    q = request.args.get("q", type=str, default=None)
-    reverse_event_filter = ~m.Product.warehouse_products.any(
-        m.WarehouseProduct.group.has(
-            m.Group.master_group.has(
-                m.MasterGroup.name == s.MasterGroupMandatory.events.value
-            )
-        )
+    language_master_group = db.session.scalar(
+        sa.select(m.MasterGroupProduct).where(m.MasterGroupProduct.name == "Language")
     )
-    query = (
-        m.Product.select()
-        .where(m.Product.id.in_(curr_user_products_ids), reverse_event_filter)
-        .order_by(m.Product.id)
+    brand_master_group = db.session.scalar(
+        sa.select(m.MasterGroupProduct).where(m.MasterGroupProduct.name == "Brand")
     )
-    count_query = sa.select(sa.func.count()).select_from(m.Product)
-    if q:
-        query = (
-            m.Product.select()
-            .where(
-                m.Product.name.ilike(f"%{q}%"), m.Product.id.in_(curr_user_products_ids)
-            )
-            .order_by(m.Product.id)
-        )
-        count_query = (
-            sa.select(sa.func.count())
-            .where(
-                m.Product.name.ilike(f"%{q}%"), m.Product.id.in_(curr_user_products_ids)
-            )
-            .select_from(m.Product)
-        )
-
-    products_object = get_all_products(
-        request, query, count_query, my_stocks=curr_user_groups_ids
-    )
-    form_sort: f.SortByGroupProductForm = f.SortByGroupProductForm()
-    form_create: f.NewProductForm = f.NewProductForm()
-    form_edit: f.ProductForm = f.ProductForm()
-
-    return render_template(
-        "product/products.html",
-        products=db.session.execute(
-            products_object["query"]
-            .offset(
-                (products_object["pagination"].page - 1)
-                * products_object["pagination"].per_page
-            )
-            .limit(products_object["pagination"].per_page)
-        ).scalars(),
-        page=products_object["pagination"],
-        search_query=products_object["q"],
-        # search_query=products_object["is_events"],
-        main_master_groups=products_object["master_groups"],
-        product_groups=products_object["product_groups"],
-        all_product_groups=products_object["all_product_groups"],
-        current_user_groups=[
-            row[0] for row in products_object["current_user_groups_rows"]
-        ],
-        current_user_groups_names=products_object["current_user_groups_names"],
-        master_groups_groups_available=products_object[
-            "mastr_for_prods_groups_for_prods"
-        ],
-        master_groups_search=products_object["master_groups_search"],
-        master_group_product_name=products_object["master_product_groups_name"],
-        suppliers=products_object["suppliers"],
-        mstr_prod_grps_prod_grps_names=products_object[
-            "mstr_prod_grps_prod_grps_names"
-        ],
-        warehouse_product_qty=products_object["warehouse_product_qty"],
-        form_sort=form_sort,
-        form_create=form_create,
-        form_edit=form_edit,
+    categories_master_group = db.session.scalar(
+        sa.select(m.MasterGroupProduct).where(m.MasterGroupProduct.name == "Categories")
     )
 
+    if not language_master_group:
+        log(
+            log.ERROR,
+            "Not found product master group Language while upload CSV with products",
+        )
+        flash("No Language product master group", "danger")
+        return url_for("product.get_all", **query_params)
 
-@product_blueprint.route("/events_stocks_owned_by_me", methods=["GET"])
-@login_required
-def events_stocks_owned_by_me():
-    is_events = request.args.get("events", type=bool, default=False)
-    if is_events:
-        log(log.INFO, "Redirect to events product: [%s]", is_events)
-        return redirect(url_for("product.get_all", events=True))
-    event_filter = m.Product.warehouse_products.any(
-        m.WarehouseProduct.group.has(
-            m.Group.master_group.has(
-                m.MasterGroup.name == s.MasterGroupMandatory.events.value
+    if not brand_master_group:
+        log(
+            log.ERROR,
+            "Not found product master group Brand while upload CSV with products",
+        )
+        flash("No Brand product master group", "danger")
+        return url_for("product.get_all", **query_params)
+
+    if not categories_master_group:
+        log(
+            log.ERROR,
+            "Not found product master group Categories while upload CSV with products",
+        )
+        flash("No Categories product master group", "danger")
+        return url_for("product.get_all", **query_params)
+
+    csv_file = request.files["upload_csv"]
+
+    # default_image = db.session.scalar(
+    #     sa.select(m.Image).where(m.Image.name == "no_picture_default.png")
+    # )
+
+    stream = codecs.iterdecode(csv_file.stream, "utf-8")
+    csv_reader = csv.reader(stream)
+    next(csv_reader)
+    error_message = ""
+
+    for i, row in enumerate(csv_reader):
+        print(row)
+        try:
+            product_item_data = s.ProductCSVItem(*row)
+        except ValidationError:
+            log(log.ERROR, "SCV product upload validation error: %s", row)
+            flash(f"Invalid product item: {i + 1}", "danger")
+            return redirect(url_for("product.get_all", **query_params))
+
+        product = db.session.scalar(
+            sa.select(m.Product).where(
+                m.Product.SKU == product_item_data.sku,
             )
         )
-    )
-    curr_user_groups_ids = [
-        i.right_id
-        for i in db.session.execute(
-            m.UserGroup.select().where(
-                m.UserGroup.left_id == current_user.id,
-                m.UserGroup.parent.has(
-                    m.Group.master_group.has(
-                        m.MasterGroup.name == s.MasterGroupMandatory.events.value
-                    )
+
+        product_by_name = db.session.scalar(
+            sa.select(m.Product).where(m.Product.name == product_item_data.name)
+        )
+
+        if not product and product_by_name:
+            log(
+                log.ERROR,
+                "Product with SKU: [%s] already exists",
+                product_item_data.sku,
+            )
+            error_message += f"Product exist with the same name: {product_by_name.name}\n Product not added\n"
+            continue
+
+        log(log.INFO, "Product: [%s]", product)
+
+        language_product_group = db.session.scalar(
+            sa.select(m.GroupProduct).where(
+                m.GroupProduct.master_groups_for_product.has(
+                    m.MasterGroupProduct.name == language_master_group.name
                 ),
+                m.GroupProduct.name == product_item_data.language,
             )
-        ).scalars()
-    ]
-    curr_user_products_ids = [
-        i.product_id
-        for i in db.session.execute(
-            m.WarehouseProduct.select().where(
-                m.WarehouseProduct.group_id.in_(curr_user_groups_ids), event_filter
-            )
-        ).scalars()
-    ]
-    q = request.args.get("q", type=str, default=None)
-
-    query = (
-        m.Product.select()
-        .where(m.Product.id.in_(curr_user_products_ids))
-        .order_by(m.Product.id)
-    )
-    count_query = sa.select(sa.func.count()).select_from(m.Product)
-    if q:
-        query = (
-            m.Product.select()
-            .where(
-                m.Product.name.ilike(f"%{q}%"), m.Product.id.in_(curr_user_products_ids)
-            )
-            .order_by(m.Product.id)
         )
-        count_query = (
-            sa.select(sa.func.count())
-            .where(
-                m.Product.name.ilike(f"%{q}%"), m.Product.id.in_(curr_user_products_ids)
+        brand_product_group = db.session.scalar(
+            sa.select(m.GroupProduct).where(
+                m.GroupProduct.master_groups_for_product.has(
+                    m.MasterGroupProduct.name == brand_master_group.name
+                ),
+                m.GroupProduct.name == product_item_data.brand,
             )
-            .select_from(m.Product)
+        )
+        category_product_group = db.session.scalar(
+            sa.select(m.GroupProduct).where(
+                m.GroupProduct.master_groups_for_product.has(
+                    m.MasterGroupProduct.name == categories_master_group.name
+                ),
+                m.GroupProduct.name == product_item_data.categories,
+            )
         )
 
-    products_object = get_all_products(
-        request, query, count_query, my_stocks=curr_user_groups_ids
-    )
-    form_sort: f.SortByGroupProductForm = f.SortByGroupProductForm()
-    form_create: f.NewProductForm = f.NewProductForm()
-    form_edit: f.ProductForm = f.ProductForm()
+        # TODO: Add logic for creating product with group Events
+        if product_item_data.categories == "Events":
+            error_message += f"Cannot upload product with group Events, product SKU: {product_item_data.sku}\n"
+            log(log.ERROR, "Cannot upload product with group Events")
+            continue
 
-    return render_template(
-        "product/products.html",
-        products=db.session.execute(
-            products_object["query"]
-            .offset(
-                (products_object["pagination"].page - 1)
-                * products_object["pagination"].per_page
+        if not language_product_group and product_item_data.language != "":
+            language_product_group = m.GroupProduct(
+                name=product_item_data.language,
+                master_groups_for_product=language_master_group,
             )
-            .limit(products_object["pagination"].per_page)
-        ).scalars(),
-        page=products_object["pagination"],
-        search_query=products_object["q"],
-        main_master_groups=products_object["master_groups"],
-        product_groups=products_object["product_groups"],
-        all_product_groups=products_object["all_product_groups"],
-        current_user_groups=[
-            row[0] for row in products_object["current_user_groups_rows"]
-        ],
-        current_user_groups_names=products_object["current_user_groups_names"],
-        master_groups_groups_available=products_object[
-            "mastr_for_prods_groups_for_prods"
-        ],
-        master_groups_search=products_object["master_groups_search"],
-        master_group_product_name=products_object["master_product_groups_name"],
-        suppliers=products_object["suppliers"],
-        mstr_prod_grps_prod_grps_names=products_object[
-            "mstr_prod_grps_prod_grps_names"
-        ],
-        warehouse_product_qty=products_object["warehouse_product_qty"],
-        form_sort=form_sort,
-        form_create=form_create,
-        form_edit=form_edit,
-    )
+            db.session.add(language_product_group)
+            log(
+                log.INFO,
+                "Added Language product group: [%s]",
+                product_item_data.language,
+            )
+
+        if not brand_product_group and product_item_data.brand != "":
+            brand_product_group = m.GroupProduct(
+                name=product_item_data.brand,
+                master_groups_for_product=brand_master_group,
+            )
+            db.session.add(brand_product_group)
+            log(log.INFO, "Added Brand product group: [%s]", product_item_data.brand)
+
+        if not category_product_group and product_item_data.categories != "":
+            category_product_group = m.GroupProduct(
+                name=product_item_data.categories,
+                master_groups_for_product=categories_master_group,
+            )
+            db.session.add(category_product_group)
+            log(
+                log.INFO,
+                "Added Category product group: [%s]",
+                product_item_data.categories,
+            )
+
+        if not product:
+            log(log.INFO, "Product not found")
+
+            product = m.Product(
+                SKU=product_item_data.sku,
+                name=product_item_data.name,
+                description=product_item_data.description,
+                regular_price=product_item_data.regular_price,
+                retail_price=product_item_data.retail_price,
+                image="",
+            )
+            db.session.add(product)
+            log(log.INFO, "Added product: [%s]", product_item_data.sku)
+
+        product_with_group_language = None
+        try:
+            product_with_group_language = db.session.scalar(
+                sa.select(m.Product.id).where(
+                    m.Product.SKU == product_item_data.sku,
+                    m.Product.groups.any(
+                        sa.and_(
+                            m.GroupProduct.name == product_item_data.language,
+                            m.GroupProduct.master_groups_for_product.has(
+                                m.MasterGroupProduct.name == language_master_group.name,
+                            ),
+                        ),
+                    ),
+                )
+            )
+        except Exception as e:
+            log(log.ERROR, "Error: [%s]", e)
+            return redirect(url_for("product.get_all", **query_params))
+
+        log(log.INFO, "Product with group language: [%s]", product_with_group_language)
+        if not product_with_group_language:
+            log(log.INFO, "Product with group not found")
+            print(product.groups)
+            if language_product_group:
+                product.groups.append(language_product_group)
+                log(
+                    log.INFO,
+                    "Language product group added: [%s]",
+                    language_product_group,
+                )
+
+        product_with_group_brand = None
+        try:
+            product_with_group_brand = db.session.scalar(
+                sa.select(m.Product.id).where(
+                    m.Product.SKU == product_item_data.sku,
+                    m.Product.groups.any(
+                        sa.and_(
+                            m.GroupProduct.name == product_item_data.brand,
+                            m.GroupProduct.master_groups_for_product.has(
+                                m.MasterGroupProduct.name == brand_master_group.name
+                            ),
+                        )
+                    ),
+                )
+            )
+        except Exception as e:
+            log(log.ERROR, "Error: [%s]", e)
+            return redirect(url_for("product.get_all", **query_params))
+
+        if not product_with_group_brand:
+            log(log.INFO, "Product with group not found")
+            if brand_product_group:
+                product.groups.append(brand_product_group)
+                log(log.INFO, "Brand product group added: [%s]", brand_product_group)
+
+        product_with_group_category = None
+        try:
+            product_with_group_category = db.session.scalar(
+                sa.select(m.Product.id).where(
+                    m.Product.SKU == product_item_data.sku,
+                    m.Product.groups.any(
+                        sa.and_(
+                            m.GroupProduct.name == product_item_data.categories,
+                            m.GroupProduct.master_groups_for_product.has(
+                                m.MasterGroupProduct.name
+                                == categories_master_group.name
+                            ),
+                        ),
+                    ),
+                )
+            )
+        except Exception as e:
+            log(log.ERROR, "Error: [%s]", e)
+            return redirect(url_for("product.get_all", **query_params))
+
+        if not product_with_group_category:
+            log(
+                log.INFO,
+                "Category product group not found: [%s]",
+                category_product_group,
+            )
+            if category_product_group:
+                product.groups.append(category_product_group)
+                log(
+                    log.INFO,
+                    "Category product group added: [%s]",
+                    category_product_group,
+                )
+
+        if language_product_group and language_product_group not in product.groups:
+            product.groups.append(language_product_group)
+            log(
+                log.INFO,
+                "Language product group added to product.groups: [%s]",
+                language_product_group,
+            )
+
+        if brand_product_group and brand_product_group not in product.groups:
+            product.groups.append(brand_product_group)
+            log(
+                log.INFO,
+                "Brand product group added to product.groups: [%s]",
+                brand_product_group,
+            )
+
+        if category_product_group and category_product_group not in product.groups:
+            product.groups.append(category_product_group)
+            log(
+                log.INFO,
+                "Category product group added to product.groups: [%s]",
+                category_product_group,
+            )
+
+        if product_item_data.name != product.name:
+            log(log.INFO, "Product name: [%s]", product.name)
+            log(log.INFO, "Product item data name: [%s]", product_item_data.name)
+            log(log.INFO, "Product: [%s]", product.SKU)
+        else:
+            log(log.INFO, "Product name not changed: [%s]", product.name)
+            log(log.INFO, "Product item data name: [%s]", product_item_data.name)
+            log(log.INFO, "Product: [%s]", product.SKU)
+
+        if product_by_name and product != product_by_name:
+            log(log.INFO, "Product by name: [%s]", product_by_name)
+            log(log.INFO, "Product: [%s]", product)
+            error_message += f"Two different products exist with same SKU: {product.SKU}\n Product not added\n"
+            continue
+
+        product.name = product_item_data.name
+        product.description = product_item_data.description
+        product.regular_price = product_item_data.regular_price
+        product.retail_price = product_item_data.retail_price
+
+        # TODO: Add creating image from csv
+        # image = db.session.scalar(
+        #     sa.select(m.Image).where(m.Image.name == product_item_data.sku)
+        # )
+        # if not image:
+        #     image = m.Image(
+        #         name=product_item_data.sku,
+        #         path=f"product/{product_item_data.sku}",
+        #         extension="png",
+        #     )
+        #     image.save(False)
+        log(log.INFO, "Product image object: [%s]", product.image_obj)
+        if not product.image_obj:
+            log(log.INFO, "Product image object not found")
+            product.image = ""
+            product.image_id = DEFUALT_IMAGE_ID
+
+        product.save(False)
+        # product.image = image.get_base64().decode()
+
+        if form.target_group_upload.data:
+            log(log.INFO, "Target group: [%s]", form.target_group_upload.data)
+            group = db.session.scalar(
+                sa.select(m.Group).where(m.Group.id == form.target_group_upload.data)
+            )
+
+            warehouse_product = (
+                db.session.query(m.WarehouseProduct)
+                .filter(m.WarehouseProduct.product == product)
+                .filter(m.WarehouseProduct.group == group)
+                .first()
+            )
+
+            if warehouse_product and group and product_item_data.available_quantity:
+                log(
+                    log.INFO,
+                    "Warehouse product found: [%s]",
+                    warehouse_product,
+                )
+                warehouse_product.product_quantity += (
+                    product_item_data.available_quantity
+                )
+
+            if not warehouse_product and group and product_item_data.available_quantity:
+                default_warehouse = db.session.scalar(
+                    sa.select(m.Warehouse).where(m.Warehouse.name != "Warehouse Events")
+                )
+                log(log.INFO, "Warehouse product not found. Default warehouse: [%s]")
+
+                warehouse_product = m.WarehouseProduct(
+                    warehouse=default_warehouse,
+                    product=product,
+                    group=group,
+                    product_quantity=product_item_data.available_quantity,
+                )
+                db.session.add(warehouse_product)
+                log(log.INFO, "Warehouse_product added: [%s]", warehouse_product)
+        log(log.INFO, "Product added; name: [%s]", product.name)
+
+    try:
+        db.session.commit()
+        log(log.INFO, "CSV file uploaded")
+        if not error_message:
+            flash("Products added!", "success")
+        else:
+            flash(f"Products added, but not all. \n {error_message}", "success")
+    except Exception as e:
+        log(log.ERROR, "CSV file uploaded error: [%s]", e)
+        flash("Cannot save product data", "danger")
+
+    return redirect(url_for("product.get_all", **query_params))
 
 
 @product_blueprint.route("/full_image/<int:id>", methods=["GET"])
 @login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.DELIVERY_AGENT.value,
+    ]
+)
 def full_image(id: int):
+    log(log.INFO, "Get full image [%d]", id)
     product: m.Product = db.session.execute(
         m.Product.select().where(m.Product.id == id)
     ).scalar()
 
-    data = {
-        "name": product.name,
-        "image": product.image if product.image else app.config["DEFAULT_IMAGE"],
-    }
-    return jsonify(data)
+    if not product.image_obj:
+        log(log.ERROR, "Can't find product image object")
+        abort(404, HTTPStatus.NOT_FOUND)
+
+    image_path: str = DEFUALT_IMAGE_PATH
+    if product.image_obj.id != DEFUALT_IMAGE_ID:
+        image_path = product.image_obj.path
+
+    if not image_path.startswith(str(BASE_IMAGE_PATH)):
+        image_path = str(BASE_IMAGE_PATH / Path(product.image_obj.path))
+
+    log(log.INFO, "Image path [%s]", image_path)
+
+    try:
+        with open(
+            image_path,
+            "rb",
+        ) as original_image:
+
+            img_bytes = base64.b64encode(original_image.read()).decode()
+
+    except FileNotFoundError as e:
+        log(log.ERROR, "Image file not found [%s]", e)
+        abort(404, HTTPStatus.NOT_FOUND)
+
+    return s.ProductFullImage(
+        name=product.name,
+        image=img_bytes,
+        imageType=product.image_obj.extension.lower(),
+    ).model_dump_json()
 
 
 @product_blueprint.route("/get_additional_info/<int:product_id>", methods=["GET"])
@@ -1337,106 +1521,5 @@ def get_additional_info(product_id):
         all_warehouses=all_warehouses,
         master_groups_groups=master_groups_groups,
         current_master_product_groups=current_master_product_groups,
-    ).model_dump_json()
-
-
-@product_blueprint.route("/stocks_in_inventory", methods=["GET"])
-@login_required
-def stocks_in_inventory():
-    curr_user_groups_ids = [
-        i.right_id
-        for i in db.session.execute(
-            m.UserGroup.select().where(
-                m.UserGroup.left_id == current_user.id,
-            )
-        ).scalars()
-    ]
-    curr_user_products_ids = [
-        i.product_id
-        for i in db.session.execute(
-            m.WarehouseProduct.select().where(
-                m.WarehouseProduct.group_id.in_(curr_user_groups_ids),
-            )
-        ).scalars()
-    ]
-    q = request.args.get("q", type=str, default=None)
-    reverse_event_filter = ~m.Product.warehouse_products.any(
-        m.WarehouseProduct.group.has(
-            m.Group.master_group.has(
-                m.MasterGroup.name == s.MasterGroupMandatory.events.value
-            )
-        )
-    )
-
-    query = (
-        m.Product.select()
-        .where(
-            m.Product.warehouse_products.any(m.WarehouseProduct.product_quantity > 0),
-        )
-        .order_by(m.Product.id)
-    )
-
-    count_query = sa.select(sa.func.count()).select_from(
-        m.Product.select().where(
-            m.Product.warehouse_products.any(m.WarehouseProduct.product_quantity > 0),
-            reverse_event_filter,
-        )
-    )
-    if q:
-        query = (
-            m.Product.select()
-            .where(
-                m.Product.name.ilike(f"%{q}%"), m.Product.id.in_(curr_user_products_ids)
-            )
-            .order_by(m.Product.id)
-        )
-        count_query = (
-            sa.select(sa.func.count())
-            .where(
-                m.Product.name.ilike(f"%{q}%"), m.Product.id.in_(curr_user_products_ids)
-            )
-            .select_from(m.Product)
-        )
-
-    products_object = get_all_products(
-        request, query, count_query, my_stocks=curr_user_groups_ids
-    )
-
-    form_sort: f.SortByGroupProductForm = f.SortByGroupProductForm()
-    form_create: f.NewProductForm = f.NewProductForm()
-    form_edit: f.ProductForm = f.ProductForm()
-
-    return render_template(
-        "product/products.html",
-        products=db.session.execute(
-            products_object["query"]
-            .offset(
-                (products_object["pagination"].page - 1)
-                * products_object["pagination"].per_page
-            )
-            .limit(products_object["pagination"].per_page)
-        ).scalars(),
-        page=products_object["pagination"],
-        search_query=products_object["q"],
-        # search_query=products_object["is_events"],
-        main_master_groups=products_object["master_groups"],
-        product_groups=products_object["product_groups"],
-        all_product_groups=products_object["all_product_groups"],
-        current_user_groups=[
-            row[0] for row in products_object["current_user_groups_rows"]
-        ],
-        current_user_groups_names=products_object["current_user_groups_names"],
-        master_groups_groups_available=products_object[
-            "mastr_for_prods_groups_for_prods"
-        ],
-        master_groups_search=products_object["master_groups_search"],
-        master_group_product_name=products_object["master_product_groups_name"],
-        suppliers=products_object["suppliers"],
-        mstr_prod_grps_prod_grps_names=products_object[
-            "mstr_prod_grps_prod_grps_names"
-        ],
-        warehouse_product_qty=products_object["warehouse_product_qty"],
-        form_sort=form_sort,
-        form_create=form_create,
-        form_edit=form_edit,
-    )
+        current_user_role=current_user.role_obj.role_name,
+    ).model_dump_json(by_alias=True)

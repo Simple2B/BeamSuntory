@@ -1,5 +1,9 @@
 import io
+from pathlib import Path
+
 from flask.testing import FlaskClient
+import sqlalchemy as sa
+
 from app import models as m, db
 from tests.utils import login, register, logout
 
@@ -19,7 +23,7 @@ def test_products_pages(mg_g_populate: FlaskClient):
     assert response.status_code == 405
 
 
-def test_create_product(client):
+def test_create_product(client: FlaskClient):
     register("samg", "samg@test.com")
     login(client, "samg")
     data = dict(
@@ -44,11 +48,11 @@ def test_create_product(client):
         product_groups="[1,2,3]",
     )
     data["image"] = (io.BytesIO(b"abcdef"), "test.png")
-    data["low_image"] = (io.BytesIO(b"abcdef"), "test.png")
     response = client.post(
         "/product/create",
         data=data,
     )
+
     assert response.status_code == 302
     assert "product" in response.text
     products_rows_objs = db.session.execute(m.Product.select()).all()
@@ -92,7 +96,6 @@ def test_edit_product(mg_g_populate: FlaskClient):
         product_groups="[1,2,3]",
     )
     data["image"] = (io.BytesIO(b"abcdef"), "test.png")
-
     response = mg_g_populate.post(
         "/product/edit",
         data=data,
@@ -106,30 +109,24 @@ def test_edit_product(mg_g_populate: FlaskClient):
 def test_sort_product(mg_g_populate: FlaskClient):
     login(mg_g_populate)
 
-    response = mg_g_populate.post(
-        "/product/sort",
-        data=dict(sort_by='{"Country": "Canada", "Brand": "JB"}'),
+    brand = "JB"
+    response = mg_g_populate.get(
+        f"""/product?master_groups={brand}""",
+        follow_redirects=True,
     )
-    assert ("populate_test_product" in response.text) is True
-    assert ("populate_test_prod2" in response.text) is True
-    assert response.status_code == 200
 
-    response = mg_g_populate.post(
-        "/product/sort",
-        data=dict(sort_by='{"Brand": "JB"}'),
-    )
     assert ("populate_test_product" in response.text) is False
     assert ("populate_test_prod2" in response.text) is True
     assert response.status_code == 200
 
-    response = mg_g_populate.post(
-        "/product/sort",
-        data=dict(sort='{"Brand": "JB"}'),
+    brand = "Canada"
+    response = mg_g_populate.get(
+        f"""/product?master_groups={brand}""",
         follow_redirects=True,
     )
+
     assert ("populate_test_product" in response.text) is True
-    assert ("populate_test_prod2" in response.text) is True
-    assert ("Wrong sort" in response.text) is True
+    assert ("populate_test_prod2" in response.text) is False
     assert response.status_code == 200
 
 
@@ -204,3 +201,60 @@ def test_assign_product(mg_g_populate: FlaskClient):
 
     assert len(assign_objs) == 2
     assert len(report_assign_objs) == 2
+
+
+def test_upload_product(mg_g_populate: FlaskClient):
+    login(mg_g_populate)
+
+    # CSV_NAME = "All Products part 5.csv"
+    CSV_NAME = "Book.csv"
+    CSV_PATH = Path("tests") / "data" / CSV_NAME
+
+    with open(CSV_PATH, "rb") as f:
+        file_csv = (io.BytesIO(f.read()), CSV_NAME)
+
+    response_no_group = mg_g_populate.post(
+        "/product/upload",
+        data=dict(
+            upload_csv=file_csv,
+            target_group_upload=0,
+        ),
+    )
+
+    assert response_no_group.status_code == 302
+
+    all_products = db.session.scalar(sa.select(sa.func.count()).select_from(m.Product))
+    all_warehouse_products = db.session.scalar(
+        sa.select(sa.func.count()).select_from(m.WarehouseProduct)
+    )
+
+    assert all_products > 8
+    assert all_warehouse_products < 9
+
+    group_upload_to: m.Group = db.session.scalar(m.Group.select())
+
+    assert group_upload_to
+
+    with open(CSV_PATH, "rb") as f:
+        file_csv = (io.BytesIO(f.read()), CSV_NAME)
+
+    response_with_group = mg_g_populate.post(
+        "/product/upload",
+        data=dict(
+            upload_csv=file_csv,
+            target_group_upload=group_upload_to.id,
+        ),
+    )
+
+    assert response_with_group.status_code == 302
+
+    all_products_with_groups = db.session.scalar(
+        sa.select(sa.func.count()).select_from(m.Product)
+    )
+    all_warehouse_products_with_groups = db.session.scalar(
+        sa.select(sa.func.count()).select_from(m.WarehouseProduct)
+    )
+
+    assert all_products_with_groups == all_products
+    assert all_warehouse_products_with_groups > all_warehouse_products
+    assert all_warehouse_products_with_groups > 9

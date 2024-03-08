@@ -3,6 +3,7 @@ from .auth import auth_blueprint
 from .main import main_blueprint
 from .user import bp as user_blueprint
 from .group import stock_target_group_blueprint
+from .sub_group import sub_stock_target_group_blueprint
 from .master_group import master_group_blueprint
 from .product import product_blueprint
 from .group_for_product import group_for_product_blueprint
@@ -41,6 +42,7 @@ BLUEPRINTS = (
     auth_blueprint,
     user_blueprint,
     stock_target_group_blueprint,
+    sub_stock_target_group_blueprint,
     master_group_blueprint,
     product_blueprint,
     group_for_product_blueprint,

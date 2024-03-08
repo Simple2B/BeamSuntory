@@ -3,11 +3,18 @@ from pydantic import BaseModel, Field, ConfigDict
 from .division import Division
 
 
-class UserRole(Enum):
+class ExtendedEnum(Enum):
+    @classmethod
+    def list(cls):
+        return list(map(lambda c: c.value, cls))
+
+
+class UserRole(ExtendedEnum):
     ADMIN: str = "admin"
     SALES_REP: str = "sales_rep"
     WAREHOUSE_MANAGER: str = "warehouse_manager"
     MANAGER: str = "manager"
+    DELIVERY_AGENT: str = "delivery_agent"
 
 
 class User(BaseModel):

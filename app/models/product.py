@@ -1,5 +1,4 @@
 from typing import TYPE_CHECKING
-import json
 import sqlalchemy as sa
 from sqlalchemy import orm
 
@@ -9,7 +8,9 @@ from .utils import ModelMixin
 
 from .product_group import ProductGroup
 from .warehouse_product import WarehouseProduct
+from .group_for_product import GroupProduct
 from .warehouse import Warehouse
+from .image import Image
 
 if TYPE_CHECKING:
     from .supplier import Supplier
@@ -24,6 +25,9 @@ class Product(db.Model, ModelMixin):
     supplier_id: orm.Mapped[str] = orm.mapped_column(
         sa.ForeignKey("suppliers.id"), nullable=True
     )  # NOTE vendor = supplier
+    image_id: orm.Mapped[str] = orm.mapped_column(
+        sa.ForeignKey("images.id"), nullable=True
+    )
 
     # Columns
     name: orm.Mapped[str] = orm.mapped_column(
@@ -60,6 +64,7 @@ class Product(db.Model, ModelMixin):
     height: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
 
     # Relationships
+    image_obj: orm.Mapped["Image"] = orm.relationship()
     supplier: orm.Mapped["Supplier"] = orm.relationship()
     warehouse_products: orm.Mapped[list[WarehouseProduct]] = orm.relationship(
         viewonly=True
@@ -67,13 +72,15 @@ class Product(db.Model, ModelMixin):
     # TODO remove relationships in WarehouseProduct (product, warehouse, etc...)
     # TODO use only as secondary
     warehouses: orm.Mapped[list[Warehouse]] = orm.relationship(
-        secondary=WarehouseProduct.__table__,
-        overlaps="warehouse",
+        secondary=WarehouseProduct.__table__, overlaps="warehouse,product"
     )
 
     # TODO is overlaps="user_obj" correct decision? remove it to see the warning
     product_groups: orm.Mapped[list[ProductGroup]] = orm.relationship(
         cascade="all, delete-orphan", overlaps="child"
+    )
+    groups: orm.Mapped[list[GroupProduct]] = orm.relationship(
+        secondary=ProductGroup.__table__, back_populates="products"
     )
 
     def __repr__(self):
@@ -81,32 +88,4 @@ class Product(db.Model, ModelMixin):
 
     @property
     def json(self):
-        # TODO refactor
-        ujs = s.Product.model_validate(self).model_dump_json()
-        mg_dict = json.loads(ujs)
-
-        # here we get dict of current product group_name:master_group_name
-        # example: {'Brand': 'Martini', 'Fr': 'Language', 'Country': 'US'}
-        warehouse_products = [
-            wp
-            for wp in db.session.execute(
-                WarehouseProduct.select().where(
-                    WarehouseProduct.product_id == mg_dict["id"]
-                )
-            ).scalars()
-        ]
-
-        # TODO: move it to schema
-        mg_dict["product_in_warehouses"] = {}
-
-        for wp in warehouse_products:
-            if wp.group.name in mg_dict["product_in_warehouses"]:
-                mg_dict["product_in_warehouses"][wp.group.name][
-                    f"{wp.warehouse_id}"
-                ] = wp.product_quantity
-            else:
-                mg_dict["product_in_warehouses"][wp.group.name] = {
-                    f"{wp.warehouse_id}": wp.product_quantity
-                }
-
-        return json.dumps(mg_dict)
+        return s.Product.model_validate(self).model_dump_json(by_alias=True)

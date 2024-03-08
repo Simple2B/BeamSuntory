@@ -72,11 +72,17 @@ def init(app: Flask):
             "Brand": ["Brugal", "Banff Ice", "Alberta Springs"],
             "Language": ["English", "French"],
             "Premises": ["On Premises", "Off Premises"],
-            "Category": ["NLVA", "GWP", "Kit", "Bareware", "Signage"],
+            "Categories": ["NLVA", "GWP", "Kit", "Bareware", "Signage"],
             s.ProductMasterGroupMandatory.events.value: [
                 s.ProductMasterGroupMandatory.events.value
             ],
         }
+
+        m.Image(
+            name="no_picture_default",
+            path="no_picture_default.png",
+            extension="png",
+        ).save(False)
 
         for mg in stock_master_groups:
             master_group = db.session.execute(
@@ -266,4 +272,9 @@ def init(app: Flask):
     @app.cli.command()
     def clear_report_events():
         db.session.execute(m.ReportEvent.delete())
+        db.session.commit()
+
+    @app.cli.command()
+    def clear_all_events():
+        db.session.execute(m.Event.delete())
         db.session.commit()

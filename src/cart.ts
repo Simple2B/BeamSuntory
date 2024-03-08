@@ -37,7 +37,7 @@ const carts = JSON.parse(cartEventsHiddenInput.value) as ICartItem[];
 
 // variable to set default image to brand dynamically in modal window. Can we get link from the internet?
 const defaultImage =
-  'https://funko.com/on/demandware.static/-/Sites-funko-master-catalog/default/dwbb38a111/images/funko/upload/55998_CocaCola_S2_SpriteBottleCap_POP_GLAM-WEB.png';
+  'https://raw.githubusercontent.com/Simple2B/BeamSuntory/develop/app/static/img/no_picture_default.png';
 
 // --count total quantity and price--
 const totalPriceElement = document.querySelector('#cart-total-price');

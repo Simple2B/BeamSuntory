@@ -8,10 +8,10 @@ from wtforms import (
     FileField,
 )
 from wtforms.validators import DataRequired, Optional
+import filetype
 
 from app import models as m
 from app import db
-from .utils import JSONField
 
 
 class ProductForm(FlaskForm):
@@ -23,7 +23,6 @@ class ProductForm(FlaskForm):
     regular_price = FloatField("Regular price", validators=[Optional()])
     retail_price = FloatField("Retail price", validators=[Optional()])
     image = FileField("Image", validators=[Optional()])
-    low_image = FileField("Image", validators=[Optional()])
     description = StringField("Description", [DataRequired()])
     # General Info ->
     SKU = StringField("SKU", [DataRequired()])
@@ -48,6 +47,13 @@ class ProductForm(FlaskForm):
 
     submit = SubmitField("Save")
 
+    def validate_image(self, field):
+        if field.data.content_type == "application/octet-stream":
+            return
+        is_file = filetype.guess(field.data)
+        if not is_file or not filetype.is_image(field.data):
+            raise ValidationError("File must be an image")
+
     def validate_product_name(self, field):
         query = m.Product.select().where(m.Product.name == field.data)
         if db.session.scalar(query) is not None:
@@ -61,7 +67,6 @@ class NewProductForm(FlaskForm):
     regular_price = FloatField("Regular price", validators=[Optional()])
     retail_price = FloatField("Retail price", validators=[Optional()])
     image = FileField("Image", validators=[Optional()])
-    low_image = FileField("Image", validators=[Optional()])
     description = StringField("Description", [DataRequired()])
     # General Info ->
     SKU = StringField("SKU", [DataRequired()])
@@ -90,10 +95,12 @@ class NewProductForm(FlaskForm):
         if db.session.scalar(query) is not None:
             raise ValidationError("This product name is taken.")
 
-
-class SortByGroupProductForm(FlaskForm):
-    sort_by = JSONField("Sort by", [DataRequired()])
-    submit = SubmitField("Submit")
+    def validate_image(self, field):
+        if field.data.content_type == "application/octet-stream":
+            return
+        is_file = filetype.guess(field.data)
+        if not is_file or not filetype.is_image(field.data):
+            raise ValidationError("File must be an image")
 
 
 class AssignProductForm(FlaskForm):
@@ -117,7 +124,7 @@ class RequestShareProductForm(FlaskForm):
 
 class AdjustProductForm(FlaskForm):
     product_id = IntegerField("Product ID", [DataRequired()])
-    groups_quantity = StringField("Groups Qty", [DataRequired()])
+    warehouses_groups_quantity = StringField("Warehouses Groups Qty", [DataRequired()])
     note = StringField("Note")
 
     submit = SubmitField("Submit")
@@ -125,5 +132,6 @@ class AdjustProductForm(FlaskForm):
 
 class UploadProductForm(FlaskForm):
     upload_csv = FileField("CSV", [DataRequired()])
+    target_group_upload = IntegerField("Target Group")
 
     submit = SubmitField("Submit")

@@ -86,6 +86,7 @@ export interface IGroup {
     id: number;
     name: string;
     masterGroup: IMasterGroup;
+    parentGroup: IGroup | null;
 }
 export interface IRequestShare {
     status: string;
@@ -131,6 +132,8 @@ interface IReportInventory {
     qtyBefore: number;
     qtyAfter: number;
     product: IProduct;
+    group: IGroup;
+    warehouse: IWarehouse;
     warehouseProductId: number;
     createdAt: string;
 }
@@ -146,7 +149,7 @@ export interface IReportInventoryList {
 }
 export interface IInventoriesReportResponse {
     pagination: IPagination;
-    reports: IReportInventoryList[];
+    reports: IReportInventory[];
 }
 export interface IReportAdjustResponse {
     pagination: IPagination;
@@ -166,6 +169,7 @@ interface IAdjustGroupQty {
     warehouse: IWarehouse;
     quantityAfter: number;
     quantityBefore: number;
+    delta: number;
 }
 export interface IReportInboundOrder {
     createdAt: string;

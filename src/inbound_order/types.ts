@@ -24,9 +24,9 @@ export interface IProduct {
 
 export interface IWarehouseProduct {
   id: number;
-  product_id: number;
-  warehouse_id: number;
-  product_quantity: number;
+  productId: number;
+  warehouseId: number;
+  productQuantity: number;
   warehouse: IWarehouse;
   group: IGroup;
 }

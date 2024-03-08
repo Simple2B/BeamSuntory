@@ -1,4 +1,4 @@
-version: "3.8"
+version: '3.8'
 
 services:
   db:
@@ -14,6 +14,20 @@ services:
       PGPASSWORD: ${POSTGRES_PASSWORD:-passwd}
       PGUSER: ${POSTGRES_USER:-postgres}
 
+  app:
+    image: simple2b/beam-suntory-app:latest
+    restart: always
+    volumes:
+      - ./product:/home/app/app/static/img/product
+    env_file:
+      - .env
+    depends_on:
+      - db
+    labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.beamsuntory_app.rule=Host(`beam.jlidistribution.com`)"
+        - "traefik.http.routers.beamsuntory_app.tls=true"
+        - "traefik.http.routers.beamsuntory_app.tls.certresolver=myresolver"
   backup:
     image: simple2b/pg-backup
     links:
@@ -31,23 +45,9 @@ services:
       POSTGRES_EXTRA_OPTS: '--schema=public --blobs'
       DAYS_HISTORY: 30
 
-  app:
-    image: simple2b/beam-suntory-app:latest
-    restart: always
-    env_file:
-      - .env
-    depends_on:
-      - db
-    labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.beamsuntory_app.rule=Host(`beam.jlidistribution.com`)"
-        - "traefik.http.routers.beamsuntory_app.tls=true"
-        - "traefik.http.routers.beamsuntory_app.tls.certresolver=myresolver"
-
 networks:
   default:
-      name: beamsuntory_network
-
+    name: beamsuntory_network
 
 volumes:
   db_data:

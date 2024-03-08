@@ -7,7 +7,7 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import schema as s
 from app import models as m, db
@@ -75,6 +75,7 @@ def get_request_share_report():
 
 @report_request_share_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def index():
     return render_template(
         "report/request_share/index.html",
@@ -84,6 +85,7 @@ def index():
 
 @report_request_share_blueprint.route("/api", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def report_json():
     pagination, reports = get_request_share_report()
     report_list_schema = s.ReportRequestShareList.model_validate(reports)
@@ -97,6 +99,7 @@ def report_json():
 
 @report_request_share_blueprint.route("search")
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def search():
     pagination, reports = get_request_share_report()
 

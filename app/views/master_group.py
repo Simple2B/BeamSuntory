@@ -8,7 +8,7 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import models as m, db
 from app import schema as s
@@ -21,18 +21,19 @@ master_group_blueprint = Blueprint("master_group", __name__, url_prefix="/master
 
 @master_group_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def get_all():
     form_create = f.NewMasterGroupForm()
     form_edit = f.MasterGroupForm()
 
     q = request.args.get("q", type=str, default=None)
-    query = m.MasterGroup.select().order_by(m.MasterGroup.id)
+    query = m.MasterGroup.select().order_by(m.MasterGroup.name)
     count_query = sa.select(sa.func.count()).select_from(m.MasterGroup)
     if q:
         query = (
             m.MasterGroup.select()
             .where(m.MasterGroup.name.ilike(f"%{q}%"))
-            .order_by(m.MasterGroup.id)
+            .order_by(m.MasterGroup.name)
         )
         count_query = (
             sa.select(sa.func.count())
@@ -62,6 +63,7 @@ def get_all():
 
 @master_group_blueprint.route("/create", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def create():
     form = f.NewMasterGroupForm()
     if form.validate_on_submit():
@@ -70,9 +72,7 @@ def create():
         if mgr:
             flash("This master group name is already taken.", "danger")
             return redirect(url_for("master_group.get_all"))
-        master_group = m.MasterGroup(
-            name=form.name.data,
-        )
+        master_group = m.MasterGroup(name=form.name.data)
         log(log.INFO, "Form submitted. master_group: [%s]", master_group)
         master_group.save()
         flash("Master group added!", "success")
@@ -85,6 +85,7 @@ def create():
 
 @master_group_blueprint.route("/edit", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def save():
     form = f.MasterGroupForm()
     if form.validate_on_submit():
@@ -113,6 +114,7 @@ def save():
 
 @master_group_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def delete(id: int):
     master_group = db.session.get(m.MasterGroup, id)
     master_groups_mandatory = [group.value for group in s.MasterGroupMandatory]

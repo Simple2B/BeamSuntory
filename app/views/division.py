@@ -8,9 +8,10 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import models as m, db
+from app import schema as s
 from app import forms as f
 from app.logger import log
 
@@ -20,6 +21,7 @@ division_blueprint = Blueprint("division", __name__, url_prefix="/division")
 
 @division_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def get_all():
     form_create: f.NewDivisionForm = f.NewDivisionForm()
     form_edit: f.DivisionForm = f.DivisionForm()
@@ -64,6 +66,7 @@ def get_all():
 
 @division_blueprint.route("/save", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def save():
     form: f.DivisionForm = f.DivisionForm()
     if form.validate_on_submit():
@@ -72,6 +75,12 @@ def save():
         if not d:
             log(log.ERROR, "Not found role by id : [%s]", form.division_id.data)
             flash("Cannot save role", "danger")
+            return redirect(url_for("division.get_all"))
+
+        if d.role_name in s.UserRole.list():
+            log(log.ERROR, "Cannot edit role with name: [%s]", d.role_name)
+            flash(f"Cannot edit role: {d.role_name}", "danger")
+            return redirect(url_for("division.get_all"))
 
         d.role_name = form.role_name.data
         d.activated = form.activated.data
@@ -89,6 +98,7 @@ def save():
 
 @division_blueprint.route("/create", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def create():
     form: f.NewDivisionForm = f.NewDivisionForm()
     if not form.validate_on_submit():
@@ -117,12 +127,18 @@ def create():
 
 @division_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def delete(id: int):
     division = db.session.get(m.Division, id)
     if not division:
         log(log.INFO, "There is no role with id: [%s]", id)
         flash("There is no such role", "danger")
         return "no role", 404
+
+    if division.role_name in s.UserRole.list():
+        log(log.ERROR, "Cannot delete role with name: [%s]", division.role_name)
+        flash(f"Cannot delete role: {division.role_name}", "danger")
+        return redirect(url_for("division.get_all"))
 
     db.session.delete(division)
     db.session.commit()

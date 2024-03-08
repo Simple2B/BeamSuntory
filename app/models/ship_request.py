@@ -9,6 +9,7 @@ from .utils import ModelMixin
 
 from .cart import Cart
 from .store import Store
+from .user import User
 from .store_category import StoreCategory
 from .report_event import ReportEvent
 from .utils import generate_uuid
@@ -65,6 +66,7 @@ class ShipRequest(db.Model, ModelMixin):
     report_inventory_list: orm.Mapped["ReportInventoryList"] = orm.relationship(
         back_populates="ship_request"
     )
+    user: orm.Mapped[User] = orm.relationship()
 
     def __repr__(self):
         return f"<{self.id}: {self.order_numb}>"

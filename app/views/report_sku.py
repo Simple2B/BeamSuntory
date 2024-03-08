@@ -6,7 +6,7 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import schema as s
 from app import models as m, db
@@ -86,7 +86,7 @@ def get_sku_reports():
     master_groups = [
         filter_skus.group_brand,
         filter_skus.group_language,
-        filter_skus.group_category,
+        filter_skus.group_categories,
         filter_skus.group_premises,
     ]
 
@@ -120,6 +120,7 @@ def get_sku_reports():
 
 @report_sku_blueprint.route("/sku/api", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def get_skus_json():
     pagination, sku_reports = get_sku_reports()
     report_list_schema = s.ReportSKUList.model_validate(sku_reports)
@@ -131,13 +132,16 @@ def get_skus_json():
 
 @report_sku_blueprint.route("/sku", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def skus():
     users = db.session.scalars(sa.select(m.User))
 
     # TODO maybe move default master product groups to config
     product_master_groups = db.session.scalars(
         m.MasterGroupProduct.select().where(
-            m.MasterGroupProduct.name.in_(["Brand", "Language", "Category", "Premises"])
+            m.MasterGroupProduct.name.in_(
+                ["Brand", "Language", "Categories", "Premises"]
+            )
         )
     )
     master_groups = db.session.scalars(m.MasterGroup.select())
@@ -155,6 +159,7 @@ def skus():
 
 @report_sku_blueprint.route("sku/search")
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def search_sku_reports():
     pagination, sku_reports = get_sku_reports()
 

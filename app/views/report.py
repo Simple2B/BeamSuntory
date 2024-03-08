@@ -7,7 +7,7 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import schema as s
 from app import models as m, db
@@ -75,6 +75,7 @@ def get_request_share_report():
 
 @report_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def index():
     brands = db.session.scalars(
         sa.select(m.MasterGroupProduct)
@@ -82,11 +83,17 @@ def index():
         .order_by(m.MasterGroupProduct.id)
     ).all()
 
+    for brand in brands:
+        brand.groups_for_product.sort(key=lambda x: x.name)
+
     categories = db.session.scalars(
         sa.select(m.MasterGroupProduct)
-        .where(m.MasterGroupProduct.name == "Category")
+        .where(m.MasterGroupProduct.name == "Categories")
         .order_by(m.MasterGroupProduct.id)
     ).all()
+
+    for category in categories:
+        category.groups_for_product.sort(key=lambda x: x.name)
 
     premises = db.session.scalars(
         sa.select(m.MasterGroupProduct)
@@ -96,15 +103,26 @@ def index():
 
     users = db.session.scalars(sa.select(m.User))
     divisions = db.session.scalars(m.Division.select())
-    master_groups = db.session.scalars(m.MasterGroup.select())
-    groups = db.session.scalars(m.Group.select())
+    master_groups = db.session.scalars(
+        m.MasterGroup.select().order_by(m.MasterGroup.name)
+    )
+    groups = db.session.scalars(m.Group.select().order_by(m.Group.name))
     product_master_groups = db.session.scalars(
         m.MasterGroupProduct.select().where(
             m.MasterGroupProduct.name.in_(
-                ["Brand", "Language", "Category", "Premises", "Events"]
+                ["Brand", "Language", "Categories", "Premises", "Events"]
             )
         )
     )
+
+    product_master_groups = list(product_master_groups)
+
+    for master_group_product in product_master_groups:
+        master_group_product.groups_for_product.sort(key=lambda x: x.name)
+
+    groups = db.session.scalars(
+        sa.select(m.Group).where(m.Group.parent_group_id.is_(None))
+    ).all()
 
     return render_template(
         "report/index.html",
@@ -114,7 +132,7 @@ def index():
         product_premises=premises,
         users=users,
         master_groups=master_groups,
-        groups=groups.all(),
+        groups=groups,
         product_master_groups=product_master_groups,
         report_request_share_action_types=s.ReportRequestShareActionType,
         report_shipping_action_types=s.ReportShipRequestActionType,
@@ -124,11 +142,13 @@ def index():
 
 @report_blueprint.route("/api", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def report_json():
     return jsonify(c.get_reports())
 
 
 @report_blueprint.route("search")
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def search():
     return c.get_reports(render=True)

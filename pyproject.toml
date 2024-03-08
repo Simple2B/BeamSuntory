@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "beam-suntory"
-version = "0.1.0"
+version = "1.0.7"
 description = ""
 authors = ["petro <xavrais312@gmail.com>", "andrii <andrey.berezyanskiy@gmail.com>"]
 
@@ -20,6 +20,8 @@ alchemical = "^0.7.1"
 pandas = "^2.0.3"
 pydantic-settings = "^2.0.3"
 beautifulsoup4 = "^4.12.2"
+filetype = "^1.2.0"
+pillow = "^10.0.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.1"
@@ -28,6 +30,7 @@ black = "^22.3.0"
 
 [tool.poetry.group.dev.dependencies]
 faker = "^18.3.1"
+pytest-mock = "^3.12.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

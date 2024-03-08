@@ -5,7 +5,8 @@ import functools
 from flask import Blueprint, jsonify, request, render_template, redirect, url_for, flash
 from flask_login import login_required
 import sqlalchemy as sa
-from app.controllers import create_pagination
+from sqlalchemy import and_, or_
+from app.controllers import create_pagination, role_required
 
 from app import schema as s
 from app import models as m, db
@@ -67,6 +68,7 @@ def get_events():
 
 @event_blueprint.route("/api", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def get_events_json():
     pagination, events = get_events()
     return s.EventsApiOut(pagination=pagination, events=events.all()).model_dump_json(
@@ -76,6 +78,7 @@ def get_events_json():
 
 @event_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def get_all():
     form_edit = f.InboundOrderUpdateForm()
 
@@ -102,6 +105,14 @@ def get_all():
 
 @event_blueprint.route("/get_available_quantity", methods=["GET"])
 @login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.MANAGER.value,
+    ]
+)
 def get_available_quantity():
     timestamps: list[str] = json.loads(request.args.get("dates"))
     product_id = request.args.get("product_id", type=int, default=None)
@@ -138,6 +149,7 @@ def get_available_quantity():
                 m.Event.date_reserve_from <= day_filter,
                 m.Event.date_reserve_to >= day_filter,
                 m.Event.product_id == product_id,
+                m.Event.group_id == group.id,
             )
         ).all()
         total_quantity = functools.reduce(lambda a, b: a + b.quantity, events, 0)
@@ -155,6 +167,14 @@ def get_available_quantity():
 
 @event_blueprint.route("/get_available_quantity_by_date", methods=["GET"])
 @login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.MANAGER.value,
+    ]
+)
 def get_available_quantity_by_date():
     date_from = request.args.get("date_from", type=str, default=None)
     date_to = request.args.get("date_to", type=str, default=None)
@@ -211,6 +231,7 @@ def get_available_quantity_by_date():
             m.Event.date_reserve_from <= date_start,
             m.Event.date_reserve_to >= date_end,
             m.Event.product_id == product_id,
+            m.Event.group_id == group.id,
         )
     ).all()
     total_quantity = functools.reduce(lambda a, b: a + b.quantity, events, 0)
@@ -229,6 +250,12 @@ def get_available_quantity_by_date():
 
 @event_blueprint.route("/save_reserved_days_amount", methods=["POST"])
 @login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ]
+)
 def save_reserved_days_amount():
     form: f.EventUpdateReservedDaysAmount = f.EventUpdateReservedDaysAmount()
     if form.validate_on_submit():
@@ -251,3 +278,83 @@ def save_reserved_days_amount():
         log(log.ERROR, "event save errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("event.get_all"))
+
+
+@event_blueprint.route("/get_adjust_available_quantity", methods=["GET"])
+@login_required
+def get_adjust_available_quantity():
+    filter_events = s.FilterEvents.model_validate(dict(request.args))
+    # TODO: use cases or better solution
+    if not filter_events.group_id:
+        log(log.INFO, "Group query param not found")
+        return "Group not found", HTTPStatus.NOT_FOUND
+    if not filter_events.quantity:
+        log(log.INFO, "Quantity query param not found")
+        return "Quantity not found", HTTPStatus.NOT_FOUND
+    if not filter_events.product_id:
+        log(log.INFO, "Product_id query param not found")
+        return "Product id not found", HTTPStatus.NOT_FOUND
+
+    group = db.session.get(m.Group, filter_events.group_id)
+    if not group:
+        log(log.INFO, "Group not found: [%s]", filter_events.group_id)
+        return "Group not found", HTTPStatus.NOT_FOUND
+
+    product: m.Product = db.session.get(m.Product, filter_events.product_id)
+    if not product:
+        log(log.INFO, "Product not found: [%s]", filter_events.product_id)
+        return "Product not found", HTTPStatus.NOT_FOUND
+    warehouse: m.Warehouse = db.session.scalar(
+        m.Warehouse.select().where(
+            m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value
+        )
+    )
+    if not warehouse:
+        log(
+            log.INFO,
+            "Warehouse not found: [%s]",
+            s.WarehouseMandatory.warehouse_events.value,
+        )
+        return "Warehouse not found", HTTPStatus.NOT_FOUND
+    warehouse_product: m.WarehouseProduct = db.session.scalar(
+        m.WarehouseProduct.select().where(
+            m.WarehouseProduct.product_id == filter_events.product_id,
+            m.WarehouseProduct.warehouse_id == warehouse.id,
+            m.WarehouseProduct.group_id == filter_events.group_id,
+        )
+    )
+    if not warehouse_product:
+        log(
+            log.INFO,
+            "Warehouse product not found. Product id: [%s]",
+            filter_events.product_id,
+        )
+        return "Warehouse product not found", HTTPStatus.NOT_FOUND
+
+    today = datetime.today()
+    events: list[m.Event] = db.session.scalars(
+        m.Event.select().where(
+            and_(
+                or_(
+                    m.Event.date_reserve_from >= today, m.Event.date_reserve_to >= today
+                ),
+                m.Event.product_id == filter_events.product_id,
+                m.Event.group_id == filter_events.group_id,
+            )
+        )
+    ).all()
+    total_quantity = functools.reduce(lambda a, b: a + b.quantity, events, 0)
+    if filter_events.quantity < total_quantity:
+        log(
+            log.INFO,
+            "Can not adjust this product, desired quantity < total quantity: [%s] - [%s]",
+            filter_events.quantity,
+            total_quantity,
+        )
+        return (
+            jsonify(
+                f"Product: {product.name} in group: {group.name} has total booking quantity: {total_quantity}."
+            ),
+            HTTPStatus.BAD_REQUEST,
+        )
+    return "ok", HTTPStatus.OK

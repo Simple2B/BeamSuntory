@@ -11,7 +11,7 @@ from flask_login import login_required, current_user
 import sqlalchemy as sa
 from sqlalchemy import desc
 from sqlalchemy.orm import aliased
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import schema as s
 from app import models as m, db
@@ -27,6 +27,7 @@ outgoing_stock_blueprint = Blueprint(
 
 @outgoing_stock_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def get_all():
     form_create: f.NewShipRequestForm = f.NewShipRequestForm()
     form_edit: f.ShipRequestForm = f.ShipRequestForm()
@@ -120,6 +121,7 @@ def get_all():
 # TODO needs refactor
 @outgoing_stock_blueprint.route("/edit", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def save():
     form_edit: f.ShipRequestForm = f.ShipRequestForm()
     if form_edit.validate_on_submit():
@@ -224,8 +226,48 @@ def save():
             )
             if warehouse_product and not is_group_in_master_group:
                 # TODO what if warehouse product not found?
+                products_to_deplete: list[m.ProductAllocated] = db.session.scalars(
+                    m.ProductAllocated.select()
+                    .where(
+                        m.ProductAllocated.product_id == cart.product_id,
+                        # m.ProductAllocated.group_id == cart_user_group.id,
+                        m.ProductAllocated.quantity_remains > 0,
+                    )
+                    .order_by(m.ProductAllocated.shelf_life_end.asc())
+                )
+
+                deplete_qty = cart.quantity
+
+                for product in products_to_deplete:
+                    # for prod_group_qty in product.product_quantity_groups:
+                    # TODO do we care from which group we deplete?
+                    # if warehouse_product.group_id != prod_group_qty.group_id:
+                    #     continue
+                    if product.quantity_remains >= deplete_qty:
+                        product.quantity_remains -= deplete_qty
+                        product.save(False)
+                        break
+                    else:
+                        deplete_qty -= product.quantity_remains
+                        product.quantity_remains = 0
+                        product.save(False)
+
+                if warehouse_product.product_quantity < cart.quantity:
+                    log(
+                        log.WARNING,
+                        "Not enough product. Available qty: [%s]; Requested qty: [%s]",
+                        warehouse_product.product_quantity,
+                        cart.quantity,
+                    )
+                    flash(
+                        f"Not enough product. Available qty: {warehouse_product.product_quantity}; \
+                            Requested qty: {cart.quantity}",
+                        "danger",
+                    )
+                    return redirect(url_for("outgoing_stock.get_all"))
 
                 warehouse_product.product_quantity -= cart.quantity
+
                 warehouse_product.save(False)
                 report_inventory = m.ReportInventory(
                     qty_before=warehouse_product.product_quantity + cart.quantity,
@@ -269,6 +311,7 @@ def save():
 
 @outgoing_stock_blueprint.route("/update_notes", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def update_notes():
     form_edit: f.ShipRequestForm = f.ShipRequestForm()
     if form_edit.validate_on_submit():
@@ -302,6 +345,7 @@ def update_notes():
 
 @outgoing_stock_blueprint.route("/cancel/<int:id>", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def cancel(id: int):
     # TODO: needs refactor
     ship_request: m.ShipRequest = db.session.get(m.ShipRequest, id)
@@ -339,6 +383,7 @@ def cancel(id: int):
 
 @outgoing_stock_blueprint.route("/sort", methods=["GET", "POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def sort():
     # TODO: Move to outgoing stock GET
     # TODO: need refactor

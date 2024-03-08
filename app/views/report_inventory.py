@@ -6,7 +6,7 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import schema as s
 from app import models as m, db
@@ -114,7 +114,7 @@ def get_inventory_reports():
     master_groups = [
         filter_inventories.group_brand,
         filter_inventories.group_language,
-        filter_inventories.group_category,
+        filter_inventories.group_categories,
         filter_inventories.group_premises,
         filter_inventories.group_event,
     ]
@@ -154,6 +154,7 @@ def get_inventory_reports():
 
 @report_inventory_blueprint.route("/inventory/api", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def get_inventories_json():
     pagination, inventory_reports = get_inventory_reports()
     report_list_schema = s.ReportInventoryListArray.model_validate(inventory_reports)
@@ -165,6 +166,7 @@ def get_inventories_json():
 
 @report_inventory_blueprint.route("/inventory", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def inventories():
     users = db.session.scalars(sa.select(m.User))
 
@@ -172,7 +174,7 @@ def inventories():
     product_master_groups = db.session.scalars(
         m.MasterGroupProduct.select().where(
             m.MasterGroupProduct.name.in_(
-                ["Brand", "Language", "Category", "Premises", "Events"]
+                ["Brand", "Language", "Categories", "Premises", "Events"]
             )
         )
     )
@@ -190,6 +192,7 @@ def inventories():
 
 @report_inventory_blueprint.route("inventory/search")
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def search_inventory_reports():
     pagination, inventory_reports = get_inventory_reports()
 

@@ -2,7 +2,6 @@
 from .user import User, AnonymousUser, gen_password_reset_id
 from .group import Group
 from .master_group import MasterGroup
-from .values import IntValue, FloatValue, StrValue, BoolValue, DateValue
 
 from .product import Product
 from .product_group import ProductGroup
@@ -39,3 +38,4 @@ from .report_inbound_order import ReportInboundOrder
 from .report_request_share import ReportRequestShare
 from .report_shipping import ReportShipping
 from .report_sku import ReportSKU
+from .image import Image

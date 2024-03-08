@@ -2,9 +2,17 @@
 from .pagination import Pagination, PaginationOut
 from .user import User, UserRole, AdminCreate
 from .master_group import MasterGroup, MasterGroupMandatory
-from .group import Group
+from .group import Group, GroupRoot
 from .warehouse import Warehouse, WarehouseMandatory, WarehouseList
-from .product import Product, Currency, ProductAdditionalInfo
+from .product import (
+    Product,
+    Currency,
+    ProductAdditionalInfo,
+    ProductWarehouses,
+    ProductWarehouseRoot,
+    ProductCSVItem,
+    ProductFullImage,
+)
 from .inbound_order import InboundOrder, InboundOrderStatus, FilterInboundOrder
 from .product_category import ProductCategory
 from .product_quantity_group import (
@@ -18,7 +26,7 @@ from .product_allocated import (
     ReportShelfLifeResponse,
     ReportShelfLifeList,
 )
-from .ship_request import ShipRequest, ShipRequestStatus
+from .ship_request import ShipRequest, ShipRequestStatus, FilterShipRequest
 from .store import Store
 from .supplier import Supplier
 from .property import Property
@@ -46,6 +54,7 @@ from .event import (
     EventsApiOut,
     EventsDateQuantity,
     EventsCalendar,
+    FilterEvents,
 )
 from .report_event import (
     ReportEventType,
@@ -57,7 +66,6 @@ from .filter_report_events import FilterReportEvents
 from .report_inventory import (
     ReportInventoryType,
     ReportInventory,
-    ReportInventoryList,
     ReportInventoryListArray,
     ReportInventoryListResponse,
 )
@@ -91,3 +99,4 @@ from .report import (
     ReportShipRequestActionType,
 )
 from .report_sku import ReportSKU, ReportSKUList, ReportSKUResponse, ReportSKUType
+from .sub_group import SubGroup, SubGroupParams

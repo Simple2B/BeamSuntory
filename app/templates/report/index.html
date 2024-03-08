@@ -1,220 +1,152 @@
 <!-- prettier-ignore -->
 {% extends 'base.html' %}
 {% block content %}
-{% set all_includes = "[name='search_sku'], [name='q'], [name='division'], [name='group_to'], [name='report_type'], [name='action_type_request_share'], [name='user'], [name='action_type_shipping'], [name='start_date'], [name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='target_group'], [name='brand'], [name='language'], [name='premises'], [name='category'], [name='events'], [name='expire_in'], [name='product-group'], [name='search-sku']" %}
+{% set all_includes = "[name='search_sku'], [name='q'], [name='division'], [name='group_to'], [name='report_type'],
+[name='action_type_request_share'], [name='user'], [name='action_type_shipping'], [name='start_date'],
+[name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='target_group'],
+[name='brand'], [name='language'], [name='premises'], [name='categories'], [name='events'], [name='expire_in'],
+[name='product-group'], [name='search-sku']" %}
 <!-- prettier-ignore -->
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-  <button
-    id="table-report-loader"
-    hx-trigger="click"
-    hx-include="[name='report_type']"
-    hx-get="{{ url_for('report.search') }}"
-    hx-target="#reports-table"
-    hx-indicator="#report-table-spinner"
-    class="hidden"
-  ></button>
+  <button id="table-report-loader" hx-trigger="click" hx-include="[name='report_type']"
+    hx-get="{{ url_for('report.search') }}" hx-target="#reports-table" hx-indicator="#report-table-spinner"
+    class="hidden"></button>
   <!-- From -> TO calendars -->
   <!-- prettier-ignore -->
   <div class="flex items-center gap-3 p-3 flex-wrap">
-    <!-- search bar -->
-    <!-- prettier-ignore -->
-    <div class="flex gap-4 items-center justify-start py-4 bg-white dark:bg-gray-800 px-4">
-      <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800">
-      <select
-        name="report_type"
-        id="report-type-select"
-        hx-trigger="change"
-        hx-swap="innerHTML"
-        hx-target="#reports-table"
-        hx-include="{{all_includes}}"
-        hx-get="{{ url_for('report.search') }}"
-        hx-indicator="#report-table-spinner"
-        class="inventories-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-      >
-        <option selected value="events">Events</option>
-        <option value="request_share">Share request</option>
-        <option value="inventories">Inventories</option>
-        <option value="adjustment">Adjustments</option>
-        <option value="assign">Assigns</option>
-        <option value="inbound_order">Inbound orders</option>
-        <option value="shipping">Shipping</option>
-        <option value="shelf_life">Shelf Life</option>
-      </select>
-    </div>
-    <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800 hidden" id="division-select">
-      <select
-        name="division"
-        hx-trigger="change"
-        hx-swap="innerHTML"
-        hx-target="#reports-table"
-        hx-include="{{all_includes}}"
-        hx-get="{{ url_for('report.search') }}"
-        hx-indicator="#report-table-spinner"
-        class="inventories-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-      >
-        <option selected value="">Divisions</option>
-        {% for division in divisions %} 
-        <option value="{{division.id}}">{{ division.role_name }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <div class="relative">
-      <label for="search-sku" class="sr-only" >Search by SKU</label>
-      <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-        {% include
-        "icon/sku.html" %}
-      </div>
-      <input
-        name="search_sku"
-        id="search-sku"
-        hx-trigger="keyup changed delay:500ms"
-        hx-target="#reports-table"
-        hx-swap="innerHTML"
-        hx-include="{{all_includes}}"
-        hx-get="{{ url_for('report.search') }}"
-        hx-indicator="#report-table-spinner"
-        type="search"
-        placeholder="Search by SKU"
-        class="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-      />
-    </div>
-    <div class="relative">
-      <label for="table-search" class="sr-only" >Search</label>
-      <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-        {% include
-        "icon/eyeglass_1.html" %}
-      </div>
-      <input
-        name="q"
-        id="search-query"
-        hx-trigger="keyup changed delay:500ms"
-        hx-target="#reports-table"
-        hx-swap="innerHTML"
-        hx-include="{{all_includes}}"
-        hx-get="{{ url_for('report.search') }}"
-        hx-indicator="#report-table-spinner"
-        type="search"
-        placeholder="Search"
-        class="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-      />
-    </div>
-    </div>
-    <!-- Select user -->
-    <!-- prettier-ignore -->
-    <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800" id="user-select">
-      <select
-        name="user"
-        hx-trigger="change"
-        hx-swap="innerHTML"
-        hx-target="#reports-table"
-        hx-include="{{all_includes}}"
-        hx-get="{{ url_for('report.search') }}"
-        hx-indicator="#report-table-spinner"
-        class="inventories-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-      >
-        <option selected value="">
-          User
-        </option>
-
-        {% for user in users %}
-        <option
-          value="{{ user.username }}"
-        >
-          {{ user.username }}
-        </option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <!-- Calendars -->
-    <!-- prettier-ignore -->
-    <div class="relative" id="filter-start-date">
-      <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-        {% include "icon/calendar.html"%}
-      </div>
-      <input
-        datepicker
-        name="start_date"
-        hx-swap="innerHTML"
-        hx-trigger="changeDate"
-        hx-target="#reports-table"
-        hx-include="{{all_includes}}"
-        hx-get="{{ url_for('report.search') }}"
-        type="text"
-        placeholder="Start date"
-        hx-indicator="#report-table-spinner"
-        class="product-event-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-      />
+    <div class="flex gap-4 items-center justify-start pt-4 bg-white dark:bg-gray-800 px-4">
+      <button type="button" id="filter-clear-button"
+        class=" px-3 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">{%
+        include "icon/mop.html" %}Clear filters</button>
     </div>
     <!-- prettier-ignore -->
-    <div class="relative calendar-to" id="filter-start-date-to">
-      <!-- prettier-ignore -->
-      <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">{% include"icon/calendar.html"%}</div>
-      <input
-        datepicker
-        name="start_date_to"
-        hx-swap="innerHTML"
-        hx-trigger="changeDate"
-        hx-target="#reports-table"
-        hx-include="{{all_includes}}"
-        hx-get="{{ url_for('report.search') }}"
-        type="text"
-        placeholder="Start date to"
-        hx-indicator="#report-table-spinner"
-        class="product-event-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-      />
-    </div>
-
-    <!-- prettier-ignore -->
-    <div class="relative" id="filter-end-date">
-      <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-        <!-- prettier-ignore -->
-        {% include "icon/calendar.html" %}
-      </div>
-      <input
-        datepicker
-        name="end_date"
-        hx-trigger="changeDate"
-        hx-include="{{all_includes}}"
-        hx-get="{{ url_for('report.search') }}"
-        type="text"
-        placeholder="End date"
-        hx-indicator="#report-table-spinner"
-        hx-target="#reports-table"
-        hx-swap="innerHTML"
-        class="product-event-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-      />
-    </div>
-    <!-- prettier-ignore -->
-    <div class="relative calendar-to" id="filter-end-date-to">
-      <!-- prettier-ignore -->
-      <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">{% include "icon/calendar.html" %}</div>
-      <input
-        datepicker
-        name="end_date_to"
-        hx-trigger="changeDate"
-        hx-include="{{all_includes}}"
-        hx-get="{{ url_for('report.search') }}"
-        type="text"
-        placeholder="End date to"
-        hx-indicator="#report-table-spinner"
-        hx-target="#reports-table"
-        hx-swap="innerHTML"
-        class="product-event-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-      />
-    </div>
-    <!-- prettier-ignore -->
-    <div class="flex gap-4 items-center justify-start py-4 bg-white dark:bg-gray-800 px-4">
-      <button type="button" id="filter-clear-button" class=" px-3 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">{% include "icon/mop.html" %}Clear filters</button>
-    </div>
-    <!-- prettier-ignore -->
-    <div class="flex gap-4 items-center justify-start py-4 bg-white dark:bg-gray-800 px-4">
+    <div class="flex gap-4 items-center justify-start pt-4 bg-white dark:bg-gray-800 px-4">
       <div class="flex w-full justify-end">
-      <button type="button" id="button-csv-download" class=" px-3 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-        {% include "icon/download.html" %}
-        &nbsp Download CSV
-      </button>  
+        <button type="button" id="button-csv-download"
+          class=" px-3 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+          {% include "icon/download.html" %}
+          &nbsp Download CSV
+        </button>
+      </div>
     </div>
+
+    <div class="flex items-center gap-3 px-3 flex-wrap">
+      <!-- search bar -->
+      <!-- prettier-ignore -->
+      <div class="flex gap-4 items-center justify-start bg-white dark:bg-gray-800 ">
+        <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800">
+          <select name="report_type" id="report-type-select" hx-trigger="change" hx-swap="innerHTML"
+            hx-target="#reports-table" hx-include="{{all_includes}}" hx-get="{{ url_for('report.search') }}"
+            hx-indicator="#report-table-spinner"
+            class="inventories-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            <option selected value="events">Events</option>
+            <option value="request_share">Share request</option>
+            <option value="inventories">Inventories</option>
+            <option value="adjustment">Adjustments</option>
+            <option value="assign">Assigns</option>
+            <option value="inbound_order">Inbound orders</option>
+            <option value="shipping">Shipping</option>
+            <option value="shelf_life">Shelf Life</option>
+          </select>
+        </div>
+        <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800 hidden" id="division-select">
+          <select name="division" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"
+            hx-include="{{all_includes}}" hx-get="{{ url_for('report.search') }}" hx-indicator="#report-table-spinner"
+            class="inventories-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            <option selected value="">Divisions</option>
+            {% for division in divisions %}
+            <option value="{{division.id}}">{{ division.role_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="relative">
+          <label for="search-sku" class="sr-only">Search by SKU</label>
+          <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            {% include
+            "icon/sku.html" %}
+          </div>
+          <input name="search_sku" id="search-sku" hx-trigger="keyup changed delay:500ms" hx-target="#reports-table"
+            hx-swap="innerHTML" hx-include="{{all_includes}}" hx-get="{{ url_for('report.search') }}"
+            hx-indicator="#report-table-spinner" type="search" placeholder="Search by SKU"
+            class="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+        </div>
+        <div class="relative">
+          <label for="table-search" class="sr-only">Search</label>
+          <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            {% include
+            "icon/eyeglass_1.html" %}
+          </div>
+          <input name="q" id="search-query" hx-trigger="keyup changed delay:500ms" hx-target="#reports-table"
+            hx-swap="innerHTML" hx-include="{{all_includes}}" hx-get="{{ url_for('report.search') }}"
+            hx-indicator="#report-table-spinner" type="search" placeholder="Search"
+            class="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+        </div>
+      </div>
+      <!-- Select user -->
+      <!-- prettier-ignore -->
+      <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800" id="user-select">
+        <select name="user" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"
+          hx-include="{{all_includes}}" hx-get="{{ url_for('report.search') }}" hx-indicator="#report-table-spinner"
+          class="inventories-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+          <option selected value="">
+            User
+          </option>
+
+          {% for user in users %}
+          <option value="{{ user.username }}">
+            {{ user.username }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3 p-3 flex-wrap">
+      <!-- Calendars -->
+      <!-- prettier-ignore -->
+      <div class="relative" id="filter-start-date">
+        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          {% include "icon/calendar.html"%}
+        </div>
+        <input datepicker name="start_date" hx-swap="innerHTML" hx-trigger="changeDate" hx-target="#reports-table"
+          hx-include="{{all_includes}}" hx-get="{{ url_for('report.search') }}" type="text" placeholder="Start date"
+          hx-indicator="#report-table-spinner"
+          class="product-event-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+      </div>
+      <!-- prettier-ignore -->
+      <div class="relative calendar-to" id="filter-start-date-to">
+        <!-- prettier-ignore -->
+        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">{%
+          include"icon/calendar.html"%}</div>
+        <input datepicker name="start_date_to" hx-swap="innerHTML" hx-trigger="changeDate" hx-target="#reports-table"
+          hx-include="{{all_includes}}" hx-get="{{ url_for('report.search') }}" type="text" placeholder="Start date to"
+          hx-indicator="#report-table-spinner"
+          class="product-event-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+      </div>
+
+      <!-- prettier-ignore -->
+      <div class="relative" id="filter-end-date">
+        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <!-- prettier-ignore -->
+          {% include "icon/calendar.html" %}
+        </div>
+        <input datepicker name="end_date" hx-trigger="changeDate" hx-include="{{all_includes}}"
+          hx-get="{{ url_for('report.search') }}" type="text" placeholder="End date"
+          hx-indicator="#report-table-spinner" hx-target="#reports-table" hx-swap="innerHTML"
+          class="product-event-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+      </div>
+      <!-- prettier-ignore -->
+      <div class="relative calendar-to" id="filter-end-date-to">
+        <!-- prettier-ignore -->
+        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">{% include
+          "icon/calendar.html" %}</div>
+        <input datepicker name="end_date_to" hx-trigger="changeDate" hx-include="{{all_includes}}"
+          hx-get="{{ url_for('report.search') }}" type="text" placeholder="End date to"
+          hx-indicator="#report-table-spinner" hx-target="#reports-table" hx-swap="innerHTML"
+          class="product-event-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+      </div>
+      <!-- prettier-ignore -->
+
     </div>
   </div>
 
@@ -222,16 +154,10 @@
   <!-- prettier-ignore -->
   <div class="flex items-center gap-3 p-3 flex-wrap">
     <!-- request share action types-->
-    <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800" id="request-share-type" >
+    <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800" id="request-share-type">
       <!-- prettier-ignore -->
-      <select 
-        hx-trigger="change" 
-        hx-swap="innerHTML" 
-        hx-target="#reports-table"
-        name="action_type_request_share"
-        hx-include="{{all_includes}}"
-        hx-get="{{ url_for('report.search') }}" 
-        hx-indicator="#report-table-spinner"
+      <select hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table" name="action_type_request_share"
+        hx-include="{{all_includes}}" hx-get="{{ url_for('report.search') }}" hx-indicator="#report-table-spinner"
         class="group-range hidden mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
         <option selected value="">Action type</option>
         {% for action_type in report_request_share_action_types %}
@@ -239,16 +165,10 @@
         {% endfor %}
       </select>
     </div>
-    <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800" id="shipping-type" >
+    <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800" id="shipping-type">
       <!-- prettier-ignore -->
-      <select 
-        hx-trigger="change" 
-        hx-swap="innerHTML" 
-        hx-target="#reports-table"
-        name="action_type_shipping"
-        hx-include="{{all_includes}}"
-        hx-get="{{ url_for('report.search') }}" 
-        hx-indicator="#report-table-spinner"
+      <select hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table" name="action_type_shipping"
+        hx-include="{{all_includes}}" hx-get="{{ url_for('report.search') }}" hx-indicator="#report-table-spinner"
         class="group-range hidden mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
         <option selected value="">Action type</option>
         {% for action_type in report_shipping_action_types %}
@@ -256,19 +176,12 @@
         {% endfor %}
       </select>
     </div>
-    <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800" id="master-group" >
+    <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800" id="master-group">
       <!-- Master groups -->
       <!-- prettier-ignore -->
-      <select
-        name="master_group"
-        hx-trigger="change" 
-        hx-swap="innerHTML"
-        hx-target="#reports-table"
-        hx-include="{{all_includes}}"
-        hx-get="{{ url_for('report.search') }}"
-        hx-indicator="#report-table-spinner"
-        class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-      >
+      <select name="master_group" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"
+        hx-include="{{all_includes}}" hx-get="{{ url_for('report.search') }}" hx-indicator="#report-table-spinner"
+        class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
         <option selected value="">Master group</option>
         {% for master_group in master_groups %}
         <option value="{{ master_group.name }}">{{ master_group.name }}</option>
@@ -277,34 +190,38 @@
     </div>
     <!-- Target groups-->
     <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800" id="target-group">
+      <input type="text" hidden name="group_id" id="report-group-id-hidden" hx-trigger="click delay:500ms"
+        hx-target="#sub-group-select-container" hx-swap="innerHTML" hx-include="[name='group_id']"
+        hx-get="{{ url_for('sub_stock_target_group.get_sub_group', type_select=True) }}">
       <!-- prettier-ignore -->
-      <select  
-        hx-trigger="change" 
-        hx-swap="innerHTML" 
-        hx-target="#reports-table"
-        name="target_group"
-        hx-include="{{all_includes}}"
-        hx-get="{{ url_for('report.search') }}" 
+      <select hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table" name="target_group"
+        id="report-target-group-select" hx-include="{{all_includes}}" hx-get="{{ url_for('report.search') }}"
         hx-indicator="#report-table-spinner"
         class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
         <option selected value="">Target group</option>
         {% for group in groups %}
-        <option value="{{ group.name }}">{{ group.name }}</option>
+        <option value="{{ group.name }}" data-target-group-id="{{ group.id }}">{{ group.name }}</option>
         {% endfor %}
       </select>
     </div>
 
+    <!-- Target sub groups-->
+    <div id="sub-group-select-container">
+      <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800" id="target-sub-group">
+        <!-- prettier-ignore -->
+        <select hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table" name="target_sub_group"
+          hx-include="{{all_includes}}" hx-get="{{ url_for('report.search') }}" hx-indicator="#report-table-spinner"
+          class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+          <option selected value="">Choose group first</option>
+        </select>
+      </div>
+    </div>
+
     <!-- From/To groups -->
-     <div class="flex hidden flex-wrap py-1 bg-white dark:bg-gray-800" id="group-from" >
+    <div class="flex hidden flex-wrap py-1 bg-white dark:bg-gray-800" id="group-from">
       <!-- prettier-ignore -->
-      <select 
-        hx-trigger="change" 
-        hx-swap="innerHTML" 
-        hx-target="#reports-table"
-        name="group_from"
-        hx-include="{{all_includes}}"
-        hx-get="{{ url_for('report.search') }}" 
-        hx-indicator="#report-table-spinner"
+      <select hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table" name="group_from"
+        hx-include="{{all_includes}}" hx-get="{{ url_for('report.search') }}" hx-indicator="#report-table-spinner"
         class="group-range mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
         <option selected value="">Group from</option>
         {% for group in groups %}
@@ -314,16 +231,10 @@
     </div>
 
     <!-- Product group -->
-    <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800 hidden" id="filter-product-group" >
+    <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800 hidden" id="filter-product-group">
       <!-- prettier-ignore -->
-      <select 
-        hx-trigger="change" 
-        hx-swap="innerHTML" 
-        hx-target="#reports-table"
-        name="product_group"
-        hx-include="{{all_includes}}"
-        hx-get="{{ url_for('report.search') }}" 
-        hx-indicator="#report-table-spinner"
+      <select hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table" name="product_group"
+        hx-include="{{all_includes}}" hx-get="{{ url_for('report.search') }}" hx-indicator="#report-table-spinner"
         class="group-range mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
         <option selected value="">Group</option>
         {% for group in groups %}
@@ -334,14 +245,8 @@
 
     <div class="flex hidden flex-wrap py-1 bg-white dark:bg-gray-800" id="group-to">
       <!-- prettier-ignore -->
-      <select 
-        hx-trigger="change" 
-        hx-swap="innerHTML" 
-        hx-target="#reports-table"
-        name="group_to"
-        hx-include="{{all_includes}}"
-        hx-get="{{ url_for('report.search') }}" 
-        hx-indicator="#report-table-spinner"
+      <select hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table" name="group_to"
+        hx-include="{{all_includes}}" hx-get="{{ url_for('report.search') }}" hx-indicator="#report-table-spinner"
         class="group-range mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
         <option selected value="">Group to</option>
         {% for group in groups %}
@@ -349,21 +254,16 @@
         {% endfor %}
       </select>
     </div>
-    
-    
+
+
 
     <!-- product master groups-->
     <!-- prettier-ignore -->
     {% for prod_master_group in product_master_groups %}
     <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800" id="filter-group-{{prod_master_group.name.lower()}}">
       <!-- prettier-ignore -->
-      <select
-        hx-trigger="change"
-        hx-swap="innerHTML"
-        hx-target="#reports-table"
-        name="{{prod_master_group.name.lower()}}"
-        hx-include="{{all_includes}}"
-        hx-get="{{ url_for('report.search') }}"
+      <select hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"
+        name="{{prod_master_group.name.lower()}}" hx-include="{{all_includes}}" hx-get="{{ url_for('report.search') }}"
         hx-indicator="#report-table-spinner"
         class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
         <option selected value="">{{ prod_master_group.name }}</option>
@@ -373,19 +273,10 @@
       </select>
     </div>
     {% endfor %}
-    <div
-      class="flex flex-wrap py-1 bg-white dark:bg-gray-800"
-      id="shelf-life-filter-expire-in"
-    >
+    <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800" id="shelf-life-filter-expire-in">
       <!-- prettier-ignore -->
-      <select 
-        id="shelf-life-filter-expire-in" 
-        hx-trigger="change" 
-        hx-swap="innerHTML"
-        hx-target="#reports-table"
-        name="expire_in"
-        hx-include="{{all_includes}}"
-        hx-get="{{ url_for('report.search') }}" 
+      <select id="shelf-life-filter-expire-in" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"
+        name="expire_in" hx-include="{{all_includes}}" hx-get="{{ url_for('report.search') }}"
         hx-indicator="#report-table-spinner"
         class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
         <option selected value="0">Expire in (days)</option>
@@ -400,10 +291,7 @@
     </div>
   </div>
   <div id="reports-table"></div>
-  <div
-    class="htmx-indicator flex justify-center items-center"
-    id="report-table-spinner"
-  >
+  <div class="htmx-indicator flex justify-center items-center" id="report-table-spinner">
     {% include "icon/spinner.html" %}
   </div>
 </div>

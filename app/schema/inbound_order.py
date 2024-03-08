@@ -19,7 +19,7 @@ class InboundOrder(BaseModel):
 
     id: int
     uuid: str
-    order_id: str = Field(alias="orderId")
+    order_id: str | None = Field(alias="orderId")
     active_date: date = Field(alias="activeDate")
     active_time: str = Field(alias="activeTime")
     title: str

@@ -11,10 +11,9 @@ from flask import (
 from flask_login import login_required, current_user
 from flask_mail import Message
 import sqlalchemy as sa
-from sqlalchemy.orm import aliased
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
-from app import models as m, db
+from app import models as m, db, mail
 from app import schema as s
 from app import forms as f
 from app.logger import log
@@ -27,41 +26,36 @@ request_share_blueprint = Blueprint(
 
 @request_share_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
+)
 def get_all():
     form_edit: f.RequestShareForm = f.RequestShareForm()
 
-    product = aliased(m.Product)
-    group = aliased(m.Group)
     q = request.args.get("q", type=str, default=None)
+    status = request.args.get("status", type=str, default=None)
     query = m.RequestShare.select().order_by(m.RequestShare.id)
     count_query = sa.select(sa.func.count()).select_from(m.RequestShare)
     if q:
-        query = (
-            m.RequestShare.select()
-            .join(product, m.RequestShare.product_id == product.id)
-            .join(group, m.RequestShare.group_id == group.id)
-            .where(
-                product.name.ilike(f"%{q}%")
-                | m.RequestShare.status.ilike(f"%{q}%")
-                | m.RequestShare.order_numb.ilike(f"%{q}%")
-                | group.name.ilike(f"%{q}%")
-            )
-            .order_by(m.RequestShare.id)
-        )
-        count_query = (
-            sa.select(sa.func.count())
-            .join(product, m.RequestShare.product_id == product.id)
-            .join(group, m.RequestShare.group_id == group.id)
-            .where(
-                product.name.ilike(f"%{q}%")
-                | m.RequestShare.status.ilike(f"%{q}%")
-                | m.RequestShare.order_numb.ilike(f"%{q}%")
-                | group.name.ilike(f"%{q}%")
-            )
-            .select_from(m.RequestShare)
+        search_by_q = (
+            (m.RequestShare.product.has(m.Product.name.ilike(f"%{q}%")))
+            | m.RequestShare.order_numb.ilike(f"%{q}%")
+            | m.RequestShare.group.has(m.Group.name.ilike(f"%{q}%"))
+            | m.RequestShare.from_group.has(m.Group.name.ilike(f"%{q}%"))
         )
 
+        query = query.where(search_by_q)
+        count_query = count_query.where(search_by_q)
+
+    if status:
+        query = query.where(m.RequestShare.status == status)
+        count_query = count_query.where(m.RequestShare.status == status)
+
     pagination = create_pagination(total=db.session.scalar(count_query))
+
+    statuses = [
+        status[0] for status in db.session.query(m.RequestShare.status).distinct().all()
+    ]
 
     return render_template(
         "request_share/request_shares.html",
@@ -73,12 +67,16 @@ def get_all():
         page=pagination,
         search_query=q,
         form_edit=form_edit,
-        user=current_user,
+        statuses=statuses,
+        search_status=status,
     )
 
 
 @request_share_blueprint.route("/edit", methods=["POST"])
 @login_required
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value], True
+)
 def save():
     form: f.RequestShareForm = f.RequestShareForm()
     if form.validate_on_submit():
@@ -118,6 +116,7 @@ def save():
 
 @request_share_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def delete(id: int):
     rs: m.RequestShare = db.session.scalar(
         m.RequestShare.select().where(m.RequestShare.id == id)
@@ -138,6 +137,9 @@ def delete(id: int):
 
 @request_share_blueprint.route("/share/<int:id>", methods=["GET"])
 @login_required
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
+)
 def share(id: int):
     request_share: m.RequestShare = db.session.scalar(
         m.RequestShare.select().where(m.RequestShare.id == id)
@@ -203,6 +205,28 @@ def share(id: int):
     warehouse_from_prod.product_quantity -= request_share.desire_quantity
     warehouse_from_prod.save(False)
 
+    msg = Message(
+        subject=f"Request share approved {request_share.order_numb}",
+        sender=app.config["MAIL_DEFAULT_SENDER"],
+        recipients=[request_share.user.email],
+    )
+    url = (
+        url_for(
+            "request_share.get_all",
+            _external=True,
+        )
+        + f"?q={request_share.order_numb}"
+    )
+
+    msg.html = render_template(
+        "email/request_share.html",
+        user=request_share.user,
+        request_share=request_share,
+        url=url,
+        action="approved",
+    )
+    mail.send(msg)
+
     m.ReportInventory(
         qty_before=warehouse_from_prod.product_quantity + request_share.desire_quantity,
         qty_after=warehouse_from_prod.product_quantity,
@@ -250,6 +274,9 @@ def share(id: int):
 
 @request_share_blueprint.route("/decline/<int:id>", methods=["GET"])
 @login_required
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
+)
 def decline(id: int):
     request_share: m.RequestShare = db.session.get(m.RequestShare, id)
     if not request_share:
@@ -281,7 +308,7 @@ def decline(id: int):
             if not u.child.approval_permission:
                 continue
             msg = Message(
-                subject="Declined request share",
+                subject=f"Declined request share {request_share.order_numb}",
                 sender=app.config["MAIL_DEFAULT_SENDER"],
                 recipients=[u.child.email],
             )
@@ -300,8 +327,7 @@ def decline(id: int):
                 request_share=request_share,
                 url=url,
             )
-            # TODO uncomment when ready to notify
-            # mail.send(msg)
+            mail.send(msg)
 
     db.session.add(report_request_share)
     db.session.commit()

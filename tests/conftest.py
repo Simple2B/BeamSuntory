@@ -2,6 +2,7 @@ import datetime
 import os
 from pathlib import Path
 
+import filetype
 import pytest
 from flask import Flask
 from flask.testing import FlaskClient
@@ -28,7 +29,14 @@ def app():
 
 
 @pytest.fixture()
-def client(app: Flask):
+def client(app: Flask, mocker):
+    mocker.patch(
+        "app.views.product.save_image",
+        return_value=("test", "test"),
+    )
+    kind = filetype.guess("tests/data/no_picture_default.png")
+    mocker.patch.object(filetype, "guess", return_value=kind)
+    mocker.patch.object(filetype, "is_image", return_value=True)
     with app.test_client() as client:
         with app.app_context():
             db.drop_all()
@@ -103,9 +111,16 @@ def populate_one_user(client: FlaskClient):
 
 
 @pytest.fixture
-def mg_g_populate(client: FlaskClient):
+def mg_g_populate(client: FlaskClient, mocker):
     # TODO refactoring
-    master_groups = ["Country", "Brand", s.ProductMasterGroupMandatory.events.value]
+    master_groups = [
+        "Country",
+        "Brand",
+        "Marketing",
+        "Language",
+        "Categories",
+        s.ProductMasterGroupMandatory.events.value,
+    ]
     groups = {
         "Canada": "1",
         "JB": "2",
@@ -592,6 +607,8 @@ def mg_g_populate(client: FlaskClient):
     )
     group_jb: m.Group = db.session.scalar(m.Group.select().where(m.Group.name == "JB"))
 
+    group_canada.parent_group_id = group_jb.id  # Sub group
+
     m.Cart(
         product=populate_test_product,
         quantity=15,
@@ -648,6 +665,7 @@ def mg_g_populate(client: FlaskClient):
             product_id=event_test_product.id,
             comment="event for product 1",
             user_id=3,
+            group_id=group_event.id,
             cart_id=cart.id,
         ).save(False)
         db.session.commit()

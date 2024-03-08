@@ -10,9 +10,10 @@ from flask import (
 )
 from flask_login import login_required, current_user
 import sqlalchemy as sa
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import models as m, db
+from app import schema as s
 from app import forms as f
 from app.logger import log
 
@@ -24,6 +25,7 @@ store_category_blueprint = Blueprint(
 
 @store_category_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def get_all():
     form_create: f.NewStoreCategoryForm = f.NewStoreCategoryForm()
     form_edit: f.StoreCategoryForm = f.StoreCategoryForm()
@@ -67,6 +69,7 @@ def get_all():
 
 @store_category_blueprint.route("/save", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def save():
     form: f.StoreCategoryForm = f.StoreCategoryForm()
     if form.validate_on_submit():
@@ -102,6 +105,7 @@ def save():
 
 @store_category_blueprint.route("/create", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def create():
     form: f.NewStoreCategoryForm = f.NewStoreCategoryForm()
     if form.validate_on_submit():
@@ -125,6 +129,7 @@ def create():
 
 @store_category_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def delete(id: int):
     s = db.session.scalar(m.StoreCategory.select().where(m.StoreCategory.id == id))
     if not s:

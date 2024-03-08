@@ -9,7 +9,7 @@ from flask import (
 from flask_login import login_required
 import sqlalchemy as sa
 from sqlalchemy import desc
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import schema as s
 from app import models as m, db
@@ -60,6 +60,7 @@ def get_pickup_inbound():
 
 @pickup_inbound_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.DELIVERY_AGENT.value])
 def get_all():
     form_edit: f.ShipRequestForm = f.ShipRequestForm()
     return render_template(
@@ -77,6 +78,7 @@ def get_all():
 
 @pickup_inbound_blueprint.route("/pickup", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.DELIVERY_AGENT.value])
 def pickup():
     form_pickup: f.InboundOrderPickupForm = f.InboundOrderPickupForm()
 
@@ -126,6 +128,7 @@ def pickup():
     "/sort", methods=["GET", "POST"]
 )  # TODO move pickup inbound sort to GET with params
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.DELIVERY_AGENT.value])
 def sort():
     pagination, orders = get_pickup_inbound()
 

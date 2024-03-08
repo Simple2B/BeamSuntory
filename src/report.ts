@@ -27,10 +27,11 @@ const filtersMap: IFilterMap = {
     'filter-end-date',
     'master-group',
     'target-group',
+    'target-sub-group',
     'filter-group-brand',
     'filter-group-language',
     'filter-group-premises',
-    'filter-group-category',
+    'filter-group-categories',
     'filter-group-events',
   ],
   adjustment: [
@@ -39,10 +40,11 @@ const filtersMap: IFilterMap = {
     'filter-end-date',
     'master-group',
     'target-group',
+    'target-sub-group',
     'filter-group-brand',
     'filter-group-language',
     'filter-group-premises',
-    'filter-group-category',
+    'filter-group-categories',
     'filter-group-events',
   ],
   assign: [
@@ -54,24 +56,25 @@ const filtersMap: IFilterMap = {
     'filter-group-brand',
     'filter-group-language',
     'filter-group-premises',
-    'filter-group-category',
+    'filter-group-categories',
   ],
   inbound_order: [
     'filter-start-date',
     'filter-end-date',
     'filter-group-brand',
     'filter-group-premises',
-    'filter-group-category',
+    'filter-group-categories',
     'filter-product-group',
   ],
   shipping: [
     'division-select',
     'target-group',
+    'target-sub-group',
     'filter-start-date',
     'filter-end-date',
     'filter-group-brand',
     'filter-group-language',
-    'filter-group-category',
+    'filter-group-categories',
     'filter-group-premises',
   ],
   shelf_life: [
@@ -79,10 +82,11 @@ const filtersMap: IFilterMap = {
     'filter-end-date',
     'master-group',
     'target-group',
+    'target-sub-group',
     'filter-group-brand',
     'filter-group-language',
     'filter-group-premises',
-    'filter-group-category',
+    'filter-group-categories',
     'shelf-life-filter-expire-in',
   ],
 };
@@ -104,14 +108,11 @@ const fetchReportAPI = async (queryParams: URLSearchParams, callback: (data: Obj
 };
 
 const generateCSVEvents = async (queryParams: URLSearchParams) => {
-  const csvData = ['action_type,user,created_at,store,event_date_from,event_date_to,sku,product_name',];
+  const csvData = ['action_type,user,created_at,store,event_date_from,event_date_to,sku,product_name'];
   await fetchReportAPI(queryParams, (data: IEventsReportResponse) => {
     data.reports.forEach((report) => {
-      
-
       report.shipRequest.carts.forEach((cart) => {
-        console.log(searchSKUInput.value, cart.product.SKU)
-        if (searchSKUInput.value && !cart.product.SKU.includes(searchSKUInput.value) ){
+        if (searchSKUInput.value && !cart.product.SKU.includes(searchSKUInput.value)) {
           return;
         }
 
@@ -134,11 +135,13 @@ const generateCSVEvents = async (queryParams: URLSearchParams) => {
 };
 
 const generateCSVRequestShare = async (queryParams: URLSearchParams) => {
-  const csvData = ['action_type,user,created_at,current_share_request_status,group_from,group_to,desired_quantity,sku,product_name'];
+  const csvData = [
+    'action_type,user,created_at,current_share_request_status,group_from,group_to,desired_quantity,sku,product_name',
+  ];
   await fetchReportAPI(queryParams, (data: IReportRequestShareResponse) => {
     data.reports.forEach((report) => {
-      if (searchSKUInput.value && !report.requestShare.product.SKU.includes(searchSKUInput.value) ){
-          return;
+      if (searchSKUInput.value && !report.requestShare.product.SKU.includes(searchSKUInput.value)) {
+        return;
       }
 
       csvData.push(
@@ -161,35 +164,24 @@ const generateCSVRequestShare = async (queryParams: URLSearchParams) => {
 
 const generateCSVInventories = async (queryParams: URLSearchParams) => {
   // CSV Headers
-  const csvData = ['created_at,store_name,type,username,qty_before,qty_after,sku,product_name'];
+  const csvData = ['product_name,sku,group,quantity,created_at'];
   await fetchReportAPI(queryParams, (data: IInventoriesReportResponse) => {
     data.reports.forEach((report) => {
-      let reportTarget: string;
-      if (report.store) {
-        reportTarget = report.store.storeName;
-      } else if (report.warehouse) {
-        reportTarget = report.warehouse.name;
-      } else {
-        reportTarget = 'Internal action';
-      }
+      for (let i = 0; i < report.product.warehouseProducts.length; i++) {
+        const warehouseProduct = report.product.warehouseProducts[i];
 
-      report.reportInventories.forEach((inventory) => {
-          if (searchSKUInput.value && !inventory.product.SKU.includes(searchSKUInput.value) ){
-            return;
+        if (warehouseProduct.group.name === report.group.name) {
+          csvData.push(
+            [
+              report.product.name,
+              report.product.SKU,
+              report.group.name,
+              warehouseProduct.productQuantity,
+              formatDate(report.createdAt),
+            ].join(',')
+          );
         }
-        csvData.push(
-          [
-            formatDate(report.createdAt),
-            reportTarget,
-            report.type,
-            report.user.username,
-            inventory.qtyBefore.toString(),
-            inventory.qtyAfter.toString(),
-            inventory.product.SKU,
-            inventory.product.name,
-          ].join(',')
-        );
-      });
+      }
     });
   });
   return csvData;
@@ -198,12 +190,12 @@ const generateCSVInventories = async (queryParams: URLSearchParams) => {
 const generateCSVAdjustments = async (queryParams: URLSearchParams) => {
   // CSV Headers
   const csvData = [
-    'created_at,product_name,sku,username,master_group,group,warehouse,quantity_before,quantity_after,note',
+    'created_at,product_name,sku,username,master_group,group,warehouse,quantity_before,quantity_after,quantity_delta,note',
   ];
   await fetchReportAPI(queryParams, (data: IReportAdjustResponse) => {
     data.reports.forEach((adjust) => {
       adjust.adjustGroupQty.forEach((reportAdjust) => {
-        if (searchSKUInput.value && !adjust.product.SKU.includes(searchSKUInput.value) ){
+        if (searchSKUInput.value && !adjust.product.SKU.includes(searchSKUInput.value)) {
           return;
         }
         csvData.push(
@@ -217,6 +209,7 @@ const generateCSVAdjustments = async (queryParams: URLSearchParams) => {
             reportAdjust.warehouse.name,
             reportAdjust.quantityBefore,
             reportAdjust.quantityAfter,
+            reportAdjust.delta,
             adjust.note,
           ].join(',')
         );
@@ -229,10 +222,14 @@ const generateCSVAdjustments = async (queryParams: URLSearchParams) => {
 const generateCSVInboundOrder = async (queryParams: URLSearchParams) => {
   const csvData = ['created_at,username,type,order_title,allocated_product,sku,group,quantity'];
   await fetchReportAPI(queryParams, (data: IReportInboundOrderResponse) => {
+    const searchingGroup = queryParams.get('product_group');
     data.reports.forEach((report) => {
       report.inboundOrder.productsAllocated.forEach((productsAllocated) => {
         productsAllocated.productQuantityGroups.forEach((productQuantityGroup) => {
-          if (searchSKUInput.value && !productsAllocated.product.SKU.includes(searchSKUInput.value) ){
+          if (searchSKUInput.value && !productsAllocated.product.SKU.includes(searchSKUInput.value)) {
+            return;
+          }
+          if (searchingGroup && !productQuantityGroup.group.name.includes(searchingGroup)) {
             return;
           }
           csvData.push(
@@ -274,8 +271,8 @@ const generateCSVShipping = async (queryParams: URLSearchParams) => {
   await fetchReportAPI(queryParams, (data: IReportShippingResponse) => {
     data.reports.forEach((report) => {
       report.shipRequest.carts.forEach((cart) => {
-        if (searchSKUInput.value && !cart.product.SKU.includes(searchSKUInput.value) ){
-            return;
+        if (searchSKUInput.value && !cart.product.SKU.includes(searchSKUInput.value)) {
+          return;
         }
         csvData.push(
           [
@@ -303,7 +300,7 @@ const generateCSVAssign = async (queryParams: URLSearchParams) => {
 
   await fetchReportAPI(queryParams, (data: IReportAssignResponse) => {
     data.reports.forEach((report) => {
-      if (searchSKUInput.value && !report.product.SKU.includes(searchSKUInput.value) ){
+      if (searchSKUInput.value && !report.product.SKU.includes(searchSKUInput.value)) {
         return;
       }
       csvData.push(
@@ -336,9 +333,7 @@ const generateCSVShelfLife = async (queryParams: URLSearchParams) => {
         received = report.quantityReceived.toString();
       }
 
-      
-
-      if (searchSKUInput.value.length && !report.product.SKU.includes(searchSKUInput.value) ){
+      if (searchSKUInput.value.length && !report.product.SKU.includes(searchSKUInput.value)) {
         return;
       }
 
@@ -377,10 +372,11 @@ const filtersIds = [
   'filter-end-date-to',
   'master-group',
   'target-group',
+  'target-sub-group',
   'filter-group-brand',
   'filter-group-language',
   'filter-group-premises',
-  'filter-group-category',
+  'filter-group-categories',
   'filter-group-events',
   'filter-product-group',
   'group-from',
@@ -396,6 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const tableLoader = document.getElementById('table-report-loader') as HTMLButtonElement;
   const clearFiltersButton = document.getElementById('filter-clear-button') as HTMLButtonElement;
   const searchQueryHTML = document.getElementById('search-query') as HTMLInputElement;
+  const searchSkuHTML = document.getElementById('search-sku') as HTMLInputElement;
   const downloadCSVButton = document.getElementById('button-csv-download') as HTMLButtonElement;
 
   for (const [reportType, filters] of Object.entries(filtersMap)) {
@@ -408,6 +405,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     allFiltersHTML.forEach((filterHTML) => filterHTML.classList.add('hidden'));
     const visibleFilters = filtersMap[selectHTML.value] as HTMLElement[];
+    console.log('visibleFilters', visibleFilters);
+    console.log('filtersMap', filtersMap);
+    console.log('allFiltersHTML', allFiltersHTML);
 
     visibleFilters.forEach((filterHTML) => filterHTML.classList.remove('hidden'));
   });
@@ -419,6 +419,7 @@ document.addEventListener('DOMContentLoaded', () => {
       input.value = '';
     });
     searchQueryHTML.value = '';
+    searchSkuHTML.value = '';
     tableLoader.click();
   });
   // Download csv button
@@ -440,5 +441,16 @@ document.addEventListener('DOMContentLoaded', () => {
     a.setAttribute('download', 'report.csv');
     a.click();
     a.remove();
+  });
+
+  const groupSelect = document.getElementById('report-target-group-select') as HTMLSelectElement;
+  const groupIdInput = document.getElementById('report-group-id-hidden') as HTMLInputElement;
+  groupSelect.addEventListener('change', (e) => {
+    const option = groupSelect.querySelector(`option[value="${groupSelect.value}"]`);
+    if (!option) {
+      return;
+    }
+    groupIdInput.value = option.getAttribute('data-target-group-id');
+    groupIdInput.click();
   });
 });

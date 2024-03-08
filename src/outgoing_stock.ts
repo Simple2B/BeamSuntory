@@ -1,5 +1,6 @@
 import { Modal } from 'flowbite';
 import type { ModalOptions, ModalInterface } from 'flowbite';
+import { IGroup } from './types';
 
 const EventsGroup = 'Events';
 
@@ -19,12 +20,12 @@ interface IStore {
   zip: string;
 }
 interface ICart {
-  product: IProduct
-  group: string
-  quantity: number
-  event?: IEvent
-  warehouse?: IWarehouse
-  status: string
+  product: IProduct;
+  group: IGroup;
+  quantity: number;
+  event?: IEvent;
+  warehouse?: IWarehouse;
+  status: string;
 }
 
 export interface IShipRequest {
@@ -364,7 +365,7 @@ function createOutgoingStockItemTable(shipRqst: IShipRequest, typeModal: string)
         </td>
         <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="cart-item-group text-base font-semibold">${cart.group}</div>
+            <div class="cart-item-group text-base font-semibold">${cart.group.name}</div>
           </div>
         </td>
         <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
@@ -406,7 +407,7 @@ function createOutgoingStockItemTable(shipRqst: IShipRequest, typeModal: string)
 
       let includeWarehouses: IWarehouse[];
 
-      if (cart.group === EventsGroup) {
+      if (cart.group.name === EventsGroup) {
         includeWarehouses = warehousesEvents;
       } else {
         includeWarehouses = warehouses;

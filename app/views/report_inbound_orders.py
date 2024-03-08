@@ -6,7 +6,7 @@ from flask import (
 from flask_login import login_required
 from sqlalchemy import desc
 import sqlalchemy as sa
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import schema as s
 from app import models as m, db
@@ -71,7 +71,7 @@ def get_inbound_order_report():
 
     master_groups = [
         filter_inbound_order.brand,
-        filter_inbound_order.category,
+        filter_inbound_order.categories,
         filter_inbound_order.premises,
     ]
 
@@ -132,6 +132,7 @@ def get_inbound_order_report():
 
 @report_inbound_orders_blueprint.route("/inbound_orders")
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def inbound_orders():
     product_master_group_brand = db.session.scalars(
         sa.select(m.MasterGroupProduct)
@@ -139,9 +140,9 @@ def inbound_orders():
         .order_by(m.MasterGroupProduct.id)
     ).all()
 
-    product_master_group_category = db.session.scalars(
+    product_master_group_categories = db.session.scalars(
         sa.select(m.MasterGroupProduct)
-        .where(m.MasterGroupProduct.name == "Category")
+        .where(m.MasterGroupProduct.name == "Categories")
         .order_by(m.MasterGroupProduct.id)
     ).all()
 
@@ -154,6 +155,6 @@ def inbound_orders():
     return render_template(
         "report/inbound_order/inbound_orders.html",
         product_master_group_brand=product_master_group_brand,
-        product_master_group_category=product_master_group_category,
+        product_master_group_categories=product_master_group_categories,
         product_master_group_premises=product_master_group_premises,
     )

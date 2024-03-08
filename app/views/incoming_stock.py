@@ -5,14 +5,16 @@ from flask import (
     flash,
     redirect,
     url_for,
+    current_app as app,
 )
 from flask_login import login_required, current_user
+from flask_mail import Message
 import sqlalchemy as sa
 from sqlalchemy import desc
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import schema as s
-from app import models as m, db
+from app import models as m, db, mail
 from app import forms as f
 from app.logger import log
 
@@ -24,6 +26,7 @@ incoming_stock_blueprint = Blueprint(
 
 @incoming_stock_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def get_all():
     form_sort: f.SortByStatusInboundOrderForm = f.SortByStatusInboundOrderForm()
     form_create = f.InboundOrderCreateForm()
@@ -68,6 +71,7 @@ def get_all():
 
 @incoming_stock_blueprint.route("/accept", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def accept():
     form_edit: f.PackageInfoForm = f.PackageInfoForm()
 
@@ -212,6 +216,7 @@ def accept():
             ).save(False)
 
         allocated_product_obj.quantity_received = full_product_qty_received
+        allocated_product_obj.quantity_remains = full_product_qty_received
         allocated_product_obj.save(False)
 
     inbound_order.status = s.InboundOrderStatus.delivered
@@ -219,11 +224,49 @@ def accept():
 
     db.session.commit()
 
+    groups_list_ids = [
+        [y.group_id for y in x.product_quantity_groups]
+        for x in inbound_order.products_allocated
+    ]
+
+    inbound_order_groups_ids = set(
+        item for sublist in groups_list_ids for item in sublist
+    )
+
+    users = db.session.scalars(
+        sa.select(m.UserGroup).where(m.UserGroup.right_id.in_(inbound_order_groups_ids))
+    ).all()
+
+    if users:
+        for u in users:
+            msg = Message(
+                subject=f"Inbound order accepted {inbound_order.title}",
+                sender=app.config["MAIL_DEFAULT_SENDER"],
+                recipients=[u.child.email],
+            )
+            url = (
+                url_for(
+                    "inbound_order.get_all",
+                    _external=True,
+                )
+                + f"?q={inbound_order.order_id}"
+            )
+
+            msg.html = render_template(
+                "email/inbound_order.html",
+                user=u.child,
+                inbound_order=inbound_order,
+                url=url,
+                action="accepted",
+            )
+            mail.send(msg)
+
     return redirect(url_for("incoming_stock.get_all"))
 
 
 @incoming_stock_blueprint.route("/cancel/<int:id>", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def cancel(id: int):
     io: m.InboundOrder = db.session.scalar(
         m.InboundOrder.select().where(m.InboundOrder.id == id)
@@ -242,6 +285,7 @@ def cancel(id: int):
 
 @incoming_stock_blueprint.route("/sort", methods=["GET", "POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def sort():
     # TODO: move to incoming stocks get request
     if (
@@ -311,6 +355,7 @@ def sort():
 
 @incoming_stock_blueprint.route("/notes", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def notes():
     form_note: f.InboundOrderPickupForm = f.InboundOrderPickupForm()
 

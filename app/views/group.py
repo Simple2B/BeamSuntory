@@ -9,7 +9,7 @@ from flask import (
 from flask_login import login_required
 import sqlalchemy as sa
 from sqlalchemy.orm import aliased
-from app.controllers import create_pagination
+from app.controllers import create_pagination, role_required
 
 from app import schema as s
 from app import models as m, db
@@ -24,20 +24,23 @@ stock_target_group_blueprint = Blueprint(
 
 @stock_target_group_blueprint.route("/", methods=["GET"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def get_all():
     form_create = f.NewGroupForm()
     form_edit = f.GroupForm()
 
     master_group = aliased(m.MasterGroup)
     q = request.args.get("q", type=str, default=None)
-    query = m.Group.select().order_by(m.Group.id)
+    query = (
+        m.Group.select().where(m.Group.parent_group_id.is_(None)).order_by(m.Group.name)
+    )
     count_query = sa.select(sa.func.count()).select_from(m.Group)
     if q:
         query = (
             m.Group.select()
             .join(master_group, m.Group.master_group_id == master_group.id)
             .where(m.Group.name.ilike(f"%{q}%") | master_group.name.ilike(f"%{q}%"))
-            .order_by(m.Group.id)
+            .order_by(m.Group.name)
         )
         count_query = (
             sa.select(sa.func.count())
@@ -69,6 +72,7 @@ def get_all():
 
 @stock_target_group_blueprint.route("/create", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def create():
     form = f.NewGroupForm()
     if form.validate_on_submit():
@@ -103,6 +107,7 @@ def create():
 
 @stock_target_group_blueprint.route("/edit", methods=["POST"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def save():
     form = f.GroupForm()
     if form.validate_on_submit():
@@ -126,6 +131,7 @@ def save():
 
 @stock_target_group_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
+@role_required([s.UserRole.ADMIN.value])
 def delete(id: int):
     group = db.session.get(m.Group, id)
     if not group:
