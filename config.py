@@ -1,6 +1,7 @@
 import os
 from typing import ClassVar
 from abc import ABC, abstractclassmethod
+import tomllib
 from functools import lru_cache
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -12,18 +13,23 @@ APP_ENV = os.environ.get("APP_ENV", "development")
 SALES_REP_LOCKER_NAME = "Locker"
 
 
+def get_version() -> str:
+    with open("pyproject.toml", "rb") as f:
+        return tomllib.load(f)["tool"]["poetry"]["version"]
+
+
 class BaseConfig(BaseSettings, ABC):
     """Base configuration."""
 
     @property
     @abstractclassmethod
-    def ENV():
-        ...
+    def ENV(): ...
 
     APP_NAME: str = "Beam Suntory"
     SECRET_KEY: str
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
     WTF_CSRF_ENABLED: bool = True
+    VERSION: str = get_version()
 
     # Mail config
     MAIL_SERVER: str
