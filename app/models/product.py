@@ -25,7 +25,7 @@ class Product(db.Model, ModelMixin):
     supplier_id: orm.Mapped[str] = orm.mapped_column(
         sa.ForeignKey("suppliers.id"), nullable=True
     )  # NOTE vendor = supplier
-    image_id: orm.Mapped[str] = orm.mapped_column(
+    image_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("images.id"), nullable=True
     )
 
@@ -44,7 +44,7 @@ class Product(db.Model, ModelMixin):
     image: orm.Mapped[str] = orm.mapped_column(sa.Text())  # png base64 str
     description: orm.Mapped[str] = orm.mapped_column(sa.String(512), nullable=False)
     # General Info ->
-    SKU: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=False)
+    SKU: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=False, unique=True)
     low_stock_level: orm.Mapped[int] = orm.mapped_column(sa.Integer(), nullable=True)
 
     program_year: orm.Mapped[int] = orm.mapped_column(sa.Integer(), nullable=True)

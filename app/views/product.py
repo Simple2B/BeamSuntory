@@ -273,7 +273,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
 
     for ware_prod in warehouse_products:
         for wpq in warehouse_product_query:
-            if wpq.product_id != ware_prod:
+            if not wpq.product or wpq.product_id != ware_prod:
                 continue
             if my_stocks:
                 if wpq.group_id not in my_stocks:
