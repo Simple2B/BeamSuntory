@@ -49,6 +49,7 @@ jobs:
           poetry run pytest
   build:
     name: Build and push
+    runs-on: Linux
     needs: tests
     steps:
       - name: Set up QEMU
