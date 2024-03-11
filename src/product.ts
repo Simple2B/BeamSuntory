@@ -342,7 +342,7 @@ const modalOptions: ModalOptions = {
     const productViewContainer = document.querySelector('#product-view-grid-container');
     productViewContainer.innerHTML = '';
   },
-  onShow: () => {},
+  onShow: () => { },
   onToggle: () => {
     console.log('modal has been toggled');
   },
@@ -367,7 +367,7 @@ const adjustModalOptions: ModalOptions = {
     });
     sessionStorage.removeItem('productInWarehouses');
   },
-  onShow: () => {},
+  onShow: () => { },
   onToggle: () => {
     console.log('modal has been toggled');
   },
@@ -381,7 +381,7 @@ const modalShipAssignOptions: ModalOptions = {
   onHide: () => {
     sessionStorage.removeItem('product');
   },
-  onShow: () => {},
+  onShow: () => { },
   onToggle: () => {
     console.log('modal has been toggled');
   },
@@ -395,7 +395,7 @@ const modalEventOptions: ModalOptions = {
   onHide: () => {
     sessionStorage.removeItem('product');
   },
-  onShow: () => {},
+  onShow: () => { },
   onToggle: () => {
     console.log('modal has been toggled');
   },
@@ -679,8 +679,8 @@ async function editProduct(product: IProduct) {
   input = document.querySelector('#product-edit-regular_price');
   input.value = product.regularPrice?.toString() ?? '0';
   input = document.querySelector('#product-edit-retail_price');
-  console.log('input', input);
-  console.log('product', product);
+  // console.log('input', input);
+  // console.log('product', product);
   input.value = product.retailPrice?.toString() ?? '0';
   input = document.querySelector('#product-edit-description');
   input.value = product.description;
@@ -719,23 +719,23 @@ async function editProduct(product: IProduct) {
   );
   const options = productMasterGroupEditSelect.querySelectorAll('option');
   const productMasterGroups = product.productGroups.map(
-    (group: IProductGroup) => group.parent.masterGroup.name as string
+    (group: IProductGroup) => {
+      return { 'groupMasterName': group.parent.masterGroup.name, 'productGroupId': group.groupId }
+    }
   );
 
   if (productMasterGroups.length > 0) {
     const productGroupsEditSelects = document.querySelectorAll<HTMLSelectElement>('.product-group-edit-item');
 
     for (let i = 0; i < productMasterGroups.length; i++) {
-      const currentProductMasterGroup = productAdditionalInfo.currentMasterProductGroups.find(
-        (masterGroupItem: IMasterGroupGroup) => masterGroupItem.masterGroup === productMasterGroups[i]
-      );
+
       if (i === 0) {
         const productGroupsEditSelect = productGroupsEditSelects[i];
 
-        productMasterGroupEditSelect.value = productMasterGroups[i];
+        productMasterGroupEditSelect.value = productMasterGroups[i].groupMasterName;
 
         const masterGroupGroup = productAdditionalInfo.masterGroupsGroups.find(
-          (masterGroup: IMasterGroupGroup) => masterGroup.masterGroup === productMasterGroups[i]
+          (masterGroup: IMasterGroupGroup) => masterGroup.masterGroup === productMasterGroups[i].groupMasterName
         );
 
         masterGroupGroup.groups.forEach((group: IGroupAdditionalInfo) => {
@@ -744,12 +744,8 @@ async function editProduct(product: IProduct) {
           storeSelectOption.textContent = group.groupName;
           productGroupsEditSelect.appendChild(storeSelectOption);
         });
-        // TODO: always select first option
-        const currentProductGroup = product.productGroups.find(
-          (group: IProductGroup) => group.parent.masterGroup.name === productMasterGroups[i]
-        );
 
-        productGroupsEditSelect.value = currentProductGroup.groupId.toString();
+        productGroupsEditSelect.value = productMasterGroups[i].productGroupId.toString();
         productMasterGroupEditSelect.addEventListener('change', () => {
           options.forEach((e) => {
             if (
@@ -774,23 +770,8 @@ async function editProduct(product: IProduct) {
             }
           });
         });
-
-        if (currentProductMasterGroup.groups.length > 1) {
-          for (let j = 1; j < currentProductMasterGroup.groups.length; j++) {
-            createProductGroupEditItem(null, productAdditionalInfo, productMasterGroups[i], j);
-          }
-          continue;
-        } else {
-          continue;
-        }
-      }
-
-      if (currentProductMasterGroup.groups.length > 0) {
-        for (let j = 0; j < currentProductMasterGroup.groups.length; j++) {
-          createProductGroupEditItem(null, productAdditionalInfo, productMasterGroups[i], j);
-        }
       } else {
-        createProductGroupEditItem(null, productAdditionalInfo, productMasterGroups[i]);
+        createProductGroupEditItem(null, productAdditionalInfo, productMasterGroups[i].groupMasterName, productMasterGroups[i].productGroupId);
       }
     }
   }
@@ -852,8 +833,6 @@ viewProductButtonElements.forEach((e) =>
         (userGroup: IMasterGroupGroupUser) => userGroup.masterGroupName === mstrGroupName
       );
 
-      console.log('currentUserGroup', currentUserGroup);
-      console.log('adminRole', productInfo.currentUserRole);
 
       if (currentUserGroup) {
         const isExistGroup = currentUserGroup.groups.find((group: IGroupAdditionalInfo) => {
@@ -1643,7 +1622,7 @@ async function createProductGroupEditItem(
   productParam: IProduct = null,
   productInfo: IProductAdditionalInfo = null,
   masterGroup: string = null,
-  itemIndex: number = null
+  productGroupId: number = 0
 ) {
   if (!productParam) {
     const product: IProduct = JSON.parse(sessionStorage.getItem('product'));
@@ -1653,6 +1632,7 @@ async function createProductGroupEditItem(
   if (!productInfo) {
     productInfo = await getAdditionalProductInfo(productParam.id);
   }
+
 
   const productGroupEditContainer = document.querySelector('#product-group-edit-add-container');
   const productGroupEditAllItems = document.querySelectorAll('.product-group-edit-add-item');
@@ -1732,15 +1712,8 @@ async function createProductGroupEditItem(
       productGroupSelectOption.textContent = group.groupName;
       productGroupEditSelect.appendChild(productGroupSelectOption);
     });
-    // TODO: always select first option
-    if (!itemIndex) {
-      itemIndex = 0;
-    }
-    const currentProductMasterGroup = productInfo.currentMasterProductGroups.find(
-      (masterGroupItem) => masterGroupItem.masterGroup === masterGroup
-    );
 
-    productGroupEditSelect.value = currentProductMasterGroup.groups[itemIndex].groupId.toString();
+    productGroupEditSelect.value = productGroupId.toString();
   }
 
   const options = productMasterGroupEditSelect.querySelectorAll('option');
