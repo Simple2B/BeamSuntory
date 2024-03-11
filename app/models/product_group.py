@@ -17,6 +17,9 @@ class ProductGroup(db.Model, ModelMixin):
     child: orm.Mapped["Product"] = orm.relationship()
     parent: orm.Mapped["GroupProduct"] = orm.relationship()
 
+    def __repr__(self):
+        return f"<id: {self.id}, Perent: {self.parent}>"
+
     @property
     def json(self):
         return s.ProductGroup.model_validate(self).model_dump_json()
