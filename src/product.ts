@@ -718,11 +718,14 @@ async function editProduct(product: IProduct) {
     '#product-master-group-edit-add-product-1'
   );
   const options = productMasterGroupEditSelect.querySelectorAll('option');
-  const productMasterGroups = product.productGroups.map(
+  let productMasterGroups = [] as { groupMasterName: string; productGroupId: number }[];
+
+  // Set dosn't work with objects, so we need to use forEach and find
+  product.productGroups.forEach(
     (group: IProductGroup) => {
-      return { 'groupMasterName': group.parent.masterGroup.name, 'productGroupId': group.groupId }
-    }
-  );
+      const groupData = { 'groupMasterName': group.parent.masterGroup.name, 'productGroupId': group.groupId }
+      productMasterGroups.find((e) => e.groupMasterName === groupData.groupMasterName && e.productGroupId === groupData.productGroupId ) ? null : productMasterGroups.push(groupData);
+  })
 
   if (productMasterGroups.length > 0) {
     const productGroupsEditSelects = document.querySelectorAll<HTMLSelectElement>('.product-group-edit-item');

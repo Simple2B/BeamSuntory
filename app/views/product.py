@@ -573,37 +573,16 @@ def save():
         u.save(False)
         db.session.commit()
 
-        product_master_groups_ids = json.loads(form.product_groups.data)
+        product_master_groups_ids = list(set(json.loads(form.product_groups.data)))
 
-        product_groups_obj = db.session.scalars(
-            m.ProductGroup.select().where(
-                m.ProductGroup.product_id == int(form.product_id.data)
-            )
-        ).all()
-        product_groups_ids = [group_row.group_id for group_row in product_groups_obj]
-
-        for group_row in product_groups_obj:
-            if group_row.group_id in product_master_groups_ids:
-                continue
-            else:
-                delete_gp = db.session.execute(
-                    m.ProductGroup.select().where(
-                        m.ProductGroup.product_id == int(form.product_id.data),
-                        m.ProductGroup.group_id == group_row.group_id,
-                    )
-                ).scalar()
-                db.session.delete(delete_gp)
-                db.session.commit()
-
+        u.product_groups = []
         for group_id in product_master_groups_ids:
-            if group_id in product_groups_ids:
-                continue
-            else:
-                product_group = m.ProductGroup(
-                    product_id=int(form.product_id.data), group_id=group_id
-                )
-                product_group.save()
+            product_group = m.ProductGroup(
+                product_id=int(form.product_id.data), group_id=group_id
+            )
+            product_group.save()
 
+        db.session.commit()
         if form.next_url.data:
             return redirect(form.next_url.data)
         return redirect(url_for("product.get_all", **query_params))
