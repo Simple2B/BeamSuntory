@@ -329,6 +329,23 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     }
 
 
+@product_blueprint.route("/<id>/view", methods=["GET"])
+@login_required
+def product_view(id: int):
+    product = db.session.get(m.Product, id)
+    if not product:
+        log(log.ERROR, "Not found product by id : [%s]", id)
+        return abort(404)
+
+    total_qty = sum(
+        warehouse.product_quantity for warehouse in product.warehouse_products
+    )
+
+    return render_template(
+        "product/test_view.html", product=product, total_qty=total_qty
+    )
+
+
 @product_blueprint.route("/", methods=["GET"])
 @login_required
 def get_all():
@@ -497,6 +514,7 @@ def save():
             # TODO: is there need to return from function?
             log(log.ERROR, "Not found product by id : [%s]", form.product_id.data)
             flash("Cannot save product data", "danger")
+            return redirect(url_for("product.get_all", **query_params))
 
         supplier: m.Supplier = db.session.scalar(m.Supplier.select())
 

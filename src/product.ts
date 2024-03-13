@@ -828,7 +828,9 @@ viewProductButtonElements.forEach((e) =>
     sessionStorage.setItem('product', JSON.stringify(product));
     const prodGroups = Object.keys(groupsMasterGroups);
 
+    console.log(prodGroups, "prodGroups")
     prodGroups.forEach((groupName: string) => {
+      console.log(groupName, "groupName")
       let isEqual = false;
       const mstrGroupName = groupsMasterGroups[groupName];
 
@@ -886,6 +888,7 @@ viewProductButtonElements.forEach((e) =>
     product.notes_location ? (div.innerHTML = product.notes_location) : (div.innerHTML = 'No notes');
     div = document.querySelector('#product-view-next_url');
     div.innerHTML = window.location.href;
+    // console.log("product.warehouseProducts ---------->", product.warehouseProducts);
 
     product.warehouseProducts.forEach((warehouseProduct: IWarehouseProduct) => {
       const productViewContainer = document.querySelector('#product-view-grid-container');
