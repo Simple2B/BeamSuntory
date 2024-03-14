@@ -28,6 +28,64 @@ def init(app: Flask):
             populate(count)
             print(f"DB populated by {count} instancies")
 
+    @app.cli.command("clear-history")
+    def clear_history():
+        """Clear all history from DB."""
+        report_inbound_order = db.session.scalars(
+            sa.delete(m.ReportInboundOrder).returning(m.ReportInboundOrder.id)
+        ).all()
+        report_sku = db.session.scalars(
+            sa.delete(m.ReportSKU).returning(m.ReportSKU.id)
+        ).all()
+        report_inventory = db.session.scalars(
+            sa.delete(m.ReportInventory).returning(m.ReportInventory.id)
+        ).all()
+        report_event = db.session.scalars(
+            sa.delete(m.ReportEvent).returning(m.ReportEvent.id)
+        ).all()
+        repord_shipping = db.session.scalars(
+            sa.delete(m.ReportShipping).returning(m.ReportShipping.id)
+        ).all()
+        adjusts_group_qty = db.session.scalars(
+            sa.delete(m.AdjustGroupQty).returning(m.AdjustGroupQty.id)
+        ).all()
+        adjusts = db.session.scalars(sa.delete(m.Adjust).returning(m.Adjust.id)).all()
+        assigns = db.session.scalars(sa.delete(m.Assign).returning(m.Assign.id)).all()
+        request_share_user = db.session.scalars(
+            sa.delete(m.RequestShareUser).returning(m.RequestShareUser.id)
+        ).all()
+        reports_request_share = db.session.scalars(
+            sa.delete(m.ReportRequestShare).returning(m.ReportRequestShare.id)
+        ).all()
+        request_shares = db.session.scalars(
+            sa.delete(m.RequestShare).returning(m.RequestShare.id)
+        ).all()
+        events = db.session.scalars(sa.delete(m.Event).returning(m.Event.id)).all()
+        carts = db.session.scalars(sa.delete(m.Cart).returning(m.Cart.id)).all()
+        ship_requests = db.session.scalars(
+            sa.delete(m.ShipRequest).returning(m.ShipRequest.id)
+        ).all()
+        package_info = db.session.scalars(
+            sa.delete(m.PackageInfo).returning(m.PackageInfo.id)
+        ).all()
+        product_quantity_group = db.session.scalars(
+            sa.delete(m.ProductQuantityGroup).returning(m.ProductQuantityGroup.id)
+        ).all()
+        inbound_orders = db.session.scalars(
+            sa.delete(m.InboundOrder).returning(m.InboundOrder.id)
+        ).all()
+        report_inbound_order = db.session.scalars(
+            sa.delete(m.ReportInboundOrder).returning(m.ReportInboundOrder.id)
+        ).all()
+        report_inventory_list = db.session.scalars(
+            sa.delete(m.ReportInventoryList).returning(m.ReportInventoryList.id)
+        ).all()
+        warehouse_product = db.session.scalars(
+            sa.delete(m.WarehouseProduct).returning(m.WarehouseProduct.id)
+        ).all()
+
+        db.session.commit()
+
     @app.cli.command("create-admin")
     def create_admin():
         """Create super admin account"""
