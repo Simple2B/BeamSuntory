@@ -32,7 +32,6 @@ class Product(db.Model, ModelMixin):
     # Columns
     name: orm.Mapped[str] = orm.mapped_column(
         sa.String(256),
-        unique=True,
         nullable=False,
     )
     currency: orm.Mapped[s.Currency] = orm.mapped_column(

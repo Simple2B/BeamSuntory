@@ -16,5 +16,23 @@ services:
     ports:
       - 127.0.0.1:${LOCAL_DB_PORT:-15432}:5432
 
+  # backup:
+  #   image: simple2b/pg-backup:1.0
+  #   links:
+  #     - db
+  #   volumes:
+  #     - ./backup:/backup
+  #   environment:
+  #     SCHEDULE_HOUR: ${SCHEDULE_HOUR:-0}
+  #     SCHEDULE_MINUTE: ${SCHEDULE_MINUTE:-0}
+  #     SCHEDULE_SECOND: ${SCHEDULE_SECOND:-0}
+  #     POSTGRES_HOST: db
+  #     POSTGRES_DATABASE: db
+  #     POSTGRES_USER: ${POSTGRES_USER:-postgres}
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-passwd}
+  #     POSTGRES_EXTRA_OPTS: '--schema=public --blobs'
+  #     DAYS_HISTORY: 30
+  
+
 volumes:
   db_data:

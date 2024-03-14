@@ -1094,19 +1094,6 @@ def upload():
             )
         )
 
-        product_by_name = db.session.scalar(
-            sa.select(m.Product).where(m.Product.name == product_item_data.name)
-        )
-
-        if not product and product_by_name:
-            log(
-                log.ERROR,
-                "Product with SKU: [%s] already exists",
-                product_item_data.sku,
-            )
-            error_message += f"Product exist with the same name: {product_by_name.name}\n Product not added\n"
-            continue
-
         log(log.INFO, "Product: [%s]", product)
 
         language_product_group = db.session.scalar(
@@ -1309,16 +1296,11 @@ def upload():
             log(log.INFO, "Product item data name: [%s]", product_item_data.name)
             log(log.INFO, "Product: [%s]", product.SKU)
 
-        if product_by_name and product != product_by_name:
-            log(log.INFO, "Product by name: [%s]", product_by_name)
-            log(log.INFO, "Product: [%s]", product)
-            error_message += f"Two different products exist with same SKU: {product.SKU}\n Product not added\n"
-            continue
-
-        product.name = product_item_data.name
-        product.description = product_item_data.description
-        product.regular_price = product_item_data.regular_price
-        product.retail_price = product_item_data.retail_price
+        # updating just 'we ignore everything except qty and give the qty to this SKU to the target group selected. '
+        # product.name = product_item_data.name
+        # product.description = product_item_data.description
+        # product.regular_price = product_item_data.regular_price
+        # product.retail_price = product_item_data.retail_price
 
         # TODO: Add creating image from csv
         # image = db.session.scalar(
@@ -1359,7 +1341,8 @@ def upload():
                     "Warehouse product found: [%s]",
                     warehouse_product,
                 )
-                warehouse_product.product_quantity += (
+                # we set new qty to the existing qty
+                warehouse_product.product_quantity = (
                     product_item_data.available_quantity
                 )
 
