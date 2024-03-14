@@ -333,6 +333,8 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
 @login_required
 def product_view(id: int):
     product = db.session.get(m.Product, id)
+    is_events = request.args.get("is_events", type=str, default="False") == "True"
+
     if not product:
         log(log.ERROR, "Not found product by id : [%s]", id)
         return abort(404)
@@ -342,7 +344,10 @@ def product_view(id: int):
     )
 
     return render_template(
-        "product/test_view.html", product=product, total_qty=total_qty
+        "product/test_view.html",
+        product=product,
+        total_qty=total_qty,
+        is_events=is_events,
     )
 
 

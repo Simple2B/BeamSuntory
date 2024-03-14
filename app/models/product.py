@@ -66,7 +66,7 @@ class Product(db.Model, ModelMixin):
     image_obj: orm.Mapped["Image"] = orm.relationship()
     supplier: orm.Mapped["Supplier"] = orm.relationship()
     warehouse_products: orm.Mapped[list[WarehouseProduct]] = orm.relationship(
-        viewonly=True
+        viewonly=True, order_by=WarehouseProduct.product_quantity.desc()
     )
     # TODO remove relationships in WarehouseProduct (product, warehouse, etc...)
     # TODO use only as secondary
