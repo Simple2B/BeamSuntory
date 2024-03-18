@@ -664,8 +664,9 @@ def get_assign_form(warehouse_product_id: int):
     product_warehouse = db.session.get(m.WarehouseProduct, warehouse_product_id)
     if not product_warehouse:
         log(log.ERROR, "Can't find product_warehouse [%d]", warehouse_product_id)
-        flash("Cannot find product warehouse", "danger")
-        return redirect(url_for("product.get_all"))
+        return render_template(
+            "error_modal.html", message="Can't find product warehouse"
+        )
 
     form.name.data = product_warehouse.product.name
     form.from_group.data = product_warehouse.group.name
@@ -845,6 +846,25 @@ def assign():
         log(log.ERROR, "product assign errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("product.get_all", **query_params))
+
+
+@product_blueprint.route("/request_share/<warehouse_product_id>", methods=["GET"])
+@login_required
+def get_request_share_form(warehouse_product_id: int):
+    form: f.RequestShareProductForm = f.RequestShareProductForm()
+    warehouse_product = db.session.get(m.WarehouseProduct, warehouse_product_id)
+    if not warehouse_product:
+        log(log.ERROR, "Can't find product_warehouse [%d]", warehouse_product_id)
+        return render_template(
+            "error_modal.html", message="Can't find product warehouse"
+        )
+    user_groups = current_user.user_groups
+    return render_template(
+        "product/test_request_share.html",
+        form=form,
+        warehouse_product=warehouse_product,
+        user_groups=user_groups,
+    )
 
 
 @product_blueprint.route("/request_share", methods=["POST"])

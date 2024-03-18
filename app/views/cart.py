@@ -184,8 +184,9 @@ def create(warehouse_product_id: int):
     warehouse_product = db.session.get(m.WarehouseProduct, warehouse_product_id)
     if not warehouse_product:
         log(log.ERROR, "Not found warehouse product by id : [%s]", warehouse_product_id)
-        flash("Can not create item", "danger")
-        return redirect(url_for("product.get_all"))
+        return render_template(
+            "error_modal.html", message="Can't find product warehouse"
+        )
     is_event = (
         warehouse_product.group.master_group.name == s.MasterGroupMandatory.events.value
     )
