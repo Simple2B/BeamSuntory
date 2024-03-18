@@ -168,46 +168,66 @@ def get_all():
         current_user_role_name=current_user_role_name,
         sales_rep_role=s.UserRole.SALES_REP.value,
         carts=json.dumps(carts),
-        locker_store_category_ids=json.dumps(locker_store_category_ids)
-        if locker_store_category_ids
-        else None,
+        locker_store_category_ids=(
+            json.dumps(locker_store_category_ids) if locker_store_category_ids else None
+        ),
     )
 
 
-@cart_blueprint.route("/create", methods=["POST"])
+@cart_blueprint.route("/create/<warehouse_product_id>", methods=["POST", "GET"])
 @login_required
 @role_required(
     [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
 )
-def create():
+def create(warehouse_product_id: int):
     form: f.NewCartForm = f.NewCartForm()
-    url = request.referrer
-    query = url_parse(url).query if url else None
-    if form.validate_on_submit():
-        group = db.session.scalar(
-            m.Group.select().where(m.Group.name == form.group.data)
+    warehouse_product = db.session.get(m.WarehouseProduct, warehouse_product_id)
+    if not warehouse_product:
+        log(log.ERROR, "Not found warehouse product by id : [%s]", warehouse_product_id)
+        flash("Can not create item", "danger")
+        return redirect(url_for("product.get_all"))
+    is_event = (
+        warehouse_product.group.master_group.name == s.MasterGroupMandatory.events.value
+    )
+    if request.method == "GET":
+
+        if is_event:
+            return render_template(
+                "product/test_event.html",
+                form=form,
+                warehouse_product=warehouse_product,
+            )
+        return render_template(
+            "product/ship.html", form=form, warehouse_product=warehouse_product
         )
-        if not group:
-            log(log.ERROR, "Not found group by name : [%s]", form.group.data)
-            flash("Can not create item", "danger")
+    # url = request.referrer
+    # query = url_parse(url).query if url else None
+    if form.validate_on_submit():
+        if form.quantity.data > warehouse_product.product_quantity:
+            flash("Not enough products in stock", "danger")
             return redirect(url_for("product.get_all"))
         item = m.Cart(
-            product_id=int(form.product_id.data),
+            product_id=warehouse_product.product_id,
+            group_id=warehouse_product.group_id,
             quantity=int(form.quantity.data),
             user_id=current_user.id,
-            group=group,
         )
         log(log.INFO, "Form submitted. Cart: [%s]", item)
         item.save()
         flash("Item added!", "success")
-        if query:
-            return redirect(url_for("product.get_all", events="true"))
+        # TODO add query
+        if is_event:
+            return redirect(url_for("product.get_all", is_event="true"))
+        # if query:
+        #     return redirect(url_for("product.get_all"))
         return redirect(url_for("product.get_all"))
     else:
         log(log.ERROR, "Item creation errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
-        if query:
-            return redirect(url_for("product.get_all", events="true"))
+        if is_event:
+            return redirect(url_for("product.get_all", is_event="true"))
+        # if query:
+        #     return redirect(url_for("product.get_all"))
         return redirect(url_for("product.get_all"))
 
 

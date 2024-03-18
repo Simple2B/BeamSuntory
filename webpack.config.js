@@ -75,6 +75,15 @@ const productConfig = {
     filename: 'js/product.js', // <--- Will be compiled to this single file
   },
 };
+const productEventConfig = {
+  entry: {
+    main: './src/product_event.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/product_event.js', // <--- Will be compiled to this single file
+  },
+};
 
 const groupProductConfig = {
   entry: {
@@ -367,6 +376,7 @@ const configs = [
   groupConfig,
   masterGroupConfig,
   productConfig,
+  productEventConfig,
   groupProductConfig,
   masterGroupProductConfig,
   warehouseConfig,

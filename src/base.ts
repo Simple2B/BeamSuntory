@@ -233,7 +233,9 @@ modalBagraundElement.addEventListener("click", triggerModal)
 const modalCallback = (mutationList: MutationRecord[]) => {
   for (const mutation of mutationList) {
     if (mutation.type === "childList" && Array.from(mutation.addedNodes).some((node: HTMLDivElement) => node.classList && node.classList.contains('htmx-added'))) {
-      triggerModal()
+      if (modalBagraundElement.classList.contains("hidden")) {
+        modalBagraundElement.classList.remove("hidden")
+      }
       // set event to close modal btn is close btn exist
       const closeModalBtn: HTMLButtonElement | null = document.querySelector("#custom-modal-content-close-btn")
       if (closeModalBtn) {

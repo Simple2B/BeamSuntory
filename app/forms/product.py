@@ -123,7 +123,7 @@ class AssignProductForm(FlaskForm):
     group = IntegerField("Group", [DataRequired()])
     quantity = IntegerField("Quantity", [DataRequired()])
     from_group = StringField("From Group", [DataRequired()])
-    from_group_id = IntegerField("From Group ID", [DataRequired()])
+    # from_group_id = IntegerField("From Group ID", [DataRequired()])
 
     submit = SubmitField("Add product")
 

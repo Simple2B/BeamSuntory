@@ -161,7 +161,7 @@ def get_available_quantity():
             }
         )
 
-    log(log.INFO, "Total available quantity: [%s]", quantity)
+    log(log.INFO, "Total available quantity: [%d]", len(total_available_quantity))
     return jsonify(total_available_quantity)
 
 

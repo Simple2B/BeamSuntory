@@ -651,6 +651,51 @@ def delete(id: int):
     return "ok", 200
 
 
+@product_blueprint.route("/assign/<warehouse_product_id>", methods=["GET"])
+@login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.MANAGER.value,
+    ]
+)
+def get_assign_form(warehouse_product_id: int):
+    form: f.AssignProductForm = f.AssignProductForm()
+    product_warehouse = db.session.get(m.WarehouseProduct, warehouse_product_id)
+    if not product_warehouse:
+        log(log.ERROR, "Can't find product_warehouse [%d]", warehouse_product_id)
+        flash("Cannot find product warehouse", "danger")
+        return redirect(url_for("product.get_all"))
+
+    form.name.data = product_warehouse.product.name
+    form.from_group.data = product_warehouse.group.name
+    main_master_groups = db.session.scalars(sa.select(m.MasterGroup)).all()
+    groups = main_master_groups[0].groups if main_master_groups[0] else []
+
+    return render_template(
+        "product/test_assign.html",
+        form=form,
+        product_warehouse=product_warehouse,
+        main_master_groups=main_master_groups,
+        groups=groups,
+    )
+
+
+@product_blueprint.route("/assign/groups", methods=["GET"])
+@login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.MANAGER.value,
+    ]
+)
+def get_assign_groups():
+    master_group_id = request.args.get("master_group", type=int, default=0)
+    master_group: m.MasterGroup | None = db.session.get(m.MasterGroup, master_group_id)
+    groups = master_group.groups if master_group else []
+    return render_template("product/assing_groups.html", groups=groups)
+
+
 @product_blueprint.route("/assign", methods=["POST"])
 @login_required
 @role_required(
@@ -665,10 +710,11 @@ def assign():
 
     if form.validate_on_submit():
         query = m.Product.select().where(m.Product.name == form.name.data)
-        p: m.Product | None = db.session.scalar(query)
-        if not p:
+        product: m.Product | None = db.session.scalar(query)
+        if not product:
             log(log.ERROR, "Not found product by name : [%s]", form.name.data)
             flash("Cannot save product data", "danger")
+            return redirect(url_for("product.get_all", **query_params))
 
         product_from_group: m.Group = db.session.scalar(
             m.Group.select().where(
@@ -723,7 +769,7 @@ def assign():
         else:
             qty_before = 0
             new_product_warehouse = m.WarehouseProduct(
-                product_id=p.id,
+                product_id=product.id,
                 group_id=int(form.group.data),
                 product_quantity=form.quantity.data,
                 warehouse_id=product_warehouse.warehouse_id,
@@ -740,7 +786,7 @@ def assign():
         report_inventory.save(False)
 
         assign_obj = m.Assign(
-            product_id=p.id,
+            product_id=product.id,
             group_id=int(form.group.data),
             quantity=form.quantity.data,
             from_group_id=form.from_group_id.data,
@@ -785,13 +831,13 @@ def assign():
                     + f"?q={assign_obj.uuid}"
                 )
 
-                msg.html = render_template(
-                    "email/assign.html",
-                    user=u.child,
-                    assign=assign_obj,
-                    url=url,
-                )
-                mail.send(msg)
+                # msg.html = render_template(
+                #     "email/assign.html",
+                #     user=u.child,
+                #     assign=assign_obj,
+                #     url=url,
+                # )
+                # mail.send(msg)
 
         return redirect(url_for("product.get_all", **query_params))
 
@@ -805,8 +851,8 @@ def assign():
 @login_required
 def request_share():
     form: f.RequestShareProductForm = f.RequestShareProductForm()
+    query_params = get_query_params_from_headers()
     if form.validate_on_submit():
-        query_params = get_query_params_from_headers()
         warehouse_product = db.session.scalar(
             m.WarehouseProduct.select().where(
                 m.WarehouseProduct.product.has(m.Product.SKU == form.sku.data),
