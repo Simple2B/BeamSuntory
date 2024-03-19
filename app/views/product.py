@@ -329,6 +329,28 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     }
 
 
+@product_blueprint.route("/<id>/view", methods=["GET"])
+@login_required
+def product_view(id: int):
+    product = db.session.get(m.Product, id)
+    is_events = request.args.get("is_events", type=str, default="False") == "True"
+
+    if not product:
+        log(log.ERROR, "Not found product by id : [%s]", id)
+        return abort(404)
+
+    total_qty = sum(
+        warehouse.product_quantity for warehouse in product.warehouse_products
+    )
+
+    return render_template(
+        "product/modal_view.html",
+        product=product,
+        total_qty=total_qty,
+        is_events=is_events,
+    )
+
+
 @product_blueprint.route("/", methods=["GET"])
 @login_required
 def get_all():
@@ -497,6 +519,7 @@ def save():
             # TODO: is there need to return from function?
             log(log.ERROR, "Not found product by id : [%s]", form.product_id.data)
             flash("Cannot save product data", "danger")
+            return redirect(url_for("product.get_all", **query_params))
 
         supplier: m.Supplier = db.session.scalar(m.Supplier.select())
 
@@ -628,6 +651,61 @@ def delete(id: int):
     return "ok", 200
 
 
+@product_blueprint.route("/assign/<warehouse_product_id>", methods=["GET"])
+@login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.MANAGER.value,
+    ]
+)
+def get_assign_form(warehouse_product_id: int):
+    form: f.AssignProductForm = f.AssignProductForm()
+    product_warehouse = db.session.get(m.WarehouseProduct, warehouse_product_id)
+    if not product_warehouse:
+        log(log.ERROR, "Can't find product_warehouse [%d]", warehouse_product_id)
+        return render_template(
+            "error_modal.html", message="Can't find product warehouse"
+        )
+
+    form.name.data = product_warehouse.product.name
+    main_master_groups = db.session.scalars(sa.select(m.MasterGroup)).all()
+    groups = main_master_groups[0].groups if main_master_groups[0] else []
+
+    return render_template(
+        "product/modal_assign.html",
+        form=form,
+        product_warehouse=product_warehouse,
+        main_master_groups=main_master_groups,
+        groups=groups,
+    )
+
+
+@product_blueprint.route("/assign/groups", methods=["GET"])
+@login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.MANAGER.value,
+    ]
+)
+def get_assign_groups():
+    master_group_id = request.args.get("master_group", type=int, default=0)
+    group_name = request.args.get("group", type=str, default="")
+    if master_group_id:
+        master_group: m.MasterGroup | None = db.session.get(
+            m.MasterGroup, master_group_id
+        )
+        groups = master_group.groups if master_group else []
+        return render_template("product/assing_groups.html", groups=groups)
+    elif group_name:
+        group = db.session.scalar(sa.select(m.Group).where(m.Group.name == group_name))
+        sub_groups = group.child_groups if group and group.child_groups else []
+        return render_template("product/assing_sub_groups.html", sub_groups=sub_groups)
+    log(log.ERROR, "Get assign groups not found master_group_id or group_name")
+    return "Not found", 404
+
+
 @product_blueprint.route("/assign", methods=["POST"])
 @login_required
 @role_required(
@@ -642,17 +720,34 @@ def assign():
 
     if form.validate_on_submit():
         query = m.Product.select().where(m.Product.name == form.name.data)
-        p: m.Product | None = db.session.scalar(query)
-        if not p:
+        product: m.Product | None = db.session.scalar(query)
+        if not product:
             log(log.ERROR, "Not found product by name : [%s]", form.name.data)
             flash("Cannot save product data", "danger")
+            return redirect(url_for("product.get_all", **query_params))
 
         product_from_group: m.Group = db.session.scalar(
             m.Group.select().where(
                 m.Group.name == form.from_group.data,
             )
         )
-        product_to_group: m.Group = db.session.get(m.Group, int(form.group.data))
+        if form.sub_group.data:
+            product_to_group: m.Group = db.session.scalar(
+                m.Group.select().where(
+                    m.Group.name == form.sub_group.data,
+                )
+            )
+        else:
+            product_to_group: m.Group = db.session.scalar(
+                m.Group.select().where(
+                    m.Group.name == form.group.data,
+                )
+            )
+
+        if not product_from_group or not product_to_group:
+            log(log.ERROR, "Group not found")
+            flash("Cannot save product data", "danger")
+            return redirect(url_for("product.get_all", **query_params))
 
         if product_from_group.id == product_to_group.id:
             log(log.ERROR, "Cannot assign to same group", form.errors)
@@ -671,10 +766,14 @@ def assign():
         # TODO sort also by warehouse_id
         product_warehouse: m.WarehouseProduct = db.session.execute(
             m.WarehouseProduct.select().where(
-                m.WarehouseProduct.product_id == p.id,
+                m.WarehouseProduct.product_id == product.id,
                 m.WarehouseProduct.group_id == product_from_group.id,
             )
         ).scalar()
+        if not product_warehouse:
+            log(log.ERROR, "Product warehouse not found")
+            flash("Product warehouse not found", "danger")
+            return redirect(url_for("product.get_all", **query_params))
         # NOTE create report for inventory
         report_inventory = m.ReportInventory(
             qty_before=product_warehouse.product_quantity,
@@ -689,8 +788,8 @@ def assign():
 
         new_product_warehouse: m.WarehouseProduct = db.session.execute(
             m.WarehouseProduct.select().where(
-                m.WarehouseProduct.product_id == p.id,
-                m.WarehouseProduct.group_id == int(form.group.data),
+                m.WarehouseProduct.product_id == product.id,
+                m.WarehouseProduct.group_id == product_to_group.id,
             )
         ).scalar()
         if new_product_warehouse:
@@ -700,8 +799,8 @@ def assign():
         else:
             qty_before = 0
             new_product_warehouse = m.WarehouseProduct(
-                product_id=p.id,
-                group_id=int(form.group.data),
+                product_id=product.id,
+                group_id=product_to_group.id,
                 product_quantity=form.quantity.data,
                 warehouse_id=product_warehouse.warehouse_id,
             )
@@ -717,10 +816,10 @@ def assign():
         report_inventory.save(False)
 
         assign_obj = m.Assign(
-            product_id=p.id,
-            group_id=int(form.group.data),
+            product_id=product.id,
+            group_id=product_to_group.id,
             quantity=form.quantity.data,
-            from_group_id=form.from_group_id.data,
+            from_group_id=product_from_group.id,
             user_id=current_user.id,
             type=s.ReportEventType.created.value,
         )
@@ -778,12 +877,31 @@ def assign():
         return redirect(url_for("product.get_all", **query_params))
 
 
+@product_blueprint.route("/request_share/<warehouse_product_id>", methods=["GET"])
+@login_required
+def get_request_share_form(warehouse_product_id: int):
+    form: f.RequestShareProductForm = f.RequestShareProductForm()
+    warehouse_product = db.session.get(m.WarehouseProduct, warehouse_product_id)
+    if not warehouse_product:
+        log(log.ERROR, "Can't find product_warehouse [%d]", warehouse_product_id)
+        return render_template(
+            "error_modal.html", message="Can't find product warehouse"
+        )
+    user_groups = current_user.user_groups
+    return render_template(
+        "product/modal_request_share.html",
+        form=form,
+        warehouse_product=warehouse_product,
+        user_groups=user_groups,
+    )
+
+
 @product_blueprint.route("/request_share", methods=["POST"])
 @login_required
 def request_share():
     form: f.RequestShareProductForm = f.RequestShareProductForm()
+    query_params = get_query_params_from_headers()
     if form.validate_on_submit():
-        query_params = get_query_params_from_headers()
         warehouse_product = db.session.scalar(
             m.WarehouseProduct.select().where(
                 m.WarehouseProduct.product.has(m.Product.SKU == form.sku.data),
@@ -883,8 +1001,8 @@ def request_share():
 def adjust():
     form: f.AdjustProductForm = f.AdjustProductForm()
 
+    query_params = get_query_params_from_headers()
     if form.validate_on_submit():
-        query_params = get_query_params_from_headers()
         adjust_item: m.Adjust = m.Adjust(
             product_id=form.product_id.data,
             note=form.note.data,

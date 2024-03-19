@@ -1,72 +1,79 @@
 <!-- Ship product modal -->
 <!-- prettier-ignore-->
-<div id="ship-product-modal" tabindex="-1" aria-hidden="true"
-  class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
-  <div class="relative w-full max-w-2xl max-h-full">
-    <!-- Modal content -->
-    <form action="{{ url_for('cart.create')}}" method="post"
-      class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-      {{ form_edit.hidden_tag() }}
-      <!-- Modal header -->
-      <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
-        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Ship</h3>
-      </div>
-      <input type="text" hidden name="product_id" id="product-ship-product-id">
-      <div class="p-6 space-y-6">
-        <div class="grid grid-cols-6 gap-5">
-          <div class="product-full-image-anchor col-span-6 sm:col-span-2 sm:row-span-2 max-height-image-container">
-            <img id="product-ship-image" class="w-full h-full object-cover">
-          </div>
-          <div class="col-span-6 sm:col-span-4">
-            <label for="product-ship-name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product
-              Name</label>
-            <div id="product-ship-name"
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            </div>
-          </div>
-          <div class="col-span-6 sm:col-span-4">
-            <label for="product-ship-sku"
-              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">SKU</label>
-            <div id="product-ship-sku"
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            </div>
-          </div>
-          <div class="col-span-6 sm:col-span-2">
-            <label for="product-ship-group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-              readonly="readonly">Group</label>
-            <input type="text" name="group" id="product-ship-group"
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Group" required />
-          </div>
-          <div class="col-span-6 sm:col-span-2">
-            <label for="product-ship-available-quantity"
-              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available Quantity</label>
-            <div id="product-ship-available-quantity"
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            </div>
-          </div>
-          <div class="col-span-6 sm:col-span-2">
-            <label for="product-ship-desire-quantity"
-              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Desired Quantity</label>
-            <input type="number" name="quantity" id="product-ship-desire-quantity"
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Quantity" required />
-          </div>
-          <div class="col-span-6 sm:col-span-2">
-            <label for="product-ship-total-available-items"
-              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Total Available Items</label>
-            <div id="product-ship-total-available-items"
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- Modal footer -->
-      <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
-        <button name="submit" type="submit"
-          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Add
-          To Cart</button>
-      </div>
-    </form>
+<form action="{{ url_for('cart.create', warehouse_product_id=warehouse_product.id)}}" method="post"
+  class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+  {{ form.hidden_tag() }}
+  <!-- Modal header -->
+  <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Ship</h3>
   </div>
-</div>
+  <div class="p-6 space-y-6">
+    <div class="grid grid-cols-6 gap-5">
+      <div class="product-full-image-anchor col-span-6 sm:col-span-2 sm:row-span-2 max-height-image-container">
+        {% if warehouse_product.product.image and warehouse_product.product.image | length > 100 %}
+          <img src="data:image/png;base64, {{ warehouse_product.product.image }}" class="w-full h-full object-cover" />
+        {% else %}
+          <img src="https://raw.githubusercontent.com/Simple2B/BeamSuntory/develop/app/static/img/no_picture_default.png" class="w-full h-full object-cover" />
+        {% endif %}
+      </div>
+      <div class="col-span-6 sm:col-span-4">
+        <label for="product-ship-name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product
+          Name</label>
+        <div
+          class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+        {{ warehouse_product.product.name }}</div>
+      </div>
+      <div class="col-span-6 sm:col-span-4">
+        <label for="product-ship-sku"
+          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">SKU</label>
+        <div
+          class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+        {{ warehouse_product.product.SKU }}</div>
+      </div>
+      <div class="col-span-6 sm:col-span-2">
+        <label for="product-ship-group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+          readonly="readonly">Group</label>
+        <div 
+          class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        >{{ warehouse_product.group.name }}</div>
+      </div>
+      <div class="col-span-6 sm:col-span-2">
+        <label for="product-ship-available-quantity"
+          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available Quantity</label>
+        <div id="product-ship-available-quantity"
+          class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+        {{ warehouse_product.product_quantity }}</div>
+      </div>
+      <div class="col-span-6 sm:col-span-2">
+        <label for="product-ship-desire-quantity"
+          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Desired Quantity</label>
+          <input type="number" name="quantity" id="product-ship-desire-quantity"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="0" min="1" max="{{ warehouse_product.product_quantity }}" required />
+    
+      </div>
+      <div class="col-span-6 sm:col-span-2">
+        <label for="product-ship-total-available-items"
+          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Total Available Items</label>
+        <div 
+          class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+        {{ warehouse_product.product_quantity }}</div>
+      </div>
+    </div>
+  </div>
+  <!-- Modal footer -->
+  <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+    <button name="submit" type="submit"
+      class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Add
+      To Cart</button>
+  </div>
+  <script>
+    document.getElementById('product-ship-desire-quantity').addEventListener('input', function (e) {
+      const total = "{{ warehouse_product.product_quantity }}"
+      const availableValue = document.getElementById('product-ship-available-quantity');
+      if (availableValue && Number(e.target.value) <= total) {
+        availableValue.textContent = total - Number(e.target.value);
+      }
+    });
+  </script>
+</form>

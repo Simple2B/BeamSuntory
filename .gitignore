@@ -6,7 +6,8 @@ env/
 node_modules/
 product_images/
 products/
-product/
+app/static/img/product
+
 
 # ignore files
 .env

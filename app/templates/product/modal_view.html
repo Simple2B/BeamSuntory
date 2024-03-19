@@ -1,0 +1,208 @@
+<!-- Modal content -->
+<div action="" class="bg-white rounded-lg shadow dark:bg-gray-700">
+  <!-- Modal header -->
+  <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+      View product
+    </h3>
+    <button type="button" id="custom-modal-content-close-btn"
+      class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+      <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+      </svg>
+    </button>
+  </div>
+  <!-- Modal body -->
+
+  <div class="p-6 space-y-6">
+    <div class="grid grid-cols-6 gap-6">
+      <div class="product-full-image-anchor col-span-6 sm:col-span-2 sm:row-span-2 max-height-image-container">
+        {% if product.image and product.image | length > 100 %}
+        <img src="data:image/png;base64, {{ product.image }}" class="w-full h-full object-cover" />
+        {% else %}
+        <img src="https://raw.githubusercontent.com/Simple2B/BeamSuntory/develop/app/static/img/no_picture_default.png" class="w-full h-full object-cover" />
+        {% endif %}
+      </div>
+      <div class="col-span-6 sm:col-span-3">
+        <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Name</label>
+        <div
+          class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+          {{ product.name }}
+        </div>
+      </div>
+      <div class="col-span-6 sm:col-span-3" id="product-view-product-name-container">
+        <label for="warehouse_qty" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Total Qty in
+          all
+          warehouses</label>
+        <div
+          class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+          {{ total_qty }}</div>
+      </div>
+      {% for warehouse_product in product.warehouse_products  %}
+        {% if warehouse_product.product_quantity > 0 and warehouse_product.group.name != "Events" %}
+          <div class="col-span-6 sm:col-span-3">
+            <label for="notes-location" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{ warehouse_product.group.master_group.name }}</label>
+            <div
+              class="product-view-warehouse-name shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              {{ warehouse_product.group.name }}</div>
+          </div>
+          <div class="sm:col-span-3 flex gap-4">
+            
+            <div>
+              <label for="notes-location" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available
+                </label>
+              <div
+                class="product-view-warehouse-available-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              {{ warehouse_product.product_quantity }}</div>
+            </div>
+            <div>
+              <label for="product_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" >Action</label >
+                {% if warehouse_product.group in current_user.user_groups  %}
+                <div>
+                  <button type="button" hx-trigger="click" hx-target="#custom-modal-content" hx-swap="innerHTML" hx-get="{{ url_for('cart.create', warehouse_product_id=warehouse_product.id ) }}"  class="inline-flex items-center mr-2 px-3 py-2.5 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
+                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
+                    Ship
+                  </button>
+                  <button type="button" hx-trigger="click" hx-target="#custom-modal-content" hx-swap="innerHTML" hx-get="{{ url_for('product.get_assign_form', warehouse_product_id=warehouse_product.id ) }}"   class=" inline-flex items-center px-3 py-2.5 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
+                    Assign
+                  </button>
+                </div>
+                {% else %}
+                <div>
+                  <button  type="button" hx-trigger="click" hx-target="#custom-modal-content" hx-swap="innerHTML" hx-get="{{ url_for('product.get_request_share_form', warehouse_product_id=warehouse_product.id ) }}"  class="inline-flex items-center px-3 py-2.5 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
+                    Request Share
+                  </button>
+                </div>
+                {% endif %}
+            </div>
+          </div>
+        {% elif warehouse_product.group.name == "Events" and warehouse_product.warehouse.name == 'Warehouse Events' and is_events  %}
+        <div class="col-span-6 sm:col-span-3">
+          <label for="notes-location" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Events</label>
+          <div
+            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            Events</div>
+        </div>
+        <div>
+          <label for="product_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Action</label >
+            <button type="button" hx-trigger="click" hx-target="#custom-modal-content" hx-swap="innerHTML" hx-get="{{ url_for('cart.create', warehouse_product_id=warehouse_product.id ) }}"  class="inline-flex items-center mr-2 px-3 py-2.5 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+              <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+              <path
+                  d="M128 0c13.3 0 24 10.7 24 24V64H296V24c0-13.3 10.7-24 24-24s24 10.7 24 24V64h40c35.3 0 64 28.7 64 64v16 48V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V192 144 128C0 92.7 28.7 64 64 64h40V24c0-13.3 10.7-24 24-24zM400 192H48V448c0 8.8 7.2 16 16 16H384c8.8 0 16-7.2 16-16V192zM329 297L217 409c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47 95-95c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"
+                  clip-rule="evenodd"></path>
+              </svg>
+              Booking
+          </button>
+        </div>
+      {% endif %}
+      {% endfor %}
+
+      <div class="col-span-6 sm:col-span-3">
+        <label for="regular_price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Regular
+          price</label>
+        <div
+          class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+          {{ product.regular_price }}
+        </div>
+      </div>
+      <div class="col-span-6 sm:col-span-3">
+        <label for="retail_price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Retail
+          price</label>
+        <div id="product-view-retail_price"
+          class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+          {{ product.retail_price }}
+        </div>
+      </div>
+      <div class="col-span-6 sm:col-span-3">
+        <label for="SKU" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">SKU</label>
+        <div
+          class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+          {{ product.SKU }}
+        </div>
+      </div>
+      <div class="col-span-6 sm:col-span-3">
+        <label for="package_qty" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Package
+          Qty.</label>
+        <div
+          class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+          {% if product.package_qty %}
+          {{ product.package_qty }} {%
+          else %} 0 {% endif %}
+        </div>
+      </div>
+      <div class="col-span-6 sm:col-span-3">
+        <label for="numb_of_items_per_case" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">No.
+          Of
+          Items Per Case</label>
+        <div
+          class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+          {% if product.numb_of_items_per_case %}{{
+          product.numb_of_items_per_case
+          }}
+          {% else %}
+          0
+          {% endif %}
+        </div>
+      </div>
+      <div class="col-span-6 sm:col-span-3">
+        <label for="numb_of_cases_per_outer_case"
+          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">No. Of Cases Per Outer
+          Case</label>
+        <div
+          class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+          {% if product.numb_of_cases_per_outer_case%}{{
+          product.numb_of_cases_per_outer_case
+          }}{% else %} 0{% endif %}
+        </div>
+      </div>
+      <div class="col-span-6 sm:col-span-3">
+        <label for="comments" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Comments</label>
+        <div
+          class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+          {% if product.comments %}{{ product.comments }}{% else %} No comments {% endif %}
+        </div>
+      </div>
+      {% if
+      current_user.role_obj.role_name ==
+      'admin' or
+      current_user.role_obj.role_name ==
+      'warehouse_manager' %}
+      <div class="col-span-6 sm:col-span-3 border-b border-gray-200 rounded-b dark:border-gray-600">
+        {% else %}
+        <div class="col-span-6 sm:col-span-3 border-b border-gray-200 rounded-b dark:border-gray-600 invisible">
+          {% endif %}
+          <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Notes Location</label>
+          <div
+            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            {% if product.notes_location %}{{ product.notes_location }}{% else %} No notes {% endif %}
+          </div>
+        </div>
+        <div
+          class="grid grid-cols-6 gap-6 col-span-6 sm:col-span-6 pt-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+          {% for warehouse_product in product.warehouse_products %}
+          {% if warehouse_product.product_quantity > 0 %}
+          <div class="col-span-6 sm:col-span-3">
+            <label for="notes-location"
+              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Warehouse</label>
+            <div
+              class="product-view-warehouse-name shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              {{ warehouse_product.warehouse.name }}</div>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="notes-location" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available
+              Quantity</label>
+            <div
+              class="product-view-warehouse-available-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              {{ warehouse_product.product_quantity }}</div>
+          </div>
+          {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <!-- Modal footer -->
+  </div>
+</div>
