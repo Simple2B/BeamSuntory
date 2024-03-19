@@ -1,0 +1,6 @@
+<datalist id="assign-group-list-data">
+    <option value="" selected disabled>Group</option>
+    {% for group in groups %}
+    <option value="{{ group.name }}">
+    {% endfor %}
+</datalist>
