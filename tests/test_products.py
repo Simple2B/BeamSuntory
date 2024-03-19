@@ -134,15 +134,15 @@ def test_assign_product(mg_g_populate: FlaskClient):
     login(mg_g_populate)
 
     group_name = "Canada"
+    to_group = "JB"
     prod_name = "populate_test_product"
 
     data = dict(
         name=prod_name,
         master_group=2,
-        group=2,
+        group=to_group,
         quantity=10,
         from_group=group_name,
-        from_group_id=1,
     )
 
     response = mg_g_populate.post(

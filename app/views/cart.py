@@ -1,4 +1,3 @@
-from werkzeug.urls import url_parse
 import json
 from flask import (
     Blueprint,
@@ -10,7 +9,11 @@ from flask import (
 )
 from flask_login import login_required, current_user
 import sqlalchemy as sa
-from app.controllers import create_pagination, role_required
+from app.controllers import (
+    create_pagination,
+    role_required,
+    get_query_params_from_headers,
+)
 
 from app import models as m, db
 
@@ -181,6 +184,7 @@ def get_all():
 )
 def create(warehouse_product_id: int):
     form: f.NewCartForm = f.NewCartForm()
+    query_params = get_query_params_from_headers()
     warehouse_product = db.session.get(m.WarehouseProduct, warehouse_product_id)
     if not warehouse_product:
         log(log.ERROR, "Not found warehouse product by id : [%s]", warehouse_product_id)
@@ -216,20 +220,17 @@ def create(warehouse_product_id: int):
         log(log.INFO, "Form submitted. Cart: [%s]", item)
         item.save()
         flash("Item added!", "success")
-        # TODO add query
         if is_event:
-            return redirect(url_for("product.get_all", is_event="true"))
-        # if query:
-        #     return redirect(url_for("product.get_all"))
-        return redirect(url_for("product.get_all"))
+            return redirect(url_for("product.get_all", is_event="true", **query_params))
+        return redirect(url_for("product.get_all", **query_params))
     else:
         log(log.ERROR, "Item creation errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         if is_event:
-            return redirect(url_for("product.get_all", is_event="true"))
+            return redirect(url_for("product.get_all", is_event="true", **query_params))
         # if query:
         #     return redirect(url_for("product.get_all"))
-        return redirect(url_for("product.get_all"))
+        return redirect(url_for("product.get_all", **query_params))
 
 
 @cart_blueprint.route("/edit", methods=["POST"])

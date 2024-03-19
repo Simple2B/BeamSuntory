@@ -14,22 +14,20 @@ def test_carts_pages(mg_g_populate: FlaskClient):
 
     response = mg_g_populate.get("/cart/")
     assert response.status_code == 200
-    response = mg_g_populate.get("/cart/create")
-    assert response.status_code == 405
 
 
 def test_create_cart(mg_g_populate: FlaskClient):
     login(mg_g_populate, "bob")
 
     group_jb: m.Group = db.session.scalar(m.Group.select().where(m.Group.name == "JB"))
+    we_product = db.session.scalar(
+        m.WarehouseProduct.select().where(m.WarehouseProduct.group_id == group_jb.id)
+    )
 
     response = mg_g_populate.post(
-        "/cart/create",
+        f"/cart/create/{we_product.id}",
         data=dict(
-            product_id=1,
             quantity=11,
-            user_id=1,
-            group="JB",
         ),
         follow_redirects=True,
     )
