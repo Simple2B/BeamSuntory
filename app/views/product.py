@@ -344,7 +344,7 @@ def product_view(id: int):
     )
 
     return render_template(
-        "product/test_view.html",
+        "product/modal_view.html",
         product=product,
         total_qty=total_qty,
         is_events=is_events,
@@ -673,7 +673,7 @@ def get_assign_form(warehouse_product_id: int):
     groups = main_master_groups[0].groups if main_master_groups[0] else []
 
     return render_template(
-        "product/test_assign.html",
+        "product/modal_assign.html",
         form=form,
         product_warehouse=product_warehouse,
         main_master_groups=main_master_groups,
@@ -889,7 +889,7 @@ def get_request_share_form(warehouse_product_id: int):
         )
     user_groups = current_user.user_groups
     return render_template(
-        "product/test_request_share.html",
+        "product/modal_request_share.html",
         form=form,
         warehouse_product=warehouse_product,
         user_groups=user_groups,

@@ -198,7 +198,7 @@ def create(warehouse_product_id: int):
 
         if is_event:
             return render_template(
-                "product/test_event.html",
+                "product/modal_event.html",
                 form=form,
                 warehouse_product=warehouse_product,
             )
