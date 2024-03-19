@@ -25,7 +25,9 @@ class MasterGroup(db.Model, ModelMixin):
         default=datetime.utcnow,
     )
 
-    groups: orm.Mapped[List[m.Group]] = orm.relationship(back_populates="master_group")
+    groups: orm.Mapped[List[m.Group]] = orm.relationship(
+        back_populates="master_group", order_by=m.Group.name.asc()
+    )
 
     def __repr__(self):
         return f"<{self.id}: {self.name}>"

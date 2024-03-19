@@ -344,7 +344,7 @@ const adjustModalOptions: ModalOptions = {
     });
 
     mstrGroupsEntries.forEach(([key, value]: [string, string]) => {
-      deleteAdjustContainer(value.replace(/\s/g, '_'), key);
+      deleteAdjustContainer(key);
     });
     sessionStorage.removeItem('productInWarehouses');
   },
@@ -731,14 +731,14 @@ adjustProductButtonElements.forEach((e) => {
       if (isEvent) {
         if (mstrGroupName === eventMasterGroup) {
           mstrGroupsEntries.forEach(([key, value]: [string, string]) => {
-            deleteAdjustContainer(value.replace(/\s/g, '_'), key);
+            deleteAdjustContainer(key);
           });
           createAdjustAction(isEqual, mstrGroupName, groupName, product);
         }
       } else {
         if (mstrGroupName !== eventMasterGroup) {
           mstrGroupsEntries.forEach(([key, value]: [string, string]) => {
-            deleteAdjustContainer(value.replace(/\s/g, '_'), key);
+            deleteAdjustContainer(key);
           });
           createAdjustAction(isEqual, mstrGroupName, groupName, product);
         }
@@ -801,7 +801,7 @@ async function createAdjustAction(isEqual: boolean, masterGroup: string, group: 
   sessionStorage.setItem('productInWarehousesSchema', JSON.stringify(productParam.warehouseProducts));
 
   const productInfo: IProductAdditionalInfo = await getAdditionalProductInfo(productParam.id);
-  const groupUnderScore = group.replace(/ /g, '_');
+  const groupUnderScore = group.replace(/ /g, '_').replace(/'/, '_');
   const groupProductIds = getGroupsIds(productParam);
 
   const productTypeContainer = document.querySelector(`#product-adjust-product-name-container`);
@@ -1015,10 +1015,11 @@ async function adjustProduct(productParam: IProduct, csrfToken: string) {
   }
 }
 
-function deleteAdjustContainer(nameGroup: string, nameGroupValue: string) {
-  const adjustContainer = document.querySelector(`#product-adjust-container-${nameGroupValue.replace(/ /g, '_')}`);
+function deleteAdjustContainer(nameGroupValue: string) {
+  const nameGroupValueKey = nameGroupValue.replace(/ /g, '_').replace(/'/, '_')
+  const adjustContainer = document.querySelector(`#product-adjust-container-${nameGroupValueKey}`);
   const masterGroupWarehouseContainer = document.querySelector(
-    `#product-adjust-product_group-container-${nameGroupValue.replace(/ /g, '_')}`
+    `#product-adjust-product_group-container-${nameGroupValueKey}`
   );
   if (adjustContainer) {
     adjustContainer.remove();
