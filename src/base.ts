@@ -236,6 +236,14 @@ const modalCallback = (mutationList: MutationRecord[]) => {
       if (modalBagraundElement.classList.contains("hidden")) {
         modalBagraundElement.classList.remove("hidden")
       }
+      const imagesElenemts = modalBagraundElement.querySelectorAll('.product-full-image-anchor');
+      imagesElenemts.forEach((e) => {
+        e.addEventListener('click', () => {
+          const productId = e.getAttribute('data-target-product-id');
+          if (productId) getFullImage(productId);
+        });
+      });
+
       // set event to close modal btn is close btn exist
       const closeModalBtn: HTMLButtonElement | null = document.querySelector("#custom-modal-content-close-btn")
       if (closeModalBtn) {

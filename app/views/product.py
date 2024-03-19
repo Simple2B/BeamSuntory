@@ -342,12 +342,23 @@ def product_view(id: int):
     total_qty = sum(
         warehouse.product_quantity for warehouse in product.warehouse_products
     )
+    warehouses = {}
+    for warehouse_product in product.warehouse_products:
+        if warehouse_product.warehouse.name not in warehouses:
+            warehouses[warehouse_product.warehouse.name] = (
+                warehouse_product.product_quantity
+            )
+        else:
+            warehouses[
+                warehouse_product.warehouse.name
+            ] += warehouse_product.product_quantity
 
     return render_template(
         "product/modal_view.html",
         product=product,
         total_qty=total_qty,
         is_events=is_events,
+        warehouses=warehouses,
     )
 
 

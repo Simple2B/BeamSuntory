@@ -58,7 +58,9 @@ def get_all():
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
-    all_groups = db.session.scalars(sa.select(m.Group)).all()
+    all_groups = db.session.scalars(
+        sa.select(m.Group).order_by(m.Group.name.asc())
+    ).all()
 
     return render_template(
         "sub_stock_target_group/groups.html",
@@ -199,7 +201,9 @@ def get_sub_group():
         return "no group", 404
 
     sub_groups = db.session.scalars(
-        sa.select(m.Group).where(m.Group.parent_group_id == params.group_id)
+        sa.select(m.Group)
+        .where(m.Group.parent_group_id == params.group_id)
+        .order_by(m.Group.name.asc())
     ).all()
 
     template = "sub_stock_target_group/sub_group_datalist.html"
