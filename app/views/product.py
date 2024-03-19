@@ -669,7 +669,6 @@ def get_assign_form(warehouse_product_id: int):
         )
 
     form.name.data = product_warehouse.product.name
-    form.from_group.data = product_warehouse.group.name
     main_master_groups = db.session.scalars(sa.select(m.MasterGroup)).all()
     groups = main_master_groups[0].groups if main_master_groups[0] else []
 
@@ -692,9 +691,19 @@ def get_assign_form(warehouse_product_id: int):
 )
 def get_assign_groups():
     master_group_id = request.args.get("master_group", type=int, default=0)
-    master_group: m.MasterGroup | None = db.session.get(m.MasterGroup, master_group_id)
-    groups = master_group.groups if master_group else []
-    return render_template("product/assing_groups.html", groups=groups)
+    group_name = request.args.get("group", type=str, default="")
+    if master_group_id:
+        master_group: m.MasterGroup | None = db.session.get(
+            m.MasterGroup, master_group_id
+        )
+        groups = master_group.groups if master_group else []
+        return render_template("product/assing_groups.html", groups=groups)
+    elif group_name:
+        group = db.session.scalar(sa.select(m.Group).where(m.Group.name == group_name))
+        sub_groups = group.child_groups if group and group.child_groups else []
+        return render_template("product/assing_sub_groups.html", sub_groups=sub_groups)
+    log(log.ERROR, "Get assign groups not found master_group_id or group_name")
+    return "Not found", 404
 
 
 @product_blueprint.route("/assign", methods=["POST"])
@@ -722,7 +731,23 @@ def assign():
                 m.Group.name == form.from_group.data,
             )
         )
-        product_to_group: m.Group = db.session.get(m.Group, int(form.group.data))
+        if form.sub_group.data:
+            product_to_group: m.Group = db.session.scalar(
+                m.Group.select().where(
+                    m.Group.name == form.sub_group.data,
+                )
+            )
+        else:
+            product_to_group: m.Group = db.session.scalar(
+                m.Group.select().where(
+                    m.Group.name == form.group.data,
+                )
+            )
+
+        if not product_from_group or not product_to_group:
+            log(log.ERROR, "Group not found")
+            flash("Cannot save product data", "danger")
+            return redirect(url_for("product.get_all", **query_params))
 
         if product_from_group.id == product_to_group.id:
             log(log.ERROR, "Cannot assign to same group", form.errors)
@@ -741,10 +766,14 @@ def assign():
         # TODO sort also by warehouse_id
         product_warehouse: m.WarehouseProduct = db.session.execute(
             m.WarehouseProduct.select().where(
-                m.WarehouseProduct.product_id == p.id,
+                m.WarehouseProduct.product_id == product.id,
                 m.WarehouseProduct.group_id == product_from_group.id,
             )
         ).scalar()
+        if not product_warehouse:
+            log(log.ERROR, "Product warehouse not found")
+            flash("Product warehouse not found", "danger")
+            return redirect(url_for("product.get_all", **query_params))
         # NOTE create report for inventory
         report_inventory = m.ReportInventory(
             qty_before=product_warehouse.product_quantity,
@@ -759,8 +788,8 @@ def assign():
 
         new_product_warehouse: m.WarehouseProduct = db.session.execute(
             m.WarehouseProduct.select().where(
-                m.WarehouseProduct.product_id == p.id,
-                m.WarehouseProduct.group_id == int(form.group.data),
+                m.WarehouseProduct.product_id == product.id,
+                m.WarehouseProduct.group_id == product_to_group.id,
             )
         ).scalar()
         if new_product_warehouse:
@@ -771,7 +800,7 @@ def assign():
             qty_before = 0
             new_product_warehouse = m.WarehouseProduct(
                 product_id=product.id,
-                group_id=int(form.group.data),
+                group_id=product_to_group.id,
                 product_quantity=form.quantity.data,
                 warehouse_id=product_warehouse.warehouse_id,
             )
@@ -788,9 +817,9 @@ def assign():
 
         assign_obj = m.Assign(
             product_id=product.id,
-            group_id=int(form.group.data),
+            group_id=product_to_group.id,
             quantity=form.quantity.data,
-            from_group_id=form.from_group_id.data,
+            from_group_id=product_from_group.id,
             user_id=current_user.id,
             type=s.ReportEventType.created.value,
         )
@@ -832,13 +861,13 @@ def assign():
                     + f"?q={assign_obj.uuid}"
                 )
 
-                # msg.html = render_template(
-                #     "email/assign.html",
-                #     user=u.child,
-                #     assign=assign_obj,
-                #     url=url,
-                # )
-                # mail.send(msg)
+                msg.html = render_template(
+                    "email/assign.html",
+                    user=u.child,
+                    assign=assign_obj,
+                    url=url,
+                )
+                mail.send(msg)
 
         return redirect(url_for("product.get_all", **query_params))
 
@@ -972,8 +1001,8 @@ def request_share():
 def adjust():
     form: f.AdjustProductForm = f.AdjustProductForm()
 
+    query_params = get_query_params_from_headers()
     if form.validate_on_submit():
-        query_params = get_query_params_from_headers()
         adjust_item: m.Adjust = m.Adjust(
             product_id=form.product_id.data,
             note=form.note.data,
