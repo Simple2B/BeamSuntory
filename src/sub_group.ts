@@ -12,6 +12,7 @@ interface IGroup {
   id: number;
   name: string;
   master_group_id: number;
+  parent_group: IGroup;
 }
 
 const $modalElement: HTMLElement = document.querySelector('#edit-sub-group-modal');
@@ -78,7 +79,7 @@ function editGroup(group: IGroup) {
   input = document.querySelector('#group-edit-id');
   input.value = group.id.toString();
   input = document.querySelector('#group-edit-master_group');
-  input.value = group.master_group_id.toString();
+  input.value =group.parent_group.id.toString();
   input = document.querySelector('#group-edit-next_url');
   input.value = window.location.href;
   modal.show();
