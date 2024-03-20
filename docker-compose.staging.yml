@@ -15,7 +15,7 @@ services:
       PGUSER: ${POSTGRES_USER:-postgres}
 
   app:
-    image: simple2b/beam-suntory-app:1.0.16
+    image: simple2b/beam-suntory-app:1.0.17
     restart: always
     volumes:
       - ./product:/home/app/app/static/img/product
