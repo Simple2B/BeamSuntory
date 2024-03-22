@@ -121,7 +121,16 @@ def get_adjustment_report():
 
 @report_adjustment_blueprint.route("/adjustment/api", methods=["GET"])
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
 def get_adjustments_json():
     pagination, reports = get_adjustment_report()
     report_list_schema = s.AdjustList.model_validate(reports)
@@ -133,7 +142,16 @@ def get_adjustments_json():
 
 @report_adjustment_blueprint.route("/adjustment", methods=["GET"])
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
 def adjustments():
     users = db.session.scalars(sa.select(m.User))
     product_master_groups = db.session.scalars(
@@ -157,7 +175,16 @@ def adjustments():
 
 @report_adjustment_blueprint.route("adjustment/search")
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
 def search_report_adjustments():
     pagination, reports = get_adjustment_report()
     filter_adjustments = s.FilterReportAdjustments.model_validate(dict(request.args))

@@ -337,7 +337,7 @@ def product_view(id: int):
 
     if not product:
         log(log.ERROR, "Not found product by id : [%s]", id)
-        return abort(404)
+        return render_template("error_modal.html", message="Can't find product")
 
     total_qty = sum(
         warehouse.product_quantity for warehouse in product.warehouse_products

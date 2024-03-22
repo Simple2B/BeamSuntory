@@ -99,7 +99,16 @@ def get_shipping_report():
 
 @report_shipping_blueprint.route("/", methods=["GET"])
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
 def index():
     divisions = db.session.scalars(m.Division.select())
     target_groups = db.session.scalars(m.Group.select())

@@ -120,7 +120,16 @@ def get_sku_reports():
 
 @report_sku_blueprint.route("/sku/api", methods=["GET"])
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
 def get_skus_json():
     pagination, sku_reports = get_sku_reports()
     report_list_schema = s.ReportSKUList.model_validate(sku_reports)
@@ -132,7 +141,16 @@ def get_skus_json():
 
 @report_sku_blueprint.route("/sku", methods=["GET"])
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
 def skus():
     users = db.session.scalars(sa.select(m.User))
 
@@ -159,7 +177,16 @@ def skus():
 
 @report_sku_blueprint.route("sku/search")
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
 def search_sku_reports():
     pagination, sku_reports = get_sku_reports()
 

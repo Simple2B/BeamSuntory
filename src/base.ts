@@ -215,43 +215,14 @@ dropdownSidebar.forEach((btn) => {
   });
 });
 
-const modalConten: HTMLDivElement = document.querySelector(
-  '#custom-modal-content',
-);
-const modalBagraundElement = modalConten.parentElement
-
-const triggerModal = () => {
-  if (modalBagraundElement.classList.contains("hidden")) {
-    modalBagraundElement.classList.remove("hidden")
-  } else {
-    modalBagraundElement.classList.add("hidden")
-  }
-}
-
-modalBagraundElement.addEventListener("click", triggerModal)
-
-const modalCallback = (mutationList: MutationRecord[]) => {
-  for (const mutation of mutationList) {
-    if (mutation.type === "childList" && Array.from(mutation.addedNodes).some((node: HTMLDivElement) => node.classList && node.classList.contains('htmx-added'))) {
-      if (modalBagraundElement.classList.contains("hidden")) {
-        modalBagraundElement.classList.remove("hidden")
-      }
-      const imagesElenemts = modalBagraundElement.querySelectorAll('.product-full-image-anchor');
+window.addEventListener('htmx:afterSwap', (event) => {
+  const eventTarget = event.target as HTMLElement;
+  const imagesElenemts = eventTarget.querySelectorAll('.product-full-image-anchor');
       imagesElenemts.forEach((e) => {
         e.addEventListener('click', () => {
           const productId = e.getAttribute('data-target-product-id');
           if (productId) getFullImage(productId);
         });
       });
+});
 
-      // set event to close modal btn is close btn exist
-      const closeModalBtn: HTMLButtonElement | null = document.querySelector("#custom-modal-content-close-btn")
-      if (closeModalBtn) {
-        closeModalBtn.addEventListener("click", triggerModal)
-      }
-    }
-  }
-};
-
-const observer = new MutationObserver(modalCallback);
-observer.observe(modalConten, { childList: true});

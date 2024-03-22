@@ -154,7 +154,16 @@ def get_inventory_reports():
 
 @report_inventory_blueprint.route("/inventory/api", methods=["GET"])
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
 def get_inventories_json():
     pagination, inventory_reports = get_inventory_reports()
     report_list_schema = s.ReportInventoryListArray.model_validate(inventory_reports)
@@ -166,7 +175,16 @@ def get_inventories_json():
 
 @report_inventory_blueprint.route("/inventory", methods=["GET"])
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
 def inventories():
     users = db.session.scalars(sa.select(m.User))
 
@@ -192,7 +210,16 @@ def inventories():
 
 @report_inventory_blueprint.route("inventory/search")
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
 def search_inventory_reports():
     pagination, inventory_reports = get_inventory_reports()
 

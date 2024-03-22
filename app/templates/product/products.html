@@ -235,7 +235,7 @@
             Adjust
           </button>
           {% endif %}
-          <button type="button" hx-trigger="click" hx-target="#custom-modal-content" hx-swap="innerHTML" hx-get="{{ url_for('product.product_view', id=product.id, is_events=is_events) }}"
+          <button type="button" hx-trigger="click" hx-target="#product-modal-element" hx-swap="innerHTML" hx-get="{{ url_for('product.product_view', id=product.id, is_events=is_events) }}"
             class="inline-flex items-center px-3 no-m-l w-24 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 576 512" xmlns="http://www.w3.org/2000/svg">
               <path
