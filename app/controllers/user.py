@@ -27,7 +27,7 @@ def create_admin(admin_data: s.AdminCreate):
     db.session.commit()
 
 
-def role_required(required_role, hasApprovalPermission=False):
+def role_required(required_role, has_approval_permission=False):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -42,7 +42,7 @@ def role_required(required_role, hasApprovalPermission=False):
                     request.path,
                 )
                 abort(403)
-            if hasApprovalPermission:
+            if has_approval_permission:
                 if not current_user.approval_permission:
                     log(
                         log.ERROR,
