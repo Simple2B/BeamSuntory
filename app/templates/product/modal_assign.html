@@ -2,66 +2,76 @@
 <!-- prettier-ignore-->
 
 <!-- Modal content -->
-<form action="{{ url_for('product.assign')}}" method="post"
-  class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-  {{ form.hidden_tag() }}
-  <!-- Modal header -->
-  <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
-    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Assign</h3>
-  </div>
-  <!-- Modal body -->
-  <input type="hidden" name="from_group" value="{{ product_warehouse.group.name }}">
-  <div class="p-6 space-y-6">
-    <div class="grid grid-cols-6 gap-5">
-      <div class="col-span-6 sm:col-span-6">
-        <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Name</label>
-        {{ form.name(class_="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-        focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500
-        dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500") }}
+<div tabindex="-1" id="product-assing-modal" hx-get="{{ url_for('main.no_content') }}" hx-trigger="click"
+  hx-swap="delete" hx-target="#product-assing-modal"
+  class="fixed bg-opacity-80 bg-gray-600 top-0 left-0 right-0 z-50 items-center justify-center w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full max-h-full justify-end items-end flex">
+  <div class="rounded-lg relative w-full max-w-2xl max-h-full bg-white" onclick="event.stopPropagation();">
+    <form action="{{ url_for('product.assign')}}" method="post"
+      class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+      {{ form.hidden_tag() }}
+      <!-- Modal header -->
+      <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Assign</h3>
       </div>
-      <div class="col-span-6 sm:col-span-2">
-        <label for="master_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Master
-          Group</label>
-        <select type="text" name="master_group"  hx-get="{{ url_for('product.get_assign_groups') }}" hx-target="#assign-group-list-data"
-          class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          placeholder="Brand" required>
-          {% for mg in main_master_groups %}
-          <option value="{{ mg.id }}">{{ mg.name }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="col-span-6 sm:col-span-2">
-        <label for="group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label>
-        <input type="text" list="assign-group-list-data" autocomplete="off" name="group" placeholder="Select group" required  hx-get="{{ url_for('product.get_assign_groups') }}" hx-target="#sub-group-element" hx-swap="outerHTML"
+      <!-- Modal body -->
+      <input type="hidden" name="from_group" value="{{ product_warehouse.group.name }}">
+      <div class="p-6 space-y-6">
+        <div class="grid grid-cols-6 gap-5">
+          <div class="col-span-6 sm:col-span-6">
+            <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Name</label>
+            {{ form.name(class_="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+            focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500
+            dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500") }}
+          </div>
+          <div class="col-span-6 sm:col-span-2">
+            <label for="master_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Master
+              Group</label>
+            <select type="text" name="master_group" hx-get="{{ url_for('product.get_assign_groups') }}"
+              hx-target="#assign-group-list-data"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="Brand" required>
+              {% for mg in main_master_groups %}
+              <option value="{{ mg.id }}">{{ mg.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-span-6 sm:col-span-2">
+            <label for="group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label>
+            <input type="text" list="assign-group-list-data" autocomplete="off" name="group" placeholder="Select group"
+              required hx-get="{{ url_for('product.get_assign_groups') }}" hx-target="#sub-group-element"
+              hx-swap="outerHTML"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-        <datalist id="assign-group-list-data">
-          <option value="" selected disabled>Group</option>
-          {% for group in groups %}
-          <option value="{{ group.name }}">
-          {% endfor %}
-        </datalist>
-      </div>
-      <div id="sub-group-element" class="col-span-6 sm:col-span-2"></div>
-      <div class="col-span-6 sm:col-span-3">
-        <label for="product-assign-available-quantity"
-          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available Quantity</label>
-        <div
-          class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-          {{ product_warehouse.product_quantity }}
+            <datalist id="assign-group-list-data">
+              <option value="" selected disabled>Group</option>
+              {% for group in groups %}
+              <option value="{{ group.name }}">
+                {% endfor %}
+            </datalist>
+          </div>
+          <div id="sub-group-element" class="col-span-6 sm:col-span-2"></div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="product-assign-available-quantity"
+              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available Quantity</label>
+            <div
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              {{ product_warehouse.product_quantity }}
+            </div>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="quantity" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
+            {{ form.quantity(max=product_warehouse.product_quantity, placeholder="Quantity", class_="shadow-sm
+            bg-gray-50 border border-gray-300 text-gray-900
+            text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600
+            dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500
+            dark:focus:border-blue-500") }}
+          </div>
         </div>
       </div>
-      <div class="col-span-6 sm:col-span-3">
-        <label for="quantity" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
-        {{ form.quantity(max=product_warehouse.product_quantity, placeholder="Quantity", class_="shadow-sm bg-gray-50 border border-gray-300 text-gray-900
-        text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600
-        dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500
-        dark:focus:border-blue-500") }}
+      <!-- Modal footer -->
+      <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+        <button name="submit" type="submit"
+          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Assign</button>
       </div>
-    </div>
+    </form>
   </div>
-  <!-- Modal footer -->
-  <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
-    <button name="submit" type="submit"
-      class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Assign</button>
-  </div>
-</form>
+</div>
