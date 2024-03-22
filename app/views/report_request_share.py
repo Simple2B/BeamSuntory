@@ -75,7 +75,16 @@ def get_request_share_report():
 
 @report_request_share_blueprint.route("/", methods=["GET"])
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
 def index():
     return render_template(
         "report/request_share/index.html",
@@ -85,7 +94,16 @@ def index():
 
 @report_request_share_blueprint.route("/api", methods=["GET"])
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
 def report_json():
     pagination, reports = get_request_share_report()
     report_list_schema = s.ReportRequestShareList.model_validate(reports)
@@ -99,7 +117,16 @@ def report_json():
 
 @report_request_share_blueprint.route("search")
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
 def search():
     pagination, reports = get_request_share_report()
 

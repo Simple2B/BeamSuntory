@@ -354,7 +354,7 @@
         </a>
       </li>
       {% endif %}
-      {% if user_role in admin_roles %}
+      {% if user_role in admin_roles or current_user.approval_permission %}
       <!-- Reports -->
       <li>
         <!-- prettier-ignore -->

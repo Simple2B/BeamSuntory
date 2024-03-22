@@ -119,7 +119,16 @@ def get_events_report():
 
 @report_event_blueprint.route("/event", methods=["GET"])
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
 def events():
     users = db.session.scalars(sa.select(m.User))
 
@@ -131,7 +140,16 @@ def events():
 
 @report_event_blueprint.route("event/search")
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
 def search_report_events():
     pagination, reports = get_events_report()
 

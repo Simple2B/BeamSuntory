@@ -75,7 +75,16 @@ def get_request_share_report():
 
 @report_blueprint.route("/", methods=["GET"])
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
 def index():
     brands = db.session.scalars(
         sa.select(m.MasterGroupProduct)
@@ -142,13 +151,31 @@ def index():
 
 @report_blueprint.route("/api", methods=["GET"])
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
 def report_json():
     return jsonify(c.get_reports())
 
 
 @report_blueprint.route("search")
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
 def search():
     return c.get_reports(render=True)
