@@ -423,10 +423,24 @@ document.addEventListener('DOMContentLoaded', () => {
     tableLoader.click();
   });
   // Download csv button
+  const groupSelect = document.getElementById('report-target-group-select') as HTMLSelectElement;
+  const groupIdInput = document.getElementById('report-group-id-hidden') as HTMLInputElement;
+  groupSelect.addEventListener('change', (e) => {
+    const option = groupSelect.querySelector(`option[value="${groupSelect.value}"]`);
+    if (!option) {
+      return;
+    }
+    groupIdInput.value = option.getAttribute('data-target-group-id');
+    groupIdInput.click();
+  });
   downloadCSVButton.addEventListener('click', async () => {
     const filtersQueryParams = new URLSearchParams();
     allFiltersHTML.forEach((filterHTML) => {
       const input = filterHTML.querySelector('input, select') as HTMLSelectElement | HTMLInputElement;
+      if (input.getAttribute('name') === 'group_id' && groupSelect) {
+        filtersQueryParams.append('target_group', groupSelect.value);
+        return
+      }
       filtersQueryParams.append(input.getAttribute('name'), input.value);
     });
 
@@ -441,16 +455,5 @@ document.addEventListener('DOMContentLoaded', () => {
     a.setAttribute('download', 'report.csv');
     a.click();
     a.remove();
-  });
-
-  const groupSelect = document.getElementById('report-target-group-select') as HTMLSelectElement;
-  const groupIdInput = document.getElementById('report-group-id-hidden') as HTMLInputElement;
-  groupSelect.addEventListener('change', (e) => {
-    const option = groupSelect.querySelector(`option[value="${groupSelect.value}"]`);
-    if (!option) {
-      return;
-    }
-    groupIdInput.value = option.getAttribute('data-target-group-id');
-    groupIdInput.click();
   });
 });

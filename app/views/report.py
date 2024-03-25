@@ -115,7 +115,6 @@ def index():
     master_groups = db.session.scalars(
         m.MasterGroup.select().order_by(m.MasterGroup.name)
     )
-    groups = db.session.scalars(m.Group.select().order_by(m.Group.name))
     product_master_groups = db.session.scalars(
         m.MasterGroupProduct.select().where(
             m.MasterGroupProduct.name.in_(
@@ -129,9 +128,7 @@ def index():
     for master_group_product in product_master_groups:
         master_group_product.groups_for_product.sort(key=lambda x: x.name)
 
-    groups = db.session.scalars(
-        sa.select(m.Group).where(m.Group.parent_group_id.is_(None))
-    ).all()
+    groups = db.session.scalars(sa.select(m.Group).order_by(m.Group.name)).all()
 
     return render_template(
         "report/index.html",
