@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "beam-suntory"
-version = "1.0.18"
+version = "1.0.19"
 description = ""
 authors = ["petro <xavrais312@gmail.com>", "andrii <andrey.berezyanskiy@gmail.com>"]
 
