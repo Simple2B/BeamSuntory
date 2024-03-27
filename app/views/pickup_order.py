@@ -160,24 +160,29 @@ def update_notes():
                 form_edit.ship_request_id.data,
             )
             flash("Cannot save item data", "danger")
-            return redirect(url_for("outgoing_stock.get_all"))
+            return redirect(url_for("pickup_order.get_all"))
+
+        ship_request.proof_of_delivery = form_edit.proof_of_delivery.data
+        ship_request.tracking = form_edit.tracking.data
 
         if form_edit.da_notes.data:
             ship_request.da_notes = form_edit.da_notes.data
             ship_request.save()
             log(log.INFO, "Ship Request note updated. Ship Request: [%s]", ship_request)
             flash("Note has been updated!", "success")
-            return redirect(url_for("outgoing_stock.get_all"))
+            return redirect(url_for("pickup_order.get_all"))
+
+        ship_request.save()
 
         if form_edit.next_url.data:
             log(log.INFO, "Redirecting to: [%s]", form_edit.next_url.data)
             return redirect(form_edit.next_url.data)
-        return redirect(url_for("outgoing_stock.get_all"))
+        return redirect(url_for("pickup_order.get_all"))
 
     else:
         log(log.ERROR, "Ship request item save errors: [%s]", form_edit.da_notes.data)
         flash("Note for warehouse manager has not been updated", "danger")
-        return redirect(url_for("outgoing_stock.get_all"))
+        return redirect(url_for("pickup_order.get_all"))
 
 
 @pickup_order_blueprint.route("/deliver/<int:id>", methods=["GET"])

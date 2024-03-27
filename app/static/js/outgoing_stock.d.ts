@@ -35,6 +35,8 @@ export interface IShipRequest {
     comment: string;
     wmNotes: string;
     daNotes: string;
+    proofOfDelivery: string | null;
+    tracking: string | null;
     carts: ICart[];
     store: IStore;
 }

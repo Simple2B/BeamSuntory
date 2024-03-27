@@ -302,6 +302,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const wmNotesView: HTMLInputElement = document.querySelector('#incoming-stock-view-wm-notes');
   const daNotesView: HTMLInputElement = document.querySelector('#incoming-stock-view-da-notes');
   const orderIdInput: HTMLInputElement = document.querySelector('#incoming-stock-edit-id');
+  const proofOfDelivery: HTMLInputElement = document.querySelector('#incoming-stock-view-proof-of-delivery');
+  const tracking: HTMLInputElement = document.querySelector('#incoming-stock-view-tracking');
 
   const orderProductAllocatedBaseView: HTMLDivElement = document.querySelector('#product-allocated-container');
   const orderProductContainerView: HTMLDivElement = document.querySelector('#incoming-stock-product-container');
@@ -334,6 +336,8 @@ document.addEventListener('DOMContentLoaded', () => {
       viewModalDeliveryDate.innerHTML = inboundOrder.deliveryDate;
       wmNotesView.value = inboundOrder.wmNotes;
       daNotesView.value = inboundOrder.daNotes;
+      proofOfDelivery.value = inboundOrder.proofOfDelivery ?? '';
+      tracking.value = inboundOrder.tracking ?? '';
       if (inboundOrder.status !== 'In transit') {
         viewModalAcceptButton.classList.add('invisible');
       } else {

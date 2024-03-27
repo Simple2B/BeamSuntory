@@ -1,6 +1,13 @@
 from datetime import date
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, IntegerField, DateField, ValidationError
+from wtforms import (
+    StringField,
+    SubmitField,
+    IntegerField,
+    DateField,
+    ValidationError,
+    TextAreaField,
+)
 from wtforms.validators import DataRequired, Optional, Regexp, AnyOf
 
 
@@ -66,4 +73,6 @@ class InboundOrderPickupForm(FlaskForm):
     inbound_order_id = StringField("Inbound order id", [DataRequired()])
     wm_notes = StringField("Warehouse manager notes")
     da_notes = StringField("Delivery agent notes")
+    proof_of_delivery = TextAreaField("Proof of delivery")
+    tracking = TextAreaField("Tracking")
     submit = SubmitField("Submit")

@@ -377,6 +377,10 @@ def notes():
         flash("There is no such inbound order", "danger")
         return redirect(url_for("incoming_stock.get_all"))
 
+    # new fields
+    inbound_order.proof_of_delivery = form_note.proof_of_delivery.data
+    inbound_order.tracking = form_note.tracking.data
+
     inbound_order.wm_notes = form_note.wm_notes.data
     inbound_order.save()
 

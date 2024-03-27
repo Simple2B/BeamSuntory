@@ -4,6 +4,7 @@ from wtforms import (
     SubmitField,
     ValidationError,
     IntegerField,
+    TextAreaField,
 )
 from wtforms.validators import DataRequired
 
@@ -38,6 +39,8 @@ class ShipRequestForm(FlaskForm):
     products = StringField("Products")
     wm_notes = StringField("Warehouse Manager Notes")
     da_notes = StringField("Delivery Agent Notes")
+    proof_of_delivery = TextAreaField("Proof of Delivery")
+    tracking = TextAreaField("Tracking")
 
     submit = SubmitField("Save")
 
