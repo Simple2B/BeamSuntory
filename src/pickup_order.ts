@@ -95,6 +95,7 @@ const editModal: ModalInterface = new Modal($modalEditElement, modalEditOptions)
 const viewPickupOrderButtonElements = document.querySelectorAll('.pickup-order-view-button');
 viewPickupOrderButtonElements.forEach((e) =>
   e.addEventListener('click', () => {
+
     const shipRequest: IShipRequest = JSON.parse(e.getAttribute('data-target'));
     console.log(shipRequest);
     const store = JSON.parse(e.getAttribute('data-target-store'));
@@ -112,6 +113,13 @@ viewPickupOrderButtonElements.forEach((e) =>
     div.innerHTML = shipRequest.comment;
     div = document.querySelector('#pickup-order-view-wm_notes');
     shipRequest.wmNotes ? (div.innerHTML = shipRequest.wmNotes) : (div.innerHTML = 'No comments');
+
+    const proofOfDelivery = document.querySelector('#pickup-order-view-proof-of-delivery') as HTMLInputElement;
+    proofOfDelivery.value = shipRequest.proofOfDelivery ?? ''
+    const trecing = document.querySelector('#pickup-order-view-tracking-data') as HTMLInputElement;
+    trecing.value = shipRequest.tracking ?? ''
+
+
     div = document.querySelector('#pickup-order-view-store');
     div.innerHTML = shipRequest.store.storeName;
     div = document.querySelector('#pickup-order-view-store_address');
@@ -349,11 +357,15 @@ updateNotesButtons.forEach((e) => {
   e.addEventListener('click', async () => {
     const shipRequestId = document.querySelector('#pickup-order-edit-id').getAttribute('value');
     const daNotes: HTMLInputElement = document.querySelector('#pickup-order-view-da_notes');
+    const proofOfDelivery: HTMLInputElement = document.querySelector('#pickup-order-view-proof-of-delivery');
+    const tracking: HTMLInputElement = document.querySelector('#pickup-order-view-tracking-data');
     const csrfTokenInput = document.querySelector<HTMLInputElement>('#csrf_token');
 
     const data = {
       csrf_token: csrfTokenInput.value,
       da_notes: daNotes.value,
+      proof_of_delivery: proofOfDelivery.value,
+      tracking: tracking.value,
       ship_request_id: shipRequestId,
     };
     const response = await fetch(`/pickup_order/update_notes`, {

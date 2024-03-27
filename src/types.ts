@@ -148,6 +148,8 @@ export interface IInboundOrderBase {
   warehouse: IWarehouse;
   wmNotes: string;
   daNotes: string;
+  proofOfDelivery: string | null;
+  tracking: string | null;
 }
 
 interface IReportInventory {

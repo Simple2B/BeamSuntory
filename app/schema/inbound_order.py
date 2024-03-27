@@ -36,6 +36,8 @@ class InboundOrder(BaseModel):
 
     wm_notes: str | None = Field(alias="wmNotes")
     da_notes: str | None = Field(alias="daNotes")
+    proof_of_delivery: str | None = Field(alias="proofOfDelivery")
+    tracking: str | None
 
     created_at: datetime = Field(alias="createdAt")
 

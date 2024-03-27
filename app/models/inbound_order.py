@@ -46,6 +46,8 @@ class InboundOrder(db.Model, ModelMixin):
     )
     wm_notes: orm.Mapped[str] = orm.mapped_column(sa.Text(), default="", nullable=True)
     da_notes: orm.Mapped[str] = orm.mapped_column(sa.Text(), default="", nullable=True)
+    proof_of_delivery: orm.Mapped[str | None] = orm.mapped_column(sa.Text(), default="")
+    tracking: orm.Mapped[str | None] = orm.mapped_column(sa.Text(), default="")
 
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,

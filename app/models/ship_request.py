@@ -55,6 +55,8 @@ class ShipRequest(db.Model, ModelMixin):
     )
     wm_notes: orm.Mapped[str] = orm.mapped_column(sa.Text(), default="", nullable=True)
     da_notes: orm.Mapped[str] = orm.mapped_column(sa.Text(), default="", nullable=True)
+    proof_of_delivery: orm.Mapped[str | None] = orm.mapped_column(sa.Text(), default="")
+    tracking: orm.Mapped[str | None] = orm.mapped_column(sa.Text(), default="")
 
     # Relationships
     carts: orm.Mapped[list["Cart"]] = orm.relationship(back_populates="ship_request")

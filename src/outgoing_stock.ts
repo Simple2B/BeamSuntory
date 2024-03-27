@@ -42,6 +42,8 @@ export interface IShipRequest {
   comment: string;
   wmNotes: string;
   daNotes: string;
+  proofOfDelivery: string | null;
+  tracking: string | null;
   carts: ICart[];
   store: IStore;
 }
@@ -207,6 +209,13 @@ viewOutgoingStockButtonElements.forEach((e) =>
     div.innerHTML = shipRequest.comment;
     div = document.querySelector('#outgoing-stock-view-da_notes');
     shipRequest.daNotes ? (div.innerHTML = shipRequest.daNotes) : (div.innerHTML = 'No notes');
+
+    div = document.querySelector('#outgoing-stock-proof-of-delivery');
+    div.innerHTML = shipRequest.proofOfDelivery ?? '';
+
+    div = document.querySelector('#outgoing-stock-view-tracking');
+    div.innerHTML = shipRequest.tracking ?? '';
+
     div = document.querySelector('#outgoing-stock-view-store');
     div.innerHTML = shipRequest.store.storeName;
     div = document.querySelector('#outgoing-stock-view-store_address');

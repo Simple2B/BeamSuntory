@@ -100,6 +100,10 @@ def pickup():
         flash("There is no such inbound order", "danger")
         return redirect(url_for("pickup_inbound.get_all"))
 
+    # new fields
+    inbound_order.proof_of_delivery = form_pickup.proof_of_delivery.data
+    inbound_order.tracking = form_pickup.tracking.data
+
     inbound_order.status = s.InboundOrderStatus.in_transit
     inbound_order.da_notes = form_pickup.da_notes.data
     inbound_order.save(False)

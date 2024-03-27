@@ -43,8 +43,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const supplierAddress = document.getElementById('pickup-inbound-view-supplier-address') as HTMLDivElement;
   const orderId= document.getElementById('pickup-inbound-view-inbound-order-id') as HTMLInputElement;
   const pickupInboundButton = document.querySelector('.pickup-inbound-btn') as HTMLButtonElement;
-  const  deliverAgentNotes = document.getElementById('pickup-inbound-view-da-notes') as HTMLDivElement;
+  const deliverAgentNotes = document.getElementById('pickup-inbound-view-da-notes') as HTMLDivElement;
   const warehouseManagerNotes = document.getElementById('pickup-inbound-view-wm-notes') as HTMLDivElement;
+  const proofOfDelivery = document.getElementById('pickup-inbound-view-proof-of-delivery') as HTMLDivElement;
+  const tracking = document.getElementById('pickup-inbound-view-tracking') as HTMLDivElement;
 
   // onload element with events-table id
   htmxDispatcher.onLoad('events-table', (target) => {
@@ -68,6 +70,9 @@ document.addEventListener('DOMContentLoaded', () => {
         supplierName.innerHTML = reportAssign.supplier.name;
         supplierAddress.innerHTML = reportAssign.supplier.address;
 
+        proofOfDelivery.innerHTML = reportAssign.proofOfDelivery ?? '';
+        tracking.innerHTML = reportAssign.tracking ?? '';
+        
         deliverAgentNotes.innerHTML = reportAssign.daNotes;
         warehouseManagerNotes.innerHTML = reportAssign.wmNotes;
 

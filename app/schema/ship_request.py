@@ -25,6 +25,9 @@ class ShipRequest(BaseModel):
     comment: str | None
     wm_notes: str | None = Field(alias="wmNotes")
     da_notes: str | None = Field(alias="daNotes")
+    proof_of_delivery: str | None = Field(alias="proofOfDelivery")
+    tracking: str | None
+
     carts: list[Cart]
 
     created_at: datetime = Field(alias="createdAt")

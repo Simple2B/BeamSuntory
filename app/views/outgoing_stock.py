@@ -325,6 +325,10 @@ def update_notes():
             flash("Cannot save item data", "danger")
             return redirect(url_for("outgoing_stock.get_all"))
 
+        ship_request.proof_of_delivery = form_edit.proof_of_delivery.data
+        ship_request.tracking = form_edit.tracking.data
+        ship_request.save()
+
         if form_edit.wm_notes.data:
             ship_request.wm_notes = form_edit.wm_notes.data
             ship_request.save()
