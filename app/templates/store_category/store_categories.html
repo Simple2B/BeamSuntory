@@ -67,7 +67,7 @@
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            {% if store_category.image|length > 100 %}
+            {% if store_category.image and store_category.image|length > 100 %}
             <img src="data:image/png;base64, {{ store_category.image }}" class="w-14 object-cover">
             {% else %}
             <img src="{{ url_for('static', filename='img/default_store_category.png') }}" class="w-14 object-cover">

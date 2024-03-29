@@ -23,7 +23,7 @@ class Store(db.Model, ModelMixin):
 
     # Columns
     store_name: orm.Mapped[str] = orm.mapped_column(
-        sa.String(64),
+        sa.String(128),
         unique=True,
         nullable=False,
     )
@@ -32,18 +32,18 @@ class Store(db.Model, ModelMixin):
         nullable=False,
     )
     email: orm.Mapped[str] = orm.mapped_column(
-        sa.String(64),
+        sa.String(128),
         nullable=False,
     )
     phone_numb: orm.Mapped[str] = orm.mapped_column(
-        sa.String(64),
+        sa.String(128),
         nullable=False,
     )
-    country: orm.Mapped[str] = orm.mapped_column(sa.String(64))
-    region: orm.Mapped[str] = orm.mapped_column(sa.String(64))
-    city: orm.Mapped[str] = orm.mapped_column(sa.String(64))
-    address: orm.Mapped[str] = orm.mapped_column(sa.String(64))
-    zip: orm.Mapped[str] = orm.mapped_column(sa.String(64))
+    country: orm.Mapped[str] = orm.mapped_column(sa.String(128))
+    region: orm.Mapped[str] = orm.mapped_column(sa.String(128))
+    city: orm.Mapped[str] = orm.mapped_column(sa.String(128))
+    address: orm.Mapped[str] = orm.mapped_column(sa.String(512))
+    zip: orm.Mapped[str] = orm.mapped_column(sa.String(128))
     active: orm.Mapped[bool] = orm.mapped_column(sa.Boolean())
 
     created_at: orm.Mapped[datetime] = orm.mapped_column(
