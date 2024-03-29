@@ -8,6 +8,7 @@ from app import models as m
 from app import db, forms
 from app import schema as s
 from app import controllers as c
+from app.commands.add_stores import add_new_store
 from config import SALES_REP_LOCKER_NAME
 
 
@@ -28,6 +29,12 @@ def init(app: Flask):
 
             populate(count)
             print(f"DB populated by {count} instancies")
+
+    @app.cli.command("add-stores")
+    def add_stores():
+        """Add stores from excel file."""
+        file_path = "stores.xlsx"
+        add_new_store(file_path, db)
 
     @app.cli.command("clear-history")
     def clear_history():
