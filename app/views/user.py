@@ -84,83 +84,102 @@ def get_all():
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def save():
     form = f.UserForm()
-    if form.validate_on_submit():
-        query = m.User.select().where(m.User.id == int(form.user_id.data))
-        u: m.User | None = db.session.scalar(query)
-        if not u:
-            log(log.ERROR, "Not found user by id : [%s]", form.user_id.data)
-            flash("Cannot save user data", "danger")
-
-        u.username = form.username.data
-        u.email = form.email.data
-        u.role = form.role.data
-        u.country = form.country.data
-        u.city = form.city.data
-        u.region = form.region.data
-        u.street_address = form.street_address.data
-        u.zip_code = form.zip_code.data
-        u.activated = form.activated.data
-        u.approval_permission = form.approval_permission.data
-        u.sales_rep = form.sales_rep.data
-        u.phone_number = form.phone_number.data
-        if form.password.data.strip("*\n "):
-            u.password = form.password.data
-
-        if (
-            current_user.role_obj.role_name == s.UserRole.WAREHOUSE_MANAGER.value
-            and u.role_obj.role_name != s.UserRole.WAREHOUSE_MANAGER.value
-        ):
-            log(
-                log.ERROR,
-                "Warehouse manager can not edit user with role: [%s]",
-                u.role_obj.role_name,
-            )
-            flash("Warehouse manager can create only warehouse managers", "danger")
-            return redirect(url_for("user.get_all"))
-        u.save()
-
-        # and add new groups to user_group relational table
-        g_query = m.Group.select().where(
-            m.Group.name.in_(str(form.group.data).split(", "))
-        )
-        group_obj: m.Group | None = db.session.scalars(g_query)
-        group_ids = [g.id for g in group_obj]
-
-        user_groups_obj: m.UserGroup = db.session.scalars(
-            m.UserGroup.select().where(m.UserGroup.left_id == u.id)
-        )
-        user_group_group_ids = [ug.right_id for ug in user_groups_obj]
-
-        for user_group_id in user_group_group_ids:
-            if user_group_id not in group_ids:
-                if u.role_obj.role_name == s.UserRole.ADMIN.value:
-                    log(log.ERROR, "Can not remove groups from user: admin")
-                    flash(
-                        "Can not remove groups from user: admin",
-                        "danger",
-                    )
-                    return redirect(url_for("user.get_all"))
-                else:
-                    db.session.execute(
-                        sa.delete(m.UserGroup).where(
-                            m.UserGroup.right_id == user_group_id,
-                            m.UserGroup.left_id == u.id,
-                        )
-                    )
-                    db.session.commit()
-
-        for group_id in group_ids:
-            if group_id not in user_group_group_ids:
-                m.UserGroup(left_id=u.id, right_id=group_id).save()
-
-        if form.next_url.data:
-            return redirect(form.next_url.data)
-        return redirect(url_for("user.get_all"))
-
-    else:
+    if not form.validate_on_submit():
         log(log.ERROR, "User save errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("user.get_all"))
+
+    query = m.User.select().where(m.User.id == int(form.user_id.data))
+    user: m.User | None = db.session.scalar(query)
+    if not user:
+        log(log.ERROR, "Not found user by id : [%s]", form.user_id.data)
+        flash("Cannot save user data", "danger")
+
+    was_user_activated = not user.activated
+
+    user.username = form.username.data
+    user.email = form.email.data
+    user.role = form.role.data
+    user.country = form.country.data
+    user.city = form.city.data
+    user.region = form.region.data
+    user.street_address = form.street_address.data
+    user.zip_code = form.zip_code.data
+    user.activated = form.activated.data
+    user.approval_permission = form.approval_permission.data
+    user.sales_rep = form.sales_rep.data
+    user.phone_number = form.phone_number.data
+    if form.password.data.strip("*\n "):
+        user.password = form.password.data
+
+    if (
+        current_user.role_obj.role_name == s.UserRole.WAREHOUSE_MANAGER.value
+        and user.role_obj.role_name != s.UserRole.WAREHOUSE_MANAGER.value
+    ):
+        log(
+            log.ERROR,
+            "Warehouse manager can not edit user with role: [%s]",
+            user.role_obj.role_name,
+        )
+        flash("Warehouse manager can create only warehouse managers", "danger")
+        return redirect(url_for("user.get_all"))
+    user.save()
+
+    # and add new groups to user_group relational table
+    g_query = m.Group.select().where(m.Group.name.in_(str(form.group.data).split(", ")))
+    group_obj: m.Group | None = db.session.scalars(g_query)
+    group_ids = [g.id for g in group_obj]
+
+    user_groups_obj: m.UserGroup = db.session.scalars(
+        m.UserGroup.select().where(m.UserGroup.left_id == user.id)
+    )
+    user_group_group_ids = [ug.right_id for ug in user_groups_obj]
+
+    for user_group_id in user_group_group_ids:
+        if user_group_id not in group_ids:
+            if user.role_obj.role_name == s.UserRole.ADMIN.value:
+                log(log.ERROR, "Can not remove groups from user: admin")
+                flash(
+                    "Can not remove groups from user: admin",
+                    "danger",
+                )
+                return redirect(url_for("user.get_all"))
+            else:
+                db.session.execute(
+                    sa.delete(m.UserGroup).where(
+                        m.UserGroup.right_id == user_group_id,
+                        m.UserGroup.left_id == user.id,
+                    )
+                )
+                db.session.commit()
+
+    for group_id in group_ids:
+        if group_id not in user_group_group_ids:
+            m.UserGroup(left_id=user.id, right_id=group_id).save()
+
+    if was_user_activated and form.activated.data:
+        log(log.INFO, "Sending email to active user: [%s]", user.email)
+        msg = Message(
+            subject="New password",
+            sender=app.config["MAIL_DEFAULT_SENDER"],
+            recipients=[user.email],
+        )
+        url = url_for(
+            "auth.password_recovery",
+            reset_password_uid=user.unique_id,
+            _external=True,
+        )
+
+        msg.html = render_template(
+            "email/set.html",
+            user=user,
+            url=url,
+        )
+        mail.send(msg)
+
+    if form.next_url.data:
+        return redirect(form.next_url.data)
+    return redirect(url_for("user.get_all"))
 
 
 @bp.route("/create", methods=["POST"])
@@ -256,23 +275,25 @@ def create():
             m.UserGroup(left_id=user.id, right_id=group_id).save()
 
     # create e-mail message
-    msg = Message(
-        subject="New password",
-        sender=app.config["MAIL_DEFAULT_SENDER"],
-        recipients=[user.email],
-    )
-    url = url_for(
-        "auth.password_recovery",
-        reset_password_uid=user.unique_id,
-        _external=True,
-    )
+    if user.activated:
+        log(log.INFO, "Sending email to active user: [%s]", user.email)
+        msg = Message(
+            subject="New password",
+            sender=app.config["MAIL_DEFAULT_SENDER"],
+            recipients=[user.email],
+        )
+        url = url_for(
+            "auth.password_recovery",
+            reset_password_uid=user.unique_id,
+            _external=True,
+        )
 
-    msg.html = render_template(
-        "email/set.html",
-        user=user,
-        url=url,
-    )
-    mail.send(msg)
+        msg.html = render_template(
+            "email/set.html",
+            user=user,
+            url=url,
+        )
+        mail.send(msg)
 
     return redirect(url_for("user.get_all"))
 
