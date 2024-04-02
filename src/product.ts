@@ -1405,15 +1405,19 @@ eventToggle.addEventListener('change', () => {
 
 
 
-// function selectUserGroupForProduct() {
-//   const selectUserGroup = document.querySelector('#select-user-group-for-product') as HTMLSelectElement;
-//   if (!selectUserGroup) return
-//   selectUserGroup.addEventListener('change', () => {
-//     const userGroupId = selectUserGroup.value;
-//     // const url = `/product/get_products_by_user_group?user_group_id=${userGroupId}`;
-//     // window.location.href
-//     // window.location.href = `${url.origin}${url.pathname}${url.search}`;
-//     console.log()
-//   })
+function selectUserGroupForProduct() {
+  const selectUserGroup = document.querySelector('#select-user-group-for-product') as HTMLSelectElement;
+  if (!selectUserGroup) return
+  selectUserGroup.addEventListener('change', () => {
+    const userGroupId = selectUserGroup.value;
+    // const url = `/product/get_products_by_user_group?user_group_id=${userGroupId}`;
+    // window.location.href
+    // window.location.href = `${url.origin}${url.pathname}${url.search}`;
+    const url = new URL(window.location.href);
+    url.searchParams.set('user_group_id', userGroupId);
+    window.location.reload();
+  })
   
-// }
+}
+
+selectUserGroupForProduct();
