@@ -397,22 +397,10 @@ $addButtonElements.forEach((e) =>
 
 let fetchedAmountByDate = [] as { date: string; quantity: number }[];
 
-async function getEventAvailableQuantity(product_id: number, group: string, calendarFilter: string[]) {
-  const response = await fetch(
-    `/event/get_available_quantity?group_name=${group.replace(
-      /_/g,
-      ' '
-    )}&product_id=${product_id}&dates=${JSON.stringify(calendarFilter)}`
-  );
-  const data = await response.json();
-  fetchedAmountByDate = data;
-
-  return data;
-}
-
 // search flow
 const searchInput: HTMLInputElement = document.querySelector('#table-search-products');
 const searchInputButton = document.querySelector('#table-search-product-button') as HTMLButtonElement;
+const selectUserGroup = document.querySelector('#select-user-group-for-product') as HTMLSelectElement;
 
 searchInputButton.addEventListener('click', () => {
   const url = new URL(window.location.href);
@@ -422,6 +410,7 @@ searchInputButton.addEventListener('click', () => {
     'is_stocks_own_by_me',
     'is_events_stocks_own_by_me',
     'is_events',
+    'user_group_id',
     'master_groups',
   ];
   searchParamsToDelete.forEach((param) => url.searchParams.delete(param));
@@ -430,6 +419,7 @@ searchInputButton.addEventListener('click', () => {
   allStocksInInventoryToggle.checked && url.searchParams.set('is_all_stocks_in_inventory', 'true');
   stocksByMeToggle.checked && url.searchParams.set('is_stocks_own_by_me', 'true');
   eventStocksOwnByMeToggle.checked && url.searchParams.set('is_events_stocks_own_by_me', 'true');
+  selectUserGroup && selectUserGroup.value && url.searchParams.set('user_group_id', selectUserGroup.value);
 
   const masterGroupsVales: string[] = [];
   filters.forEach((selector: HTMLSelectElement) => {
@@ -496,6 +486,7 @@ clearFilterButton.addEventListener('click', () => {
   stocksByMeToggle.checked = false;
   eventStocksOwnByMeToggle.checked = false;
   eventToggle.checked = false;
+  selectUserGroup.value = '';
   sessionStorage.removeItem('masterGroupValues');
   let url = new URL(window.location.href);
   url.search = '';
@@ -1402,22 +1393,3 @@ eventToggle.addEventListener('change', () => {
   }
   searchInputButton.click();
 });
-
-
-
-function selectUserGroupForProduct() {
-  const selectUserGroup = document.querySelector('#select-user-group-for-product') as HTMLSelectElement;
-  if (!selectUserGroup) return
-  selectUserGroup.addEventListener('change', () => {
-    const userGroupId = selectUserGroup.value;
-    // const url = `/product/get_products_by_user_group?user_group_id=${userGroupId}`;
-    // window.location.href
-    // window.location.href = `${url.origin}${url.pathname}${url.search}`;
-    const url = new URL(window.location.href);
-    url.searchParams.set('user_group_id', userGroupId);
-    window.location.reload();
-  })
-  
-}
-
-selectUserGroupForProduct();

@@ -17,6 +17,17 @@
           {% endfor %}
         </select>
         {% endfor %}
+        <select id="select-user-group-for-product" name="user_group_id"
+          class="mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+          <option value="" class="text-gray-900">Select regions</option>
+          {% for user_group in current_user.user_groups %}
+          {% if user_group_id and user_group.id == user_group_id %}
+          <option value="{{ user_group.id }}" selected>{{ user_group.name }}</option>
+          {% else %}
+          <option value="{{  user_group.id }}">{{ user_group.name }}</option>
+          {% endif %}
+          {% endfor %}
+        </select>
       </div>
 
       <button type="submit" id="product-filter-button" name="submit"
@@ -79,13 +90,7 @@
         <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Events</span>
       </label>
     </div>
-    <div><select id="select-user-group-for-product" name="user_group_id"
-        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-        <option selected>Select region</option>
-        {% for user_group in current_user.user_groups %}
-        <option value="{{  user_group.id }}">{{ user_group.name }}</option>
-        {% endfor %}
-      </select>
+    <div>
     </div>
   </div>
 

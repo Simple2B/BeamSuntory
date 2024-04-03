@@ -54,7 +54,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         "is_events_stocks_own_by_me", type=bool, default=False
     )
 
-    user_group_id = request.args.get("user_group_id", type=str, default="")
+    user_group_id = request.args.get("user_group_id", type=int, default="")
 
     master_groups = request.args.get("master_groups", type=str, default="")
     master_groups_list = master_groups.split(",")
@@ -328,6 +328,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         "is_events_stocks_own_by_me": is_events_stocks_own_by_me,
         "is_stocks_own_by_me": is_stocks_own_by_me,
         "is_all_stocks_in_inventory": is_all_stocks_in_inventory,
+        "user_group_id": user_group_id,
         "master_groups_search": master_groups_search,
         "master_product_groups_name": master_group_product_name,
         "suppliers": [s for s in suppliers],
@@ -406,6 +407,7 @@ def get_all():
         master_groups_list=products_object["master_groups_list"],
         is_all_stocks_in_inventory=products_object["is_all_stocks_in_inventory"],
         is_stocks_own_by_me=products_object["is_stocks_own_by_me"],
+        user_group_id=products_object["user_group_id"],
         is_events_stocks_own_by_me=products_object["is_events_stocks_own_by_me"],
         is_events=products_object["is_events"],
         main_master_groups=products_object["master_groups"],
