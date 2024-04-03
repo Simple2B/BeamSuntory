@@ -10,6 +10,7 @@ from .supplier import Supplier
 from .warehouse import Warehouse
 from .product_allocated import ProductAllocated
 from .report_inventory import ReportInventoryList
+from .utils import START_ORDER_NUMBER
 
 
 class InboundOrder(db.Model, ModelMixin):
@@ -65,7 +66,7 @@ class InboundOrder(db.Model, ModelMixin):
     )
 
     def set_order_id(self):
-        self.order_id = f"IO-BEAM-{1000 + self.id}"
+        self.order_id = f"Beam-IB-{START_ORDER_NUMBER + self.id}"
 
     def __repr__(self):
         return f"<{self.id}: {self.order_id}>"

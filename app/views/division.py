@@ -77,12 +77,12 @@ def save():
             flash("Cannot save role", "danger")
             return redirect(url_for("division.get_all"))
 
-        if d.role_name in s.UserRole.list():
+        if d.role_name in s.UserRole.list() and not d.label_role_name:
             log(log.ERROR, "Cannot edit role with name: [%s]", d.role_name)
             flash(f"Cannot edit role: {d.role_name}", "danger")
             return redirect(url_for("division.get_all"))
 
-        d.role_name = form.role_name.data
+        d.label_role_name = form.role_name.data
         d.activated = form.activated.data
         d.save()
 
@@ -105,14 +105,20 @@ def create():
         flash("This role is already taken.", "danger")
         return redirect(url_for("division.get_all"))
     if form.validate_on_submit():
+        # not mistake, set role_name to as s.UserRole.MANAGER.value
         division = m.Division(
-            role_name=form.role_name.data,
+            role_name=s.UserRole.MANAGER.value,
             activated=form.activated.data,
+            label_role_name=form.role_name.data,
         )
-        query = m.Division.select().where(m.Division.role_name == division.role_name)
+        query = m.Division.select().where(
+            m.Division.label_role_name == division.label_role_name
+        )
 
         if db.session.scalar(query) is not None:
-            log(log.INFO, "Cannot create role with name: [%s]", division.role_name)
+            log(
+                log.INFO, "Cannot create role with name: [%s]", division.label_role_name
+            )
             flash("This role is already taken.", "danger")
             return redirect(url_for("division.get_all"))
         log(log.INFO, "Form submitted. Division: [%s]", division)
@@ -135,7 +141,7 @@ def delete(id: int):
         flash("There is no such role", "danger")
         return "no role", 404
 
-    if division.role_name in s.UserRole.list():
+    if division.role_name in s.UserRole.list() and not division.label_role_name:
         log(log.ERROR, "Cannot delete role with name: [%s]", division.role_name)
         flash(f"Cannot delete role: {division.role_name}", "danger")
         return redirect(url_for("division.get_all"))

@@ -30,6 +30,24 @@ def init(app: Flask):
             populate(count)
             print(f"DB populated by {count} instancies")
 
+    @app.cli.command("up-order-number")
+    def update_order_number():
+        """Update order number"""
+        ship_requests: list[m.ShipRequest] = db.session.scalars(
+            m.ShipRequest.select()
+        ).all()
+        for ship_request in ship_requests:
+            ship_request.set_order_numb()
+            for cart in ship_request.carts:
+                cart.order_numb = ship_request.order_numb
+        db.session.commit()
+        inbound_orders: list[m.InboundOrder] = db.session.scalars(
+            m.InboundOrder.select()
+        ).all()
+        for inbound_order in inbound_orders:
+            inbound_order.set_order_id()
+        db.session.commit()
+
     @app.cli.command("add-stores")
     def add_stores():
         """Add stores from excel file."""

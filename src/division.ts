@@ -14,6 +14,7 @@ interface IDivision {
   type: string;
   parent_role: string;
   activated: boolean;
+  label_role_name: string | null;
   possible_parent_roles: Array<string>;
 }
 
@@ -60,9 +61,7 @@ const searchInputButton = document.querySelector(
 
 if (searchInputButton && searchInput) {
   searchInputButton.addEventListener('click', () => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('q', searchInput.value);
-    window.location.href = `${url.href}`;
+    window.location.href = `${window.location.origin}${window.location.pathname}?q=${searchInput.value}`;
   });
 }
 const deleteButtons = document.querySelectorAll('.delete-division-btn');
@@ -86,7 +85,7 @@ function editDivision(division: IDivision) {
   let input: HTMLInputElement = document.querySelector(
     '#division-edit-role-name',
   );
-  input.value = division.role_name;
+  input.value = division.label_role_name || '';
   input = document.querySelector('#division-edit-id');
   input.value = division.id.toString();
 
