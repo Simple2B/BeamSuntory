@@ -122,10 +122,11 @@ def get_all():
         sales_rep_locker = db.session.execute(
             m.Store.select().where(m.Store.user_id == current_user.id)
         ).scalar()
-        locker_store_category_ids = [
-            sales_rep_locker.id,
-            sales_rep_locker.store_category_id,
-        ]
+        if sales_rep_locker:
+            locker_store_category_ids = [
+                sales_rep_locker.id,
+                sales_rep_locker.store_category_id,
+            ]
     current_user_role_name = (
         db.session.execute(
             m.Division.select().where(m.Division.id == current_user.role)
@@ -180,7 +181,11 @@ def get_all():
 @cart_blueprint.route("/create/<warehouse_product_id>", methods=["POST", "GET"])
 @login_required
 @role_required(
-    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.SALES_REP.value,
+    ]
 )
 def create(warehouse_product_id: int):
     form: f.NewCartForm = f.NewCartForm()
