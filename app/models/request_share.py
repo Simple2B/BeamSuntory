@@ -42,6 +42,9 @@ class RequestShare(db.Model, ModelMixin):
     from_group: orm.Mapped[Group] = orm.relationship(foreign_keys=[from_group_id])
     user: orm.Mapped["User"] = orm.relationship()
 
+    def __repr__(self):
+        return f"<RequestShare {self.id} user: {self.user_id}>"
+
     @property
     def json(self):
         return s.RequestShare.model_validate(self).model_dump_json()

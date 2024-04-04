@@ -1042,10 +1042,17 @@ def adjust():
         )
         db.session.add(adjust_item)
         is_adjust_products = False
-        model_root = s.ProductWarehouseRoot.model_validate_json(
-            form.warehouses_groups_quantity.data
-        )
-        warehouses_groups_qty = model_root.root
+
+        try:
+            model_root = s.ProductWarehouseRoot.model_validate_json(
+                form.warehouses_groups_quantity.data
+            )
+            warehouses_groups_qty = model_root.root
+        except ValidationError as e:
+            log(log.ERROR, "Adjust model_root validate errors: [%s]", e)
+            flash("Data is not valid", "danger")
+            return redirect(url_for("product.get_all", **query_params))
+
         product = db.session.get(m.Product, form.product_id.data)
         warehouse_event: m.Warehouse = db.session.scalar(
             m.Warehouse.select().where(
