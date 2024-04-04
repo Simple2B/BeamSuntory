@@ -68,7 +68,11 @@
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
+            {% if user.role_obj.label_role_name %}
+            <div class="text-base font-semibold">{{ user.role_obj.label_role_name }}</div>
+            {% else %}
             <div class="text-base font-semibold">{{ user.role_obj.role_name }}</div>
+            {% endif %}
           </div>
         </td>
         <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
