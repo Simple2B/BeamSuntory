@@ -156,6 +156,8 @@
             </svg>
             Edit store
           </button>
+          {% if current_user.role_obj.role_name in admin_manager_roles %}
+
           <button data-store-id={{ store.id }} type="button"
             class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900 delete-store-btn">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -165,6 +167,7 @@
             </svg>
             Delete store
           </button>
+          {% endif %}
         </td>
       </tr>
       {% endif %}

@@ -16,6 +16,8 @@ from app import models as m, db
 from app import forms as f
 from app.logger import log
 
+from app.constants import DELIVERY_AGENT_ROLES
+
 # NOTE pickup inbound IS inbound order. Meaning goods going from supplier to warehouse
 pickup_inbound_blueprint = Blueprint(
     "pickup_inbound", __name__, url_prefix="/pickup_inbound"
@@ -60,7 +62,7 @@ def get_pickup_inbound():
 
 @pickup_inbound_blueprint.route("/", methods=["GET"])
 @login_required
-@role_required([s.UserRole.ADMIN.value, s.UserRole.DELIVERY_AGENT.value])
+@role_required(DELIVERY_AGENT_ROLES)
 def get_all():
     form_edit: f.ShipRequestForm = f.ShipRequestForm()
     return render_template(
@@ -78,7 +80,7 @@ def get_all():
 
 @pickup_inbound_blueprint.route("/pickup", methods=["POST"])
 @login_required
-@role_required([s.UserRole.ADMIN.value, s.UserRole.DELIVERY_AGENT.value])
+@role_required(DELIVERY_AGENT_ROLES)
 def pickup():
     form_pickup: f.InboundOrderPickupForm = f.InboundOrderPickupForm()
 
@@ -132,7 +134,7 @@ def pickup():
     "/sort", methods=["GET", "POST"]
 )  # TODO move pickup inbound sort to GET with params
 @login_required
-@role_required([s.UserRole.ADMIN.value, s.UserRole.DELIVERY_AGENT.value])
+@role_required(DELIVERY_AGENT_ROLES)
 def sort():
     pagination, orders = get_pickup_inbound()
 

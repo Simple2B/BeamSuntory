@@ -41,10 +41,7 @@ def test_create_warehouse(mg_g_populate: FlaskClient):
     assert len(warehouses_rows_objs) > 0
     logout(mg_g_populate)
 
-    role = db.session.execute(
-        m.Division.select().where(m.Division.role_name == "Manager")  # TODO ?
-    ).scalar()
-    register("samm", "samm@test.com", role=role)
+    register("samm", "samm@test.com", role_name=s.UserRole.WAREHOUSE_MANAGER.value)
     login(mg_g_populate, "samm")
 
     response = mg_g_populate.post(
@@ -79,7 +76,7 @@ def test_edit_warehouse(mg_g_populate: FlaskClient):
     role_sales = db.session.scalar(
         m.Division.select().where(m.Division.role_name == s.UserRole.SALES_REP.value)
     )
-    register("samm", "samm@test.com", role=role_sales)
+    register("samm", "samm@test.com", role_name=s.UserRole.SALES_REP.value)
     cur_user = db.session.scalar(m.User.select().where(m.User.role_obj == role_sales))
     response = mg_g_populate.post(
         "/warehouse/edit",

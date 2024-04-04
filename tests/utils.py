@@ -12,14 +12,11 @@ def register(
     username=TEST_ADMIN_NAME,
     email=TEST_ADMIN_EMAIL,
     password=TEST_ADMIN_PASSWORD,
-    role=None,
+    role_name=s.UserRole.ADMIN.value,
 ):
     create_default_divisions()
 
-    if not role:
-        role = db.session.scalar(
-            Division.select().where(Division.role_name == s.UserRole.ADMIN.value)
-        )
+    role = db.session.scalar(Division.select().where(Division.role_name == role_name))
 
     user = User(
         username=username,

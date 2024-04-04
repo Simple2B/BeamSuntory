@@ -44,7 +44,7 @@
         </a>
       </li>
       {% endif %}
-      {% if user_role in admin_roles %}
+      {% if user_role in warehouse_roles %}
       <li>
         <!-- prettier-ignore -->
         <a href="{{ url_for('inbound_order.get_all') }}"
@@ -95,7 +95,7 @@
           </ul>
         </div>
       </li>
-      {% if user_role in admin_manager_roles %}
+      {% if user_role in admin_manager_roles or user_role == "warehouse_manager" %}
       <li>
         <!-- prettier-ignore -->
         <a href="#"

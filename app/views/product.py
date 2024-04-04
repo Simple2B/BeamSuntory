@@ -440,7 +440,7 @@ def get_all():
 
 @product_blueprint.route("/create", methods=["POST"])
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def create():
     form: f.NewProductForm = f.NewProductForm()
     query_params = get_query_params_from_headers()
@@ -544,7 +544,7 @@ def create():
 
 @product_blueprint.route("/edit", methods=["POST"])
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def save():
     form: f.ProductForm = f.ProductForm()
     query_params = get_query_params_from_headers()
