@@ -32,7 +32,7 @@ inbound_order_blueprint = Blueprint(
 
 @inbound_order_blueprint.route("/", methods=["GET"])
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def get_all():
     form_create = f.InboundOrderUpdateForm()
     form_edit = f.InboundOrderUpdateForm()
@@ -109,7 +109,7 @@ def get_all():
 
 @inbound_order_blueprint.route("/create", methods=["POST"])
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def create():
     form = f.InboundOrderCreateForm()
 
@@ -228,7 +228,7 @@ def create():
 
 @inbound_order_blueprint.route("/save", methods=["POST"])
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def save():
     form = f.InboundOrderUpdateForm()
     if form.validate_on_submit():

@@ -23,7 +23,12 @@ store_blueprint = Blueprint("store", __name__, url_prefix="/store")
 @store_blueprint.route("/", methods=["GET"])
 @login_required
 @role_required(
-    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ]
 )
 def get_all():
     form_create: f.NewStoreForm = f.NewStoreForm()
@@ -100,7 +105,12 @@ def get_all():
 @store_blueprint.route("/save", methods=["POST"])
 @login_required
 @role_required(
-    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ]
 )
 def save():
     form: f.StoreForm = f.StoreForm()
@@ -141,7 +151,12 @@ def save():
 @store_blueprint.route("/create", methods=["POST"])
 @login_required
 @role_required(
-    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ]
 )
 def create():
     form: f.NewStoreForm = f.NewStoreForm()
@@ -198,7 +213,12 @@ def delete(id: int):
 @store_blueprint.route("/add-favorite", methods=["POST"])
 @login_required
 @role_required(
-    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ]
 )
 def add_favorite():
     store_user_ids = request.json

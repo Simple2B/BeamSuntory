@@ -18,7 +18,7 @@ from app import schema as s
 from app import models as m, db, mail
 from app import forms as f
 from app.logger import log
-
+from app.constants import DELIVERY_AGENT_ROLES
 
 # NOTE pickup order IS ship request. Meaning good going from warehouse to store
 pickup_order_blueprint = Blueprint("pickup_order", __name__, url_prefix="/pickup_order")
@@ -26,7 +26,7 @@ pickup_order_blueprint = Blueprint("pickup_order", __name__, url_prefix="/pickup
 
 @pickup_order_blueprint.route("/", methods=["GET"])
 @login_required
-@role_required([s.UserRole.ADMIN.value, s.UserRole.DELIVERY_AGENT.value])
+@role_required(DELIVERY_AGENT_ROLES)
 def get_all():
     # TODO needs to refactor
     form_create: f.NewShipRequestForm = f.NewShipRequestForm()
@@ -102,7 +102,7 @@ def get_all():
 
 @pickup_order_blueprint.route("/edit", methods=["POST"])
 @login_required
-@role_required([s.UserRole.ADMIN.value, s.UserRole.DELIVERY_AGENT.value])
+@role_required(DELIVERY_AGENT_ROLES)
 def save():
     form_edit: f.ShipRequestForm = f.ShipRequestForm()
     if form_edit.validate_on_submit():
@@ -148,7 +148,7 @@ def save():
 
 @pickup_order_blueprint.route("/update_notes", methods=["POST"])
 @login_required
-@role_required([s.UserRole.ADMIN.value, s.UserRole.DELIVERY_AGENT.value])
+@role_required(DELIVERY_AGENT_ROLES)
 def update_notes():
     form_edit: f.ShipRequestForm = f.ShipRequestForm()
     if form_edit.validate_on_submit():
@@ -187,7 +187,7 @@ def update_notes():
 
 @pickup_order_blueprint.route("/deliver/<int:id>", methods=["GET"])
 @login_required
-@role_required([s.UserRole.ADMIN.value, s.UserRole.DELIVERY_AGENT.value])
+@role_required(DELIVERY_AGENT_ROLES)
 def deliver(id: int):
     ship_request: m.ShipRequest = db.session.scalar(
         m.ShipRequest.select().where(m.ShipRequest.id == id)
@@ -235,7 +235,7 @@ def deliver(id: int):
 # TODO: need refactor
 @pickup_order_blueprint.route("/sort", methods=["GET", "POST"])
 @login_required
-@role_required([s.UserRole.ADMIN.value, s.UserRole.DELIVERY_AGENT.value])
+@role_required(DELIVERY_AGENT_ROLES)
 def sort():
     # TODO: handle GET request without
     if (
