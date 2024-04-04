@@ -96,9 +96,7 @@ const searchInput: HTMLInputElement = document.querySelector('#table-search-user
 const searchInputButton = document.querySelector('#table-search-user-button');
 if (searchInputButton && searchInput) {
   searchInputButton.addEventListener('click', () => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('q', searchInput.value);
-    window.location.href = `${url.href}`;
+    window.location.href = `${window.location.origin}${window.location.pathname}?q=${searchInput.value}`;
   });
 }
 const deleteButtons = document.querySelectorAll('.delete-user-btn');

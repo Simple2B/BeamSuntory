@@ -2,6 +2,9 @@ import uuid
 from app import db
 
 
+START_ORDER_NUMBER = 10000
+
+
 def generate_uuid() -> str:
     return str(uuid.uuid4())
 

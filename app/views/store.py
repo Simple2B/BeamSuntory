@@ -31,7 +31,7 @@ def get_all():
 
     store_category = aliased(m.StoreCategory)
     q = request.args.get("q", type=str, default=None)
-    query = m.Store.select().order_by(m.Store.id)
+    query = m.Store.select().order_by(m.Store.store_name.asc())
     count_query = sa.select(sa.func.count()).select_from(m.Store)
     if q:
         query = (
@@ -45,7 +45,7 @@ def get_all():
                 | m.Store.email.ilike(f"%{q}%")
                 | store_category.name.ilike(f"%{q}%")
             )
-            .order_by(m.Store.id)
+            .order_by(m.Store.store_name.asc())
         )
         count_query = (
             sa.select(sa.func.count())

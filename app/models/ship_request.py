@@ -5,7 +5,7 @@ from sqlalchemy import orm
 
 from app.database import db
 from app import schema as s
-from .utils import ModelMixin
+from .utils import START_ORDER_NUMBER, ModelMixin
 
 from .cart import Cart
 from .store import Store
@@ -69,6 +69,9 @@ class ShipRequest(db.Model, ModelMixin):
         back_populates="ship_request"
     )
     user: orm.Mapped[User] = orm.relationship()
+
+    def set_order_numb(self):
+        self.order_numb = f"Beam-OB-{START_ORDER_NUMBER + self.id}"
 
     def __repr__(self):
         return f"<{self.id}: {self.order_numb}>"

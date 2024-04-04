@@ -416,6 +416,7 @@ searchInputButton.addEventListener('click', () => {
   searchParamsToDelete.forEach((param) => url.searchParams.delete(param));
 
   url.searchParams.set('q', searchInput.value);
+  url.searchParams.delete("page")
   allStocksInInventoryToggle.checked && url.searchParams.set('is_all_stocks_in_inventory', 'true');
   stocksByMeToggle.checked && url.searchParams.set('is_stocks_own_by_me', 'true');
   eventStocksOwnByMeToggle.checked && url.searchParams.set('is_events_stocks_own_by_me', 'true');

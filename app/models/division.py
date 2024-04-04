@@ -14,8 +14,10 @@ class Division(db.Model, ModelMixin):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
     role_name: orm.Mapped[str] = orm.mapped_column(
         sa.String(64),
-        unique=True,
         nullable=False,
+    )
+    label_role_name: orm.Mapped[str | None] = orm.mapped_column(
+        sa.String(64),
     )
     activated: orm.Mapped[bool] = orm.mapped_column(sa.Boolean, default=False)
 

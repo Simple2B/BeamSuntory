@@ -1,6 +1,6 @@
 <!-- Modal content -->
-<div tabindex="-1" id="product-view-modal-element" hx-get="{{ url_for('main.no_content') }}" hx-trigger="click" hx-swap="delete"
-  hx-target="#product-view-modal-element"
+<div tabindex="-1" id="product-view-modal-element" hx-get="{{ url_for('main.no_content') }}" hx-trigger="click"
+  hx-swap="delete" hx-target="#product-view-modal-element"
   class="fixed bg-opacity-80 bg-gray-600 top-0 left-0 right-0 z-50 items-center justify-center w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full max-h-full justify-end items-end flex">
   <div class="rounded-lg relative w-full max-w-2xl max-h-full bg-white" onclick="event.stopPropagation();">
 
@@ -49,6 +49,7 @@
               {{ total_qty }}</div>
           </div>
           {% for warehouse_product in product.warehouse_products %}
+          {% if current_user.role_obj.role_name in required_role %}
           {% if warehouse_product.product_quantity > 0 and warehouse_product.group.name != "Events" %}
           <div class="col-span-6 sm:col-span-3">
             <label for="notes-location" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{
@@ -134,6 +135,7 @@
               Booking
             </button>
           </div>
+          {% endif %}
           {% endif %}
           {% endfor %}
 

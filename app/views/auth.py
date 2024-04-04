@@ -16,8 +16,8 @@ auth_blueprint = Blueprint("auth", __name__)
 def login():
     form = f.LoginForm(request.form)
     if form.validate_on_submit():
+        log(log.INFO, "Form submitted. User: [%s]", form.user_id.data)
         user = m.User.authenticate(form.user_id.data, form.password.data)
-        log(log.INFO, "Form submitted. User: [%s]", user)
         if user:
             login_user(user)
             app.jinja_env.globals["user_role"] = user

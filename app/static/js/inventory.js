@@ -1,1 +1,1 @@
-(()=>{var e=document.querySelector("#table-search-inventory"),n=document.querySelector("#table-search-inventory-button");n&&e&&n.addEventListener("click",(function(){var n=new URL(window.location.href);n.searchParams.set("q",e.value),window.location.href="".concat(n.href)}))})();
+(()=>{var n=document.querySelector("#table-search-inventory"),o=document.querySelector("#table-search-inventory-button");o&&n&&o.addEventListener("click",(function(){window.location.href="".concat(window.location.origin).concat(window.location.pathname,"?q=").concat(n.value)}))})();

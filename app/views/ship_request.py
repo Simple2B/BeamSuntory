@@ -182,7 +182,9 @@ def create():
             order_type="store_delivery",
             user_id=current_user.id,
         )
-        db.session.add(ship_request)
+        ship_request.save()
+        ship_request.set_order_numb()
+        db.session.commit()
 
         # Create Report ship request
         report_shipping = m.ReportShipping(

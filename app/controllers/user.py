@@ -34,6 +34,7 @@ def role_required(required_role, has_approval_permission=False):
             if not current_user:
                 log(log.ERROR, "User is not authenticated")
                 abort(401)
+
             if current_user.role_obj.role_name not in required_role:
                 log(
                     log.ERROR,

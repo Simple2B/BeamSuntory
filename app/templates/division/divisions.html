@@ -62,7 +62,14 @@
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ division.role_name}}</div>
+            <div class="text-base font-semibold">
+              {% if division.label_role_name %}
+              {{ division.label_role_name }}
+              {% else %}
+              {{ division.role_name}}
+              {% endif %}
+            </div>
+
           </div>
         </td>
         <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
@@ -76,7 +83,7 @@
           </div>{% endif %}
         </td>
         <td class="p-4 space-x-2 whitespace-nowrap">
-          {% if division.role_name.lower() not in all_main_user_roles %}
+          {% if division.label_role_name %}
           <button type="button" data-target="{{ division.json }}"
             class="division-edit-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 sm:w-auto dark:bg-yellow-400 dark:hover:bg-yellow-500">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
