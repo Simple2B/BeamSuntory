@@ -210,8 +210,7 @@ def create(warehouse_product_id: int):
         return render_template(
             "product/ship.html", form=form, warehouse_product=warehouse_product
         )
-    # url = request.referrer
-    # query = url_parse(url).query if url else None
+
     if form.validate_on_submit():
         if form.quantity.data > warehouse_product.product_quantity:
             flash("Not enough products in stock", "danger")
@@ -233,8 +232,7 @@ def create(warehouse_product_id: int):
         flash(f"{form.errors}", "danger")
         if is_event:
             return redirect(url_for("product.get_all", is_event="true", **query_params))
-        # if query:
-        #     return redirect(url_for("product.get_all"))
+
         return redirect(url_for("product.get_all", **query_params))
 
 

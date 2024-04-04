@@ -379,6 +379,11 @@ def product_view(id: int):
         total_qty=total_qty,
         is_events=is_events,
         warehouses=warehouses,
+        required_role=[
+            s.UserRole.ADMIN.value,
+            s.UserRole.MANAGER.value,
+            s.UserRole.SALES_REP.value,
+        ],
     )
 
 
@@ -686,10 +691,7 @@ def delete(id: int):
 @product_blueprint.route("/assign/<warehouse_product_id>", methods=["GET"])
 @login_required
 @role_required(
-    [
-        s.UserRole.ADMIN.value,
-        s.UserRole.MANAGER.value,
-    ]
+    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
 )
 def get_assign_form(warehouse_product_id: int):
     form: f.AssignProductForm = f.AssignProductForm()
@@ -716,10 +718,7 @@ def get_assign_form(warehouse_product_id: int):
 @product_blueprint.route("/assign/groups", methods=["GET"])
 @login_required
 @role_required(
-    [
-        s.UserRole.ADMIN.value,
-        s.UserRole.MANAGER.value,
-    ]
+    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
 )
 def get_assign_groups():
     master_group_id = request.args.get("master_group", type=int, default=0)
@@ -741,10 +740,7 @@ def get_assign_groups():
 @product_blueprint.route("/assign", methods=["POST"])
 @login_required
 @role_required(
-    [
-        s.UserRole.ADMIN.value,
-        s.UserRole.MANAGER.value,
-    ]
+    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
 )
 def assign():
     form: f.AssignProductForm = f.AssignProductForm()
