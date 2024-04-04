@@ -41,7 +41,7 @@ def test_create_warehouse(mg_g_populate: FlaskClient):
     assert len(warehouses_rows_objs) > 0
     logout(mg_g_populate)
 
-    register("samm", "samm@test.com", role_name=s.UserRole.MANAGER.value)
+    register("samm", "samm@test.com", role_name=s.UserRole.WAREHOUSE_MANAGER.value)
     login(mg_g_populate, "samm")
 
     response = mg_g_populate.post(
