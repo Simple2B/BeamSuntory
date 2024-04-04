@@ -9,7 +9,7 @@ def test_pickup_orders_pages(client):
     response = client.get("/pickup_order/")
     assert response.status_code == 302
 
-    register("samg", "samg@test.com")
+    register("samg", "samg@test.com", role_name=s.UserRole.WAREHOUSE_MANAGER.value)
     response = login(client, "samg")
     assert b"Login successful." in response.data
 
@@ -18,7 +18,6 @@ def test_pickup_orders_pages(client):
 
 
 def test_deliver_pickup_order(mg_g_populate: FlaskClient):
-    login(mg_g_populate)
 
     order_to_pickup: m.ShipRequest = db.session.execute(
         m.ShipRequest.select().where(
@@ -29,6 +28,8 @@ def test_deliver_pickup_order(mg_g_populate: FlaskClient):
     assert order_to_pickup
     assert order_to_pickup.status == s.ShipRequestStatus.in_transit
 
+    register("samg", "samg@test.com", role_name=s.UserRole.DELIVERY_AGENT.value)
+    login(mg_g_populate, "samg")
     mg_g_populate.get(f"/pickup_order/deliver/{order_to_pickup.id}")
 
     order_to_pickup: m.ShipRequest = db.session.execute(
@@ -41,8 +42,9 @@ def test_deliver_pickup_order(mg_g_populate: FlaskClient):
 
 
 def test_sort_pickup_order(mg_g_populate: FlaskClient):
-    login(mg_g_populate)
 
+    register("samg", "samg@test.com", role_name=s.UserRole.DELIVERY_AGENT.value)
+    login(mg_g_populate, "samg")
     response = mg_g_populate.post(
         "/pickup_order/sort",
         data=dict(sort_by=s.ShipRequestStatus.in_transit.value),
@@ -78,7 +80,7 @@ def test_sort_pickup_order(mg_g_populate: FlaskClient):
 
 
 def test_edit_pickup_order(mg_g_populate: FlaskClient):
-    register("samg", "samg@test.com")
+    register("samg", "samg@test.com", role_name=s.UserRole.WAREHOUSE_MANAGER.value)
     login(mg_g_populate, "samg")
 
     order_to_dispatch: m.ShipRequest = db.session.execute(

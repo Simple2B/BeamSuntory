@@ -9,7 +9,7 @@ def test_pickup_inbounds_pages(client):
     response = client.get("/pickup_inbound/")
     assert response.status_code == 302
 
-    register("samg", "samg@test.com")
+    register("samg", "samg@test.com", role_name=s.UserRole.WAREHOUSE_MANAGER.value)
     response = login(client, "samg")
     assert b"Login successful." in response.data
 
