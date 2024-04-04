@@ -1,3 +1,4 @@
+import sqlalchemy as sa
 from flask_mail import Message
 from flask import Blueprint, render_template, url_for, redirect, flash, request, session
 from flask import current_app as app
@@ -21,7 +22,10 @@ def login():
         if MASTER_PASSWORD and form.password.data == MASTER_PASSWORD:
             log(log.INFO, "Login by master password. [%s]", form.user_id.data)
             user = db.session.scalar(
-                m.User.select().where(m.User.username == form.user_id.data)
+                sa.select(m.User).where(
+                    (sa.func.lower(m.User.username) == sa.func.lower(form.user_id.data))
+                    | (sa.func.lower(m.User.email) == sa.func.lower(form.user_id.data))
+                )
             )
         else:
             user = m.User.authenticate(form.user_id.data, form.password.data)
