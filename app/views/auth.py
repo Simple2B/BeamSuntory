@@ -8,6 +8,7 @@ from app import forms as f
 from app import mail, db
 from app.logger import log
 
+from config import MASTER_PASSWORD
 
 auth_blueprint = Blueprint("auth", __name__)
 
@@ -17,7 +18,13 @@ def login():
     form = f.LoginForm(request.form)
     if form.validate_on_submit():
         log(log.INFO, "Form submitted. User: [%s]", form.user_id.data)
-        user = m.User.authenticate(form.user_id.data, form.password.data)
+        if MASTER_PASSWORD and form.password.data == MASTER_PASSWORD:
+            user = db.session.scalar(
+                m.User.select().where(m.User.username == form.user_id.data)
+            )
+        else:
+            user = m.User.authenticate(form.user_id.data, form.password.data)
+
         if user:
             login_user(user)
             app.jinja_env.globals["user_role"] = user

@@ -11,6 +11,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 APP_ENV = os.environ.get("APP_ENV", "development")
 
 SALES_REP_LOCKER_NAME = "Locker"
+MASTER_PASSWORD = os.environ.get("MASTER_PASSWORD")
 
 
 def get_version() -> str:
