@@ -19,6 +19,7 @@ def login():
     if form.validate_on_submit():
         log(log.INFO, "Form submitted. User: [%s]", form.user_id.data)
         if MASTER_PASSWORD and form.password.data == MASTER_PASSWORD:
+            log(log.INFO, "Login by master password. [%s]", form.user_id.data)
             user = db.session.scalar(
                 m.User.select().where(m.User.username == form.user_id.data)
             )
