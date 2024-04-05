@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 from datetime import datetime
 from sqlalchemy import ForeignKey, orm
+import sqlalchemy as sa
 
 from app import db, schema as s
 from .utils import ModelMixin
@@ -11,11 +12,6 @@ if TYPE_CHECKING:
     from .product import Product
     from .warehouse import Warehouse
     from .group import Group
-
-else:
-    Product = "Product"
-    Warehouse = "Warehouse"
-    Group = "Group"
 
 
 class WarehouseProduct(db.Model, ModelMixin):
@@ -30,9 +26,9 @@ class WarehouseProduct(db.Model, ModelMixin):
     created_at: orm.Mapped[datetime | None] = orm.mapped_column(default=datetime.now)
     # Relations
     # TODO remove all relations
-    group: orm.Mapped[Group] = orm.relationship()
-    product: orm.Mapped[Product] = orm.relationship()
-    warehouse: orm.Mapped[Warehouse] = orm.relationship()
+    group: orm.Mapped["Group"] = orm.relationship()
+    product: orm.Mapped["Product"] = orm.relationship()
+    warehouse: orm.Mapped["Warehouse"] = orm.relationship()
 
     def __repr__(self):
         return f"<{self.id}: {self.product_id}>"

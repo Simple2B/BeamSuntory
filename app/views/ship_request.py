@@ -171,13 +171,13 @@ def create():
     ).all()
 
     for cart in carts:
-        we_ho_product_quantit = db.session.execute(
-            sa.select(sa.func.sum(m.WarehouseProduct.product_quantity)).where(
+        we_ho_product = db.session.scalar(
+            sa.select(m.WarehouseProduct).where(
                 m.WarehouseProduct.group_id == cart.group_id,
                 m.WarehouseProduct.product_id == cart.product_id,
             )
-        ).scalar()
-        if not we_ho_product_quantit:
+        )
+        if not we_ho_product:
             flash("There is not enough in the warehouse", "danger")
             log(
                 log.INFO,
@@ -186,21 +186,13 @@ def create():
             )
             return redirect(url_for("cart.get_all"))
 
-        ordered_quantity = db.session.execute(
-            sa.select(sa.func.sum(m.Cart.quantity))
-            .join(m.ShipRequest)
-            .where(
-                m.Cart.product_id == cart.product_id,
-                m.Cart.group_id == cart.group_id,
-                m.Cart.status == "submitted",
-                m.ShipRequest.status == "waiting_for_warehouse",
-            )
-        ).scalar()
+        quantity = sum(
+            c.quantity
+            for c in carts
+            if c.product_id == cart.product_id and cart.group_id == c.group_id
+        )
 
-        if (
-            ordered_quantity
-            and ordered_quantity + cart.quantity > we_ho_product_quantit
-        ) or cart.quantity > we_ho_product_quantit:
+        if quantity > we_ho_product.product_quantity:
             log(
                 log.INFO,
                 "There is not enough product in the warehouse: [%s]",
@@ -286,6 +278,16 @@ def create():
             type=s.ReportSKUType.ship_request.value,
             status="Ship request created.",
         ).save(False)
+
+        we_ho_product = db.session.scalar(
+            sa.select(m.WarehouseProduct).where(
+                m.WarehouseProduct.group_id == cart.group_id,
+                m.WarehouseProduct.product_id == cart.product_id,
+            )
+        )
+        if we_ho_product:
+            we_ho_product.product_quantity -= cart.quantity
+            we_ho_product.save(False)
 
         cart.status = "submitted"
         cart.order_numb = ship_request.order_numb

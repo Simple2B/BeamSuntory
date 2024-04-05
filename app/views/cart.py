@@ -215,19 +215,24 @@ def create(warehouse_product_id: int):
         if form.quantity.data > warehouse_product.product_quantity:
             flash("Not enough products in stock", "danger")
             return redirect(url_for("product.get_all"))
-        cart_product_amount = db.session.execute(
-            sa.select(sa.func.sum(m.Cart.quantity)).where(
-                m.Cart.user_id == current_user.id,
-                m.Cart.product_id == warehouse_product.product_id,
-                m.Cart.group_id == warehouse_product.group_id,
-                m.Cart.status == "pending",
+        cart_product_amount: list[int] = (
+            db.session.execute(
+                sa.select(sa.func.sum(m.Cart.quantity)).where(
+                    m.Cart.user_id == current_user.id,
+                    m.Cart.product_id == warehouse_product.product_id,
+                    m.Cart.group_id == warehouse_product.group_id,
+                    m.Cart.status == "pending",
+                )
             )
-        ).scalar()
+            .scalars()
+            .all()
+        )
         new_quantity = int(form.quantity.data)
 
         if (
             cart_product_amount
-            and cart_product_amount + new_quantity > warehouse_product.product_quantity
+            and sum(amount for amount in cart_product_amount if amount) + new_quantity
+            > warehouse_product.product_quantity
         ):
             log(log.ERROR, "The cart is full,not enough products in stock")
             flash("The cart is full, not enough products in stock", "danger")
@@ -284,18 +289,22 @@ def save():
         flash("Cannot save item data", "danger")
         return redirect(url_for("cart.get_all"))
 
-    cart_product_amount = db.session.execute(
-        sa.select(sa.func.sum(m.Cart.quantity)).where(
-            m.Cart.id != cart.id,
-            m.Cart.user_id == current_user.id,
-            m.Cart.product_id == cart.product_id,
-            m.Cart.group_id == cart.group_id,
-            m.Cart.status == "pending",
+    cart_product_amount = (
+        db.session.execute(
+            sa.select(sa.func.sum(m.Cart.quantity)).where(
+                m.Cart.id != cart.id,
+                m.Cart.user_id == current_user.id,
+                m.Cart.product_id == cart.product_id,
+                m.Cart.group_id == cart.group_id,
+                m.Cart.status == "pending",
+            )
         )
-    ).scalar()
+        .scalars()
+        .all()
+    )
     if (
         cart_product_amount
-        and cart_product_amount + form.quantity.data
+        and sum(amount for amount in cart_product_amount if amount) + form.quantity.data
         > warehouse_product.product_quantity
     ) or form.quantity.data > warehouse_product.product_quantity:
         log(log.ERROR, "The cart is full, not enough products in stock")
