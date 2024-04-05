@@ -27,14 +27,15 @@ class WarehouseProduct(db.Model, ModelMixin):
     group_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("groups.id"))
     # Columns
     product_quantity: orm.Mapped[int] = orm.mapped_column(nullable=False)
-    created_at: orm.Mapped[datetime | None] = orm.mapped_column(
-        default=datetime.now
-    )
+    created_at: orm.Mapped[datetime | None] = orm.mapped_column(default=datetime.now)
     # Relations
     # TODO remove all relations
     group: orm.Mapped[Group] = orm.relationship()
     product: orm.Mapped[Product] = orm.relationship()
     warehouse: orm.Mapped[Warehouse] = orm.relationship()
+
+    def __repr__(self):
+        return f"<{self.id}: {self.product_id}>"
 
     @property
     def json(self):

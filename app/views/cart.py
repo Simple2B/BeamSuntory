@@ -215,10 +215,28 @@ def create(warehouse_product_id: int):
         if form.quantity.data > warehouse_product.product_quantity:
             flash("Not enough products in stock", "danger")
             return redirect(url_for("product.get_all"))
+        cart_product_amount = db.session.execute(
+            sa.select(sa.func.sum(m.Cart.quantity)).where(
+                m.Cart.user_id == current_user.id,
+                m.Cart.product_id == warehouse_product.product_id,
+                m.Cart.group_id == warehouse_product.group_id,
+                m.Cart.status == "pending",
+            )
+        ).scalar()
+        new_quantity = int(form.quantity.data)
+
+        if (
+            cart_product_amount
+            and cart_product_amount + new_quantity > warehouse_product.product_quantity
+        ):
+            log(log.ERROR, "The cart is full,not enough products in stock")
+            flash("The cart is full, not enough products in stock", "danger")
+            return redirect(url_for("product.get_all"))
+
         item = m.Cart(
             product_id=warehouse_product.product_id,
             group_id=warehouse_product.group_id,
-            quantity=int(form.quantity.data),
+            quantity=new_quantity,
             user_id=current_user.id,
         )
         log(log.INFO, "Form submitted. Cart: [%s]", item)
@@ -241,20 +259,52 @@ def create(warehouse_product_id: int):
 @role_required([s.UserRole.ADMIN.value, s.UserRole.MANAGER.value])
 def save():
     form: f.CartForm = f.CartForm()
-    if form.validate_on_submit():
-        query = m.Cart.select().where(m.Cart.id == int(form.cart_id.data))
-        c: m.Cart | None = db.session.scalar(query)
-        if not c:
-            log(log.ERROR, "Not found cart item by id : [%s]", form.cart_id.data)
-            flash("Cannot save item data", "danger")
-        c.quantity = form.quantity.data
-        c.save()
-        return redirect(url_for("cart.get_all"))
-
-    else:
+    if not form.validate_on_submit():
         log(log.ERROR, "Cart item save errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("cart.get_all"))
+
+    cart = db.session.scalar(
+        sa.select(m.Cart).where(m.Cart.id == int(form.cart_id.data))
+    )
+
+    if not cart:
+        log(log.ERROR, "Not found cart item by id : [%s]", form.cart_id.data)
+        flash("Cannot save item data", "danger")
+        return redirect(url_for("cart.get_all"))
+
+    warehouse_product = db.session.scalar(
+        sa.select(m.WarehouseProduct).where(
+            m.WarehouseProduct.product_id == cart.product_id,
+            m.WarehouseProduct.group_id == cart.group_id,
+        )
+    )
+    if not warehouse_product:
+        log(log.ERROR, "Not found warehouse product by id : [%s]", cart.product_id)
+        flash("Cannot save item data", "danger")
+        return redirect(url_for("cart.get_all"))
+
+    cart_product_amount = db.session.execute(
+        sa.select(sa.func.sum(m.Cart.quantity)).where(
+            m.Cart.id != cart.id,
+            m.Cart.user_id == current_user.id,
+            m.Cart.product_id == cart.product_id,
+            m.Cart.group_id == cart.group_id,
+            m.Cart.status == "pending",
+        )
+    ).scalar()
+    if (
+        cart_product_amount
+        and cart_product_amount + form.quantity.data
+        > warehouse_product.product_quantity
+    ) or form.quantity.data > warehouse_product.product_quantity:
+        log(log.ERROR, "The cart is full, not enough products in stock")
+        flash("The cart is full, not enough products in stock", "danger")
+        return redirect(url_for("cart.get_all"))
+
+    cart.quantity = form.quantity.data
+    cart.save()
+    return redirect(url_for("cart.get_all"))
 
 
 @cart_blueprint.route("/delete/<int:id>", methods=["DELETE"])

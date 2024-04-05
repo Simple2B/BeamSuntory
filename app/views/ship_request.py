@@ -22,8 +22,9 @@ ship_request_blueprint = Blueprint("ship_request", __name__, url_prefix="/ship_r
 
 def get_ship_request():
     filter_ship_request = s.FilterShipRequest.model_validate(dict(request.args))
-    query = m.ShipRequest.select().order_by(desc(m.ShipRequest.id))
-    count_query = sa.select(sa.func.count()).select_from(m.ShipRequest)
+    stm_where = sa.and_(m.ShipRequest.user_id == current_user.id)
+    query = m.ShipRequest.select().where(stm_where).order_by(desc(m.ShipRequest.id))
+    count_query = sa.select(sa.func.count()).where(stm_where).select_from(m.ShipRequest)
     if filter_ship_request.q:
         query = (
             m.ShipRequest.select()
@@ -120,155 +121,186 @@ def create():
         flash("Validation failed", "danger")
         log(log.ERROR, "Validation failed: [%s]", form_create.errors)
         return redirect(url_for("ship_request.get_all"))
-    if form_create.validate_on_submit():
-        # TODO move into form validation
-        event_date_range = form_create.event_date_range.data
-        start_date = None
-        end_date = None
-        if event_date_range:
-            current_date = datetime.now()
-            date_from = event_date_range.split(" - ")[0]
-            date_to = event_date_range.split(" - ")[1]
-            start_date = datetime.strptime(date_from, "%Y-%m-%d")
-            end_date = datetime.strptime(date_to, "%Y-%m-%d")
-            difference_date = start_date - current_date
 
-            if difference_date < timedelta(days=5):
-                flash("The event must be created more than 5 days in advance", "danger")
-                log(
-                    log.INFO,
-                    "The event must be created more than 5 days: [%s]",
-                    start_date,
-                )
-                return redirect(url_for("product.get_all"))
+    event_date_range = form_create.event_date_range.data
+    start_date = None
+    end_date = None
+    if event_date_range:
+        current_date = datetime.now()
+        date_from = event_date_range.split(" - ")[0]
+        date_to = event_date_range.split(" - ")[1]
+        start_date = datetime.strptime(date_from, "%Y-%m-%d")
+        end_date = datetime.strptime(date_to, "%Y-%m-%d")
+        difference_date = start_date - current_date
 
-        # Check for store
-        store = db.session.get(m.Store, form_create.store.data)
-        if not store:
-            flash("Store not found", "danger")
+        if difference_date < timedelta(days=5):
+            flash("The event must be created more than 5 days in advance", "danger")
             log(
                 log.INFO,
-                "Store not found: [%s]",
-                form_create.store.data,
+                "The event must be created more than 5 days: [%s]",
+                start_date,
             )
             return redirect(url_for("product.get_all"))
 
-        # Check for store category
-        store_category = db.session.get(
-            m.StoreCategory, form_create.store_category.data
+    # Check for store
+    store = db.session.get(m.Store, form_create.store.data)
+    if not store:
+        flash("Store not found", "danger")
+        log(
+            log.INFO,
+            "Store not found: [%s]",
+            form_create.store.data,
         )
-        if not store_category:
-            flash("Store category not found", "danger")
+        return redirect(url_for("product.get_all"))
+
+    # Check for store category
+    store_category = db.session.get(m.StoreCategory, form_create.store_category.data)
+    if not store_category:
+        flash("Store category not found", "danger")
+        log(
+            log.INFO,
+            "Store category not found: [%s]",
+            form_create.store_category.data,
+        )
+        return redirect(url_for("product.get_all"))
+
+    carts = db.session.scalars(
+        sa.select(m.Cart).where(
+            m.Cart.user_id == current_user.id, m.Cart.status == "pending"
+        )
+    ).all()
+
+    for cart in carts:
+        we_ho_product_quantit = db.session.execute(
+            sa.select(sa.func.sum(m.WarehouseProduct.product_quantity)).where(
+                m.WarehouseProduct.group_id == cart.group_id,
+                m.WarehouseProduct.product_id == cart.product_id,
+            )
+        ).scalar()
+        if not we_ho_product_quantit:
+            flash("There is not enough in the warehouse", "danger")
             log(
                 log.INFO,
-                "Store category not found: [%s]",
-                form_create.store_category.data,
+                "There is not enough in the warehouse: [%s]",
+                cart.product_id,
             )
-            return redirect(url_for("product.get_all"))
+            return redirect(url_for("cart.get_all"))
 
-        # check if there are events in the ship request
-        # if yes - create event report
-        events_exist = False
-
-        # Create ship request
-        ship_request = m.ShipRequest(
-            # NOTE: what status is default?
-            # TODO make shiprequest status UPPERCASE (Enum)
-            status=s.ShipRequestStatus.waiting_for_warehouse,
-            store=store,
-            store_category=store_category,
-            comment=form_create.comment.data,
-            # TODO: ask client about store_delivery
-            order_type="store_delivery",
-            user_id=current_user.id,
-        )
-        ship_request.save()
-        ship_request.set_order_numb()
-        db.session.commit()
-
-        # Create Report ship request
-        report_shipping = m.ReportShipping(
-            type=s.ReportShipRequestActionType.CREATED.value,
-            ship_request=ship_request,
-            user=current_user,
-        )
-
-        db.session.add(report_shipping)
-
-        warehouse_event = db.session.scalar(
-            m.Warehouse.select().where(
-                m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value,
+        ordered_quantity = db.session.execute(
+            sa.select(sa.func.sum(m.Cart.quantity))
+            .join(m.ShipRequest)
+            .where(
+                m.Cart.product_id == cart.product_id,
+                m.Cart.group_id == cart.group_id,
+                m.Cart.status == "submitted",
+                m.ShipRequest.status == "waiting_for_warehouse",
             )
-        )
+        ).scalar()
 
-        carts: list[m.Cart] = db.session.scalars(
-            m.Cart.select().where(
-                m.Cart.user_id == current_user.id, m.Cart.status == "pending"
+        if (
+            ordered_quantity
+            and ordered_quantity + cart.quantity > we_ho_product_quantit
+        ) or cart.quantity > we_ho_product_quantit:
+            log(
+                log.INFO,
+                "There is not enough product in the warehouse: [%s]",
+                cart.product_id,
             )
+            flash("There is not enough product in the warehouse", "danger")
+            return redirect(url_for("cart.get_all"))
+
+    events_exist = False
+
+    # Create ship request
+    ship_request = m.ShipRequest(
+        # NOTE: what status is default?
+        # TODO make shiprequest status UPPERCASE (Enum)
+        status=s.ShipRequestStatus.waiting_for_warehouse,
+        store=store,
+        store_category=store_category,
+        comment=form_create.comment.data,
+        # TODO: ask client about store_delivery
+        order_type="store_delivery",
+        user_id=current_user.id,
+    )
+    ship_request.save()
+    ship_request.set_order_numb()
+    db.session.commit()
+
+    # Create Report ship request
+    report_shipping = m.ReportShipping(
+        type=s.ReportShipRequestActionType.CREATED.value,
+        ship_request=ship_request,
+        user=current_user,
+    )
+
+    db.session.add(report_shipping)
+
+    warehouse_event = db.session.scalar(
+        m.Warehouse.select().where(
+            m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value,
         )
+    )
 
-        for cart in carts:
-            is_group_in_master_group = (
-                db.session.query(m.Group)
-                .join(m.MasterGroup)
-                .filter(
-                    m.MasterGroup.name == s.MasterGroupMandatory.events.value,
-                    m.Group.name == cart.group.name,
-                )
-                .count()
-                > 0
+    for cart in carts:
+        is_group_in_master_group = (
+            db.session.query(m.Group)
+            .join(m.MasterGroup)
+            .filter(
+                m.MasterGroup.name == s.MasterGroupMandatory.events.value,
+                m.Group.name == cart.group.name,
             )
-            if event_date_range and is_group_in_master_group:
-                report_event = m.ReportEvent(
-                    # TODO make report event type UPPERCASE (Enum)
-                    type=s.ReportEventType.created.value,
-                    user=current_user,
-                    ship_request=ship_request,
-                )
-                events_exist = True
-                # creation event
-                event = m.Event(
-                    date_reserve_from=start_date - timedelta(days=5),
-                    date_reserve_to=end_date + timedelta(days=5),
-                    date_from=start_date,
-                    date_to=end_date,
-                    quantity=cart.quantity,
-                    product_id=cart.product_id,
-                    cart_id=cart.id,
-                    comment=form_create.event_comment.data,
-                    user=current_user,
-                    group_id=cart.group_id,
-                )
-                db.session.add(event)
-                db.session.add(report_event)
-                log(log.INFO, "Event added. Event: [%s]", event)
-
-                cart.warehouse = warehouse_event
-
-            m.ReportSKU(
-                product_id=cart.product_id,
+            .count()
+            > 0
+        )
+        if event_date_range and is_group_in_master_group:
+            report_event = m.ReportEvent(
+                # TODO make report event type UPPERCASE (Enum)
+                type=s.ReportEventType.created.value,
+                user=current_user,
                 ship_request=ship_request,
-                type=s.ReportSKUType.ship_request.value,
-                status="Ship request created.",
-            ).save(False)
+            )
+            events_exist = True
+            # creation event
+            event = m.Event(
+                date_reserve_from=start_date - timedelta(days=5),
+                date_reserve_to=end_date + timedelta(days=5),
+                date_from=start_date,
+                date_to=end_date,
+                quantity=cart.quantity,
+                product_id=cart.product_id,
+                cart_id=cart.id,
+                comment=form_create.event_comment.data,
+                user=current_user,
+                group_id=cart.group_id,
+            )
+            db.session.add(event)
+            db.session.add(report_event)
+            log(log.INFO, "Event added. Event: [%s]", event)
 
-            cart.status = "submitted"
-            cart.order_numb = ship_request.order_numb
-            cart.ship_request_id = ship_request.id
-            cart.save()
+            cart.warehouse = warehouse_event
 
-        log(log.INFO, "Form submitted. Ship Request: [%s]", ship_request)
-        flash("Ship request added!", "success")
+        m.ReportSKU(
+            product_id=cart.product_id,
+            ship_request=ship_request,
+            type=s.ReportSKUType.ship_request.value,
+            status="Ship request created.",
+        ).save(False)
 
-        if events_exist:
-            ship_request.report_event = report_event
-            report_event.save(False)
+        cart.status = "submitted"
+        cart.order_numb = ship_request.order_numb
+        cart.ship_request_id = ship_request.id
+        cart.save()
 
-        db.session.commit()
+    log(log.INFO, "Form submitted. Ship Request: [%s]", ship_request)
+    flash("Ship request added!", "success")
 
-        return redirect(url_for("ship_request.get_all"))
+    if events_exist:
+        ship_request.report_event = report_event
+        report_event.save(False)
 
-    flash("Something went wrong!", "danger")
+    db.session.commit()
+
     return redirect(url_for("ship_request.get_all"))
 
 
