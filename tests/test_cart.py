@@ -82,7 +82,7 @@ def test_edit_cart(mg_g_populate: FlaskClient):
         "/cart/edit",
         data=dict(
             cart_id=cart_canada.id,
-            quantity=211,
+            quantity=10,
         ),
     )
     assert response.status_code == 302
@@ -92,7 +92,7 @@ def test_edit_cart(mg_g_populate: FlaskClient):
             m.Cart.group == group_canada,
             m.Cart.user_id == 1,
             m.Cart.product_id == 1,
-            m.Cart.quantity == 211,
+            m.Cart.quantity == 10,
         )
     ).all()
     assert len(carts_rows_objs) == 1

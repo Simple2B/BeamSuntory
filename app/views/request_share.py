@@ -34,8 +34,19 @@ def get_all():
 
     q = request.args.get("q", type=str, default=None)
     status = request.args.get("status", type=str, default=None)
-    query = m.RequestShare.select().order_by(m.RequestShare.id)
-    count_query = sa.select(sa.func.count()).select_from(m.RequestShare)
+    stm_where = sa.or_(
+        m.RequestShare.user_id == current_user.id,
+        sa.and_(
+            m.RequestShare.group_id.in_(
+                [group.id for group in current_user.user_groups]
+            ),
+            current_user.approval_permission,
+        ),
+    )
+    query = m.RequestShare.select().where(stm_where).order_by(m.RequestShare.id)
+    count_query = (
+        sa.select(sa.func.count()).where(stm_where).select_from(m.RequestShare)
+    )
     if q:
         search_by_q = (
             (m.RequestShare.product.has(m.Product.name.ilike(f"%{q}%")))
