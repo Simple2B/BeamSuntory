@@ -37,7 +37,7 @@ def get_all():
     stm_where = sa.or_(
         m.RequestShare.user_id == current_user.id,
         sa.and_(
-            m.RequestShare.group_id.in_(
+            m.RequestShare.from_group_id.in_(
                 [group.id for group in current_user.user_groups]
             ),
             current_user.approval_permission,

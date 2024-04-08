@@ -338,7 +338,7 @@ def notification():
     requests_share = db.session.scalars(
         sa.select(m.RequestShare).where(
             sa.and_(
-                m.RequestShare.group_id.in_(
+                m.RequestShare.from_group_id.in_(
                     [group.id for group in current_user.user_groups]
                 ),
                 current_user.approval_permission,

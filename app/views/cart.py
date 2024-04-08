@@ -211,52 +211,51 @@ def create(warehouse_product_id: int):
             "product/ship.html", form=form, warehouse_product=warehouse_product
         )
 
-    if form.validate_on_submit():
-        if form.quantity.data > warehouse_product.product_quantity:
-            flash("Not enough products in stock", "danger")
-            return redirect(url_for("product.get_all"))
-        cart_product_amount: list[int] = (
-            db.session.execute(
-                sa.select(sa.func.sum(m.Cart.quantity)).where(
-                    m.Cart.user_id == current_user.id,
-                    m.Cart.product_id == warehouse_product.product_id,
-                    m.Cart.group_id == warehouse_product.group_id,
-                    m.Cart.status == "pending",
-                )
-            )
-            .scalars()
-            .all()
-        )
-        new_quantity = int(form.quantity.data)
-
-        if (
-            cart_product_amount
-            and sum(amount for amount in cart_product_amount if amount) + new_quantity
-            > warehouse_product.product_quantity
-        ):
-            log(log.ERROR, "The cart is full,not enough products in stock")
-            flash("The cart is full, not enough products in stock", "danger")
-            return redirect(url_for("product.get_all"))
-
-        item = m.Cart(
-            product_id=warehouse_product.product_id,
-            group_id=warehouse_product.group_id,
-            quantity=new_quantity,
-            user_id=current_user.id,
-        )
-        log(log.INFO, "Form submitted. Cart: [%s]", item)
-        item.save()
-        flash("Item added!", "success")
-        if is_event:
-            return redirect(url_for("product.get_all", is_event="true", **query_params))
-        return redirect(url_for("product.get_all", **query_params))
-    else:
+    if not form.validate_on_submit():
         log(log.ERROR, "Item creation errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         if is_event:
             return redirect(url_for("product.get_all", is_event="true", **query_params))
 
         return redirect(url_for("product.get_all", **query_params))
+    if form.quantity.data > warehouse_product.product_quantity:
+        flash("Not enough products in stock", "danger")
+        return redirect(url_for("product.get_all"))
+    cart_product_amount: list[int] = (
+        db.session.execute(
+            sa.select(sa.func.sum(m.Cart.quantity)).where(
+                m.Cart.user_id == current_user.id,
+                m.Cart.product_id == warehouse_product.product_id,
+                m.Cart.group_id == warehouse_product.group_id,
+                m.Cart.status == "pending",
+            )
+        )
+        .scalars()
+        .all()
+    )
+    new_quantity = int(form.quantity.data)
+
+    if (
+        cart_product_amount
+        and sum(amount for amount in cart_product_amount if amount) + new_quantity
+        > warehouse_product.product_quantity
+    ):
+        log(log.ERROR, "The cart is full,not enough products in stock")
+        flash("The cart is full, not enough products in stock", "danger")
+        return redirect(url_for("product.get_all"))
+
+    item = m.Cart(
+        product_id=warehouse_product.product_id,
+        group_id=warehouse_product.group_id,
+        quantity=new_quantity,
+        user_id=current_user.id,
+    )
+    log(log.INFO, "Form submitted. Cart: [%s]", item)
+    item.save()
+    flash("Item added!", "success")
+    if is_event:
+        return redirect(url_for("product.get_all", is_event="true", **query_params))
+    return redirect(url_for("product.get_all", **query_params))
 
 
 @cart_blueprint.route("/edit", methods=["POST"])

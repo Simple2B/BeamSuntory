@@ -289,7 +289,13 @@ def create():
         )
         if we_ho_product:
             we_ho_product.product_quantity -= cart.quantity
-            we_ho_product.save(False)
+        else:
+            log(
+                log.ERROR,
+                "Warehouse product not found: product_id:[%d] group_id:[%d]",
+                cart.product_id,
+                cart.group_id,
+            )
 
         cart.status = "submitted"
         cart.order_numb = ship_request.order_numb
