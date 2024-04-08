@@ -252,23 +252,23 @@ def save():
                         product.quantity_remains = 0
                         product.save(False)
 
-                if warehouse_product.product_quantity < cart.quantity:
-                    log(
-                        log.WARNING,
-                        "Not enough product. Available qty: [%s]; Requested qty: [%s]",
-                        warehouse_product.product_quantity,
-                        cart.quantity,
-                    )
-                    flash(
-                        f"Not enough product. Available qty: {warehouse_product.product_quantity}; \
-                            Requested qty: {cart.quantity}",
-                        "danger",
-                    )
-                    return redirect(url_for("outgoing_stock.get_all"))
+                # if warehouse_product.product_quantity < cart.quantity:
+                #     log(
+                #         log.WARNING,
+                #         "Not enough product. Available qty: [%s]; Requested qty: [%s]",
+                #         warehouse_product.product_quantity,
+                #         cart.quantity,
+                #     )
+                #     flash(
+                #         f"Not enough product. Available qty: {warehouse_product.product_quantity}; \
+                #             Requested qty: {cart.quantity}",
+                #         "danger",
+                #     )
+                #     return redirect(url_for("outgoing_stock.get_all"))
 
-                warehouse_product.product_quantity -= cart.quantity
+                # warehouse_product.product_quantity -= cart.quantity
 
-                warehouse_product.save(False)
+                # warehouse_product.save(False)
                 report_inventory = m.ReportInventory(
                     qty_before=warehouse_product.product_quantity + cart.quantity,
                     qty_after=warehouse_product.product_quantity,
