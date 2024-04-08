@@ -52,7 +52,7 @@
         <td scope="row" class="text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
             {% if assign.product.image and assign.product.image|length > 100 %}
-            <img src="data:image/png;base64, {{ assign.product.name }}" alt="{{ assign.product.name }}"
+            <img src="data:image/png;base64, {{ assign.product.image }}" alt="{{ assign.product.name }}"
               class="w-14 object-cover">
             {% else %}
             <img src="{{ url_for('static', filename='img/default_image_brand.png') }}" alt="{{ assign.product.name }}"

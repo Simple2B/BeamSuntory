@@ -173,14 +173,14 @@ def save():
                     m.Cart.quantity == int(product["quantity"]),
                 )
             )
-            if cart:
-                cart.warehouse_id = product["warehouse_id"]
-                cart.save(False)
-                log(log.INFO, "Cart warehouse_id updated. Cart item: [%s]", cart)
             if not cart:
                 log(log.ERROR, "Cart not found")
                 flash("Cannot save item data", "danger")
                 return redirect(url_for("outgoing_stock.get_all"))
+            if cart:
+                cart.warehouse_id = product["warehouse_id"]
+                cart.save(False)
+                log(log.INFO, "Cart warehouse_id updated. Cart item: [%s]", cart)
 
             report_shipping = m.ReportShipping(
                 type=s.ReportShipRequestActionType.ACCEPTED.value,
