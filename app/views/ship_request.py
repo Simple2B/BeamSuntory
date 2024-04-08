@@ -23,6 +23,8 @@ ship_request_blueprint = Blueprint("ship_request", __name__, url_prefix="/ship_r
 def get_ship_request():
     filter_ship_request = s.FilterShipRequest.model_validate(dict(request.args))
     stm_where = sa.and_(m.ShipRequest.user_id == current_user.id)
+    if current_user.role_obj.role_name == s.UserRole.ADMIN.value:
+        stm_where = sa.true()
     query = m.ShipRequest.select().where(stm_where).order_by(desc(m.ShipRequest.id))
     count_query = sa.select(sa.func.count()).where(stm_where).select_from(m.ShipRequest)
     if filter_ship_request.q:

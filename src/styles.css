@@ -158,3 +158,13 @@ button[disabled]{
 .toast-position{
     z-index: 500 !important;
 }
+
+.htmx-indicator{
+    display: none;
+}
+.htmx-request .htmx-indicator{
+    display:inline;
+}
+.htmx-request.htmx-indicator{
+    display:inline;
+}

@@ -3,7 +3,7 @@ from flask import (
     render_template,
     request,
 )
-from flask_login import login_required
+from flask_login import login_required, current_user
 import sqlalchemy as sa
 from sqlalchemy.orm import aliased
 from app.controllers import create_pagination, role_required
@@ -28,8 +28,14 @@ def get_all():
     product = aliased(m.Product)
     group = aliased(m.Group)
     q = request.args.get("q", type=str, default=None)
-    query = m.Assign.select().order_by(m.Assign.id)
-    count_query = sa.select(sa.func.count()).select_from(m.Assign)
+    stm_where = sa.or_(
+        m.Assign.user_id == current_user.id,
+    )
+    if current_user.role_obj.role_name == s.UserRole.ADMIN.value:
+        stm_where = sa.true()
+
+    query = m.Assign.select().where(stm_where).order_by(m.Assign.id.desc())
+    count_query = sa.select(sa.func.count()).where(stm_where).select_from(m.Assign)
     if q:
         query = (
             m.Assign.select()

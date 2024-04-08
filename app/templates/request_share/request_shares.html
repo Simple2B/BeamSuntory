@@ -42,6 +42,7 @@
     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
       <tr>
         <th scope="col" class="px-6 py-3">#</th>
+        <th scope="col" class="px-6 py-3">Image</th>
         <th scope="col" class="px-6 py-3">Order NO</th>
         <th scope="col" class="px-6 py-3">Product name</th>
         <th scope="col" class="px-6 py-3">SKU</th>
@@ -63,11 +64,23 @@
             {{ loop.index + page.skip }}
           </div>
         </td>
+        <td scope="row" class="text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            {% if request_share.product.image and request_share.product.image|length > 100 %}
+            <img src="data:image/png;base64, {{ request_share.product.name }}" alt="{{ request_share.product.name }}"
+              class="w-14 object-cover">
+            {% else %}
+            <img src="{{ url_for('static', filename='img/default_image_brand.png') }}"
+              alt="{{ request_share.product.name }}" class="w-14 object-cover">
+            {% endif %}
+          </div>
+        </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
             <div class="text-base font-semibold">{{ request_share.order_numb }}</div>
           </div>
         </td>
+
         <td scope="row" class="p-4 text-base font-normal text-gray-900 dark:text-white">
           <div class="pl-3">
             <div class="text-base font-semibold">{{ request_share.product.name }}</div>
@@ -128,8 +141,6 @@
             </svg>
             Share
           </button>
-          {% endif %}
-          {% if current_user.approval_permission and request_share.from_group in current_user.user_groups %}
           <button type="button" data-target="{{request_share.json}}"
             class="request-share-edit-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 sm:w-auto dark:bg-yellow-400 dark:hover:bg-yellow-500">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -140,16 +151,6 @@
             </svg>
             Edit
           </button>
-          <!-- TODO: ask client if he wants to delete request share -->
-          <!-- <button data-request-share-id={{ request_share.id }} type="button"
-            class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900 delete-request-share-btn">
-            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-              <path fill-rule="evenodd"
-                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                clip-rule="evenodd"></path>
-            </svg>
-            Delete request share
-          </button> -->
           <button data-request-share-id={{ request_share.id }} type="button"
             class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900 decline-request-share-btn">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">

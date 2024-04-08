@@ -43,6 +43,8 @@ def get_all():
             current_user.approval_permission,
         ),
     )
+    if current_user.role == s.UserRole.ADMIN.value:
+        stm_where = sa.true()
     query = m.RequestShare.select().where(stm_where).order_by(m.RequestShare.id)
     count_query = (
         sa.select(sa.func.count()).where(stm_where).select_from(m.RequestShare)
