@@ -17,7 +17,7 @@ class ProductAllocated(BaseModel):
     @field_validator("shelf_life_start", mode="before")
     def validate_start_date(cls, value):
         return (
-            datetime.strptime(value, "%Y-%m-%d").date()
+            datetime.strptime(value, "%m/%d/%Y").date()
             if value
             else datetime.now().date()
         )
@@ -27,9 +27,9 @@ class ProductAllocated(BaseModel):
         # NOTE until self_lif_end default value is not defined
         # we use "01/01/5000" as default value
         return (
-            datetime.strptime(value, "%Y-%m-%d").date()
+            datetime.strptime(value, "%m/%d/%Y").date()
             if value
-            else datetime.strptime("5000-01-01", "%Y-%m-%d").date()
+            else datetime.strptime("01/01/5000", "%m/%d/%Y").date()
         )
 
 
