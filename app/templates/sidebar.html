@@ -129,12 +129,17 @@
       </li>
       {% endif %}
       {% if user_role in admin_manager_roles %}
+      {% set is_adjust = user_role in warehouse_roles %}
       <li>
         <!-- prettier-ignore -->
         <a href="#"
           class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dropdown-btn">
           {% include "icon/store_2.html" %}
+          {% if is_adjust %}
           <span class="flex-1 ml-3 whitespace-nowrap">Assign/Share/Adjust</span>
+          {% else %}
+          <span class="flex-1 ml-3 whitespace-nowrap">Assign/Share</span>
+          {% endif %}
           <div class="dropdown-arrow">
             {% include "icon/right_arrow.html" %}
           </div>
@@ -157,7 +162,7 @@
                 <span class="flex-1 ml-3 whitespace-nowrap">Share</span>
               </a>
             </li>
-            {% if user_role in warehouse_roles %}
+            {% if is_adjust %}
             <li>
               <!-- prettier-ignore -->
               <a href="{{ url_for('adjust.get_all') }}"
