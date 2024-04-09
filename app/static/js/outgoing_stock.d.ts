@@ -21,6 +21,14 @@ interface ICart {
     warehouse?: IWarehouse;
     status: string;
 }
+interface ShipRequestUser {
+    username: string;
+    streetAddress: string | null;
+    country: string | null;
+    region: string | null;
+    city: string | null;
+    zipCode: string | null;
+}
 export interface IShipRequest {
     id: number;
     orderNumb: string;
@@ -39,6 +47,7 @@ export interface IShipRequest {
     tracking: string | null;
     carts: ICart[];
     store: IStore;
+    user: ShipRequestUser | null;
 }
 interface IProduct {
     id: number;

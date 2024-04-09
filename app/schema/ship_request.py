@@ -13,6 +13,21 @@ class ShipRequestStatus(Enum):
     cancelled = "Cancelled"
 
 
+class User(BaseModel):
+    username: str
+    street_address: str | None
+
+
+class ShipRequestUser(BaseModel):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+    username: str
+    street_address: str | None = Field(alias="streetAddress")
+    country: str | None
+    region: str | None
+    city: str | None
+    zip_code: str | None = Field(alias="zipCode")
+
+
 class ShipRequest(BaseModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
@@ -20,6 +35,7 @@ class ShipRequest(BaseModel):
     order_numb: str = Field(alias="orderNumb")
     status: ShipRequestStatus
     order_type: str = Field(alias="orderType")  # TODO enum??? ask client
+
     store_id: int = Field(alias="storeId")
     store: Store
     comment: str | None
@@ -27,6 +43,7 @@ class ShipRequest(BaseModel):
     da_notes: str | None = Field(alias="daNotes")
     proof_of_delivery: str | None = Field(alias="proofOfDelivery")
     tracking: str | None
+    user: ShipRequestUser | None
 
     carts: list[Cart]
 

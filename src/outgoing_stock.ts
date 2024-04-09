@@ -28,6 +28,16 @@ interface ICart {
   status: string;
 }
 
+interface ShipRequestUser {
+  username: string;
+  streetAddress: string | null;
+  country: string | null;
+  region: string | null;
+  city: string | null;
+  zipCode: string | null;
+
+}
+
 export interface IShipRequest {
   id: number;
   orderNumb: string;
@@ -46,6 +56,8 @@ export interface IShipRequest {
   tracking: string | null;
   carts: ICart[];
   store: IStore;
+  user: ShipRequestUser | null;
+  
 }
 
 interface IProduct {
@@ -193,10 +205,22 @@ const viewOutgoingStockButtonElements = document.querySelectorAll('.outgoing-sto
 viewOutgoingStockButtonElements.forEach((e) =>
   e.addEventListener('click', () => {
     const shipRequest: IShipRequest = JSON.parse(e.getAttribute('data-target'));
-    console.log('shipRequest: ', shipRequest);
+    console.log('shipRequest: ', shipRequest.user);
+
+    
 
     let div: HTMLDivElement = document.querySelector('#outgoing-stock-view-order-number');
+
     div.innerHTML = shipRequest.orderNumb;
+
+
+    div = document.querySelector('#outgoing-stock-view-username');
+    div.innerHTML = shipRequest.user ? shipRequest.user.username : 'Unknown User';
+
+    div = document.querySelector('#outgoing-stock-view-user-address');
+    const userAddress = shipRequest.user ? Object.values(shipRequest.user).slice(1).filter(v => !!v).join(', ') : 'No Address';
+    div.innerHTML = shipRequest.user ? userAddress : 'No Address';
+
     div = document.querySelector('#outgoing-stock-view-status');
     div.innerHTML = shipRequest.status;
     div = document.querySelector('#outgoing-stock-view-created-date');
