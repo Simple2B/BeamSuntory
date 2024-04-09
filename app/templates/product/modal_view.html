@@ -136,6 +136,28 @@
             </button>
           </div>
           {% endif %}
+          {% elif current_user.role_obj.role_name == 'warehouse_manager' %}
+          <div class="col-span-6 sm:col-span-3">
+            <label for="notes-location" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{
+              warehouse_product.group.master_group.name
+              }}</label>
+            <div
+              class="product-view-warehouse-name shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              {{
+              warehouse_product.group.name
+              }}
+            </div>
+          </div>
+          <div class="sm:col-span-3">
+            <label for="notes-location" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available
+            </label>
+            <div
+              class="product-view-warehouse-available-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              {{
+              warehouse_product.product_quantity
+              }}
+            </div>
+          </div>
           {% endif %}
           {% endfor %}
 
