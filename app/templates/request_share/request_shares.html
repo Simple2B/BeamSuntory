@@ -43,7 +43,7 @@
       <tr>
         <th scope="col" class="px-6 py-3">#</th>
         <th scope="col" class="px-6 py-3">Image</th>
-        <th scope="col" class="px-6 py-3">Order NO</th>
+        <th scope="col" class="px-6 py-3">Date finished time</th>
         <th scope="col" class="px-6 py-3">Product name</th>
         <th scope="col" class="px-6 py-3">SKU</th>
         <th scope="col" class="px-6 py-3">Date</th>
@@ -75,9 +75,13 @@
             {% endif %}
           </div>
         </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ request_share.order_numb }}</div>
+            {% if request_share.finished_date %}
+            <div class="text-base font-semibold">{{ request_share.finished_date.strftime("%m/%d/%Y %H:%M:%S") }}</div>
+            {% else %}
+            <div class="text-base font-semibold">Not finished</div>
+            {% endif %}
           </div>
         </td>
 
