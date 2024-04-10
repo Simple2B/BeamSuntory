@@ -6,14 +6,16 @@ from flask import (
     flash,
     redirect,
     url_for,
+    current_app as app,
 )
 from flask_login import login_required, current_user
 import sqlalchemy as sa
 from sqlalchemy import desc
+from flask_mail import Message
 from app.controllers import create_pagination, role_required
 
 from app import schema as s
-from app import models as m, db
+from app import models as m, db, mail
 from app import forms as f
 from app.logger import log
 
@@ -310,6 +312,44 @@ def create():
         report_event.save(False)
 
     db.session.commit()
+
+    # TODO: send email
+
+    warehouse_managers = db.session.scalars(
+        sa.select(m.User)
+        .join(m.Division)
+        .where(m.Division.role_name == s.UserRole.WAREHOUSE_MANAGER.value)
+    ).all()
+
+    url = (
+        url_for(
+            "outgoing_stock.get_all",
+            _external=True,
+        )
+        + f"?q={ship_request.order_numb}"
+    )
+
+    for warehouse_manager in warehouse_managers:
+        msg = Message(
+            subject=f"New ship request: {ship_request.order_numb}",
+            sender=app.config["MAIL_DEFAULT_SENDER"],
+            recipients=[warehouse_manager.email],
+        )
+        msg.html = render_template(
+            "email/new_ship_request.html",
+            user=warehouse_manager,
+            ship_request=ship_request,
+            url=url,
+        )
+        try:
+            mail.send(msg)
+        except Exception as e:
+            log(
+                log.ERROR,
+                "Error: [%s] sending email to: [%s]",
+                e,
+                warehouse_manager.email,
+            )
 
     return redirect(url_for("ship_request.get_all"))
 

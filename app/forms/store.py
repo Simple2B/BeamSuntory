@@ -4,6 +4,8 @@ from wtforms import (
     SubmitField,
     ValidationError,
     BooleanField,
+    IntegerField,
+    HiddenField,
 )
 from wtforms.validators import DataRequired, Email
 
@@ -13,8 +15,8 @@ from app import db
 
 class StoreForm(FlaskForm):
     next_url = StringField("next_url")
-    store_id = StringField("store_id", [DataRequired()])
-    store_category = StringField("Store category", [DataRequired()])
+    store_id = HiddenField("store_id", [DataRequired()])
+    category_id = IntegerField("Store category", [DataRequired()])
     store_name = StringField("Name", [DataRequired()])
     contact_person = StringField("Contact person", [DataRequired()])
     email = StringField("Email", [DataRequired(), Email()])
@@ -48,7 +50,7 @@ class StoreForm(FlaskForm):
 
 
 class NewStoreForm(FlaskForm):
-    store_category = StringField("Store category", [DataRequired()])
+    category_id = IntegerField("Store category", [DataRequired()])
     store_name = StringField("Name", [DataRequired()])
     contact_person = StringField("Contact person", [DataRequired()])
     email = StringField("Email", [DataRequired(), Email()])

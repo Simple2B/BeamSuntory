@@ -11,15 +11,10 @@ if TYPE_CHECKING:
     from .store import Store
 
 
-else:
-    User = "User"
-    Store = "Store"
-
-
 class FavoriteStoreUser(db.Model, ModelMixin):
     __tablename__ = "favorite_store_user"
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
     user_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("users.id"))
     store_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("stores.id"))
-    child: orm.Mapped[User] = orm.relationship()
-    parent: orm.Mapped[Store] = orm.relationship()
+    child: orm.Mapped["User"] = orm.relationship()
+    parent: orm.Mapped["Store"] = orm.relationship()

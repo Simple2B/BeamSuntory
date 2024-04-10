@@ -8,7 +8,7 @@ from flask_mail import Mail
 
 from app.logger import log
 from .database import db
-from .constants import DELIVERY_AGENT_ROLES
+from .constants import DELIVERY_AGENT_ROLES, ADMIN_WAREHOUSE_ROLES
 
 # instantiate extensions
 login_manager = LoginManager()
@@ -57,10 +57,7 @@ def create_app(environment="development"):
 
     app.jinja_env.globals["form_product_upload"] = forms.UploadProductForm
     app.jinja_env.globals["admin_roles"] = [s.UserRole.ADMIN.value]
-    app.jinja_env.globals["admin_warehouse_roles"] = [
-        s.UserRole.ADMIN.value,
-        s.UserRole.WAREHOUSE_MANAGER.value,
-    ]
+    app.jinja_env.globals["admin_warehouse_roles"] = ADMIN_WAREHOUSE_ROLES
     app.jinja_env.globals["warehouse_roles"] = [
         # TODO: delete admin role after testing
         s.UserRole.ADMIN.value,

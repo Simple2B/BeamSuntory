@@ -15,16 +15,16 @@ def test_stores_pages(client):
     response = client.get("/store/")
     assert response.status_code == 200
     response = client.get("/store/create")
-    assert response.status_code == 405
+    assert response.status_code == 200
 
 
 def test_create_store(client):
     login(client, "bob")
-
+    category = m.StoreCategory(name="Bar", active=True).save()
     response = client.post(
         "/store/create",
         data=dict(
-            store_category="1",
+            category_id=category.id,
             store_name="JBbar",
             contact_person="John",
             email="store@email.com",
@@ -53,9 +53,9 @@ def test_delete_store(mg_g_populate: FlaskClient):
     assert len(stores_rows_objs) == 1
     response = mg_g_populate.delete("/store/delete/1")
     assert response.status_code == 200
-    assert "ok" in response.text
+    assert "The store has ship requests dependency" in response.text
     stores_rows_objs = db.session.execute(m.Store.select()).all()
-    assert len(stores_rows_objs) == 0
+    assert len(stores_rows_objs) == 1
 
 
 def test_edit_store(mg_g_populate: FlaskClient):
@@ -70,7 +70,7 @@ def test_edit_store(mg_g_populate: FlaskClient):
         "/store/save",
         data=dict(
             store_id=1,
-            store_category="1",
+            category_id="1",
             store_name="JBbar",
             contact_person="John",
             email="store@email.com",

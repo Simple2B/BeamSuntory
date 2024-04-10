@@ -123,6 +123,7 @@ def pickup():
             type=s.ReportSKUType.inbound_order.value,
             status="Inbound order in transit",
         ).save(False)
+
     db.session.commit()
 
     log(log.INFO, "Inbound order pickup done. Inbound order: [%s]", inbound_order)
