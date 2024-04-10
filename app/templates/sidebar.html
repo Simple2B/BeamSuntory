@@ -95,7 +95,6 @@
           </ul>
         </div>
       </li>
-      {% if user_role in admin_manager_roles or user_role == "warehouse_manager" %}
       <li>
         <!-- prettier-ignore -->
         <a href="#"
@@ -114,7 +113,7 @@
                 <span class="flex-1 ml-3 whitespace-nowrap">All Stores</span>
               </a>
             </li>
-            {% if user_role in admin_roles %}
+            {% if user_role in admin_warehouse_roles %}
             <li>
               <!-- prettier-ignore -->
               <a href="{{ url_for('store_category.get_all') }}"
@@ -127,7 +126,6 @@
           </ul>
         </div>
       </li>
-      {% endif %}
       {% if user_role in admin_manager_roles %}
       {% set is_adjust = user_role in warehouse_roles %}
       <li>

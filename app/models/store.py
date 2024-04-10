@@ -1,3 +1,4 @@
+from typing import TYPE_CHECKING
 from datetime import datetime
 
 import sqlalchemy as sa
@@ -6,6 +7,9 @@ from sqlalchemy import orm
 from app.database import db
 from app import schema as s
 from .utils import ModelMixin
+
+if TYPE_CHECKING:
+    from .store_category import StoreCategory
 
 
 class Store(db.Model, ModelMixin):
@@ -51,8 +55,7 @@ class Store(db.Model, ModelMixin):
         default=datetime.utcnow,
     )
 
-    # Relationships
-    store_category = orm.relationship("StoreCategory")
+    store_category: orm.Mapped["StoreCategory"] = orm.relationship()
 
     def __repr__(self):
         return f"<{self.id}: {self.store_name}>"

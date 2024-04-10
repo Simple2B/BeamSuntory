@@ -205,10 +205,6 @@ const viewOutgoingStockButtonElements = document.querySelectorAll('.outgoing-sto
 viewOutgoingStockButtonElements.forEach((e) =>
   e.addEventListener('click', () => {
     const shipRequest: IShipRequest = JSON.parse(e.getAttribute('data-target'));
-    console.log('shipRequest: ', shipRequest.user);
-
-    
-
     let div: HTMLDivElement = document.querySelector('#outgoing-stock-view-order-number');
 
     div.innerHTML = shipRequest.orderNumb;
@@ -217,18 +213,13 @@ viewOutgoingStockButtonElements.forEach((e) =>
     div = document.querySelector('#outgoing-stock-view-username');
     div.innerHTML = shipRequest.user ? shipRequest.user.username : 'Unknown User';
 
-    div = document.querySelector('#outgoing-stock-view-user-address');
-    const userAddress = shipRequest.user ? Object.values(shipRequest.user).slice(1).filter(v => !!v).join(', ') : 'No Address';
-    div.innerHTML = shipRequest.user ? userAddress : 'No Address';
+
 
     div = document.querySelector('#outgoing-stock-view-status');
     div.innerHTML = shipRequest.status;
     div = document.querySelector('#outgoing-stock-view-created-date');
     div.innerHTML = shipRequest.createdAt.slice(0, 10);
-    div = document.querySelector('#outgoing-stock-view-type');
-    div.innerHTML = shipRequest.orderType;
-    div = document.querySelector('#outgoing-stock-view-warehouse-name');
-    div.innerHTML = shipRequest.warehouseName || 'No Warehouse';
+
     div = document.querySelector('#outgoing-stock-view-comment');
     div.innerHTML = shipRequest.comment;
     div = document.querySelector('#outgoing-stock-view-da_notes');

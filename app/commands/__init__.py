@@ -254,6 +254,25 @@ def init(app: Flask):
                 manager_id=wh_manager.id,
             ).save(False)
 
+        role = db.session.execute(
+            m.Division.select().where(m.Division.role_name == s.UserRole.MANAGER.value)
+        ).scalar()
+        m.User(
+            username="m",
+            email="w@mail.com",
+            password="123456",
+            role=role.id,
+            activated=True,
+            approval_permission=True,
+            street_address="street",
+            phone_number="123456789",
+            country="UK",
+            region="Lv",
+            city="Dro",
+            zip_code="82100",
+            sales_rep=False,
+        ).save(False)
+
         m.DeliveryAgent(
             first_name="May",
             last_name="Wood",
