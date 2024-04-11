@@ -55,13 +55,6 @@ def get_all():
             .where(m.Cart.order_numb.ilike(f"%{q}%"))
             .select_from(m.Cart)
         )
-    pagination = create_pagination(total=db.session.scalar(count_query))
-
-    delivery_agents_rows = db.session.execute(sa.select(m.DeliveryAgent)).all()
-    delivery_agents = [row[0] for row in delivery_agents_rows]
-
-    warehouses_rows = db.session.execute(sa.select(m.Warehouse)).all()
-    warehouses = [row[0] for row in warehouses_rows]
 
     locker_id = db.session.execute(
         m.StoreCategory.select()
@@ -69,10 +62,11 @@ def get_all():
         .with_only_columns(m.StoreCategory.id)
     ).scalar()
 
-    stores_rows = db.session.execute(
+    pagination = create_pagination(total=db.session.scalar(count_query))
+
+    stores = db.session.scalars(
         m.Store.select().where(m.Store.store_category_id != locker_id)
     ).all()
-    stores = [row[0] for row in stores_rows]
 
     for store in stores:
         store.favorite = db.session.execute(
@@ -105,35 +99,20 @@ def get_all():
         if warehouse_products
         else {}
     )
-    store_categories = [
-        sc
-        for sc in db.session.execute(
-            m.StoreCategory.select().where(m.StoreCategory.id != locker_id)
-        ).scalars()
-    ]
-    sales_rep_role_id = db.session.execute(
-        m.Division.select()
-        .where(m.Division.role_name == s.UserRole.SALES_REP.value)
-        .with_only_columns(m.Division.id)
-    ).scalar()
-    locker_store_category_ids = None
+    store_categories = db.session.scalars(
+        sa.select(m.StoreCategory).where(m.StoreCategory.id != locker_id)
+    ).all()
 
-    if current_user.role == sales_rep_role_id:
-        sales_rep_locker = db.session.execute(
+    is_locker_store_category = False
+
+    if (
+        current_user.role_obj.role_name == s.UserRole.SALES_REP.value
+        and db.session.execute(
             m.Store.select().where(m.Store.user_id == current_user.id)
-        ).scalar()
-        if sales_rep_locker:
-            locker_store_category_ids = [
-                sales_rep_locker.id,
-                sales_rep_locker.store_category_id,
-            ]
-    current_user_role_name = (
-        db.session.execute(
-            m.Division.select().where(m.Division.id == current_user.role)
         )
-        .scalar()
-        .role_name
-    )
+        is not None
+    ):
+        is_locker_store_category = True
 
     cart_items = db.session.scalars(
         query.offset((pagination.page - 1) * pagination.per_page).limit(
@@ -162,20 +141,110 @@ def get_all():
         "cart.html",
         cart_items=cart_items,
         page=pagination,
-        search_query=q,
         form=form,
-        delivery_agents=delivery_agents,
-        warehouses=warehouses,
         stores=stores,
         available_products=available_products,
         store_categories=store_categories,
-        current_user_role_name=current_user_role_name,
-        sales_rep_role=s.UserRole.SALES_REP.value,
         carts=json.dumps(carts),
-        locker_store_category_ids=(
-            json.dumps(locker_store_category_ids) if locker_store_category_ids else None
-        ),
+        is_locker_store_category=is_locker_store_category,
     )
+
+
+@cart_blueprint.route("/get-base-select", methods=["GET"])
+@login_required
+@role_required(
+    [
+        s.UserRole.SALES_REP.value,
+    ]
+)
+def get_base_select():
+    """htmx"""
+    locker_id = db.session.execute(
+        m.StoreCategory.select()
+        .where(m.StoreCategory.name == SALES_REP_LOCKER_NAME)
+        .with_only_columns(m.StoreCategory.id)
+    ).scalar()
+
+    stores = db.session.scalars(
+        m.Store.select().where(m.Store.store_category_id != locker_id)
+    ).all()
+
+    store_categories = db.session.scalars(
+        sa.select(m.StoreCategory).where(m.StoreCategory.id != locker_id)
+    ).all()
+
+    return render_template(
+        "cart/base_select.html",
+        store_categories=store_categories,
+        stores=stores,
+        is_locker_store_category=True,
+    )
+
+
+@cart_blueprint.route("/ship-to-locker", methods=["GET"])
+@login_required
+@role_required(
+    [
+        s.UserRole.SALES_REP.value,
+    ]
+)
+def get_ship_to_locker():
+    """htmx"""
+    stores = db.session.scalars(
+        sa.select(m.Store).where(m.Store.user_id == current_user.id)
+    ).all()
+
+    store_categories = db.session.scalars(
+        sa.select(m.StoreCategory)
+        .join(m.Store)
+        .where(m.Store.user_id == current_user.id)
+    ).all()
+
+    return render_template(
+        "cart/locker_select.html",
+        is_locker_store_category=True,
+        store_categories=store_categories,
+        stores=stores,
+    )
+
+
+@cart_blueprint.route("/get-stores", methods=["GET"])
+@login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+        s.UserRole.MANAGER.value,
+    ]
+)
+def get_stores_options():
+    """htmx"""
+
+    category_id = request.args.get("store_category", type=str, default=None)
+    is_favorites = request.args.get("is_favorites", type=bool, default=False)
+    query = (
+        sa.select(m.Store)
+        .join(m.StoreCategory)
+        .where(m.StoreCategory.name != SALES_REP_LOCKER_NAME)
+    )
+    if category_id:
+        query = query.where(m.Store.store_category_id == category_id)
+
+    if is_favorites:
+        query = query.where(
+            m.Store.id.in_(
+                db.session.execute(
+                    sa.select(m.FavoriteStoreUser.store_id).where(
+                        m.FavoriteStoreUser.user_id == current_user.id
+                    )
+                ).scalars()
+            )
+        )
+
+    stores = db.session.scalars(query.order_by(m.Store.store_name)).all()
+
+    return render_template("cart/store_options.html", stores=stores)
 
 
 @cart_blueprint.route("/create/<warehouse_product_id>", methods=["POST", "GET"])
