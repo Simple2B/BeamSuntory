@@ -734,7 +734,7 @@ def get_assign_groups():
         sub_groups = group.child_groups if group and group.child_groups else []
         return render_template("product/assing_sub_groups.html", sub_groups=sub_groups)
     log(log.ERROR, "Get assign groups not found master_group_id or group_name")
-    return "Not found", 404
+    return "", 202
 
 
 @product_blueprint.route("/assign", methods=["POST"])
