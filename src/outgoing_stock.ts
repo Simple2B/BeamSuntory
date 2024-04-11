@@ -209,7 +209,6 @@ viewOutgoingStockButtonElements.forEach((e) =>
 
     div.innerHTML = shipRequest.orderNumb;
 
-
     div = document.querySelector('#outgoing-stock-view-username');
     div.innerHTML = shipRequest.user ? shipRequest.user.username : 'Unknown User';
 
@@ -267,6 +266,10 @@ $buttonEditElements.forEach((e) =>
 function editShipRequest(shipRequest: IShipRequest, store: IStore) {
   let input: HTMLInputElement = document.querySelector('#outgoing-stock-edit-status');
   input.value = shipRequest.status;
+
+  input = document.querySelector('#outgoing-stock-edit-username');
+  input.innerHTML = shipRequest.user ? shipRequest.user.username : 'Unknown User';
+
   input = document.querySelector('#outgoing-stock-edit-id');
   input.value = shipRequest.id.toString();
   input = document.querySelector('#outgoing-stock-edit-store');
@@ -282,8 +285,6 @@ function editShipRequest(shipRequest: IShipRequest, store: IStore) {
   div.innerHTML = shipRequest.orderNumb;
   div = document.querySelector('#outgoing-stock-edit-store');
   div.innerHTML = shipRequest.store.storeName;
-  div = document.querySelector('#outgoing-stock-edit-type');
-  div.innerHTML = shipRequest.orderType;
   div = document.querySelector('#outgoing-stock-edit-created-date');
   div.innerHTML = shipRequest.createdAt.slice(0, 10);
   div = document.querySelector('#outgoing-stock-edit-comment');
