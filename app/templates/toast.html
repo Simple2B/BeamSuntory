@@ -42,7 +42,9 @@
                 clip-rule="evenodd"></path>
         </svg>
     </button>
+    <script>
+        setTimeout(() => {
+            document.getElementById('custom-toast-{{category}}').remove();
+        }, 3000);
+    </script>
 </div>
-{% if category == 'danger' %}
-<div id="error-404"></div>
-{% endif %}

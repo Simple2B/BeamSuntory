@@ -313,8 +313,6 @@ def create():
 
     db.session.commit()
 
-    # TODO: send email
-
     warehouse_managers = db.session.scalars(
         sa.select(m.User)
         .join(m.Division)

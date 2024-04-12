@@ -66,9 +66,7 @@ def get_all():
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
-    statuses = [
-        status[0] for status in db.session.query(m.RequestShare.status).distinct().all()
-    ]
+    statuses = db.session.scalars(sa.select(sa.distinct(m.RequestShare.status))).all()
 
     return render_template(
         "request_share/request_shares.html",
@@ -92,39 +90,35 @@ def get_all():
 )
 def save():
     form: f.RequestShareForm = f.RequestShareForm()
-    if form.validate_on_submit():
-        query = m.RequestShare.select().where(
-            m.RequestShare.id == int(form.request_share_id.data)
-        )
-        request_share: m.RequestShare | None = db.session.scalar(query)
-        if not request_share:
-            log(
-                log.ERROR,
-                "Not found request_share by id : [%s]",
-                form.request_share_id.data,
-            )
-            flash("Cannot save request_share data", "danger")
-            return redirect(url_for("request_share.get_all"))
-
-        report_request_share = m.ReportRequestShare(
-            type=s.ReportRequestShareActionType.UPDATED_QUANTITY.value,
-            history=f"{request_share.desire_quantity} => {form.desire_quantity.data}",
-            user=current_user,
-            request_share=request_share,
-        )
-
-        request_share.desire_quantity = form.desire_quantity.data
-        db.session.add(report_request_share)
-        db.session.commit()
-
-        if form.next_url.data:
-            return redirect(form.next_url.data)
-        return redirect(url_for("request_share.get_all"))
-
-    else:
+    if not form.validate_on_submit():
         log(log.ERROR, "Request Share save errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("request_share.get_all"))
+
+    request_share = db.session.get(m.RequestShare, int(form.request_share_id.data))
+    if not request_share:
+        log(
+            log.ERROR,
+            "Not found request_share by id : [%s]",
+            form.request_share_id.data,
+        )
+        flash("Cannot save request_share data", "danger")
+        return redirect(url_for("request_share.get_all"))
+
+    report_request_share = m.ReportRequestShare(
+        type=s.ReportRequestShareActionType.UPDATED_QUANTITY.value,
+        history=f"{request_share.desire_quantity} => {form.desire_quantity.data}",
+        user=current_user,
+        request_share=request_share,
+    )
+
+    request_share.desire_quantity = form.desire_quantity.data
+    db.session.add(report_request_share)
+    db.session.commit()
+
+    if form.next_url.data:
+        return redirect(form.next_url.data)
+    return redirect(url_for("request_share.get_all"))
 
 
 @request_share_blueprint.route("/delete/<int:id>", methods=["DELETE"])
@@ -160,6 +154,11 @@ def share(id: int):
     if not request_share:
         log(log.INFO, "There is no request_share with id: [%s]", id)
         flash("There is no such request_share", "danger")
+        return redirect(url_for("request_share.get_all"))
+
+    if request_share.status == "shared":
+        log(log.INFO, "Request_share already shared id: [%s]", id)
+        flash("Someone already shared", "danger")
         return redirect(url_for("request_share.get_all"))
 
     # TODO Filter by warehouse id also
@@ -295,6 +294,10 @@ def decline(id: int):
     if not request_share:
         log(log.INFO, "There is no request_share with id: [%s]", id)
         flash("There is no such request_share", "danger")
+        return redirect(url_for("request_share.get_all"))
+    if request_share.status == "declined":
+        log(log.INFO, "Request_share already declined id: [%s]", id)
+        flash("Someone already declined", "danger")
         return redirect(url_for("request_share.get_all"))
 
     request_share.status = "declined"

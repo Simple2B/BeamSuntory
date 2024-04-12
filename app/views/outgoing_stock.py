@@ -124,189 +124,179 @@ def get_all():
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def save():
     form_edit: f.ShipRequestForm = f.ShipRequestForm()
-    if form_edit.validate_on_submit():
-        ship_request: m.ShipRequest = db.session.get(
-            m.ShipRequest, form_edit.ship_request_id.data
-        )
-        if not ship_request:
-            log(
-                log.ERROR,
-                "Not found ship request item by id : [%s]",
-                form_edit.ship_request_id.data,
-            )
-            flash("Cannot save item data", "danger")
-            return redirect(url_for("outgoing_stock.get_all"))
-
-        products = json.loads(form_edit.products.data)
-
-        report_inventory_list = m.ReportInventoryList(
-            type="Ship Request Dispatched",
-            # TODO who sholud be responsible for change?
-            # one who created inbound order?
-            # or one who accepted it?
-            user_id=current_user.id,
-            ship_request=ship_request,
-            store=ship_request.store,
-        )
-        report_inventory_list.save(False)
-
-        if not products:
-            log(log.ERROR, "No products in ship request: [%s]", form_edit.products.data)
-            flash("Cannot save item data", "danger")
-            return redirect(url_for("outgoing_stock.get_all"))
-
-        for product in products:
-            warehouse: m.Warehouse | None = db.session.get(
-                m.Warehouse,
-                product["warehouse_id"],
-            )
-            if not warehouse:
-                log(log.ERROR, "Warehouse not found: [%s]", product["warehouse_id"])
-                flash("Warehouse not found", "danger")
-                return redirect(url_for("outgoing_stock.get_all"))
-
-            cart: m.Cart = db.session.scalar(
-                m.Cart.select().where(
-                    m.Cart.product_id == int(product["product_id"]),
-                    m.Cart.group.has(m.Group.name == product["group_name"]),
-                    m.Cart.ship_request_id == ship_request.id,
-                    m.Cart.quantity == int(product["quantity"]),
-                )
-            )
-            if not cart:
-                log(log.ERROR, "Cart not found")
-                flash("Cannot save item data", "danger")
-                return redirect(url_for("outgoing_stock.get_all"))
-            if cart:
-                cart.warehouse_id = product["warehouse_id"]
-                cart.save(False)
-                log(log.INFO, "Cart warehouse_id updated. Cart item: [%s]", cart)
-
-            report_shipping = m.ReportShipping(
-                type=s.ReportShipRequestActionType.ACCEPTED.value,
-                ship_request=ship_request,
-                user=current_user,
-                history=f"{warehouse.name}: {product['quantity']}",
-            )
-            db.session.add(report_shipping)
-
-        ship_request.wm_notes = form_edit.wm_notes.data
-
-        carts: list[m.Cart] = db.session.scalars(
-            m.Cart.select().where(
-                # TODO do we need this check? Because current_user here is warehouse manager
-                # BUT current_user at Cart creation is user who created cart
-                # m.Cart.user_id == current_user.id,
-                m.Cart.status == "submitted",
-                m.Cart.ship_request_id == ship_request.id,
-            )
-        )
-
-        for cart in carts:
-            is_group_in_master_group = (
-                db.session.query(m.Group)
-                .join(m.MasterGroup)
-                .filter(
-                    m.MasterGroup.name == s.MasterGroupMandatory.events.value,
-                    m.Group.name == cart.group.name,
-                )
-                .count()
-                > 0
-            )
-
-            cart_user_group: m.Group = db.session.execute(
-                m.Group.select().where(m.Group.name == cart.group.name)
-            ).scalar()
-            warehouse_product: m.WarehouseProduct = db.session.scalar(
-                m.WarehouseProduct.select().where(
-                    m.WarehouseProduct.product_id == cart.product_id,
-                    m.WarehouseProduct.warehouse_id == cart.warehouse_id,
-                    m.WarehouseProduct.group_id == cart_user_group.id,
-                )
-            )
-            if warehouse_product and not is_group_in_master_group:
-                # TODO what if warehouse product not found?
-                products_to_deplete: list[m.ProductAllocated] = db.session.scalars(
-                    m.ProductAllocated.select()
-                    .where(
-                        m.ProductAllocated.product_id == cart.product_id,
-                        # m.ProductAllocated.group_id == cart_user_group.id,
-                        m.ProductAllocated.quantity_remains > 0,
-                    )
-                    .order_by(m.ProductAllocated.shelf_life_end.asc())
-                )
-
-                deplete_qty = cart.quantity
-
-                for product in products_to_deplete:
-                    # for prod_group_qty in product.product_quantity_groups:
-                    # TODO do we care from which group we deplete?
-                    # if warehouse_product.group_id != prod_group_qty.group_id:
-                    #     continue
-                    if product.quantity_remains >= deplete_qty:
-                        product.quantity_remains -= deplete_qty
-                        product.save(False)
-                        break
-                    else:
-                        deplete_qty -= product.quantity_remains
-                        product.quantity_remains = 0
-                        product.save(False)
-
-                # if warehouse_product.product_quantity < cart.quantity:
-                #     log(
-                #         log.WARNING,
-                #         "Not enough product. Available qty: [%s]; Requested qty: [%s]",
-                #         warehouse_product.product_quantity,
-                #         cart.quantity,
-                #     )
-                #     flash(
-                #         f"Not enough product. Available qty: {warehouse_product.product_quantity}; \
-                #             Requested qty: {cart.quantity}",
-                #         "danger",
-                #     )
-                #     return redirect(url_for("outgoing_stock.get_all"))
-
-                # warehouse_product.product_quantity -= cart.quantity
-
-                # warehouse_product.save(False)
-                report_inventory = m.ReportInventory(
-                    qty_before=warehouse_product.product_quantity + cart.quantity,
-                    qty_after=warehouse_product.product_quantity,
-                    report_inventory_list_id=report_inventory_list.id,
-                    product_id=warehouse_product.product_id,
-                    warehouse_product=warehouse_product,
-                )
-                report_inventory.save(False)
-
-                m.ReportSKU(
-                    product_id=warehouse_product.product_id,
-                    ship_request=ship_request,
-                    type=s.ReportSKUType.ship_request.value,
-                    status="Ship request assigned to pickup.",
-                ).save(False)
-
-            cart.status = "completed"
-            cart.save(False)
-
-        ship_request.status = s.ShipRequestStatus.assigned
-        db.session.commit()
-
-        log(
-            log.INFO,
-            "Ship Request saved and dispatched. Ship Request: [%s]",
-            ship_request,
-        )
-        flash("Ship Request dispatched!", "success")
-
-        if form_edit.next_url.data:
-            log(log.INFO, "Redirecting to: [%s]", form_edit.next_url.data)
-            return redirect(form_edit.next_url.data)
-        return redirect(url_for("outgoing_stock.get_all"))
-
-    else:
+    if not form_edit.validate_on_submit():
         log(log.ERROR, "Cart item save errors: [%s]", form_edit.errors)
         flash(f"{form_edit.errors}", "danger")
         return redirect(url_for("outgoing_stock.get_all"))
+    ship_request: m.ShipRequest = db.session.get(
+        m.ShipRequest, form_edit.ship_request_id.data
+    )
+    if not ship_request:
+        log(
+            log.ERROR,
+            "Not found ship request item by id : [%s]",
+            form_edit.ship_request_id.data,
+        )
+        flash("Cannot save item data", "danger")
+        return redirect(url_for("outgoing_stock.get_all"))
+
+    if ship_request.status == s.ShipRequestStatus.assigned:
+        log(
+            log.ERROR,
+            "Cannot save item data. Ship Request already Dispatched: [%s]",
+            ship_request,
+        )
+        flash("Cannot save item data. Ship Request already Dispatched", "danger")
+        return redirect(url_for("outgoing_stock.get_all"))
+
+    products = json.loads(form_edit.products.data)
+
+    report_inventory_list = m.ReportInventoryList(
+        type="Ship Request Dispatched",
+        # TODO who sholud be responsible for change?
+        # one who created inbound order?
+        # or one who accepted it?
+        user_id=current_user.id,
+        ship_request=ship_request,
+        store=ship_request.store,
+    )
+    report_inventory_list.save(False)
+
+    if not products:
+        log(log.ERROR, "No products in ship request: [%s]", form_edit.products.data)
+        flash("Cannot save item data", "danger")
+        return redirect(url_for("outgoing_stock.get_all"))
+
+    for product in products:
+        warehouse: m.Warehouse | None = db.session.get(
+            m.Warehouse,
+            product["warehouse_id"],
+        )
+        if not warehouse:
+            log(log.ERROR, "Warehouse not found: [%s]", product["warehouse_id"])
+            flash("Warehouse not found", "danger")
+            return redirect(url_for("outgoing_stock.get_all"))
+
+        cart: m.Cart = db.session.scalar(
+            m.Cart.select().where(
+                m.Cart.product_id == int(product["product_id"]),
+                m.Cart.group.has(m.Group.name == product["group_name"]),
+                m.Cart.ship_request_id == ship_request.id,
+                m.Cart.quantity == int(product["quantity"]),
+            )
+        )
+        if not cart:
+            log(log.ERROR, "Cart not found")
+            flash("Cannot save item data", "danger")
+            return redirect(url_for("outgoing_stock.get_all"))
+        if cart:
+            cart.warehouse_id = product["warehouse_id"]
+            cart.save(False)
+            log(log.INFO, "Cart warehouse_id updated. Cart item: [%s]", cart)
+
+        report_shipping = m.ReportShipping(
+            type=s.ReportShipRequestActionType.ACCEPTED.value,
+            ship_request=ship_request,
+            user=current_user,
+            history=f"{warehouse.name}: {product['quantity']}",
+        )
+        db.session.add(report_shipping)
+
+    ship_request.wm_notes = form_edit.wm_notes.data
+
+    carts: list[m.Cart] = db.session.scalars(
+        m.Cart.select().where(
+            # TODO do we need this check? Because current_user here is warehouse manager
+            # BUT current_user at Cart creation is user who created cart
+            # m.Cart.user_id == current_user.id,
+            m.Cart.status == "submitted",
+            m.Cart.ship_request_id == ship_request.id,
+        )
+    )
+
+    for cart in carts:
+        is_group_in_master_group = (
+            db.session.query(m.Group)
+            .join(m.MasterGroup)
+            .filter(
+                m.MasterGroup.name == s.MasterGroupMandatory.events.value,
+                m.Group.name == cart.group.name,
+            )
+            .count()
+            > 0
+        )
+
+        cart_user_group: m.Group = db.session.execute(
+            m.Group.select().where(m.Group.name == cart.group.name)
+        ).scalar()
+        warehouse_product: m.WarehouseProduct = db.session.scalar(
+            m.WarehouseProduct.select().where(
+                m.WarehouseProduct.product_id == cart.product_id,
+                m.WarehouseProduct.warehouse_id == cart.warehouse_id,
+                m.WarehouseProduct.group_id == cart_user_group.id,
+            )
+        )
+        if warehouse_product and not is_group_in_master_group:
+            # TODO what if warehouse product not found?
+            products_to_deplete: list[m.ProductAllocated] = db.session.scalars(
+                m.ProductAllocated.select()
+                .where(
+                    m.ProductAllocated.product_id == cart.product_id,
+                    # m.ProductAllocated.group_id == cart_user_group.id,
+                    m.ProductAllocated.quantity_remains > 0,
+                )
+                .order_by(m.ProductAllocated.shelf_life_end.asc())
+            )
+
+            deplete_qty = cart.quantity
+
+            for product in products_to_deplete:
+                # for prod_group_qty in product.product_quantity_groups:
+                # TODO do we care from which group we deplete?
+                # if warehouse_product.group_id != prod_group_qty.group_id:
+                #     continue
+                if product.quantity_remains >= deplete_qty:
+                    product.quantity_remains -= deplete_qty
+                    product.save(False)
+                    break
+                else:
+                    deplete_qty -= product.quantity_remains
+                    product.quantity_remains = 0
+                    product.save(False)
+
+            report_inventory = m.ReportInventory(
+                qty_before=warehouse_product.product_quantity + cart.quantity,
+                qty_after=warehouse_product.product_quantity,
+                report_inventory_list_id=report_inventory_list.id,
+                product_id=warehouse_product.product_id,
+                warehouse_product=warehouse_product,
+            )
+            report_inventory.save(False)
+
+            m.ReportSKU(
+                product_id=warehouse_product.product_id,
+                ship_request=ship_request,
+                type=s.ReportSKUType.ship_request.value,
+                status="Ship request assigned to pickup.",
+            ).save(False)
+
+        cart.status = "completed"
+        cart.save(False)
+
+    ship_request.status = s.ShipRequestStatus.assigned
+    db.session.commit()
+
+    log(
+        log.INFO,
+        "Ship Request saved and dispatched. Ship Request: [%s]",
+        ship_request,
+    )
+    flash("Ship Request dispatched!", "success")
+
+    if form_edit.next_url.data:
+        log(log.INFO, "Redirecting to: [%s]", form_edit.next_url.data)
+        return redirect(form_edit.next_url.data)
+    return redirect(url_for("outgoing_stock.get_all"))
 
 
 @outgoing_stock_blueprint.route("/update_notes", methods=["POST"])
@@ -314,37 +304,35 @@ def save():
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def update_notes():
     form_edit: f.ShipRequestForm = f.ShipRequestForm()
-    if form_edit.validate_on_submit():
-        ship_request = db.session.get(m.ShipRequest, form_edit.ship_request_id.data)
-        if not ship_request:
-            log(
-                log.ERROR,
-                "Not found ship request item by id : [%s]",
-                form_edit.ship_request_id.data,
-            )
-            flash("Cannot save item data", "danger")
-            return redirect(url_for("outgoing_stock.get_all"))
-
-        ship_request.proof_of_delivery = form_edit.proof_of_delivery.data
-        ship_request.tracking = form_edit.tracking.data
-        ship_request.save()
-
-        if form_edit.wm_notes.data:
-            ship_request.wm_notes = form_edit.wm_notes.data
-            ship_request.save()
-            log(log.INFO, "Ship Request note updated. Ship Request: [%s]", ship_request)
-            flash("Note has been updated!", "success")
-            return redirect(url_for("outgoing_stock.get_all"))
-
-        if form_edit.next_url.data:
-            log(log.INFO, "Redirecting to: [%s]", form_edit.next_url.data)
-            return redirect(form_edit.next_url.data)
-        return redirect(url_for("outgoing_stock.get_all"))
-
-    else:
+    if not form_edit.validate_on_submit():
         log(log.ERROR, "Ship request item save errors: [%s]", form_edit.wm_notes.data)
         flash("Note for warehouse manager has not been updated", "danger")
         return redirect(url_for("outgoing_stock.get_all"))
+    ship_request = db.session.get(m.ShipRequest, form_edit.ship_request_id.data)
+    if not ship_request:
+        log(
+            log.ERROR,
+            "Not found ship request item by id : [%s]",
+            form_edit.ship_request_id.data,
+        )
+        flash("Cannot save item data", "danger")
+        return redirect(url_for("outgoing_stock.get_all"))
+
+    ship_request.proof_of_delivery = form_edit.proof_of_delivery.data
+    ship_request.tracking = form_edit.tracking.data
+    ship_request.save()
+
+    if form_edit.wm_notes.data:
+        ship_request.wm_notes = form_edit.wm_notes.data
+        ship_request.save()
+        log(log.INFO, "Ship Request note updated. Ship Request: [%s]", ship_request)
+        flash("Note has been updated!", "success")
+        return redirect(url_for("outgoing_stock.get_all"))
+
+    if form_edit.next_url.data:
+        log(log.INFO, "Redirecting to: [%s]", form_edit.next_url.data)
+        return redirect(form_edit.next_url.data)
+    return redirect(url_for("outgoing_stock.get_all"))
 
 
 @outgoing_stock_blueprint.route("/cancel/<int:id>", methods=["GET"])
@@ -357,6 +345,12 @@ def cancel(id: int):
         log(log.INFO, "There is no ship request with id: [%s]", id)
         flash("There is no such ship request", "danger")
         return "no ship request", 404
+    if ship_request.status == s.ShipRequestStatus.cancelled:
+        log(
+            log.INFO, "Ship Request already cancelled. Ship Request: [%s]", ship_request
+        )
+        flash("Ship Request already cancelled!", "danger")
+        return "already cancelled", 404
 
     carts: list[m.Cart] = db.session.execute(
         m.Cart.select().where(m.Cart.ship_request_id == ship_request.id)

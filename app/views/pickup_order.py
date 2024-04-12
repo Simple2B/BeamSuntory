@@ -105,45 +105,47 @@ def get_all():
 @role_required(DELIVERY_AGENT_ROLES)
 def save():
     form_edit: f.ShipRequestForm = f.ShipRequestForm()
-    if form_edit.validate_on_submit():
-        query = m.ShipRequest.select().where(
-            m.ShipRequest.id == int(form_edit.ship_request_id.data)
-        )
-        ship_request: m.ShipRequest | None = db.session.scalar(query)
-        if not ship_request:
-            log(
-                log.ERROR,
-                "Not found ship request item by id : [%s]",
-                form_edit.ship_request_id.data,
-            )
-            flash("Cannot save item data", "danger")
-        ship_request.da_notes = form_edit.da_notes.data
-        ship_request.status = s.ShipRequestStatus.in_transit
-
-        report_shipping = m.ReportShipping(
-            type=s.ReportShipRequestActionType.PICKED_UP.value,
-            ship_request=ship_request,
-            user=current_user,
-        )
-        db.session.add(report_shipping)
-        # TODO should we report SKU on pickup??
-        # for cart in ship_request.carts:
-        # m.ReportSKU(
-        #         product_id=cart.product_id,
-        #         ship_request=ship_request,
-        #         type=s.ReportSKUType.ship_request.value,
-        #         status="Ship request created.",
-        #     ).save(False)
-        ship_request.save()
-
-        if form_edit.next_url.data:
-            return redirect(form_edit.next_url.data)
-        return redirect(url_for("pickup_order.get_all"))
-
-    else:
+    if not form_edit.validate_on_submit():
         log(log.ERROR, "Cart item save errors: [%s]", form_edit.errors)
         flash(f"{form_edit.errors}", "danger")
         return redirect(url_for("pickup_order.get_all"))
+
+    ship_request = db.session.get(m.ShipRequest, int(form_edit.ship_request_id.data))
+    if not ship_request:
+        log(
+            log.ERROR,
+            "Not found ship request item by id : [%s]",
+            form_edit.ship_request_id.data,
+        )
+        flash("Cannot save item data", "danger")
+        return redirect(url_for("pickup_order.get_all"))
+
+    if ship_request.status == s.ShipRequestStatus.in_transit:
+        flash("Cannot edit ship request in transit", "danger")
+        return redirect(url_for("pickup_order.get_all"))
+
+    ship_request.da_notes = form_edit.da_notes.data
+    ship_request.status = s.ShipRequestStatus.in_transit
+
+    report_shipping = m.ReportShipping(
+        type=s.ReportShipRequestActionType.PICKED_UP.value,
+        ship_request=ship_request,
+        user=current_user,
+    )
+    db.session.add(report_shipping)
+    # TODO should we report SKU on pickup??
+    # for cart in ship_request.carts:
+    # m.ReportSKU(
+    #         product_id=cart.product_id,
+    #         ship_request=ship_request,
+    #         type=s.ReportSKUType.ship_request.value,
+    #         status="Ship request created.",
+    #     ).save(False)
+    ship_request.save()
+
+    if form_edit.next_url.data:
+        return redirect(form_edit.next_url.data)
+    return redirect(url_for("pickup_order.get_all"))
 
 
 @pickup_order_blueprint.route("/update_notes", methods=["POST"])
@@ -151,38 +153,36 @@ def save():
 @role_required(DELIVERY_AGENT_ROLES)
 def update_notes():
     form_edit: f.ShipRequestForm = f.ShipRequestForm()
-    if form_edit.validate_on_submit():
-        ship_request = db.session.get(m.ShipRequest, form_edit.ship_request_id.data)
-        if not ship_request:
-            log(
-                log.ERROR,
-                "Not found ship request item by id : [%s]",
-                form_edit.ship_request_id.data,
-            )
-            flash("Cannot save item data", "danger")
-            return redirect(url_for("pickup_order.get_all"))
-
-        ship_request.proof_of_delivery = form_edit.proof_of_delivery.data
-        ship_request.tracking = form_edit.tracking.data
-
-        if form_edit.da_notes.data:
-            ship_request.da_notes = form_edit.da_notes.data
-            ship_request.save()
-            log(log.INFO, "Ship Request note updated. Ship Request: [%s]", ship_request)
-            flash("Note has been updated!", "success")
-            return redirect(url_for("pickup_order.get_all"))
-
-        ship_request.save()
-
-        if form_edit.next_url.data:
-            log(log.INFO, "Redirecting to: [%s]", form_edit.next_url.data)
-            return redirect(form_edit.next_url.data)
-        return redirect(url_for("pickup_order.get_all"))
-
-    else:
+    if not form_edit.validate_on_submit():
         log(log.ERROR, "Ship request item save errors: [%s]", form_edit.da_notes.data)
         flash("Note for warehouse manager has not been updated", "danger")
         return redirect(url_for("pickup_order.get_all"))
+    ship_request = db.session.get(m.ShipRequest, form_edit.ship_request_id.data)
+    if not ship_request:
+        log(
+            log.ERROR,
+            "Not found ship request item by id : [%s]",
+            form_edit.ship_request_id.data,
+        )
+        flash("Cannot save item data", "danger")
+        return redirect(url_for("pickup_order.get_all"))
+
+    ship_request.proof_of_delivery = form_edit.proof_of_delivery.data
+    ship_request.tracking = form_edit.tracking.data
+
+    if form_edit.da_notes.data:
+        ship_request.da_notes = form_edit.da_notes.data
+        ship_request.save()
+        log(log.INFO, "Ship Request note updated. Ship Request: [%s]", ship_request)
+        flash("Note has been updated!", "success")
+        return redirect(url_for("pickup_order.get_all"))
+
+    ship_request.save()
+
+    if form_edit.next_url.data:
+        log(log.INFO, "Redirecting to: [%s]", form_edit.next_url.data)
+        return redirect(form_edit.next_url.data)
+    return redirect(url_for("pickup_order.get_all"))
 
 
 @pickup_order_blueprint.route("/deliver/<int:id>", methods=["GET"])

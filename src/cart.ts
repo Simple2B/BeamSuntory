@@ -100,7 +100,7 @@ deleteButtons.forEach((e) => {
       const response = await fetch(`/cart/delete/${id}`, {
         method: 'DELETE',
       });
-      if (response.status == 200) {
+      if (response.status == 200 || response.status == 404) {
         location.reload();
       }
     }
