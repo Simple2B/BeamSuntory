@@ -1,10 +1,14 @@
 from flask_wtf import FlaskForm
 from wtforms import (
+    FieldList,
+    Form,
+    FormField,
     StringField,
     SubmitField,
     ValidationError,
     IntegerField,
     TextAreaField,
+    HiddenField,
 )
 from wtforms.validators import DataRequired
 
@@ -26,6 +30,27 @@ class NewShipRequestForm(FlaskForm):
         query = m.ShipRequest.select().where(m.ShipRequest.order_numb == field.data)
         if db.session.scalar(query) is not None:
             raise ValidationError("This request already exist.")
+
+
+class ProductShipRequestForm(Form):
+    cart_id = HiddenField("cart_id", [DataRequired()])
+    warehouse_id = IntegerField("warehouse_id", [DataRequired()])
+
+
+class ShipRequestOutgoingForm(FlaskForm):
+    ship_request_id = HiddenField("ship_request_id", [DataRequired()])
+    products = FieldList(FormField(ProductShipRequestForm))
+
+
+class ShipRequestOutgoingNotesForm(FlaskForm):
+    ship_request_id = HiddenField("ship_request_id", [DataRequired()])
+    wm_notes = TextAreaField(
+        "Warehouse Manager Notes", render_kw={"placeholder": "commnets"}
+    )
+    proof_of_delivery = TextAreaField(
+        "Proof of Delivery", render_kw={"placeholder": "Proof of Delivery"}
+    )
+    tracking = TextAreaField("Tracking", render_kw={"placeholder": "Tracking"})
 
 
 class ShipRequestForm(FlaskForm):
