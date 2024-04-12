@@ -102,6 +102,15 @@ def pickup():
         flash("There is no such inbound order", "danger")
         return redirect(url_for("pickup_inbound.get_all"))
 
+    if inbound_order.status == s.InboundOrderStatus.in_transit:
+        log(
+            log.INFO,
+            "Inbound order with id: [%s] is already in transit",
+            form_pickup.inbound_order_id.data,
+        )
+        flash("Inbound order is already in transit", "danger")
+        return redirect(url_for("pickup_inbound.get_all"))
+
     # new fields
     inbound_order.proof_of_delivery = form_pickup.proof_of_delivery.data
     inbound_order.tracking = form_pickup.tracking.data

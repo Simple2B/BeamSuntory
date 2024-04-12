@@ -245,7 +245,7 @@ def init(app: Flask):
                 manager_id=wh_manager.id,
             ).save(False)
 
-            m.Warehouse(
+            wh = m.Warehouse(
                 name=s.WarehouseMandatory.warehouse_events.value,
                 phone_number="380362470344",
                 city="Kv",
@@ -368,6 +368,12 @@ def init(app: Flask):
 
         m.ProductGroup(product_id=bottle.id, group_id=1).save(False)
         m.ProductGroup(product_id=cup.id, group_id=1).save(False)
+        m.WarehouseProduct(
+            warehouse_id=wh.id,
+            product_id=bottle.id,
+            group_id=1,
+            product_quantity=2000,
+        ).save(False)
 
         db.session.commit()
         print("database filled")

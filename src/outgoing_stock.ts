@@ -142,7 +142,7 @@ cancelButtons.forEach((e) => {
       const response = await fetch(`/outgoing_stock/cancel/${id}`, {
         method: 'GET',
       });
-      if (response.status == 200) {
+      if (response.status == 200 || response.status == 404) {
         location.reload();
       }
     }

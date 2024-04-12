@@ -92,6 +92,15 @@ def accept():
         flash("There is no such inbound order", "danger")
         return redirect(url_for("incoming_stock.get_all"))
 
+    if inbound_order.status == s.InboundOrderStatus.delivered:
+        log(
+            log.INFO,
+            "Inbound order already accepted. Inbound order: [%s]",
+            inbound_order,
+        )
+        flash("Inbound order already accepted", "warning")
+        return redirect(url_for("incoming_stock.get_all"))
+
     products_info_json = s.IncomingStocks.model_validate_json(
         form_edit.received_products.data
     ).root

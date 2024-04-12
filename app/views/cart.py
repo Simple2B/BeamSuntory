@@ -388,15 +388,15 @@ def save():
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.MANAGER.value])
 def delete(id: int):
-    c = db.session.scalar(m.Cart.select().where(m.Cart.id == id))
-    if not c:
+    cart = db.session.get(m.Cart, id)
+    if not cart:
         log(log.INFO, "There is no cart item with id: [%s]", id)
         flash("There is no such item", "danger")
         return "no item", 404
 
     db.session.execute(m.Event.delete().where(m.Event.cart_id == id))
-    db.session.delete(c)
+    db.session.delete(cart)
     db.session.commit()
-    log(log.INFO, "Cart item deleted. Group: [%s]", c)
+    log(log.INFO, "Cart item deleted. cart_id: [%d]", id)
     flash("Item deleted!", "success")
     return "ok", 200
