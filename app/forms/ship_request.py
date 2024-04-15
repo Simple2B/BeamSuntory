@@ -37,11 +37,6 @@ class ProductShipRequestForm(Form):
     warehouse_id = IntegerField("warehouse_id", [DataRequired()])
 
 
-class ShipRequestOutgoingForm(FlaskForm):
-    ship_request_id = HiddenField("ship_request_id", [DataRequired()])
-    products = FieldList(FormField(ProductShipRequestForm))
-
-
 class ShipRequestOutgoingNotesForm(FlaskForm):
     ship_request_id = HiddenField("ship_request_id", [DataRequired()])
     wm_notes = TextAreaField(
@@ -51,6 +46,10 @@ class ShipRequestOutgoingNotesForm(FlaskForm):
         "Proof of Delivery", render_kw={"placeholder": "Proof of Delivery"}
     )
     tracking = TextAreaField("Tracking", render_kw={"placeholder": "Tracking"})
+
+
+class ShipRequestOutgoingForm(ShipRequestOutgoingNotesForm):
+    products = FieldList(FormField(ProductShipRequestForm))
 
 
 class ShipRequestForm(FlaskForm):

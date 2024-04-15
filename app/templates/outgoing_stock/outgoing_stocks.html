@@ -7,8 +7,6 @@
 {% set base_url = url_for('outgoing_stock.get_all') %}
 {% endif %}
 
-<input hidden id="warehouses-json-input" value="{{warehouses_json}}">
-<input hidden id="warehouses-events-json-input" value="{{warehouses_events_json}}">
 
 <div class="relative overflow-visible shadow-md sm:rounded-lg overflow-x-auto min-h-half">
   <div class="flex sm:gap-5 flex-wrap">
@@ -151,8 +149,10 @@
         </td>
         <td class="p-4 space-x-2 whitespace-nowrap">
           {% if ship_request.status == ship_requests_status.waiting_for_warehouse %}
-          <button type="button" data-target="{{ ship_request.json }}" data-target-store="{{ ship_request.store.json }}"
-            class="outgoing-stock-edit-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 sm:w-auto dark:bg-yellow-400 dark:hover:bg-yellow-500">
+          <button type="button"
+            hx-get="{{ url_for('outgoing_stock.ship_request_edit_view', ship_request_id=ship_request.id) }}"
+            hx-trigger="click" hx-target="body" hx-swap="beforeend" hx-indicator="#htmx-spinner"
+            class="inline-flex px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 sm:w-auto dark:bg-yellow-400 dark:hover:bg-yellow-500">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
               <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path>
               <path fill-rule="evenodd"
@@ -161,22 +161,11 @@
             </svg>
             View
           </button>
-          <button type="button"
-            hx-get="{{ url_for('outgoing_stock.ship_request_edit_view', ship_request_id=ship_request.id) }}"
-            hx-trigger="click" hx-target="body" hx-swap="beforeend" hx-indicator="#htmx-spinner"
-            class="items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 sm:w-auto dark:bg-yellow-400 dark:hover:bg-yellow-500">
-            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-              <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path>
-              <path fill-rule="evenodd"
-                d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
-                clip-rule="evenodd"></path>
-            </svg>
-            View hx
-          </button>
           {% else %}
-          <button type="button" data-target="{{ ship_request.json }}" data-target-store="{{ ship_request.store.json }}"
-            data-target-cart-items="{{ current_order_carts }}" data-target-current-order="{{ ship_request.order_numb }}"
-            class="outgoing-stock-view-button inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+          <button type="button"
+            hx-get="{{ url_for('outgoing_stock.ship_request_view', ship_request_id=ship_request.id) }}"
+            hx-trigger="click" hx-target="body" hx-swap="beforeend" hx-indicator="#htmx-spinner"
+            class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 576 512" xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35.3-28.7 64-64 64c-7.1 0-13.9-1.2-20.3-3.3c-5.5-1.8-11.9 1.6-11.7 7.4c.3 6.9 1.3 13.8 3.2 20.7c13.7 51.2 66.4 81.6 117.6 67.9s81.6-66.4 67.9-117.6c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3z"
@@ -284,9 +273,6 @@
 </div>
 {% endif %}
 </div>
-
-{% include 'outgoing_stock/view.html' %}
-{% include 'outgoing_stock/edit.html' %}
 
 <!-- prettier-ignore -->
 {% endblock %}

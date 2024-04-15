@@ -1,4 +1,3 @@
-import json
 from flask import (
     Blueprint,
     render_template,
@@ -29,8 +28,6 @@ outgoing_stock_blueprint = Blueprint(
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def get_all():
-    form_create: f.NewShipRequestForm = f.NewShipRequestForm()
-    form_edit: f.ShipRequestForm = f.ShipRequestForm()
     form_sort: f.SortByStatusShipRequestForm = f.SortByStatusShipRequestForm()
 
     store_category = aliased(m.StoreCategory)
@@ -74,47 +71,43 @@ def get_all():
             )
         ).scalars()
     ]
-    current_order_carts = {
-        spr.order_numb: [
-            cart
-            for cart in db.session.execute(
-                m.Cart.select().where(m.Cart.order_numb == spr.order_numb)
-            ).scalars()
-        ]
-        for spr in ship_requests
-    }
-    warehouses = db.session.scalars(
-        m.Warehouse.select().where(
-            m.Warehouse.name != s.WarehouseMandatory.warehouse_events.value
-        )
-    ).all()
-    warehouses_events = db.session.scalars(
-        m.Warehouse.select().where(
-            m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value
-        )
-    ).all()
-
-    warehouses_json = s.WarehouseList.model_validate(warehouses).model_dump_json(
-        by_alias=True
-    )
-    warehouses_events_json = s.WarehouseList.model_validate(
-        warehouses_events
-    ).model_dump_json(by_alias=True)
-
     return render_template(
         "outgoing_stock/outgoing_stocks.html",
         ship_requests=ship_requests,
-        current_order_carts=current_order_carts,
         page=pagination,
         search_query=q,
-        form_create=form_create,
-        form_edit=form_edit,
         form_sort=form_sort,
-        warehouses=warehouses,
-        warehouses_json=warehouses_json,
-        warehouses_events_json=warehouses_events_json,
-        warehouses_events=warehouses_events,
         ship_requests_status=s.ShipRequestStatus,
+    )
+
+
+@outgoing_stock_blueprint.route("/<ship_request_id>/view", methods=["GET"])
+@login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+def ship_request_view(ship_request_id: int):
+    """htmx"""
+    ship_request = db.session.get(m.ShipRequest, ship_request_id)
+    if not ship_request:
+        log(log.ERROR, "Not found ship request item by id : [%s]", ship_request_id)
+        return render_template(
+            "toast.html", message="Ship request not found", category="danger"
+        )
+    carts = db.session.scalars(
+        sa.select(m.Cart).where(m.Cart.ship_request_id == ship_request_id)
+    ).all()
+
+    notes_form = f.ShipRequestOutgoingNotesForm(
+        ship_request_id=ship_request_id,
+        wm_notes=ship_request.wm_notes,
+        proof_of_delivery=ship_request.proof_of_delivery,
+        tracking=ship_request.tracking,
+    )
+
+    return render_template(
+        "outgoing_stock/modal_view.html",
+        notes_form=notes_form,
+        ship_request=ship_request,
+        carts=carts,
     )
 
 
@@ -141,12 +134,29 @@ def ship_request_edit_view(ship_request_id: int):
         )
     form = f.ShipRequestOutgoingForm(
         ship_request_id=ship_request_id,
+        wm_notes=ship_request.wm_notes,
+        proof_of_delivery=ship_request.proof_of_delivery,
+        tracking=ship_request.tracking,
     )
     carts = db.session.scalars(
         sa.select(m.Cart).where(
             m.Cart.ship_request_id == ship_request_id, m.Cart.status == "submitted"
         )
     ).all()
+
+    cart_products = []
+    warehouse_product_ids = set()  # type: Set[int]
+    for cart in carts:
+        cart_products.append(
+            (
+                cart,
+                f.ProductShipRequestForm(
+                    cart_id=cart.id,
+                ),
+            )
+        )
+        warehouse_product_ids.update(ware_h.id for ware_h in cart.product.warehouses)
+
     form.products = [
         (
             cart,
@@ -158,19 +168,22 @@ def ship_request_edit_view(ship_request_id: int):
     ]
 
     notes_form = f.ShipRequestOutgoingNotesForm(
+        ship_request_id=ship_request_id,
         wm_notes=ship_request.wm_notes,
         proof_of_delivery=ship_request.proof_of_delivery,
         tracking=ship_request.tracking,
     )
 
-    warehouses = db.session.scalars(m.Warehouse.select()).all()
+    warehouses = db.session.scalars(
+        sa.select(m.Warehouse).where(m.Warehouse.id.in_(list(warehouse_product_ids)))
+    ).all()
 
     return render_template(
         "outgoing_stock/modal_edit.html",
         form=form,
+        notes_form=notes_form,
         ship_request=ship_request,
         warehouses=warehouses,
-        notes_form=notes_form,
         status=s.ShipRequestStatus.waiting_for_warehouse.value,
     )
 
@@ -314,7 +327,9 @@ def save():
             ).save(False)
         cart.status = "completed"
 
-    # ship_request.wm_notes = form.wm_notes.data TODO: need to add wm_notes to form
+    ship_request.tracking = form.proof_of_delivery.data
+    ship_request.proof_of_delivery = form.proof_of_delivery.data
+    ship_request.wm_notes = form.wm_notes.data
     ship_request.status = s.ShipRequestStatus.assigned
     db.session.commit()
 
@@ -361,7 +376,6 @@ def update_notes():
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def cancel(id: int):
-    # TODO: needs refactor
     ship_request: m.ShipRequest = db.session.get(m.ShipRequest, id)
     if not ship_request:
         log(log.INFO, "There is no ship request with id: [%s]", id)

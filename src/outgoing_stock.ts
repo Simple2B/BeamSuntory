@@ -1,8 +1,4 @@
-import { Modal } from 'flowbite';
-import type { ModalOptions, ModalInterface } from 'flowbite';
-import { IGroup } from './types';
-
-const EventsGroup = 'Events';
+import { IGroup } from "./types";
 
 interface IEvent {
   dateFrom: string;
@@ -80,7 +76,6 @@ interface IWarehouse {
   name: string;
   products_ids: number[];
 }
-
 // search flow
 const searchOutgoingInput: HTMLInputElement = document.querySelector('#table-search-outgoing-stock');
 const searchOutgoingInputButton = document.querySelector('#table-search-outgoing-stock-button');
@@ -91,47 +86,6 @@ if (searchOutgoingInputButton && searchOutgoingInput) {
     window.location.href = `${url.href}`;
   });
 }
-const dispatchButtons = document.querySelectorAll('.dispatch-outgoing-stock-btn');
-
-dispatchButtons.forEach((e) => {
-  e.addEventListener('click', async () => {
-    if (confirm('Are sure?')) {
-      let id = e.getAttribute('data-outgoing-stock-id');
-      const response = await fetch(`/outgoing_stock/dispatch/${id}`, {
-        method: 'GET',
-      });
-      if (response.status == 200) {
-        location.reload();
-      }
-    }
-  });
-});
-
-const updateNotesButtons = document.querySelectorAll('.outgoing-stock-edit-notes-btn');
-
-updateNotesButtons.forEach((e) => {
-  e.addEventListener('click', async () => {
-    const shipRequestId = document.querySelector('#outgoing-stock-edit-id').getAttribute('value');
-    const wmNotes: HTMLInputElement = document.querySelector('#outgoing-stock-edit-wm_notes');
-    const csrfTokenInput = document.querySelector<HTMLInputElement>('#csrf_token');
-
-    const data = {
-      csrf_token: csrfTokenInput.value,
-      wm_notes: wmNotes.value,
-      ship_request_id: shipRequestId,
-    };
-    const response = await fetch(`/outgoing_stock/update_notes`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-    if (response.status == 200) {
-      location.reload();
-    }
-  });
-});
 
 const cancelButtons = document.querySelectorAll('.cancel-outgoing-stock-btn');
 
@@ -149,356 +103,6 @@ cancelButtons.forEach((e) => {
   });
 });
 
-const $modalViewElement: HTMLElement = document.querySelector('#view-outgoing-stock-modal');
-const $modalEditElement: HTMLElement = document.querySelector('#edit-outgoing-stock-modal');
-const editModalClosingButton = document.querySelector('#buttonClosingEditOutgoingStockModal');
-const viewModalClosingButton = document.querySelector('#buttonClosingEditOutgoingStockModal');
-editModalClosingButton.addEventListener('click', () => {
-  editModal.hide();
-});
-viewModalClosingButton.addEventListener('click', () => {
-  viewModal.hide();
-});
-
-const modalViewOptions: ModalOptions = {
-  placement: 'bottom-right',
-  backdrop: 'dynamic',
-  backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
-  closable: true,
-  onHide: () => {
-    console.log('modal is hidden');
-    const tableShipRequestBody = document.querySelector('#table-outgoing-stock-body-view');
-    while (tableShipRequestBody.firstChild) {
-      tableShipRequestBody.removeChild(tableShipRequestBody.firstChild);
-    }
-  },
-  onShow: () => {},
-  onToggle: () => {
-    console.log('modal has been toggled');
-  },
-};
-
-const modalEditOptions: ModalOptions = {
-  placement: 'bottom-right',
-  backdrop: 'dynamic',
-  backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
-  closable: true,
-  onHide: () => {
-    console.log('modal is hidden');
-    const tableShipRequestBody = document.querySelector('#table-outgoing-stock-body-edit');
-    while (tableShipRequestBody.firstChild) {
-      tableShipRequestBody.removeChild(tableShipRequestBody.firstChild);
-    }
-  },
-  onShow: () => {},
-  onToggle: () => {
-    console.log('modal has been toggled');
-  },
-};
-
-const viewModal: ModalInterface = new Modal($modalViewElement, modalViewOptions);
-
-const editModal: ModalInterface = new Modal($modalEditElement, modalEditOptions);
-
-// ----view modal-----
-const viewOutgoingStockButtonElements = document.querySelectorAll('.outgoing-stock-view-button');
-viewOutgoingStockButtonElements.forEach((e) =>
-  e.addEventListener('click', () => {
-    const shipRequest: IShipRequest = JSON.parse(e.getAttribute('data-target'));
-    let div: HTMLDivElement = document.querySelector('#outgoing-stock-view-order-number');
-
-    div.innerHTML = shipRequest.orderNumb;
-
-    div = document.querySelector('#outgoing-stock-view-username');
-    div.innerHTML = shipRequest.user ? shipRequest.user.username : 'Unknown User';
-
-
-
-    div = document.querySelector('#outgoing-stock-view-status');
-    div.innerHTML = shipRequest.status;
-    div = document.querySelector('#outgoing-stock-view-created-date');
-    div.innerHTML = shipRequest.createdAt.slice(0, 10);
-
-    div = document.querySelector('#outgoing-stock-view-comment');
-    div.innerHTML = shipRequest.comment;
-    div = document.querySelector('#outgoing-stock-view-da_notes');
-    shipRequest.daNotes ? (div.innerHTML = shipRequest.daNotes) : (div.innerHTML = 'No notes');
-
-    div = document.querySelector('#outgoing-stock-proof-of-delivery');
-    div.innerHTML = shipRequest.proofOfDelivery ?? '';
-
-    div = document.querySelector('#outgoing-stock-view-tracking');
-    div.innerHTML = shipRequest.tracking ?? '';
-
-    div = document.querySelector('#outgoing-stock-view-store');
-    div.innerHTML = shipRequest.store.storeName;
-    div = document.querySelector('#outgoing-stock-view-store_address');
-    div.innerHTML = shipRequest.store.address;
-    div = document.querySelector('#outgoing-stock-view-store_phone');
-    div.innerHTML = shipRequest.store.phoneNumb;
-    div = document.querySelector('#outgoing-stock-view-store_country');
-    div.innerHTML = shipRequest.store.country;
-    div = document.querySelector('#outgoing-stock-view-store_province');
-    div.innerHTML = shipRequest.store.region;
-    div = document.querySelector('#outgoing-stock-view-store_city');
-    div.innerHTML = shipRequest.store.city;
-    div = document.querySelector('#outgoing-stock-view-store_zip_code');
-    div.innerHTML = shipRequest.store.zip;
-
-    let input: HTMLInputElement = document.querySelector('#outgoing-stock-view-id');
-    input.value = shipRequest.id.toString();
-    input = document.querySelector('#outgoing-stock-view-wm_notes');
-    input.value = shipRequest.wmNotes;
-
-    createOutgoingStockItemTable(shipRequest, 'view');
-    viewModal.show();
-  })
-);
-
-// -----edit modal------
-const $buttonEditElements = document.querySelectorAll('.outgoing-stock-edit-button');
-$buttonEditElements.forEach((e) =>
-  e.addEventListener('click', () => {
-    editShipRequest(JSON.parse(e.getAttribute('data-target')), JSON.parse(e.getAttribute('data-target-store')));
-  })
-);
-
-function editShipRequest(shipRequest: IShipRequest, store: IStore) {
-  let input: HTMLInputElement = document.querySelector('#outgoing-stock-edit-status');
-  input.value = shipRequest.status;
-
-  input = document.querySelector('#outgoing-stock-edit-username');
-  input.innerHTML = shipRequest.user ? shipRequest.user.username : 'Unknown User';
-
-  input = document.querySelector('#outgoing-stock-edit-id');
-  input.value = shipRequest.id.toString();
-  input = document.querySelector('#outgoing-stock-edit-store');
-  input.value = shipRequest.storeId.toString();
-  input = document.querySelector('#outgoing-stock-edit-status');
-  input.value = shipRequest.status;
-  input = document.querySelector('#outgoing-stock-edit-wm_notes');
-  shipRequest.wmNotes ? (input.value = shipRequest.wmNotes) : (input.value = '');
-  input = document.querySelector('#outgoing-stock-edit-da_notes');
-  shipRequest.daNotes ? (input.value = shipRequest.daNotes) : (input.value = '');
-
-  let div: HTMLDivElement = document.querySelector('#outgoing-stock-edit-order-number');
-  div.innerHTML = shipRequest.orderNumb;
-  div = document.querySelector('#outgoing-stock-edit-store');
-  div.innerHTML = shipRequest.store.storeName;
-  div = document.querySelector('#outgoing-stock-edit-created-date');
-  div.innerHTML = shipRequest.createdAt.slice(0, 10);
-  div = document.querySelector('#outgoing-stock-edit-comment');
-  div.innerHTML = shipRequest.comment;
-  div = document.querySelector('#outgoing-stock-edit-store_address');
-  div.innerHTML = store.address;
-  div = document.querySelector('#outgoing-stock-edit-store_phone');
-  div.innerHTML = shipRequest.store.phoneNumb;
-  div = document.querySelector('#outgoing-stock-edit-store_country');
-  div.innerHTML = store.country;
-  div = document.querySelector('#outgoing-stock-edit-store_province');
-  div.innerHTML = store.region;
-  div = document.querySelector('#outgoing-stock-edit-store_city');
-  div.innerHTML = store.city;
-  div = document.querySelector('#outgoing-stock-edit-store_zip_code');
-  div.innerHTML = store.zip;
-
-  createOutgoingStockItemTable(shipRequest, 'edit');
-  console.log('shipRequest: ', shipRequest);
-
-  editModal.show();
-}
-
-// -----create outgoing stock item table-----
-function createOutgoingStockItemTable(shipRqst: IShipRequest, typeModal: string) {
-  const warehousesJSONInput = document.getElementById('warehouses-json-input') as HTMLInputElement;
-  const warehousesEventsJSONInput = document.getElementById('warehouses-events-json-input') as HTMLInputElement;
-
-  const warehouses: IWarehouse[] = JSON.parse(warehousesJSONInput.value);
-  const warehousesEvents: IWarehouse[] = JSON.parse(warehousesEventsJSONInput.value);
-
-  const tableShipRequestBody = document.querySelector(`#table-outgoing-stock-body-${typeModal}`);
-  shipRqst.carts.forEach((cart, index) => {
-    const tableShipRequestItem = document.createElement('tr');
-
-    tableShipRequestItem.classList.add(
-      'table-product-item-tr',
-      'bg-white',
-      'border-b',
-      'dark:bg-gray-800',
-      'dark:border-gray-700',
-      'hover:bg-gray-50',
-      'dark:hover:bg-gray-600'
-    );
-    tableShipRequestItem.innerHTML = `
-        <td class="w-4 p-4">
-          <div class="flex items-center">
-            ${index + 1}
-          </div>
-        </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            ${
-              cart.product.image.length > 100
-                ? `<img src="data:image/png;base64, ${cart.product.image}" alt="${cart.product.name}" class="w-14 h-14">`
-                : `<img src="/static/img/default_image_brand.png" alt="${cart.product.name}" class="w-14 h-14">`
-            }
-          </div>
-        </td>
-        <td scope="row" class="max-w-xs p-4 text-base font-normal text-gray-900 dark:text-white">
-          <div class="pl-3">
-            <div class="cart-item-product-name text-base font-semibold" data-target-product-id="${cart.product.id}">${
-      cart.product.name
-    }</div>
-          </div>
-        </td>
-        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="text-base font-semibold">${cart.product.SKU}</div>
-          </div>
-        </td>
-        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="text-base font-semibold">some date</div>
-          </div>
-        </td>
-        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="cart-item-retail-regular_price text-base font-semibold">${cart.product.regularPrice}</div>
-          </div>
-        </td>
-        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="cart-item-retail-retail_price text-base font-semibold">${cart.product.regularPrice}</div>
-          </div>
-        </td>
-        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="cart-item-start-date text-base font-semibold">${cart.event ? cart.event.dateFrom : '-'}</div>
-          </div>
-        </td>
-        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="cart-item-end-date text-base font-semibold">${cart.event ? cart.event.dateTo : '-'}</div>
-          </div>
-        </td>
-        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="cart-item-location-notes text-base font-semibold">${
-              cart.product.notes_location ? cart.product.notes_location : '-'
-            }</div>
-          </div>
-        </td>
-        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="cart-item-group text-base font-semibold">${cart.group.name}</div>
-          </div>
-        </td>
-        <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="cart-item-quantity text-base font-semibold">${cart.quantity}</div>
-        </div>
-        </td>
-      `;
-
-    const warehouseEditElement = document.createElement('td');
-    warehouseEditElement.classList.add('p-4', 'space-x-2', 'whitespace-nowrap');
-    // Select warehouse
-    warehouseEditElement.innerHTML = `
-      <td class="p-4 space-x-2 whitespace-nowrap">
-            <select type="text" name="store" id="outgoing-stock-${typeModal}-warehouse-name"
-              class="outgoing-stock-${typeModal}-warehouse-name shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              required>
-                <option selected="selected" value="" disabled>Select Warehouse</option>
-            </select>
-      </td>
-    `;
-
-    const warehouseName = cart.warehouse ? cart.warehouse.name : 'No Warehouse';
-    const warehouseViewElement = document.createElement('td');
-    warehouseViewElement.classList.add('p-4', 'space-x-2', 'whitespace-nowrap');
-    warehouseViewElement.innerHTML = `
-      <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-        <div class="pl-3">
-          <div class="text-base text-gray-900 dark:text-white font-semibold">${warehouseName}</div>
-        </div>
-      </td>
-    `;
-
-    if (typeModal === 'edit') {
-      tableShipRequestItem.appendChild(warehouseEditElement);
-      const selectWarehouse: HTMLSelectElement = tableShipRequestItem.querySelector(
-        `#outgoing-stock-${typeModal}-warehouse-name`
-      );
-
-      let includeWarehouses: IWarehouse[];
-
-      if (cart.group.name === EventsGroup) {
-        includeWarehouses = warehousesEvents;
-      } else {
-        includeWarehouses = warehouses;
-      }
-
-      cart.product.warehouses.forEach((productWarehouse) => {
-        if (includeWarehouses.some((warehouse) => warehouse.name == productWarehouse.name)) {
-          const option = document.createElement('option');
-          option.value = productWarehouse.id.toString();
-          option.text = productWarehouse.name;
-          selectWarehouse.appendChild(option);
-        }
-      });
-      if (selectWarehouse.options.length === 2) {
-        selectWarehouse.options[1].selected = true;
-      }
-
-      if (cart.product.warehouse) {
-        selectWarehouse.value = cart.product.warehouse.id.toString();
-      }
-      if (shipRqst.status !== 'Waiting for warehouse manager') {
-        const allWarehousesSelect: HTMLInputElement = document.querySelector('#outgoing-stock-edit-warehouse-name');
-        const allWarehousesCheckbox: HTMLInputElement = document.querySelector(
-          '#outgoing-stock-edit-warehouse-set-all'
-        );
-        allWarehousesSelect.disabled = true;
-        selectWarehouse.disabled = true;
-        allWarehousesCheckbox.disabled = true;
-      }
-    } else {
-      tableShipRequestItem.appendChild(warehouseViewElement);
-    }
-
-    tableShipRequestBody.appendChild(tableShipRequestItem);
-  });
-}
-
-// -----set one warehouse to all items-----
-function setWarehouseAllItems(warehouseId: number, typeModal: string) {
-  const warehousesSelect = document.querySelectorAll(`.outgoing-stock-${typeModal}-warehouse-name`);
-  const warehousesJSONInput = document.getElementById('warehouses-json-input') as HTMLInputElement;
-  const warehouses: IWarehouse[] = JSON.parse(warehousesJSONInput.value);
-  if (warehouses.some((warehouse) => warehouse.id === warehouseId)) {
-    // Non event warehouse
-    warehousesSelect.forEach((select: HTMLSelectElement) => {
-      if (select.parentElement.parentElement.querySelector('.cart-item-group').innerHTML !== EventsGroup) {
-        select.value = warehouseId.toString();
-      }
-    });
-  }
-}
-
-const isWarehouseSetAll: HTMLInputElement = document.querySelector('#outgoing-stock-edit-warehouse-set-all');
-
-isWarehouseSetAll.addEventListener('change', () => {
-  if (isWarehouseSetAll.checked) {
-    const warehouseInput = document.querySelector('#outgoing-stock-edit-warehouse-name') as HTMLInputElement;
-    const warehouseId = parseInt(warehouseInput.value);
-    setWarehouseAllItems(warehouseId, 'edit');
-  }
-});
-
-const warehouseNameSelect = document.querySelector('#outgoing-stock-edit-warehouse-name') as HTMLInputElement;
-warehouseNameSelect.addEventListener('change', () => {
-  isWarehouseSetAll.checked = false;
-});
 
 // function to filter order by status
 const orderFilterInputs = document.querySelectorAll('.outgoing-stock-filter-input');
@@ -524,42 +128,70 @@ orderFilterInputs.forEach((input: HTMLInputElement) => {
   });
 });
 
-// ----set product to JSON hidden input in inbound-order-edit-form----
-function setProducts() {
-  const outgoingStockGroupItems = document.querySelectorAll('.cart-item-group');
-  const outgoingStockProductItem = document.querySelectorAll('.cart-item-product-name');
-  const outgoingStockQuantityItems = document.querySelectorAll('.cart-item-quantity');
-  const outgoingStockWarehouses = document.querySelectorAll('.outgoing-stock-edit-warehouse-name');
 
-  const products = [];
+// observer for outgoing stock view, edit modal
+const body = document.querySelector('body');
 
-  for (let i = 0; i < outgoingStockProductItem.length; i++) {
-    const outgoingStockProductNameItem = outgoingStockProductItem[i] as HTMLSelectElement;
-    const inboundOrderAddQuantity = outgoingStockQuantityItems[i] as HTMLSelectElement;
-    const outgoingStockGroupName = outgoingStockGroupItems[i] as HTMLSelectElement;
-    const outgoingStockWarehouse = outgoingStockWarehouses[i] as HTMLSelectElement;
 
-    const product = {
-      product_id: Number(outgoingStockProductNameItem.getAttribute('data-target-product-id')),
-      quantity: Number(inboundOrderAddQuantity.innerHTML),
-      group_name: outgoingStockGroupName.innerHTML,
-      warehouse_id: Number(outgoingStockWarehouse.value),
-    };
-    products.push(product);
+const handleOrderView = () => {
+  const orderView = document.querySelector('#outgoing-stock-ship-request-edit') as HTMLDivElement;
+  if (orderView) {
+    setNotesForInputs(orderView)
+    selectAllWarehouseHandler(orderView);
   }
+}
+const observer = new MutationObserver(handleOrderView);
+const config: MutationObserverInit = { childList: true, subtree: true };
+observer.observe(body, config);
 
-  const inputProducts: HTMLInputElement = document.querySelector('#outgoing-stock-edit-products');
-  inputProducts.value = JSON.stringify(products);
-  return true;
+
+
+function setNotesForInputs (div: HTMLDivElement) {
+  const waNotes = div.querySelector('#wm_notes') as HTMLInputElement;
+  const proofOfDelivery = div.querySelector('#proof_of_delivery') as HTMLInputElement;
+  const tracking = div.querySelector('#tracking') as HTMLInputElement;
+  
+  const waNotesFormDispatch = div.querySelector('#wm-notes-form-dispatched') as HTMLInputElement;
+  const roofOfDeliveryFormDispatch = div.querySelector('#proof-of-delivery-form-dispatched') as HTMLInputElement;
+  const trackingFormDispatch = div.querySelector('#tracking-form-dispatched') as HTMLInputElement;
+
+  waNotesFormDispatch && waNotes.addEventListener('change', (event: Event) => {
+      waNotesFormDispatch.value = (event.target as HTMLInputElement).value;
+  });
+  
+  roofOfDeliveryFormDispatch && proofOfDelivery.addEventListener('change', (event: Event) => {
+      roofOfDeliveryFormDispatch.value = (event.target as HTMLInputElement).value;
+  });
+
+  trackingFormDispatch && tracking.addEventListener('change', (event: Event) => {
+      trackingFormDispatch.value = (event.target as HTMLInputElement).value;
+  });
 }
 
-// ----submit edit form through hidden submit button----
-const inboundOrderSubmitButton: HTMLButtonElement = document.querySelector('#outgoing-stock-submit-btn');
-const inboundOrderSaveProductsButton = document.querySelector('#outgoing-stock-save-products-btn');
+function setWarehouseIdsForInputs (div: HTMLDivElement, id: number) {
+  const warehouseInputs =  div.querySelectorAll('select[name="warehouse_id"]') as NodeListOf<HTMLSelectElement>;
+  warehouseInputs.forEach((selectElement) => {
+    const options = selectElement.options;
+    for (let i = 0; i < options.length; i++) {
+      if (parseInt(options[i].value) === id) {
+        options[i].selected = true;
+      }
+    }
+  });
+}
 
-inboundOrderSaveProductsButton.addEventListener('click', () => {
-  const result = setProducts();
-  if (result) {
-    inboundOrderSubmitButton.click();
-  }
-});
+function selectAllWarehouseHandler(div: HTMLDivElement) {
+  const selectWarehouse: HTMLSelectElement = div.querySelector('#outgoing-stock-edit-warehouse-name');
+  const chechboxSelectAll: HTMLInputElement = div.querySelector('#outgoing-stock-edit-warehouse-set-all');
+  if (!selectWarehouse || !chechboxSelectAll) return;
+
+  selectWarehouse.addEventListener('change', () => {
+    if (!chechboxSelectAll.checked || !selectWarehouse.value) return;
+    setWarehouseIdsForInputs(div, parseInt(selectWarehouse.value));
+    
+  })
+  chechboxSelectAll.addEventListener('change', () => {
+    if (!chechboxSelectAll.checked || !selectWarehouse.value)  return;
+    setWarehouseIdsForInputs(div, parseInt(selectWarehouse.value));
+  });
+}
