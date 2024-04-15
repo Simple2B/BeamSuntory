@@ -1,9 +1,12 @@
+import io
+from typing import Set
 from flask import (
     Blueprint,
     render_template,
     request,
     flash,
     redirect,
+    send_file,
     url_for,
 )
 from flask_login import login_required, current_user
@@ -145,7 +148,7 @@ def ship_request_edit_view(ship_request_id: int):
     ).all()
 
     cart_products = []
-    warehouse_product_ids = set()  # type: Set[int]
+    warehouse_product_ids: Set[int] = set()
     for cart in carts:
         cart_products.append(
             (
@@ -485,4 +488,38 @@ def sort():
         warehouses=warehouses,
         filtered=filtered,
         ship_requests_status=s.ShipRequestStatus,
+    )
+
+
+@outgoing_stock_blueprint.route("/download", methods=["POST"])
+@login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+def download_file():
+    from xhtml2pdf import pisa
+
+    # In this example, let's assume `file_data` is the content of the file you want to serve
+    # You'd typically read the file contents from disk, a database, or some other source
+    html_content = """
+    <html>
+    <head><title>HTML to PDF</title></head>
+    <body>
+    <h1>Hello, World!</h1>
+    <p>This is a PDF generated from HTML.</p>
+    </body>
+    </html>
+    """
+
+    # Using BytesIO to work with file-like objects in memory
+    pdf = pisa.CreatePDF(html_content)
+    # file_obj = io.BytesIO(html_content)
+    pdf_data = pdf.dest.getvalue()
+
+    # You can specify a filename for the browser to use when saving the file
+
+    # Send file to the client for download
+    return send_file(
+        pdf_data,
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name="file.txt",
     )
