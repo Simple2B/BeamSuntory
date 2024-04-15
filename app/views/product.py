@@ -977,7 +977,7 @@ def request_share():
         db.session.add(report_request_share)
 
         users: list[m.UserGroup] = db.session.scalars(
-            m.UserGroup.select().where(m.UserGroup.right_id == to_group.id)
+            m.UserGroup.select().where(m.UserGroup.right_id == form.from_group_id.data)
         ).all()
 
         if users:
