@@ -243,6 +243,9 @@ const spinner = `<div tabindex="-1"
     </div>
 </div>`;
 
-window.addEventListener('submit', () => {
+window.addEventListener('submit', (event: Event) => {
+  const target = event.target as HTMLFormElement;
+  const method = target.method;
+  if (method.toLocaleLowerCase() === "get") return;
   document.body.insertAdjacentHTML('beforeend', spinner);
 });

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <style>
+    html,
+    body {
+      height: 100%;
+    }
+
+    html {
+      display: table;
+      margin: auto;
+    }
+
+
+    td,
+    th {
+      width: 10px;
+      height: 100%;
+      border: 1px solid;
+      text-align: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 8px;
+    }
+
+    tbody,
+    thead {
+      width: 100%;
+    }
+
+    .image {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+    }
+
+    .text {
+      padding: 1px;
+      max-width: 80px;
+      word-wrap: break-word;
+      text-align: center;
+    }
+
+    header {
+      margin-bottom: 10px;
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <h1>№: {{ ship_request.order_numb }}</h1>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">User name</th>
+        <th scope="col">Status</th>
+        <th scope="col">Created
+          Date</th>
+        <th scope="col">Store</th>
+        <th scope="col">Store
+          Address</th>
+        <th scope="col">Store
+          Phone</th>
+        <th scope="col">Store
+          Country</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <div class="text">
+            {{ ship_request.user.username }}
+          </div>
+        </td>
+        <td>
+          <div class="text">
+            {{ ship_request.status.value}}
+          </div>
+        </td>
+        <td>
+          <div class="text">
+            {{ ship_request.created_at.strftime('%Y-%m-%d %H:%M') }}
+          </div>
+        </td>
+        <td>
+          <div class="text">{{ ship_request.store.store_name }}</div>
+        </td>
+        <td>
+          <div class="text">
+            {{ ship_request.store.address }}
+          </div>
+        </td>
+        <td>
+          <div class="text">
+            {{ ship_request.store.phone_numb}}
+          </div>
+        </td>
+        <td>
+          <div class="text">
+            {{ ship_request.store.country }}
+          </div>
+        </td>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Store
+          City</th>
+        <th scope="col">Store Zip
+          Code</th>
+        <th scope="col">Store
+          Province</th>
+        <th scope="col">Comment</th>
+        <th scope="col"> Warehouse manager notes</th>
+        <th scope="col"> Proof of delivery</th>
+        <th scope="col">Tracking</th>
+        <th scope="col">Delivery agent notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <div class="text">
+            {{ ship_request.store.city }}
+          </div>
+        </td>
+        <td>
+          <div class="text">
+            {{ ship_request.store.zip }}
+          </div>
+        </td>
+        <td>
+          <div class="text">
+            {{ ship_request.store.region }}
+          </div>
+        </td>
+        <td>
+          <div class="text">
+            {{ ship_request.comment if ship_request.comment else 'No comments' }}
+          </div>
+        </td>
+        <td>
+          <div class="text">
+            {{ ship_request.wm_notes }}
+          </div>
+        </td>
+        <td>
+          <div class="text">
+            {{ ship_request.proof_of_delivery }}
+          </div>
+        </td>
+        <td>
+          <div class="text">
+            {{ ship_request.tracking }}
+          </div>
+        </td>
+        <td>
+          <div class="text">
+            {{ ship_request.da_notes if ship_request.da_notes else 'No notes'}}
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Image</th>
+        <th scope="col">Name</th>
+        <th scope="col">SKU</th>
+        <th scope="col">Regular price</th>
+        <th scope="col">Retail price</th>
+        <th scope="col">Group</th>
+        <th scope="col">Quantity</th>
+        <th scope="col">Warehouse</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for cart in carts %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>
+          {% if cart.product.image and cart.product.image | length > 100 %}
+          <img src="data:image/png;base64, {{ cart.product.image }}" class="image" />
+          {% else %}
+          <img
+            src="https://raw.githubusercontent.com/Simple2B/BeamSuntory/develop/app/static/img/no_picture_default.png"
+            class="image" />
+          {% endif %}
+        </td>
+        <td>{{ cart.product.name }}</td>
+        <td>{{ cart.product.SKU }}</td>
+        <td>{{ cart.product.regular_price }}</td>
+        <td>{{ cart.product.retail_price }}</td>
+
+        <td>{{ cart.group.name }}</td>
+        <td>{{ cart.quantity }}</td>
+        <td>{{ cart.warehouse.name if cart.warehouse else "" }}</td>
+        </td>
+        {% endfor %}
+    </tbody>
+  </table>
+</body>
+
+</html>

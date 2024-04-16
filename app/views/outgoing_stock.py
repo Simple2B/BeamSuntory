@@ -1,15 +1,19 @@
-import json
+from typing import Set
 from flask import (
     Blueprint,
+    make_response,
     render_template,
     request,
     flash,
     redirect,
     url_for,
 )
+from weasyprint import HTML
 from flask_login import login_required, current_user
 import sqlalchemy as sa
 from sqlalchemy import desc
+from flask_pydantic import validate
+
 from sqlalchemy.orm import aliased
 from app.controllers import create_pagination, role_required
 
@@ -26,21 +30,21 @@ outgoing_stock_blueprint = Blueprint(
 
 
 @outgoing_stock_blueprint.route("/", methods=["GET"])
+@validate()
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
-def get_all():
-    form_create: f.NewShipRequestForm = f.NewShipRequestForm()
-    form_edit: f.ShipRequestForm = f.ShipRequestForm()
-    form_sort: f.SortByStatusShipRequestForm = f.SortByStatusShipRequestForm()
+def get_all(query: s.OutgoingStockQueryParams):
 
     store_category = aliased(m.StoreCategory)
     store = aliased(m.Store)
-    q = request.args.get("q", type=str, default=None)
-    query = m.ShipRequest.select().order_by(desc(m.ShipRequest.id))
+    q = query.q
+    status = query.status
+
+    sql_query = sa.select(m.ShipRequest).order_by(desc(m.ShipRequest.id))
     count_query = sa.select(sa.func.count()).select_from(m.ShipRequest)
     if q:
-        query = (
-            m.ShipRequest.select()
+        sql_query = (
+            sa.select(m.ShipRequest)
             .join(store_category, m.ShipRequest.store_category_id == store_category.id)
             .join(store, m.ShipRequest.store_id == store.id)
             .where(
@@ -63,79 +67,156 @@ def get_all():
             )
             .select_from(m.ShipRequest)
         )
+    if status:
+        sql_query = sql_query.where(m.ShipRequest.status == s.ShipRequestStatus(status))
+        count_query = count_query.where(
+            m.ShipRequest.status == s.ShipRequestStatus(status)
+        )
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
     ship_requests = [
         i
         for i in db.session.execute(
-            query.offset((pagination.page - 1) * pagination.per_page).limit(
+            sql_query.offset((pagination.page - 1) * pagination.per_page).limit(
                 pagination.per_page
             )
         ).scalars()
     ]
-    current_order_carts = {
-        spr.order_numb: [
-            cart
-            for cart in db.session.execute(
-                m.Cart.select().where(m.Cart.order_numb == spr.order_numb)
-            ).scalars()
-        ]
-        for spr in ship_requests
-    }
-    warehouses = db.session.scalars(
-        m.Warehouse.select().where(
-            m.Warehouse.name != s.WarehouseMandatory.warehouse_events.value
-        )
-    ).all()
-    warehouses_events = db.session.scalars(
-        m.Warehouse.select().where(
-            m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value
-        )
-    ).all()
-
-    warehouses_json = s.WarehouseList.model_validate(warehouses).model_dump_json(
-        by_alias=True
-    )
-    warehouses_events_json = s.WarehouseList.model_validate(
-        warehouses_events
-    ).model_dump_json(by_alias=True)
-
     return render_template(
         "outgoing_stock/outgoing_stocks.html",
         ship_requests=ship_requests,
-        current_order_carts=current_order_carts,
         page=pagination,
         search_query=q,
-        form_create=form_create,
-        form_edit=form_edit,
-        form_sort=form_sort,
-        warehouses=warehouses,
-        warehouses_json=warehouses_json,
-        warehouses_events_json=warehouses_events_json,
-        warehouses_events=warehouses_events,
+        search_status=status,
         ship_requests_status=s.ShipRequestStatus,
     )
 
 
-# TODO needs refactor
+@outgoing_stock_blueprint.route("/<ship_request_id>/view", methods=["GET"])
+@login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+def ship_request_view(ship_request_id: int):
+    """htmx"""
+    ship_request = db.session.get(m.ShipRequest, ship_request_id)
+    if not ship_request:
+        log(log.ERROR, "Not found ship request item by id : [%s]", ship_request_id)
+        return render_template(
+            "toast.html", message="Ship request not found", category="danger"
+        )
+    carts = db.session.scalars(
+        sa.select(m.Cart).where(
+            m.Cart.ship_request_id == ship_request_id, m.Cart.status != "pending"
+        )
+    ).all()
+
+    notes_form = f.ShipRequestOutgoingNotesForm(
+        ship_request_id=ship_request_id,
+        wm_notes=ship_request.wm_notes,
+        proof_of_delivery=ship_request.proof_of_delivery,
+        tracking=ship_request.tracking,
+    )
+
+    return render_template(
+        "outgoing_stock/modal_view.html",
+        notes_form=notes_form,
+        ship_request=ship_request,
+        carts=carts,
+    )
+
+
+@outgoing_stock_blueprint.route("/<ship_request_id>/edit-view", methods=["GET"])
+@login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+def ship_request_edit_view(ship_request_id: int):
+    ship_request = db.session.get(m.ShipRequest, ship_request_id)
+    if not ship_request:
+        log(log.ERROR, "Not found ship request item by id : [%s]", ship_request_id)
+        return render_template(
+            "toast.html", message="Ship request not found", category="danger"
+        )
+    if ship_request.status == s.ShipRequestStatus.assigned:
+        log(
+            log.ERROR,
+            "Cannot save item data. Ship Request already Dispatched: [%s]",
+            ship_request,
+        )
+        return render_template(
+            "toast.html",
+            message="Cannot save item data. Ship Request already Dispatched",
+            category="danger",
+        )
+    form = f.ShipRequestOutgoingForm(
+        ship_request_id=ship_request_id,
+        wm_notes=ship_request.wm_notes,
+        proof_of_delivery=ship_request.proof_of_delivery,
+        tracking=ship_request.tracking,
+    )
+    carts = db.session.scalars(
+        sa.select(m.Cart).where(
+            m.Cart.ship_request_id == ship_request_id, m.Cart.status == "submitted"
+        )
+    ).all()
+
+    cart_products = []
+    warehouse_product_ids: Set[int] = set()
+    for cart in carts:
+        cart_products.append(
+            (
+                cart,
+                f.ProductShipRequestForm(
+                    cart_id=cart.id,
+                ),
+            )
+        )
+        warehouse_product_ids.update(ware_h.id for ware_h in cart.product.warehouses)
+
+    form.products = [
+        (
+            cart,
+            f.ProductShipRequestForm(
+                cart_id=cart.id,
+            ),
+        )
+        for cart in carts
+    ]
+
+    notes_form = f.ShipRequestOutgoingNotesForm(
+        ship_request_id=ship_request_id,
+        wm_notes=ship_request.wm_notes,
+        proof_of_delivery=ship_request.proof_of_delivery,
+        tracking=ship_request.tracking,
+    )
+
+    warehouses = db.session.scalars(
+        sa.select(m.Warehouse).where(m.Warehouse.id.in_(list(warehouse_product_ids)))
+    ).all()
+
+    return render_template(
+        "outgoing_stock/modal_edit.html",
+        form=form,
+        notes_form=notes_form,
+        ship_request=ship_request,
+        warehouses=warehouses,
+        status=s.ShipRequestStatus.waiting_for_warehouse.value,
+    )
+
+
 @outgoing_stock_blueprint.route("/edit", methods=["POST"])
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def save():
-    form_edit: f.ShipRequestForm = f.ShipRequestForm()
-    if not form_edit.validate_on_submit():
-        log(log.ERROR, "Cart item save errors: [%s]", form_edit.errors)
-        flash(f"{form_edit.errors}", "danger")
+    form = f.ShipRequestOutgoingForm()
+    if not form.validate_on_submit():
+        log(log.ERROR, "Cart item save errors: [%s]", form.errors)
+        flash(f"{form.errors}", "danger")
         return redirect(url_for("outgoing_stock.get_all"))
-    ship_request: m.ShipRequest = db.session.get(
-        m.ShipRequest, form_edit.ship_request_id.data
-    )
+    ship_request = db.session.get(m.ShipRequest, form.ship_request_id.data)
     if not ship_request:
         log(
             log.ERROR,
             "Not found ship request item by id : [%s]",
-            form_edit.ship_request_id.data,
+            form.ship_request_id.data,
         )
         flash("Cannot save item data", "danger")
         return redirect(url_for("outgoing_stock.get_all"))
@@ -149,72 +230,68 @@ def save():
         flash("Cannot save item data. Ship Request already Dispatched", "danger")
         return redirect(url_for("outgoing_stock.get_all"))
 
-    products = json.loads(form_edit.products.data)
+    carts_ids = request.form.getlist("cart_id")
+    warehouse_ids = request.form.getlist("warehouse_id")
+
+    if len(carts_ids) != len(warehouse_ids):
+        log(log.ERROR, "Carts and warehouses count mismatch")
+        flash("Cannot save item data", "danger")
+        return redirect(url_for("outgoing_stock.get_all"))
+    products = list(zip(carts_ids, warehouse_ids))
+
+    if not products:
+        log(log.ERROR, "No products in ship request: [%s]", form.products.data)
+        flash("Cannot save item data", "danger")
+        return redirect(url_for("outgoing_stock.get_all"))
 
     report_inventory_list = m.ReportInventoryList(
         type="Ship Request Dispatched",
-        # TODO who sholud be responsible for change?
-        # one who created inbound order?
-        # or one who accepted it?
         user_id=current_user.id,
         ship_request=ship_request,
         store=ship_request.store,
     )
     report_inventory_list.save(False)
 
-    if not products:
-        log(log.ERROR, "No products in ship request: [%s]", form_edit.products.data)
-        flash("Cannot save item data", "danger")
-        return redirect(url_for("outgoing_stock.get_all"))
-
-    for product in products:
-        warehouse: m.Warehouse | None = db.session.get(
+    for cart_id, warehouse_id in products:
+        warehouse = db.session.get(
             m.Warehouse,
-            product["warehouse_id"],
+            warehouse_id,
         )
         if not warehouse:
-            log(log.ERROR, "Warehouse not found: [%s]", product["warehouse_id"])
+            log(log.ERROR, "Warehouse not found: [%s]", warehouse_id)
             flash("Warehouse not found", "danger")
             return redirect(url_for("outgoing_stock.get_all"))
 
-        cart: m.Cart = db.session.scalar(
-            m.Cart.select().where(
-                m.Cart.product_id == int(product["product_id"]),
-                m.Cart.group.has(m.Group.name == product["group_name"]),
-                m.Cart.ship_request_id == ship_request.id,
-                m.Cart.quantity == int(product["quantity"]),
-            )
-        )
-        if not cart:
+        cart = db.session.get(m.Cart, cart_id)
+        if (
+            not cart
+            or cart.ship_request_id != ship_request.id
+            or cart.status != "submitted"
+        ):
             log(log.ERROR, "Cart not found")
             flash("Cannot save item data", "danger")
             return redirect(url_for("outgoing_stock.get_all"))
-        if cart:
-            cart.warehouse_id = product["warehouse_id"]
-            cart.save(False)
-            log(log.INFO, "Cart warehouse_id updated. Cart item: [%s]", cart)
+
+        cart.warehouse_id = warehouse_id
+
+        log(log.INFO, "Cart warehouse_id updated. Cart item: [%s]", cart)
 
         report_shipping = m.ReportShipping(
             type=s.ReportShipRequestActionType.ACCEPTED.value,
             ship_request=ship_request,
             user=current_user,
-            history=f"{warehouse.name}: {product['quantity']}",
+            history=f"{warehouse.name}: {cart.quantity}",
         )
         db.session.add(report_shipping)
 
-    ship_request.wm_notes = form_edit.wm_notes.data
-
-    carts: list[m.Cart] = db.session.scalars(
-        m.Cart.select().where(
-            # TODO do we need this check? Because current_user here is warehouse manager
-            # BUT current_user at Cart creation is user who created cart
-            # m.Cart.user_id == current_user.id,
-            m.Cart.status == "submitted",
-            m.Cart.ship_request_id == ship_request.id,
+        warehouse_product: m.WarehouseProduct = db.session.scalar(
+            m.WarehouseProduct.select().where(
+                m.WarehouseProduct.product_id == cart.product_id,
+                m.WarehouseProduct.warehouse_id == cart.warehouse_id,
+                m.WarehouseProduct.group_id == cart.group_id,
+            )
         )
-    )
 
-    for cart in carts:
         is_group_in_master_group = (
             db.session.query(m.Group)
             .join(m.MasterGroup)
@@ -225,24 +302,11 @@ def save():
             .count()
             > 0
         )
-
-        cart_user_group: m.Group = db.session.execute(
-            m.Group.select().where(m.Group.name == cart.group.name)
-        ).scalar()
-        warehouse_product: m.WarehouseProduct = db.session.scalar(
-            m.WarehouseProduct.select().where(
-                m.WarehouseProduct.product_id == cart.product_id,
-                m.WarehouseProduct.warehouse_id == cart.warehouse_id,
-                m.WarehouseProduct.group_id == cart_user_group.id,
-            )
-        )
         if warehouse_product and not is_group_in_master_group:
-            # TODO what if warehouse product not found?
             products_to_deplete: list[m.ProductAllocated] = db.session.scalars(
                 m.ProductAllocated.select()
                 .where(
                     m.ProductAllocated.product_id == cart.product_id,
-                    # m.ProductAllocated.group_id == cart_user_group.id,
                     m.ProductAllocated.quantity_remains > 0,
                 )
                 .order_by(m.ProductAllocated.shelf_life_end.asc())
@@ -251,10 +315,6 @@ def save():
             deplete_qty = cart.quantity
 
             for product in products_to_deplete:
-                # for prod_group_qty in product.product_quantity_groups:
-                # TODO do we care from which group we deplete?
-                # if warehouse_product.group_id != prod_group_qty.group_id:
-                #     continue
                 if product.quantity_remains >= deplete_qty:
                     product.quantity_remains -= deplete_qty
                     product.save(False)
@@ -279,10 +339,11 @@ def save():
                 type=s.ReportSKUType.ship_request.value,
                 status="Ship request assigned to pickup.",
             ).save(False)
-
         cart.status = "completed"
-        cart.save(False)
 
+    ship_request.tracking = form.proof_of_delivery.data
+    ship_request.proof_of_delivery = form.proof_of_delivery.data
+    ship_request.wm_notes = form.wm_notes.data
     ship_request.status = s.ShipRequestStatus.assigned
     db.session.commit()
 
@@ -293,9 +354,6 @@ def save():
     )
     flash("Ship Request dispatched!", "success")
 
-    if form_edit.next_url.data:
-        log(log.INFO, "Redirecting to: [%s]", form_edit.next_url.data)
-        return redirect(form_edit.next_url.data)
     return redirect(url_for("outgoing_stock.get_all"))
 
 
@@ -303,35 +361,28 @@ def save():
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def update_notes():
-    form_edit: f.ShipRequestForm = f.ShipRequestForm()
-    if not form_edit.validate_on_submit():
-        log(log.ERROR, "Ship request item save errors: [%s]", form_edit.wm_notes.data)
+    form = f.ShipRequestOutgoingNotesForm()
+    if not form.validate_on_submit():
+        log(log.ERROR, "Ship request item save errors: [%s]", form.wm_notes.data)
         flash("Note for warehouse manager has not been updated", "danger")
         return redirect(url_for("outgoing_stock.get_all"))
-    ship_request = db.session.get(m.ShipRequest, form_edit.ship_request_id.data)
+    ship_request = db.session.get(m.ShipRequest, form.ship_request_id.data)
     if not ship_request:
         log(
             log.ERROR,
             "Not found ship request item by id : [%s]",
-            form_edit.ship_request_id.data,
+            form.ship_request_id.data,
         )
         flash("Cannot save item data", "danger")
         return redirect(url_for("outgoing_stock.get_all"))
 
-    ship_request.proof_of_delivery = form_edit.proof_of_delivery.data
-    ship_request.tracking = form_edit.tracking.data
+    ship_request.proof_of_delivery = form.proof_of_delivery.data
+    ship_request.tracking = form.tracking.data
+    ship_request.wm_notes = form.wm_notes.data
     ship_request.save()
 
-    if form_edit.wm_notes.data:
-        ship_request.wm_notes = form_edit.wm_notes.data
-        ship_request.save()
-        log(log.INFO, "Ship Request note updated. Ship Request: [%s]", ship_request)
-        flash("Note has been updated!", "success")
-        return redirect(url_for("outgoing_stock.get_all"))
-
-    if form_edit.next_url.data:
-        log(log.INFO, "Redirecting to: [%s]", form_edit.next_url.data)
-        return redirect(form_edit.next_url.data)
+    log(log.INFO, "Ship Request note updated. Ship Request: [%s]", ship_request)
+    flash("Note has been updated!", "success")
     return redirect(url_for("outgoing_stock.get_all"))
 
 
@@ -339,7 +390,6 @@ def update_notes():
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def cancel(id: int):
-    # TODO: needs refactor
     ship_request: m.ShipRequest = db.session.get(m.ShipRequest, id)
     if not ship_request:
         log(log.INFO, "There is no ship request with id: [%s]", id)
@@ -374,79 +424,61 @@ def cancel(id: int):
     return "ok", 200
 
 
-@outgoing_stock_blueprint.route("/sort", methods=["GET", "POST"])
+@outgoing_stock_blueprint.route("/download", methods=["GET"])
+@validate()
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
-def sort():
-    # TODO: Move to outgoing stock GET
-    # TODO: need refactor
-    if (
-        request.method == "GET"
-        and request.args.get("page", type=str, default=None) is None
-    ):
-        flash("Sort without any arguments", "danger")
-        return redirect(url_for("outgoing_stock.get_all"))
-    form_sort: f.SortByStatusShipRequestForm = f.SortByStatusShipRequestForm()
-    form_create: f.NewShipRequestForm = f.NewShipRequestForm()
-    form_edit: f.ShipRequestForm = f.ShipRequestForm()
-    if not form_sort.validate_on_submit() and request.method == "POST":
-        # NOTE: this is drop filters action
-        return redirect(url_for("outgoing_stock.get_all"))
+def download(query: s.OutgoingStockQueryParamsDownload):
 
-    filtered = True
-    status = form_sort.sort_by.data if request.method == "POST" else "Draft"
+    context = ""
+    filename = "ship_requests.pdf"
 
-    q = request.args.get("q", type=str, default=None)
-    query = (
-        m.ShipRequest.select()
-        .where(m.ShipRequest.status == s.ShipRequestStatus(status))
-        .order_by(m.ShipRequest.id)
-    )
-    count_query = (
-        sa.select(sa.func.count())
-        .where(m.ShipRequest.status == s.ShipRequestStatus(status))
-        .select_from(m.ShipRequest)
-    )
-    if q:
-        query = query.where(
-            m.ShipRequest.order_numb.ilike(f"%{q}%")
-            | m.ShipRequest.store_category.ilike(f"%{q}%")
-            | m.ShipRequest.order_type.ilike(f"%{q}%")
+    sql_query = sa.select(m.ShipRequest).order_by(desc(m.ShipRequest.id))
+
+    if query.ship_request_id:
+        log(log.INFO, "Download ship request with id: [%s]", query.ship_request_id)
+        sql_query = sql_query.where(m.ShipRequest.id == query.ship_request_id)
+        filename = f"ship_request_{ query.ship_request_id}.pdf"
+
+    elif query.q:
+        log(log.INFO, "Download ship request with query: [%s]", query.q)
+        sql_query = (
+            sa.select(m.ShipRequest)
+            .join(
+                m.StoreCategory, m.ShipRequest.store_category_id == m.StoreCategory.id
+            )
+            .join(m.Store, m.ShipRequest.store_id == m.Store.id)
+            .where(
+                m.ShipRequest.order_numb.ilike(f"%{query.q}%")
+                | m.ShipRequest.order_type.ilike(f"%{query.q}%")
+                | m.StoreCategory.name.ilike(f"%{query.q}%")
+                | m.Store.store_name.ilike(f"%{query.q}%")
+            )
+            .order_by(m.ShipRequest.id)
+        )
+    elif query.status:
+        sql_query = sql_query.where(
+            m.ShipRequest.status == s.ShipRequestStatus(query.status)
         )
 
-        count_query = count_query.where(
-            m.ShipRequest.order_numb.ilike(f"%{q}%")
-            | m.ShipRequest.store_category.ilike(f"%{q}%")
-            | m.ShipRequest.order_type.ilike(f"%{q}%")
-        )
-
-    pagination = create_pagination(total=db.session.scalar(count_query))
-
-    ship_requests = db.session.scalars(
-        query.offset((pagination.page - 1) * pagination.per_page).limit(
-            pagination.per_page
-        )
-    ).all()
-
-    current_order_carts = {
-        spr.order_numb: db.session.scalars(
-            m.Cart.select().where(m.Cart.order_numb == spr.order_numb)
+    ship_requests = db.session.scalars(sql_query).all()
+    for ship_request in ship_requests:
+        carts = db.session.scalars(
+            sa.select(m.Cart).where(
+                m.Cart.ship_request_id == ship_request.id,
+                m.Cart.status != "pending",
+            )
         ).all()
-        for spr in ship_requests
-    }
-    warehouses_rows = db.session.execute(sa.select(m.Warehouse)).scalars()
-    warehouses = [{"name": w.name, "id": w.id} for w in warehouses_rows]
+        context += render_template(
+            "outgoing_stock/pdf_template.html",
+            ship_request=ship_request,
+            carts=carts,
+        )
 
-    return render_template(
-        "outgoing_stock/outgoing_stocks.html",
-        ship_requests=ship_requests,
-        current_order_carts=current_order_carts,
-        page=pagination,
-        search_query=q,
-        form_create=form_create,
-        form_edit=form_edit,
-        form_sort=form_sort,
-        warehouses=warehouses,
-        filtered=filtered,
-        ship_requests_status=s.ShipRequestStatus,
-    )
+    pdf = HTML(string=context).write_pdf()
+
+    response = make_response(pdf)
+    response.headers["Content-Type"] = "application/pdf"
+    response.headers["Content-Disposition"] = f"attachment; filename={filename}"
+
+    return response

@@ -100,3 +100,4 @@ from .report import (
 )
 from .report_sku import ReportSKU, ReportSKUList, ReportSKUResponse, ReportSKUType
 from .sub_group import SubGroup, SubGroupParams
+from .outgoing_stock import OutgoingStockQueryParams, OutgoingStockQueryParamsDownload
