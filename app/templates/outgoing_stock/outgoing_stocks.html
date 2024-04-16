@@ -10,11 +10,8 @@
 
 <div class="relative overflow-visible shadow-md sm:rounded-lg overflow-x-auto min-h-half">
   <div class="flex sm:gap-5 flex-wrap">
-    <!-- <form action="{{ url_for('outgoing_stock.download_file') }}" method="POST"> -->
-    <button hx-post="{{ url_for('outgoing_stock.test') }}" hx-swap="none" type="submit">download</button>
-    <!-- </form> -->
-    <form id="outgoing-stock-filter-form" action="{{url_for('outgoing_stock.sort')}}" method="post"
-      hx-indicator="#htmx-spinner" class="flex flex-wrap py-4 gap-3 bg-white dark:bg-gray-800">
+    <form id="outgoing-stock-filter-form" action="{{url_for('outgoing_stock.sort')}}" method="get"
+      class="flex flex-wrap py-4 gap-3 bg-white dark:bg-gray-800">
       {{ form_sort.hidden_tag() }}
       <input id="sort_by" hidden type="text" value="" name="sort_by"
         class="outgoing-stock-filter-input w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">

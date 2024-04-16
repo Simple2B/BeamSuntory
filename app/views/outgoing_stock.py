@@ -9,9 +9,11 @@ from flask import (
     send_file,
     url_for,
 )
+from xhtml2pdf import pisa
 from flask_login import login_required, current_user
 import sqlalchemy as sa
 from sqlalchemy import desc
+
 from sqlalchemy.orm import aliased
 from app.controllers import create_pagination, role_required
 
@@ -96,7 +98,9 @@ def ship_request_view(ship_request_id: int):
             "toast.html", message="Ship request not found", category="danger"
         )
     carts = db.session.scalars(
-        sa.select(m.Cart).where(m.Cart.ship_request_id == ship_request_id)
+        sa.select(m.Cart).where(
+            m.Cart.ship_request_id == ship_request_id, m.Cart.status != "pending"
+        )
     ).all()
 
     notes_form = f.ShipRequestOutgoingNotesForm(
@@ -491,35 +495,35 @@ def sort():
     )
 
 
-@outgoing_stock_blueprint.route("/download", methods=["POST"])
+@outgoing_stock_blueprint.route("/<ship_request_id>/download", methods=["GET"])
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
-def download_file():
-    from xhtml2pdf import pisa
-
+def download(ship_request_id: int):
     # In this example, let's assume `file_data` is the content of the file you want to serve
     # You'd typically read the file contents from disk, a database, or some other source
-    html_content = """
-    <html>
-    <head><title>HTML to PDF</title></head>
-    <body>
-    <h1>Hello, World!</h1>
-    <p>This is a PDF generated from HTML.</p>
-    </body>
-    </html>
-    """
+    ship_request = db.session.get(m.ShipRequest, ship_request_id)
+    if not ship_request:
+        log(log.INFO, "There is no ship request with id: [%s]", ship_request_id)
+        flash("There is no such ship request", "danger")
+        return redirect(url_for("outgoing_stock.get_all"))
 
+    carts = db.session.scalars(
+        sa.select(m.Cart).where(
+            m.Cart.ship_request_id == ship_request_id, m.Cart.status != "pending"
+        )
+    ).all()
+
+    context = render_template(
+        "outgoing_stock/pdf_template.html", ship_request=ship_request, carts=carts
+    )
     # Using BytesIO to work with file-like objects in memory
-    pdf = pisa.CreatePDF(html_content)
-    # file_obj = io.BytesIO(html_content)
-    pdf_data = pdf.dest.getvalue()
+    pdf_output = io.BytesIO()
+    pisa.CreatePDF(context, dest=pdf_output, encoding="utf-8")
+    pdf_output.seek(0)
 
-    # You can specify a filename for the browser to use when saving the file
-
-    # Send file to the client for download
     return send_file(
-        pdf_data,
+        pdf_output,
         mimetype="application/pdf",
         as_attachment=True,
-        download_name="file.txt",
+        download_name=f"ship_request_{ship_request.order_numb}.pdf",
     )
