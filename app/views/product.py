@@ -976,41 +976,39 @@ def request_share():
         db.session.add(request_share)
         db.session.add(report_request_share)
 
-        users: list[m.UserGroup] = db.session.scalars(
-            m.UserGroup.select().where(m.UserGroup.right_id == form.from_group_id.data)
+        users = db.session.scalars(
+            sa.select(m.User)
+            .join(m.UserGroup)
+            .where(m.UserGroup.right_id == form.from_group_id.data)
         ).all()
 
-        if users:
-            for u in users:
-                # TODO: ask client about users notification without approval permission
-                if not u.child.approval_permission:
-                    continue
-                msg = Message(
-                    subject=f"New request share {request_share.order_numb}",
-                    sender=app.config["MAIL_DEFAULT_SENDER"],
-                    recipients=[u.child.email],
+        for user in users:
+            msg = Message(
+                subject=f"New request share {request_share.order_numb}",
+                sender=app.config["MAIL_DEFAULT_SENDER"],
+                recipients=[user.email],
+            )
+            url = (
+                url_for(
+                    "request_share.get_all",
+                    _external=True,
                 )
-                url = (
-                    url_for(
-                        "request_share.get_all",
-                        _external=True,
-                    )
-                    + f"?q={request_share.order_numb}"
-                )
+                + f"?q={request_share.order_numb}"
+            )
 
-                msg.html = render_template(
-                    "email/request_share.html",
-                    user=u.child,
-                    request_share=request_share,
-                    url=url,
-                    action="created",
-                )
-                request_share_user = m.RequestShareUser(
-                    user_id=u.child.id,
-                    request_share=request_share,
-                )
-                db.session.add(request_share_user)
-                mail.send(msg)
+            msg.html = render_template(
+                "email/request_share.html",
+                user=user,
+                request_share=request_share,
+                url=url,
+                action="created",
+            )
+            request_share_user = m.RequestShareUser(
+                user_id=user.id,
+                request_share=request_share,
+            )
+            db.session.add(request_share_user)
+            mail.send(msg)
 
         db.session.commit()
 
