@@ -205,14 +205,30 @@
             class="image" />
           {% endif %}
         </td>
-        <td>{{ cart.product.name }}</td>
-        <td>{{ cart.product.SKU }}</td>
-        <td>{{ cart.product.regular_price }}</td>
-        <td>{{ cart.product.retail_price }}</td>
+        <td>
+          <div class="text">{{ cart.product.name }}</div>
+        </td>
+        <td>
+          <div class="text">{{ cart.product.SKU }}</div>
+        </td>
+        <td>
+          <div class="text">{{ cart.product.regular_price }}</div>
+        </td>
+        <td>
+          <div class="text">
+            {{ cart.product.retail_price }}
+          </div>
+        </td>
 
-        <td>{{ cart.group.name }}</td>
-        <td>{{ cart.quantity }}</td>
-        <td>{{ cart.warehouse.name if cart.warehouse else "" }}</td>
+        <td>
+          <div class="text">{{ cart.group.name }}</div>
+        </td>
+        <td>
+          <div class="text">{{ cart.quantity }}</div>
+        </td>
+        <td>
+          <div class="text"> {{ cart.warehouse.name if cart.warehouse else "" }}</div>
+        </td>
         </td>
         {% endfor %}
     </tbody>
