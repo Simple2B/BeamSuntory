@@ -56,7 +56,7 @@ def test_edit_outgoing_stock(mg_g_populate: FlaskClient):
             m.Cart.status == "submitted",
             m.Cart.ship_request_id == order_to_dispatch.id,
         )
-    )
+    ).all()
 
     assert order_to_dispatch
     assert order_to_dispatch.status == s.ShipRequestStatus.waiting_for_warehouse
@@ -71,7 +71,8 @@ def test_edit_outgoing_stock(mg_g_populate: FlaskClient):
             order_type="test type",
             store=1,
             quantity=1,
-            products='[{"product_id": "1", "group_name": "Canada", "quantity": "100", "warehouse_id": "1"}]',
+            cart_id=carts[0].id,
+            warehouse_id=1,
         ),
     )
     assert response.status_code == 302
