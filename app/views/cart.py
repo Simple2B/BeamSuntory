@@ -386,7 +386,9 @@ def save():
 
 @cart_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
-@role_required([s.UserRole.ADMIN.value, s.UserRole.MANAGER.value])
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
+)
 def delete(id: int):
     cart = db.session.get(m.Cart, id)
     if not cart:

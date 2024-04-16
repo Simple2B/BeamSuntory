@@ -482,3 +482,24 @@ def download(query: s.OutgoingStockQueryParamsDownload):
     response.headers["Content-Disposition"] = f"attachment; filename={filename}"
 
     return response
+
+
+@outgoing_stock_blueprint.route("/delete/<cart_id>", methods=["DELETE"])
+@login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+def delete_cart(cart_id: int):
+    log(log.INFO, "Delete cart item with id: [%s]", cart_id)
+    cart = db.session.get(m.Cart, cart_id)
+    if not cart:
+        log(log.INFO, "There is no cart item with id: [%s]", cart_id)
+        return render_template(
+            "toast.html", message="There is no such product item!", category="danger"
+        )
+
+    db.session.execute(m.Event.delete().where(m.Event.cart_id == cart_id))
+    db.session.delete(cart)
+    db.session.commit()
+    log(log.INFO, "Cart item deleted. cart_id: [%d]", cart_id)
+    return render_template(
+        "toast.html", message="Product item deleted!", category="success"
+    )

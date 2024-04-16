@@ -114,6 +114,29 @@ def get_all():
     )
 
 
+@ship_request_blueprint.route("/<ship_request_id>", methods=["GET"])
+@login_required
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
+)
+def get_view(ship_request_id: int):
+    ship_request = db.session.get(m.ShipRequest, ship_request_id)
+    if not ship_request:
+        log(log.INFO, "Ship request not found: [%s]", ship_request_id)
+        return render_template(
+            "toast.html", message="Ship request not found", category="danger"
+        )
+
+    carts = db.session.scalars(
+        sa.select(m.Cart).where(
+            m.Cart.ship_request_id == ship_request_id, m.Cart.status != "pending"
+        )
+    ).all()
+    return render_template(
+        "ship_request/modal_view.html", ship_request=ship_request, carts=carts
+    )
+
+
 @ship_request_blueprint.route("/create", methods=["POST"])
 @login_required
 @role_required(
