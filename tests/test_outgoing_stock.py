@@ -40,43 +40,6 @@ def test_cancel_outgoing_stock(mg_g_populate: FlaskClient):
     assert order_to_cancel.status == s.ShipRequestStatus.cancelled
 
 
-def test_sort_outgoing_stock(mg_g_populate: FlaskClient):
-    login(mg_g_populate)
-
-    response = mg_g_populate.post(
-        "/outgoing_stock/sort",
-        data=dict(sort_by=s.ShipRequestStatus.in_transit.value),
-    )
-    assert ("Order-12345-In-transit" in response.text) is True
-    assert ("Order-12345-Waiting-for-warehouse-manager" in response.text) is False
-    assert response.status_code == 200
-
-    response = mg_g_populate.post(
-        "/outgoing_stock/sort",
-        data=dict(sort_by=s.ShipRequestStatus.waiting_for_warehouse.value),
-    )
-    assert ("Order-12345-Waiting-for-warehouse-manager" in response.text) is True
-    assert ("Order-12345-In-transit" in response.text) is False
-    assert response.status_code == 200
-
-    response = mg_g_populate.post(
-        "/outgoing_stock/sort",
-        data=dict(sort_by=""),
-        follow_redirects=True,
-    )
-    assert ("Order-12345-Waiting-for-warehouse-manager" in response.text) is True
-    assert ("Order-12345-In-transit" in response.text) is True
-    assert response.status_code == 200
-
-    response = mg_g_populate.get(
-        "/outgoing_stock/sort",
-        follow_redirects=True,
-    )
-    assert ("Order-12345-Waiting-for-warehouse-manager" in response.text) is True
-    assert ("Order-12345-In-transit" in response.text) is True
-    assert response.status_code == 200
-
-
 def test_edit_outgoing_stock(mg_g_populate: FlaskClient):
     register("samg", "samg@test.com")
     login(mg_g_populate, "samg")

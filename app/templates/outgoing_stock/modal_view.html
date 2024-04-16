@@ -216,8 +216,8 @@
               </svg>
               Update notes
             </button>
-            <form class="items-end" action="{{ url_for('outgoing_stock.download', ship_request_id=ship_request.id) }}"
-              method="GET">
+            <form class="items-end" action="{{ url_for('outgoing_stock.download') }}" method="GET">
+              <input type="number" class="hidden" name="ship_request_id" value="{{ ship_request.id }}">
               <button type="submit"><svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
                   xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve" width="32px"
                   height="32px" fill="#000000">

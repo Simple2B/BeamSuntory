@@ -1,18 +1,18 @@
-import io
 from typing import Set
 from flask import (
     Blueprint,
+    make_response,
     render_template,
     request,
     flash,
     redirect,
-    send_file,
     url_for,
 )
-from xhtml2pdf import pisa
+from weasyprint import HTML
 from flask_login import login_required, current_user
 import sqlalchemy as sa
 from sqlalchemy import desc
+from flask_pydantic import validate
 
 from sqlalchemy.orm import aliased
 from app.controllers import create_pagination, role_required
@@ -30,19 +30,21 @@ outgoing_stock_blueprint = Blueprint(
 
 
 @outgoing_stock_blueprint.route("/", methods=["GET"])
+@validate()
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
-def get_all():
-    form_sort: f.SortByStatusShipRequestForm = f.SortByStatusShipRequestForm()
+def get_all(query: s.OutgoingStockQueryParams):
 
     store_category = aliased(m.StoreCategory)
     store = aliased(m.Store)
-    q = request.args.get("q", type=str, default=None)
-    query = m.ShipRequest.select().order_by(desc(m.ShipRequest.id))
+    q = query.q
+    status = query.status
+
+    sql_query = sa.select(m.ShipRequest).order_by(desc(m.ShipRequest.id))
     count_query = sa.select(sa.func.count()).select_from(m.ShipRequest)
     if q:
-        query = (
-            m.ShipRequest.select()
+        sql_query = (
+            sa.select(m.ShipRequest)
             .join(store_category, m.ShipRequest.store_category_id == store_category.id)
             .join(store, m.ShipRequest.store_id == store.id)
             .where(
@@ -65,13 +67,18 @@ def get_all():
             )
             .select_from(m.ShipRequest)
         )
+    if status:
+        sql_query = sql_query.where(m.ShipRequest.status == s.ShipRequestStatus(status))
+        count_query = count_query.where(
+            m.ShipRequest.status == s.ShipRequestStatus(status)
+        )
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
     ship_requests = [
         i
         for i in db.session.execute(
-            query.offset((pagination.page - 1) * pagination.per_page).limit(
+            sql_query.offset((pagination.page - 1) * pagination.per_page).limit(
                 pagination.per_page
             )
         ).scalars()
@@ -81,7 +88,7 @@ def get_all():
         ship_requests=ship_requests,
         page=pagination,
         search_query=q,
-        form_sort=form_sort,
+        search_status=status,
         ship_requests_status=s.ShipRequestStatus,
     )
 
@@ -417,113 +424,61 @@ def cancel(id: int):
     return "ok", 200
 
 
-@outgoing_stock_blueprint.route("/sort", methods=["GET", "POST"])
+@outgoing_stock_blueprint.route("/download", methods=["GET"])
+@validate()
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
-def sort():
-    # TODO: Move to outgoing stock GET
-    # TODO: need refactor
-    if (
-        request.method == "GET"
-        and request.args.get("page", type=str, default=None) is None
-    ):
-        flash("Sort without any arguments", "danger")
-        return redirect(url_for("outgoing_stock.get_all"))
-    form_sort: f.SortByStatusShipRequestForm = f.SortByStatusShipRequestForm()
-    form_create: f.NewShipRequestForm = f.NewShipRequestForm()
-    form_edit: f.ShipRequestForm = f.ShipRequestForm()
-    if not form_sort.validate_on_submit() and request.method == "POST":
-        # NOTE: this is drop filters action
-        return redirect(url_for("outgoing_stock.get_all"))
+def download(query: s.OutgoingStockQueryParamsDownload):
 
-    filtered = True
-    status = form_sort.sort_by.data if request.method == "POST" else "Draft"
+    context = ""
+    filename = "ship_requests.pdf"
 
-    q = request.args.get("q", type=str, default=None)
-    query = (
-        m.ShipRequest.select()
-        .where(m.ShipRequest.status == s.ShipRequestStatus(status))
-        .order_by(m.ShipRequest.id)
-    )
-    count_query = (
-        sa.select(sa.func.count())
-        .where(m.ShipRequest.status == s.ShipRequestStatus(status))
-        .select_from(m.ShipRequest)
-    )
-    if q:
-        query = query.where(
-            m.ShipRequest.order_numb.ilike(f"%{q}%")
-            | m.ShipRequest.store_category.ilike(f"%{q}%")
-            | m.ShipRequest.order_type.ilike(f"%{q}%")
+    sql_query = sa.select(m.ShipRequest).order_by(desc(m.ShipRequest.id))
+
+    if query.ship_request_id:
+        log(log.INFO, "Download ship request with id: [%s]", query.ship_request_id)
+        sql_query = sql_query.where(m.ShipRequest.id == query.ship_request_id)
+        filename = f"ship_request_{ query.ship_request_id}.pdf"
+
+    elif query.q:
+        log(log.INFO, "Download ship request with query: [%s]", query.q)
+        sql_query = (
+            sa.select(m.ShipRequest)
+            .join(
+                m.StoreCategory, m.ShipRequest.store_category_id == m.StoreCategory.id
+            )
+            .join(m.Store, m.ShipRequest.store_id == m.Store.id)
+            .where(
+                m.ShipRequest.order_numb.ilike(f"%{query.q}%")
+                | m.ShipRequest.order_type.ilike(f"%{query.q}%")
+                | m.StoreCategory.name.ilike(f"%{query.q}%")
+                | m.Store.store_name.ilike(f"%{query.q}%")
+            )
+            .order_by(m.ShipRequest.id)
+        )
+    elif query.status:
+        sql_query = sql_query.where(
+            m.ShipRequest.status == s.ShipRequestStatus(query.status)
         )
 
-        count_query = count_query.where(
-            m.ShipRequest.order_numb.ilike(f"%{q}%")
-            | m.ShipRequest.store_category.ilike(f"%{q}%")
-            | m.ShipRequest.order_type.ilike(f"%{q}%")
-        )
-
-    pagination = create_pagination(total=db.session.scalar(count_query))
-
-    ship_requests = db.session.scalars(
-        query.offset((pagination.page - 1) * pagination.per_page).limit(
-            pagination.per_page
-        )
-    ).all()
-
-    current_order_carts = {
-        spr.order_numb: db.session.scalars(
-            m.Cart.select().where(m.Cart.order_numb == spr.order_numb)
+    ship_requests = db.session.scalars(sql_query).all()
+    for ship_request in ship_requests:
+        carts = db.session.scalars(
+            sa.select(m.Cart).where(
+                m.Cart.ship_request_id == ship_request.id,
+                m.Cart.status != "pending",
+            )
         ).all()
-        for spr in ship_requests
-    }
-    warehouses_rows = db.session.execute(sa.select(m.Warehouse)).scalars()
-    warehouses = [{"name": w.name, "id": w.id} for w in warehouses_rows]
-
-    return render_template(
-        "outgoing_stock/outgoing_stocks.html",
-        ship_requests=ship_requests,
-        current_order_carts=current_order_carts,
-        page=pagination,
-        search_query=q,
-        form_create=form_create,
-        form_edit=form_edit,
-        form_sort=form_sort,
-        warehouses=warehouses,
-        filtered=filtered,
-        ship_requests_status=s.ShipRequestStatus,
-    )
-
-
-@outgoing_stock_blueprint.route("/<ship_request_id>/download", methods=["GET"])
-@login_required
-@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
-def download(ship_request_id: int):
-    # In this example, let's assume `file_data` is the content of the file you want to serve
-    # You'd typically read the file contents from disk, a database, or some other source
-    ship_request = db.session.get(m.ShipRequest, ship_request_id)
-    if not ship_request:
-        log(log.INFO, "There is no ship request with id: [%s]", ship_request_id)
-        flash("There is no such ship request", "danger")
-        return redirect(url_for("outgoing_stock.get_all"))
-
-    carts = db.session.scalars(
-        sa.select(m.Cart).where(
-            m.Cart.ship_request_id == ship_request_id, m.Cart.status != "pending"
+        context += render_template(
+            "outgoing_stock/pdf_template.html",
+            ship_request=ship_request,
+            carts=carts,
         )
-    ).all()
 
-    context = render_template(
-        "outgoing_stock/pdf_template.html", ship_request=ship_request, carts=carts
-    )
-    # Using BytesIO to work with file-like objects in memory
-    pdf_output = io.BytesIO()
-    pisa.CreatePDF(context, dest=pdf_output, encoding="utf-8")
-    pdf_output.seek(0)
+    pdf = HTML(string=context).write_pdf()
 
-    return send_file(
-        pdf_output,
-        mimetype="application/pdf",
-        as_attachment=True,
-        download_name=f"ship_request_{ship_request.order_numb}.pdf",
-    )
+    response = make_response(pdf)
+    response.headers["Content-Type"] = "application/pdf"
+    response.headers["Content-Disposition"] = f"attachment; filename={filename}"
+
+    return response
