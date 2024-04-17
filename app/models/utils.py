@@ -1,6 +1,11 @@
 import uuid
+import pytz
+from datetime import datetime
 from app import db
 
+eastern = pytz.timezone("US/Eastern")
+
+current_datetime = datetime.astimezone(eastern)
 
 START_ORDER_NUMBER = 10000
 
