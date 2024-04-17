@@ -268,7 +268,11 @@ def accept():
                 url=url,
                 action="accepted",
             )
-            mail.send(msg)
+            try:
+                mail.send(msg)
+            except Exception as e:
+                log(log.ERROR, "Email send error: [%s]", e)
+                flash(f"Error to send email to [{u.child.email}]", "danger")
 
     return redirect(url_for("incoming_stock.get_all"))
 

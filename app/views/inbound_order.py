@@ -476,7 +476,7 @@ def save():
 
 @inbound_order_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
-@role_required([s.UserRole.ADMIN.value])
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def delete(id: int):
     inbound_order: m.InboundOrder = db.session.get(m.InboundOrder, id)
 
