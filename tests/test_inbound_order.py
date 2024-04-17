@@ -45,6 +45,18 @@ def test_create_inbound_order(mg_g_populate: FlaskClient):
     assert len(inbound_orders_rows_objs) > 0
 
 
+def test_get_view(mg_g_populate: FlaskClient):
+    login(mg_g_populate)
+    response = mg_g_populate.get("/inbound_order/200/view")
+    assert response.status_code == 200
+    assert "Inbound order not found" in response.text
+
+    ib_order = db.session.get(m.InboundOrder, 1)
+    response = mg_g_populate.get(f"/inbound_order/{ib_order.id}/view")
+    assert response.status_code == 200
+    assert ib_order.title in response.text
+
+
 def test_delete_inbound_order(mg_g_populate: FlaskClient):
     login(mg_g_populate)
 

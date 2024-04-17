@@ -223,6 +223,19 @@ def create():
     )
 
 
+@inbound_order_blueprint.route("/<inbound_order_id>/view", methods=["GET"])
+@login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+def get_view(inbound_order_id: int):
+    inbound_order = db.session.get(m.InboundOrder, inbound_order_id)
+    if not inbound_order:
+        log(log.INFO, "Inbound order not found with id: [%s]", inbound_order_id)
+        return render_template(
+            "toast.html", message="Inbound order not found", category="danger"
+        )
+    return render_template("inbound_order/modal_view.html", inbound_order=inbound_order)
+
+
 @inbound_order_blueprint.route("/save", methods=["POST"])
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
@@ -473,6 +486,16 @@ def delete(id: int):
         return "no inbound order", 404
 
     db.session.execute(
+        m.ReportSKU.delete().where(m.ReportSKU.inbound_order_id == inbound_order.id)
+    )
+
+    db.session.execute(
+        m.ReportInboundOrder.delete().where(
+            m.ReportInboundOrder.inbound_order_id == inbound_order.id
+        )
+    )
+
+    db.session.execute(
         m.PackageInfo.delete().where(
             m.PackageInfo.product_quantity_group.has(
                 m.ProductQuantityGroup.product_allocated.has(
@@ -483,29 +506,21 @@ def delete(id: int):
     )
 
     db.session.execute(
-        m.ProductQuantityGroup.delete().where(
+        m.ProductQuantityGroup.select().where(
             m.ProductAllocated.product_quantity_groups.any(
                 m.ProductAllocated.inbound_order_id == inbound_order.id
             )
         )
     )
 
-    db.session.execute(
-        m.PackageInfo.delete().where(
-            m.PackageInfo.product_quantity_group.has(
-                m.ProductQuantityGroup.product_allocated.has(
-                    m.ProductAllocated.inbound_order_id == inbound_order.id
-                )
-            )
-        )
-    )
+    db.session.delete(inbound_order)
+    db.session.commit()
+
     db.session.execute(
         m.ProductAllocated.delete().where(
             m.ProductAllocated.inbound_order_id == inbound_order.id
         )
     )
-    db.session.delete(inbound_order)
-    db.session.commit()
     log(log.INFO, "Inbound order deleted. Inbound order: [%s]", inbound_order)
     flash("Inbound order deleted!", "success")
     return "ok", 200

@@ -1,7 +1,6 @@
 import { Input, Timepicker, initTE } from 'tw-elements';
 import { IInboundOrderBase } from '../types';
 import { initAddInboundOrderModal } from './add';
-import { initViewInboundOrderModal } from './view';
 import { initEditOrderModal } from './edit';
 import { easepick } from '@easepick/bundle';
 import Datepicker from 'flowbite-datepicker/Datepicker';
@@ -42,7 +41,7 @@ deleteButtons.forEach((e) => {
       const response = await fetch(`/inbound_order/delete/${id}`, {
         method: 'DELETE',
       });
-      if (response.status == 200) {
+      if (response.status == 200 || response.status == 404) {
         location.reload();
       }
     }
@@ -104,8 +103,6 @@ const createAllocationProductContainer = (e: MouseEvent) => {
 
 // # NOTE: depends on flash from create route on inbound_order_blueprint
 document.addEventListener('DOMContentLoaded', () => {
-  // view order
-  initViewInboundOrderModal();
   // Add new inbound order handler
   initAddInboundOrderModal();
   // Add edit inbound order handler
