@@ -8,18 +8,16 @@ from flask import (
     flash,
     redirect,
     url_for,
-    current_app as app,
 )
 
 from flask_login import login_required, current_user
-from flask_mail import Message
 import sqlalchemy as sa
 from sqlalchemy import desc
 from pydantic import ValidationError
 
 from app.controllers import create_pagination, role_required
 
-from app import models as m, db, mail
+from app import models as m, db
 from app import schema as s
 from app import forms as f
 from app.logger import log
