@@ -198,6 +198,9 @@ export const initEditOrderModal = () => {
         const productAllocatedNameDiv = currentProductAllocatedContainer.querySelector(
           '.inbound-order-edit-check-product'
         ) as HTMLDivElement;
+        const productAllocatedDescription= currentProductAllocatedContainer.querySelector(
+          '.inbound-order-edit-product-description'
+        ) as HTMLDivElement;
         const productAllocatedSKUDiv = currentProductAllocatedContainer.querySelector(
           '.inbound-order-edit-check-product-sku'
         ) as HTMLDivElement;
@@ -218,7 +221,9 @@ export const initEditOrderModal = () => {
 
         productAllocatedNameDiv.innerHTML = `<p title='${productAllocated.product.name}' class='cropped-text'>${productAllocated.product.name}</p>`;
         productAllocatedSKUDiv.innerHTML = `<p title='${productAllocated.product.SKU}'>${productAllocated.product.SKU}</p>`;
+        productAllocatedDescription.innerHTML = `<p title='${productAllocated.product.description}' class='cropped-text'>${productAllocated.product.description}</p>`;
         productAllocatedQuantityDiv.innerHTML = productAllocated.quantity.toString();
+
         productAllocatedQuantityDiv.setAttribute('data-quantity', productAllocated.quantity.toString());
         productAllocatedTotalQuantityDiv.innerHTML = productAllocated.quantity.toString();
         productAllocatedShelfLifeFromDiv.innerHTML = getDatepickerDateFormat(productAllocated.shelfLifeStart);

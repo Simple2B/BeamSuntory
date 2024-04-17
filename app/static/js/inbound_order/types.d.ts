@@ -16,6 +16,7 @@ export interface IProduct {
     retailPrice?: number;
     warehouseProducts?: IWarehouseProduct[];
     supplier: ISupplier;
+    description: string;
     warehouses: IWarehouse[];
 }
 export interface IWarehouseProduct {
