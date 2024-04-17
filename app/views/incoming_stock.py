@@ -246,33 +246,31 @@ def accept():
         sa.select(m.UserGroup).where(m.UserGroup.right_id.in_(inbound_order_groups_ids))
     ).all()
 
-    if users:
-        for u in users:
-            msg = Message(
-                subject=f"Inbound order accepted {inbound_order.title}",
-                sender=app.config["MAIL_DEFAULT_SENDER"],
-                recipients=[u.child.email],
+    for u in users:
+        msg = Message(
+            subject=f"Inbound order accepted {inbound_order.title}",
+            sender=app.config["MAIL_DEFAULT_SENDER"],
+            recipients=[u.child.email],
+        )
+        url = (
+            url_for(
+                "inbound_order.get_all",
+                _external=True,
             )
-            url = (
-                url_for(
-                    "inbound_order.get_all",
-                    _external=True,
-                )
-                + f"?q={inbound_order.order_id}"
-            )
+            + f"?q={inbound_order.order_id}"
+        )
 
-            msg.html = render_template(
-                "email/inbound_order.html",
-                user=u.child,
-                inbound_order=inbound_order,
-                url=url,
-                action="accepted",
-            )
-            try:
-                mail.send(msg)
-            except Exception as e:
-                log(log.ERROR, "Email send error: [%s]", e)
-                flash(f"Error to send email to [{u.child.email}]", "danger")
+        msg.html = render_template(
+            "email/inbound_order.html",
+            user=u.child,
+            inbound_order=inbound_order,
+            url=url,
+        )
+        try:
+            mail.send(msg)
+        except Exception as e:
+            log(log.ERROR, "Email send error: [%s]", e)
+            flash(f"Error to send email to [{u.child.email}]", "danger")
 
     return redirect(url_for("incoming_stock.get_all"))
 

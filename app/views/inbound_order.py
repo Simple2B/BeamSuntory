@@ -183,28 +183,6 @@ def create():
     inbound_order.set_order_id()
     db.session.commit()
 
-    msg = Message(
-        subject=f"New inbound order {inbound_order.order_id}",
-        sender=app.config["MAIL_DEFAULT_SENDER"],
-        recipients=[inbound_order.warehouse.manager.email],
-    )
-    url = (
-        url_for(
-            "inbound_order.get_all",
-            _external=True,
-        )
-        + f"?q={inbound_order.order_id}"
-    )
-
-    msg.html = render_template(
-        "email/inbound_order.html",
-        user=inbound_order.warehouse.manager,
-        inbound_order=inbound_order,
-        url=url,
-        action="created",
-    )
-    mail.send(msg)
-
     report_inbound_order = m.ReportInboundOrder(
         type=s.ReportEventType.created.value,
         history="",
