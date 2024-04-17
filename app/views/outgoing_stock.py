@@ -1,14 +1,12 @@
 from typing import Set
 from flask import (
     Blueprint,
-    make_response,
     render_template,
     request,
     flash,
     redirect,
     url_for,
 )
-from weasyprint import HTML
 from flask_login import login_required, current_user
 import sqlalchemy as sa
 from sqlalchemy import desc
@@ -429,8 +427,6 @@ def cancel(id: int):
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def print(query: s.OutgoingStockQueryParamsDownload):
-
-
 
     sql_query = sa.select(m.ShipRequest).order_by(desc(m.ShipRequest.id))
 
