@@ -424,21 +424,19 @@ def cancel(id: int):
     return "ok", 200
 
 
-@outgoing_stock_blueprint.route("/download", methods=["GET"])
+@outgoing_stock_blueprint.route("/print", methods=["GET"])
 @validate()
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
-def download(query: s.OutgoingStockQueryParamsDownload):
+def print(query: s.OutgoingStockQueryParamsDownload):
 
-    context = ""
-    filename = "ship_requests.pdf"
+
 
     sql_query = sa.select(m.ShipRequest).order_by(desc(m.ShipRequest.id))
 
     if query.ship_request_id:
         log(log.INFO, "Download ship request with id: [%s]", query.ship_request_id)
         sql_query = sql_query.where(m.ShipRequest.id == query.ship_request_id)
-        filename = f"ship_request_{ query.ship_request_id}.pdf"
 
     elif query.q:
         log(log.INFO, "Download ship request with query: [%s]", query.q)
@@ -462,26 +460,17 @@ def download(query: s.OutgoingStockQueryParamsDownload):
         )
 
     ship_requests = db.session.scalars(sql_query).all()
-    for ship_request in ship_requests:
-        carts = db.session.scalars(
-            sa.select(m.Cart).where(
-                m.Cart.ship_request_id == ship_request.id,
-                m.Cart.status != "pending",
-            )
-        ).all()
-        context += render_template(
-            "outgoing_stock/pdf_template.html",
-            ship_request=ship_request,
-            carts=carts,
-        )
 
-    pdf = HTML(string=context).write_pdf()
+    # pdf = HTML(string=context).write_pdf()
 
-    response = make_response(pdf)
-    response.headers["Content-Type"] = "application/pdf"
-    response.headers["Content-Disposition"] = f"attachment; filename={filename}"
+    # response = make_response(pdf)
+    # response.headers["Content-Type"] = "application/pdf"
+    # response.headers["Content-Disposition"] = f"attachment; filename={filename}"
 
-    return response
+    return render_template(
+        "outgoing_stock/pdf_template.html",
+        ship_requests=ship_requests,
+    )
 
 
 @outgoing_stock_blueprint.route("/delete/<cart_id>", methods=["DELETE"])

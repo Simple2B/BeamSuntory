@@ -87,6 +87,20 @@ if (searchOutgoingInputButton && searchOutgoingInput) {
   });
 }
 
+const printBtn = document.querySelector('#print-outgoing-stock');
+printBtn.addEventListener('click', async (e) => {
+  const url = new URL(window.location.origin + '/outgoing_stock/print');
+  url.searchParams.set('q', searchOutgoingInput.value);
+  url.searchParams.set('status', JSON.parse(sessionStorage.getItem('sortByNameOutgoingStock')));
+  const res = await fetch(url);
+  const resData = await res.text();
+  window.document.body.innerHTML = resData;
+  window.print();
+  location.reload();
+  
+});
+
+
 const cancelButtons = document.querySelectorAll('.cancel-outgoing-stock-btn');
 
 cancelButtons.forEach((e) => {

@@ -96,19 +96,11 @@
           <path stroke-linecap="round" stroke-linejoin="round"
             d="M15.75 15.75l-2.489-2.489m0 0a3.375 3.375 0 10-4.773-4.773 3.375 3.375 0 004.774 4.774zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>Search</button>
-      <form method="get" action="{{ url_for('outgoing_stock.download') }}">
-        <button type="submit" name="submit"
-          class="inline-flex items-center justify-center  px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-blue-300 sm:w-auto dark:bg-yellow-400 dark:hover:bg-yellow-500 dark:focus:ring-blue-800">
-          {% include "icon/download.html" %}
-          &nbsp Download PDF
-        </button>
-        {% if search_query %}
-        <input value="{{ search_query }}" type="text" name="q" class="hidden" />
-        {% endif %}
-        {% if search_status %}
-        <input value="{{search_status }}" type="text" name="status" class="hidden" />
-        {% endif %}
-      </form>
+      <button type="buttom" id="print-outgoing-stock"
+        class="inline-flex items-center justify-center  px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-blue-300 sm:w-auto dark:bg-yellow-400 dark:hover:bg-yellow-500 dark:focus:ring-blue-800">
+        {% include "icon/download.html" %}
+        &nbsp Download PDF
+      </button>
     </div>
   </div>
   <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
