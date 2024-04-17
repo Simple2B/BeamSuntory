@@ -451,7 +451,9 @@ def print(query: s.OutgoingStockQueryParamsDownload):
             .order_by(m.ShipRequest.id)
         )
     # TODO: add status filter
-    elif query.status and query.status != "null":
+    elif query.status and query.status in [
+        status.value for status in s.ShipRequestStatus
+    ]:
         sql_query = sql_query.where(
             m.ShipRequest.status == s.ShipRequestStatus(query.status)
         )
