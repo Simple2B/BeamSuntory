@@ -43,7 +43,7 @@ class Cart(db.Model, ModelMixin):
     )  # in progress, completed, removed
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
-        default=datetime.utcnow,
+        default=datetime.now,
     )
 
     # Relationship

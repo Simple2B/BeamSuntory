@@ -21,7 +21,7 @@ class Adjust(db.Model, ModelMixin):
     note: orm.Mapped[str] = orm.mapped_column(sa.Text(), default="", nullable=True)
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
-        default=datetime.utcnow,
+        default=datetime.now,
     )
     # Relationships
     product: orm.Mapped[Product] = orm.relationship()

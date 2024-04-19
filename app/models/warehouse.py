@@ -30,7 +30,7 @@ class Warehouse(db.Model, ModelMixin):
     address: orm.Mapped[str] = orm.mapped_column(sa.String(64))
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
-        default=datetime.utcnow,
+        default=datetime.now,
     )
 
     manager: orm.Mapped[User] = orm.relationship()

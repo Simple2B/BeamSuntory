@@ -34,7 +34,7 @@ class Event(db.Model, ModelMixin):
     comment: orm.Mapped[str] = orm.mapped_column(sa.Text(), nullable=True)
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
-        default=datetime.utcnow,
+        default=datetime.now,
     )
 
     # Relationships

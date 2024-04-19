@@ -25,7 +25,7 @@ class Assign(db.Model, ModelMixin):
     type: orm.Mapped[str] = orm.mapped_column(sa.String(64))
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
-        default=datetime.utcnow,
+        default=datetime.now,
     )
     uuid: orm.Mapped[str] = orm.mapped_column(sa.String(64), default=generate_uuid)
     # Relationships

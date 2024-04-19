@@ -21,7 +21,7 @@ class MasterGroupProduct(db.Model, ModelMixin):
     )
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
-        default=datetime.utcnow,
+        default=datetime.now,
     )
 
     groups_for_product: orm.Mapped[List[m.GroupProduct]] = orm.relationship(

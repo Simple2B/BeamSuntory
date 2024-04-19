@@ -22,7 +22,7 @@ class MasterGroup(db.Model, ModelMixin):
     )
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
-        default=datetime.utcnow,
+        default=datetime.now,
     )
 
     groups: orm.Mapped[List[m.Group]] = orm.relationship(
