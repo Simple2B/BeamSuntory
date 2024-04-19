@@ -988,20 +988,11 @@ def request_share():
                 sender=app.config["MAIL_DEFAULT_SENDER"],
                 recipients=[user.email],
             )
-            url = (
-                url_for(
-                    "request_share.get_all",
-                    _external=True,
-                )
-                + f"?q={request_share.order_numb}"
-            )
 
             msg.html = render_template(
-                "email/request_share.html",
+                "email/request_share_create.html",
                 user=user,
                 request_share=request_share,
-                url=url,
-                action="created",
             )
             request_share_user = m.RequestShareUser(
                 user_id=user.id,
