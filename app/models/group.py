@@ -34,7 +34,7 @@ class Group(db.Model, ModelMixin):
     )
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
-        default=datetime.utcnow,
+        default=datetime.now,
     )
 
     # Relationships

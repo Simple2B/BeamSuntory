@@ -51,7 +51,7 @@ class ShipRequest(db.Model, ModelMixin):
     comment: orm.Mapped[str] = orm.mapped_column(sa.Text(), default="", nullable=True)
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
-        default=datetime.utcnow,
+        default=datetime.now,
     )
     wm_notes: orm.Mapped[str] = orm.mapped_column(sa.Text(), default="", nullable=True)
     da_notes: orm.Mapped[str] = orm.mapped_column(sa.Text(), default="", nullable=True)

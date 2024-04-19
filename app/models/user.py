@@ -47,7 +47,7 @@ class User(db.Model, UserMixin, ModelMixin):
     activated: orm.Mapped[bool] = orm.mapped_column(sa.Boolean, default=False)
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
-        default=datetime.utcnow,
+        default=datetime.now,
     )
     unique_id: orm.Mapped[str] = orm.mapped_column(
         sa.String(36),

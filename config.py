@@ -31,6 +31,7 @@ class BaseConfig(BaseSettings, ABC):
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
     WTF_CSRF_ENABLED: bool = True
     VERSION: str = get_version()
+    TIMEZONE: str = "EST"
 
     # Mail config
     MAIL_SERVER: str
@@ -74,6 +75,7 @@ class DevelopmentConfig(BaseConfig):
     ENV: ClassVar[str] = "development"
     DEBUG: bool = True
     ALCHEMICAL_DATABASE_URL: str = Field(alias="DB_URL_DEV")
+    # ALCHEMICAL_ENGINE_OPTIONS = {"options": "-c timezone=est"}
 
 
 class TestingConfig(BaseConfig):
