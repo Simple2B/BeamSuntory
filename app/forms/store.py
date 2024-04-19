@@ -30,14 +30,14 @@ class StoreForm(FlaskForm):
 
     submit = SubmitField("Save")
 
-    def validate_address(self, field):
-        query = (
-            m.Store.select()
-            .where(m.Store.address == field.data)
-            .where(m.Store.id != int(self.store_id.data))
-        )
-        if db.session.scalar(query) is not None:
-            raise ValidationError("This store address is taken.")
+    # def validate_address(self, field):
+    #     query = (
+    #         m.Store.select()
+    #         .where(m.Store.address == field.data)
+    #         .where(m.Store.id != int(self.store_id.data))
+    #     )
+    #     if db.session.scalar(query) is not None:
+    #         raise ValidationError("This store address is taken.")
 
 
 class NewStoreForm(FlaskForm):
@@ -55,7 +55,7 @@ class NewStoreForm(FlaskForm):
 
     submit = SubmitField("Save")
 
-    def validate_address(self, field):
-        query = m.Store.select().where(m.Store.address == field.data)
-        if db.session.scalar(query) is not None:
-            raise ValidationError("This store address is taken.")
+    # def validate_address(self, field):
+    #     query = m.Store.select().where(m.Store.address == field.data)
+    #     if db.session.scalar(query) is not None:
+    #         raise ValidationError("This store address is taken.")
