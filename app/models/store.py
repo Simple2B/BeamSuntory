@@ -28,7 +28,6 @@ class Store(db.Model, ModelMixin):
     # Columns
     store_name: orm.Mapped[str] = orm.mapped_column(
         sa.String(128),
-        unique=True,
         nullable=False,
     )
     contact_person: orm.Mapped[str] = orm.mapped_column(
@@ -46,6 +45,7 @@ class Store(db.Model, ModelMixin):
     country: orm.Mapped[str] = orm.mapped_column(sa.String(128))
     region: orm.Mapped[str] = orm.mapped_column(sa.String(128))
     city: orm.Mapped[str] = orm.mapped_column(sa.String(128))
+    # must check if address already exists
     address: orm.Mapped[str] = orm.mapped_column(sa.String(512))
     zip: orm.Mapped[str] = orm.mapped_column(sa.String(128))
     active: orm.Mapped[bool] = orm.mapped_column(sa.Boolean())

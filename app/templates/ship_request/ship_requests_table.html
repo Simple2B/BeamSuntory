@@ -57,7 +57,7 @@
         </td>
         <td class="p-4 space-x-2 whitespace-nowrap">
           <button type="button" hx-get="{{ url_for('ship_request.get_view', ship_request_id=ship_request.id) }}"
-            hx-target="body" hx-swap="beforeend" hx-indicator="#htmx-indicator"
+            hx-target="body" hx-swap="beforeend" hx-indicator="#htmx-spinner"
             class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 576 512" xmlns="http://www.w3.org/2000/svg">
               <path

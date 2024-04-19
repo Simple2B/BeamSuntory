@@ -248,7 +248,7 @@ def create():
             city=user.city if user.sales_rep else form.locker_city.data,
             address=(
                 user.street_address
-                if user.sales_rep
+                if user.sales_rep or not user.street_address
                 else form.locker_street_address.data
             ),
             zip=user.zip_code if user.sales_rep else form.locker_zip_code.data,

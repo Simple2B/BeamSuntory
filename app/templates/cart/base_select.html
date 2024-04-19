@@ -40,7 +40,7 @@
                 <option value="" disabled selected>Select store</option>
                 {% for store in stores %}
                 <option class="cart-store-option" value="{{ store.id }}">
-                    {{ store.store_name }}
+                    {{ store.store_name }} ({{ store.address }})
                 </option>
                 {% endfor %}
             </select>

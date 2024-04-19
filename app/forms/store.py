@@ -24,20 +24,20 @@ class StoreForm(FlaskForm):
     country = StringField("Country")
     region = StringField("Region")
     city = StringField("City")
-    address = StringField("Address")
+    address = StringField("Address", [DataRequired()])
     zip = StringField("ZIP")
     active = BooleanField("active")
 
     submit = SubmitField("Save")
 
-    def validate_store_name(self, field):
+    def validate_address(self, field):
         query = (
             m.Store.select()
-            .where(m.Store.store_name == field.data)
+            .where(m.Store.address == field.data)
             .where(m.Store.id != int(self.store_id.data))
         )
         if db.session.scalar(query) is not None:
-            raise ValidationError("This store name is taken.")
+            raise ValidationError("This store address is taken.")
 
     def validate_email(self, field):
         query = (
@@ -58,16 +58,16 @@ class NewStoreForm(FlaskForm):
     country = StringField("Country")
     region = StringField("Region")
     city = StringField("City")
-    address = StringField("Address")
+    address = StringField("Address", [DataRequired()])
     zip = StringField("ZIP")
     active = BooleanField("active")
 
     submit = SubmitField("Save")
 
-    def validate_store_name(self, field):
-        query = m.Store.select().where(m.Store.store_name == field.data)
+    def validate_address(self, field):
+        query = m.Store.select().where(m.Store.address == field.data)
         if db.session.scalar(query) is not None:
-            raise ValidationError("This store name is taken.")
+            raise ValidationError("This store address is taken.")
 
     def validate_email(self, field):
         query = m.Store.select().where(m.Store.email == field.data)
