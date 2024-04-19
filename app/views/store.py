@@ -198,7 +198,7 @@ def create():
     form: f.NewStoreForm = f.NewStoreForm()
     if not form.validate_on_submit():
         log(log.ERROR, "Form validation error: [%s]", form.errors)
-        flash("Something went wrong!", "danger")
+        flash(f"Error: {form.errors}", "danger")
         return redirect(url_for("store.get_all"))
     store_category = db.session.get(m.StoreCategory, form.category_id.data)
     if not store_category:

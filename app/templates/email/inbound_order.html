@@ -340,6 +340,8 @@
                                             </thead>
                                             <tbody>
                                               {% for prod_allocated in inbound_order.products_allocated %}
+                                              {% for product_quantity_group in prod_allocated.product_quantity_groups %}
+                                              {% if product_quantity_group.group in user.user_groups %}
                                               <tr>
                                                 <td style="
                                                       text-align: center;
@@ -380,9 +382,11 @@
                                                       border: 1px solid #000;
                                                       padding: 4px;
                                                     ">
-                                                  {{ prod_allocated.quantity }}
+                                                  {{ product_quantity_group.quantity }}
                                                 </td>
                                               </tr>
+                                              {% endif %}
+                                              {% endfor %}
                                               {% endfor %}
                                             </tbody>
                                           </table>
