@@ -88,7 +88,8 @@ def test_edit_inbound_order(mg_g_populate: FlaskClient):
             supplier_id=1,
             warehouse_id=1,
             product_id=1,
-            product_groups="""[{"productAllocatedId":1, "productAllocatedGroups":[{"groupId":1, "quantity":11}]}]""",
+            product_groups="""[{"productAllocatedId":1, "productAllocatedQuantity": 40, 
+            "productAllocatedGroups":[{"groupId":1, "quantity":11}]}]""",
         ),
     )
     assert response.status_code == 302

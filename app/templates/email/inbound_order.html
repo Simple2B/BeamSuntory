@@ -321,20 +321,69 @@
                                               </tr>
                                             </tbody>
                                           </table>
-                                          <table class="s-5 w-full" role="presentation" border="0" cellpadding="0"
-                                            cellspacing="0" style="width: 100%" width="100%">
+                                          <table style="width: 100%; border-collapse: collapse; border: 1px solid #000">
+                                            <thead>
+                                              <tr>
+                                                <th style="border-collapse: collapse; border: 1px solid #000">
+                                                  Image
+                                                </th>
+                                                <th style="border-collapse: collapse; border: 1px solid #000">
+                                                  SKU
+                                                </th>
+                                                <th style="border-collapse: collapse; border: 1px solid #000">
+                                                  Description
+                                                </th>
+                                                <th style="border-collapse: collapse; border: 1px solid #000">
+                                                  Quantity
+                                                </th>
+                                              </tr>
+                                            </thead>
                                             <tbody>
+                                              {% for prod_allocated in inbound_order.products_allocated %}
                                               <tr>
                                                 <td style="
-                                                      line-height: 20px;
-                                                      font-size: 20px;
-                                                      width: 100%;
-                                                      height: 20px;
-                                                      margin: 0;
-                                                    " align="left" width="100%" height="20">
-                                                  &#160;
+                                                      text-align: center;
+                                                      border-collapse: collapse;
+                                                      border: 1px solid #000;
+                                                      padding: 4px;
+                                                    ">
+                                                  {% if prod_allocated.product.image and prod_allocated.product.image |
+                                                  length > 100 %}
+                                                  <img src="data:image/png;base64, {{ prod_allocated.product.image }}"
+                                                    alt="Product Image"
+                                                    style="width: 100px; height: 100px; object-fit: cover;" />
+                                                  {% else %}
+                                                  <img
+                                                    src="https://raw.githubusercontent.com/Simple2B/BeamSuntory/develop/app/static/img/no_picture_default.png"
+                                                    style="width: 100px; height: 100px; object-fit: cover;" />
+                                                  {% endif %}
+                                                </td>
+                                                <td style="
+                                                      text-align: center;
+                                                      border-collapse: collapse;
+                                                      border: 1px solid #000;
+                                                      padding: 4px;
+                                                    ">
+                                                  {{ prod_allocated.product.SKU }}
+                                                </td>
+                                                <td style="
+                                                      text-align: center;
+                                                      border-collapse: collapse;
+                                                      border: 1px solid #000;
+                                                      padding: 4px;
+                                                    ">
+                                                  {{ prod_allocated.product.description }}
+                                                </td>
+                                                <td style="
+                                                      text-align: center;
+                                                      border-collapse: collapse;
+                                                      border: 1px solid #000;
+                                                      padding: 4px;
+                                                    ">
+                                                  {{ prod_allocated.quantity }}
                                                 </td>
                                               </tr>
+                                              {% endfor %}
                                             </tbody>
                                           </table>
                                           <table class="hr" role="presentation" border="0" cellpadding="0"
@@ -354,51 +403,7 @@
                                               </tr>
                                             </tbody>
                                           </table>
-                                          <table class="s-5 w-full" role="presentation" border="0" cellpadding="0"
-                                            cellspacing="0" style="width: 100%" width="100%">
-                                            <tbody>
-                                              <tr>
-                                                <td style="
-                                                      line-height: 20px;
-                                                      font-size: 20px;
-                                                      width: 100%;
-                                                      height: 20px;
-                                                      margin: 0;
-                                                    " align="left" width="100%" height="20">
-                                                  &#160;
-                                                </td>
-                                              </tr>
-                                            </tbody>
-                                          </table>
-                                          <table class="btn btn-primary" role="presentation" border="0" cellpadding="0"
-                                            cellspacing="0"
-                                            style="border-radius: 6px; border-collapse: separate !important">
-                                            <tbody>
-                                              <tr>
-                                                <td style="
-                                                      line-height: 24px;
-                                                      font-size: 16px;
-                                                      border-radius: 6px;
-                                                      margin: 0;
-                                                    " align="center" bgcolor="#0d6efd">
-                                                  <a href="{{url}}" target="_blank" style="
-                                                        color: #ffffff;
-                                                        font-size: 16px;
-                                                        font-family: Helvetica, Arial, sans-serif;
-                                                        text-decoration: none;
-                                                        border-radius: 6px;
-                                                        line-height: 20px;
-                                                        display: block;
-                                                        font-weight: normal;
-                                                        white-space: nowrap;
-                                                        background-color: #0d6efd;
-                                                        padding: 8px 12px;
-                                                        border: 1px solid #0d6efd;
-                                                      ">View inbound order</a>
-                                                </td>
-                                              </tr>
-                                            </tbody>
-                                          </table>
+
                                         </td>
                                       </tr>
                                     </tbody>
@@ -422,12 +427,6 @@
                       </tr>
                     </tbody>
                   </table>
-                  <!--[if (gte mso 9)|(IE)]>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-                    <![endif]-->
                 </td>
               </tr>
             </tbody>

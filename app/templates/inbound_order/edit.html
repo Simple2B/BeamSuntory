@@ -177,7 +177,6 @@
           <div class="col-span-6 sm:col-span-3">
             <label for="status" id="inbound-order-edit-check-quantity-label"
               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available Quantity</label>
-            <div type="text" name="check_quantity" class="inbound-order-edit-check-quantity-hidden" hidden></div>
             <div type="text" name="check_quantity_display"
               class="inbound-order-edit-check-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Quantity">
@@ -186,11 +185,9 @@
           <div class="col-span-6 sm:col-span-3">
             <label for="status" id="inbound-order-edit-check-quantity-label"
               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Total Quantity</label>
-            <div type="text" name="check_quantity" class="inbound-order-edit-check-quantity-hidden" hidden></div>
-            <div type="text" name="check_quantity_display"
+            <input type="number" name="check_quantity_display"
               class="inbound-order-edit-total-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Quantity">
-            </div>
+              placeholder="Quantity" required>
           </div>
           <div class="col-span-12 sm:col-span-6">
             <label for="shelf_life_start" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Shelf

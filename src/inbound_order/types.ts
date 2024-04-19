@@ -7,6 +7,7 @@ export interface IProductAllocatedGroup {
 
 export interface IProductGroupCreate {
   productAllocatedId: number;
+  productAllocatedQuantity: number;
   productAllocatedGroups: IProductAllocatedGroup[];
 }
 

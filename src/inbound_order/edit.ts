@@ -213,9 +213,9 @@ export const initEditOrderModal = () => {
         const productAllocatedShelfLifeToDiv = currentProductAllocatedContainer.querySelector(
           '.inbound-order-edit-shelf-life-to'
         ) as HTMLDivElement;
-        const productAllocatedTotalQuantityDiv = currentProductAllocatedContainer.querySelector(
+        const productAllocatedTotalQuantityInput = currentProductAllocatedContainer.querySelector(
           '.inbound-order-edit-total-quantity'
-        ) as HTMLDivElement;
+        ) as HTMLInputElement;
 
         productAllocatedIdInput.value = productAllocated.id.toString();
 
@@ -225,9 +225,10 @@ export const initEditOrderModal = () => {
         productAllocatedQuantityDiv.innerHTML = productAllocated.quantity.toString();
 
         productAllocatedQuantityDiv.setAttribute('data-quantity', productAllocated.quantity.toString());
-        productAllocatedTotalQuantityDiv.innerHTML = productAllocated.quantity.toString();
+        productAllocatedTotalQuantityInput.value = productAllocated.quantity.toString();
         productAllocatedShelfLifeFromDiv.innerHTML = getDatepickerDateFormat(productAllocated.shelfLifeStart);
         productAllocatedShelfLifeToDiv.innerHTML = getDatepickerDateFormat(productAllocated.shelfLifeEnd);
+
 
         const buttonAddNewGroup = orderEditAddGroupButtonTemplate.cloneNode(true) as HTMLButtonElement;
         // current point
@@ -275,6 +276,13 @@ export const initEditOrderModal = () => {
         }
 
         setNewQuantityView(currentProductAllocatedContainer as HTMLDivElement);
+        productAllocatedTotalQuantityInput.addEventListener('input', (e: Event) => {
+          const newQuantity = (e.target as HTMLInputElement).value;
+
+          productAllocatedQuantityDiv.innerHTML = newQuantity;
+          productAllocatedQuantityDiv.setAttribute('data-quantity', newQuantity);
+          setNewQuantityView(currentProductAllocatedContainer as HTMLDivElement);
+        })
       });
 
       if (inboundOrderData.status !== 'Assigned to pickup' && inboundOrderData.status !== 'Draft') {
@@ -311,9 +319,13 @@ export const initEditOrderModal = () => {
 
     productAllocatedGroupsContainers.forEach((productGroupContainer) => {
       const productAllocatedIdInput = productGroupContainer.querySelector('.product-allocated-id') as HTMLInputElement;
+      const productAllocatedQuantityInput = productGroupContainer.querySelector('.inbound-order-edit-total-quantity') as HTMLInputElement;
+
+      const productAllocatedQuantity = parseInt(productAllocatedQuantityInput.value);
 
       const productGroupCreate: IProductGroupCreate = {
         productAllocatedId: parseInt(productAllocatedIdInput.value),
+        productAllocatedQuantity: productAllocatedQuantity,
         productAllocatedGroups: [],
       };
 

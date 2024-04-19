@@ -23,6 +23,7 @@ class ProductQuantityGroupCreate(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     product_allocated_id: int = Field(alias="productAllocatedId")
+    product_allocated_quantity: int = Field(alias="productAllocatedQuantity")
     product_allocated_groups: list[ProductAllocatedGroupCreate] = Field(
         alias="productAllocatedGroups"
     )

@@ -35,11 +35,11 @@ class InboundOrderBaseForm(FlaskForm):
 
     def validate_delivery_date(self, field):
         if field.data < date.today():
-            raise ValidationError("Active date cannot be earlier than today")
+            raise ValidationError("Delivery date cannot be earlier than today")
 
     def validate_active_date(self, field):
         if field.data < date.today():
-            raise ValidationError("Delivery date cannot be earlier than today")
+            raise ValidationError("Active date cannot be earlier than today")
 
 
 class InboundOrderCreateForm(InboundOrderBaseForm):
