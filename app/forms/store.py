@@ -39,15 +39,6 @@ class StoreForm(FlaskForm):
         if db.session.scalar(query) is not None:
             raise ValidationError("This store address is taken.")
 
-    def validate_email(self, field):
-        query = (
-            m.Store.select()
-            .where(m.Store.email == field.data)
-            .where(m.Store.id != int(self.store_id.data))
-        )
-        if db.session.scalar(query) is not None:
-            raise ValidationError("This email is already registered.")
-
 
 class NewStoreForm(FlaskForm):
     category_id = IntegerField("Store category", [DataRequired()])
@@ -68,8 +59,3 @@ class NewStoreForm(FlaskForm):
         query = m.Store.select().where(m.Store.address == field.data)
         if db.session.scalar(query) is not None:
             raise ValidationError("This store address is taken.")
-
-    def validate_email(self, field):
-        query = m.Store.select().where(m.Store.email == field.data)
-        if db.session.scalar(query) is not None:
-            raise ValidationError("This email is already registered.")
