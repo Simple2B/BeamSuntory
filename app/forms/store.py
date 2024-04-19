@@ -2,15 +2,11 @@ from flask_wtf import FlaskForm
 from wtforms import (
     StringField,
     SubmitField,
-    ValidationError,
     BooleanField,
     IntegerField,
     HiddenField,
 )
 from wtforms.validators import DataRequired, Email
-
-from app import models as m
-from app import db
 
 
 class StoreForm(FlaskForm):
