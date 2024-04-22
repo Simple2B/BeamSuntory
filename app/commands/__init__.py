@@ -5,9 +5,10 @@ from flask import Flask
 import sqlalchemy as sa
 from sqlalchemy import orm
 from app import models as m
-from app import db, forms
+from app import forms
 from app import schema as s
 from app import controllers as c
+from app.database import db
 from app.commands.add_stores import add_new_store
 from config import SALES_REP_LOCKER_NAME
 
@@ -17,7 +18,15 @@ def init(app: Flask):
     @app.shell_context_processor
     def get_context():
         """Objects exposed here will be automatically available from the shell."""
-        return dict(app=app, db=db, m=m, f=forms, s=s, sa=sa, orm=orm)
+        return dict(
+            app=app,
+            db=db,
+            m=m,
+            f=forms,
+            s=s,
+            sa=sa,
+            orm=orm,
+        )
 
     if app.config["ENV"] != "production":
 

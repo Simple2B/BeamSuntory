@@ -2,7 +2,8 @@ from typing import TYPE_CHECKING
 from datetime import datetime
 from sqlalchemy import ForeignKey, orm
 
-from app import db, schema as s
+from app import schema as s
+from app.database import db
 from .utils import ModelMixin
 
 

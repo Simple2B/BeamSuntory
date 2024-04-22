@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 import sqlalchemy as sa
 from sqlalchemy import orm
 
-from app import db
+from app.database import db
 from .utils import ModelMixin
 
 

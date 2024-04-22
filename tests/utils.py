@@ -1,6 +1,6 @@
 from app.models import User, Division
 from app import schema as s
-from app import db
+from app.database import db
 
 TEST_ADMIN_NAME = "bob"
 TEST_ADMIN_EMAIL = "bob@test.com"

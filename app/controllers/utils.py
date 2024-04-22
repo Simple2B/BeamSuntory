@@ -1,6 +1,7 @@
 from urllib.parse import urlparse, parse_qs
 from flask import request
-from app import db, models as m
+from app import models as m
+from app.database import db
 
 
 def replace_underscore(validation_obj, field):

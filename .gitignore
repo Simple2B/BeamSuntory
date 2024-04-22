@@ -15,4 +15,4 @@ backup/
 *.pyc
 /*.sqlite3
 .DS_Store
-
+celerybeat-schedule.db

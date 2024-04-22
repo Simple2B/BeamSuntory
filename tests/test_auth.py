@@ -1,6 +1,6 @@
 from app import mail
 from app import models as m, schema as s
-from app import db
+from app.database import db
 from tests.utils import register, login, logout
 
 
