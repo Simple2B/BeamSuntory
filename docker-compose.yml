@@ -18,6 +18,8 @@ services:
 
   
 
+  
+
   backup:
     image: simple2b/pg-backup:1.0
     links:
@@ -57,3 +59,5 @@ services:
 
 volumes:
   db_data:
+  redis:
+    driver: local
