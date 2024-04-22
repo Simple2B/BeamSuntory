@@ -45,6 +45,26 @@ services:
       POSTGRES_EXTRA_OPTS: '--schema=public --blobs'
       DAYS_HISTORY: 30
 
+
+  celery:
+    image: simple2b/beam-suntory-app:latest
+    restart: always
+    env_file:
+      - .env
+    command: 'poetry run celery -A app.worker:celery_worker worker --loglevel=INFO'
+    depends_on:
+      - db
+      - redis
+
+  redis:
+    image: redis:6.2-alpine
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - 127.0.0.1:${REDIS_PORT}:6379
+    command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASSWORD}
+
 networks:
   default:
     name: beamsuntory_network_staging

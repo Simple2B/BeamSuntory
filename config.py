@@ -51,7 +51,7 @@ class BaseConfig(BaseSettings, ABC):
     # Redis
     REDIS_PORT: int
     REDIS_PASSWORD: str
-    REDIS_HOST: str
+    REDIS_HOST: str = "localhost"
 
     # Default user password
     DEFAULT_USER_PASSWORD: str
@@ -104,6 +104,7 @@ class ProductionConfig(BaseConfig):
 
     ENV: ClassVar[str] = "production"
     ALCHEMICAL_DATABASE_URL: str = Field(alias="DB_URL_PROD")
+    REDIS_HOST: str = "redis"
 
 
 @lru_cache

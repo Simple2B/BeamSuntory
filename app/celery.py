@@ -1,4 +1,7 @@
+import os
+
 import sqlalchemy as sa
+
 
 from celery import Celery
 from flask_mail import Message
@@ -10,7 +13,8 @@ from app import create_app
 from config import config
 from app.logger import log
 
-CFG = config()
+APP_ENV = os.environ.get("APP_ENV", "development")
+CFG = config(APP_ENV)
 
 
 celery_worker = Celery("beam-suntory", broker_url=CFG.REDIS_URL)
