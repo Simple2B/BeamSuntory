@@ -34,6 +34,18 @@ def client(app: Flask, mocker):
         "app.views.product.save_image",
         return_value=("test", "test"),
     )
+    mocker.patch(
+        "app.views.incoming_stock.notify_users_accept_inbount.delay",
+    )
+    mocker.patch(
+        "app.views.product.notify_users_assign.delay",
+    )
+    mocker.patch(
+        "app.views.request_share.notify_users_request_share.delay",
+    )
+    mocker.patch(
+        "app.views.product.notify_users_new_request_share.delay",
+    )
     kind = filetype.guess("tests/data/no_picture_default.png")
     mocker.patch.object(filetype, "guess", return_value=kind)
     mocker.patch.object(filetype, "is_image", return_value=True)
