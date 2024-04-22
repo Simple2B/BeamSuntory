@@ -1,7 +1,6 @@
 import os
 from typing import ClassVar
 from abc import ABC, abstractmethod
-from abc import ABC, abstractmethod
 import tomllib
 from functools import lru_cache
 from pydantic import Field
@@ -66,10 +65,6 @@ class BaseConfig(BaseSettings, ABC):
     def configure(app: Flask):
         # Implement this method to do further configuration on your app.
         pass
-
-    @property
-    def REDIS_URL(self):
-        return f"redis://:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}"
 
     @property
     def REDIS_URL(self):
