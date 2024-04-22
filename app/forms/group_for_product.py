@@ -8,7 +8,7 @@ from wtforms.validators import DataRequired
 
 from app.controllers.utils import replace_underscore
 from app import models as m
-from app import db
+from app.database import db
 
 
 class GroupProductForm(FlaskForm):

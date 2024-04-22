@@ -1,5 +1,5 @@
 import uuid
-from app import db
+from app.database import db
 
 
 START_ORDER_NUMBER = 10000

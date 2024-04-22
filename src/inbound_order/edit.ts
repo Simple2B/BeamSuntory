@@ -176,12 +176,13 @@ export const initEditOrderModal = () => {
     const inboundOrderData = JSON.parse(orderEditButton.getAttribute('data-target')) as IInboundOrderOut;
     orderEditButton.addEventListener('click', () => {
       // Set order edit modal values
+      const currentDate = new Date();
       orderUuidInput.value = inboundOrderData.uuid;
       orderStatusSelect.value = inboundOrderData.status;
       orderTitleInput.value = inboundOrderData.title;
-      orderActiveDateInput.value = getDatepickerDateFormat(inboundOrderData.activeDate);
+      orderActiveDateInput.value = getDatepickerDateFormat(inboundOrderData.activeDate, currentDate);
       orderActiveTimeInput.value = inboundOrderData.activeTime;
-      orderDeliveryDateInput.value = getDatepickerDateFormat(inboundOrderData.deliveryDate);
+      orderDeliveryDateInput.value = getDatepickerDateFormat(inboundOrderData.deliveryDate, currentDate);
       orderSupplierIdSelect.value = inboundOrderData.supplier.id.toString();
       orderWarehouseIdSelect.value = inboundOrderData.warehouse.id.toString();
 

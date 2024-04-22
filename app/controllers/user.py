@@ -2,7 +2,7 @@ from functools import wraps
 from flask import abort, request
 from flask_login import current_user
 
-from app import db
+from app.database import db
 from app import schema as s
 from app import models as m
 

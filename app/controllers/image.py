@@ -2,8 +2,6 @@ import base64
 from io import BytesIO
 from pathlib import Path
 
-# from app import db
-# from app import models as m
 from app.logger import log
 
 

@@ -17,7 +17,6 @@ from flask import (
     abort,
 )
 from flask_login import login_required, current_user
-from flask_mail import Message
 from pydantic import ValidationError
 import sqlalchemy as sa
 from app.controllers import (
@@ -29,9 +28,10 @@ from app.controllers import (
     BASE_IMAGE_PATH,
 )
 
-from app import models as m, db, mail
+from app import models as m, db
 from app import schema as s
 from app import forms as f
+from app.celery import notify_users_assign, notify_users_new_request_share
 from app.logger import log
 
 DEFUALT_IMAGE_ID = 1
@@ -862,40 +862,15 @@ def assign():
 
         db.session.commit()
 
-        users: list[m.UserGroup] = db.session.scalars(
-            m.UserGroup.select().where(
-                sa.or_(
-                    m.UserGroup.right_id == product_to_group.id,
-                    m.UserGroup.right_id == product_from_group.id,
-                )
+        redirect_url = (
+            url_for(
+                "assign.get_all",
+                _external=True,
             )
-        ).all()
+            + f"?q={assign_obj.uuid}"
+        )
 
-        if users:
-            for u in users:
-                # TODO: ask client about users notification without approval permission
-                if not u.child.approval_permission:
-                    continue
-                msg = Message(
-                    subject=f"Assign {assign_obj.product.name}",
-                    sender=app.config["MAIL_DEFAULT_SENDER"],
-                    recipients=[u.child.email],
-                )
-                url = (
-                    url_for(
-                        "assign.get_all",
-                        _external=True,
-                    )
-                    + f"?q={assign_obj.uuid}"
-                )
-
-                msg.html = render_template(
-                    "email/assign.html",
-                    user=u.child,
-                    assign=assign_obj,
-                    url=url,
-                )
-                mail.send(msg)
+        notify_users_assign.delay(assign_obj.id, app.config["ENV"], redirect_url)
 
         return redirect(url_for("product.get_all", **query_params))
 
@@ -929,87 +904,78 @@ def get_request_share_form(warehouse_product_id: int):
 def request_share():
     form: f.RequestShareProductForm = f.RequestShareProductForm()
     query_params = get_query_params_from_headers()
-    if form.validate_on_submit():
-        warehouse_product = db.session.scalar(
-            m.WarehouseProduct.select().where(
-                m.WarehouseProduct.product.has(m.Product.SKU == form.sku.data),
-                m.WarehouseProduct.group.has(m.Group.id == form.from_group_id.data),
-            )
-        )
-
-        if not warehouse_product:
-            log(
-                log.ERROR,
-                "Not found product by SKU and group: [%s], [%s]",
-                form.sku.data,
-                form.from_group_id.data,
-            )
-            flash("Cannot save product data", "danger")
-            return redirect(url_for("product.get_all", **query_params))
-
-        to_group: m.Group = db.session.get(m.Group, form.to_group_id.data)
-        if not to_group:
-            log(
-                log.ERROR,
-                "From to not found: [%s]",
-                form.to_group_id.data,
-            )
-            flash("Cannot save product data", "danger")
-            return redirect(url_for("product.get_all", **query_params))
-
-        request_share: m.RequestShare = m.RequestShare(
-            product_id=warehouse_product.product.id,
-            group_id=form.to_group_id.data,
-            desire_quantity=form.desire_quantity.data,
-            status="pending",
-            from_group_id=warehouse_product.group.id,
-            user_id=current_user.id,
-        )
-        log(log.INFO, "Form submitted. Share Request: [%s]", request_share)
-
-        report_request_share = m.ReportRequestShare(
-            user=current_user,
-            type=s.ReportRequestShareActionType.CREATED.value,
-            request_share=request_share,
-        )
-
-        db.session.add(request_share)
-        db.session.add(report_request_share)
-
-        users = db.session.scalars(
-            sa.select(m.User)
-            .join(m.UserGroup)
-            .where(m.UserGroup.right_id == form.from_group_id.data)
-        ).all()
-
-        for user in users:
-            msg = Message(
-                subject=f"New request share {request_share.order_numb}",
-                sender=app.config["MAIL_DEFAULT_SENDER"],
-                recipients=[user.email],
-            )
-
-            msg.html = render_template(
-                "email/request_share_create.html",
-                user=user,
-                request_share=request_share,
-            )
-            request_share_user = m.RequestShareUser(
-                user_id=user.id,
-                request_share=request_share,
-            )
-            db.session.add(request_share_user)
-            mail.send(msg)
-
-        db.session.commit()
-
-        flash("Share request created!", "success")
-        return redirect(url_for("product.get_all", **query_params))
-
-    else:
+    if not form.validate_on_submit():
         log(log.ERROR, "product assign errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("product.get_all", **query_params))
+    warehouse_product = db.session.scalar(
+        m.WarehouseProduct.select().where(
+            m.WarehouseProduct.product.has(m.Product.SKU == form.sku.data),
+            m.WarehouseProduct.group.has(m.Group.id == form.from_group_id.data),
+        )
+    )
+
+    if not warehouse_product:
+        log(
+            log.ERROR,
+            "Not found product by SKU and group: [%s], [%s]",
+            form.sku.data,
+            form.from_group_id.data,
+        )
+        flash("Cannot save product data", "danger")
+        return redirect(url_for("product.get_all", **query_params))
+
+    to_group: m.Group = db.session.get(m.Group, form.to_group_id.data)
+    if not to_group:
+        log(
+            log.ERROR,
+            "From to not found: [%s]",
+            form.to_group_id.data,
+        )
+        flash("Cannot save product data", "danger")
+        return redirect(url_for("product.get_all", **query_params))
+
+    request_share: m.RequestShare = m.RequestShare(
+        product_id=warehouse_product.product.id,
+        group_id=form.to_group_id.data,
+        desire_quantity=form.desire_quantity.data,
+        status="pending",
+        from_group_id=warehouse_product.group.id,
+        user_id=current_user.id,
+    )
+    log(log.INFO, "Form submitted. Share Request: [%s]", request_share)
+
+    report_request_share = m.ReportRequestShare(
+        user=current_user,
+        type=s.ReportRequestShareActionType.CREATED.value,
+        request_share=request_share,
+    )
+
+    db.session.add(request_share)
+    db.session.add(report_request_share)
+
+    users = db.session.scalars(
+        sa.select(m.User)
+        .join(m.UserGroup)
+        .where(m.UserGroup.right_id == form.from_group_id.data)
+    ).all()
+
+    for user in users:
+        request_share_user = m.RequestShareUser(
+            user_id=user.id,
+            request_share=request_share,
+        )
+        db.session.add(request_share_user)
+
+    db.session.commit()
+
+    redirect_url = url_for("auth.login", _external=True)
+
+    notify_users_new_request_share.delay(
+        request_share.id, app.config["ENV"], redirect_url
+    )
+    flash("Share request created!", "success")
+    return redirect(url_for("product.get_all", **query_params))
 
 
 @product_blueprint.route("/adjust", methods=["POST"])

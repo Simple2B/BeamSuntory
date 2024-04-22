@@ -1,6 +1,6 @@
 import os
 from typing import ClassVar
-from abc import ABC, abstractclassmethod
+from abc import ABC, abstractmethod
 import tomllib
 from functools import lru_cache
 from pydantic import Field
@@ -23,7 +23,8 @@ class BaseConfig(BaseSettings, ABC):
     """Base configuration."""
 
     @property
-    @abstractclassmethod
+    @abstractmethod
+    @abstractmethod
     def ENV(): ...
 
     APP_NAME: str = "Beam Suntory"
@@ -48,6 +49,11 @@ class BaseConfig(BaseSettings, ABC):
     ADMIN_EMAIL: str
     ADMIN_PASSWORD: str
 
+    # Redis
+    REDIS_PORT: int
+    REDIS_PASSWORD: str
+    REDIS_HOST: str = "localhost"
+
     # Default user password
     DEFAULT_USER_PASSWORD: str
 
@@ -59,6 +65,10 @@ class BaseConfig(BaseSettings, ABC):
     def configure(app: Flask):
         # Implement this method to do further configuration on your app.
         pass
+
+    @property
+    def REDIS_URL(self):
+        return f"redis://:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}"
 
     model_config = SettingsConfigDict(
         env_file=(
@@ -95,6 +105,7 @@ class ProductionConfig(BaseConfig):
 
     ENV: ClassVar[str] = "production"
     ALCHEMICAL_DATABASE_URL: str = Field(alias="DB_URL_PROD")
+    REDIS_HOST: str = "redis"
 
 
 @lru_cache

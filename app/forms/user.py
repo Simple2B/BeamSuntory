@@ -10,7 +10,7 @@ from wtforms import (
 from wtforms.validators import DataRequired, Email, EqualTo
 
 from app import models as m
-from app import db
+from app.database import db
 
 DEFAULT_USER_PASSWORD = os.environ.get("DEFAULT_USER_PASSWORD")
 

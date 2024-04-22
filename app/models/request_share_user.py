@@ -1,6 +1,6 @@
 from sqlalchemy import ForeignKey, orm
 
-from app import db
+from app.database import db
 from .utils import ModelMixin
 from .user import User
 from .request_share import RequestShare

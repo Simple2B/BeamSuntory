@@ -3,7 +3,7 @@ from datetime import date
 import sqlalchemy as sa
 from sqlalchemy import orm
 
-from app import db
+from app.database import db
 from .utils import ModelMixin
 from .product import Product
 from .product_quantity_group import ProductQuantityGroup

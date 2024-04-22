@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 from sqlalchemy import ForeignKey, orm
 
-from app import db
+from app.database import db
 from .utils import ModelMixin
 
 
