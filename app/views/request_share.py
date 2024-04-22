@@ -16,6 +16,7 @@ from app.controllers import create_pagination, role_required
 from app import models as m, db, mail
 from app import schema as s
 from app import forms as f
+from app.celery import notify_users_request_share
 from app.logger import log
 
 
@@ -308,45 +309,22 @@ def decline(id: int):
         request_share=request_share,
     )
 
-    product_group: m.Group = db.session.execute(
-        m.Group.select().where(m.Group.id == request_share.group_id)
-    ).scalar()
-
-    users: list[m.UserGroup] = [
-        u
-        for u in db.session.execute(
-            m.UserGroup.select().where(m.UserGroup.right_id == product_group.id)
-        ).scalars()
-    ]
-    if len(users) != 0:
-        for u in users:
-            # TODO: ask client about users notification without approval permission
-            if not u.child.approval_permission:
-                continue
-            msg = Message(
-                subject=f"Declined request share {request_share.order_numb}",
-                sender=app.config["MAIL_DEFAULT_SENDER"],
-                recipients=[u.child.email],
-            )
-            url = (
-                url_for(
-                    "request_share.get_all",
-                    _external=True,
-                )
-                + f"?q={request_share.order_numb}"
-            )
-
-            msg.html = render_template(
-                "email/request_share.html",
-                user=u.child,
-                action="declined",
-                request_share=request_share,
-                url=url,
-            )
-            mail.send(msg)
-
     db.session.add(report_request_share)
     db.session.commit()
+
+    url = (
+        url_for(
+            "request_share.get_all",
+            _external=True,
+        )
+        + f"?q={request_share.order_numb}"
+    )
+
+    notify_users_request_share.delay(
+        request_share.id,
+        app.config["ENV"],
+        url,
+    )
     log(log.INFO, "Request Share declined: [%s]", request_share)
     flash("Request Share declined!", "success")
     return redirect(url_for("request_share.get_all"))

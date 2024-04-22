@@ -2,7 +2,8 @@ import json
 from datetime import datetime, timedelta
 from http import HTTPStatus
 from flask.testing import FlaskClient
-from app import db, models as m
+from app import models as m
+from app.database import db
 
 
 from tests.utils import login, register, logout

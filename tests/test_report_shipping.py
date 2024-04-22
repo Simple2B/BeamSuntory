@@ -3,7 +3,7 @@ import sqlalchemy as sa
 from flask.testing import FlaskClient
 from http import HTTPStatus
 
-from app import db
+from app.database import db
 from app import models as m
 
 from tests.utils import login

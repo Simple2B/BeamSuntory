@@ -3,7 +3,7 @@ from datetime import datetime
 import sqlalchemy as sa
 from sqlalchemy import orm
 
-from app import db
+from app.database import db
 from app import schema as s
 
 from .utils import ModelMixin

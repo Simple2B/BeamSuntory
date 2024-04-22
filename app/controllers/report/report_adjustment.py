@@ -4,7 +4,8 @@ import sqlalchemy as sa
 
 from flask import render_template
 
-from app import db, schema as s, models as m
+from app import schema as s, models as m
+from app.database import db
 from app.controllers.pagination import create_pagination
 
 from .report_data import ReportData

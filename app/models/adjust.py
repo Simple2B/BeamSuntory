@@ -3,7 +3,8 @@ from datetime import datetime
 import sqlalchemy as sa
 from sqlalchemy import ForeignKey, orm
 
-from app import db, schema as s
+from app import schema as s
+from app.database import db
 from .utils import ModelMixin
 
 from .product import Product

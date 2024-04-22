@@ -11,7 +11,7 @@ from wtforms.validators import DataRequired, Optional
 import filetype
 
 from app import models as m
-from app import db
+from app.database import db
 
 
 class ProductForm(FlaskForm):
