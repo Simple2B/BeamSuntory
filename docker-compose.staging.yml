@@ -61,8 +61,6 @@ services:
     restart: always
     env_file:
       - .env
-    ports:
-      - 127.0.0.1:${REDIS_PORT}:6379
     command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASSWORD}
 
 networks:

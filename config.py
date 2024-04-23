@@ -50,7 +50,7 @@ class BaseConfig(BaseSettings, ABC):
     ADMIN_PASSWORD: str
 
     # Redis
-    REDIS_PORT: int
+    REDIS_PORT: int = 6379
     REDIS_PASSWORD: str
     REDIS_HOST: str = "localhost"
 
@@ -106,6 +106,7 @@ class ProductionConfig(BaseConfig):
     ENV: ClassVar[str] = "production"
     ALCHEMICAL_DATABASE_URL: str = Field(alias="DB_URL_PROD")
     REDIS_HOST: str = "redis"
+    REDIS_PORT: int = 6379
 
 
 @lru_cache
