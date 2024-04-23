@@ -466,12 +466,7 @@ def mg_g_populate(client: FlaskClient, mocker):
             quantity=200,
             shelf_life_start=datetime.datetime.now().date(),
             shelf_life_end=datetime.datetime.now().date(),
-            product_quantity_groups=[
-                m.ProductQuantityGroup(
-                    group_id=1,
-                    quantity=200,
-                )
-            ],
+            product_quantity_groups=[m.ProductQuantityGroup(group_id=1, quantity=200)],
         )
     )
     inbound_order_test.save(False)

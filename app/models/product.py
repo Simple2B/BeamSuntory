@@ -76,10 +76,12 @@ class Product(db.Model, ModelMixin):
 
     # TODO is overlaps="user_obj" correct decision? remove it to see the warning
     product_groups: orm.Mapped[list[ProductGroup]] = orm.relationship(
-        cascade="all, delete-orphan", overlaps="child", order_by=ProductGroup.id
+        cascade="all, delete-orphan", order_by=ProductGroup.id, back_populates="child"
     )
     groups: orm.Mapped[list[GroupProduct]] = orm.relationship(
-        secondary=ProductGroup.__table__, back_populates="products"
+        secondary=ProductGroup.__table__,
+        back_populates="products",
+        overlaps="child,product_groups,parent",
     )
 
     def __repr__(self):

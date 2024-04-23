@@ -102,29 +102,38 @@ def create():
 @role_required([s.UserRole.ADMIN.value])
 def save():
     form: f.GroupProductForm = f.GroupProductForm()
-    if form.validate_on_submit():
-        query = m.GroupProduct.select().where(
-            m.GroupProduct.id == int(form.group_product_id.data)
-        )
-        u: m.GroupProduct | None = db.session.scalar(query)
-        if not u:
-            log(
-                log.ERROR,
-                "Not found group_for_product by id : [%s]",
-                form.group_product_id.data,
-            )
-            flash("Cannot save group_for_product data", "danger")
-        u.name = form.name.data
-        u.master_group_id = form.master_group.data
-        u.save()
-        if form.next_url.data:
-            return redirect(form.next_url.data)
-        return redirect(url_for("group_product.get_all"))
-
-    else:
+    if not form.validate_on_submit():
         log(log.ERROR, "group_for_product save errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("group_product.get_all"))
+
+    product_group = db.session.get(m.GroupProduct, form.group_product_id.data)
+    if not product_group:
+        log(
+            log.ERROR,
+            "Not found group_for_product by id : [%s]",
+            form.group_product_id.data,
+        )
+        flash("Cannot save group_for_product data", "danger")
+        return redirect(url_for("group_product.get_all"))
+    if product_group.name != form.name.data and (
+        db.session.scalar(
+            m.GroupProduct.select().where(
+                m.GroupProduct.name == form.name.data,
+                m.GroupProduct.id != product_group.id,
+            )
+        )
+        is not None
+    ):
+        flash("This group name is already taken.", "danger")
+        return redirect(url_for("group_product.get_all"))
+
+    product_group.name = form.name.data
+    product_group.master_group_id = form.master_group.data
+    product_group.save()
+    if form.next_url.data:
+        return redirect(form.next_url.data)
+    return redirect(url_for("group_product.get_all"))
 
 
 @group_for_product_blueprint.route("/delete/<int:id>", methods=["DELETE"])
@@ -141,5 +150,5 @@ def delete(id: int):
     db.session.execute(delete_u)
     db.session.commit()
     log(log.INFO, "Group deleted. Group for product: [%s]", u)
-    flash("Group_for_product deleted!", "success")
+    flash("Group for product deleted!", "success")
     return "ok", 200

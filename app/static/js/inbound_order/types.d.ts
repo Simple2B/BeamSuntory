@@ -34,10 +34,16 @@ export interface IProductAllocatedBase {
     shelfLifeStart: string;
     shelfLifeEnd: string;
 }
+export interface PackageInfoOut {
+    quantityPerWrap: number;
+    quantityWrapCarton: number;
+    quantityCartonMaster: number | null;
+}
 export interface IProductQuantityGroupOut {
     id: number;
     quantity: number;
     group: IGroup;
+    packageInfo: PackageInfoOut | null;
 }
 export interface IAllocatedProductOut extends IProductAllocatedBase {
     product: IProduct;

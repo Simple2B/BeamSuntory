@@ -165,7 +165,7 @@ def accept():
             full_product_qty_received += new_package_info.quantity_received
 
             # update or create package info
-            if product_quantity_group.package_info_id:
+            if product_quantity_group.package_info:
                 product_quantity_group.package_info.quantity_carton_master = (
                     new_package_info.quantity_carton_master
                 )
@@ -180,9 +180,9 @@ def accept():
                     quantity_carton_master=new_package_info.quantity_carton_master,
                     quantity_per_wrap=new_package_info.quantity_per_wrap,
                     quantity_wrap_carton=new_package_info.quantity_wrap_carton,
-                    product_quantity_group_id=product_quantity_group.id,
                 )
                 create_package_info.save(False)
+                product_quantity_group.package_info = create_package_info
 
             # update or create warehouse product
             warehouse_product: m.WarehouseProduct = db.session.scalar(

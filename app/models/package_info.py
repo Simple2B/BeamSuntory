@@ -1,5 +1,5 @@
 from typing import TYPE_CHECKING
-from sqlalchemy import ForeignKey, orm
+from sqlalchemy import orm
 
 from app import schema as s
 from app.database import db
@@ -16,12 +16,13 @@ class PackageInfo(db.Model, ModelMixin):
     quantity_per_wrap: orm.Mapped[int] = orm.mapped_column()
     quantity_wrap_carton: orm.Mapped[int] = orm.mapped_column()
     quantity_carton_master: orm.Mapped[int] = orm.mapped_column(nullable=True)
-    product_quantity_group_id: orm.Mapped[int] = orm.mapped_column(
-        ForeignKey("product_quantity_group.id")
-    )
+
     product_quantity_group: orm.Mapped["ProductQuantityGroup"] = orm.relationship(
-        foreign_keys=[product_quantity_group_id],
+        back_populates="package_info", uselist=False
     )
+
+    def __repr__(self):
+        return f"<{self.id}: {self.product_quantity_group.group.name if self.product_quantity_group else ''}>"
 
     @property
     def json(self):

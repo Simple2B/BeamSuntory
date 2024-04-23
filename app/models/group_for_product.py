@@ -40,7 +40,9 @@ class GroupProduct(db.Model, ModelMixin):
         back_populates="parent"
     )
     products: orm.Mapped[list["Product"]] = orm.relationship(
-        back_populates="groups", secondary=ProductGroup.__table__
+        back_populates="groups",
+        secondary=ProductGroup.__table__,
+        overlaps="parent,product_groups,child",
     )
 
     def __repr__(self):

@@ -26,7 +26,7 @@ class ProductQuantityGroup(db.Model, ModelMixin):
         nullable=True,
     )
     package_info: orm.Mapped["PackageInfo"] = orm.relationship(
-        foreign_keys=[package_info_id],
+        back_populates="product_quantity_group", uselist=False
     )
     product_allocated_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("products_allocated.id")
@@ -34,3 +34,6 @@ class ProductQuantityGroup(db.Model, ModelMixin):
     product_allocated: orm.Mapped["ProductAllocated"] = orm.relationship(
         back_populates="product_quantity_groups"
     )
+
+    def __repr__(self):
+        return f"<{self.id}: group name:{self.group.name}>"

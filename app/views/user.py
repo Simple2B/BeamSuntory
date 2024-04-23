@@ -50,6 +50,7 @@ def get_all():
         )
         count_query = (
             sa.select(sa.func.count())
+            .join(role, m.User.role == role.id)
             .where(
                 m.User.username.ilike(f"%{q}%")
                 | m.User.email.ilike(f"%{q}%")
