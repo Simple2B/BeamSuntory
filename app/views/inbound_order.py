@@ -375,11 +375,23 @@ def save():
                     )
                 )
 
+            # set package info
+            package_info = db.session.execute(
+                sa.select(m.PackageInfo.id)
+                .join(m.ProductQuantityGroup)
+                .join(m.ProductAllocated)
+                .where(
+                    m.ProductQuantityGroup.group_id == group.id,
+                    m.ProductAllocated.product_id == product_allocated.product_id,
+                )
+            ).scalar()
+
             db.session.add(
                 m.ProductQuantityGroup(
                     group=group,
                     quantity=quantity_group.quantity,
                     product_allocated_id=product_allocated.id,
+                    package_info_id=package_info,
                 )
             )
             if inbound_order.status == s.InboundOrderStatus.assigned:

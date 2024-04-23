@@ -93,7 +93,6 @@ function editIncomingStock(inboundOrder: IInboundOrderOut) {
   inboundOrder.productsAllocated.forEach((productAllocated) => {
     createIncomingStockOrderItems(productAllocated);
   });
-
   acceptModal.show();
 }
 
@@ -137,6 +136,7 @@ function createIncomingStockOrderItems(productAllocated: IAllocatedProductOut) {
 
   const productQuantityGroupsLength = productAllocated.productQuantityGroups.length;
   productAllocated.productQuantityGroups.forEach((quantityGroup, index) => {
+    console.log('packageInfoId', quantityGroup.packageInfo);
     const groupQuantityContainer = groupQuantityContainerTemplate.cloneNode(true) as HTMLDivElement;
     groupQuantityContainer.removeAttribute('id');
     groupQuantityContainer.classList.remove('hidden');
@@ -187,6 +187,7 @@ function createIncomingStockOrderItems(productAllocated: IAllocatedProductOut) {
     quantityPerWrapDiv.classList.add(`product-${productAllocated.id}-group-${quantityGroup.group.id}-per-wrap`);
     quantityPerWrapDiv.setAttribute('required', 'true');
     quantityPerWrapDiv.placeholder = 'Quantity';
+    
 
     const quantityWrapCartonDiv = productGroupQuantityPackageInfoContainer.querySelector(
       '.quantity-wrap-carton'
@@ -202,6 +203,12 @@ function createIncomingStockOrderItems(productAllocated: IAllocatedProductOut) {
       `product-${productAllocated.id}-group-${quantityGroup.group.id}-carton-master`
     );
     quantityCartonMasterDiv.placeholder = 'Quantity';
+
+    if (quantityGroup.packageInfo) {
+      quantityPerWrapDiv.value = quantityGroup.packageInfo.quantityPerWrap.toString();
+      quantityWrapCartonDiv.value = quantityGroup.packageInfo.quantityWrapCarton.toString();
+      quantityCartonMasterDiv.value = quantityGroup.packageInfo.quantityCartonMaster.toString();
+    }
 
     packageInfoFields.forEach((packageInfoField) => {
       // packageInfoField.classList.add()

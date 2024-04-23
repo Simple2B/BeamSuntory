@@ -15,8 +15,10 @@ class ProductGroup(db.Model, ModelMixin):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
     product_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("products.id"))
     group_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("groups_for_product.id"))
-    child: orm.Mapped["Product"] = orm.relationship()
-    parent: orm.Mapped["GroupProduct"] = orm.relationship()
+    child: orm.Mapped["Product"] = orm.relationship(back_populates="product_groups")
+    parent: orm.Mapped["GroupProduct"] = orm.relationship(
+        back_populates="product_groups"
+    )
 
     def __repr__(self):
         return f"<id: {self.id}, Perent: {self.parent}>"
