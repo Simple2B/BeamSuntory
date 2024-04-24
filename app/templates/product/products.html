@@ -230,8 +230,7 @@
         </td>
         <td class=" text-base font-normal text-gray-900 dark:text-white max-width-100">
           <div class="px-3">
-            <div class="text-sm">{{ warehouse_product_qty[product.name] if product.name in
-              warehouse_product_qty else 0 }}</div>
+            <div class="text-sm">{{ product.get_warehouse_products_qty(is_stocks_own_by_me) }}</div>
           </div>
         </td>
         <td class=" space-x-2 flex gap-2 flex-wrap justify-center py-3">

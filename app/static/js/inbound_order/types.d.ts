@@ -18,6 +18,7 @@ export interface IProduct {
     warehouseProducts?: IWarehouseProduct[];
     supplier: ISupplier;
     description: string;
+    notes_location: string | null;
     warehouses: IWarehouse[];
 }
 export interface IWarehouseProduct {

@@ -370,10 +370,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const orderProductSkuView: HTMLDivElement = productAllocatedContainer.querySelector(
           '#incoming-stock-view-product-sku'
         );
+        const orderProductNotesLocation: HTMLImageElement = productAllocatedContainer.querySelector('#incoming-stock-view-product-notes-location')
 
         orderProductNamesView.innerHTML = productsAllocated.product.name;
         orderProductQuantitiesView.innerHTML = productsAllocated.quantity.toString();
         orderProductSkuView.innerHTML = productsAllocated.product.SKU;
+        orderProductNotesLocation.innerHTML = productsAllocated.product.notes_location ? productsAllocated.product.notes_location : '-';
 
         orderProductContainerView.appendChild(productAllocatedContainer);
       });

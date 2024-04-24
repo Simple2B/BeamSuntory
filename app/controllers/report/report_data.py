@@ -1,5 +1,5 @@
 from typing import Type
-from abc import ABC, abstractclassmethod
+from abc import ABC, abstractmethod
 import sqlalchemy as sa
 from app import schema as s
 
@@ -8,13 +8,13 @@ class ReportData(ABC):
     type: s.ReportType
     ResponseModel: Type[s.ReportsBaseResponse]
 
-    @abstractclassmethod
-    def get_reports(cls, report_filter: s.ReportFilter):
-        ...
+    @classmethod
+    @abstractmethod
+    def get_reports(cls, report_filter: s.ReportFilter): ...
 
-    @abstractclassmethod
-    def render(cls, pagination: sa.ScalarResult, reports: sa.ScalarResult) -> str:
-        ...
+    @classmethod
+    @abstractmethod
+    def render(cls, pagination: sa.ScalarResult, reports: sa.ScalarResult) -> str: ...
 
     @classmethod
     def generate_html_response(cls, report_filter: s.ReportFilter) -> str:
