@@ -146,19 +146,19 @@ def inbound_orders():
     product_master_group_brand = db.session.scalars(
         sa.select(m.MasterGroupProduct)
         .where(m.MasterGroupProduct.name == "Brand")
-        .order_by(m.MasterGroupProduct.id)
+        .order_by(m.MasterGroupProduct.name.asc())
     ).all()
 
     product_master_group_categories = db.session.scalars(
         sa.select(m.MasterGroupProduct)
         .where(m.MasterGroupProduct.name == "Categories")
-        .order_by(m.MasterGroupProduct.id)
+        .order_by(m.MasterGroupProduct.name.asc())
     ).all()
 
     product_master_group_premises = db.session.scalars(
         sa.select(m.MasterGroupProduct)
         .where(m.MasterGroupProduct.name == "Premises")
-        .order_by(m.MasterGroupProduct.id)
+        .order_by(m.MasterGroupProduct.name.asc())
     ).all()
 
     return render_template(

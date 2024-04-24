@@ -9,6 +9,7 @@ from flask import (
 from flask_login import login_required
 import sqlalchemy as sa
 from sqlalchemy.orm import aliased
+from sqlalchemy.exc import IntegrityError
 from app.controllers import create_pagination, role_required
 
 from app import models as m, db
@@ -31,7 +32,7 @@ def get_all():
 
     master_group = aliased(m.MasterGroupProduct)
     q = request.args.get("q", type=str, default=None)
-    query = m.GroupProduct.select().order_by(m.GroupProduct.id)
+    query = m.GroupProduct.select().order_by(m.GroupProduct.name.asc())
     count_query = sa.select(sa.func.count()).select_from(m.GroupProduct)
     if q:
         query = (
@@ -40,7 +41,7 @@ def get_all():
             .where(
                 m.GroupProduct.name.ilike(f"%{q}%") | master_group.name.ilike(f"%{q}%")
             )
-            .order_by(m.GroupProduct.id)
+            .order_by(m.GroupProduct.name.asc())
         )
         count_query = (
             sa.select(sa.func.count())
@@ -77,24 +78,29 @@ def get_all():
 @role_required([s.UserRole.ADMIN.value])
 def create():
     form: f.NewGroupProductForm = f.NewGroupProductForm()
-    if form.validate_on_submit():
-        query = m.GroupProduct.select().where(m.GroupProduct.name == form.name.data)
-        gr: m.GroupProduct | None = db.session.scalar(query)
-        if gr:
-            flash("This group_for_product name is already taken.", "danger")
-            return redirect(url_for("group_product.get_all"))
-        group = m.GroupProduct(
-            name=form.name.data,
-            master_group_id=form.master_group.data,
-        )
-        log(log.INFO, "Form submitted. Group for product: [%s]", group)
-        group.save()
-        flash("Group for product added!", "success")
-        return redirect(url_for("group_product.get_all"))
-    else:
+    if not form.validate_on_submit():
         log(log.ERROR, "Group_for_product creation errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("group_product.get_all"))
+
+    master_group_product = db.session.get(m.MasterGroupProduct, form.master_group.data)
+    if not master_group_product:
+        log(
+            log.ERROR,
+            "Not found master_group_product by id : [%s]",
+            form.master_group.data,
+        )
+        flash("Not found master group for product", "danger")
+        return redirect(url_for("group_product.get_all"))
+
+    group = m.GroupProduct(
+        name=form.name.data,
+        master_group_id=master_group_product.id,
+    )
+    log(log.INFO, "Form submitted. Group for product: [%s]", group)
+    group.save()
+    flash("Group for product added!", "success")
+    return redirect(url_for("group_product.get_all"))
 
 
 @group_for_product_blueprint.route("/edit", methods=["POST"])
@@ -114,18 +120,17 @@ def save():
             "Not found group_for_product by id : [%s]",
             form.group_product_id.data,
         )
-        flash("Cannot save group_for_product data", "danger")
+        flash("Cannot save group for product data", "danger")
         return redirect(url_for("group_product.get_all"))
-    if product_group.name != form.name.data and (
-        db.session.scalar(
-            m.GroupProduct.select().where(
-                m.GroupProduct.name == form.name.data,
-                m.GroupProduct.id != product_group.id,
-            )
+
+    master_group_product = db.session.get(m.MasterGroupProduct, form.master_group.data)
+    if not master_group_product:
+        log(
+            log.ERROR,
+            "Not found master_group_product by id : [%s]",
+            form.master_group.data,
         )
-        is not None
-    ):
-        flash("This group name is already taken.", "danger")
+        flash("Not found master group for product", "danger")
         return redirect(url_for("group_product.get_all"))
 
     product_group.name = form.name.data
@@ -140,15 +145,21 @@ def save():
 @login_required
 @role_required([s.UserRole.ADMIN.value])
 def delete(id: int):
-    u = db.session.scalar(m.GroupProduct.select().where(m.GroupProduct.id == id))
-    if not u:
+    group = db.session.get(m.GroupProduct, id)
+    if not group:
         log(log.INFO, "There is no group_for_product with id: [%s]", id)
-        flash("There is no such group_for_product", "danger")
+        flash("There is no such group for product", "danger")
         return "no group_for_product", 404
 
     delete_u = sa.delete(m.GroupProduct).where(m.GroupProduct.id == id)
-    db.session.execute(delete_u)
-    db.session.commit()
-    log(log.INFO, "Group deleted. Group for product: [%s]", u)
+    try:
+        db.session.execute(delete_u)
+        db.session.commit()
+    except IntegrityError as e:
+        log(log.ERROR, "Group deletion error: [%s]", e)
+        db.session.rollback()
+        flash("Unable to delete group, group has dependencies", "danger")
+        return "Unable to delete group, group has dependencies", 409
+    log(log.INFO, "Group deleted. Group for product: [%s]", group)
     flash("Group for product deleted!", "success")
     return "ok", 200

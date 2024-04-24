@@ -92,7 +92,7 @@ deleteButtons.forEach(e => {
       const response = await fetch(`/master_group/delete/${id}`, {
         method: 'DELETE',
       });
-      if (response.status == 200) {
+      if ([200, 202, 404].includes(response.status)) {
         location.reload();
       }
     }

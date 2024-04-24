@@ -25,7 +25,7 @@ class MasterGroupProduct(db.Model, ModelMixin):
     )
 
     groups_for_product: orm.Mapped[List[m.GroupProduct]] = orm.relationship(
-        back_populates="master_groups_for_product"
+        back_populates="master_groups_for_product", order_by=m.GroupProduct.name.asc()
     )
 
     def __repr__(self):

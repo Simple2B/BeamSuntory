@@ -88,7 +88,9 @@ class User(db.Model, UserMixin, ModelMixin):
     # Relations
     role_obj: orm.Mapped[Division] = orm.relationship(lazy="joined")
     user_groups: orm.Mapped[list[Group]] = orm.relationship(
-        secondary=UserGroup.__table__, overlaps="parent,user_obj,child"
+        secondary=UserGroup.__table__,
+        overlaps="parent,user_obj,child",
+        order_by="Group.name.asc()",
     )
 
     @hybrid_property

@@ -8,6 +8,7 @@ from flask import (
 )
 from flask_login import login_required
 import sqlalchemy as sa
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import aliased
 from app.controllers import create_pagination, role_required
 
@@ -33,14 +34,13 @@ def get_all():
     q = request.args.get("q", type=str, default=None)
     query = (
         m.Group.select().where(m.Group.parent_group_id.is_(None)).order_by(m.Group.name)
-    )
+    ).order_by(m.Group.name.asc())
     count_query = sa.select(sa.func.count()).select_from(m.Group)
     if q:
         query = (
             m.Group.select()
             .join(master_group, m.Group.master_group_id == master_group.id)
             .where(m.Group.name.ilike(f"%{q}%") | master_group.name.ilike(f"%{q}%"))
-            .order_by(m.Group.name)
         )
         count_query = (
             sa.select(sa.func.count())
@@ -75,34 +75,33 @@ def get_all():
 @role_required([s.UserRole.ADMIN.value])
 def create():
     form = f.NewGroupForm()
-    if form.validate_on_submit():
-        query = m.Group.select().where(m.Group.name == form.name.data)
-        gr: m.Group | None = db.session.scalar(query)
-        if gr:
-            flash("This group name is already taken.", "danger")
-            return redirect(url_for("stock_target_group.get_all"))
-        group = m.Group(
-            name=form.name.data,
-            master_group_id=form.master_group.data,
-        )
-        log(log.INFO, "Form submitted. Group: [%s]", group)
-        group.save()
-
-        admin_users = db.session.scalars(
-            m.User.select().where(
-                m.User.role_obj.has(m.Division.role_name == s.UserRole.ADMIN.value)
-            )
-        )
-
-        for user in admin_users:
-            m.UserGroup(left_id=user.id, right_id=group.id).save()
-
-        flash("Group added!", "success")
-        return redirect(url_for("stock_target_group.get_all"))
-    else:
+    if not form.validate_on_submit():
         log(log.ERROR, "Group creation errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("stock_target_group.get_all"))
+
+    master_group = db.session.get(m.MasterGroup, form.master_group.data)
+    if not master_group:
+        flash("Master group is incorrect", "danger")
+        return redirect(url_for("stock_target_group.get_all"))
+    group = m.Group(
+        name=form.name.data,
+        master_group_id=master_group.id,
+    )
+    log(log.INFO, "Form submitted. Group: [%s]", group)
+    group.save()
+
+    admin_users = db.session.scalars(
+        m.User.select().where(
+            m.User.role_obj.has(m.Division.role_name == s.UserRole.ADMIN.value)
+        )
+    )
+
+    for user in admin_users:
+        m.UserGroup(left_id=user.id, right_id=group.id).save()
+
+    flash("Group added!", "success")
+    return redirect(url_for("stock_target_group.get_all"))
 
 
 @stock_target_group_blueprint.route("/edit", methods=["POST"])
@@ -110,23 +109,28 @@ def create():
 @role_required([s.UserRole.ADMIN.value])
 def save():
     form = f.GroupForm()
-    if form.validate_on_submit():
-        query = m.Group.select().where(m.Group.id == int(form.group_id.data))
-        u: m.Group | None = db.session.scalar(query)
-        if not u:
-            log(log.ERROR, "Not found group by id : [%s]", form.group_id.data)
-            flash("Cannot save group data", "danger")
-        u.name = form.name.data
-        u.master_group_id = form.master_group.data
-        u.save()
-        if form.next_url.data:
-            return redirect(form.next_url.data)
-        return redirect(url_for("stock_target_group.get_all"))
-
-    else:
+    if not form.validate_on_submit():
         log(log.ERROR, "group save errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("stock_target_group.get_all"))
+
+    group = db.session.get(m.Group, int(form.group_id.data))
+    if not group:
+        log(log.ERROR, "Not found group by id : [%s]", form.group_id.data)
+        flash("Group not found", "danger")
+        return redirect(url_for("stock_target_group.get_all"))
+
+    master_group = db.session.get(m.MasterGroup, form.master_group.data)
+    if not master_group:
+        flash("Master group is incorrect", "danger")
+        return redirect(url_for("stock_target_group.get_all"))
+
+    group.name = form.name.data
+    group.master_group_id = master_group.id
+    group.save()
+    if form.next_url.data:
+        return redirect(form.next_url.data)
+    return redirect(url_for("stock_target_group.get_all"))
 
 
 @stock_target_group_blueprint.route("/delete/<int:id>", methods=["DELETE"])
@@ -140,7 +144,13 @@ def delete(id: int):
         return "no group", 404
 
     db.session.delete(group)
-    db.session.commit()
+    try:
+        db.session.commit()
+    except IntegrityError as e:
+        log(log.ERROR, "Group deletion error: [%s]", e)
+        db.session.rollback()
+        flash("Unable to delete group, group has dependencies", "danger")
+        return "Unable to delete group, group has dependencies", 409
     log(log.INFO, "Group deleted. Group: [%s]", group)
     flash("Group deleted!", "success")
     return "ok", 200

@@ -20,12 +20,12 @@ class GroupForm(FlaskForm):
 
     submit = SubmitField("Save")
 
-    def validate_group_name(self, field):
-        query = m.Group.select().where(m.Group.name == field.data)
+    def validate_name(self, field):
+        query = m.Group.select().where(
+            m.Group.name == field.data, m.Group.id != int(self.group_id.data)
+        )
         if db.session.scalar(query) is not None:
             raise ValidationError("This group name is taken.")
-
-    def validate_name(self, field):
         replace_underscore(self, field)
 
 
@@ -35,12 +35,10 @@ class NewGroupForm(FlaskForm):
 
     submit = SubmitField("Add group")
 
-    def validate_group_name(self, field):
+    def validate_name(self, field):
         query = m.Group.select().where(m.Group.name == field.data)
         if db.session.scalar(query) is not None:
             raise ValidationError("This group name is taken.")
-
-    def validate_name(self, field):
         replace_underscore(self, field)
 
 
@@ -51,12 +49,13 @@ class MasterGroupForm(FlaskForm):
 
     submit = SubmitField("Save")
 
-    def validate_group_name(self, field):
-        query = m.MasterGroup.select().where(m.MasterGroup.name == field.data)
+    def validate_name(self, field):
+        query = m.MasterGroup.select().where(
+            m.MasterGroup.name == field.data,
+            m.MasterGroup.id != int(self.master_group_id.data),
+        )
         if db.session.scalar(query) is not None:
             raise ValidationError("This master group name is taken.")
-
-    def validate_name(self, field):
         replace_underscore(self, field)
 
 
@@ -65,12 +64,10 @@ class NewMasterGroupForm(FlaskForm):
 
     submit = SubmitField("Save")
 
-    def validate_group_name(self, field):
+    def validate_name(self, field):
         query = m.MasterGroup.select().where(m.MasterGroup.name == field.data)
         if db.session.scalar(query) is not None:
             raise ValidationError("This master group name is taken.")
-
-    def validate_name(self, field):
         replace_underscore(self, field)
 
 

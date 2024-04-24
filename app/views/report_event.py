@@ -130,7 +130,7 @@ def get_events_report():
     has_approval_permission=True,
 )
 def events():
-    users = db.session.scalars(sa.select(m.User))
+    users = db.session.scalars(sa.select(m.User).group_by(m.User.username.asc()))
 
     return render_template(
         "report/event/events.html",

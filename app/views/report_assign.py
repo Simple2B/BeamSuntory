@@ -130,28 +130,30 @@ def assigns():
     product_master_group_brand = db.session.scalars(
         sa.select(m.MasterGroupProduct)
         .where(m.MasterGroupProduct.name == "Brand")
-        .order_by(m.MasterGroupProduct.id)
+        .order_by(m.MasterGroupProduct.name.asc())
     ).all()
 
     product_master_group_language = db.session.scalars(
         sa.select(m.MasterGroupProduct)
         .where(m.MasterGroupProduct.name == "Language")
-        .order_by(m.MasterGroupProduct.id)
+        .order_by(m.MasterGroupProduct.name.asc())
     ).all()
 
     product_master_group_categories = db.session.scalars(
         sa.select(m.MasterGroupProduct)
         .where(m.MasterGroupProduct.name == "Categories")
-        .order_by(m.MasterGroupProduct.id)
+        .order_by(m.MasterGroupProduct.name.asc())
     ).all()
 
     product_master_group_premises = db.session.scalars(
         sa.select(m.MasterGroupProduct)
         .where(m.MasterGroupProduct.name == "Premises")
-        .order_by(m.MasterGroupProduct.id)
+        .order_by(m.MasterGroupProduct.name.asc())
     ).all()
 
-    product_groups = db.session.scalars(sa.select(m.Group)).all()
+    product_groups = db.session.scalars(
+        sa.select(m.Group).order_by(m.Group.name.asc())
+    ).all()
 
     return render_template(
         "report/assign/assigns.html",

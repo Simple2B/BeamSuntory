@@ -70,7 +70,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     )
 
     if query is None or count_query is None:
-        query = m.Product.select().order_by(m.Product.id)
+        query = m.Product.select().order_by(m.Product.SKU.asc())
 
         count_query = sa.select(sa.func.count()).select_from(m.Product)
 
@@ -210,12 +210,14 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     get_all_filters_time = datetime.now()
 
     groups_for_products_obj = db.session.scalars(
-        m.GroupProduct.select().order_by(m.GroupProduct.name)
+        sa.select(m.GroupProduct).order_by(m.GroupProduct.name.asc())
     ).all()
 
     pagination = create_pagination(total=db.session.scalar(count_query))
 
-    master_groups = db.session.scalars(m.MasterGroup.select()).all()
+    master_groups = db.session.scalars(
+        sa.select(m.MasterGroup).order_by(m.MasterGroup.name.asc())
+    ).all()
 
     log(
         log.DEBUG,
@@ -250,14 +252,19 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     get_all_mastr_grps_names = datetime.now()
 
     # get all product_groups to list and compare in view.html
-    product_groups: list[m.ProductGroup] = db.session.scalars(
-        m.ProductGroup.select()
+    product_groups = db.session.scalars(
+        sa.select(m.ProductGroup)
+        .join(m.GroupProduct)
+        .order_by(m.GroupProduct.name.asc())
     ).all()
 
     # TODO: consider using a join instead of two queries <- Copilot
     # get all groups ids for current user to compare with product groups ids in view.html
     current_user_groups_rows = db.session.scalars(
-        m.UserGroup.select().where(m.UserGroup.left_id == current_user.id)
+        sa.select(m.UserGroup)
+        .join(m.Group)
+        .where(m.UserGroup.left_id == current_user.id)
+        .order_by(m.Group.name.asc())
     ).all()
 
     master_groups_search = {}
@@ -280,10 +287,12 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         mgp.name for mgp in db.session.scalars(m.MasterGroupProduct.select())
     ]
 
-    suppliers = db.session.scalars(m.Supplier.select()).all()
+    suppliers = db.session.scalars(
+        sa.select(m.Supplier).order_by(m.Supplier.name.asc())
+    ).all()
 
-    warehouse_product_query: list[m.WarehouseProduct] = db.session.scalars(
-        m.WarehouseProduct.select().order_by(m.WarehouseProduct.id)
+    warehouse_product_query = db.session.scalars(
+        sa.select(m.WarehouseProduct).join(m.Warehouse).order_by(m.Warehouse.name.asc())
     ).all()
 
     warehouse_product_qty = dict()
@@ -337,7 +346,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
             for i in db.session.execute(
                 m.Group.select()
                 .where(m.Group.parent_group_id.is_(None))
-                .order_by(m.Group.name)
+                .order_by(m.Group.name.asc())
             ).scalars()
         },
         "current_user_groups_names": [i.parent.name for i in current_user_groups_rows],

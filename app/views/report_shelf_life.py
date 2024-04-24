@@ -165,14 +165,18 @@ def shelf_lifes():
 
     # TODO maybe move default master product groups to config
     product_master_groups = db.session.scalars(
-        m.MasterGroupProduct.select().where(
+        m.MasterGroupProduct.select()
+        .where(
             m.MasterGroupProduct.name.in_(
                 ["Brand", "Language", "Categories", "Premises"]
             )
         )
+        .order_by(m.MasterGroupProduct.name.asc())
     )
-    master_groups = db.session.scalars(m.MasterGroup.select())
-    groups = db.session.scalars(m.Group.select())
+    master_groups = db.session.scalars(
+        sa.select(m.MasterGroup).order_by(m.MasterGroup.name.asc())
+    )
+    groups = db.session.scalars(sa.select(m.Group).order_by(m.Group.name.asc()))
 
     return render_template(
         "report/shelf_life/shelf_lifes.html",

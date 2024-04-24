@@ -89,46 +89,43 @@ def index():
     brands = db.session.scalars(
         sa.select(m.MasterGroupProduct)
         .where(m.MasterGroupProduct.name == "Brand")
-        .order_by(m.MasterGroupProduct.id)
+        .order_by(m.MasterGroupProduct.name.asc())
     ).all()
-
-    for brand in brands:
-        brand.groups_for_product.sort(key=lambda x: x.name)
 
     categories = db.session.scalars(
         sa.select(m.MasterGroupProduct)
         .where(m.MasterGroupProduct.name == "Categories")
-        .order_by(m.MasterGroupProduct.id)
+        .order_by(m.MasterGroupProduct.name.asc())
     ).all()
-
-    for category in categories:
-        category.groups_for_product.sort(key=lambda x: x.name)
 
     premises = db.session.scalars(
         sa.select(m.MasterGroupProduct)
         .where(m.MasterGroupProduct.name == "Premises")
-        .order_by(m.MasterGroupProduct.id)
+        .order_by(m.MasterGroupProduct.name.asc())
     ).all()
 
-    users = db.session.scalars(sa.select(m.User))
-    divisions = db.session.scalars(m.Division.select())
+    users = db.session.scalars(sa.select(m.User).order_by(m.User.username.asc()))
+    divisions = db.session.scalars(
+        sa.select(m.Division).order_by(
+            m.Division.label_role_name.asc(), m.Division.role_name.asc()
+        )
+    )
     master_groups = db.session.scalars(
-        m.MasterGroup.select().order_by(m.MasterGroup.name)
+        sa.select(m.MasterGroup).order_by(m.MasterGroup.name.asc())
     )
     product_master_groups = db.session.scalars(
-        m.MasterGroupProduct.select().where(
+        m.MasterGroupProduct.select()
+        .where(
             m.MasterGroupProduct.name.in_(
                 ["Brand", "Language", "Categories", "Premises", "Events"]
             )
         )
+        .order_by(m.MasterGroupProduct.name.asc())
     )
 
     product_master_groups = list(product_master_groups)
 
-    for master_group_product in product_master_groups:
-        master_group_product.groups_for_product.sort(key=lambda x: x.name)
-
-    groups = db.session.scalars(sa.select(m.Group).order_by(m.Group.name)).all()
+    groups = db.session.scalars(sa.select(m.Group).order_by(m.Group.name.asc())).all()
 
     return render_template(
         "report/index.html",

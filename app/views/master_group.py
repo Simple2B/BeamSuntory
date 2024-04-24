@@ -27,7 +27,7 @@ def get_all():
     form_edit = f.MasterGroupForm()
 
     q = request.args.get("q", type=str, default=None)
-    query = m.MasterGroup.select().order_by(m.MasterGroup.name)
+    query = m.MasterGroup.select().order_by(m.MasterGroup.name.asc())
     count_query = sa.select(sa.func.count()).select_from(m.MasterGroup)
     if q:
         query = (
@@ -66,21 +66,15 @@ def get_all():
 @role_required([s.UserRole.ADMIN.value])
 def create():
     form = f.NewMasterGroupForm()
-    if form.validate_on_submit():
-        query = m.MasterGroup.select().where(m.MasterGroup.name == form.name.data)
-        mgr: m.MasterGroup | None = db.session.scalar(query)
-        if mgr:
-            flash("This master group name is already taken.", "danger")
-            return redirect(url_for("master_group.get_all"))
-        master_group = m.MasterGroup(name=form.name.data)
-        log(log.INFO, "Form submitted. master_group: [%s]", master_group)
-        master_group.save()
-        flash("Master group added!", "success")
-        return redirect(url_for("master_group.get_all"))
-    else:
+    if not form.validate_on_submit():
         log(log.ERROR, "Master group creation errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("master_group.get_all"))
+    master_group = m.MasterGroup(name=form.name.data)
+    log(log.INFO, "Form submitted. master_group: [%s]", master_group)
+    master_group.save()
+    flash("Master group added!", "success")
+    return redirect(url_for("master_group.get_all"))
 
 
 @master_group_blueprint.route("/edit", methods=["POST"])
@@ -88,28 +82,24 @@ def create():
 @role_required([s.UserRole.ADMIN.value])
 def save():
     form = f.MasterGroupForm()
-    if form.validate_on_submit():
-        query = m.MasterGroup.select().where(
-            m.MasterGroup.id == int(form.master_group_id.data)
-        )
-        u: m.MasterGroup | None = db.session.scalar(query)
-        if not u:
-            log(
-                log.ERROR,
-                "Not found master group by id : [%s]",
-                form.master_group_id.data,
-            )
-            flash("Cannot save master group data", "danger")
-        u.name = form.name.data
-        u.save()
-        if form.next_url.data:
-            return redirect(form.next_url.data)
-        return redirect(url_for("master_group.get_all"))
-
-    else:
+    if not form.validate_on_submit():
         log(log.ERROR, "Master group save errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("master_group.get_all"))
+
+    master_group = db.session.get(m.MasterGroup, form.master_group_id.data)
+    if not master_group:
+        log(
+            log.ERROR,
+            "Not found master group by id : [%s]",
+            form.master_group_id.data,
+        )
+        flash("Cannot save master group data", "danger")
+    master_group.name = form.name.data
+    master_group.save()
+    if form.next_url.data:
+        return redirect(form.next_url.data)
+    return redirect(url_for("master_group.get_all"))
 
 
 @master_group_blueprint.route("/delete/<int:id>", methods=["DELETE"])

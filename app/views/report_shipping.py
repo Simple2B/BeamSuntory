@@ -114,35 +114,43 @@ def index():
     target_groups = db.session.scalars(m.Group.select())
 
     languages = db.session.scalars(
-        m.GroupProduct.select().where(
+        m.GroupProduct.select()
+        .where(
             m.GroupProduct.master_groups_for_product.has(
                 m.MasterGroupProduct.name == "Language"
             )
         )
+        .order_by(m.GroupProduct.name.asc())
     )
 
     brands = db.session.scalars(
-        m.GroupProduct.select().where(
+        m.GroupProduct.select()
+        .where(
             m.GroupProduct.master_groups_for_product.has(
                 m.MasterGroupProduct.name == "Brand"
             )
         )
+        .order_by(m.GroupProduct.name.asc())
     )
 
     categories = db.session.scalars(
-        m.GroupProduct.select().where(
+        m.GroupProduct.select()
+        .where(
             m.GroupProduct.master_groups_for_product.has(
                 m.MasterGroupProduct.name == "Categories"
             )
         )
+        .order_by(m.GroupProduct.name.asc())
     )
 
     premises = db.session.scalars(
-        m.GroupProduct.select().where(
+        m.GroupProduct.select()
+        .where(
             m.GroupProduct.master_groups_for_product.has(
                 m.MasterGroupProduct.name == "Premises"
             )
         )
+        .order_by(m.GroupProduct.name.asc())
     )
 
     return render_template(

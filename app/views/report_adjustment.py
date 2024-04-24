@@ -155,14 +155,18 @@ def get_adjustments_json():
 def adjustments():
     users = db.session.scalars(sa.select(m.User))
     product_master_groups = db.session.scalars(
-        m.MasterGroupProduct.select().where(
+        m.MasterGroupProduct.select()
+        .where(
             m.MasterGroupProduct.name.in_(
                 ["Brand", "Language", "Categories", "Premises", "Events"]
             )
         )
+        .order_by(m.MasterGroupProduct.name.asc())
     )
-    master_groups = db.session.scalars(m.MasterGroup.select())
-    groups = db.session.scalars(m.Group.select())
+    master_groups = db.session.scalars(
+        sa.select(m.MasterGroup).order_by(m.MasterGroup.name.asc())
+    )
+    groups = db.session.scalars(sa.select(m.Group).order_by(m.Group.name.asc()))
 
     return render_template(
         "report/adjustment/adjustments.html",

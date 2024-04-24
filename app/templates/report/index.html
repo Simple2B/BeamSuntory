@@ -39,14 +39,14 @@
             hx-target="#reports-table" hx-include="{{all_includes}}" hx-get="{{ url_for('report.search') }}"
             hx-indicator="#report-table-spinner"
             class="inventories-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            <option selected value="events">Events</option>
-            <option value="request_share">Share request</option>
-            <option value="inventories">Inventories</option>
             <option value="adjustment">Adjustments</option>
             <option value="assign">Assigns</option>
+            <option value="events" selected>Events</option>
             <option value="inbound_order">Inbound orders</option>
-            <option value="shipping">Shipping</option>
+            <option value="inventories">Inventories</option>
+            <option value="request_share">Share request</option>
             <option value="shelf_life">Shelf Life</option>
+            <option value="shipping">Shipping</option>
           </select>
         </div>
         <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800 hidden" id="division-select">

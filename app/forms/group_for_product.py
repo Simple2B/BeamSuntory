@@ -19,12 +19,13 @@ class GroupProductForm(FlaskForm):
 
     submit = SubmitField("Save")
 
-    def validate_group_name(self, field):
-        query = m.GroupProduct.select().where(m.GroupProduct.name == field.data)
+    def validate_name(self, field):
+        query = m.GroupProduct.select().where(
+            m.GroupProduct.name == field.data,
+            m.GroupProduct.id != int(self.group_product_id.data),
+        )
         if db.session.scalar(query) is not None:
             raise ValidationError("This group_for_product name is taken.")
-
-    def validate_name(self, field):
         replace_underscore(self, field)
 
 
@@ -34,12 +35,10 @@ class NewGroupProductForm(FlaskForm):
 
     submit = SubmitField("Add group")
 
-    def validate_group_name(self, field):
+    def validate_name(self, field):
         query = m.GroupProduct.select().where(m.GroupProduct.name == field.data)
         if db.session.scalar(query) is not None:
             raise ValidationError("This group_for_product name is taken.")
-
-    def validate_name(self, field):
         replace_underscore(self, field)
 
 
@@ -50,14 +49,13 @@ class MasterGroupProductForm(FlaskForm):
 
     submit = SubmitField("Save")
 
-    def validate_group_name(self, field):
+    def validate_name(self, field):
         query = m.MasterGroupProduct.select().where(
-            m.MasterGroupProduct.name == field.data
+            m.MasterGroupProduct.name == field.data,
+            m.MasterGroupProduct.id != self.master_group_product_id.data,
         )
         if db.session.scalar(query) is not None:
-            raise ValidationError("This master group_for_product name is taken.")
-
-    def validate_name(self, field):
+            raise ValidationError("This master group for product name is taken.")
         replace_underscore(self, field)
 
 
@@ -66,12 +64,11 @@ class NewMasterGroupProductForm(FlaskForm):
 
     submit = SubmitField("Save")
 
-    def validate_group_name(self, field):
+    def validate_name(self, field):
         query = m.MasterGroupProduct.select().where(
             m.MasterGroupProduct.name == field.data
         )
         if db.session.scalar(query) is not None:
-            raise ValidationError("This master group_for_product name is taken.")
+            raise ValidationError("This master group for product name is taken.")
 
-    def validate_name(self, field):
         replace_underscore(self, field)

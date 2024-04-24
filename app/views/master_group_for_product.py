@@ -29,7 +29,7 @@ def get_all():
     form_edit: f.MasterGroupProductForm = f.MasterGroupProductForm()
 
     q = request.args.get("q", type=str, default=None)
-    query = m.MasterGroupProduct.select().order_by(m.MasterGroupProduct.id)
+    query = m.MasterGroupProduct.select().order_by(m.MasterGroupProduct.name.asc())
     count_query = sa.select(sa.func.count()).select_from(m.MasterGroupProduct)
     if q:
         query = (
@@ -68,23 +68,15 @@ def get_all():
 @role_required([s.UserRole.ADMIN.value])
 def create():
     form: f.NewMasterGroupProductForm = f.NewMasterGroupProductForm()
-    if form.validate_on_submit():
-        query = m.MasterGroupProduct.select().where(
-            m.MasterGroupProduct.name == form.name.data
-        )
-        mgr: m.MasterGroupProduct | None = db.session.scalar(query)
-        if mgr:
-            flash("This master group name is already taken.", "danger")
-            return redirect(url_for("master_group_product.get_all"))
-        master_group = m.MasterGroupProduct(name=form.name.data)
-        log(log.INFO, "Form submitted. master_group: [%s]", master_group)
-        master_group.save()
-        flash("Master group added!", "success")
-        return redirect(url_for("master_group_product.get_all"))
-    else:
+    if not form.validate_on_submit():
         log(log.ERROR, "Master group creation errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("master_group_product.get_all"))
+    master_group = m.MasterGroupProduct(name=form.name.data)
+    log(log.INFO, "Form submitted. master_group: [%s]", master_group)
+    master_group.save()
+    flash("Master group added!", "success")
+    return redirect(url_for("master_group_product.get_all"))
 
 
 @master_group_for_product_blueprint.route("/edit", methods=["POST"])
@@ -92,28 +84,27 @@ def create():
 @role_required([s.UserRole.ADMIN.value])
 def save():
     form: f.MasterGroupProductForm = f.MasterGroupProductForm()
-    if form.validate_on_submit():
-        query = m.MasterGroupProduct.select().where(
-            m.MasterGroupProduct.id == int(form.master_group_product_id.data)
-        )
-        u: m.MasterGroupProduct | None = db.session.scalar(query)
-        if not u:
-            log(
-                log.ERROR,
-                "Not found master group by id : [%s]",
-                form.master_group_product_id.data,
-            )
-            flash("Cannot save master group data", "danger")
-        u.name = form.name.data
-        u.save()
-        if form.next_url.data:
-            return redirect(form.next_url.data)
-        return redirect(url_for("master_group_product.get_all"))
-
-    else:
+    if not form.validate_on_submit():
         log(log.ERROR, "Master group save errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("master_group_product.get_all"))
+
+    master_group = db.session.get(
+        m.MasterGroupProduct, form.master_group_product_id.data
+    )
+    if not master_group:
+        log(
+            log.ERROR,
+            "Not found master group by id : [%s]",
+            form.master_group_product_id.data,
+        )
+        flash("Cannot save master group data", "danger")
+        return redirect(url_for("master_group_product.get_all"))
+    master_group.name = form.name.data
+    master_group.save()
+    if form.next_url.data:
+        return redirect(form.next_url.data)
+    return redirect(url_for("master_group_product.get_all"))
 
 
 @master_group_for_product_blueprint.route("/delete/<int:id>", methods=["DELETE"])

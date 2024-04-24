@@ -27,14 +27,13 @@ def get_all():
     form_edit: f.DivisionForm = f.DivisionForm()
 
     q = request.args.get("q", type=str, default=None)
-    query = m.Division.select().order_by(m.Division.id)
+    query = m.Division.select().order_by(
+        m.Division.label_role_name.asc(),
+        m.Division.role_name.asc(),
+    )
     count_query = sa.select(sa.func.count()).select_from(m.Division)
     if q:
-        query = (
-            m.Division.select()
-            .where(m.Division.role_name.ilike(f"%{q}%"))
-            .order_by(m.Division.id)
-        )
+        query = m.Division.select().where(m.Division.role_name.ilike(f"%{q}%"))
         count_query = (
             sa.select(sa.func.count())
             .where(m.Division.role_name.ilike(f"%{q}%"))
