@@ -47,6 +47,18 @@ class ReportDataInventories(ReportData):
                 )
             )
 
+        if report_filter.user:
+            user_groups_ids = db.session.scalars(
+                sa.select(m.UserGroup.right_id)
+                .join(m.User)
+                .where(m.User.username == report_filter.user)
+            ).all()
+
+            query = query.where(m.WarehouseProduct.group_id.in_(user_groups_ids))
+            count_query = count_query.where(
+                m.WarehouseProduct.group_id.in_(user_groups_ids)
+            )
+
         if report_filter.search_sku:
             where_stmt = m.WarehouseProduct.product.has(
                 m.Product.SKU.ilike(f"%{report_filter.search_sku}%")

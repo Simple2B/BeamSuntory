@@ -121,32 +121,20 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
 
     if is_stocks_own_by_me:
         if current_user.role_obj.role_name == s.UserRole.ADMIN.value:
-            curr_user_groups_ids = [
-                i.id
-                for i in db.session.execute(
-                    m.Group.select().where(
-                        m.Group.name.ilike("admin"),
-                    )
-                ).scalars()
-            ]
-        else:
-            curr_user_groups_ids = [
-                i.right_id
-                for i in db.session.execute(
-                    m.UserGroup.select().where(
-                        m.UserGroup.left_id == current_user.id,
-                    )
-                ).scalars()
-            ]
-        curr_user_products_ids = [
-            i.product_id
-            for i in db.session.execute(
-                m.WarehouseProduct.select().where(
-                    m.WarehouseProduct.group_id.in_(curr_user_groups_ids),
-                    m.WarehouseProduct.product_quantity > 0,
+            curr_user_groups_ids = db.session.scalars(
+                sa.select(m.Group.id).where(
+                    m.Group.name.ilike("admin"),
                 )
-            ).scalars()
-        ]
+            ).all()
+        else:
+            curr_user_groups_ids = [group.id for group in current_user.user_groups]
+
+        curr_user_products_ids = db.session.scalars(
+            sa.select(m.WarehouseProduct.product_id).where(
+                m.WarehouseProduct.group_id.in_(curr_user_groups_ids),
+                m.WarehouseProduct.product_quantity > 0,
+            )
+        ).all()
 
         query = query.where(
             m.Product.id.in_(curr_user_products_ids), reverse_event_filter
@@ -291,29 +279,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         sa.select(m.Supplier).order_by(m.Supplier.name.asc())
     ).all()
 
-    warehouse_product_query = db.session.scalars(
-        sa.select(m.WarehouseProduct).join(m.Warehouse).order_by(m.Warehouse.name.asc())
-    ).all()
-
-    warehouse_product_qty = dict()
-
-    warehouse_products = {wpq.product_id for wpq in warehouse_product_query}
-
-    for ware_prod in warehouse_products:
-        for wpq in warehouse_product_query:
-            if not wpq.product or wpq.product_id != ware_prod:
-                continue
-            if my_stocks:
-                if wpq.group_id not in my_stocks:
-                    continue
-            if wpq.product.name in warehouse_product_qty:
-                warehouse_product_qty[wpq.product.name] = str(
-                    int(warehouse_product_qty[wpq.product.name])
-                    + int(wpq.product_quantity)
-                )
-            else:
-                warehouse_product_qty[wpq.product.name] = str(wpq.product_quantity)
-
     log(
         log.DEBUG,
         "Product get_all warehouse_products finished in [%s]",
@@ -351,7 +316,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         },
         "current_user_groups_names": [i.parent.name for i in current_user_groups_rows],
         "mstr_prod_grps_prod_grps_names": json.dumps(mstr_prod_grps_prod_grps_names),
-        "warehouse_product_qty": warehouse_product_qty,
         "target_groups": target_groups,
         # TODO remove when testing is done
         "datetime": datetime,
@@ -438,7 +402,6 @@ def get_all():
         mstr_prod_grps_prod_grps_names=products_object[
             "mstr_prod_grps_prod_grps_names"
         ],
-        warehouse_product_qty=products_object["warehouse_product_qty"],
         target_groups=products_object["target_groups"],
         datetime=products_object["datetime"],
         form_create=form_create,

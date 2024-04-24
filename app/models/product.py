@@ -5,6 +5,7 @@ from sqlalchemy import orm
 from app.database import db
 from app import schema as s
 from .utils import ModelMixin
+from flask_login import current_user
 
 from .product_group import ProductGroup
 from .warehouse_product import WarehouseProduct
@@ -86,6 +87,15 @@ class Product(db.Model, ModelMixin):
 
     def __repr__(self):
         return f"<{self.id}: {self.name}>"
+
+    def get_warehouse_products_qty(self, is_stock_own_by_me: bool = False):
+        if is_stock_own_by_me:
+            return sum(
+                wp.product_quantity
+                for wp in self.warehouse_products
+                if wp.group in current_user.user_groups
+            )
+        return sum(wp.product_quantity for wp in self.warehouse_products)
 
     @property
     def json(self):
