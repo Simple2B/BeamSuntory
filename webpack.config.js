@@ -225,15 +225,6 @@ const divisionConfig = {
   },
 };
 
-const bellConfig = {
-  entry: {
-    main: './src/bell.ts',
-  },
-  output: {
-    path: path.resolve(__dirname, './app/static'),
-    filename: 'js/bell.js', // <--- Will be compiled to this single file
-  },
-};
 
 const requestShareConfig = {
   entry: {
@@ -391,7 +382,6 @@ const configs = [
   pickupOrderConfig,
   pickupInboundConfig,
   divisionConfig,
-  bellConfig,
   requestShareConfig,
   storeCategoryConfig,
   assignConfig,

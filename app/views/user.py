@@ -1,5 +1,5 @@
 from typing import List
-import json
+from datetime import datetime
 from flask import (
     Blueprint,
     render_template,
@@ -163,7 +163,7 @@ def save():
         msg = Message(
             subject="New password",
             sender=app.config["MAIL_DEFAULT_SENDER"],
-            recipients=[user.email],
+            recipients=["nazarr.kobryn@gmail.com"],
         )
         url = url_for(
             "auth.password_recovery",
@@ -336,32 +336,34 @@ def delete(id: int):
 @login_required
 def notification():
 
+    now = datetime.now()
+
     requests_share = db.session.scalars(
-        sa.select(m.RequestShare).where(
+        sa.select(m.RequestShare)
+        .join(m.RequestShareUser)
+        .where(
+            sa.func.date(m.RequestShareUser.reviewed_datetime) >= now.date(),
             sa.and_(
                 m.RequestShare.from_group_id.in_(
                     [group.id for group in current_user.user_groups]
                 ),
                 current_user.approval_permission,
+                m.RequestShareUser.user_id == current_user.id,
             ),
         )
-    )
+        .order_by(m.RequestShareUser.reviewed_datetime.desc())
+    ).all()
 
-    user_requests = [
-        {
-            "product_name": request_share.product.name,
-            "product_image": request_share.product.image,
-            "SKU": request_share.product.SKU,
-            "desire_quantity": request_share.desire_quantity,
-            "target_group": request_share.group.name,
-            "created_at": request_share.created_at.isoformat(),
-            "request_share_id": request_share.id,
-            "order_number": request_share.order_numb,
-        }
-        for request_share in requests_share
-    ]
-    response = app.response_class(
-        response=json.dumps(user_requests), status=200, mimetype="application/json"
-    )
+    new_requests_ids = []
+    for request_share in requests_share:
+        if not request_share.notification.reviewed:
+            request_share.notification.reviewed_datetime = now
+            new_requests_ids.append(request_share.id)
 
-    return response
+    db.session.commit()
+
+    return render_template(
+        "user/notifications.html",
+        requests_share=requests_share,
+        new_requests_ids=new_requests_ids,
+    )

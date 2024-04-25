@@ -14,6 +14,8 @@ from app.models.division import Division
 from .utils import ModelMixin
 from .group import Group
 from .user_group import UserGroup
+from .request_share_user import RequestShareUser
+from .cart import Cart
 from app.logger import log
 from app import schema as s
 
@@ -92,6 +94,26 @@ class User(db.Model, UserMixin, ModelMixin):
         overlaps="parent,user_obj,child",
         order_by="Group.name.asc()",
     )
+
+    @property
+    def has_notivications(self) -> bool:
+        count = db.session.scalar(
+            sa.select(sa.func.count(RequestShareUser.id)).where(
+                RequestShareUser.user_id == self.id,
+                RequestShareUser.reviewed_datetime >= datetime.now(),
+            )
+        )
+        return bool(count)
+
+    @property
+    def has_carts(self) -> bool:
+        count = db.session.scalar(
+            sa.select(sa.func.count(Cart.id)).where(
+                Cart.user_id == self.id,
+                Cart.status == "pending",
+            )
+        )
+        return bool(count)
 
     @hybrid_property
     def password(self):

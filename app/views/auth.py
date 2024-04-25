@@ -78,35 +78,35 @@ def activate(reset_password_uid):
 
 @auth_blueprint.route("/forgot", methods=["GET", "POST"])
 def forgot_pass():
-    form = f.ForgotForm(request.form)
-    if form.validate_on_submit():
-        query = m.User.select().where(m.User.email == form.email.data)
-        user: m.User = db.session.scalar(query)
-        # create e-mail message
-        msg = Message(
-            subject="Reset password",
-            sender=app.config["MAIL_DEFAULT_SENDER"],
-            recipients=[user.email],
-        )
-        url = url_for(
-            "auth.password_recovery",
-            reset_password_uid=user.unique_id,
-            _external=True,
-        )
-        msg.html = render_template(
-            "email/set.html",
-            user=user,
-            url=url,
-        )
-        mail.send(msg)
-        user.reset_password()
-        flash(
-            "Password reset successful. For set new password please check your e-mail.",
-            "success",
-        )
-    elif form.is_submitted():
-        log(log.ERROR, "No registered user with this e-mail")
-        flash("No registered user with this e-mail", "danger")
+    form = f.ForgotForm()
+    if not form.validate_on_submit():
+        log(log.ERROR, "Form submitted error: [%s]", form.errors)
+        flash(f"No registered user with this e-mail: [{form.email.data}]", "danger")
+        return render_template("auth/forgot.html", form=form)
+
+    user = db.session.scalar(sa.select(m.User).where(m.User.email == form.email.data))
+    msg = Message(
+        subject="Reset password",
+        sender=app.config["MAIL_DEFAULT_SENDER"],
+        recipients=["nazarr.kobryn@gmail.com"],
+    )
+    url = url_for(
+        "auth.password_recovery",
+        reset_password_uid=user.unique_id,
+        _external=True,
+    )
+    msg.html = render_template(
+        "email/set.html",
+        user=user,
+        url=url,
+    )
+    mail.send(msg)
+    user.reset_password()
+    flash(
+        "Password reset successful. For set new password please check your e-mail.",
+        "success",
+    )
+
     return render_template("auth/forgot.html", form=form)
 
 

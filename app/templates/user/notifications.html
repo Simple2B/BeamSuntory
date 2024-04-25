@@ -1,0 +1,71 @@
+<div id="notification-list-conteiner" class="overflow-y-scroll h-[40rem]">
+    {% for request_share in requests_share %}
+    <a href="{{ url_for('request_share.get_all', q=request_share.order_numb) }}"
+        class="flex px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700">
+        <div class="h-24 w-24">
+            {% if request_share.product.image|length > 100 %}
+            <img src="data:image/png;base64, {{ request_share.product.image }}" alt="{{ request_share.product.name }}"
+                class="rounded-full">
+            {% else %}
+            <img src="{{ url_for('static', filename='img/default_image_brand.png') }}"
+                alt="{{ request_share.product.name }}" class="rounded-full">
+            {% endif %}
+        </div>
+        <div class="w-full pl-3">
+            <div class="text-gray-500 text-sm mb-1.5 dark:text-gray-400">
+                New
+                <span class="font-semibold text-gray-900 dark:text-white">request share</span>: product - <span
+                    class="font-semibold text-gray-900 dark:text-white">{{request_share.product.name}}</span>,
+                SKU - <span class="font-semibold text-gray-900 dark:text-white">{{ request_share.product.SKU }}
+                    request.SKU
+                </span>, desired quantity -
+                <span class="font-semibold text-gray-900 dark:text-white">{{
+                    request_share.desire_quantity
+                    }}</span>, target_group - <span
+                    class="font-semibold text-gray-900 dark:text-white">{{request_share.group.name}}</span>
+            </div>
+            <div class="flex justify-between">
+                <div class="text-xs text-blue-600 dark:text-blue-500">
+                    {{ request_share.created_at.strftime('%Y-%m-%d %H:%M') }}
+                </div>
+                {% if request_share.id in new_requests_ids %}
+                <div class="text-xs text-blue-600 dark:text-blue-500">
+                    <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="#D1D5DB" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M5 11.917 9.724 16.5 19 7.5" />
+                    </svg>
+                </div>
+                {% else %}
+                <div class="text-xs text-blue-600 dark:text-blue-500">
+                    <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="#22c55e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M5 11.917 9.724 16.5 19 7.5" />
+                    </svg>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+    <div class="p-6"></div>
+
+    <script>
+        function setBell() {
+            const isNew = "{{ new_requests_ids | length}}"
+            const bell = document.querySelector("#bell-notification-red-dot")
+            if (parseInt(isNew) > 0) {
+                bell.classList.remove("invisible")
+                setTimeout(() => {
+                    bell.classList.add("invisible");
+                }, 5000);
+            } else {
+                if (!bell.classList.contains("invisible")) {
+                    bell.classList.add("invisible")
+                }
+            }
+        }
+        setBell()
+    </script>
+</div>
