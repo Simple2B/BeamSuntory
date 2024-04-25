@@ -750,7 +750,7 @@ def assign():
             return redirect(url_for("product.get_all", **query_params))
 
         if product_from_group.id == product_to_group.id:
-            log(log.ERROR, "Cannot assign to same group", form.errors)
+            log(log.ERROR, "Cannot assign to same group")
             flash(
                 f"Cannot assign from {product_from_group.name} to {product_to_group.name}",
                 "danger",

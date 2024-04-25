@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 import sqlalchemy as sa
 from sqlalchemy import ForeignKey, orm
 
@@ -9,6 +10,9 @@ from .utils import ModelMixin, generate_uuid
 from .product import Product
 from .group import Group
 from .user import User
+
+if TYPE_CHECKING:
+    from .request_share_user import RequestShareUser
 
 
 class RequestShare(db.Model, ModelMixin):
@@ -42,6 +46,11 @@ class RequestShare(db.Model, ModelMixin):
     group: orm.Mapped[Group] = orm.relationship(foreign_keys=[group_id])
     from_group: orm.Mapped[Group] = orm.relationship(foreign_keys=[from_group_id])
     user: orm.Mapped["User"] = orm.relationship()
+
+    notification: orm.Mapped["RequestShareUser"] = orm.relationship(
+        back_populates="request_share",
+        uselist=False,
+    )
 
     def __repr__(self):
         return f"<RequestShare {self.id} user: {self.user_id}>"
