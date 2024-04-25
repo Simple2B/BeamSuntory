@@ -1,6 +1,5 @@
 from typing import List
 from datetime import datetime
-import json
 from flask import (
     Blueprint,
     render_template,
