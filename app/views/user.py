@@ -337,44 +337,6 @@ def delete(id: int):
 @login_required
 def notification():
 
-    requests_share = db.session.scalars(
-        sa.select(m.RequestShareUser)
-        .join(m.RequestShare)
-        .where(
-            sa.and_(
-                m.RequestShare.from_group_id.in_(
-                    [group.id for group in current_user.user_groups]
-                ),
-                current_user.approval_permission,
-                m.RequestShareUser.user_id == current_user.id,
-            ),
-        )
-    )
-
-    user_requests = [
-        {
-            "product_name": request_share.request_share.product.name,
-            "product_image": request_share.request_share.product.image,
-            "SKU": request_share.request_share.product.SKU,
-            "desire_quantity": request_share.request_share.desire_quantity,
-            "target_group": request_share.request_share.group.name,
-            "created_at": request_share.request_share.created_at.isoformat(),
-            "request_share_id": request_share.id,
-            "order_number": request_share.request_share.order_numb,
-        }
-        for request_share in requests_share
-    ]
-    response = app.response_class(
-        response=json.dumps(user_requests), status=200, mimetype="application/json"
-    )
-
-    return response
-
-
-@bp.route("/test", methods=["GET"])
-@login_required
-def test():
-
     now = datetime.now()
 
     requests_share = db.session.scalars(
