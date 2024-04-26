@@ -64,7 +64,8 @@
         </div>
         <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">All stocks in inventory</span>
       </label>
-      <label class="ml-7 relative inline-flex items-center cursor-pointer">
+      <label
+        class="ml-7 relative inline-flex items-center cursor-pointer {{ 'hidden' if user_role == 'warehouse_manager' else '' }}">
         <input id="product-show-stocks-own-by-me-btn" name="product-show-stocks-own-by-me-btn" {% if is_stocks_own_by_me
           %}checked{% endif %} type="checkbox" value="" class="sr-only peer product-sorting-toggle">
         <div
@@ -72,7 +73,8 @@
         </div>
         <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Stocks Own By Me</span>
       </label>
-      <label class="ml-7 relative inline-flex items-center cursor-pointer">
+      <label
+        class="ml-7 relative inline-flex items-center cursor-pointer {{ 'hidden' if user_role == 'warehouse_manager' else '' }}">
         <input id="product-show-events-stocks-own-by-me-btn" name="product-show-events-stocks-own-by-me-btn" {% if
           is_events_stocks_own_by_me %}checked{% endif %} type="checkbox" value=""
           class="sr-only peer product-sorting-toggle">
