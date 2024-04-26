@@ -6,42 +6,85 @@ from wtforms import (
     IntegerField,
     FloatField,
     FileField,
+    HiddenField,
+    SelectField,
+    TextAreaField,
 )
 from wtforms.validators import DataRequired, Optional
 import filetype
 
+from app import schema as s
 from app import models as m
 from app.database import db
 
 
 class ProductForm(FlaskForm):
-    next_url = StringField("next_url")
-    product_id = StringField("product_id", [DataRequired()])
-    name = StringField("Name", [DataRequired()])
+    product_id = HiddenField("product_id", [DataRequired()])
+    name = StringField("Name", [DataRequired()], render_kw={"placeholder": "Name"})
     supplier = IntegerField("Supplier ID", validators=[Optional()])
-    currency = StringField("Currency", validators=[Optional()])
-    regular_price = FloatField("Regular price", validators=[Optional()])
-    retail_price = FloatField("Retail price", validators=[Optional()])
+    currency = SelectField(
+        "Currency", validators=[Optional()], choices=[c.value for c in s.Currency]
+    )
+    regular_price = FloatField(
+        "Regular price",
+        validators=[Optional()],
+        render_kw={"placeholder": "Regular price"},
+    )
+    retail_price = FloatField(
+        "Retail price",
+        validators=[Optional()],
+        render_kw={"placeholder": "Retail price"},
+    )
     image = FileField("Image", validators=[Optional()])
-    description = StringField("Description", [DataRequired()])
+    description = StringField(
+        "Description", [DataRequired()], render_kw={"placeholder": "Description"}
+    )
     # General Info ->
-    SKU = StringField("SKU", [DataRequired()])
-    low_stock_level = IntegerField("Low stock level", validators=[Optional()])
-    program_year = IntegerField("Program year", validators=[Optional()])
-    package_qty = IntegerField("Package qty", validators=[Optional()])
+    SKU = StringField("SKU", [DataRequired()], render_kw={"placeholder": "SKU"})
+    low_stock_level = IntegerField(
+        "Low stock level",
+        validators=[Optional()],
+        render_kw={"placeholder": "Low stock level"},
+    )
+    program_year = IntegerField(
+        "Program year",
+        validators=[Optional()],
+        render_kw={"placeholder": "Program year"},
+    )
+    package_qty = IntegerField(
+        "Package qty", validators=[Optional()], render_kw={"placeholder": "Package qty"}
+    )
     numb_of_items_per_case = IntegerField(
-        "Number of items per case", validators=[Optional()]
+        "Number of items per case",
+        validators=[Optional()],
+        render_kw={"placeholder": "Number of items per case"},
     )
     numb_of_cases_per_outer_case = IntegerField(
-        "Number of cases per outer case", validators=[Optional()]
+        "Number of cases per outer case",
+        validators=[Optional()],
+        render_kw={"placeholder": "Number of cases per outer case"},
     )
-    comments = StringField("Comments", validators=[Optional()])
-    notes_location = StringField("Notes Location", validators=[Optional()])
+    comments = StringField(
+        "Comments", validators=[Optional()], render_kw={"placeholder": "Comments"}
+    )
+    notes_location = TextAreaField(
+        "Notes Location",
+        validators=[Optional()],
+        render_kw={"placeholder": "Notes Location"},
+    )
     # shipping
-    weight = FloatField("Weight", validators=[Optional()])
-    length = FloatField("Length", validators=[Optional()])
-    width = FloatField("Width", validators=[Optional()])
-    height = FloatField("Height", validators=[Optional()])
+    weight = FloatField(
+        "Weight", validators=[Optional()], render_kw={"placeholder": "Weight"}
+    )
+    length = FloatField(
+        "Length", validators=[Optional()], render_kw={"placeholder": "Length"}
+    )
+    width = FloatField(
+        "Width", validators=[Optional()], render_kw={"placeholder": "Width"}
+    )
+    height = FloatField(
+        "Height", validators=[Optional()], render_kw={"placeholder": "Height"}
+    )
     # json groups
     product_groups = StringField("Groups", [DataRequired()])
 

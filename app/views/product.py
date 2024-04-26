@@ -34,9 +34,12 @@ from app import forms as f
 from app.celery import notify_users_assign, notify_users_new_request_share
 from app.logger import log
 
+from .product_htmx import product_htmx
+
 DEFUALT_IMAGE_ID = 1
 DEFUALT_IMAGE_PATH = "app/static/img/no_picture_default.png"
 product_blueprint = Blueprint("product", __name__, url_prefix="/product")
+product_blueprint.register_blueprint(product_htmx)
 
 
 # TODO: needs refactor FIRST!!

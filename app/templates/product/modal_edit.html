@@ -1,0 +1,249 @@
+<!-- Edit product modal -->
+<!-- prettier-ignore-->
+<div tabindex="-1" id="product-edit-modal-element" hx-get="{{ url_for('main.no_content') }}" hx-trigger="click"
+  hx-swap="delete" hx-target="#product-edit-modal-element"
+  class="fixed bg-opacity-80 bg-gray-600 top-0 left-0 right-0 z-50 items-center justify-center w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full max-h-full justify-end items-end flex">
+  <div class="rounded-lg relative w-full max-w-2xl max-h-full bg-white" onclick="event.stopPropagation();">
+    <!-- Modal content -->
+    <form action="{{url_for('product.save')}}" method="post" enctype="multipart/form-data"
+      class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+      {{ form.hidden_tag() }}
+      {{ form.product_id }}
+      <!-- Modal header -->
+      <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Edit product </h3>
+        <button type="button" hx-get="{{ url_for('main.no_content') }}" hx-trigger="click" hx-swap="delete"
+          hx-target="#product-view-modal-element"
+          class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+          </svg>
+        </button>
+      </div>
+      <!-- Modal body -->
+      <div class="p-6 space-y-6">
+        <div class="grid grid-cols-6 gap-6">
+          <div class="product-full-image-anchor col-span-6 sm:col-span-2 sm:row-span-2 max-height-image-container">
+            {% if product.image and product.image | length > 100 %}
+            <img src="data:image/png;base64, {{ product.image }}" class="w-full h-full object-cover" />
+            {% else %}
+            <img
+              src="https://raw.githubusercontent.com/Simple2B/BeamSuntory/develop/app/static/img/no_picture_default.png"
+              class="w-full h-full object-cover" />
+            {% endif %}
+          </div>
+          <div class="col-span-6 sm:col-span-4">
+            <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Name</label>
+            {{ form.name(class_="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+            focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500
+            dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500") }}
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="supplier" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Supplier</label>
+            <select type="text" name="supplier"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="Supplier">
+              {% for supplier in suppliers %}
+              {% if form.supplier.data == supplier.id %}
+              <option value="{{ supplier.id }}" selected>{{ supplier.name }}</option>
+              {% else %}
+              <option value="{{ supplier.id }}">{{ supplier.name }}</option>
+              {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="currency" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Currency</label>
+            {{ form.currency(class_="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+            focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500
+            dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500") }}
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="regular_price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Regular
+              price</label>
+            {{ form.regular_price(class_="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+            focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500
+            dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500") }}
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="retail_price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Retail
+              price</label>
+            {{ form.retail_price(class_="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+            focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500
+            dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500") }}
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="image" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Image</label>
+            {{ form.image }}
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="description"
+              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
+            {{ form.description(class_="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+            focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500
+            dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500") }}
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="SKU" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">SKU</label>
+            {{ form.SKU(class_="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+            focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500
+            dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500") }}
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="low_stock_level" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Low Stock
+              Level</label>
+            {{ form.low_stock_level(class_="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+            focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500
+            dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500") }}
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="program_year" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Program
+              Year</label>
+            {{ form.program_year(class_='shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+            focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500
+            dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500') }}
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="package_qty" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Package
+              Qty.</label>
+            {{ form.package_qty(class_='shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+            focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500
+            dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500') }}
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="numb_of_items_per_case" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">No.
+              Of Items Per Case</label>
+            {{ form.numb_of_items_per_case(class_="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm
+            rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600
+            dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500
+            dark:focus:border-blue-500") }}
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="numb_of_cases_per_outer_case"
+              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">No. Of Cases Per Outer Case</label>
+            {{ form.numb_of_cases_per_outer_case(class_="shadow-sm bg-gray-50 border border-gray-300 text-gray-900
+            text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600
+            dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500
+            dark:focus:border-blue-500") }}
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="comments" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Comments</label>
+            {{ form.comments(class_="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+            focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500
+            dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500") }}
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="weight" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Weight (in
+              gm)</label>
+            {{ form.weight(class_="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+            focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500
+            dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500") }}
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="length" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Length (in
+              cm)</label>
+            {{ form.length(class_="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+            focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500
+            dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500") }}
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="width" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Width (in
+              cm)</label>
+            {{ form.width(class_="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+            focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500
+            dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500") }}
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <label for="height" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Height (in
+              cm)</label>
+            {{ form.height(class_="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+            focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500
+            dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500")}}
+          </div>
+          {% if current_user.role_obj.role_name == 'admin' or current_user.role_obj.role_name == 'warehouse_manager' %}
+          <div class="col-span-6 sm:col-span-6">
+            {% else %}
+            <div class="col-span-6 sm:col-span-6 invisible">
+              {% endif %}
+              <label for="notes-location" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Notes
+                Location</label>
+              {{form.notes_location(class_="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+              focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500
+              dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500")}}
+            </div>
+          </div>
+        </div>
+        <div id="product-group-edit-container">
+          {% for group in product.groups %}
+          <div class="product-group-edit-add-item p-6 space-y-6 border-t">
+            <div class="grid grid-cols-12 gap-5" id="product-master-group-edit-item-1">
+              <div class="col-span-6 sm:col-span-4">
+                <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Master
+                  Group</label>
+                <select type="text" name="master_group_id" hx-get="{{ url_for('product.htmx.get_product_group') }}"
+                  hx-trigger="change" hx-spinner="#htmx-spinner" hx-swap="outerHTML"
+                  hx-target="next .product-group-edit-item" hx-indicator="#htmx-spinner"
+                  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  placeholder="Master
+                Group" required>
+                  {% for master_group in master_product_groups %}
+                  {% if group.master_group_id == master_group.id %}
+                  <option value="{{ master_group.id }}" selected>{{ master_group.name }}</option>
+                  {% else %}
+                  <option value="{{ master_group.id }}">{{ master_group.name }}</option>
+                  {% endif %}
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="product-group-edit-item col-span-6 sm:col-span-4">
+                <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label>
+                <select type="text" name="add_group"
+                  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  placeholder="Group" required>
+                  {% for sub_group in group.master_groups_for_product.groups_for_product %}
+                  {% if group.id == sub_group.id %}
+                  <option value="{{ sub_group.id }}" selected>{{ sub_group.name }}</option>
+                  {% endif %}
+                  <option value="{{ sub_group.id }}">{{ sub_group.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-span-6 sm:col-span-4">
+                <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Action</label>
+                {% if loop.index != 1 %}
+                <button type="button"
+                  hx-delete="{{ url_for('product.htmx.delete_group_for_product', product_id=product.id, group_id=group.id) }}"
+                  class=" inline-flex items-center px-3 py-2 mr-3 text-sm font-medium text-center text-white rounded-lg bg-red-600 hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
+                  <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z">
+                    </path>
+                  </svg>
+                </button>
+                {% endif %}
+                <button type="button" hx-get="{{ url_for('product.htmx.get_product_master_groups') }}"
+                  hx-trigger="click" hx-swap="beforeend" hx-target="#product-group-edit-container"
+                  hx-indicator="#htmx-spinner"
+                  class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300">
+                  <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M64 80c-8.8 0-16 7.2-16 16V416c0 8.8 7.2 16 16 16H384c8.8 0 16-7.2 16-16V96c0-8.8-7.2-16-16-16H64zM0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96zM200 344V280H136c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H248v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z">
+                    </path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <!-- Modal footer -->
+        <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+          <button id="product-edit-save-products-btn" name="submit" type="submit"
+            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+            Save all </button>
+        </div>
+    </form>
+  </div>
+  {% include 'spinner.html' %}
+</div>
