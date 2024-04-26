@@ -351,6 +351,12 @@ def create():
     )
 
     for warehouse_manager in warehouse_managers:
+        # create notification modale
+        m.ShipRequestNotification(
+            user_id=warehouse_manager.id,
+            ship_request_id=ship_request.id,
+        ).save()
+
         msg = Message(
             subject=f"New ship request: {ship_request.order_numb}",
             sender=app.config["MAIL_DEFAULT_SENDER"],

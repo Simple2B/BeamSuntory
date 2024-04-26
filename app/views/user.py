@@ -332,15 +332,15 @@ def delete(id: int):
     return "ok", 200
 
 
-@bp.route("/notification", methods=["GET"])
+@bp.route("/request-share-notifications", methods=["GET"])
 @login_required
-def notification():
+def request_share_notification():
 
     now = datetime.now()
 
-    requests_share = db.session.scalars(
-        sa.select(m.RequestShare)
-        .join(m.RequestShareUser)
+    requests_share_notifications = db.session.scalars(
+        sa.select(m.RequestShareUser)
+        .join(m.RequestShare)
         .where(
             sa.func.date(m.RequestShareUser.reviewed_datetime) >= now.date(),
             sa.and_(
@@ -354,16 +354,49 @@ def notification():
         .order_by(m.RequestShareUser.reviewed_datetime.desc())
     ).all()
 
-    new_requests_ids = []
-    for request_share in requests_share:
-        if not request_share.notification.reviewed:
-            request_share.notification.reviewed_datetime = now
-            new_requests_ids.append(request_share.id)
+    new_notification_ids = []
+    for notification in requests_share_notifications:
+        if not notification.reviewed:
+            notification.reviewed_datetime = now
+            new_notification_ids.append(notification.id)
 
     db.session.commit()
 
     return render_template(
-        "user/notifications.html",
-        requests_share=requests_share,
-        new_requests_ids=new_requests_ids,
+        "user/request_share_notification.html",
+        requests_share_notifications=requests_share_notifications,
+        new_notification_ids=new_notification_ids,
+    )
+
+
+@bp.route("/ship-request-notifications", methods=["GET"])
+@login_required
+@role_required([s.UserRole.WAREHOUSE_MANAGER.value])
+def ship_request_notification():
+
+    now = datetime.now()
+
+    ship_req_notifications = db.session.scalars(
+        sa.select(m.ShipRequestNotification)
+        .join(m.ShipRequest)
+        .where(
+            sa.func.date(m.ShipRequestNotification.reviewed_datetime) >= now.date(),
+            m.ShipRequestNotification.user_id == current_user.id,
+            m.ShipRequest.status == s.ShipRequestStatus.waiting_for_warehouse,
+        )
+        .order_by(m.ShipRequestNotification.reviewed_datetime.desc())
+    ).all()
+
+    new_notifications_ids = []
+    for notification in ship_req_notifications:
+        if not notification.reviewed:
+            notification.reviewed_datetime = now
+            new_notifications_ids.append(notification.id)
+
+    db.session.commit()
+
+    return render_template(
+        "user/ship_request_notification.html",
+        ship_req_notifications=ship_req_notifications,
+        new_notifications_ids=new_notifications_ids,
     )

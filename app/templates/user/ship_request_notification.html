@@ -1,34 +1,27 @@
 <div id="notification-list-conteiner" class="overflow-y-scroll h-[40rem]">
-    {% for request_share in requests_share %}
-    <a href="{{ url_for('request_share.get_all', q=request_share.order_numb) }}"
+    {% for notifications in ship_req_notifications %}
+    <a href="{{ url_for('outgoing_stock.get_all', q=notifications.ship_request.order_numb) }}"
         class="flex px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700">
-        <div class="h-24 w-24">
-            {% if request_share.product.image|length > 100 %}
-            <img src="data:image/png;base64, {{ request_share.product.image }}" alt="{{ request_share.product.name }}"
-                class="rounded-full">
-            {% else %}
-            <img src="{{ url_for('static', filename='img/default_image_brand.png') }}"
-                alt="{{ request_share.product.name }}" class="rounded-full">
-            {% endif %}
-        </div>
         <div class="w-full pl-3">
             <div class="text-gray-500 text-sm mb-1.5 dark:text-gray-400">
                 New
-                <span class="font-semibold text-gray-900 dark:text-white">request share</span>: product - <span
-                    class="font-semibold text-gray-900 dark:text-white">{{request_share.product.name}}</span>,
-                SKU - <span class="font-semibold text-gray-900 dark:text-white">{{ request_share.product.SKU }}
-                    request.SKU
-                </span>, desired quantity -
-                <span class="font-semibold text-gray-900 dark:text-white">{{
-                    request_share.desire_quantity
-                    }}</span>, target_group - <span
-                    class="font-semibold text-gray-900 dark:text-white">{{request_share.group.name}}</span>
+                <span class="font-semibold text-gray-900 dark:text-white">Ship request</span> created: Order number
+                -
+                <span
+                    class="font-semibold text-gray-900 dark:text-white">{{notifications.ship_request.order_numb}}</span>,
+                User - <span class="font-semibold text-gray-900 dark:text-white">{{
+                    notifications.ship_request.user.username }}</span>, Store category - <span
+                    class="font-semibold text-gray-900 dark:text-white">{{notifications.ship_request.store_category.name}}</span>,
+                Store - <span
+                    class="font-semibold text-gray-900 dark:text-white">{{notifications.ship_request.store.store_name}}</span>,
+                Status - <span
+                    class="font-semibold text-gray-900 dark:text-white">{{notifications.ship_request.status.value}}</span>
             </div>
             <div class="flex justify-between">
                 <div class="text-xs text-blue-600 dark:text-blue-500">
-                    {{ request_share.created_at.strftime('%Y-%m-%d %H:%M') }}
+                    {{ notifications.ship_request.created_at.strftime('%Y-%m-%d %H:%M') }}
                 </div>
-                {% if request_share.id in new_requests_ids %}
+                {% if notifications.id in new_notifications_ids %}
                 <div class="text-xs text-blue-600 dark:text-blue-500">
                     <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
                         xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
@@ -47,13 +40,13 @@
                 {% endif %}
             </div>
         </div>
+
     </a>
     {% endfor %}
     <div class="p-6"></div>
-
     <script>
         function setBell() {
-            const isNew = "{{ new_requests_ids | length}}"
+            const isNew = "{{ new_notifications_ids | length }}"
             const bell = document.querySelector("#bell-notification-red-dot")
             if (parseInt(isNew) > 0) {
                 bell.classList.remove("invisible")
