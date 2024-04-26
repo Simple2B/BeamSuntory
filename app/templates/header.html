@@ -75,11 +75,19 @@
           <div id="dropdownNotification"
             class="z-20 hidden w-full max-w-sm bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-800 dark:divide-gray-700"
             aria-labelledby="dropdownNotificationButton">
-            <div hx-get="{{ url_for('user.notification') }}" hx-trigger="intersect threshold:1"
+            {% if current_user.role_obj.role_name == "warehouse_manager" %}
+            <div hx-get="{{ url_for('user.ship_request_notification') }}" hx-trigger="intersect threshold:1"
               hx-target="#notification-list-conteiner" hx-swap="outerHTML" hx-indicator="#htmx-spinner"
               class="block px-4 py-2 font-medium text-center text-gray-700 rounded-t-lg bg-gray-50 dark:bg-gray-800 dark:text-white">
               Notifications
             </div>
+            {% else %}
+            <div hx-get="{{ url_for('user.request_share_notification') }}" hx-trigger="intersect threshold:1"
+              hx-target="#notification-list-conteiner" hx-swap="outerHTML" hx-indicator="#htmx-spinner"
+              class="block px-4 py-2 font-medium text-center text-gray-700 rounded-t-lg bg-gray-50 dark:bg-gray-800 dark:text-white">
+              Notifications
+            </div>
+            {% endif %}
 
             <div class="divide-y divide-gray-100 dark:divide-gray-700">
               <div id="notification-list-conteiner"></div>

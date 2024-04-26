@@ -1,5 +1,7 @@
 from sqlalchemy import select
+from datetime import datetime
 from flask import current_app as app
+import sqlalchemy as sa
 from flask.testing import FlaskClient, FlaskCliRunner
 from click.testing import Result
 from app import models as m, db
@@ -122,3 +124,41 @@ def test_edit_user(populate_one_user: FlaskClient):
     users = db.session.execute(m.User.select()).all()
     assert len(users) > 0
     assert users[1][0].street_address == new_street_address
+
+
+def test_ship_request_notifications(mg_g_populate: FlaskClient):
+    login(mg_g_populate, "user1")
+    notifications = db.session.scalars(
+        sa.select(m.ShipRequestNotification).where(
+            m.ShipRequestNotification.reviewed_datetime == datetime.max
+        )
+    ).all()
+    assert notifications
+    response = mg_g_populate.get("/user/ship-request-notifications")
+    assert response.status_code == 200
+    assert "notification-list-conteiner" in response.text
+    notifications = db.session.scalars(
+        sa.select(m.ShipRequestNotification).where(
+            m.ShipRequestNotification.reviewed_datetime == datetime.max
+        )
+    ).all()
+    assert not notifications
+
+
+def test_request_shere_notifications(mg_g_populate: FlaskClient):
+    login(mg_g_populate, "meng2")
+    notifications = db.session.scalars(
+        sa.select(m.RequestShareUser).where(
+            m.RequestShareUser.reviewed_datetime == datetime.max
+        )
+    ).all()
+    assert notifications
+    response = mg_g_populate.get("/user/request-share-notifications")
+    assert response.status_code == 200
+    assert "notification-list-conteiner" in response.text
+    notifications = db.session.scalars(
+        sa.select(m.RequestShareUser).where(
+            m.RequestShareUser.reviewed_datetime == datetime.max
+        )
+    ).all()
+    assert not notifications

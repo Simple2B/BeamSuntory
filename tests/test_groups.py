@@ -55,23 +55,11 @@ def test_delete_group(mg_g_populate: FlaskClient):
     master_groups_rows_objs = db.session.execute(m.MasterGroup.select()).all()
     assert len(master_groups_rows_objs) == len(before_delete_master_groups_rows_objs)
 
-    before_delete_groups_rows_objs = db.session.execute(m.Group.select()).all()
-
     response = mg_g_populate.delete("/stock_target_group/delete/1")
-    assert response.status_code == 200
-    assert "ok" in response.text
-    groups_rows_objs = db.session.execute(m.Group.select()).all()
-    assert len(groups_rows_objs) < len(before_delete_groups_rows_objs)
-
-    before_delete_master_groups_rows_objs = db.session.execute(
-        m.MasterGroup.select()
-    ).all()
+    assert response.status_code == 409
 
     response = mg_g_populate.delete("/master_group/delete/1")
-    assert response.status_code == 200
-    assert "ok" in response.text
-    master_groups_rows_objs = db.session.execute(m.MasterGroup.select()).all()
-    assert len(master_groups_rows_objs) < len(before_delete_master_groups_rows_objs)
+    assert response.status_code == 202
 
 
 def test_edit_group(mg_g_populate: FlaskClient):

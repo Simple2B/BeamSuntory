@@ -119,6 +119,7 @@ def populate_one_user(client: FlaskClient):
         sales_rep=False,
     ).save(False)
     db.session.commit()
+
     yield client
 
 
@@ -144,7 +145,7 @@ def mg_g_populate(client: FlaskClient, mocker):
             m.Division.role_name == s.UserRole.WAREHOUSE_MANAGER.value
         )
     ).scalar()
-    m.User(
+    weh_menegar = m.User(
         username="user1",
         email="user1@mail.com",
         password="password",
@@ -176,6 +177,37 @@ def mg_g_populate(client: FlaskClient, mocker):
         sales_rep=False,
     ).save(False)
 
+    meng = m.User(
+        username="meng",
+        email="meng@mail.com",
+        password="password",
+        role=4,
+        activated=True,
+        approval_permission=True,
+        street_address="street",
+        phone_number="123456789",
+        country="UK",
+        region="Lv",
+        city="Dro",
+        zip_code="82100",
+        sales_rep=False,
+    ).save()
+    meng2 = m.User(
+        username="meng2",
+        email="meng2@mail.com",
+        password="password",
+        role=4,
+        activated=True,
+        approval_permission=True,
+        street_address="street",
+        phone_number="123456789",
+        country="UK",
+        region="Lv",
+        city="Dro",
+        zip_code="82100",
+        sales_rep=False,
+    ).save()
+
     for mg in master_groups:
         m.MasterGroup(
             name=mg,
@@ -194,6 +226,15 @@ def mg_g_populate(client: FlaskClient, mocker):
             name=g,
             master_group_id=groups[g],
         ).save(False)
+
+    m.UserGroup(
+        left_id=meng.id,
+        right_id=1,
+    ).save()
+    m.UserGroup(
+        left_id=meng2.id,
+        right_id=2,
+    ).save()
 
     group_event = m.Group(
         name=s.ProductMasterGroupMandatory.events.value,
@@ -310,6 +351,19 @@ def mg_g_populate(client: FlaskClient, mocker):
         active=True,
     ).save(False)
 
+    m.RequestShare(
+        product_id=1,
+        group_id=1,
+        from_group_id=2,
+        user_id=meng.id,
+        desire_quantity=100,
+        status="pending",
+    ).save()
+    m.RequestShareUser(
+        request_share_id=1,
+        user_id=meng2.id,
+    ).save()
+
     inbound_order_test = m.InboundOrder(
         active_date=datetime.datetime.strptime("07/20/2023", "%m/%d/%Y"),
         active_time="12:00 AM",
@@ -383,6 +437,10 @@ def mg_g_populate(client: FlaskClient, mocker):
         user_id=1,
     )
     waiting_ship.save(False)
+    m.ShipRequestNotification(
+        user=weh_menegar,
+        ship_request=waiting_ship,
+    ).save(False)
 
     m.InboundOrder(
         active_date=datetime.datetime.strptime("07/20/2023", "%m/%d/%Y"),
@@ -651,6 +709,10 @@ def mg_g_populate(client: FlaskClient, mocker):
             order_type="Regular",
             store_id=1,
             user_id=3,
+        ).save(False)
+        m.ShipRequestNotification(
+            user=weh_menegar,
+            ship_request=sr,
         ).save(False)
 
         cart = m.Cart(

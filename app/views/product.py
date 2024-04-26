@@ -56,7 +56,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
 
     user_group_id = request.args.get("user_group_id", type=int, default="")
 
-    master_groups = request.args.get("master_groups", type=str, default="")
+    master_groups = request.args.get("master_groups", type=str, default="").strip()
     master_groups_list = master_groups.split(",")
 
     q = request.args.get("q", type=str, default="")
