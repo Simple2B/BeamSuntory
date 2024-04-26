@@ -8,6 +8,7 @@ from flask_mail import Message
 from flask import render_template
 from app import models as m
 from app import mail
+from app import schema as s
 from app.database import db
 from app import create_app
 from config import config
@@ -69,12 +70,15 @@ def notify_users_assign(assign_id: int, app_env: str, redirect_url: str):
         users = db.session.scalars(
             sa.select(m.User)
             .join(m.UserGroup)
+            .join(m.Division)
             .where(
+                m.Division.role_name != s.UserRole.WAREHOUSE_MANAGER.value,
                 sa.or_(
                     m.UserGroup.right_id == assign_obj.group_id,
                     m.UserGroup.right_id == assign_obj.from_group_id,
-                )
+                ),
             )
+            .distinct()
         ).all()
 
         for user in users:
@@ -105,7 +109,12 @@ def notify_users_request_share(request_share_id: int, app_env: str, redirect_url
         users = db.session.scalars(
             sa.select(m.User)
             .join(m.UserGroup)
-            .where(m.UserGroup.right_id == request_share.group_id)
+            .join(m.Division)
+            .where(
+                m.Division.role_name != s.UserRole.WAREHOUSE_MANAGER.value,
+                m.UserGroup.right_id == request_share.group_id,
+            )
+            .distinct()
         ).all()
 
         for user in users:
@@ -132,13 +141,18 @@ def notify_users_new_request_share(
 ):
     app = create_app(app_env)
     with app.app_context():
-        log(log.INFO, "Notifying users of request_share")
+        log(log.INFO, "Notifying users of new request_share")
         request_share = db.session.get(m.RequestShare, request_share_id)
 
         users = db.session.scalars(
             sa.select(m.User)
             .join(m.UserGroup)
-            .where(m.UserGroup.right_id == request_share.from_group_id)
+            .join(m.Division)
+            .where(
+                m.Division.role_name != s.UserRole.WAREHOUSE_MANAGER.value,
+                m.UserGroup.right_id == request_share.from_group_id,
+            )
+            .distinct()
         ).all()
 
         for user in users:

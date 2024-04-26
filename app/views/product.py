@@ -718,138 +718,137 @@ def assign():
     form: f.AssignProductForm = f.AssignProductForm()
     query_params = get_query_params_from_headers()
 
-    if form.validate_on_submit():
-        query = m.Product.select().where(m.Product.name == form.name.data)
-        product: m.Product | None = db.session.scalar(query)
-        if not product:
-            log(log.ERROR, "Not found product by name : [%s]", form.name.data)
-            flash("Cannot save product data", "danger")
-            return redirect(url_for("product.get_all", **query_params))
-
-        product_from_group: m.Group = db.session.scalar(
-            m.Group.select().where(
-                m.Group.name == form.from_group.data,
-            )
-        )
-        if form.sub_group.data:
-            product_to_group: m.Group = db.session.scalar(
-                m.Group.select().where(
-                    m.Group.name == form.sub_group.data,
-                )
-            )
-        else:
-            product_to_group: m.Group = db.session.scalar(
-                m.Group.select().where(
-                    m.Group.name == form.group.data,
-                )
-            )
-
-        if not product_from_group or not product_to_group:
-            log(log.ERROR, "Group not found")
-            flash("Cannot save product data", "danger")
-            return redirect(url_for("product.get_all", **query_params))
-
-        if product_from_group.id == product_to_group.id:
-            log(log.ERROR, "Cannot assign to same group")
-            flash(
-                f"Cannot assign from {product_from_group.name} to {product_to_group.name}",
-                "danger",
-            )
-            return redirect(url_for("product.get_all", **query_params))
-
-        report_inventory_list = m.ReportInventoryList(
-            type="Product Assigned",
-            user_id=current_user.id,
-        )
-        report_inventory_list.save(False)
-
-        # TODO sort also by warehouse_id
-        product_warehouse: m.WarehouseProduct = db.session.execute(
-            m.WarehouseProduct.select().where(
-                m.WarehouseProduct.product_id == product.id,
-                m.WarehouseProduct.group_id == product_from_group.id,
-            )
-        ).scalar()
-        if not product_warehouse:
-            log(log.ERROR, "Product warehouse not found")
-            flash("Product warehouse not found", "danger")
-            return redirect(url_for("product.get_all", **query_params))
-        # NOTE create report for inventory
-        report_inventory = m.ReportInventory(
-            qty_before=product_warehouse.product_quantity,
-            qty_after=product_warehouse.product_quantity - form.quantity.data,
-            report_inventory_list_id=report_inventory_list.id,
-            product_id=product_warehouse.product_id,
-            warehouse_product=product_warehouse,
-        )
-        report_inventory.save(False)
-        product_warehouse.product_quantity -= form.quantity.data
-        product_warehouse.save(False)
-
-        new_product_warehouse: m.WarehouseProduct = db.session.execute(
-            m.WarehouseProduct.select().where(
-                m.WarehouseProduct.product_id == product.id,
-                m.WarehouseProduct.group_id == product_to_group.id,
-            )
-        ).scalar()
-        if new_product_warehouse:
-            qty_before = new_product_warehouse.product_quantity
-            new_product_warehouse.product_quantity += form.quantity.data
-            new_product_warehouse.save(False)
-        else:
-            qty_before = 0
-            new_product_warehouse = m.WarehouseProduct(
-                product_id=product.id,
-                group_id=product_to_group.id,
-                product_quantity=form.quantity.data,
-                warehouse_id=product_warehouse.warehouse_id,
-            )
-            new_product_warehouse.save(False)
-
-        report_inventory = m.ReportInventory(
-            qty_before=qty_before,
-            qty_after=new_product_warehouse.product_quantity,
-            report_inventory_list_id=report_inventory_list.id,
-            product_id=new_product_warehouse.product_id,
-            warehouse_product=new_product_warehouse,
-        )
-        report_inventory.save(False)
-
-        assign_obj = m.Assign(
-            product_id=product.id,
-            group_id=product_to_group.id,
-            quantity=form.quantity.data,
-            from_group_id=product_from_group.id,
-            user_id=current_user.id,
-            type=s.ReportEventType.created.value,
-        )
-        assign_obj.save(False)
-
-        m.ReportSKU(
-            product_id=new_product_warehouse.product_id,
-            assign=assign_obj,
-            type=s.ReportSKUType.assign.value,
-            status=f"Assigned from {product_from_group.name} to {product_to_group.name}",
-        ).save(False)
-
-        db.session.commit()
-
-        redirect_url = (
-            url_for(
-                "assign.get_all",
-                _external=True,
-            )
-            + f"?q={assign_obj.uuid}"
-        )
-
-        notify_users_assign.delay(assign_obj.id, app.config["ENV"], redirect_url)
-
-        return redirect(url_for("product.get_all", **query_params))
-
-    else:
+    if not form.validate_on_submit():
         log(log.ERROR, "product assign errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("product.get_all", **query_params))
+    query = m.Product.select().where(m.Product.name == form.name.data)
+    product: m.Product | None = db.session.scalar(query)
+
+    if not product:
+        log(log.ERROR, "Not found product by name : [%s]", form.name.data)
+        flash("Cannot save product data", "danger")
+        return redirect(url_for("product.get_all", **query_params))
+
+    product_from_group: m.Group = db.session.scalar(
+        m.Group.select().where(
+            m.Group.name == form.from_group.data,
+        )
+    )
+    if form.sub_group.data:
+        product_to_group: m.Group = db.session.scalar(
+            m.Group.select().where(
+                m.Group.name == form.sub_group.data,
+            )
+        )
+    else:
+        product_to_group: m.Group = db.session.scalar(
+            m.Group.select().where(
+                m.Group.name == form.group.data,
+            )
+        )
+
+    if not product_from_group or not product_to_group:
+        log(log.ERROR, "Group not found")
+        flash("Cannot save product data", "danger")
+        return redirect(url_for("product.get_all", **query_params))
+
+    if product_from_group.id == product_to_group.id:
+        log(log.ERROR, "Cannot assign to same group")
+        flash(
+            f"Cannot assign from {product_from_group.name} to {product_to_group.name}",
+            "danger",
+        )
+        return redirect(url_for("product.get_all", **query_params))
+
+    report_inventory_list = m.ReportInventoryList(
+        type="Product Assigned",
+        user_id=current_user.id,
+    )
+    report_inventory_list.save(False)
+
+    # TODO sort also by warehouse_id
+    product_warehouse: m.WarehouseProduct = db.session.execute(
+        m.WarehouseProduct.select().where(
+            m.WarehouseProduct.product_id == product.id,
+            m.WarehouseProduct.group_id == product_from_group.id,
+        )
+    ).scalar()
+    if not product_warehouse:
+        log(log.ERROR, "Product warehouse not found")
+        flash("Product warehouse not found", "danger")
+        return redirect(url_for("product.get_all", **query_params))
+    # NOTE create report for inventory
+    report_inventory = m.ReportInventory(
+        qty_before=product_warehouse.product_quantity,
+        qty_after=product_warehouse.product_quantity - form.quantity.data,
+        report_inventory_list_id=report_inventory_list.id,
+        product_id=product_warehouse.product_id,
+        warehouse_product=product_warehouse,
+    )
+    report_inventory.save(False)
+    product_warehouse.product_quantity -= form.quantity.data
+    product_warehouse.save(False)
+
+    new_product_warehouse: m.WarehouseProduct = db.session.execute(
+        m.WarehouseProduct.select().where(
+            m.WarehouseProduct.product_id == product.id,
+            m.WarehouseProduct.group_id == product_to_group.id,
+        )
+    ).scalar()
+    if new_product_warehouse:
+        qty_before = new_product_warehouse.product_quantity
+        new_product_warehouse.product_quantity += form.quantity.data
+        new_product_warehouse.save(False)
+    else:
+        qty_before = 0
+        new_product_warehouse = m.WarehouseProduct(
+            product_id=product.id,
+            group_id=product_to_group.id,
+            product_quantity=form.quantity.data,
+            warehouse_id=product_warehouse.warehouse_id,
+        )
+        new_product_warehouse.save(False)
+
+    report_inventory = m.ReportInventory(
+        qty_before=qty_before,
+        qty_after=new_product_warehouse.product_quantity,
+        report_inventory_list_id=report_inventory_list.id,
+        product_id=new_product_warehouse.product_id,
+        warehouse_product=new_product_warehouse,
+    )
+    report_inventory.save(False)
+
+    assign_obj = m.Assign(
+        product_id=product.id,
+        group_id=product_to_group.id,
+        quantity=form.quantity.data,
+        from_group_id=product_from_group.id,
+        user_id=current_user.id,
+        type=s.ReportEventType.created.value,
+    )
+    assign_obj.save(False)
+
+    m.ReportSKU(
+        product_id=new_product_warehouse.product_id,
+        assign=assign_obj,
+        type=s.ReportSKUType.assign.value,
+        status=f"Assigned from {product_from_group.name} to {product_to_group.name}",
+    ).save(False)
+
+    db.session.commit()
+
+    redirect_url = (
+        url_for(
+            "assign.get_all",
+            _external=True,
+        )
+        + f"?q={assign_obj.uuid}"
+    )
+
+    notify_users_assign.delay(assign_obj.id, app.config["ENV"], redirect_url)
+
+    return redirect(url_for("product.get_all", **query_params))
 
 
 @product_blueprint.route("/request_share/<warehouse_product_id>", methods=["GET"])

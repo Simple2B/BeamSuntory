@@ -359,6 +359,15 @@ def mg_g_populate(client: FlaskClient, mocker):
         desire_quantity=100,
         status="pending",
     ).save()
+
+    m.Assign(
+        product_id=1,
+        from_group_id=2,
+        group_id=1,
+        user_id=meng.id,
+        quantity=100,
+        type="request_share",
+    ).save()
     m.RequestShareUser(
         request_share_id=1,
         user_id=meng2.id,
