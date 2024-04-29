@@ -29,11 +29,13 @@ class ProductForm(FlaskForm):
         "Regular price",
         validators=[Optional()],
         render_kw={"placeholder": "Regular price"},
+        default=0,
     )
     retail_price = FloatField(
         "Retail price",
         validators=[Optional()],
         render_kw={"placeholder": "Retail price"},
+        default=0,
     )
     image = FileField("Image", validators=[Optional()])
     description = StringField(
@@ -45,45 +47,65 @@ class ProductForm(FlaskForm):
         "Low stock level",
         validators=[Optional()],
         render_kw={"placeholder": "Low stock level"},
+        default=0,
     )
     program_year = IntegerField(
         "Program year",
         validators=[Optional()],
         render_kw={"placeholder": "Program year"},
+        default=2024,
     )
     package_qty = IntegerField(
-        "Package qty", validators=[Optional()], render_kw={"placeholder": "Package qty"}
+        "Package qty",
+        validators=[Optional()],
+        render_kw={"placeholder": "Package qty"},
+        default=0,
     )
     numb_of_items_per_case = IntegerField(
         "Number of items per case",
         validators=[Optional()],
         render_kw={"placeholder": "Number of items per case"},
+        default=0,
     )
     numb_of_cases_per_outer_case = IntegerField(
         "Number of cases per outer case",
         validators=[Optional()],
         render_kw={"placeholder": "Number of cases per outer case"},
+        default=0,
     )
     comments = StringField(
-        "Comments", validators=[Optional()], render_kw={"placeholder": "Comments"}
+        "Comments",
+        validators=[Optional()],
+        render_kw={"placeholder": "Comments"},
+        default="No comments.",
     )
     notes_location = TextAreaField(
         "Notes Location",
         validators=[Optional()],
         render_kw={"placeholder": "Notes Location"},
+        default="",
     )
     # shipping
     weight = FloatField(
-        "Weight", validators=[Optional()], render_kw={"placeholder": "Weight"}
+        "Weight",
+        validators=[Optional()],
+        render_kw={"placeholder": "Weight"},
+        default=0,
     )
     length = FloatField(
-        "Length", validators=[Optional()], render_kw={"placeholder": "Length"}
+        "Length",
+        validators=[Optional()],
+        render_kw={"placeholder": "Length"},
+        default=0,
     )
     width = FloatField(
-        "Width", validators=[Optional()], render_kw={"placeholder": "Width"}
+        "Width", validators=[Optional()], render_kw={"placeholder": "Width"}, default=0
     )
     height = FloatField(
-        "Height", validators=[Optional()], render_kw={"placeholder": "Height"}
+        "Height",
+        validators=[Optional()],
+        render_kw={"placeholder": "Height"},
+        default=0,
     )
     # json groups
     product_groups = StringField("Groups", [DataRequired()])

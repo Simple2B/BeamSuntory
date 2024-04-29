@@ -6,7 +6,7 @@
   <div class="rounded-lg relative w-full max-w-2xl max-h-full bg-white" onclick="event.stopPropagation();">
     <!-- Modal content -->
     <form action="{{url_for('product.save')}}" method="post" enctype="multipart/form-data"
-      class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+      id="edit-product-form-element" class="relative bg-white rounded-lg shadow dark:bg-gray-700">
       {{ form.hidden_tag() }}
       {{ form.product_id }}
       <!-- Modal header -->
@@ -24,7 +24,8 @@
       <!-- Modal body -->
       <div class="p-6 space-y-6">
         <div class="grid grid-cols-6 gap-6">
-          <div class="product-full-image-anchor col-span-6 sm:col-span-2 sm:row-span-2 max-height-image-container">
+          <div data-target-product-id="{{ product.id }}"
+            class="product-full-image-anchor cursor-pointer col-span-6 sm:col-span-2 sm:row-span-2 max-height-image-container">
             {% if product.image and product.image | length > 100 %}
             <img src="data:image/png;base64, {{ product.image }}" class="w-full h-full object-cover" />
             {% else %}
@@ -173,6 +174,7 @@
               dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500")}}
             </div>
           </div>
+          <input type="text" name="product_groups" class="hidden" id="product-groups-ids-input">
         </div>
         <div id="product-group-edit-container">
           {% for group in product.groups %}
@@ -199,7 +201,7 @@
               <div class="product-group-edit-item col-span-6 sm:col-span-4">
                 <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label>
                 <select type="text" name="add_group"
-                  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  class="product_group_id shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="Group" required>
                   {% for sub_group in group.master_groups_for_product.groups_for_product %}
                   {% if group.id == sub_group.id %}
@@ -239,11 +241,25 @@
         </div>
         <!-- Modal footer -->
         <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
-          <button id="product-edit-save-products-btn" name="submit" type="submit"
+          <button onclick="handleSubmitBtn()" name="button" type="button"
             class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
             Save all </button>
         </div>
     </form>
   </div>
   {% include 'spinner.html' %}
+  <script>
+    function handleSubmitBtn() {
+      const form = document.querySelector("#edit-product-form-element");
+      const input = document.querySelector("#product-groups-ids-input");
+      if (!form || !input) {
+        console.error("Form or input not found");
+        return;
+      }
+      const groups = form.querySelectorAll(".product_group_id");
+      const groups_ids = Array.from(groups).map((group) => group.value);
+      input.value = JSON.stringify(groups_ids);
+      form.submit();
+    }
+  </script>
 </div>

@@ -83,6 +83,7 @@ class Product(db.Model, ModelMixin):
         secondary=ProductGroup.__table__,
         back_populates="products",
         overlaps="child,product_groups,parent",
+        order_by=GroupProduct.name.asc(),
     )
 
     def __repr__(self):
