@@ -95,6 +95,7 @@ class User(db.Model, UserMixin, ModelMixin):
         overlaps="parent,user_obj,child",
         order_by="Group.name.asc()",
     )
+    is_deleted = orm.mapped_column(sa.Boolean, default=False)
 
     @property
     def has_notivications(self) -> bool:

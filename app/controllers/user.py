@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import abort, request
+from flask import abort, redirect, request, url_for
 from flask_login import current_user
 
 from app.database import db
@@ -34,6 +34,10 @@ def role_required(required_role, has_approval_permission=False):
             if not current_user:
                 log(log.ERROR, "User is not authenticated")
                 abort(401)
+
+            if current_user.is_deleted:
+                log(log.ERROR, "User is deleted")
+                return redirect(url_for("auth.logout"))
 
             if current_user.role_obj.role_name not in required_role:
                 log(

@@ -35,16 +35,21 @@ def get_all():
 
     role = aliased(m.Division)
     q = request.args.get("q", type=str, default=None)
-    query = m.User.select().order_by(m.User.id)
-    count_query = sa.select(sa.func.count()).select_from(m.User)
+    query = m.User.select().where(m.User.is_deleted.is_(False)).order_by(m.User.id)
+    count_query = (
+        sa.select(sa.func.count())
+        .where(m.User.is_deleted.is_(False))
+        .select_from(m.User)
+    )
     if q:
         query = (
             m.User.select()
             .join(role, m.User.role == role.id)
             .where(
+                m.User.is_deleted.is_(False),
                 m.User.username.ilike(f"%{q}%")
                 | m.User.email.ilike(f"%{q}%")
-                | role.role_name.ilike(f"%{q}%")
+                | role.role_name.ilike(f"%{q}%"),
             )
             .order_by(m.User.id)
         )
@@ -52,9 +57,10 @@ def get_all():
             sa.select(sa.func.count())
             .join(role, m.User.role == role.id)
             .where(
+                m.User.is_deleted.is_(False),
                 m.User.username.ilike(f"%{q}%")
                 | m.User.email.ilike(f"%{q}%")
-                | role.role_name.ilike(f"%{q}%")
+                | role.role_name.ilike(f"%{q}%"),
             )
             .select_from(m.User)
         )
@@ -303,31 +309,21 @@ def create():
 @login_required
 @role_required([s.UserRole.ADMIN.value])
 def delete(id: int):
-    u: m.User = db.session.scalar(m.User.select().where(m.User.id == id))
-    if not u:
+    user = db.session.get(m.User, id)
+    if not user or user.is_deleted:
         log(log.INFO, "There is no user with id: [%s]", id)
         flash("There is no such user", "danger")
         return "no user", 404
-    sales_rep_role_id = (
-        db.session.execute(
-            m.Division.select().where(
-                m.Division.role_name == s.UserRole.SALES_REP.value
-            )
-        )
-        .scalar()
-        .id
-    )
-    if u.role == sales_rep_role_id:
-        store = db.session.scalar(m.Store.select().where(m.Store.user_id == u.id))
-        if store:
-            db.session.delete(store)
 
-    delete_u = sa.delete(m.UserGroup).where(m.UserGroup.left_id == u.id)
+    delete_u = sa.delete(m.UserGroup).where(m.UserGroup.left_id == user.id)
     db.session.execute(delete_u)
 
-    db.session.delete(u)
+    now = datetime.now()
+    user.is_deleted = True
+    user.email = f"{user.email}_deleted_at_{now}"
+    user.username = f"{user.username}_deleted_at_{now}"
     db.session.commit()
-    log(log.INFO, "User deleted. User: [%s]", u)
+    log(log.INFO, "User deleted. User: [%s]", user)
     flash("User deleted!", "success")
     return "ok", 200
 
