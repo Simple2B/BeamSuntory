@@ -2,7 +2,6 @@ import csv
 import codecs
 from http import HTTPStatus
 import base64
-import json
 from datetime import datetime
 from pathlib import Path
 import filetype
@@ -18,6 +17,8 @@ from flask import (
 )
 from flask_login import login_required, current_user
 from pydantic import ValidationError
+from pydantic import TypeAdapter
+
 import sqlalchemy as sa
 from app.controllers import (
     create_pagination,
@@ -34,9 +35,13 @@ from app import forms as f
 from app.celery import notify_users_assign, notify_users_new_request_share
 from app.logger import log
 
+from .product_htmx import product_htmx
+
 DEFUALT_IMAGE_ID = 1
 DEFUALT_IMAGE_PATH = "app/static/img/no_picture_default.png"
 product_blueprint = Blueprint("product", __name__, url_prefix="/product")
+product_blueprint.register_blueprint(product_htmx)
+adapter = TypeAdapter(list[int])
 
 
 # TODO: needs refactor FIRST!!
@@ -215,22 +220,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     get_all_groups_time = datetime.now()
 
     mastr_for_prods_groups_for_prods = {}
-    mstr_prod_grps_prod_grps_names = {}
-    for group in groups_for_products_obj:
-        if group.master_groups_for_product.name not in mastr_for_prods_groups_for_prods:
-            mastr_for_prods_groups_for_prods[group.master_groups_for_product.name] = [
-                group
-            ]
-            mstr_prod_grps_prod_grps_names[group.master_groups_for_product.name] = [
-                {"group_name": group.name, "group_id": group.id}
-            ]
-        else:
-            mastr_for_prods_groups_for_prods[
-                group.master_groups_for_product.name
-            ].append(group)
-            mstr_prod_grps_prod_grps_names[group.master_groups_for_product.name].append(
-                {"group_name": group.name, "group_id": group.id}
-            )
 
     log(
         log.DEBUG,
@@ -315,7 +304,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
             ).scalars()
         },
         "current_user_groups_names": [i.parent.name for i in current_user_groups_rows],
-        "mstr_prod_grps_prod_grps_names": json.dumps(mstr_prod_grps_prod_grps_names),
         "target_groups": target_groups,
         # TODO remove when testing is done
         "datetime": datetime,
@@ -364,8 +352,7 @@ def product_view(id: int):
 @login_required
 def get_all():
     products_object = get_all_products(request)
-    form_create: f.NewProductForm = f.NewProductForm()
-    form_edit: f.ProductForm = f.ProductForm()
+    adjust_form = f.AdjustProductForm()
 
     name = request.args.get("is_stocks_own_by_me", type=bool, default=False)
     url_with_params = url_for("product.get_all", name=name)
@@ -399,14 +386,10 @@ def get_all():
         master_groups_search=products_object["master_groups_search"],
         master_group_product_name=products_object["master_product_groups_name"],
         suppliers=products_object["suppliers"],
-        mstr_prod_grps_prod_grps_names=products_object[
-            "mstr_prod_grps_prod_grps_names"
-        ],
         target_groups=products_object["target_groups"],
         datetime=products_object["datetime"],
-        form_create=form_create,
-        form_edit=form_edit,
         url_with_params=url_with_params,
+        adjust_form=adjust_form,
     )
 
 
@@ -416,102 +399,104 @@ def get_all():
 def create():
     form: f.NewProductForm = f.NewProductForm()
     query_params = get_query_params_from_headers()
-    if form.validate_on_submit():
-        query = m.Product.select().where(m.Product.name == form.name.data)
-        gr: m.Product | None = db.session.scalar(query)
-        if gr:
-            flash("This product name is already taken.", "danger")
-            return redirect(url_for("product.get_all", **query_params))
-
-        supplier: m.Supplier = db.session.scalar(m.Supplier.select())
-
-        product: m.Product = m.Product(
-            name=str(form.name.data).strip(" "),
-            supplier_id=form.supplier.data if form.supplier.data else supplier.id,
-            currency=form.currency.data if form.currency.data else "CAD",
-            regular_price=form.regular_price.data if form.regular_price.data else 0,
-            retail_price=form.retail_price.data if form.retail_price.data else 0,
-            description=form.description.data,
-            # General Info ->
-            SKU=form.SKU.data,
-            low_stock_level=(
-                form.low_stock_level.data if form.low_stock_level.data else 0
-            ),
-            program_year=form.program_year.data if form.program_year.data else 2023,
-            package_qty=form.package_qty.data if form.package_qty.data else 0,
-            numb_of_items_per_case=(
-                form.numb_of_items_per_case.data
-                if form.numb_of_items_per_case.data
-                else 0
-            ),
-            numb_of_cases_per_outer_case=(
-                form.numb_of_cases_per_outer_case.data
-                if form.numb_of_cases_per_outer_case.data
-                else 0
-            ),
-            comments=form.comments.data if form.comments.data else "no comment",
-            # shipping
-            weight=form.weight.data if form.weight.data else 0,
-            length=form.length.data if form.length.data else 0,
-            width=form.width.data if form.width.data else 0,
-            height=form.height.data if form.height.data else 0,
-        )
-        image = form.image.data
-        if image:
-            image_name = (
-                f"{form.SKU.data}{'.'.join(image.filename.split('.')[:-1])}"
-                if image.filename
-                else f"{form.SKU.data}"
-            )
-            kind = filetype.guess(image)
-
-            if not kind:
-                log(log.ERROR, "Can't guess image type.")
-                flash("Can't guess image type.", "danger")
-                return redirect(url_for("product.get_all", **query_params))
-
-            if (
-                db.session.scalar(sa.select(m.Image).where(m.Image.name == image_name))
-                is not None
-            ):
-                flash("Image name already exist", "danger")
-                return redirect(url_for("product.get_all", **query_params))
-
-            try:
-                image_path, image_string = save_image(
-                    image=image, path=f"product/{image_name}.{kind.extension}"
-                )
-            except PermissionError as e:
-                log(log.ERROR, "Can't save product image. Error: [%s]", e)
-                flash("Can't save image some problems.", "danger")
-                return redirect(url_for("product.get_all", **query_params))
-
-            product.image = image_string
-            new_img = m.Image(
-                name=image_name,
-                path=image_path,
-                extension=kind.extension,
-            )
-            product.image_obj = new_img
-        else:
-            product.image_id = DEFUALT_IMAGE_ID
-            product.image = ""
-        db.session.add(product)
-        db.session.commit()
-
-        product_master_groups_ids = json.loads(form.product_groups.data)
-
-        for group_id in product_master_groups_ids:
-            product_group = m.ProductGroup(product_id=product.id, group_id=group_id)
-            product_group.save(False)
-        db.session.commit()
-
-        log(log.INFO, "Form submitted. Product: [%s]", product)
-        return redirect(url_for("product.get_all", **query_params))
-    else:
+    if not form.validate_on_submit():
         log(log.ERROR, "Product creation errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("product.get_all", **query_params))
+    query = m.Product.select().where(m.Product.name == form.name.data)
+    gr: m.Product | None = db.session.scalar(query)
+    if gr:
+        flash("This product name is already taken.", "danger")
+        return redirect(url_for("product.get_all", **query_params))
+
+    try:
+        product_group_ids = adapter.validate_json(form.product_groups.data)
+    except ValidationError as e:
+        log(log.ERROR, "product_groups data is not valid json: [%s]", e)
+        flash("Groups data is not valid", "danger")
+        return redirect(url_for("product.get_all", **query_params))
+
+    if not len(product_group_ids):
+        log(log.ERROR, "Product must belong to at least one group")
+        flash("Product must belong to at least one group", "danger")
+        return redirect(url_for("product.get_all", **query_params))
+
+    supplier: m.Supplier = db.session.scalar(m.Supplier.select())
+
+    product: m.Product = m.Product(
+        name=str(form.name.data).strip(" "),
+        supplier_id=form.supplier.data if form.supplier.data else supplier.id,
+        currency=form.currency.data if form.currency.data else "CAD",
+        regular_price=form.regular_price.data,
+        retail_price=form.retail_price.data,
+        description=form.description.data,
+        # General Info ->
+        SKU=form.SKU.data,
+        low_stock_level=form.low_stock_level.data,
+        program_year=form.program_year.data,
+        package_qty=form.package_qty.data,
+        numb_of_items_per_case=form.numb_of_items_per_case.data,
+        numb_of_cases_per_outer_case=form.numb_of_cases_per_outer_case.data,
+        expire_date=form.expire_date.data,
+        comments=form.comments.data,
+        # shipping
+        weight=form.weight.data,
+        length=form.length.data,
+        width=form.width.data,
+        height=form.height.data,
+    )
+    image = form.image.data
+    if image:
+        image_name = (
+            f"{form.SKU.data}{'.'.join(image.filename.split('.')[:-1])}"
+            if image.filename
+            else f"{form.SKU.data}"
+        )
+        kind = filetype.guess(image)
+
+        if not kind:
+            log(log.ERROR, "Can't guess image type.")
+            flash("Can't guess image type.", "danger")
+            return redirect(url_for("product.get_all", **query_params))
+
+        if (
+            db.session.scalar(sa.select(m.Image).where(m.Image.name == image_name))
+            is not None
+        ):
+            flash("Image name already exist", "danger")
+            return redirect(url_for("product.get_all", **query_params))
+
+        try:
+            image_path, image_string = save_image(
+                image=image, path=f"product/{image_name}.{kind.extension}"
+            )
+        except PermissionError as e:
+            log(log.ERROR, "Can't save product image. Error: [%s]", e)
+            flash("Can't save image some problems.", "danger")
+            return redirect(url_for("product.get_all", **query_params))
+
+        product.image = image_string
+        new_img = m.Image(
+            name=image_name,
+            path=image_path,
+            extension=kind.extension,
+        )
+        product.image_obj = new_img
+    else:
+        product.image_id = DEFUALT_IMAGE_ID
+        product.image = ""
+    db.session.add(product)
+    db.session.commit()
+
+    product_group_ids = tuple(set(product_group_ids))
+
+    for group_id in product_group_ids:
+        product_group = m.ProductGroup(product_id=product.id, group_id=group_id)
+        product_group.save(False)
+    db.session.commit()
+
+    log(log.INFO, "Form submitted. Product: [%s]", product)
+    return redirect(url_for("product.get_all", **query_params))
 
 
 @product_blueprint.route("/edit", methods=["POST"])
@@ -521,108 +506,102 @@ def save():
     form: f.ProductForm = f.ProductForm()
     query_params = get_query_params_from_headers()
 
-    if form.validate_on_submit():
-        query = m.Product.select().where(m.Product.id == int(form.product_id.data))
-        u: m.Product = db.session.scalar(query)
-        if not u:
-            # TODO: is there need to return from function?
-            log(log.ERROR, "Not found product by id : [%s]", form.product_id.data)
-            flash("Cannot save product data", "danger")
-            return redirect(url_for("product.get_all", **query_params))
-
-        supplier: m.Supplier = db.session.scalar(m.Supplier.select())
-
-        u.name = str(form.name.data).strip(" ")
-        u.supplier_id = form.supplier.data if form.supplier.data else supplier.id
-        u.currency = form.currency.data if form.currency.data else "CAD"
-        u.regular_price = form.regular_price.data if form.regular_price.data else 0
-        u.retail_price = form.retail_price.data if form.retail_price.data else 0
-        u.description = form.description.data
-        # General Info ->
-        u.SKU = form.SKU.data
-        u.low_stock_level = (
-            form.low_stock_level.data if form.low_stock_level.data else 0
-        )
-        u.program_year = form.program_year.data if form.program_year.data else 2023
-        u.package_qty = form.package_qty.data if form.package_qty.data else 0
-        u.numb_of_items_per_case = (
-            form.numb_of_items_per_case.data if form.numb_of_items_per_case.data else 0
-        )
-        u.numb_of_cases_per_outer_case = (
-            form.numb_of_cases_per_outer_case.data
-            if form.numb_of_cases_per_outer_case.data
-            else 0
-        )
-        u.comments = form.comments.data if form.comments.data else "no comment"
-        u.notes_location = form.notes_location.data if form.notes_location.data else ""
-        # shipping
-        u.weight = form.weight.data if form.weight.data else 0
-        u.length = form.length.data if form.length.data else 0
-        u.width = form.width.data if form.width.data else 0
-        u.height = form.height.data if form.height.data else 0
-        image = form.image.data
-        if image:
-            image_name = (
-                f"{form.SKU.data}{'.'.join(image.filename.split('.')[:-1])}"
-                if image.filename
-                else f"{form.SKU.data}"
-            )
-            kind = filetype.guess(image)
-
-            if not kind:
-                log(log.ERROR, "Can't guess image type.")
-                flash("Can't guess image type.", "danger")
-                return redirect(url_for("product.get_all", **query_params))
-
-            if (
-                db.session.scalar(sa.select(m.Image).where(m.Image.name == image_name))
-                is not None
-            ):
-                flash("Image name already exist", "danger")
-                return redirect(url_for("product.get_all", **query_params))
-
-            try:
-                image_path, image_string = save_image(
-                    image=image, path=f"product/{image_name}.{kind.extension}"
-                )
-            except PermissionError as e:
-                log(log.ERROR, "Can't save product image. Error: [%s]", e)
-                flash("Can't save image some problems.", "danger")
-                return redirect(url_for("product.get_all", **query_params))
-
-            u.image = image_string
-            if u.image_obj and u.image_obj.id != DEFUALT_IMAGE_ID:
-                u.image_obj.name = image_name
-                u.image_obj.path = image_path
-                u.image_obj.extension = kind.extension
-            else:
-                new_img = m.Image(
-                    name=image_name,
-                    path=image_path,
-                    extension=kind.extension,
-                )
-                u.image_obj = new_img
-        u.save(False)
-        db.session.commit()
-
-        product_master_groups_ids = list(set(json.loads(form.product_groups.data)))
-
-        u.product_groups = []
-        for group_id in product_master_groups_ids:
-            product_group = m.ProductGroup(
-                product_id=int(form.product_id.data), group_id=group_id
-            )
-            product_group.save()
-
-        db.session.commit()
-        if form.next_url.data:
-            return redirect(form.next_url.data)
-        return redirect(url_for("product.get_all", **query_params))
-
-    else:
+    if not form.validate_on_submit():
         log(log.ERROR, "product save errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("product.get_all", **query_params))
+
+    try:
+        product_group_ids = adapter.validate_json(form.product_groups.data)
+    except ValidationError as e:
+        log(log.ERROR, "product_groups data is not valid json: [%s]", e)
+        flash("Groups data is not valid", "danger")
+        return redirect(url_for("product.get_all", **query_params))
+
+    product = db.session.get(m.Product, form.product_id.data)
+    if not product:
+        log(log.ERROR, "Not found product by id : [%s]", form.product_id.data)
+        flash("Cannot save product data", "danger")
+        return redirect(url_for("product.get_all", **query_params))
+
+    supplier: m.Supplier = db.session.scalar(m.Supplier.select())
+
+    product.name = str(form.name.data).strip(" ")
+    product.supplier_id = form.supplier.data if form.supplier.data else supplier.id
+    product.currency = form.currency.data if form.currency.data else "CAD"
+    product.regular_price = form.regular_price.data
+    product.retail_price = form.retail_price.data
+    product.description = form.description.data
+    # General Info ->
+    product.SKU = form.SKU.data
+    product.low_stock_level = form.low_stock_level.data
+    product.program_year = form.program_year.data
+    product.package_qty = form.package_qty.data
+    product.numb_of_items_per_case = form.numb_of_items_per_case.data
+    product.numb_of_cases_per_outer_case = form.numb_of_cases_per_outer_case.data
+    product.expire_date = form.expire_date.data
+    product.comments = form.comments.data
+    product.notes_location = form.notes_location.data
+    # shipping
+    product.weight = form.weight.data
+    product.length = form.length.data
+    product.width = form.width.data
+    product.height = form.height.data
+    image = form.image.data
+    if image:
+        image_name = (
+            f"{form.SKU.data}{'.'.join(image.filename.split('.')[:-1])}"
+            if image.filename
+            else f"{form.SKU.data}"
+        )
+        kind = filetype.guess(image)
+
+        if not kind:
+            log(log.ERROR, "Can't guess image type.")
+            flash("Can't guess image type.", "danger")
+            return redirect(url_for("product.get_all", **query_params))
+
+        if (
+            db.session.scalar(sa.select(m.Image).where(m.Image.name == image_name))
+            is not None
+        ):
+            flash("Image name already exist", "danger")
+            return redirect(url_for("product.get_all", **query_params))
+
+        try:
+            image_path, image_string = save_image(
+                image=image, path=f"product/{image_name}.{kind.extension}"
+            )
+        except PermissionError as e:
+            log(log.ERROR, "Can't save product image. Error: [%s]", e)
+            flash("Can't save image some problems.", "danger")
+            return redirect(url_for("product.get_all", **query_params))
+
+        product.image = image_string
+        if product.image_obj and product.image_obj.id != DEFUALT_IMAGE_ID:
+            product.image_obj.name = image_name
+            product.image_obj.path = image_path
+            product.image_obj.extension = kind.extension
+        else:
+            new_img = m.Image(
+                name=image_name,
+                path=image_path,
+                extension=kind.extension,
+            )
+            product.image_obj = new_img
+    product.save(False)
+    db.session.commit()
+    product_group_ids = tuple(set(product_group_ids))
+
+    product.product_groups = []
+    for group_id in product_group_ids:
+        product_group = m.ProductGroup(
+            product_id=int(form.product_id.data), group_id=group_id
+        )
+        product_group.save()
+
+    db.session.commit()
+    return redirect(url_for("product.get_all", **query_params))
 
 
 # TODO brainstorm
