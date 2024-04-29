@@ -30,7 +30,7 @@ def login():
         else:
             user = m.User.authenticate(form.user_id.data, form.password.data)
 
-        if user:
+        if user and not user.is_deleted:
             login_user(user)
             app.jinja_env.globals["user_role"] = user
             log(log.INFO, "Login successful.")
@@ -63,7 +63,7 @@ def activate(reset_password_uid):
     query = m.User.select().where(m.User.unique_id == reset_password_uid)
     user: m.User | None = db.session.scalar(query)
 
-    if not user:
+    if not user or user.is_deleted:
         log(log.INFO, "User not found")
         flash("Incorrect reset password link", "danger")
         return redirect(url_for("main.index"))
@@ -85,6 +85,9 @@ def forgot_pass():
         return render_template("auth/forgot.html", form=form)
 
     user = db.session.scalar(sa.select(m.User).where(m.User.email == form.email.data))
+    if not user or user.is_deleted:
+        flash("No registered user with this e-mail", "danger")
+        return render_template("auth/forgot.html", form=form)
     msg = Message(
         subject="Reset password",
         sender=app.config["MAIL_DEFAULT_SENDER"],
@@ -120,7 +123,7 @@ def password_recovery(reset_password_uid):
     query = m.User.select().where(m.User.unique_id == reset_password_uid)
     user: m.User = db.session.scalar(query)
 
-    if not user:
+    if not user or user.is_deleted:
         flash("Incorrect reset password link", "danger")
         return redirect(url_for("main.index"))
 
@@ -147,7 +150,7 @@ def password_reset(reset_password_uid):
     query = m.User.select().where(m.User.unique_id == reset_password_uid)
     user: m.User = db.session.scalar(query)
 
-    if not user:
+    if not user or user.is_deleted:
         flash("Incorrect reset password link", "danger")
         return redirect(url_for("main.index"))
 
