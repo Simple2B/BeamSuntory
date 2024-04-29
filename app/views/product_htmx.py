@@ -52,7 +52,7 @@ def get_edit_form(product_id: int):
         product_id=product.id,
         name=product.name,
         supplier=product.supplier_id,
-        currency=product.currency.value,
+        currency=product.currency.value if product.currency else s.Currency.CAD.value,
         regular_price=product.regular_price,
         retail_price=product.retail_price,
         description=product.description,
