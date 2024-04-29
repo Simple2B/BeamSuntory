@@ -46,6 +46,7 @@ class Product(db.Model, ModelMixin):
     # General Info ->
     SKU: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=False, unique=True)
     low_stock_level: orm.Mapped[int] = orm.mapped_column(sa.Integer(), nullable=True)
+    expire_date: orm.Mapped[str] = orm.mapped_column(default="N/A")
 
     program_year: orm.Mapped[int] = orm.mapped_column(sa.Integer(), nullable=True)
     package_qty: orm.Mapped[int] = orm.mapped_column(sa.Integer(), nullable=True)

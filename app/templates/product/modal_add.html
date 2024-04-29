@@ -1,19 +1,18 @@
 <!-- Edit product modal -->
 <!-- prettier-ignore-->
-<div tabindex="-1" id="product-edit-modal-element" hx-get="{{ url_for('main.no_content') }}" hx-trigger="click"
-  hx-swap="delete" hx-target="#product-edit-modal-element"
+<div tabindex="-1" id="product-add-modal-element" hx-get="{{ url_for('main.no_content') }}" hx-trigger="click"
+  hx-swap="delete" hx-target="#product-add-modal-element"
   class="fixed bg-opacity-80 bg-gray-600 top-0 left-0 right-0 z-50 items-center justify-center w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full max-h-full justify-end items-end flex">
   <div class="rounded-lg relative w-full max-w-2xl max-h-full bg-white" onclick="event.stopPropagation();">
     <!-- Modal content -->
-    <form action="{{url_for('product.save')}}" method="post" enctype="multipart/form-data"
-      id="edit-product-form-element" class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+    <form action="{{url_for('product.create')}}" method="post" enctype="multipart/form-data"
+      id="add-product-form-element" class="relative bg-white rounded-lg shadow dark:bg-gray-700">
       {{ form.hidden_tag() }}
-      {{ form.product_id }}
       <!-- Modal header -->
       <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
-        <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Edit product </h3>
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Add product </h3>
         <button type="button" hx-get="{{ url_for('main.no_content') }}" hx-trigger="click" hx-swap="delete"
-          hx-target="#product-view-modal-element"
+          hx-target="#product-add-modal-element"
           class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
           <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -24,17 +23,7 @@
       <!-- Modal body -->
       <div class="p-6 space-y-6">
         <div class="grid grid-cols-6 gap-6">
-          <div data-target-product-id="{{ product.id }}"
-            class="product-full-image-anchor cursor-pointer col-span-6 sm:col-span-2 sm:row-span-2 max-height-image-container">
-            {% if product.image and product.image | length > 100 %}
-            <img src="data:image/png;base64, {{ product.image }}" class="w-full h-full object-cover" />
-            {% else %}
-            <img
-              src="https://raw.githubusercontent.com/Simple2B/BeamSuntory/develop/app/static/img/no_picture_default.png"
-              class="w-full h-full object-cover" />
-            {% endif %}
-          </div>
-          <div class="col-span-6 sm:col-span-4">
+          <div class="col-span-6 sm:col-span-3">
             <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Name</label>
             {{ form.name(class_="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
             focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500
@@ -182,10 +171,9 @@
               dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500")}}
             </div>
           </div>
-          <input type="text" name="product_groups" class="hidden" id="product-groups-ids-input">
+          <input type="text" name="product_groups" class="hidden" id="product-groups-ids-input-add">
         </div>
         <div id="product-group-edit-container">
-          {% for group in product.groups %}
           <div class="product-group-edit-add-item p-6 space-y-6 border-t">
             <div class="grid grid-cols-12 gap-5">
               <div class="col-span-6 sm:col-span-4">
@@ -198,11 +186,7 @@
                   placeholder="Master
                 Group" required>
                   {% for master_group in master_product_groups %}
-                  {% if group.master_group_id == master_group.id %}
-                  <option value="{{ master_group.id }}" selected>{{ master_group.name }}</option>
-                  {% else %}
                   <option value="{{ master_group.id }}">{{ master_group.name }}</option>
-                  {% endif %}
                   {% endfor %}
                 </select>
               </div>
@@ -211,27 +195,16 @@
                 <select type="text" name="add_group"
                   class="product_group_id shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="Group" required>
-                  {% for sub_group in group.master_groups_for_product.groups_for_product %}
-                  {% if group.id == sub_group.id %}
-                  <option value="{{ sub_group.id }}" selected>{{ sub_group.name }}</option>
-                  {% endif %}
+                  <option selected disabled>Select group</option>
+                  {% if master_product_groups %}
+                  {% for sub_group in master_product_groups[0].groups_for_product %}
                   <option value="{{ sub_group.id }}">{{ sub_group.name }}</option>
                   {% endfor %}
+                  {% endif %}
                 </select>
               </div>
               <div class="col-span-6 sm:col-span-4">
                 <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Action</label>
-                {% if loop.index != 1 %}
-                <button type="button"
-                  hx-delete="{{ url_for('product.htmx.delete_group_for_product', product_id=product.id, group_id=group.id) }}"
-                  class=" inline-flex items-center px-3 py-2 mr-3 text-sm font-medium text-center text-white rounded-lg bg-red-600 hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
-                  <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z">
-                    </path>
-                  </svg>
-                </button>
-                {% endif %}
                 <button type="button" hx-get="{{ url_for('product.htmx.get_product_master_groups') }}"
                   hx-trigger="click" hx-swap="beforeend" hx-target="#product-group-edit-container"
                   hx-indicator="#htmx-spinner"
@@ -245,7 +218,6 @@
               </div>
             </div>
           </div>
-          {% endfor %}
         </div>
         <!-- Modal footer -->
         <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
@@ -258,8 +230,8 @@
   {% include 'spinner.html' %}
   <script>
     function handleSubmitBtn() {
-      const form = document.querySelector("#edit-product-form-element");
-      const input = document.querySelector("#product-groups-ids-input");
+      const form = document.querySelector("#add-product-form-element");
+      const input = document.querySelector("#product-groups-ids-input-add");
       if (!form || !input) {
         console.error("Form or input not found");
         return;
@@ -269,8 +241,9 @@
         return;
       }
 
+
       const groups = form.querySelectorAll(".product_group_id");
-      const groups_ids = Array.from(groups).map((group) => group.value);
+      const groups_ids = Array.from(groups).map((group) => group.value).filter((group) => !!parseInt(group));
       if (groups_ids.length < 1) {
         alert("Please select at least one group");
         return;

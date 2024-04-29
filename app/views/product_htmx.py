@@ -18,6 +18,25 @@ from app.logger import log
 product_htmx = Blueprint("htmx", __name__, url_prefix="/htmx")
 
 
+@product_htmx.route("/add", methods=["GET"])
+@login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+def get_add_form():
+    """htmx"""
+    form = f.NewProductForm()
+    supliers = db.session.scalars(sa.select(m.Supplier)).all()
+    master_product_groups = db.session.scalars(
+        sa.select(m.MasterGroupProduct).order_by(m.MasterGroupProduct.name.asc())
+    ).all()
+    return render_template(
+        "product/modal_add.html",
+        form=form,
+        suppliers=supliers,
+        currencies=[c.value for c in s.Currency],
+        master_product_groups=master_product_groups,
+    )
+
+
 @product_htmx.route("/<product_id>/edit", methods=["GET"])
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
@@ -43,6 +62,7 @@ def get_edit_form(product_id: int):
         package_qty=product.package_qty,
         numb_of_items_per_case=product.numb_of_items_per_case,
         numb_of_cases_per_outer_case=product.numb_of_cases_per_outer_case,
+        expire_date=product.expire_date,
         comments=product.comments,
         notes_location=product.notes_location,
         weight=product.weight,

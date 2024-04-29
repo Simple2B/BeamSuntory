@@ -304,29 +304,8 @@ checkboxFilterProductMasterGroups.forEach((checkbox) => {
 });
 
 
-const $addProductModalElement: HTMLElement = document.querySelector('#add-product-modal');
 const $adjustProductModalElement: HTMLElement = document.querySelector('#adjust-product-modal');
 
-const modalOptions: ModalOptions = {
-  placement: 'bottom-right',
-  backdrop: 'dynamic',
-  backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
-  closable: true,
-  onHide: () => {
-    const product = JSON.parse(sessionStorage.product);
-    const groupsMasterGroups = getGroupsMasterGroups(product);
-    const mstrGroupsEntries = Object.entries(groupsMasterGroups);
-
-    mstrGroupsEntries.forEach(([key, value]: [string, string]) => {
-      deleteShipAssignButton(value.replace(/\s/g, '_'), key);
-    });
-    clearProductGroupContainer();
-  },
-  onShow: () => { },
-  onToggle: () => {
-    console.log('modal has been toggled');
-  },
-};
 
 const adjustModalOptions: ModalOptions = {
   placement: 'bottom-right',
@@ -358,27 +337,13 @@ const adjustModalOptions: ModalOptions = {
 
 
 
-const addModal: ModalInterface = new Modal($addProductModalElement, modalOptions);
 const adjustModal: ModalInterface = new Modal($adjustProductModalElement, adjustModalOptions);
 
-const closingAddModalButton = document.getElementById('add-product-modal-close-btn');
-closingAddModalButton.addEventListener('click', () => {
-  addModal.hide();
-});
 const closingAdjustModalButton = document.getElementById('adjust-product-modal-close-btn');
 closingAdjustModalButton.addEventListener('click', () => {
   adjustModal.hide();
 });
 
-
-const $addButtonElements = document.querySelectorAll('.product-add-button');
-$addButtonElements.forEach((e) =>
-  e.addEventListener('click', () => {
-    const groups = JSON.parse(e.getAttribute('data-target-groups'));
-    sessionStorage.setItem('groups', JSON.stringify(groups));
-    addProduct(groups);
-  })
-);
 
 
 
@@ -508,33 +473,6 @@ async function getAdditionalProductInfo(product_id: number) {
   }
 }
 
-function addProduct(groups: IProductMasterGroupGroup) {
-  addModal.show();
-  const productMasterGroupAddSelect: HTMLSelectElement = document.querySelector(
-    '#product-master-group-add-add-product-1'
-  );
-  const options = productMasterGroupAddSelect.querySelectorAll('option');
-
-  productMasterGroupAddSelect.addEventListener('change', () => {
-    options.forEach((e) => {
-      if (e.textContent === productMasterGroupAddSelect.options[productMasterGroupAddSelect.selectedIndex].text) {
-        const groupSelect = document.querySelector('#product-group-add-item-1');
-        const optionCategory =
-          groups[productMasterGroupAddSelect.options[productMasterGroupAddSelect.selectedIndex].text];
-
-        groupSelect.innerHTML = '';
-        if (optionCategory) {
-          optionCategory.forEach((group: { group_name: string; group_id: number }) => {
-            const storeSelectOption = document.createElement('option');
-            storeSelectOption.setAttribute('value', group.group_id.toString());
-            storeSelectOption.textContent = group.group_name;
-            groupSelect.appendChild(storeSelectOption);
-          });
-        }
-      }
-    });
-  });
-}
 
 
 const adjustProductButtonElements = document.querySelectorAll('.product-adjust-button');
@@ -611,20 +549,6 @@ function getGroupsIds(product: IProduct) {
   return groupsIds;
 }
 
-function deleteShipAssignButton(nameGroup: string, nameGroupValue: string) {
-  const shipAssignShareContainer = document.querySelector(
-    `#product-ship-assign-share-container-${nameGroup.replace(/ /g, '_')}`
-  );
-  const groupContainer = document.querySelector(
-    `#product-view-product_group-container-${nameGroupValue.replace(/ /g, '_')}`
-  );
-  if (shipAssignShareContainer) {
-    shipAssignShareContainer.remove();
-  }
-  if (groupContainer) {
-    groupContainer.remove();
-  }
-}
 
 const filterProductButton = document.querySelector('#product-filter-button') as HTMLButtonElement;
 
@@ -863,163 +787,6 @@ function deleteAdjustContainer(nameGroupValue: string) {
     masterGroupWarehouseContainer.remove();
   }
 }
-
-// ----set product to JSON hidden input in inbound-order-edit-form----
-function setProducts(typeModal: string) {
-  const productGroupItems = document.querySelectorAll(`.product-group-${typeModal}-add-item`);
-
-  const products = [];
-
-  for (let i = 0; i < productGroupItems.length; i++) {
-    const productGroupItem: HTMLSelectElement = productGroupItems[i].querySelector(`.product-group-${typeModal}-item`);
-
-    const product = Number(productGroupItem.value);
-    products.push(product);
-  }
-
-  const inputProducts: HTMLInputElement = document.querySelector(`#product-${typeModal}-product-groups`);
-  inputProducts.value = JSON.stringify(products);
-
-  return true;
-}
-
-// ----submit edit form through hidden submit button----
-
-
-// ----add product group item for edit modal----
-function createProductGroupAddItem(groups: IProductMasterGroupGroup = null) {
-  if (!groups) {
-    groups = JSON.parse(sessionStorage.getItem('groups'));
-  }
-  const productGroupAddContainer = document.querySelector('#product-group-add-add-container');
-  const productGroupEditOriginal = document.querySelector('#product-group-add-item');
-  const productGroupAddAllItems = document.querySelectorAll('.product-group-add-add-item');
-  const index = productGroupAddAllItems.length + 1;
-  const productGroupAddItem = document.createElement('div');
-
-  productGroupAddItem.classList.add('p-6', 'space-y-6', 'border-t', 'product-group-add-add-item', `delete-id-${index}`);
-  productGroupAddItem.innerHTML = `
-  <div class="grid grid-cols-12 gap-5">
-    <div class="col-span-6 sm:col-span-4">
-      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Master
-        Group</label>
-      <select type="text" name="add_product" id="product-master-group-add-item-${index}"
-        class="product-master-group-add-item shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-        placeholder="Master
-        Group" required>
-        <option value="" disabled selected>Select master group</option>
-      </select>
-    </div>
-    <div class="col-span-6 sm:col-span-4">
-      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label>
-      <select type="text" name="add_group" id="product-group-add-item-${index}"
-        class="product-group-add-item shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-        placeholder="Group" required>
-        <option value="" disabled selected>Select group</option>
-      </select>
-    </div>
-    <div class="col-span-6 sm:col-span-4">
-      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Action</label>
-      <button type="button" data-target=""
-        class="product-group-add-delete-item-btn inline-flex items-center px-3 py-2 mr-3 text-sm font-medium text-center text-white rounded-lg bg-red-600 hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
-        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z">
-          </path>
-        </svg>
-      </button>
-      <button type="button" id="product-group-add-add-item-btn-${index}"
-        class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300">
-        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M64 80c-8.8 0-16 7.2-16 16V416c0 8.8 7.2 16 16 16H384c8.8 0 16-7.2 16-16V96c0-8.8-7.2-16-16-16H64zM0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96zM200 344V280H136c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H248v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z">
-          </path>
-        </svg>
-      </button>
-    </div>
-  </div>
-  `;
-
-  const productMasterGroupAddSelect: HTMLSelectElement = productGroupAddItem.querySelector(
-    `#product-master-group-add-item-${index}`
-  );
-  const productGroupAddSelect: HTMLSelectElement = productGroupAddItem.querySelector('.product-group-add-item');
-  const availableMasterGroups = Object.keys(groups);
-
-  availableMasterGroups.forEach((masterGroup) => {
-    const option = document.createElement('option');
-    option.setAttribute('value', masterGroup);
-    option.innerHTML = masterGroup;
-    productMasterGroupAddSelect.appendChild(option);
-  });
-  const options = productMasterGroupAddSelect.querySelectorAll('option');
-
-  productMasterGroupAddSelect.addEventListener('change', () => {
-    options.forEach((e) => {
-      if (e.textContent === productMasterGroupAddSelect.options[productMasterGroupAddSelect.selectedIndex].text) {
-        const optionCategory =
-          groups[productMasterGroupAddSelect.options[productMasterGroupAddSelect.selectedIndex].text];
-
-        document.getElementById(`product-group-add-item-${index}`).innerHTML = '';
-        if (optionCategory) {
-          optionCategory.forEach((group: { group_name: string; group_id: number }) => {
-            const storeSelectOption = document.createElement('option');
-            storeSelectOption.setAttribute('value', group.group_id.toString());
-            storeSelectOption.textContent = group.group_name;
-            productGroupAddSelect.appendChild(storeSelectOption);
-          });
-        }
-      }
-    });
-  });
-
-  productGroupAddContainer.appendChild(productGroupAddItem);
-
-  const addButton = productGroupAddItem.querySelector(`#product-group-add-add-item-btn-${index}`);
-
-  addButton.addEventListener('click', () => {
-    createProductGroupAddItem();
-  });
-
-  const deleteButton = productGroupAddItem.querySelector('.product-group-add-delete-item-btn');
-  deleteButton.addEventListener('click', () => {
-    const inboundOrderItem = document.querySelector(`.delete-id-${index}`);
-    if (inboundOrderItem) {
-      inboundOrderItem.remove();
-    }
-  });
-}
-
-// this button need to add first item from template
-const productGroupAddBtnById = document.querySelector('#product-group-add-add-item-btn');
-productGroupAddBtnById.addEventListener('click', () => {
-  createProductGroupAddItem();
-});
-
-// ----submit add form through hidden submit button----
-const productAddSubmitButton: HTMLButtonElement = document.querySelector('#product-add-submit-btn');
-const productAddSaveButton = document.querySelector('#product-add-save-products-btn');
-
-productAddSaveButton.addEventListener('click', () => {
-  const result = setProducts('add');
-  if (result) {
-    productAddSubmitButton.click();
-  }
-});
-
-// ----clear product group container----
-function clearProductGroupContainer() {
-  const productGroupEditContainer = document.querySelector('#product-group-edit-add-container');
-  const productGroupEditItems = document.querySelectorAll('.product-group-edit-add-item');
-  for (let i = 1; i < productGroupEditItems.length; i++) {
-    productGroupEditContainer.removeChild(productGroupEditItems[i]);
-  }
-  const productGroupEditSelects = document.querySelectorAll('.product-group-edit-add-item');
-}
-
-
-
-
 
 
 const autoswitchAllStocksToggle = () => {
