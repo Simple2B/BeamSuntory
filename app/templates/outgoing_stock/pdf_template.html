@@ -8,177 +8,83 @@
 <div class="relative w-full max-h-full" onclick="event.stopPropagation();">
   <!-- Modal content -->
   <!-- TODO change action for view form -->
-  <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+  <div class="w-full h-full flex flex-col gap-4 relative">
     <!-- Modal header -->
     <!-- Modal body -->
-    <div class="p-6 space-y-6">
-      <div class="grid grid-cols-6 gap-6">
-        <div class="col-span-3 sm:col-span-3">
-          <label for="outgoing-stock-edit-username"
-            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">User
-            name</label>
-          <div
-            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            {{ ship_request.user.username }}</div>
-        </div>
-        <div class="col-span-3 sm:col-span-3">
-          <label for="order_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Order
-            Number</label>
-          <div
-            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            {{ ship_request.order_numb }}</div>
-        </div>
-        <div class="col-span-6 sm:col-span-3">
-          <label for="outgoing-stock-edit-status"
-            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status</label>
-          <div
-            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            {{ ship_request.status.value }}
-          </div>
-        </div>
-        <div class="col-span-6 sm:col-span-3">
-          <label for="created_date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Created
-            Date</label>
-          <div
-            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            {{ ship_request.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
-        </div>
-        <div class="col-span-6 sm:col-span-3">
-          <label for="outgoing-stock-edit-store"
-            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store</label>
-          <div
-            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            {{ ship_request.store.store_name }}</div>
-        </div>
-        <div class="col-span-6 sm:col-span-3">
-          <label for="store_address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store
-            Address</label>
-          <div id="outgoing-stock-edit-store_address"
-            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            {{ ship_request.store.address }}</div>
-        </div>
-        <div class="col-span-6 sm:col-span-3">
-          <label for="store_phone" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store
-            Phone</label>
-          <div id="outgoing-stock-edit-store_phone"
-            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            {{ ship_request.store.phone_numb }}</div>
-        </div>
-        <div class="col-span-6 sm:col-span-3">
-          <label for="store_country" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store
-            Country</label>
-          <div id="outgoing-stock-edit-store_country"
-            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            {{ ship_request.store.country }}</div>
-        </div>
-        <div class="col-span-6 sm:col-span-3">
-          <label for="store_province" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store
-            Province</label>
-          <div
-            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            {{ ship_request.store.region }}</div>
-        </div>
-        <div class="col-span-6 sm:col-span-3 row-span-2 flex flex-col">
-          <label for="outgoing-stock-edit-comment"
-            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Comment</label>
-          <div
-            class="shadow-sm flex-grow bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            {{ ship_request.comment if ship_request.comment else 'No comments' }}</div>
+    <div
+      class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-md font-bold rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+      №:{{ ship_request.order_numb }}
+    </div>
+    <div class="w-full h-full flex flex-col gap-2">
+      <div class="flex flex-col gap-2  border border-gray-300 justify-center items-center">
+        <label for="outgoing-stock-edit-comment" class="block mt-1 mb-1 text-sm font-medium ">Comment</label>
+        <div class="w-full border-t-2 p-2 text-center flex-grow bg-gray-50  text-sm">
+          {{ ship_request.comment if ship_request.comment else 'No comments' }}</div>
+      </div>
 
-        </div>
-        <div class="col-span-6 sm:col-span-3">
-          <label for="store_city" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store
-            City</label>
-          <div
-            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            {{ ship_request.store.city }}</div>
-        </div>
-        <div class="col-span-6 sm:col-span-3">
-          <label for="store_zip_code" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store Zip
-            Code</label>
-          <div
-            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            {{ ship_request.store.zip }}</div>
-        </div>
-        <div class="col-span-6 sm:col-span-3 row-span-2 flex flex-col gap-4">
-          <div class="col-span-6 sm:col-span-3 row-span-2 flex flex-col">
-            <label for="outgoing-stock-edit-wm-notes"
-              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Warehouse manager notes</label>
-            <div class="shadow-sm flex-grow bg-gray-50 border border-gray-300 text-gray-900 text-sm
-              rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600
-              dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500
-              dark:focus:border-blue-500">{{ ship_request.wm_notes }}</div>
-          </div>
-          <div class="col-span-6 sm:col-span-3 row-span-2 flex flex-col">
-            <label for="outgoing-stock-edit-wm-notes"
-              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Proof of delivery</label>
-            <div class="shadow-sm flex-grow bg-gray-50 border border-gray-300
-              text-gray-900
-              text-sm
-              rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600
-              dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500
-              dark:focus:border-blue-500">{{ ship_request.proof_of_delivery }}</div>
-          </div>
-          <div class="col-span-6 sm:col-span-3 row-span-2 flex flex-col">
-            <label for="outgoing-stock-edit-wm-notes"
-              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tracking</label>
-            <div class="shadow-sm flex-grow bg-gray-50 border border-gray-300 text-gray-900 text-sm
-              rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600
-              dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500
-              dark:focus:border-blue-500">{{ ship_request.tracking }}</div>
-          </div>
-        </div>
-
-        <div class="col-span-6 sm:col-span-3 row-span-2 flex flex-col">
-          <label for="outgoing-stock-edit-da-notes"
-            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Delivery agent notes</label>
-
-          <div
-            class="shadow-sm flex-grow bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            {{ ship_request.da_notes if ship_request.da_notes else 'No notes' }}</textarea>
-          </div>
+      <div class="flex flex-col gap-2 border border-gray-300 justify-center items-center">
+        <label for="outgoing-stock-edit-da-notes" class="block mt-1 mb-1 text-sm font-medium dark:text-white">Delivery
+          agent
+          notes</label>
+        <div class="w-full border-t-2 p-2 text-center flex-grow bg-gray-50 text-sm">
+          {{ ship_request.da_notes if ship_request.da_notes else 'No notes' }}</textarea>
         </div>
       </div>
     </div>
-  </div>
-</div>
-<div class="overflow-x-auto">
-  <table class="w-full mb-1 text-sm text-left text-gray-500 dark:text-gray-400">
-    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-      <tr>
-        <th scope="col" class="px-6 py-3">#</th>
-        <th scope="col" class="px-6 py-3">Image</th>
-        <th scope="col" class="px-6 py-3">Name</th>
-        <th scope="col" class="px-6 py-3">SKU</th>
-        <th scope="col" class="px-6 py-3">Regular price</th>
-        <th scope="col" class="px-6 py-3">Retail price</th>
-        <th scope="col" class="px-6 py-3">Group</th>
-        <th scope="col" class="px-6 py-3">Quantity</th>
-        <th scope="col" class="px-6 py-3">Warehouse</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for cart in ship_request.carts %}
-      <tr class="border-b border-gray-200 dark:border-gray-600">
-        <td class="px-6 py-4">{{ loop.index }}</td>
-        <td class="px-6 py-4">
-          {% if cart.product.image and cart.product.image | length > 100 %}
-          <img src="data:image/png;base64, {{ cart.product.image }}" class="w-14 h-14 object-cover" />
-          {% else %}
-          <img
-            src="https://raw.githubusercontent.com/Simple2B/BeamSuntory/develop/app/static/img/no_picture_default.png"
-            class="w-14 h-14 object-cover" />
-          {% endif %}
-        </td>
-        <td class="px-6 py-4">{{ cart.product.name }}</td>
-        <td class="px-6 py-4">{{ cart.product.SKU }}</td>
-        <td class="px-6 py-4">{{ cart.product.regular_price }}</td>
-        <td class="px-6 py-4">{{ cart.product.retail_price }}</td>
-        <td class="px-6 py-4">{{ cart.group.name }}</td>
-        <td class="px-6 py-4">{{ cart.quantity }}</td>
-        <td class="px-6 py-4">{{ cart.warehouse.name if cart.warehouse else "" }}</td>
-        {% endfor %}
-    </tbody>
-  </table>
-</div>
-{% endfor %}
+    <div>
+      <table class="w-full mb-1 text-sm text-left text-gray-500 dark:text-gray-400">
+        <thead class="border-collapse text-xs text-gray-700 bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+          <tr>
+            <th scope="col" class="border border-slate-300 px-6 py-3">Create date</th>
+            <th scope="col" class="border border-slate-300 px-6 py-3">Status</th>
+            <th scope="col" class="border border-slate-300 px-6 py-3">User</th>
+            <th scope="col" class="border border-slate-300 px-6 py-3">Store</th>
+            <th scope="col" class="border border-slate-300 px-6 py-3">Address</th>
+            <th scope="col" class="border border-slate-300 px-6 py-3">Phone</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-gray-200 dark:border-gray-600">
+            <td class="border border-slate-300 px-6 py-4">{{ ship_request.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td class="border border-slate-300 px-6 py-4">{{ ship_request.status.value }}</td>
+            <td class="border border-slate-300 px-6 py-4">{{ ship_request.user.username }}</td>
+            <td class="border border-slate-300 px-6 py-4">{{ ship_request.store.store_namey }}</td>
+            <td class="border border-slate-300 px-6 py-4">{{ ship_request.store.full_address }}</td>
+            <td class="border border-slate-300 px-6 py-4">{{ ship_request.store.phone_numb }}</td>
+        </tbody>
+      </table>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="border-collapse w-full mb-1 text-sm text-left text-gray-500 dark:text-gray-400">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+          <tr>
+            <th scope="col" class="border border-slate-300 px-6 py-3">Image</th>
+            <th scope="col" class="border border-slate-300 px-6 py-3">SKU</th>
+            <th scope="col" class="border border-slate-300 px-6 py-3">Description</th>
+            <th scope="col" class="border border-slate-300 px-6 py-3">Group</th>
+            <th scope="col" class="border border-slate-300 px-6 py-3">Quantity</th>
+            <th scope="col" class="border border-slate-300 px-6 py-3">Warehouse</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cart in ship_request.carts %}
+          <tr class="border-b border-gray-200 dark:border-gray-600">
+            <td class="border border-slate-300 px-6 py-4">
+              {% if cart.product.image and cart.product.image | length > 100 %}
+              <img src="data:image/png;base64, {{ cart.product.image }}" class="w-14 h-14 object-cover" />
+              {% else %}
+              <img
+                src="https://raw.githubusercontent.com/Simple2B/BeamSuntory/develop/app/static/img/no_picture_default.png"
+                class="w-14 h-14 object-cover" />
+              {% endif %}
+            </td>
+            <td class="border border-slate-300 px-6 py-4">{{ cart.product.SKU }}</td>
+            <td class="border border-slate-300 px-6 py-4">{{ cart.product.description }}</td>
+            <td class="border border-slate-300 px-6 py-4">{{ cart.group.name }}</td>
+            <td class="border border-slate-300 px-6 py-4">{{ cart.quantity }}</td>
+            <td class="border border-slate-300 px-6 py-4">{{ cart.warehouse.name if cart.warehouse else "" }}</td>
+            {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endfor %}

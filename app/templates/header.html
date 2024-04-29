@@ -13,11 +13,21 @@
             </path>
           </svg>
         </button>
-        <a href="https://beam.jlidistribution.com" class="flex ml-2 md:mr-24">
-          <img src="{{url_for('static',filename='img/logo-mini.png')}}" class="h-8 mr-3" alt="Beam Suntory Logo" />
-          <span class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">Beam
-            Suntory</span>
+        {% if config.APP_NAME == 'Campari' %}
+        <a href="https://campari.jlidistribution.com" class="flex ml-2 md:mr-24">
+          <img src="{{url_for('static',filename='img/logo-campari-min.jpg')}}" class="h-8 mr-3"
+            alt="{{ config.APP_NAME }} Logo" />
+          <span class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">{{
+            config.APP_NAME }}</span>
         </a>
+        {% else %}
+        <a href="https://beam.jlidistribution.com" class="flex ml-2 md:mr-24">
+          <img src="{{url_for('static',filename='img/logo-mini.png')}}" class="h-8 mr-3"
+            alt="{{ config.APP_NAME }} Logo" />
+          <span class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">{{
+            config.APP_NAME }}</span>
+        </a>
+        {% endif %}
       </div>
       <div class="flex items-center">
         <a href="{{ url_for('cart.get_all') }}" id="product-cart" type="button"

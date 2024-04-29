@@ -144,3 +144,34 @@ jobs:
             docker compose pull &&
             docker compose up -d &&
             docker system prune -f
+  deploy-campari:
+    name: Deploy to campari
+    runs-on: Linux
+    needs: 
+      - build
+      - on-develop-branch-check
+    if: ${{ needs.on-develop-branch-check.outputs.on_develop == 'true' }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: copy file via ssh password
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST_IP_CLIENT_PROD }}
+          username: ${{ secrets.SSH_PROD_USER }}
+          key: ${{ secrets.SSH_PROD_KEY }}
+          port: ${{ secrets.SSH_PROD_PORT }}
+          source: 'docker-compose.prod.yml'
+          target: '~/beam_suntory'
+      - name: Deploy beam-suntory-app to campari
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST_IP_CLIENT_PROD }}
+          username: ${{ secrets.SSH_PROD_USER }}
+          key: ${{ secrets.SSH_PROD_KEY }}
+          port: ${{ secrets.SSH_PROD_PORT }}
+          script: |
+            cd beam_campari &&
+            mv docker-compose.prod.yml docker-compose.yml &&
+            docker compose pull &&
+            docker compose up -d &&
+            docker system prune -f

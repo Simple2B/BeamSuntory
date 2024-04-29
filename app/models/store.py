@@ -61,5 +61,9 @@ class Store(db.Model, ModelMixin):
         return f"<{self.id}: {self.store_name}>"
 
     @property
+    def full_address(self):
+        return f"{self.country}, {self.region}, {self.city}, {self.address}, {self.zip}"
+
+    @property
     def json(self):
         return s.Store.model_validate(self).model_dump_json()

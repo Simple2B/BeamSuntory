@@ -181,6 +181,7 @@ def save():
             "email/set.html",
             user=user,
             url=url,
+            app_name=app.config["APP_NAME"],
         )
         mail.send(msg)
 
@@ -299,6 +300,7 @@ def create():
             "email/set.html",
             user=user,
             url=url,
+            app_name=app.config["APP_NAME"],
         )
         mail.send(msg)
 

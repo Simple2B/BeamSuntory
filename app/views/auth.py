@@ -102,6 +102,7 @@ def forgot_pass():
         "email/set.html",
         user=user,
         url=url,
+        app_name=app.config["APP_NAME"],
     )
     mail.send(msg)
     user.reset_password()
@@ -169,6 +170,7 @@ def password_reset(reset_password_uid):
         "email/set.html",
         user=user,
         url=url,
+        app_name=app.config["APP_NAME"],
     )
     mail.send(msg)
     flash("Login successful.", "success")
