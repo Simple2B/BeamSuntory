@@ -66,12 +66,25 @@ def notify_users_assign(assign_id: int, app_env: str, redirect_url: str):
     with app.app_context():
         log(log.INFO, "Notifying users of assign")
         assign_obj = db.session.get(m.Assign, assign_id)
+        admin_groups_ids = db.session.scalars(
+            sa.select(m.Group.id).where(m.Group.name.ilike("%admin%"))
+        ).all()
+
+        user_role_where = sa.and_(
+            m.UserGroup.right_id.not_in(admin_groups_ids),
+        )
+        if (
+            assign_obj.group_id in admin_groups_ids
+            or assign_obj.from_group_id in admin_groups_ids
+        ):
+            user_role_where = sa.and_(True)
 
         users = db.session.scalars(
             sa.select(m.User)
             .join(m.UserGroup)
             .join(m.Division)
             .where(
+                user_role_where,
                 m.Division.role_name != s.UserRole.WAREHOUSE_MANAGER.value,
                 sa.or_(
                     m.UserGroup.right_id == assign_obj.group_id,
@@ -96,7 +109,7 @@ def notify_users_assign(assign_id: int, app_env: str, redirect_url: str):
                 assign=assign_obj,
                 url=redirect_url,
             )
-            mail.send(msg)
+            # mail.send(msg)
 
 
 @celery_worker.task

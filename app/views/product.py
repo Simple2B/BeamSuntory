@@ -825,7 +825,8 @@ def assign():
         + f"?q={assign_obj.uuid}"
     )
 
-    notify_users_assign.delay(assign_obj.id, app.config["ENV"], redirect_url)
+    # notify_users_assign.delay(assign_obj.id, app.config["ENV"], redirect_url)
+    notify_users_assign(assign_obj.id, app.config["ENV"], redirect_url)
 
     return redirect(url_for("product.get_all", **query_params))
 
