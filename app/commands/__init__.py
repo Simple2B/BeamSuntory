@@ -9,7 +9,8 @@ from app import forms
 from app import schema as s
 from app import controllers as c
 from app.database import db
-from app.commands.add_stores import add_new_store
+from .add_stores import add_new_store
+from .set_courvoisier import set_counrvoisier
 from config import SALES_REP_LOCKER_NAME
 
 
@@ -63,6 +64,12 @@ def init(app: Flask):
         file_path = "stores.xlsx"
         add_new_store(file_path, db)
 
+    @app.cli.command("set-courvoisier")
+    def set_courvoisier_command():
+        """Set courvoisier product group."""
+        set_counrvoisier(db)
+        print("courvoisier set is done")
+
     @app.cli.command("clear-history")
     def clear_history():
         """Clear all history from DB."""
@@ -97,15 +104,19 @@ def init(app: Flask):
         ).all()
         events = db.session.scalars(sa.delete(m.Event).returning(m.Event.id)).all()
         carts = db.session.scalars(sa.delete(m.Cart).returning(m.Cart.id)).all()
+        ship_requests_notifications = db.session.scalars(
+            sa.delete(m.ShipRequestNotification).returning(m.ShipRequestNotification.id)
+        ).all()
         ship_requests = db.session.scalars(
             sa.delete(m.ShipRequest).returning(m.ShipRequest.id)
-        ).all()
-        package_info = db.session.scalars(
-            sa.delete(m.PackageInfo).returning(m.PackageInfo.id)
         ).all()
         product_quantity_group = db.session.scalars(
             sa.delete(m.ProductQuantityGroup).returning(m.ProductQuantityGroup.id)
         ).all()
+        package_info = db.session.scalars(
+            sa.delete(m.PackageInfo).returning(m.PackageInfo.id)
+        ).all()
+
         inbound_orders = db.session.scalars(
             sa.delete(m.InboundOrder).returning(m.InboundOrder.id)
         ).all()
