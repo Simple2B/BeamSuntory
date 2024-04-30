@@ -77,14 +77,6 @@ def set_counrvoisier(db):
     ).all()
 
     print(len(product_group))
-    user_groups = db.session.scalars(
-        sa.delete(m.UserGroup)
-        .returning(m.UserGroup.id)
-        .where(
-            m.UserGroup.right_id != courvoisier_grop.id,
-            m.UserGroup.left_id.not_in(g.id for g in admin_groups),
-        )
-    ).all()
     warehouse_product = db.session.scalars(
         sa.delete(m.WarehouseProduct)
         .returning(m.WarehouseProduct.id)
@@ -129,12 +121,14 @@ def set_counrvoisier(db):
     print(len(delete_user_ids), "---users")
 
     for user_id in delete_user_ids:
+        delete_groups_stm = sa.delete(m.UserGroup).where(m.UserGroup.left_id == user_id)
         delete_stm = sa.delete(m.User).where(m.User.id == user_id)
         store_stm = sa.delete(m.Store).where(m.Store.user_id == user_id)
         fav_store_stm = sa.delete(m.FavoriteStoreUser).where(
             m.FavoriteStoreUser.user_id == user_id
         )
         try:
+            db.session.execute(delete_groups_stm)
             db.session.execute(fav_store_stm)
             db.session.execute(store_stm)
             db.session.execute(delete_stm)

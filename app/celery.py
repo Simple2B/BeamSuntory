@@ -70,27 +70,32 @@ def notify_users_assign(assign_id: int, app_env: str, redirect_url: str):
             sa.select(m.Group.id).where(m.Group.name.ilike("%admin%"))
         ).all()
 
-        user_role_where = sa.and_(
+        where_stm = sa.and_(
             m.UserGroup.right_id.not_in(admin_groups_ids),
+            m.Division.role_name != s.UserRole.ADMIN.value,
+            m.Division.role_name != s.UserRole.WAREHOUSE_MANAGER.value,
+            sa.or_(
+                m.UserGroup.right_id == assign_obj.group_id,
+                m.UserGroup.right_id == assign_obj.from_group_id,
+            ),
         )
         if (
             assign_obj.group_id in admin_groups_ids
             or assign_obj.from_group_id in admin_groups_ids
         ):
-            user_role_where = sa.and_(True)
-
-        users = db.session.scalars(
-            sa.select(m.User)
-            .join(m.UserGroup)
-            .join(m.Division)
-            .where(
-                user_role_where,
+            where_stm = sa.and_(
                 m.Division.role_name != s.UserRole.WAREHOUSE_MANAGER.value,
                 sa.or_(
                     m.UserGroup.right_id == assign_obj.group_id,
                     m.UserGroup.right_id == assign_obj.from_group_id,
                 ),
             )
+
+        users = db.session.scalars(
+            sa.select(m.User)
+            .join(m.UserGroup)
+            .join(m.Division)
+            .where(where_stm)
             .distinct()
         ).all()
 
@@ -109,7 +114,7 @@ def notify_users_assign(assign_id: int, app_env: str, redirect_url: str):
                 assign=assign_obj,
                 url=redirect_url,
             )
-            # mail.send(msg)
+            mail.send(msg)
 
 
 @celery_worker.task
@@ -118,15 +123,27 @@ def notify_users_request_share(request_share_id: int, app_env: str, redirect_url
     with app.app_context():
         log(log.INFO, "Notifying users of request_share")
         request_share = db.session.get(m.RequestShare, request_share_id)
+        admin_groups_ids = db.session.scalars(
+            sa.select(m.Group.id).where(m.Group.name.ilike("%admin%"))
+        ).all()
+
+        where_stm = sa.and_(
+            m.UserGroup.right_id.not_in(admin_groups_ids),
+            m.Division.role_name != s.UserRole.ADMIN.value,
+            m.Division.role_name != s.UserRole.WAREHOUSE_MANAGER.value,
+            m.UserGroup.right_id == request_share.group_id,
+        )
+        if request_share.group_id in admin_groups_ids:
+            where_stm = sa.and_(
+                m.Division.role_name != s.UserRole.WAREHOUSE_MANAGER.value,
+                m.UserGroup.right_id == request_share.group_id,
+            )
 
         users = db.session.scalars(
             sa.select(m.User)
             .join(m.UserGroup)
             .join(m.Division)
-            .where(
-                m.Division.role_name != s.UserRole.WAREHOUSE_MANAGER.value,
-                m.UserGroup.right_id == request_share.group_id,
-            )
+            .where(where_stm)
             .distinct()
         ).all()
 
@@ -156,15 +173,28 @@ def notify_users_new_request_share(
     with app.app_context():
         log(log.INFO, "Notifying users of new request_share")
         request_share = db.session.get(m.RequestShare, request_share_id)
+        admin_groups_ids = db.session.scalars(
+            sa.select(m.Group.id).where(m.Group.name.ilike("%admin%"))
+        ).all()
+
+        where_stm = sa.and_(
+            m.UserGroup.right_id.not_in(admin_groups_ids),
+            m.Division.role_name != s.UserRole.ADMIN.value,
+            m.Division.role_name != s.UserRole.WAREHOUSE_MANAGER.value,
+            m.UserGroup.right_id == request_share.from_group_id,
+        )
+
+        if request_share.from_group_id in admin_groups_ids:
+            where_stm = sa.and_(
+                m.Division.role_name != s.UserRole.WAREHOUSE_MANAGER.value,
+                m.UserGroup.right_id == request_share.from_group_id,
+            )
 
         users = db.session.scalars(
             sa.select(m.User)
             .join(m.UserGroup)
             .join(m.Division)
-            .where(
-                m.Division.role_name != s.UserRole.WAREHOUSE_MANAGER.value,
-                m.UserGroup.right_id == request_share.from_group_id,
-            )
+            .where(where_stm)
             .distinct()
         ).all()
 
