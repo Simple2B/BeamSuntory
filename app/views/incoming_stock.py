@@ -72,11 +72,36 @@ def get_all():
     )
 
 
+@incoming_stock_blueprint.route("/<int:inbound_order_id>/view", methods=["GET"])
+@login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+def view(inbound_order_id: int):
+    """htmx"""
+    inbount_order = db.session.get(m.InboundOrder, inbound_order_id)
+    if not inbount_order:
+        log(log.INFO, "There is no inbound order with id: [%s]", inbound_order_id)
+        return render_template(
+            "toast.html",
+            message="Can't find inbound order",
+            category="danger",
+        )
+    form = f.InboundOrderPickupForm(
+        inbound_order_id=inbound_order_id,
+        wm_notes=inbount_order.wm_notes,
+        proof_of_delivery=inbount_order.proof_of_delivery,
+        tracking=inbount_order.tracking,
+        da_notes=inbount_order.da_notes,
+    )
+    return render_template(
+        "incoming_stock/modal_view.html", form=form, inbound_order=inbount_order
+    )
+
+
 @incoming_stock_blueprint.route("/accept", methods=["POST"])
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def accept():
-    form_edit: f.PackageInfoForm = f.PackageInfoForm()
+    form_edit = f.PackageInfoForm()
 
     if not form_edit.validate_on_submit():
         log(log.WARNING, "Form is not valid: [%s]", form_edit.errors)

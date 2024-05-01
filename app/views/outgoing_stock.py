@@ -8,6 +8,8 @@ from flask import (
     url_for,
 )
 from flask_login import login_required, current_user
+from pydantic import TypeAdapter
+from pydantic import ValidationError
 import sqlalchemy as sa
 from sqlalchemy import desc
 from flask_pydantic import validate
@@ -25,6 +27,10 @@ from app.logger import log
 outgoing_stock_blueprint = Blueprint(
     "outgoing_stock", __name__, url_prefix="/outgoing_stock"
 )
+
+
+notes_location_adapter = TypeAdapter(list[s.CartNoteLocation])
+cart_prodcuts_data_adapter = TypeAdapter(list[s.CartProductData])
 
 
 @outgoing_stock_blueprint.route("/", methods=["GET"])
@@ -127,6 +133,7 @@ def ship_request_view(ship_request_id: int):
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def ship_request_edit_view(ship_request_id: int):
+    """htmx"""
     ship_request = db.session.get(m.ShipRequest, ship_request_id)
     if not ship_request:
         log(log.ERROR, "Not found ship request item by id : [%s]", ship_request_id)
@@ -156,28 +163,9 @@ def ship_request_edit_view(ship_request_id: int):
         )
     ).all()
 
-    cart_products = []
     warehouse_product_ids: Set[int] = set()
     for cart in carts:
-        cart_products.append(
-            (
-                cart,
-                f.ProductShipRequestForm(
-                    cart_id=cart.id,
-                ),
-            )
-        )
         warehouse_product_ids.update(ware_h.id for ware_h in cart.product.warehouses)
-
-    form.products = [
-        (
-            cart,
-            f.ProductShipRequestForm(
-                cart_id=cart.id,
-            ),
-        )
-        for cart in carts
-    ]
 
     notes_form = f.ShipRequestOutgoingNotesForm(
         ship_request_id=ship_request_id,
@@ -193,6 +181,7 @@ def ship_request_edit_view(ship_request_id: int):
     return render_template(
         "outgoing_stock/modal_edit.html",
         form=form,
+        carts=carts,
         notes_form=notes_form,
         ship_request=ship_request,
         warehouses=warehouses,
@@ -228,14 +217,14 @@ def save():
         flash("Cannot save item data. Ship Request already Dispatched", "danger")
         return redirect(url_for("outgoing_stock.get_all"))
 
-    carts_ids = request.form.getlist("cart_id")
-    warehouse_ids = request.form.getlist("warehouse_id")
-
-    if len(carts_ids) != len(warehouse_ids):
-        log(log.ERROR, "Carts and warehouses count mismatch")
+    try:
+        products = cart_prodcuts_data_adapter.validate_json(
+            form.cart_products_data.data
+        )
+    except ValidationError as e:
+        log(log.ERROR, "Validation error: [%s]", e)
         flash("Cannot save item data", "danger")
         return redirect(url_for("outgoing_stock.get_all"))
-    products = list(zip(carts_ids, warehouse_ids))
 
     if not products:
         log(log.ERROR, "No products in ship request: [%s]", form.products.data)
@@ -250,7 +239,11 @@ def save():
     )
     report_inventory_list.save(False)
 
-    for cart_id, warehouse_id in products:
+    for prodcut_data in products:
+        cart_id = prodcut_data.cart_id
+        warehouse_id = prodcut_data.warehouse_id
+        note_location = prodcut_data.note_location
+
         warehouse = db.session.get(
             m.Warehouse,
             warehouse_id,
@@ -337,11 +330,12 @@ def save():
                 type=s.ReportSKUType.ship_request.value,
                 status="Ship request assigned to pickup.",
             ).save(False)
+        cart.note_location = note_location
         cart.status = "completed"
 
-    ship_request.tracking = form.proof_of_delivery.data
-    ship_request.proof_of_delivery = form.proof_of_delivery.data
     ship_request.wm_notes = form.wm_notes.data
+    ship_request.proof_of_delivery = form.proof_of_delivery.data
+    ship_request.tracking = form.tracking.data
     ship_request.status = s.ShipRequestStatus.assigned
     db.session.commit()
 
@@ -373,6 +367,23 @@ def update_notes():
         )
         flash("Cannot save item data", "danger")
         return redirect(url_for("outgoing_stock.get_all"))
+
+    try:
+        notes_location_data = notes_location_adapter.validate_json(
+            form.notes_locations_data.data
+        )
+    except ValidationError as e:
+        log(log.ERROR, "Notes location validation error: [%s]", e)
+        flash("Notes for ship reauest has not been updated", "danger")
+        return redirect(url_for("outgoing_stock.get_all"))
+
+    for note_location_data in notes_location_data:
+        cart = db.session.get(m.Cart, note_location_data.cart_id)
+        if not cart or cart.ship_request_id != ship_request.id:
+            log(log.ERROR, "Cart not found")
+            flash("Cannot save item data", "danger")
+            return redirect(url_for("outgoing_stock.get_all"))
+        cart.note_location = note_location_data.note_location
 
     ship_request.proof_of_delivery = form.proof_of_delivery.data
     ship_request.tracking = form.tracking.data

@@ -105,8 +105,8 @@
               {{ ship_request.store.city }}</div>
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="store_zip_code" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store Zip
-              Code</label>
+            <label for="store_zip_code" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store
+              Postal Code</label>
             <div
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
               {{ ship_request.store.zip }}</div>
@@ -115,6 +115,7 @@
             class="col-span-6 sm:col-span-3 row-span-2 flex flex-col gap-4">
             {{ notes_form.hidden_tag() }}
             {{ notes_form.ship_request_id }}
+            {{ notes_form.notes_locations_data }}
             <div class="col-span-6 sm:col-span-3 row-span-2 flex flex-col">
               <label for="outgoing-stock-edit-wm-notes"
                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Warehouse manager notes</label>
@@ -198,7 +199,10 @@
                 <td class="px-6 py-4">{{ cart.product.retail_price }}</td>
                 <td class="px-6 py-4">{{ cart.event.date_from if cart.event else '-' }}</td>
                 <td class="px-6 py-4">{{ cart.event.date_to if cart.event else '-' }}</td>
-                <td class="px-6 py-4">{{ cart.product.notes_location if cart.product.notes_location else '-' }}</td>
+                <td class="px-6 py-4"><input type="text" name="note_location" value="{{ cart.note_location }}"
+                    cart_id="{{ cart.id }}"
+                    class="view_cart_note_location_input bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                </td>
                 <td class="px-6 py-4">{{ cart.group.name }}</td>
                 <td class="px-6 py-4">{{ cart.quantity }}</td>
                 <td class="px-6 py-4">{{ cart.warehouse.name if cart.warehouse else "" }}</td>
@@ -222,7 +226,7 @@
           </form>
           <div
             class="w-full flex justify-between items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
-            <button type="submit" form="outgoing-stock-update-notes"
+            <button type="button" onclick="onClickSubmitNotes(this)"
               class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-green-600 hover:bg-green-800 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900">
               <svg class="w-4 h-4 mr-2" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
                 <path
@@ -269,6 +273,15 @@
     </div>
   </div>
   <script>
+    function onClickSubmitNotes(e) {
+      const form = document.getElementById('outgoing-stock-update-notes')
+      const input_notes_location_data = form.querySelector('input[name="notes_locations_data"]')
+      if (!form || !input_notes_location_data) return
+      const notes_location = Array.from(document.querySelectorAll('.view_cart_note_location_input')).map((input) => { return { cart_id: input.getAttribute('cart_id'), note_location: input.value } })
+      input_notes_location_data.value = JSON.stringify(notes_location)
+      form.submit()
+      e.disabled = true
+    }
     async function printOrder() {
       const res = await fetch("{{ url_for('outgoing_stock.print', ship_request_id=ship_request.id) }}");
       const content = await res.text();

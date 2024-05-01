@@ -120,8 +120,8 @@
               {{ ship_request.store.city }}</div>
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="store_zip_code" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store Zip
-              Code</label>
+            <label for="store_zip_code" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store
+              Postal Code </label>
             <div
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
               {{ ship_request.store.zip }}</div>
@@ -130,10 +130,12 @@
             class="col-span-6 sm:col-span-3 row-span-2 flex flex-col gap-4">
             {{ notes_form.hidden_tag() }}
             {{ notes_form.ship_request_id }}
+            {{ notes_form.notes_locations_data }}
             <div class="col-span-6 sm:col-span-3 row-span-2 flex flex-col">
               <label for="outgoing-stock-edit-wm-notes"
                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Warehouse manager notes</label>
-              {{ notes_form.wm_notes(class_="shadow-sm flex-grow bg-gray-50 border border-gray-300 text-gray-900 text-sm
+              {{ notes_form.wm_notes(class_="wm-notes-form-notes shadow-sm flex-grow bg-gray-50 border
+              border-gray-300 text-gray-900 text-sm
               rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600
               dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500
               dark:focus:border-blue-500") }}
@@ -143,7 +145,8 @@
                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{
                 notes_form.proof_of_delivery.label
                 }}</label>
-              {{ notes_form.proof_of_delivery(class_="shadow-sm flex-grow bg-gray-50 border border-gray-300
+              {{ notes_form.proof_of_delivery(class_="proof-of-delivery-form-notes shadow-sm flex-grow bg-gray-50
+              border border-gray-300
               text-gray-900
               text-sm
               rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600
@@ -154,7 +157,9 @@
               <label for="outgoing-stock-edit-wm-notes"
                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{ notes_form.tracking.label
                 }}</label>
-              {{ notes_form.tracking(class_="shadow-sm flex-grow bg-gray-50 border border-gray-300 text-gray-900 text-sm
+              {{ notes_form.tracking(class_="tracking-form-notes shadow-sm flex-grow bg-gray-50 border border-gray-300
+              text-gray-900
+              text-sm
               rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600
               dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500
               dark:focus:border-blue-500") }}
@@ -176,14 +181,12 @@
           id="outgoing-stock-dispatch-goods">
           {{ form.hidden_tag() }}
           {{ form.ship_request_id }}
+          {{ form.cart_products_data }}
 
 
-          <input id="wm-notes-form-dispatched" name="wm_notes" type="text" class="hidden"
-            value="{{ form.wm_notes.data }}">
-          <input id="proof-of-delivery-form-dispatched" name="proof_of_delivery" type="text" class="hidden"
-            value="{{ form.proof_of_delivery.data }}">
-          <input id="tracking-form-dispatched" name="tracking" type="text" class="hidden"
-            value="{{ form.tracking.data }}">
+          <input name="wm_notes" type="text" class="hidden" value="{{ form.wm_notes.data }}">
+          <input name="proof_of_delivery" type="text" class="hidden" value="{{ form.proof_of_delivery.data }}">
+          <input name="tracking" type="text" class="hidden" value="{{ form.tracking.data }}">
 
 
           <table class="w-full mb-1 text-sm text-left text-gray-500 dark:text-gray-400">
@@ -205,8 +208,8 @@
               </tr>
             </thead>
             <tbody>
-              {% for cart, cart_form in form.products %}
-              <tr class="border-b border-gray-200 dark:border-gray-600">
+              {% for cart in carts %}
+              <tr class="cart_product_data border-b border-gray-200 dark:border-gray-600">
                 <td class="px-6 py-4">{{ loop.index }}</td>
                 <td class="px-6 py-4">
                   {% if cart.product.image and cart.product.image | length > 100 %}
@@ -223,12 +226,14 @@
                 <td class="px-6 py-4">{{ cart.product.retail_price }}</td>
                 <td class="px-6 py-4">{{ cart.event.date_from if cart.event else '-' }}</td>
                 <td class="px-6 py-4">{{ cart.event.date_to if cart.event else '-' }}</td>
-                <td class="px-6 py-4">{{ cart.product.notes_location if cart.product.notes_location else '-' }}</td>
+                <td class="px-6 py-4"><input type="text" name="note_location" value="{{ cart.note_location }}"
+                    cart_id="{{ cart.id }}"
+                    class="edit_cart_note_location_input bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                </td>
                 <td class="px-6 py-4">{{ cart.group.name }}</td>
                 <td class="px-6 py-4">{{ cart.quantity }}</td>
 
                 <td class="px-6 py-4">
-                  {{ cart_form.cart_id }}
                   <select type="number" name="warehouse_id" required
                     class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                     {% for warehouse in cart.product.warehouses %}
@@ -257,7 +262,7 @@
         </form>
         <div class="w-full flex justify-between p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
           <div>
-            <button type="submit" form="outgoing-stock-update-notes"
+            <button type="button" onclick="onClickSubmitNotes(this)"
               class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-green-600 hover:bg-green-800 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900">
               <svg class="w-4 h-4 mr-2" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
                 <path
@@ -265,7 +270,7 @@
               </svg>
               Update notes
             </button>
-            <button type="submit" form="outgoing-stock-dispatch-goods"
+            <button type="click" onclick="onClickSubmitDispatchGoods(this)"
               class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900">
               <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
@@ -325,6 +330,41 @@
     </div>
   </div>
   <script>
+    function onClickSubmitDispatchGoods(e) {
+      const form = document.getElementById('outgoing-stock-dispatch-goods')
+      const input_cart_products_data = form.querySelector('input[name="cart_products_data"]')
+      if (!form || !input_cart_products_data) return
+      const cart_products_data = Array.from(document.querySelectorAll('.cart_product_data')).map((tr) => {
+        const notes_location = tr.querySelector('.edit_cart_note_location_input')
+        const cart_id = notes_location.getAttribute('cart_id')
+        const note_location = notes_location.value
+        const warehouse_id = tr.querySelector('select[name="warehouse_id"]').value
+        return { cart_id, warehouse_id, note_location }
+      })
+      // set product data
+      input_cart_products_data.value = JSON.stringify(cart_products_data)
+
+      // set notes data
+      const wm_notes = document.querySelector('.wm-notes-form-notes')
+      const proof_of_delivery = document.querySelector('.proof-of-delivery-form-notes')
+      const tracking = document.querySelector('.tracking-form-notes')
+
+      form.wm_notes.value = wm_notes.value
+      form.proof_of_delivery.value = proof_of_delivery.value
+      form.tracking.value = tracking.value
+      form.submit()
+      e.disabled = true
+    }
+
+    function onClickSubmitNotes(e) {
+      const form = document.getElementById('outgoing-stock-update-notes')
+      const input_notes_location_data = form.querySelector('input[name="notes_locations_data"]')
+      if (!form || !input_notes_location_data) return
+      const notes_location = Array.from(document.querySelectorAll('.edit_cart_note_location_input')).map((input) => { return { cart_id: input.getAttribute('cart_id'), note_location: input.value } })
+      input_notes_location_data.value = JSON.stringify(notes_location)
+      form.submit()
+      e.disabled = true
+    }
     async function printOrder() {
       const res = await fetch("{{ url_for('outgoing_stock.print', ship_request_id=ship_request.id) }}");
       const content = await res.text();

@@ -41,5 +41,9 @@ class Supplier(db.Model, ModelMixin):
         return f"<{self.id}: {self.name}>"
 
     @property
+    def full_address(self):
+        return f"{self.address}, {self.city}, {self.region}, {self.country}, {self.zip}"
+
+    @property
     def json(self):
         return s.Supplier.model_validate(self).model_dump_json()
