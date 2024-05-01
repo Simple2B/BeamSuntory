@@ -16,7 +16,6 @@ from app.controllers import create_pagination, role_required
 from app import models as m, db, mail
 from app import schema as s
 from app import forms as f
-from app.celery import notify_users_request_share
 from app.logger import log
 
 
