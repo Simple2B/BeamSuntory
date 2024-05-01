@@ -25,6 +25,7 @@ from .product_allocated import (
     ProductAllocatedList,
     ReportShelfLifeResponse,
     ReportShelfLifeList,
+    ProductAllocatedNoteLocation,
 )
 from .ship_request import ShipRequest, ShipRequestStatus, FilterShipRequest
 from .store import Store

@@ -8,6 +8,8 @@ from flask import (
     current_app as app,
 )
 from flask_login import login_required, current_user
+from pydantic import TypeAdapter
+from pydantic import ValidationError
 import sqlalchemy as sa
 from sqlalchemy import desc
 from app.controllers import (
@@ -25,6 +27,9 @@ from app.logger import log
 incoming_stock_blueprint = Blueprint(
     "incoming_stock", __name__, url_prefix="/incoming_stock"
 )
+
+
+product_allocated_adapter = TypeAdapter(list[s.ProductAllocatedNoteLocation])
 
 
 @incoming_stock_blueprint.route("/", methods=["GET"])
@@ -77,23 +82,23 @@ def get_all():
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def view(inbound_order_id: int):
     """htmx"""
-    inbount_order = db.session.get(m.InboundOrder, inbound_order_id)
-    if not inbount_order:
+    inbound_order = db.session.get(m.InboundOrder, inbound_order_id)
+    if not inbound_order:
         log(log.INFO, "There is no inbound order with id: [%s]", inbound_order_id)
         return render_template(
             "toast.html",
             message="Can't find inbound order",
             category="danger",
         )
-    form = f.InboundOrderPickupForm(
+    form = f.InboundOrderUpdateNotes(
         inbound_order_id=inbound_order_id,
-        wm_notes=inbount_order.wm_notes,
-        proof_of_delivery=inbount_order.proof_of_delivery,
-        tracking=inbount_order.tracking,
-        da_notes=inbount_order.da_notes,
+        wm_notes=inbound_order.wm_notes,
+        proof_of_delivery=inbound_order.proof_of_delivery,
+        tracking=inbound_order.tracking,
+        da_notes=inbound_order.da_notes,
     )
     return render_template(
-        "incoming_stock/modal_view.html", form=form, inbound_order=inbount_order
+        "incoming_stock/modal_view.html", form=form, inbound_order=inbound_order
     )
 
 
@@ -367,7 +372,7 @@ def sort():
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def notes():
-    form_note: f.InboundOrderPickupForm = f.InboundOrderPickupForm()
+    form_note = f.InboundOrderUpdateNotes()
 
     if not form_note.validate_on_submit():
         log(log.ERROR, "Incoming stock form errors: [%s]", form_note.errors)
@@ -387,7 +392,31 @@ def notes():
         flash("There is no such inbound order", "danger")
         return redirect(url_for("incoming_stock.get_all"))
 
-    # new fields
+    try:
+        products_allocated_data = product_allocated_adapter.validate_json(
+            form_note.products_allocated_note_locations.data
+        )
+    except ValidationError as e:
+        log(log.ERROR, "Incoming stock form errors: [%s]", e)
+        flash("Some information about the location of the notes is incorrect", "danger")
+        return redirect(url_for("incoming_stock.get_all"))
+
+    for product_allocated_note_location in products_allocated_data:
+        product_allocated: m.ProductAllocated = db.session.get(
+            m.ProductAllocated, product_allocated_note_location.product_id
+        )
+        if not product_allocated:
+            log(
+                log.INFO,
+                "There is no product allocated with id: [%s]",
+                product_allocated_note_location.product_id,
+            )
+            flash("There is no such product allocated", "danger")
+            return redirect(url_for("incoming_stock.get_all"))
+
+        product_allocated.note_location = product_allocated_note_location.note_location
+        product_allocated.save()
+
     inbound_order.proof_of_delivery = form_note.proof_of_delivery.data
     inbound_order.tracking = form_note.tracking.data
 
