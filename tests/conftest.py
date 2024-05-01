@@ -40,9 +40,9 @@ def client(app: Flask, mocker):
     mocker.patch(
         "app.views.product.notify_users_assign.delay",
     )
-    mocker.patch(
-        "app.views.request_share.notify_users_request_share.delay",
-    )
+    # mocker.patch(
+    #     "app.views.request_share.notify_users_request_share.delay",
+    # )
     mocker.patch(
         "app.views.product.notify_users_new_request_share.delay",
     )

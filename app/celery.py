@@ -117,52 +117,52 @@ def notify_users_assign(assign_id: int, app_env: str, redirect_url: str):
             mail.send(msg)
 
 
-@celery_worker.task
-def notify_users_request_share(request_share_id: int, app_env: str, redirect_url: str):
-    app = create_app(app_env)
-    with app.app_context():
-        log(log.INFO, "Notifying users of request_share")
-        request_share = db.session.get(m.RequestShare, request_share_id)
-        admin_groups_ids = db.session.scalars(
-            sa.select(m.Group.id).where(m.Group.name.ilike("%admin%"))
-        ).all()
+# @celery_worker.task
+# def notify_users_request_share(request_share_id: int, app_env: str, redirect_url: str):
+#     app = create_app(app_env)
+#     with app.app_context():
+#         log(log.INFO, "Notifying users of request_share")
+#         request_share = db.session.get(m.RequestShare, request_share_id)
+#         admin_groups_ids = db.session.scalars(
+#             sa.select(m.Group.id).where(m.Group.name.ilike("%admin%"))
+#         ).all()
 
-        where_stm = sa.and_(
-            m.UserGroup.right_id.not_in(admin_groups_ids),
-            m.Division.role_name != s.UserRole.ADMIN.value,
-            m.Division.role_name != s.UserRole.WAREHOUSE_MANAGER.value,
-            m.UserGroup.right_id == request_share.group_id,
-        )
-        if request_share.group_id in admin_groups_ids:
-            where_stm = sa.and_(
-                m.Division.role_name != s.UserRole.WAREHOUSE_MANAGER.value,
-                m.UserGroup.right_id == request_share.group_id,
-            )
+#         where_stm = sa.and_(
+#             m.UserGroup.right_id.not_in(admin_groups_ids),
+#             m.Division.role_name != s.UserRole.ADMIN.value,
+#             m.Division.role_name != s.UserRole.WAREHOUSE_MANAGER.value,
+#             m.UserGroup.right_id == request_share.group_id,
+#         )
+#         if request_share.group_id in admin_groups_ids:
+#             where_stm = sa.and_(
+#                 m.Division.role_name != s.UserRole.WAREHOUSE_MANAGER.value,
+#                 m.UserGroup.right_id == request_share.group_id,
+#             )
 
-        users = db.session.scalars(
-            sa.select(m.User)
-            .join(m.UserGroup)
-            .join(m.Division)
-            .where(where_stm)
-            .distinct()
-        ).all()
+#         users = db.session.scalars(
+#             sa.select(m.User)
+#             .join(m.UserGroup)
+#             .join(m.Division)
+#             .where(where_stm)
+#             .distinct()
+#         ).all()
 
-        for user in users:
-            if not user.approval_permission:
-                continue
-            msg = Message(
-                subject=f"Declined request share {request_share.order_numb}",
-                sender=app.config["MAIL_DEFAULT_SENDER"],
-                recipients=[user.email],
-            )
-            msg.html = render_template(
-                "email/request_share.html",
-                user=user,
-                action="declined",
-                request_share=request_share,
-                url=redirect_url,
-            )
-            mail.send(msg)
+#         for user in users:
+#             if not user.approval_permission:
+#                 continue
+#             msg = Message(
+#                 subject=f"Declined request share {request_share.order_numb}",
+#                 sender=app.config["MAIL_DEFAULT_SENDER"],
+#                 recipients=[user.email],
+#             )
+#             msg.html = render_template(
+#                 "email/request_share.html",
+#                 user=user,
+#                 action="declined",
+#                 request_share=request_share,
+#                 url=redirect_url,
+#             )
+#             mail.send(msg)
 
 
 @celery_worker.task
