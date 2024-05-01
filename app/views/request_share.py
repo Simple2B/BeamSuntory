@@ -16,7 +16,6 @@ from app.controllers import create_pagination, role_required
 from app import models as m, db, mail
 from app import schema as s
 from app import forms as f
-from app.celery import notify_users_request_share
 from app.logger import log
 
 
@@ -319,12 +318,20 @@ def decline(id: int):
         )
         + f"?q={request_share.order_numb}"
     )
-
-    notify_users_request_share.delay(
-        request_share.id,
-        app.config["ENV"],
-        url,
+    msg = Message(
+        subject=f"Declined request share {request_share.order_numb}",
+        sender=app.config["MAIL_DEFAULT_SENDER"],
+        recipients=[request_share.user.email],
     )
+    msg.html = render_template(
+        "email/request_share.html",
+        user=request_share.user,
+        action="declined",
+        request_share=request_share,
+        url=url,
+    )
+    mail.send(msg)
+
     log(log.INFO, "Request Share declined: [%s]", request_share)
     flash("Request Share declined!", "success")
     return redirect(url_for("request_share.get_all"))
