@@ -37,8 +37,6 @@ product_allocated_adapter = TypeAdapter(list[s.ProductAllocatedNoteLocation])
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def get_all():
     form_sort: f.SortByStatusInboundOrderForm = f.SortByStatusInboundOrderForm()
-    form_create = f.InboundOrderCreateForm()
-    form_edit = f.InboundOrderUpdateForm()
     filtered = False
 
     q = request.args.get("q", type=str, default=None)
@@ -69,8 +67,6 @@ def get_all():
         suppliers=db.session.scalars(m.Supplier.select().order_by(m.Supplier.id)),
         warehouses=db.session.scalars(m.Warehouse.select().order_by(m.Warehouse.id)),
         products=db.session.scalars(m.Product.select().order_by(m.Product.id)),
-        form_create=form_create,
-        form_edit=form_edit,
         form_sort=form_sort,
         filtered=filtered,
         inbound_orders_status=s.InboundOrderStatus,
@@ -98,7 +94,33 @@ def view(inbound_order_id: int):
         da_notes=inbound_order.da_notes,
     )
     return render_template(
-        "incoming_stock/modal_view.html", form=form, inbound_order=inbound_order
+        "incoming_stock/modal_view.html",
+        form=form,
+        inbound_order=inbound_order,
+        in_transit=s.InboundOrderStatus.in_transit.value,
+    )
+
+
+@incoming_stock_blueprint.route(
+    "/<int:inbound_order_id>/view-accept-goods", methods=["GET"]
+)
+@login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+def view_accept_goods(inbound_order_id: int):
+    """htmx"""
+    inbound_order = db.session.get(m.InboundOrder, inbound_order_id)
+    if not inbound_order:
+        log(log.INFO, "There is no inbound order with id: [%s]", inbound_order_id)
+        return render_template(
+            "toast.html",
+            message="Can't find inbound order",
+            category="danger",
+        )
+    form = f.PackageInfoForm(inbound_order_id=inbound_order_id)
+    return render_template(
+        "incoming_stock/modal_accept_goods.html",
+        form=form,
+        inbound_order=inbound_order,
     )
 
 
@@ -134,15 +156,17 @@ def accept():
         flash("Inbound order already accepted", "warning")
         return redirect(url_for("incoming_stock.get_all"))
 
-    products_info_json = s.IncomingStocks.model_validate_json(
-        form_edit.received_products.data
-    ).root
+    try:
+        products_info_json = s.IncomingStocks.model_validate_json(
+            form_edit.received_products.data
+        ).root
+    except ValidationError as e:
+        log(log.ERROR, "Incoming stock form errors: [%s]", e)
+        flash("Some data is incorrect", "danger")
+        return redirect(url_for("incoming_stock.get_all"))
 
     report_inventory_list = m.ReportInventoryList(
         type="Inbound Order Accepted",
-        # TODO who sholud be responsible for change?
-        # one who created inbound order?
-        # or one who accepted it?
         user_id=current_user.id,
         inbound_order=inbound_order,
         warehouse=inbound_order.warehouse,
@@ -310,8 +334,6 @@ def sort():
         flash("Sort without any arguments", "danger")
         return redirect(url_for("incoming_stock.get_all"))
     form_sort: f.SortByStatusInboundOrderForm = f.SortByStatusInboundOrderForm()
-    form_create = f.InboundOrderCreateForm()
-    form_edit = f.InboundOrderUpdateForm()
     if not form_sort.validate_on_submit() and request.method == "POST":
         # NOTE: this is drop filters action
         return redirect(url_for("incoming_stock.get_all"))
@@ -360,8 +382,6 @@ def sort():
             m.Warehouse.select().order_by(m.Warehouse.id)
         ).all(),
         products=db.session.scalars(m.Product.select().order_by(m.Product.id)).all(),
-        form_create=form_create,
-        form_edit=form_edit,
         form_sort=form_sort,
         filtered=filtered,
         inbound_orders_status=s.InboundOrderStatus,
