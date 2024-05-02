@@ -135,10 +135,10 @@ def test_assign_product(mg_g_populate: FlaskClient):
 
     group_name = "Canada"
     to_group = "JB"
-    prod_name = "populate_test_product"
+    prod_SKU = "322ewd3333rs3"
 
     data = dict(
-        name=prod_name,
+        product_SKU=prod_SKU,
         master_group=2,
         group=to_group,
         quantity=10,
@@ -162,7 +162,7 @@ def test_assign_product(mg_g_populate: FlaskClient):
     assign_objs: m.Assign = db.session.scalars(
         m.Assign.select().where(
             m.Assign.group_id == 2,
-            m.Assign.product.has(m.Product.name == prod_name),
+            m.Assign.product.has(m.Product.SKU == prod_SKU),
         )
     ).all()
     report_assign_objs: m.ReportInventoryList = db.session.scalars(
@@ -190,7 +190,7 @@ def test_assign_product(mg_g_populate: FlaskClient):
     assign_objs: m.Assign = db.session.scalars(
         m.Assign.select().where(
             m.Assign.group_id == 2,
-            m.Assign.product.has(m.Product.name == prod_name),
+            m.Assign.product.has(m.Product.SKU == prod_SKU),
         )
     ).all()
     report_assign_objs: m.ReportInventoryList = db.session.scalars(
