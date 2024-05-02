@@ -132,6 +132,22 @@ def init(app: Flask):
 
         db.session.commit()
 
+    @app.cli.command("update-admins-groups")
+    def update_admins_groups():
+        """Update admins groups."""
+        groups = db.session.scalars(sa.select(m.Group)).all()
+        admins = db.session.scalars(
+            sa.select(m.User).where(
+                m.User.role_obj.has(m.Division.role_name == s.UserRole.ADMIN.value)
+            )
+        ).all()
+        for group in groups:
+            for admin in admins:
+                if group not in admin.user_groups:
+                    print(f"Add group: {group.name} to admin: {admin.username}")
+                    m.UserGroup(left_id=admin.id, right_id=group.id).save(False)
+        db.session.commit()
+
     @app.cli.command("create-admin")
     def create_admin():
         """Create super admin account"""
