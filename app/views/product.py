@@ -673,19 +673,40 @@ def get_assign_form(warehouse_product_id: int):
 )
 def get_assign_groups():
     master_group_id = request.args.get("master_group", type=int, default=0)
-    group_name = request.args.get("group", type=str, default="")
-    if master_group_id:
-        master_group: m.MasterGroup | None = db.session.get(
-            m.MasterGroup, master_group_id
-        )
-        groups = master_group.groups if master_group else []
+    groups = []
+    if not master_group_id:
+        log(log.ERROR, "Get assign groups not found master_group_id")
         return render_template("product/assing_groups.html", groups=groups)
-    elif group_name:
-        group = db.session.scalar(sa.select(m.Group).where(m.Group.name == group_name))
-        sub_groups = group.child_groups if group and group.child_groups else []
-        return render_template("product/assing_sub_groups.html", sub_groups=sub_groups)
-    log(log.ERROR, "Get assign groups not found master_group_id or group_name")
-    return "", 202
+
+    master_group = db.session.get(m.MasterGroup, master_group_id)
+
+    if not master_group:
+        log(log.ERROR, "Not found master_group by id : [%s]", master_group_id)
+        return render_template("product/assing_groups.html", groups=groups)
+
+    return render_template("product/assing_groups.html", groups=master_group.groups)
+
+
+@product_blueprint.route("/assign/sub_groups", methods=["GET"])
+@login_required
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.MANAGER.value, s.UserRole.SALES_REP.value]
+)
+def get_assign_sub_groups():
+    group_name = request.args.get("group", type=str, default="")
+    groups = []
+    if not group_name:
+        log(log.ERROR, "Get assign groups not found group name")
+        return render_template("product/assing_sub_groups.html", groups=groups)
+
+    group = db.session.scalar(sa.select(m.Group).where(m.Group.name == group_name))
+    if not group or not group.child_groups:
+        log(log.ERROR, "Not found group by name : [%s]", group_name)
+        return render_template("product/assing_sub_groups.html", groups=groups)
+
+    return render_template(
+        "product/assing_sub_groups.html", sub_groups=group.child_groups
+    )
 
 
 @product_blueprint.route("/assign", methods=["POST"])
