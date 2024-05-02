@@ -653,7 +653,7 @@ def get_assign_form(warehouse_product_id: int):
             "error_modal.html", message="Can't find product warehouse"
         )
 
-    form.name.data = product_warehouse.product.name
+    form.product_SKU.data = product_warehouse.product.SKU
     main_master_groups = db.session.scalars(sa.select(m.MasterGroup)).all()
     groups = main_master_groups[0].groups if main_master_groups[0] else []
 
@@ -701,7 +701,7 @@ def assign():
         log(log.ERROR, "product assign errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("product.get_all", **query_params))
-    query = m.Product.select().where(m.Product.name == form.name.data)
+    query = m.Product.select().where(m.Product.SKU == form.product_SKU.data)
     product: m.Product | None = db.session.scalar(query)
 
     if not product:

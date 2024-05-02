@@ -92,13 +92,14 @@ def create():
     group.save()
 
     admin_users = db.session.scalars(
-        m.User.select().where(
+        sa.select(m.User).where(
             m.User.role_obj.has(m.Division.role_name == s.UserRole.ADMIN.value)
         )
     )
 
     for user in admin_users:
-        m.UserGroup(left_id=user.id, right_id=group.id).save()
+        m.UserGroup(left_id=user.id, right_id=group.id).save(False)
+    db.session.commit()
 
     flash("Group added!", "success")
     return redirect(url_for("stock_target_group.get_all"))

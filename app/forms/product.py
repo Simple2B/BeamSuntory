@@ -258,7 +258,7 @@ class NewProductForm(FlaskForm):
 
 
 class AssignProductForm(FlaskForm):
-    name = StringField("Name", [DataRequired()])
+    product_SKU = HiddenField("SKU", [DataRequired()])
     master_group = IntegerField("Master group", [DataRequired()])
     group = StringField("Group", [DataRequired()])
     sub_group = StringField("Sub Group")
