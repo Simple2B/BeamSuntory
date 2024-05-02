@@ -1,8 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import (
-    FieldList,
     Form,
-    FormField,
     StringField,
     SubmitField,
     ValidationError,
