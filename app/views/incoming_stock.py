@@ -8,6 +8,8 @@ from flask import (
     current_app as app,
 )
 from flask_login import login_required, current_user
+from pydantic import TypeAdapter
+from pydantic import ValidationError
 import sqlalchemy as sa
 from sqlalchemy import desc
 from app.controllers import (
@@ -27,13 +29,14 @@ incoming_stock_blueprint = Blueprint(
 )
 
 
+product_allocated_adapter = TypeAdapter(list[s.ProductAllocatedNoteLocation])
+
+
 @incoming_stock_blueprint.route("/", methods=["GET"])
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def get_all():
     form_sort: f.SortByStatusInboundOrderForm = f.SortByStatusInboundOrderForm()
-    form_create = f.InboundOrderCreateForm()
-    form_edit = f.InboundOrderUpdateForm()
     filtered = False
 
     q = request.args.get("q", type=str, default=None)
@@ -64,11 +67,60 @@ def get_all():
         suppliers=db.session.scalars(m.Supplier.select().order_by(m.Supplier.id)),
         warehouses=db.session.scalars(m.Warehouse.select().order_by(m.Warehouse.id)),
         products=db.session.scalars(m.Product.select().order_by(m.Product.id)),
-        form_create=form_create,
-        form_edit=form_edit,
         form_sort=form_sort,
         filtered=filtered,
         inbound_orders_status=s.InboundOrderStatus,
+    )
+
+
+@incoming_stock_blueprint.route("/<int:inbound_order_id>/view", methods=["GET"])
+@login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+def view(inbound_order_id: int):
+    """htmx"""
+    inbound_order = db.session.get(m.InboundOrder, inbound_order_id)
+    if not inbound_order:
+        log(log.INFO, "There is no inbound order with id: [%s]", inbound_order_id)
+        return render_template(
+            "toast.html",
+            message="Can't find inbound order",
+            category="danger",
+        )
+    form = f.InboundOrderUpdateNotes(
+        inbound_order_id=inbound_order_id,
+        wm_notes=inbound_order.wm_notes,
+        proof_of_delivery=inbound_order.proof_of_delivery,
+        tracking=inbound_order.tracking,
+        da_notes=inbound_order.da_notes,
+    )
+    return render_template(
+        "incoming_stock/modal_view.html",
+        form=form,
+        inbound_order=inbound_order,
+        in_transit=s.InboundOrderStatus.in_transit.value,
+    )
+
+
+@incoming_stock_blueprint.route(
+    "/<int:inbound_order_id>/view-accept-goods", methods=["GET"]
+)
+@login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+def view_accept_goods(inbound_order_id: int):
+    """htmx"""
+    inbound_order = db.session.get(m.InboundOrder, inbound_order_id)
+    if not inbound_order:
+        log(log.INFO, "There is no inbound order with id: [%s]", inbound_order_id)
+        return render_template(
+            "toast.html",
+            message="Can't find inbound order",
+            category="danger",
+        )
+    form = f.PackageInfoForm(inbound_order_id=inbound_order_id)
+    return render_template(
+        "incoming_stock/modal_accept_goods.html",
+        form=form,
+        inbound_order=inbound_order,
     )
 
 
@@ -76,7 +128,7 @@ def get_all():
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def accept():
-    form_edit: f.PackageInfoForm = f.PackageInfoForm()
+    form_edit = f.PackageInfoForm()
 
     if not form_edit.validate_on_submit():
         log(log.WARNING, "Form is not valid: [%s]", form_edit.errors)
@@ -104,15 +156,17 @@ def accept():
         flash("Inbound order already accepted", "warning")
         return redirect(url_for("incoming_stock.get_all"))
 
-    products_info_json = s.IncomingStocks.model_validate_json(
-        form_edit.received_products.data
-    ).root
+    try:
+        products_info_json = s.IncomingStocks.model_validate_json(
+            form_edit.received_products.data
+        ).root
+    except ValidationError as e:
+        log(log.ERROR, "Incoming stock form errors: [%s]", e)
+        flash("Some data is incorrect", "danger")
+        return redirect(url_for("incoming_stock.get_all"))
 
     report_inventory_list = m.ReportInventoryList(
         type="Inbound Order Accepted",
-        # TODO who sholud be responsible for change?
-        # one who created inbound order?
-        # or one who accepted it?
         user_id=current_user.id,
         inbound_order=inbound_order,
         warehouse=inbound_order.warehouse,
@@ -280,8 +334,6 @@ def sort():
         flash("Sort without any arguments", "danger")
         return redirect(url_for("incoming_stock.get_all"))
     form_sort: f.SortByStatusInboundOrderForm = f.SortByStatusInboundOrderForm()
-    form_create = f.InboundOrderCreateForm()
-    form_edit = f.InboundOrderUpdateForm()
     if not form_sort.validate_on_submit() and request.method == "POST":
         # NOTE: this is drop filters action
         return redirect(url_for("incoming_stock.get_all"))
@@ -330,8 +382,6 @@ def sort():
             m.Warehouse.select().order_by(m.Warehouse.id)
         ).all(),
         products=db.session.scalars(m.Product.select().order_by(m.Product.id)).all(),
-        form_create=form_create,
-        form_edit=form_edit,
         form_sort=form_sort,
         filtered=filtered,
         inbound_orders_status=s.InboundOrderStatus,
@@ -342,7 +392,7 @@ def sort():
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def notes():
-    form_note: f.InboundOrderPickupForm = f.InboundOrderPickupForm()
+    form_note = f.InboundOrderUpdateNotes()
 
     if not form_note.validate_on_submit():
         log(log.ERROR, "Incoming stock form errors: [%s]", form_note.errors)
@@ -362,7 +412,31 @@ def notes():
         flash("There is no such inbound order", "danger")
         return redirect(url_for("incoming_stock.get_all"))
 
-    # new fields
+    try:
+        products_allocated_data = product_allocated_adapter.validate_json(
+            form_note.products_allocated_note_locations.data
+        )
+    except ValidationError as e:
+        log(log.ERROR, "Incoming stock form errors: [%s]", e)
+        flash("Some information about the location of the notes is incorrect", "danger")
+        return redirect(url_for("incoming_stock.get_all"))
+
+    for product_allocated_note_location in products_allocated_data:
+        product_allocated: m.ProductAllocated = db.session.get(
+            m.ProductAllocated, product_allocated_note_location.product_id
+        )
+        if not product_allocated:
+            log(
+                log.INFO,
+                "There is no product allocated with id: [%s]",
+                product_allocated_note_location.product_id,
+            )
+            flash("There is no such product allocated", "danger")
+            return redirect(url_for("incoming_stock.get_all"))
+
+        product_allocated.note_location = product_allocated_note_location.note_location
+        product_allocated.save()
+
     inbound_order.proof_of_delivery = form_note.proof_of_delivery.data
     inbound_order.tracking = form_note.tracking.data
 

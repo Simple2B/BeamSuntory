@@ -150,7 +150,6 @@ const body = document.querySelector('body');
 const handleOrderView = () => {
   const orderView = document.querySelector('#outgoing-stock-ship-request-edit') as HTMLDivElement;
   if (orderView) {
-    setNotesForInputs(orderView)
     selectAllWarehouseHandler(orderView);
   }
 }
@@ -159,28 +158,6 @@ const config: MutationObserverInit = { childList: true, subtree: true };
 observer.observe(body, config);
 
 
-
-function setNotesForInputs (div: HTMLDivElement) {
-  const waNotes = div.querySelector('#wm_notes') as HTMLInputElement;
-  const proofOfDelivery = div.querySelector('#proof_of_delivery') as HTMLInputElement;
-  const tracking = div.querySelector('#tracking') as HTMLInputElement;
-  
-  const waNotesFormDispatch = div.querySelector('#wm-notes-form-dispatched') as HTMLInputElement;
-  const roofOfDeliveryFormDispatch = div.querySelector('#proof-of-delivery-form-dispatched') as HTMLInputElement;
-  const trackingFormDispatch = div.querySelector('#tracking-form-dispatched') as HTMLInputElement;
-
-  waNotesFormDispatch && waNotes.addEventListener('change', (event: Event) => {
-      waNotesFormDispatch.value = (event.target as HTMLInputElement).value;
-  });
-  
-  roofOfDeliveryFormDispatch && proofOfDelivery.addEventListener('change', (event: Event) => {
-      roofOfDeliveryFormDispatch.value = (event.target as HTMLInputElement).value;
-  });
-
-  trackingFormDispatch && tracking.addEventListener('change', (event: Event) => {
-      trackingFormDispatch.value = (event.target as HTMLInputElement).value;
-  });
-}
 
 function setWarehouseIdsForInputs (div: HTMLDivElement, id: number) {
   const warehouseInputs =  div.querySelectorAll('select[name="warehouse_id"]') as NodeListOf<HTMLSelectElement>;

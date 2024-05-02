@@ -27,6 +27,40 @@ def test_incoming_stocks_pages(mg_g_populate: FlaskClient):
     assert inbound_order
 
 
+def test_view_incoming_stock(mg_g_populate: FlaskClient):
+    login(mg_g_populate)
+    order_to_accept: m.InboundOrder = db.session.execute(
+        m.InboundOrder.select().where(
+            m.InboundOrder.title == "Inbound Order In transit"
+        )
+    ).scalar()
+    assert order_to_accept
+    res = mg_g_populate.get(f"/incoming_stock/{order_to_accept.id}/view")
+    assert res.status_code == 200
+    assert order_to_accept.title in res.data.decode("utf-8")
+
+    res = mg_g_populate.get(f"/incoming_stock/{1000}/view")
+    assert res.status_code == 200
+    assert "Can&#39;t find inbound order" in res.data.decode("utf-8")
+
+
+def test_view_accept_goods_incoming_stock(mg_g_populate: FlaskClient):
+    login(mg_g_populate)
+    order_to_accept: m.InboundOrder = db.session.execute(
+        m.InboundOrder.select().where(
+            m.InboundOrder.title == "Inbound Order In transit"
+        )
+    ).scalar()
+    assert order_to_accept
+    res = mg_g_populate.get(f"/incoming_stock/{order_to_accept.id}/view-accept-goods")
+    assert res.status_code == 200
+    assert order_to_accept.products_allocated[0].product.SKU in res.data.decode("utf-8")
+
+    res = mg_g_populate.get(f"/incoming_stock/{1000}/view-accept-goods")
+    assert res.status_code == 200
+    assert "Can&#39;t find inbound order" in res.data.decode("utf-8")
+
+
 def test_cancel_incoming_stock(mg_g_populate: FlaskClient):
     login(mg_g_populate)
 

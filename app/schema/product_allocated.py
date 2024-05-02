@@ -6,6 +6,13 @@ from .product_group import ProductGroupOut
 from .pagination import PaginationOut
 
 
+class ProductAllocatedNoteLocation(BaseModel):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    product_id: int = Field(alias="productId")
+    note_location: str = Field("", alias="noteLocation")
+
+
 class ProductAllocated(BaseModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 

@@ -7,6 +7,7 @@ from wtforms import (
     DateField,
     ValidationError,
     TextAreaField,
+    HiddenField,
 )
 from wtforms.validators import DataRequired, Optional, Regexp, AnyOf
 
@@ -69,10 +70,26 @@ class SortByStatusInboundOrderForm(FlaskForm):
     submit = SubmitField("Submit")
 
 
+class InboundOrderUpdateNotes(FlaskForm):
+    inbound_order_id = HiddenField("Inbound order id", [DataRequired()])
+    wm_notes = StringField(
+        "Warehouse manager notes", render_kw={"placeholder": "Notes"}
+    )
+    proof_of_delivery = TextAreaField(
+        "Proof of delivery", render_kw={"placeholder": "Proof of delivery"}
+    )
+    tracking = TextAreaField("Tracking", render_kw={"placeholder": "Tracking"})
+    products_allocated_note_locations = HiddenField([DataRequired()])
+
+
 class InboundOrderPickupForm(FlaskForm):
     inbound_order_id = StringField("Inbound order id", [DataRequired()])
-    wm_notes = StringField("Warehouse manager notes")
-    da_notes = StringField("Delivery agent notes")
-    proof_of_delivery = TextAreaField("Proof of delivery")
-    tracking = TextAreaField("Tracking")
+    wm_notes = StringField(
+        "Warehouse manager notes", render_kw={"placeholder": "Notes"}
+    )
+    da_notes = StringField("Delivery agent notes", render_kw={"placeholder": "Notes"})
+    proof_of_delivery = TextAreaField(
+        "Proof of delivery", render_kw={"placeholder": "Proof of delivery"}
+    )
+    tracking = TextAreaField("Tracking", render_kw={"placeholder": "Tracking"})
     submit = SubmitField("Submit")

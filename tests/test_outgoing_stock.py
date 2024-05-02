@@ -1,3 +1,4 @@
+import json
 from flask.testing import FlaskClient
 from app import models as m, db
 from app import schema as s
@@ -62,6 +63,11 @@ def test_edit_outgoing_stock(mg_g_populate: FlaskClient):
     assert order_to_dispatch.status == s.ShipRequestStatus.waiting_for_warehouse
     assert carts
 
+    cart_products_data = [
+        {"cart_id": cart.id, "warehouse_id": 1, "note_location": f"n-{cart.id}"}
+        for cart in carts
+    ]
+
     response = mg_g_populate.post(
         "/outgoing_stock/edit",
         data=dict(
@@ -73,6 +79,7 @@ def test_edit_outgoing_stock(mg_g_populate: FlaskClient):
             quantity=1,
             cart_id=carts[0].id,
             warehouse_id=1,
+            cart_products_data=json.dumps(cart_products_data),
         ),
     )
     assert response.status_code == 302

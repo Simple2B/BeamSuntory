@@ -29,6 +29,7 @@ class ProductAllocated(db.Model, ModelMixin):
     )
     shelf_life_start: orm.Mapped[date] = orm.mapped_column()
     shelf_life_end: orm.Mapped[date] = orm.mapped_column()
+    note_location: orm.Mapped[str] = orm.mapped_column(sa.String(512), default="")
 
     product_quantity_groups: orm.Mapped[list[ProductQuantityGroup]] = orm.relationship(
         back_populates="product_allocated",

@@ -46,6 +46,8 @@ class Cart(db.Model, ModelMixin):
         default=datetime.now,
     )
 
+    note_location: orm.Mapped[str] = orm.mapped_column(sa.String(512), default="")
+
     # Relationship
     product: orm.Mapped["Product"] = orm.relationship()
     warehouse: orm.Mapped["Warehouse"] = orm.relationship()

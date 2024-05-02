@@ -25,6 +25,7 @@ from .product_allocated import (
     ProductAllocatedList,
     ReportShelfLifeResponse,
     ReportShelfLifeList,
+    ProductAllocatedNoteLocation,
 )
 from .ship_request import ShipRequest, ShipRequestStatus, FilterShipRequest
 from .store import Store
@@ -100,4 +101,9 @@ from .report import (
 )
 from .report_sku import ReportSKU, ReportSKUList, ReportSKUResponse, ReportSKUType
 from .sub_group import SubGroup, SubGroupParams
-from .outgoing_stock import OutgoingStockQueryParams, OutgoingStockQueryParamsDownload
+from .outgoing_stock import (
+    OutgoingStockQueryParams,
+    OutgoingStockQueryParamsDownload,
+    CartNoteLocation,
+    CartProductData,
+)

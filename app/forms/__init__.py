@@ -40,6 +40,7 @@ from .inbound_order import (
     InboundOrderUpdateForm,
     SortByStatusInboundOrderForm,
     InboundOrderPickupForm,
+    InboundOrderUpdateNotes,
 )
 from .store import StoreForm, NewStoreForm
 from .package_info import PackageInfoForm
