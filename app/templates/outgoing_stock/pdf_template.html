@@ -6,68 +6,39 @@
 </head>
 {% for ship_request in ship_requests %}
 <div class="relative w-full max-h-full" onclick="event.stopPropagation();">
-  <!-- Modal content -->
-  <!-- TODO change action for view form -->
-  <div class="w-full h-full flex flex-col gap-4 relative">
-    <!-- Modal header -->
-    <!-- Modal body -->
-    <div
-      class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-md font-bold rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+  <div class="w-full h-full flex flex-col gap-8 relative">
+    <div class="text-md">Date: {{ ship_request.created_at.strftime("%B %d %Y") }}</div>
+    <div class="text-lg">
       №:{{ ship_request.order_numb }}
     </div>
-    <div class="w-full h-full flex flex-col gap-2">
-      <div class="flex flex-col gap-2  border border-gray-300 justify-center items-center">
-        <label for="outgoing-stock-edit-comment" class="block mt-1 mb-1 text-sm font-medium ">Comment</label>
-        <div class="w-full border-t-2 p-2 text-center flex-grow bg-gray-50  text-sm">
-          {{ ship_request.comment if ship_request.comment else 'No comments' }}</div>
-      </div>
-
-      <div class="flex flex-col gap-2 border border-gray-300 justify-center items-center">
-        <label for="outgoing-stock-edit-da-notes" class="block mt-1 mb-1 text-sm font-medium dark:text-white">Delivery
-          agent
-          notes</label>
-        <div class="w-full border-t-2 p-2 text-center flex-grow bg-gray-50 text-sm">
-          {{ ship_request.da_notes if ship_request.da_notes else 'No notes' }}</textarea>
-        </div>
-      </div>
+    <div class="flex flex-col gap-4">
+      <div class="text-md">Sipe To:</div>
+      <div class="text-lg font-bold ">{{ ship_request.store.store_name }}</div>
+      <div class="text-lg">{{ ship_request.store.country }},{{ ship_request.store.city }},{{
+        ship_request.store.address }}</div>
+      <div class="text-lg">{{ ship_request.store.region }}, {{ ship_request.store.zip }}</div>
+      <div class="text-lg">{{ ship_request.user.username|title }}</div>
     </div>
-    <div>
-      <table class="w-full mb-1 text-sm text-left text-gray-500 dark:text-gray-400">
-        <thead class="border-collapse text-xs text-gray-700 bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-          <tr>
-            <th scope="col" class="border border-slate-300 px-6 py-3">Create date</th>
-            <th scope="col" class="border border-slate-300 px-6 py-3">User</th>
-            <th scope="col" class="border border-slate-300 px-6 py-3">Store</th>
-            <th scope="col" class="border border-slate-300 px-6 py-3">Address</th>
-            <th scope="col" class="border border-slate-300 px-6 py-3">Phone</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="border-b border-gray-200 dark:border-gray-600">
-            <td class="border border-slate-300 px-6 py-4">{{ ship_request.created_at.strftime('%Y-%m-%d') }}</td>
-            <td class="border border-slate-300 px-6 py-4">{{ ship_request.user.username }}</td>
-            <td class="border border-slate-300 px-6 py-4">{{ ship_request.store.store_name }}</td>
-            <td class="border border-slate-300 px-6 py-4">{{ ship_request.store.full_address }}</td>
-            <td class="border border-slate-300 px-6 py-4">{{ ship_request.store.phone_numb }}</td>
-        </tbody>
-      </table>
+    <div class="w-full flex flex-col gap-4">
+      <div class="w-full text-md">Delivery Note: {{ ship_request.comment if ship_request.comment else 'No comments' }}
+      </div>
+      <div class="w-full text-md">Comments: {{ ship_request.da_notes if ship_request.da_notes else 'No notes' }}</div>
     </div>
     <div class="overflow-x-auto">
-      <table class="border-collapse w-full mb-1 text-sm text-left text-gray-500 dark:text-gray-400">
-        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+      <table class="border-collapse w-full mb-1 text-base">
+        <thead class="text-md border-black uppercase ">
           <tr>
-            <th scope="col" class="border border-slate-300 px-6 py-3">Image</th>
-            <th scope="col" class="border border-slate-300 px-6 py-3">SKU</th>
-            <th scope="col" class="border border-slate-300 px-6 py-3">Description</th>
-            <th scope="col" class="border border-slate-300 px-6 py-3">Group</th>
-            <th scope="col" class="border border-slate-300 px-6 py-3">Quantity</th>
-            <th scope="col" class="border border-slate-300 px-6 py-3">Warehouse</th>
+            <th scope="col" class="border border-black px-6 py-3">Picture</th>
+            <th scope="col" class="border border-black px-6 py-3">SKU</th>
+            <th scope="col" class="border border-black px-6 py-3">Description</th>
+            <th scope="col" class="border border-black px-6 py-3">Location</th>
+            <th scope="col" class="border border-black px-6 py-3">Quantity</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody class="text-md">
           {% for cart in ship_request.carts %}
-          <tr class="border-b border-gray-200 dark:border-gray-600">
-            <td class="border border-slate-300 px-6 py-4">
+          <tr class="border border-gray-200 dark:border-gray-600">
+            <td class="border border-black px-6 py-4">
               {% if cart.product.image and cart.product.image | length > 100 %}
               <img src="data:image/png;base64, {{ cart.product.image }}" class="w-14 h-14 object-cover" />
               {% else %}
@@ -76,12 +47,11 @@
                 class="w-14 h-14 object-cover" />
               {% endif %}
             </td>
-            <td class="border border-slate-300 px-4 py-2 text-align">{{ cart.product.SKU }}</td>
-            <td class="border border-slate-300 px-4 py-2 text-align">{{ cart.product.description }}</td>
-            <td class="border border-slate-300 px-4 py-2 text-align">{{ cart.group.name }}</td>
-            <td class="border border-slate-300 px-4 py-2 text-align">{{ cart.quantity }}</td>
-            <td class="border border-slate-300 px-4 py-2 text-align">{{ cart.note_location if cart.note_location
-              else "-" }}
+            <td class="border border-black px-4 py-2 text-align">{{ cart.product.SKU }}</td>
+            <td class="border border-black px-4 py-2 text-align">{{ cart.product.description }}</td>
+            <td class="border border-black px-4 py-2 text-align">{{ cart.note_location if cart.note_location else
+              "-" }}
+            <td class="border border-black px-4 py-2 text-align">{{ cart.quantity }}</td>
             </td>
             {% endfor %}
         </tbody>
