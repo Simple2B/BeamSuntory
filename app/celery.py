@@ -182,12 +182,14 @@ def notify_users_new_request_share(
             m.Division.role_name != s.UserRole.ADMIN.value,
             m.Division.role_name != s.UserRole.WAREHOUSE_MANAGER.value,
             m.UserGroup.right_id == request_share.from_group_id,
+            m.User.approval_permission.is_(True),
         )
 
         if request_share.from_group_id in admin_groups_ids:
             where_stm = sa.and_(
                 m.Division.role_name != s.UserRole.WAREHOUSE_MANAGER.value,
                 m.UserGroup.right_id == request_share.from_group_id,
+                m.User.approval_permission.is_(True),
             )
 
         users = db.session.scalars(

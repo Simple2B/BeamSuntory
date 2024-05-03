@@ -329,7 +329,7 @@ def save():
                 type=s.ReportSKUType.ship_request.value,
                 status="Ship request assigned to pickup.",
             ).save(False)
-        cart.note_location = note_location
+        cart.product.notes_location = note_location
         cart.status = "completed"
 
     ship_request.wm_notes = form.wm_notes.data
@@ -382,7 +382,7 @@ def update_notes():
             log(log.ERROR, "Cart not found")
             flash("Cannot save item data", "danger")
             return redirect(url_for("outgoing_stock.get_all"))
-        cart.note_location = note_location_data.note_location
+        cart.product.notes_location = note_location_data.note_location
 
     ship_request.proof_of_delivery = form.proof_of_delivery.data
     ship_request.tracking = form.tracking.data
