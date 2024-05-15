@@ -10,10 +10,6 @@ if TYPE_CHECKING:
     from .product import Product
     from .group_for_product import GroupProduct
 
-else:
-    Product = "Product"
-    GroupProduct = "GroupProduct"
-
 
 class ProductGroupForSort(db.Model, ModelMixin):
     __tablename__ = "product_groups_for_sort"
