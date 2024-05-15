@@ -124,7 +124,7 @@ def get_assigns_report():
     ],
     has_approval_permission=True,
 )
-def assigns():
+def search_report_assigns():
     users = db.session.scalars(sa.select(m.User))
 
     product_master_group_brand = db.session.scalars(

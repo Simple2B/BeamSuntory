@@ -317,7 +317,7 @@ def create():
         else:
             log(
                 log.ERROR,
-                "Warehouse product not found: product_id:[%d] group_id:[%d]",
+                "Warehouse product not found: product_id:[%s] group_id:[%s]",
                 cart.product_id,
                 cart.group_id,
             )
