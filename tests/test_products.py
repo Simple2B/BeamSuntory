@@ -62,12 +62,18 @@ def test_create_product(client: FlaskClient):
 def test_delete_product(mg_g_populate: FlaskClient):
     login(mg_g_populate)
 
-    before_delete_products_rows_objs = db.session.execute(m.Product.select()).all()
+    before_delete_products_rows_objs = db.session.scalars(sa.select(m.Product)).all()
 
-    response = mg_g_populate.delete("/product/delete/1")
+    response = mg_g_populate.delete(
+        f"/product/delete/{before_delete_products_rows_objs[0].id}"
+    )
+    assert response.status_code == 409
+
+    response = mg_g_populate.delete(
+        f"/product/delete/{before_delete_products_rows_objs[1].id}"
+    )
     assert response.status_code == 200
-    assert "ok" in response.text
-    products_rows_objs = db.session.execute(m.Product.select()).all()
+    products_rows_objs = db.session.scalars(sa.select(m.Product)).all()
     assert len(products_rows_objs) < len(before_delete_products_rows_objs)
 
 
