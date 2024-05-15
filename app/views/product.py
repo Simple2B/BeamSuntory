@@ -648,7 +648,7 @@ def get_assign_form(warehouse_product_id: int):
     form: f.AssignProductForm = f.AssignProductForm()
     product_warehouse = db.session.get(m.WarehouseProduct, warehouse_product_id)
     if not product_warehouse:
-        log(log.ERROR, "Can't find product_warehouse [%d]", warehouse_product_id)
+        log(log.ERROR, "Can't find product_warehouse [%s]", warehouse_product_id)
         return render_template(
             "error_modal.html", message="Can't find product warehouse"
         )
@@ -857,7 +857,7 @@ def get_request_share_form(warehouse_product_id: int):
     form: f.RequestShareProductForm = f.RequestShareProductForm()
     warehouse_product = db.session.get(m.WarehouseProduct, warehouse_product_id)
     if not warehouse_product:
-        log(log.ERROR, "Can't find product_warehouse [%d]", warehouse_product_id)
+        log(log.ERROR, "Can't find product_warehouse [%s]", warehouse_product_id)
         return render_template(
             "error_modal.html", message="Can't find product warehouse"
         )
@@ -1449,7 +1449,7 @@ def upload():
     ]
 )
 def full_image(id: int):
-    log(log.INFO, "Get full image [%d]", id)
+    log(log.INFO, "Get full image [%s]", id)
     product: m.Product = db.session.execute(
         m.Product.select().where(m.Product.id == id)
     ).scalar()

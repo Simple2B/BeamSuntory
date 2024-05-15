@@ -399,6 +399,6 @@ def delete(id: int):
     db.session.execute(m.Event.delete().where(m.Event.cart_id == id))
     db.session.delete(cart)
     db.session.commit()
-    log(log.INFO, "Cart item deleted. cart_id: [%d]", id)
+    log(log.INFO, "Cart item deleted. cart_id: [%s]", id)
     flash("Item deleted!", "success")
     return "ok", 200
