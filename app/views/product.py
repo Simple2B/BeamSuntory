@@ -20,6 +20,7 @@ from pydantic import ValidationError
 from pydantic import TypeAdapter
 
 import sqlalchemy as sa
+from sqlalchemy.exc import SQLAlchemyError
 from app.controllers import (
     create_pagination,
     save_image,
@@ -614,26 +615,71 @@ def delete(id: int):
         log(log.INFO, "There is no product with id: [%s]", id)
         flash("There is no such product", "danger")
         return "no product", 404
-    db.session.execute(
-        m.WarehouseProduct.delete().where(m.WarehouseProduct.product == product)
-    )
-    db.session.execute(m.Cart.delete().where(m.Cart.product == product))
-    db.session.execute(
-        m.ProductGroup.delete().where(m.ProductGroup.product_id == product.id)
-    )
-    db.session.execute(
-        m.ProductQuantityGroup.delete().where(
-            m.ProductAllocated.product_quantity_groups.any(
-                m.ProductAllocated.product == product
+    try:
+        db.session.execute(
+            m.AdjustGroupQty.delete().where(m.AdjustGroupQty.product == product)
+        )
+        db.session.execute(m.Adjust.delete().where(m.Adjust.product == product))
+        db.session.execute(m.Assign.delete().where(m.Assign.product == product))
+        db.session.execute(m.Event.delete().where(m.Event.product == product))
+        db.session.execute(
+            m.Event.delete().where(m.Event.cart.has(m.Product.id == product.id))
+        )
+        db.session.execute(m.Cart.delete().where(m.Cart.product == product))
+        db.session.execute(
+            m.ProductQuantityGroup.delete().where(
+                m.ProductAllocated.product_quantity_groups.any(
+                    m.ProductAllocated.product == product  # type: ignore
+                )
             )
         )
-    )
-    db.session.execute(
-        m.ProductAllocated.delete().where(m.ProductAllocated.product == product)
-    )
-    db.session.commit()
-    db.session.delete(product)
-    db.session.commit()
+        db.session.execute(
+            m.ProductAllocated.delete().where(m.ProductAllocated.product == product)
+        )
+        db.session.execute(
+            m.ProductGroup.delete().where(m.ProductGroup.product_id == product.id)
+        )
+        db.session.execute(
+            m.WarehouseProduct.delete().where(
+                m.WarehouseProduct.product_id == product.id
+            )
+        )
+        db.session.execute(
+            m.ReportInventory.delete().where(m.ReportInventory.product == product)
+        )
+        db.session.execute(m.ReportSKU.delete().where(m.ReportSKU.product == product))
+
+        db.session.execute(
+            m.ReportRequestShare.delete().where(
+                m.ReportRequestShare.request_share.has(product_id=product.id)
+            )
+        )
+        db.session.execute(
+            m.RequestShareUser.delete().where(
+                m.ReportRequestShare.request_share.has(product=product)
+            )
+        )
+        db.session.execute(
+            m.RequestShare.delete().where(m.RequestShare.product == product)
+        )
+
+        db.session.delete(product)
+        db.session.commit()
+    except SQLAlchemyError as e:
+        log(
+            log.ERROR,
+            "Unable to delete a product, the product has dependencies to other instance: [%s]",
+            e,
+        )
+        db.session.rollback()
+        flash(
+            "Unable to delete a product, the product has dependencies to other instance",
+            "danger",
+        )
+        return (
+            "Unable to delete a product, the product has dependencies to other instance",
+            409,
+        )
     log(log.INFO, "Product deleted. Product: [%s]", product)
     flash("Product deleted!", "success")
     return "ok", 200

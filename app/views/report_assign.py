@@ -124,7 +124,7 @@ def get_assigns_report():
     ],
     has_approval_permission=True,
 )
-def search_report_assigns():
+def assigns():
     users = db.session.scalars(sa.select(m.User))
 
     product_master_group_brand = db.session.scalars(
@@ -163,4 +163,24 @@ def search_report_assigns():
         product_master_group_categories=product_master_group_categories,
         product_master_group_premises=product_master_group_premises,
         product_groups=product_groups,
+    )
+
+
+@report_assign_blueprint.route("/assigns/search")
+@login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
+def search_report_assigns():
+    pagination, reports = get_assigns_report()
+
+    return render_template(
+        "report/assign/reports_assign_table.html", page=pagination, reports=reports
     )
