@@ -326,6 +326,7 @@ def product_view(id: int):
     )
     warehouses = {}
     for warehouse_product in product.warehouse_products:
+
         if warehouse_product.warehouse.name not in warehouses:
             warehouses[warehouse_product.warehouse.name] = (
                 warehouse_product.product_quantity
@@ -605,7 +606,43 @@ def save():
     return redirect(url_for("product.get_all", **query_params))
 
 
-# TODO brainstorm
+@product_blueprint.route("/product-ship-form/<warehouse_product_id>", methods=["GET"])
+@login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.SALES_REP.value,
+    ]
+)
+def get_product_ship_form(warehouse_product_id: int):
+    form: f.NewCartForm = f.NewCartForm()
+    warehouse_product = db.session.get(m.WarehouseProduct, warehouse_product_id)
+    if not warehouse_product:
+        log(log.ERROR, "Not found warehouse product [%s]", warehouse_product_id)
+        return render_template(
+            "error_modal.html", message="Can't find product warehouse"
+        )
+
+    form.warehouse_product_id.data = warehouse_product_id
+
+    is_event = False
+    if warehouse_product.group.master_group.name == s.MasterGroupMandatory.events.value:
+        is_event = True
+
+    if is_event:
+        return render_template(
+            "product/modal_event.html",
+            form=form,
+            warehouse_product=warehouse_product,
+        )
+    return render_template(
+        "product/ship.html",
+        form=form,
+        warehouse_product=warehouse_product,
+    )
+
+
 @product_blueprint.route("/delete/<int:id>", methods=["DELETE"])
 @login_required
 @role_required([s.UserRole.ADMIN.value])
@@ -625,7 +662,7 @@ def delete(id: int):
         db.session.execute(
             m.Event.delete().where(m.Event.cart.has(m.Product.id == product.id))
         )
-        db.session.execute(m.Cart.delete().where(m.Cart.product == product))
+        db.session.execute(m.Cart.delete().where(m.Cart.product_id == product.id))
         db.session.execute(
             m.ProductQuantityGroup.delete().where(
                 m.ProductAllocated.product_quantity_groups.any(

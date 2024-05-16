@@ -71,7 +71,7 @@
                     <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
                         <div class="pl-3">
                             <div class="text-base font-semibold">{{
-                                available_products[item.group.name][item.product.SKU] }}
+                                item.available_quantity }}
                             </div>
                         </div>
                     </td>
@@ -86,7 +86,7 @@
                         <div class="pl-3">
                             <input type="number" name="quantity" id="cart-item-quantity-{{ item.id }}"
                                 value="{{ item.quantity }}"
-                                data-target-available-quantity="{{ available_products[item.group.name][item.product.SKU] }}"
+                                data-target-available-quantity="{{ item.available_quantity }}"
                                 class="cart-item-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                 placeholder="{{ item.quantity }}" />
 

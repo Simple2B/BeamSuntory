@@ -306,21 +306,10 @@ def create():
             status="Ship request created.",
         ).save(False)
 
-        we_ho_product = db.session.scalar(
-            sa.select(m.WarehouseProduct).where(
-                m.WarehouseProduct.group_id == cart.group_id,
-                m.WarehouseProduct.product_id == cart.product_id,
-            )
-        )
-        if we_ho_product:
-            we_ho_product.product_quantity -= cart.quantity
+        if cart.from_warehouse_product:
+            cart.from_warehouse_product.product_quantity -= cart.quantity
         else:
-            log(
-                log.ERROR,
-                "Warehouse product not found: product_id:[%s] group_id:[%s]",
-                cart.product_id,
-                cart.group_id,
-            )
+            log(log.ERROR, "Warehouse product not found: cart_id:[%s] cart_id:[%s]")
 
         cart.status = "submitted"
         cart.order_numb = ship_request.order_numb

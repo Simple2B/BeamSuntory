@@ -35,6 +35,10 @@ class Cart(db.Model, ModelMixin):
     )
     group_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("groups.id"))
 
+    from_warehouse_product_id: orm.Mapped[int] = orm.mapped_column(
+        sa.ForeignKey("warehouse_product.id")
+    )
+
     # Column
     quantity: orm.Mapped[int] = orm.mapped_column(sa.Integer)
     order_numb: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=True)
@@ -51,12 +55,19 @@ class Cart(db.Model, ModelMixin):
     # Relationship
     product: orm.Mapped["Product"] = orm.relationship()
     warehouse: orm.Mapped["Warehouse"] = orm.relationship()
+    from_warehouse_product: orm.Mapped["WarehouseProduct"] = orm.relationship()
     ship_request: orm.Mapped["ShipRequest"] = orm.relationship(back_populates="carts")
     event: orm.Mapped["Event"] = orm.relationship()
     group: orm.Mapped["Group"] = orm.relationship()
 
     def __repr__(self):
         return f"<{self.id}: {self.product_id}>"
+
+    @property
+    def available_quantity(self):
+        if self.from_warehouse_product:
+            return self.from_warehouse_product.product_quantity
+        return 0
 
     @property
     def json(self):

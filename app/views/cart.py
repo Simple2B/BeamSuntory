@@ -87,18 +87,6 @@ def get_all():
         )
     ).all()
 
-    available_products = (
-        {
-            wg.group.name: {
-                wprod.product.SKU: wprod.product_quantity
-                for wprod in warehouse_products
-                if wg.group.name == wprod.group.name
-            }
-            for wg in warehouse_products
-        }
-        if warehouse_products
-        else {}
-    )
     store_categories = db.session.scalars(
         sa.select(m.StoreCategory).where(m.StoreCategory.id != locker_id)
     ).all()
@@ -119,7 +107,7 @@ def get_all():
             pagination.per_page
         )
     ).all()
-    carts = [
+    event_carts = [
         {
             "group": cart.group.name,
             "id": cart.id,
@@ -127,14 +115,7 @@ def get_all():
             "product_id": cart.product_id,
         }
         for cart in cart_items
-        if db.session.query(m.Group)
-        .join(m.MasterGroup)
-        .filter(
-            m.MasterGroup.name == s.MasterGroupMandatory.events.value,
-            m.Group.name == cart.group.name,
-        )
-        .count()
-        > 0
+        if cart.group.master_group.name == s.MasterGroupMandatory.events.value
     ]
 
     return render_template(
@@ -143,9 +124,8 @@ def get_all():
         page=pagination,
         form=form,
         stores=stores,
-        available_products=available_products,
         store_categories=store_categories,
-        carts=json.dumps(carts),
+        carts=json.dumps(event_carts),
         is_locker_store_category=is_locker_store_category,
     )
 
@@ -247,7 +227,7 @@ def get_stores_options():
     return render_template("cart/store_options.html", stores=stores)
 
 
-@cart_blueprint.route("/create/<warehouse_product_id>", methods=["POST", "GET"])
+@cart_blueprint.route("/create", methods=["POST"])
 @login_required
 @role_required(
     [
@@ -256,46 +236,40 @@ def get_stores_options():
         s.UserRole.SALES_REP.value,
     ]
 )
-def create(warehouse_product_id: int):
+def create():
     form: f.NewCartForm = f.NewCartForm()
     query_params = get_query_params_from_headers()
-    warehouse_product = db.session.get(m.WarehouseProduct, warehouse_product_id)
-    if not warehouse_product:
-        log(log.ERROR, "Not found warehouse product by id : [%s]", warehouse_product_id)
-        return render_template(
-            "error_modal.html", message="Can't find product warehouse"
-        )
-    is_event = (
-        warehouse_product.group.master_group.name == s.MasterGroupMandatory.events.value
-    )
-    if request.method == "GET":
-
-        if is_event:
-            return render_template(
-                "product/modal_event.html",
-                form=form,
-                warehouse_product=warehouse_product,
-            )
-        return render_template(
-            "product/ship.html", form=form, warehouse_product=warehouse_product
-        )
 
     if not form.validate_on_submit():
         log(log.ERROR, "Item creation errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
-        if is_event:
-            return redirect(url_for("product.get_all", is_event="true", **query_params))
-
         return redirect(url_for("product.get_all", **query_params))
+
+    warehouse_product = db.session.get(
+        m.WarehouseProduct, form.warehouse_product_id.data
+    )
+
+    if not warehouse_product:
+        log(log.ERROR, "Not found warehouse products")
+        return render_template(
+            "error_modal.html", message="Can't find product warehouse"
+        )
+
+    is_event = False
+    if warehouse_product.group.master_group.name == s.MasterGroupMandatory.events.value:
+        is_event = True
+
     if form.quantity.data > warehouse_product.product_quantity:
         flash("Not enough products in stock", "danger")
         return redirect(url_for("product.get_all"))
+
     cart_product_amount: list[int] = (
         db.session.execute(
             sa.select(sa.func.sum(m.Cart.quantity)).where(
                 m.Cart.user_id == current_user.id,
                 m.Cart.product_id == warehouse_product.product_id,
                 m.Cart.group_id == warehouse_product.group_id,
+                m.Cart.from_warehouse_product_id == warehouse_product.id,
                 m.Cart.status == "pending",
             )
         )
@@ -317,6 +291,7 @@ def create(warehouse_product_id: int):
         product_id=warehouse_product.product_id,
         group_id=warehouse_product.group_id,
         quantity=new_quantity,
+        from_warehouse_product_id=warehouse_product.id,
         user_id=current_user.id,
     )
     log(log.INFO, "Form submitted. Cart: [%s]", item)
@@ -329,7 +304,13 @@ def create(warehouse_product_id: int):
 
 @cart_blueprint.route("/edit", methods=["POST"])
 @login_required
-@role_required([s.UserRole.ADMIN.value, s.UserRole.MANAGER.value])
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.SALES_REP.value,
+    ]
+)
 def save():
     form: f.CartForm = f.CartForm()
     if not form.validate_on_submit():
@@ -346,14 +327,10 @@ def save():
         flash("Cannot save item data", "danger")
         return redirect(url_for("cart.get_all"))
 
-    warehouse_product = db.session.scalar(
-        sa.select(m.WarehouseProduct).where(
-            m.WarehouseProduct.product_id == cart.product_id,
-            m.WarehouseProduct.group_id == cart.group_id,
-        )
-    )
-    if not warehouse_product:
-        log(log.ERROR, "Not found warehouse product by id : [%s]", cart.product_id)
+    available_quantity = cart.from_warehouse_product.product_quantity
+
+    if not available_quantity:
+        log(log.ERROR, "Not enough products in stock")
         flash("Cannot save item data", "danger")
         return redirect(url_for("cart.get_all"))
 
@@ -363,6 +340,7 @@ def save():
                 m.Cart.id != cart.id,
                 m.Cart.user_id == current_user.id,
                 m.Cart.product_id == cart.product_id,
+                m.Cart.from_warehouse_product_id == cart.from_warehouse_product_id,
                 m.Cart.group_id == cart.group_id,
                 m.Cart.status == "pending",
             )
@@ -373,8 +351,8 @@ def save():
     if (
         cart_product_amount
         and sum(amount for amount in cart_product_amount if amount) + form.quantity.data
-        > warehouse_product.product_quantity
-    ) or form.quantity.data > warehouse_product.product_quantity:
+        > available_quantity
+    ) or form.quantity.data > available_quantity:
         log(log.ERROR, "The cart is full, not enough products in stock")
         flash("The cart is full, not enough products in stock", "danger")
         return redirect(url_for("cart.get_all"))
