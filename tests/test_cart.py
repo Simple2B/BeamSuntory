@@ -25,8 +25,9 @@ def test_create_cart(mg_g_populate: FlaskClient):
     )
 
     response = mg_g_populate.post(
-        f"/cart/create/{we_product.id}",
+        "/cart/create",
         data=dict(
+            warehouse_product_id=we_product.id,
             quantity=11,
         ),
         follow_redirects=True,

@@ -414,15 +414,8 @@ def cancel(id: int):
         m.Cart.select().where(m.Cart.ship_request_id == ship_request.id)
     ).scalars()
     for cart in carts:
-        warehouse_product: m.WarehouseProduct = db.session.execute(
-            m.WarehouseProduct.select().where(
-                m.WarehouseProduct.product_id == cart.product_id,
-                m.WarehouseProduct.group_id == cart.group_id,
-            )
-        ).scalar()
-        if warehouse_product:
-            warehouse_product.product_quantity += cart.quantity
-            warehouse_product.save()
+        if cart.from_warehouse_product:
+            cart.from_warehouse_product.product_quantity += cart.quantity
 
     ship_request.status = s.ShipRequestStatus.cancelled
     ship_request.save()
@@ -469,12 +462,6 @@ def print(query: s.OutgoingStockQueryParamsDownload):
 
     ship_requests = db.session.scalars(sql_query).all()
 
-    # pdf = HTML(string=context).write_pdf()
-
-    # response = make_response(pdf)
-    # response.headers["Content-Type"] = "application/pdf"
-    # response.headers["Content-Disposition"] = f"attachment; filename={filename}"
-
     return render_template(
         "outgoing_stock/pdf_template.html",
         ship_requests=ship_requests,
@@ -492,6 +479,9 @@ def delete_cart(cart_id: int):
         return render_template(
             "toast.html", message="There is no such product item!", category="danger"
         )
+
+    if cart.from_warehouse_product:
+        cart.from_warehouse_product.product_quantity += cart.quantity
 
     db.session.execute(m.Event.delete().where(m.Event.cart_id == cart_id))
     db.session.delete(cart)
