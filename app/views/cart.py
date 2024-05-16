@@ -79,14 +79,6 @@ def get_all():
         else:
             store.favorite = False
 
-    warehouse_products = db.session.scalars(
-        m.WarehouseProduct.select().where(
-            m.WarehouseProduct.product_id.in_(
-                [wp.product_id for wp in db.session.execute(query).scalars()]
-            )
-        )
-    ).all()
-
     store_categories = db.session.scalars(
         sa.select(m.StoreCategory).where(m.StoreCategory.id != locker_id)
     ).all()
