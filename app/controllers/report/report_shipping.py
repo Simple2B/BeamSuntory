@@ -17,64 +17,64 @@ class ReportDataShipping(ReportData):
 
     @classmethod
     def get_reports(cls, report_filter: s.ReportFilter):
-        query = m.ReportShipping.select().order_by(m.ReportShipping.id)
-        count_query = sa.select(sa.func.count()).select_from(m.ReportShipping)
+        query = m.ShipRequest.select().order_by(m.ShipRequest.id)
+        count_query = sa.select(sa.func.count()).select_from(m.ShipRequest)
 
         if report_filter.q:
-            where_stmt = m.ReportShipping.ship_request.has(
-                m.ShipRequest.store.has(
-                    m.Store.store_name.ilike(f"%{report_filter.q}%")
-                )
-            ) | m.ReportShipping.user.has(m.User.username.ilike(f"%{report_filter.q}%"))
+            where_stmt = m.ShipRequest.store.has(
+                m.Store.store_name.ilike(f"%{report_filter.q}%")
+            ) | m.ShipRequest.reports.any(
+                m.ReportShipping.user.has(m.User.username.ilike(f"%{report_filter.q}%"))
+            )
 
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)
 
         if report_filter.search_sku:
-            where_stmt = m.ReportShipping.ship_request.has(
-                m.ShipRequest.carts.any(
-                    m.Cart.product.has(
-                        m.Product.SKU.ilike(f"%{report_filter.search_sku}%")
-                    )
+            where_stmt = m.ShipRequest.carts.any(
+                m.Cart.product.has(m.Product.SKU.ilike(f"%{report_filter.search_sku}%"))
+            )
+
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
+
+        if report_filter.division:
+            where_stmt = m.ShipRequest.reports.any(
+                m.ReportShipping.user.has(
+                    m.User.role == report_filter.division,
                 )
             )
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)
 
-        if report_filter.division:
-            where_stmt = m.ReportShipping.user.has(
-                m.User.role == report_filter.division,
-            )
-            query = query.where(where_stmt)
-            count_query = count_query.where(where_stmt)
-
         if report_filter.start_date:
-            where_stmt = m.ReportShipping.created_at >= datetime.strptime(
-                report_filter.start_date, "%m/%d/%Y"
+            where_stmt = m.ShipRequest.reports.any(
+                m.ReportShipping.created_at
+                >= datetime.strptime(report_filter.start_date, "%m/%d/%Y")
             )
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)
 
         if report_filter.start_date_to:
-            where_stmt = m.ReportShipping.created_at <= datetime.strptime(
-                report_filter.start_date_to, "%m/%d/%Y"
+            where_stmt = m.ShipRequest.reports.any(
+                m.ReportShipping.created_at
+                <= datetime.strptime(report_filter.start_date_to, "%m/%d/%Y")
             )
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)
 
         if report_filter.action_type_shipping:
-            where_stmt = (
+            where_stmt = m.ShipRequest.reports.any(
                 m.ReportShipping.type == report_filter.action_type_shipping.value
             )
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)
 
         if report_filter.target_group:
-            where_stmt = m.ReportShipping.ship_request.has(
-                m.ShipRequest.carts.any(
-                    m.Cart.group.has((m.Group.name == report_filter.target_group))
-                )
+            where_stmt = m.ShipRequest.carts.any(
+                m.Cart.group.has((m.Group.name == report_filter.target_group))
             )
+
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)
 
@@ -85,17 +85,14 @@ class ReportDataShipping(ReportData):
             report_filter.premises,
         ):
             if group_name:
-                where_stmt = m.ReportShipping.ship_request.has(
-                    m.ShipRequest.carts.any(
-                        m.Cart.product.has(
-                            m.Product.product_groups.any(
-                                m.ProductGroup.parent.has(
-                                    m.GroupProduct.name == group_name
-                                )
-                            )
+                where_stmt = m.ShipRequest.carts.any(
+                    m.Cart.product.has(
+                        m.Product.product_groups.any(
+                            m.ProductGroup.parent.has(m.GroupProduct.name == group_name)
                         )
                     )
                 )
+
                 query = query.where(where_stmt)
                 count_query = count_query.where(where_stmt)
 

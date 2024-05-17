@@ -322,28 +322,19 @@ const generateCSVAssign = async (queryParams: URLSearchParams) => {
 
 const generateCSVShelfLife = async (queryParams: URLSearchParams) => {
   // CSV Headers
-  const csvData = ['SKU, shelfLifeStart, shelfLifeEnd, quantityOrdered, quantityReceived'];
+  const csvData = ['Numb Of Day Left, SKU, Name, Qty, Expire Date'];
 
   await fetchReportAPI(queryParams, (data: IReportShelfLifeResponse) => {
     data.reportShelfLifeList.forEach((report) => {
-      let received;
-      if (!report.quantityReceived) {
-        received = '-';
-      } else {
-        received = report.quantityReceived.toString();
-      }
-
-      if (searchSKUInput.value.length && !report.product.SKU.includes(searchSKUInput.value)) {
-        return;
-      }
 
       csvData.push(
         [
-          report.product.SKU,
-          formatDate(report.shelfLifeStart),
-          formatDate(report.shelfLifeStart),
-          report.quantity,
-          received,
+          report.numbOfDayLeft,
+          report.SKU,
+          report.name,
+          report.qty,
+          report.expiry_date,
+          
         ].join(',')
       );
     });

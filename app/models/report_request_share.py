@@ -37,6 +37,9 @@ class ReportRequestShare(db.Model, ModelMixin):
     request_share: orm.Mapped["RequestShare"] = orm.relationship()
     user: orm.Mapped["User"] = orm.relationship()
 
+    def __repr__(self):
+        return f"<ReportRequestShare {self.id}> user: {self.user.username}"
+
     @property
     def json(self):
         return s.ReportRequestShare.model_validate(self).model_dump_json(by_alias=True)

@@ -19,50 +19,36 @@ report_shelf_life_blueprint = Blueprint(
 
 def get_shelf_life_reports():
     filter_shelf_lifes = s.FilterReportInventories.model_validate(dict(request.args))
-    query = m.ProductAllocated.select().order_by(m.ProductAllocated.id)
+    query = m.Product.select().order_by(m.Product.id)
 
-    count_query = sa.select(sa.func.count()).select_from(m.ReportSKU)
+    count_query = sa.select(sa.func.count()).select_from(m.Product)
 
     if filter_shelf_lifes.q:
         query = query.where(
-            m.ProductAllocated.shelf_life_start.ilike(f"%{filter_shelf_lifes.q}%")
-            | m.ProductAllocated.shelf_life_end.ilike(f"%{filter_shelf_lifes.q}%")
-            # | m.ProductAllocated.user.has(m.User.username.ilike(f"%{filter_shelf_lifes.q}%"))
-            | m.ProductAllocated.product.has(
-                m.Product.name.ilike(f"%{filter_shelf_lifes.q}%")
-            )
-            | m.ProductAllocated.product.has(
-                m.Product.SKU.ilike(f"%{filter_shelf_lifes.q}%")
-            )
+            m.Product.name.ilike(f"%{filter_shelf_lifes.q}%")
+            | m.Product.SKU.ilike(f"%{filter_shelf_lifes.q}%")
         )
 
         count_query = count_query.where(
-            m.ProductAllocated.shelf_life_start.ilike(f"%{filter_shelf_lifes.q}%")
-            | m.ProductAllocated.shelf_life_end.ilike(f"%{filter_shelf_lifes.q}%")
-            # | m.ProductAllocated.user.has(m.User.username.ilike(f"%{filter_shelf_lifes.q}%"))
-            | m.ProductAllocated.product.has(
-                m.Product.name.ilike(f"%{filter_shelf_lifes.q}%")
-            )
-            | m.ProductAllocated.product.has(
-                m.Product.SKU.ilike(f"%{filter_shelf_lifes.q}%")
-            )
+            m.Product.name.ilike(f"%{filter_shelf_lifes.q}%")
+            | m.Product.SKU.ilike(f"%{filter_shelf_lifes.q}%")
         )
 
     if filter_shelf_lifes.created_from:
         query = query.where(
-            m.ProductAllocated.shelf_life_start
+            m.Product.expiry_date
             >= datetime.strptime(filter_shelf_lifes.created_from, "%m/%d/%Y")
         )
 
     if filter_shelf_lifes.created_to:
         query = query.where(
-            m.ProductAllocated.shelf_life_end
+            m.Product.expiry_date
             <= datetime.strptime(filter_shelf_lifes.created_to, "%m/%d/%Y")
         )
 
-    if filter_shelf_lifes.expire_in:
+    if filter_shelf_lifes.expire_in and int(filter_shelf_lifes.expire_in) > 0:
         query = query.where(
-            m.ProductAllocated.shelf_life_end
+            m.Product.shelf_life_end
             <= datetime.now() + timedelta(days=int(filter_shelf_lifes.expire_in))
         )
 
@@ -79,7 +65,7 @@ def get_shelf_life_reports():
             )
         ).all()
 
-        query = query.where(m.ProductAllocated.product_id.in_(mg_product_ids))
+        query = query.where(m.Product.id.in_(mg_product_ids))
 
     if filter_shelf_lifes.group:
         product_ids = db.session.scalars(
@@ -90,7 +76,7 @@ def get_shelf_life_reports():
             )
         ).all()
 
-        query = query.where(m.ProductAllocated.product_id.in_(product_ids))
+        query = query.where(m.Product.id.in_(product_ids))
 
     master_groups = [
         filter_shelf_lifes.group_brand,
@@ -103,17 +89,13 @@ def get_shelf_life_reports():
         for group in master_groups:
             if group:
                 query = query.where(
-                    m.ProductAllocated.product.has(
-                        m.Product.product_groups.any(
-                            m.ProductGroup.parent.has(m.GroupProduct.name == group)
-                        )
+                    m.Product.product_groups.any(
+                        m.ProductGroup.parent.has(m.GroupProduct.name == group)
                     )
                 )
                 count_query = count_query.where(
-                    m.ProductAllocated.product.has(
-                        m.Product.product_groups.any(
-                            m.ProductGroup.parent.has(m.GroupProduct.name == group)
-                        )
+                    m.Product.product_groups.any(
+                        m.ProductGroup.parent.has(m.GroupProduct.name == group)
                     )
                 )
 

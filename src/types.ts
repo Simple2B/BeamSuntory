@@ -263,16 +263,15 @@ export interface IReportAssignResponse {
   reports: IReportAssign[];
 }
 
+
+
 export interface IReportShelfLife {
-  quantity: number;
-  quantityReceived: number;
-  shelfLifeStart: string;
-  shelfLifeEnd: string;
-  product: IProduct;
-  // TODO do we need this?
-  // productQuantityGroups: list[ProductGroupOut] = Field(
-  //     alias="productQuantityGroups"
-  // )
+  
+  numbOfDayLeft: number
+  SKU: string
+  qty: number
+  name: string
+  expiry_date: string
 }
 
 export interface IReportShelfLifeResponse {

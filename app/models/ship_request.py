@@ -1,3 +1,4 @@
+from typing import TYPE_CHECKING, List
 from datetime import datetime
 
 import sqlalchemy as sa
@@ -14,6 +15,10 @@ from .store_category import StoreCategory
 from .report_event import ReportEvent
 from .utils import generate_uuid
 from .report_inventory import ReportInventoryList
+
+
+if TYPE_CHECKING:
+    from .report_shipping import ReportShipping
 
 
 class ShipRequest(db.Model, ModelMixin):
@@ -68,7 +73,33 @@ class ShipRequest(db.Model, ModelMixin):
     report_inventory_list: orm.Mapped["ReportInventoryList"] = orm.relationship(
         back_populates="ship_request"
     )
+
+    reports: orm.Mapped[List["ReportShipping"]] = orm.relationship(
+        back_populates="ship_request"
+    )
     user: orm.Mapped[User] = orm.relationship()
+
+    @property
+    def date_picked_up(self):
+        if not self.reports:
+            return "-"
+
+        for report in self.reports:
+            if report.type == s.ReportShipRequestActionType.PICKED_UP.value:
+                return report.created_at.strftime("%m/%d/%Y")
+
+        return self.reports[-1].type
+
+    @property
+    def date_delivered(self):
+        if not self.reports:
+            return "-"
+
+        for report in self.reports:
+            if report.type == s.ReportShipRequestActionType.DELIVERED.value:
+                return report.created_at.strftime("%m/%d/%Y")
+
+        return self.reports[-1].type
 
     def set_order_numb(self):
         self.order_numb = f"Beam-OB-{START_ORDER_NUMBER + self.id}"

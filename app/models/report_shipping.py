@@ -34,8 +34,13 @@ class ReportShipping(db.Model, ModelMixin):
     )
 
     # Relations
-    ship_request: orm.Mapped["ShipRequest"] = orm.relationship()
+    ship_request: orm.Mapped["ShipRequest"] = orm.relationship(back_populates="reports")
     user: orm.Mapped["User"] = orm.relationship()
+
+    def __repr__(self):
+        return (
+            f"<ReportShipping {self.id}, Ship request: {self.ship_request.order_numb}>"
+        )
 
     @property
     def json(self):

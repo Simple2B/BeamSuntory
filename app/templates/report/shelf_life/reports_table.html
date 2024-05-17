@@ -9,39 +9,29 @@
           Image
         </th>
         <th scope="col" class="px-6 py-3">
+          Number of days left
+        </th>
+        <th scope="col" class="px-6 py-3">
           SKU
         </th>
         <th scope="col" class="px-6 py-3">
-          Quantity
-        </th>
-        <th scope="col" class="px-6 py-3">
-          Shelf life start
-        </th>
-        <th scope="col" class="px-6 py-3">
-          Shelf life end
+          Name
         </th>
         <th scope="col" class="px-6 py-3">
           Quantity
         </th>
         <th scope="col" class="px-6 py-3">
-          Quantity received
+          Date Expires
         </th>
         <th scope="col" class="px-6 py-3">
-          Quantity remains
+          Action
         </th>
-        <!-- <th
-          scope="col"
-          class="px-6 py-3"
-        >
-          Actions
-        </th> -->
       </tr>
     </thead>
     <tbody>
       <!-- prettier-ignore -->
       {% for report in shelf_life_reports if not request.args.get('search_sku') or request.args.get('search_sku') in
-      report.product.SKU %}
-      {% if report.quantity_remains and report.quantity_remains > 0 %}
+      report.SKU %}
       <!-- prettier-ignore -->
       <tr
         class="table-shelf-life-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
@@ -51,58 +41,46 @@
         <td scope="row"
           class="product-full-image-anchor   text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            {% if report.product.image|length > 100 %}
-            <img src="data:image/png;base64, {{ report.product.image }}" alt="{{ report.product.name }}"
-              class="w-14 object-cover">
+            {% if report.image|length > 100 %}
+            <img src="data:image/png;base64, {{ report.image }}" alt="{{ report.name }}" class="w-14 object-cover">
             {% else %}
-            <img src="{{ url_for('static', filename='img/default_image_brand.png') }}" alt="{{ report.product.name }}"
+            <img src="{{ url_for('static', filename='img/default_image_brand.png') }}" alt="{{ report.name }}"
               class="w-14 object-cover">
             {% endif %}
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.product.SKU }}</div>
+            <div class="text-base font-semibold">{{ report.numb_of_day_left }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.inbound_order.order_id }}</div>
+            <div class="text-base font-semibold">{{ report.SKU }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900  dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.name }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.shelf_life_start.strftime('%m/%d/%Y') }}</div>
+            <div class="text-base font-semibold">{{ report.get_warehouse_products_qty() }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.shelf_life_end.strftime('%m/%d/%Y') }}</div>
+            <div class="text-base font-semibold">{{ report.expiry_date.strftime('%m/%d/%Y') }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.quantity }}</div>
-          </div>
-        </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="text-base font-semibold">
-              {% if report.quantity_received %}
-              {{ report.quantity_received }}
-              {% else %}
-              -
-              {% endif %}
-            </div>
-          </div>
-        </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.quantity_remains }}</div>
+            <div class="text-base font-semibold">Action</div>
           </div>
         </td>
       </tr>
-      {% endif %} {% endfor %}
+      {% endfor %}
     </tbody>
   </table>
   {% if page.pages > 1 %}
