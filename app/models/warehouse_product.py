@@ -34,5 +34,13 @@ class WarehouseProduct(db.Model, ModelMixin):
         return f"<{self.id}: {self.product_id}>"
 
     @property
+    def warehouse_name(self):
+        return self.warehouse.name
+
+    @property
+    def group_name(self):
+        return self.group.name
+
+    @property
     def json(self):
         return s.WarehouseProduct.model_validate(self).model_dump_json()

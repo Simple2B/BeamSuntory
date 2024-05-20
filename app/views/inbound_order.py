@@ -439,8 +439,6 @@ def save():
     ).save(False)
 
     db.session.commit()
-    if form.next_url.data:
-        return redirect(form.next_url.data)
     return redirect(url_for("inbound_order.get_all"))
 
 

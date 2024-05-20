@@ -46,5 +46,9 @@ class Event(db.Model, ModelMixin):
         return f"<{self.id}: {self.product_id}>"
 
     @property
+    def ship_request(self):
+        return self.cart.ship_request
+
+    @property
     def json(self):
         return s.Event.model_validate(self).model_dump_json(by_alias=True)

@@ -5,9 +5,8 @@
 [name='group'], [name='group_brand'], [name='group_categories'], [name='group_language'], [name='group_premises'],
 [name='expire_in']" %}
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-  <button id="table-report-loader" hx-trigger="click"
-    hx-get="{{ url_for('report_shelf_life.search_shelf_life_reports') }}" hx-target="#reports-table"
-    hx-indicator="#report-table-spinner" class="hidden"></button>
+  <button id="table-report-loader" hx-trigger="click" hx-get="{{ url_for('search_shelf_life_reports') }}"
+    hx-target="#reports-table" hx-indicator="#report-table-spinner" class="hidden"></button>
 
   <div class="flex items-center gap-3 p-3">
     <div class="flex gap-4 items-center justify-start py-4 bg-white dark:bg-gray-800 px-4">
@@ -18,7 +17,7 @@
           "icon/eyeglass_1.html" %}
         </div>
         <input name="q" hx-trigger="keyup changed delay:500ms" hx-target="#reports-table" hx-swap="innerHTML"
-          hx-include="{{all_includes}}" hx-get="{{ url_for('report_shelf_life.search_shelf_life_reports') }}"
+          hx-include="{{all_includes}}" hx-get="{{ url_for('search_shelf_life_reports') }}"
           hx-indicator="#report-table-spinner" type="search" id="table-search-shelf-life" placeholder="Search"
           class="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
       </div>
@@ -29,9 +28,8 @@
         %}
       </div>
       <input datepicker name="created_from" hx-trigger="changeDate" hx-include="{{all_includes}}"
-        hx-get="{{ url_for('report_shelf_life.search_shelf_life_reports') }}" hx-target="#reports-table"
-        hx-swap="innerHTML" type="text" id="filter-start-date" placeholder="Shelf life start"
-        hx-indicator="#report-table-spinner"
+        hx-get="{{ url_for('search_shelf_life_reports') }}" hx-target="#reports-table" hx-swap="innerHTML" type="text"
+        id="filter-start-date" placeholder="Shelf life start" hx-indicator="#report-table-spinner"
         class="product-shelf-life-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
     </div>
     <span class="text-gray-500">to</span>
@@ -40,9 +38,8 @@
         {% include "icon/calendar.html" %}
       </div>
       <input datepicker name="created_to" hx-trigger="changeDate" hx-include="{{all_includes}}"
-        hx-get="{{ url_for('report_shelf_life.search_shelf_life_reports') }}" hx-target="#reports-table"
-        hx-swap="innerHTML" type="text" placeholder="Shelf life end" id="filter-end-date"
-        hx-indicator="#report-table-spinner"
+        hx-get="{{ url_for('search_shelf_life_reports') }}" hx-target="#reports-table" hx-swap="innerHTML" type="text"
+        placeholder="Shelf life end" id="filter-end-date" hx-indicator="#report-table-spinner"
         class="product-shelf-life-sort-datepicker bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
     </div>
 
@@ -67,7 +64,7 @@
     <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800">
       <!-- prettier-ignore -->
       <select id="master-group" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table" name="master_group"
-        hx-include="{{all_includes}}" hx-get="{{ url_for('report_shelf_life.search_shelf_life_reports') }}"
+        hx-include="{{all_includes}}" hx-get="{{ url_for('search_shelf_life_reports') }}"
         hx-indicator="#report-table-spinner"
         class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
         <option selected value="">Master group</option>
@@ -79,7 +76,7 @@
     <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800">
       <!-- prettier-ignore -->
       <select id="target-group" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table" name="group"
-        hx-include="{{all_includes}}" hx-get="{{ url_for('report_shelf_life.search_shelf_life_reports') }}"
+        hx-include="{{all_includes}}" hx-get="{{ url_for('search_shelf_life_reports') }}"
         hx-indicator="#report-table-spinner"
         class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
         <option selected value="">Target group</option>
@@ -94,7 +91,7 @@
       <!-- prettier-ignore -->
       <select id="filter-group-{{prod_master_group.name}}" hx-trigger="change" hx-swap="innerHTML"
         hx-target="#reports-table" name="group_{{prod_master_group.name.lower()}}" hx-include="{{all_includes}}"
-        hx-get="{{ url_for('report_shelf_life.search_shelf_life_reports') }}" hx-indicator="#report-table-spinner"
+        hx-get="{{ url_for('search_shelf_life_reports') }}" hx-indicator="#report-table-spinner"
         class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
         <option selected value="">{{ prod_master_group.name }}</option>
         {% for group in prod_master_group.groups_for_product %}
@@ -107,8 +104,8 @@
     <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800">
       <!-- prettier-ignore -->
       <select id="shelf-life-filter-expire-in" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"
-        name="expire_in" hx-include="{{all_includes}}"
-        hx-get="{{ url_for('report_shelf_life.search_shelf_life_reports') }}" hx-indicator="#report-table-spinner"
+        name="expire_in" hx-include="{{all_includes}}" hx-get="{{ url_for('search_shelf_life_reports') }}"
+        hx-indicator="#report-table-spinner"
         class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
         <option selected value="0">Expire in (days)</option>
         <option value="1">1</option>
@@ -132,5 +129,5 @@
 {% endblock %}
 <!-- prettier-ignore -->
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/report_shelf_life.js') }}" type="text/javascript" defer></script>
+<script src="{{ url_for('static', filename='js/js') }}" type="text/javascript" defer></script>
 {% endblock %}

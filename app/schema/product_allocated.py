@@ -64,7 +64,7 @@ class ProductShellLifeOut(BaseModel):
     SKU: str
     qty: int
     name: str
-    expiry_date: str = Field("N/A", alias="expireDate")
+    expiry_date: str | datetime = Field("N/A", alias="expireDate")
 
 
 class ReportShelfLifeResponse(BaseModel):

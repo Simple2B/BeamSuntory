@@ -1,6 +1,6 @@
 import { ModalOptions, Modal } from 'flowbite';
 import { defaultBrandImage, htmxLoader } from './base';
-import { IReportEvent } from './types';
+import { IReportEventData } from './types';
 
 // initialize modal
 const viewReportEventsModal = document.getElementById('view-report-events-modal') as HTMLDivElement;
@@ -33,7 +33,7 @@ htmxLoader.onLoad('events-table', (target) => {
   const reportViewButtons: NodeListOf<HTMLButtonElement> = target.querySelectorAll('.report-event-view-btn');
     reportViewButtons.forEach((btn) => {
       btn.addEventListener('click', () => {
-        const reportEvent: IReportEvent = JSON.parse(btn.getAttribute('data-target'));
+        const reportEvent: IReportEventData = JSON.parse(btn.getAttribute('data-target'));
         const createAt = new Date(reportEvent.createdAt);
         const year = createAt.getFullYear();
         const month = String(createAt.getMonth() + 1).padStart(2, '0'); // Month is 0-based

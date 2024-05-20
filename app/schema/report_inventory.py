@@ -21,8 +21,22 @@ class ReportInventory(BaseModel):
     group: Group | None = None
 
 
+class WarehouseProduct(BaseModel):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+    product_quantity: int = Field(alias="productQuantity")
+    warehouse_name: str | None = Field(None, alias="warehouseName")
+    group_name: str | None = Field(None, alias="groupName")
+
+
+class ReportInventoryProduct(BaseModel):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+    SKU: str
+    name: str
+    warehouse_products: list[WarehouseProduct] = Field(alias="warehouseProducts")
+
+
 class ReportInventoryListResponse(ReportsBaseResponse):
-    reports: list[ReportInventory]
+    reports: list[ReportInventoryProduct]
 
 
 ReportInventoryListArray = RootModel[list[ReportInventory]]

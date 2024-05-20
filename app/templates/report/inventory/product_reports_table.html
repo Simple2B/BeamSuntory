@@ -1,4 +1,4 @@
-<div id="report-inbound-order-table">
+<div id="inventories-table">
   <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
       <tr>
@@ -18,73 +18,57 @@
           Quantity
         </th>
         <th scope="col" class="px-6 py-3">
-          Date
-        </th>
-        <th scope="col" class="px-6 py-3">
           Action
         </th>
       </tr>
     </thead>
+    <!-- prettier-ignore -->
     <tbody>
-      {% for report in reports %} {% set
-      loop_index = loop.index %}
-      <!-- prettier-ignore -->
-      {% for product_allocated, qty in report.inbound_order_products if not request.args.get('search_sku') or
-      request.args.get('search_sku') in product_allocated.product.SKU %}
-      <!-- prettier-ignore -->
+      {% for report in inventory_reports %}
       <tr
-        class="table-event-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+        class="table-inventory-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
         <td class="w-4 p-4">
-          <div class="flex items-center">{{ loop_index + page.skip }}</div>
+          <div class="flex items-center">{{ loop.index + page.skip }}</div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
             <div class="text-base font-semibold">
-              {% if product_allocated.product.image|length > 100 %}
-              <img src="data:image/png;base64, {{ product_allocated.product.image }}"
-                alt="{{ product_allocated.product.image }}" class="w-14 object-cover">
+              {% if report.image|length > 100 %}
+              <img src="data:image/png;base64, {{ report.image }}" alt="{{ report.image }}" class="w-14 object-cover">
               {% else %}
-              <img src="{{ url_for('static', filename='img/default_image_brand.png') }}"
-                alt="{{ product_allocated.product.image }}" class="w-14 object-cover">
+              <img src="{{ url_for('static', filename='img/default_image_brand.png') }}" alt="{{ report.image }}"
+                class="w-14 object-cover">
               {% endif %}
             </div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ product_allocated.product.SKU }}</div>
+            <div class="text-base font-semibold">{{ report.SKU }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ product_allocated.product.name }}</div>
+            <div class="text-base font-semibold">{{ report.name }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold" id="report-inbound-order-quantity">{{ qty }}</div>
+            <div class="text-base font-semibold">{{ report.qty }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="text-base font-semibold">{{ product_allocated.inbound_order.created_at.strftime('%m/%d/%Y,
-              %H:%M:%S') }}</div>
-          </div>
-        </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 dark:text-white">
           <div class="pl-3">
             <div class="text-base font-semibold">
-              <a type="button"
-                href="{{ url_for('report_inbound_orders.download_csv', report_id=report.id, SKU=product_allocated.product.SKU) }}"
+              <a type="button" href="{{ url_for('report_inventory.download_csv', product_id=report.id) }}"
                 class="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Details</a>
             </div>
           </div>
         </td>
       </tr>
       {% endfor %}
-      {% endfor %}
     </tbody>
   </table>
   <!-- prettier-ignore -->
-  {% include "report/pagination_bar_report.html"%}
+  {% include "report/pagination_bar_report.html" %}
 </div>

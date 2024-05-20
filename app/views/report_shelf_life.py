@@ -3,10 +3,19 @@ from flask import (
     Blueprint,
     request,
     render_template,
+    redirect,
+    url_for,
+    flash,
+    send_file,
 )
 from flask_login import login_required
 import sqlalchemy as sa
+import pandas as pd
+import io
+
+
 from app.controllers import create_pagination, role_required
+
 
 from app import schema as s
 from app import models as m, db
@@ -189,4 +198,57 @@ def search_shelf_life_reports():
         "report/shelf_life/reports_table.html",
         page=pagination,
         shelf_life_reports=shelf_life_reports,
+    )
+
+
+@report_shelf_life_blueprint.route("/<int:product_id>/download_csv")
+@login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
+def downlaod_csv(product_id: int):
+    product = db.session.get(m.Product, product_id)
+    if not product:
+        flash("Peport not found", "danger")
+        return redirect(url_for("report.index"))
+
+    data = {
+        "Name": [],
+        "SKU": [],
+        "Number of days left": [],
+        "Expiry Date": [],
+        "Group": [],
+        "Quantity": [],
+        "Warehouse": [],
+    }  # type: dict[str, list]
+
+    for we_product in product.warehouse_products:
+        data["Name"].append(product.name)
+        data["SKU"].append(product.SKU)
+        data["Number of days left"].append(product.numb_of_day_left)
+        data["Expiry Date"].append(product.expiry_date)
+        data["Group"].append(we_product.group.name)
+        data["Quantity"].append(we_product.product_quantity)
+        data["Warehouse"].append(we_product.warehouse.name)
+
+    df = pd.DataFrame(data)
+
+    # Save the DataFrame to a CSV file in memory
+    csv_buffer = io.StringIO()
+    df.to_csv(csv_buffer, index=False)
+    csv_buffer.seek(0)
+
+    # Send the CSV file as a response
+    return send_file(
+        io.BytesIO(csv_buffer.getvalue().encode("utf-8")),
+        mimetype="text/csv",
+        as_attachment=True,
+        download_name="report.csv",
     )

@@ -6,6 +6,8 @@ from sqlalchemy import orm
 from app.database import db
 from .utils import ModelMixin
 from app import schema as s
+from .product_allocated import ProductAllocated
+from .product import Product
 
 if TYPE_CHECKING:
     from .user import User
@@ -34,6 +36,22 @@ class ReportInboundOrder(db.Model, ModelMixin):
     # Relationships
     inbound_order: orm.Mapped["InboundOrder"] = orm.relationship()
     user: orm.Mapped["User"] = orm.relationship()
+
+    @property
+    def inbound_order_products(self):
+        return db.session.execute(
+            sa.select(
+                ProductAllocated,
+                sa.func.sum(ProductAllocated.quantity).label("total_quantity"),
+            )
+            .join(Product)
+            .where(ProductAllocated.inbound_order_id == self.inbound_order.id)
+            .group_by(ProductAllocated.id, Product.SKU)
+            .distinct()
+        ).all()
+
+    def __repr__(self):
+        return f"<ReportInboundOrder {self.id}, IB-ORDER: {self.inbound_order.id}>"
 
     @property
     def json(self):
