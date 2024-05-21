@@ -65,6 +65,12 @@ class InboundOrder(db.Model, ModelMixin):
         back_populates="inbound_order"
     )
 
+    @property
+    def finished_date(self):
+        if not self.report_inventory_list:
+            return self.status
+        return self.report_inventory_list.created_at.strftime("%Y-%m-%d")
+
     def set_order_id(self):
         self.order_id = f"Beam-IB-{START_ORDER_NUMBER + self.id}"
 

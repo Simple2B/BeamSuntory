@@ -3,10 +3,19 @@ from flask import (
     Blueprint,
     request,
     render_template,
+    redirect,
+    url_for,
+    flash,
+    send_file,
 )
 from flask_login import login_required
 import sqlalchemy as sa
+import pandas as pd
+import io
+
+
 from app.controllers import create_pagination, role_required
+
 
 from app import schema as s
 from app import models as m, db
@@ -19,50 +28,36 @@ report_shelf_life_blueprint = Blueprint(
 
 def get_shelf_life_reports():
     filter_shelf_lifes = s.FilterReportInventories.model_validate(dict(request.args))
-    query = m.ProductAllocated.select().order_by(m.ProductAllocated.id)
+    query = m.Product.select().order_by(m.Product.id)
 
-    count_query = sa.select(sa.func.count()).select_from(m.ReportSKU)
+    count_query = sa.select(sa.func.count()).select_from(m.Product)
 
     if filter_shelf_lifes.q:
         query = query.where(
-            m.ProductAllocated.shelf_life_start.ilike(f"%{filter_shelf_lifes.q}%")
-            | m.ProductAllocated.shelf_life_end.ilike(f"%{filter_shelf_lifes.q}%")
-            # | m.ProductAllocated.user.has(m.User.username.ilike(f"%{filter_shelf_lifes.q}%"))
-            | m.ProductAllocated.product.has(
-                m.Product.name.ilike(f"%{filter_shelf_lifes.q}%")
-            )
-            | m.ProductAllocated.product.has(
-                m.Product.SKU.ilike(f"%{filter_shelf_lifes.q}%")
-            )
+            m.Product.name.ilike(f"%{filter_shelf_lifes.q}%")
+            | m.Product.SKU.ilike(f"%{filter_shelf_lifes.q}%")
         )
 
         count_query = count_query.where(
-            m.ProductAllocated.shelf_life_start.ilike(f"%{filter_shelf_lifes.q}%")
-            | m.ProductAllocated.shelf_life_end.ilike(f"%{filter_shelf_lifes.q}%")
-            # | m.ProductAllocated.user.has(m.User.username.ilike(f"%{filter_shelf_lifes.q}%"))
-            | m.ProductAllocated.product.has(
-                m.Product.name.ilike(f"%{filter_shelf_lifes.q}%")
-            )
-            | m.ProductAllocated.product.has(
-                m.Product.SKU.ilike(f"%{filter_shelf_lifes.q}%")
-            )
+            m.Product.name.ilike(f"%{filter_shelf_lifes.q}%")
+            | m.Product.SKU.ilike(f"%{filter_shelf_lifes.q}%")
         )
 
     if filter_shelf_lifes.created_from:
         query = query.where(
-            m.ProductAllocated.shelf_life_start
+            m.Product.expiry_date
             >= datetime.strptime(filter_shelf_lifes.created_from, "%m/%d/%Y")
         )
 
     if filter_shelf_lifes.created_to:
         query = query.where(
-            m.ProductAllocated.shelf_life_end
+            m.Product.expiry_date
             <= datetime.strptime(filter_shelf_lifes.created_to, "%m/%d/%Y")
         )
 
-    if filter_shelf_lifes.expire_in:
+    if filter_shelf_lifes.expire_in and int(filter_shelf_lifes.expire_in) > 0:
         query = query.where(
-            m.ProductAllocated.shelf_life_end
+            m.Product.shelf_life_end
             <= datetime.now() + timedelta(days=int(filter_shelf_lifes.expire_in))
         )
 
@@ -79,7 +74,7 @@ def get_shelf_life_reports():
             )
         ).all()
 
-        query = query.where(m.ProductAllocated.product_id.in_(mg_product_ids))
+        query = query.where(m.Product.id.in_(mg_product_ids))
 
     if filter_shelf_lifes.group:
         product_ids = db.session.scalars(
@@ -90,7 +85,7 @@ def get_shelf_life_reports():
             )
         ).all()
 
-        query = query.where(m.ProductAllocated.product_id.in_(product_ids))
+        query = query.where(m.Product.id.in_(product_ids))
 
     master_groups = [
         filter_shelf_lifes.group_brand,
@@ -103,17 +98,13 @@ def get_shelf_life_reports():
         for group in master_groups:
             if group:
                 query = query.where(
-                    m.ProductAllocated.product.has(
-                        m.Product.product_groups.any(
-                            m.ProductGroup.parent.has(m.GroupProduct.name == group)
-                        )
+                    m.Product.product_groups.any(
+                        m.ProductGroup.parent.has(m.GroupProduct.name == group)
                     )
                 )
                 count_query = count_query.where(
-                    m.ProductAllocated.product.has(
-                        m.Product.product_groups.any(
-                            m.ProductGroup.parent.has(m.GroupProduct.name == group)
-                        )
+                    m.Product.product_groups.any(
+                        m.ProductGroup.parent.has(m.GroupProduct.name == group)
                     )
                 )
 
@@ -207,4 +198,57 @@ def search_shelf_life_reports():
         "report/shelf_life/reports_table.html",
         page=pagination,
         shelf_life_reports=shelf_life_reports,
+    )
+
+
+@report_shelf_life_blueprint.route("/<int:product_id>/download_csv")
+@login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
+def downlaod_csv(product_id: int):
+    product = db.session.get(m.Product, product_id)
+    if not product:
+        flash("Peport not found", "danger")
+        return redirect(url_for("report.index"))
+
+    data = {
+        "Name": [],
+        "SKU": [],
+        "Number of days left": [],
+        "Expiry Date": [],
+        "Group": [],
+        "Quantity": [],
+        "Warehouse": [],
+    }  # type: dict[str, list]
+
+    for we_product in product.warehouse_products:
+        data["Name"].append(product.name)
+        data["SKU"].append(product.SKU)
+        data["Number of days left"].append(product.numb_of_day_left)
+        data["Expiry Date"].append(product.expiry_date)
+        data["Group"].append(we_product.group.name)
+        data["Quantity"].append(we_product.product_quantity)
+        data["Warehouse"].append(we_product.warehouse.name)
+
+    df = pd.DataFrame(data)
+
+    # Save the DataFrame to a CSV file in memory
+    csv_buffer = io.StringIO()
+    df.to_csv(csv_buffer, index=False)
+    csv_buffer.seek(0)
+
+    # Send the CSV file as a response
+    return send_file(
+        io.BytesIO(csv_buffer.getvalue().encode("utf-8")),
+        mimetype="text/csv",
+        as_attachment=True,
+        download_name="report.csv",
     )

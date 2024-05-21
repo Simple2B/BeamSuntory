@@ -439,7 +439,7 @@ def create():
         package_qty=form.package_qty.data,
         numb_of_items_per_case=form.numb_of_items_per_case.data,
         numb_of_cases_per_outer_case=form.numb_of_cases_per_outer_case.data,
-        expire_date=form.expire_date.data,
+        expiry_date=form.expiry_date.data,
         comments=form.comments.data,
         # shipping
         weight=form.weight.data,
@@ -541,7 +541,7 @@ def save():
     product.package_qty = form.package_qty.data
     product.numb_of_items_per_case = form.numb_of_items_per_case.data
     product.numb_of_cases_per_outer_case = form.numb_of_cases_per_outer_case.data
-    product.expire_date = form.expire_date.data
+    product.expiry_date = form.expiry_date.data
     product.comments = form.comments.data
     product.notes_location = form.notes_location.data
     # shipping

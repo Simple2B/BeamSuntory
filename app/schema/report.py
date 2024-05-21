@@ -52,6 +52,7 @@ class ReportActionTypes(BaseModel):
 
 
 class ReportFilter(CalendarFilters, GroupFilters, ReportActionTypes):
+    id: int | None = None
     report_type: ReportType
     action_type: str | None = None
     request_share: str | None = None

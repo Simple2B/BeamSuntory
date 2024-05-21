@@ -21,6 +21,13 @@ class ReportDataShareRequests(ReportData):
         query = m.ReportRequestShare.select().order_by(m.ReportRequestShare.id)
         count_query = sa.select(sa.func.count()).select_from(m.ReportRequestShare)
 
+        if report_filter.user:
+            where_stmt = m.ReportRequestShare.user.has(
+                m.User.username == report_filter.user
+            )
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
+
         if report_filter.q:
             where_stmt = m.ReportRequestShare.request_share.has(
                 m.RequestShare.product.has(m.Product.name.ilike(f"%{report_filter.q}%"))

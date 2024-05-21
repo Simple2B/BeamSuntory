@@ -108,27 +108,27 @@ const fetchReportAPI = async (queryParams: URLSearchParams, callback: (data: Obj
 };
 
 const generateCSVEvents = async (queryParams: URLSearchParams) => {
-  const csvData = ['action_type,user,created_at,store,event_date_from,event_date_to,sku,product_name'];
+  const csvData = ['SKU,Name,Quantity,Group,User,Store,Date delivered,Date picked up,Order №'];
   await fetchReportAPI(queryParams, (data: IEventsReportResponse) => {
     data.reports.forEach((report) => {
-      report.shipRequest.carts.forEach((cart) => {
-        if (searchSKUInput.value && !cart.product.SKU.includes(searchSKUInput.value)) {
+      
+        if (searchSKUInput.value && !report.cart.product.SKU.includes(searchSKUInput.value)) {
           return;
         }
-
         csvData.push(
           [
-            report.type,
+            report.cart.product.SKU,
+            report.cart.product.name,
+            report.cart.quantity,
+            report.cart.group.name,
             report.user.username,
-            report.createdAt,
             report.shipRequest.store.storeName,
-            cart.event.dateFrom,
-            cart.event.dateTo,
-            cart.product.SKU,
-            cart.product.name,
+            report.shipRequest.dateDelivered,
+            report.shipRequest.datePickedUp,
+            report.shipRequest.orderNumb,
           ].join(',')
         );
-      });
+      
     });
   });
   return csvData;
@@ -136,25 +136,26 @@ const generateCSVEvents = async (queryParams: URLSearchParams) => {
 
 const generateCSVRequestShare = async (queryParams: URLSearchParams) => {
   const csvData = [
-    'action_type,user,created_at,current_share_request_status,group_from,group_to,desired_quantity,sku,product_name',
+    'Name,SKU,Quantity,From,To,Status,Created At,Approved At,User Approved,Declined At, User Declined',
   ];
   await fetchReportAPI(queryParams, (data: IReportRequestShareResponse) => {
     data.reports.forEach((report) => {
       if (searchSKUInput.value && !report.requestShare.product.SKU.includes(searchSKUInput.value)) {
         return;
       }
-
       csvData.push(
         [
-          report.type,
-          report.user.username,
-          report.createdAt,
-          report.requestShare.status,
+          report.requestShare.product.name,
+          report.requestShare.product.SKU,
+          report.requestShare.desireQuantity,
           report.requestShare.fromGroup.name,
           report.requestShare.group.name,
-          report.requestShare.desireQuantity,
-          report.requestShare.product.SKU,
-          report.requestShare.product.name,
+          report.requestShare.status,
+          report.createdAt,
+          report.requestShare.reports.find((r) => r.type === 'shared')?.createdAtFormated || '-',
+          report.requestShare.reports.find((r) => r.type === 'shared')?.username || '-',
+          report.requestShare.reports.find((r) => r.type === 'declined')?.createdAtFormated || '-',
+          report.requestShare.reports.find((r) => r.type === 'declined')?.username || '-',
         ].join(',')
       );
     });
@@ -164,24 +165,20 @@ const generateCSVRequestShare = async (queryParams: URLSearchParams) => {
 
 const generateCSVInventories = async (queryParams: URLSearchParams) => {
   // CSV Headers
-  const csvData = ['product_name,sku,group,quantity,created_at'];
+  const csvData = ['product_name,sku,quantity,group,warehouse'];
   await fetchReportAPI(queryParams, (data: IInventoriesReportResponse) => {
     data.reports.forEach((report) => {
-      for (let i = 0; i < report.product.warehouseProducts.length; i++) {
-        const warehouseProduct = report.product.warehouseProducts[i];
-
-        if (warehouseProduct.group.name === report.group.name) {
-          csvData.push(
-            [
-              report.product.name,
-              report.product.SKU,
-              report.group.name,
-              warehouseProduct.productQuantity,
-              formatDate(report.createdAt),
-            ].join(',')
-          );
-        }
-      }
+      report.warehouseProducts.forEach((warehouseProduct) => {
+        csvData.push(
+          [
+            report.name,
+            report.SKU,
+            warehouseProduct.productQuantity,
+            warehouseProduct.groupName,
+            warehouseProduct.warehouseName,
+          ].join(',')
+        );
+      });
     });
   });
   return csvData;
@@ -220,7 +217,7 @@ const generateCSVAdjustments = async (queryParams: URLSearchParams) => {
 };
 
 const generateCSVInboundOrder = async (queryParams: URLSearchParams) => {
-  const csvData = ['created_at,username,type,order_title,allocated_product,sku,group,quantity'];
+  const csvData = ['Name,SKU,Quantity,Group,Created At,Supplier,Arrived,Warehouse'];
   await fetchReportAPI(queryParams, (data: IReportInboundOrderResponse) => {
     const searchingGroup = queryParams.get('product_group');
     data.reports.forEach((report) => {
@@ -234,14 +231,14 @@ const generateCSVInboundOrder = async (queryParams: URLSearchParams) => {
           }
           csvData.push(
             [
-              formatDate(report.createdAt),
-              report.user.username,
-              report.type,
-              report.inboundOrder.title,
               productsAllocated.product.name,
               productsAllocated.product.SKU,
-              productQuantityGroup.group.name,
               productQuantityGroup.quantity,
+              productQuantityGroup.group.name,
+              formatDate(report.createdAt),
+              report.inboundOrder.supplier.name,
+              report.inboundOrder.finishedDate,
+              report.inboundOrder.warehouse.name,
             ].join(',')
           );
         });
@@ -266,25 +263,26 @@ const generateCSVInboundOrder = async (queryParams: URLSearchParams) => {
 const generateCSVShipping = async (queryParams: URLSearchParams) => {
   // CSV Headers
   const csvData = [
-    'action_type,user,created_at,current_ship_request_status,store_name,sku,product_name,group,quantity',
+    'SKU,Name,Quantity,Group,User,Store,Date delivered,Date picked up,Warehouse,Order №',
   ];
   await fetchReportAPI(queryParams, (data: IReportShippingResponse) => {
     data.reports.forEach((report) => {
-      report.shipRequest.carts.forEach((cart) => {
+      report.carts.forEach((cart) => {
         if (searchSKUInput.value && !cart.product.SKU.includes(searchSKUInput.value)) {
           return;
         }
         csvData.push(
           [
-            report.type,
-            report.user.username,
-            report.createdAt,
-            report.shipRequest.status,
-            report.shipRequest.store.storeName,
             cart.product.SKU,
             cart.product.name,
-            cart.group.name,
             cart.quantity,
+            cart.group.name,
+            report.user?.username || '-',
+            report.store.storeName,
+            report.dateDelivered,
+            report.datePickedUp,
+            cart.warehouse?.name || '-',
+            report.orderNumb,
           ].join(',')
         );
       });
@@ -322,28 +320,19 @@ const generateCSVAssign = async (queryParams: URLSearchParams) => {
 
 const generateCSVShelfLife = async (queryParams: URLSearchParams) => {
   // CSV Headers
-  const csvData = ['SKU, shelfLifeStart, shelfLifeEnd, quantityOrdered, quantityReceived'];
+  const csvData = ['Numb Of Day Left, SKU, Name, Qty, Expire Date'];
 
   await fetchReportAPI(queryParams, (data: IReportShelfLifeResponse) => {
     data.reportShelfLifeList.forEach((report) => {
-      let received;
-      if (!report.quantityReceived) {
-        received = '-';
-      } else {
-        received = report.quantityReceived.toString();
-      }
-
-      if (searchSKUInput.value.length && !report.product.SKU.includes(searchSKUInput.value)) {
-        return;
-      }
 
       csvData.push(
         [
-          report.product.SKU,
-          formatDate(report.shelfLifeStart),
-          formatDate(report.shelfLifeStart),
-          report.quantity,
-          received,
+          report.numbOfDayLeft,
+          report.SKU,
+          report.name,
+          report.qty,
+          report.expiry_date,
+          
         ].join(',')
       );
     });

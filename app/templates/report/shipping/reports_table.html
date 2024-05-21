@@ -1,22 +1,20 @@
 <div id="report-shipping-table">
-  <table
-    class="w-full text-sm text-left text-gray-500 dark:text-gray-400"
-  >
-    <thead
-      class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
-    >
+  <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
       <!-- prettier-ignore -->
       <tr>
         <th scope="col" class="px-6 py-3">#</th>
-        <th scope="col" class="px-6 py-3">Action</th>
-        <th scope="col" class="px-6 py-3">User</th>
-        <th scope="col" class="px-6 py-3">Date</th>
-        <th scope="col" class="px-6 py-3">Status</th>
-        <th scope="col" class="px-6 py-3">Store</th>
+        <th scope="col" class="px-6 py-3">Image</th>
         <th scope="col" class="px-6 py-3">SKU</th>
+        <th scope="col" class="px-6 py-3">Product name</th>
+        <th scope="col" class="px-6 py-3">Qty</th>
         <th scope="col" class="px-6 py-3">Group</th>
-        <th scope="col" class="px-6 py-3">Quantity</th>
-        <!-- <th scope="col" class="px-6 py-3">Actions</th> -->
+        <th scope="col" class="px-6 py-3">Name</th>
+        <th scope="col" class="px-6 py-3">Store</th>
+        <th scope="col" class="px-6 py-3">Date ordered</th>
+        <th scope="col" class="px-6 py-3">Date delivered</th>
+        <th scope="col" class="px-6 py-3">Warehous</th>
+        <th scope="col" class="px-6 py-3">Order: №</th>
       </tr>
     </thead>
     <tbody>
@@ -24,40 +22,40 @@
       <!-- prettier-ignore -->
       {% set report_index = loop.index + page.skip%}
       <!-- prettier-ignore -->
-      {% for cart in report.ship_request.carts if not request.args.get('search_sku') or request.args.get('search_sku') in cart.product.SKU %}
+      {% for cart in report.carts if not request.args.get('search_sku') or request.args.get('search_sku')
+      in cart.product.SKU %}
       <!-- prettier-ignore -->
-      <tr class="table-event-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+      <tr
+        class="table-event-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
         <td class="w-4 p-4">
           <div class="flex items-center">{{ report_index }}</div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.type }}</div>
-          </div>
-        </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.user.username }}</div>
-          </div>
-        </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.created_at.strftime('%m/%d/%Y') }}</div>
-          </div>
-        </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.ship_request.status.value }}</div>
-          </div>
-        </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.ship_request.store.store_name }}</div>
+            <div class="text-base font-semibold">
+              {% if cart.product.image|length > 100 %}
+              <img src="data:image/png;base64, {{ cart.product.image }}" alt="{{ cart.product.image }}"
+                class="w-14 object-cover">
+              {% else %}
+              <img src="{{ url_for('static', filename='img/default_image_brand.png') }}" alt="{{ cart.product.image }}"
+                class="w-14 object-cover">
+              {% endif %}
+            </div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
             <div class="text-base font-semibold">{{ cart.product.SKU }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ cart.product.name }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ cart.quantity }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
@@ -67,19 +65,34 @@
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ cart.quantity }}</div>
+            <div class="text-base font-semibold">{{ report.user.username }}</div>
           </div>
         </td>
-        <!-- <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">
-              <button type="button" data-target="{{report.json}}" class="report-shipping-table-report-view-btn inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-              {# % include "icon/view.html" % #}
-                View
-              </button>
-            </div>
+            <div class="text-base font-semibold">{{ report.store.store_name }}</div>
           </div>
-        </td> -->
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.created_at.strftime('%m/%d/%Y') }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.date_delivered }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ cart.warehouse.name if cart.warehouse else '-' }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.order_numb }}</div>
+          </div>
+        </td>
       </tr>
       <!-- prettier-ignore -->
       {% endfor %}

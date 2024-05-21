@@ -17,11 +17,20 @@ class ReportDataInventories(ReportData):
 
     @classmethod
     def get_reports(cls, report_filter: s.ReportFilter):
-        query = m.WarehouseProduct.select().order_by(m.WarehouseProduct.id)
-        count_query = sa.select(sa.func.count()).select_from(m.WarehouseProduct)
+        query = (
+            sa.select(m.Product)
+            .join(m.WarehouseProduct)
+            .distinct()
+            .order_by(m.Product.id)
+        )
+        count_query = sa.select(sa.func.count()).select_from(m.Product)
+
+        if report_filter.id:
+            query = query.where(m.Product.id == report_filter.id)
+            count_query = count_query.where(m.Product.id == report_filter.id)
 
         if report_filter.q:
-            query = query.where(
+            where_stmt = (
                 m.WarehouseProduct.group.has(m.Group.name.ilike(f"%{report_filter.q}%"))
                 | m.WarehouseProduct.product.has(
                     m.Product.SKU.ilike(f"%{report_filter.q}%")
@@ -33,19 +42,9 @@ class ReportDataInventories(ReportData):
                     m.Product.name.ilike(f"%{report_filter.q}%")
                 )
             )
+            query = query.where(where_stmt)
 
-            count_query = count_query.where(
-                m.WarehouseProduct.group.has(m.Group.name.ilike(f"%{report_filter.q}%"))
-                | m.WarehouseProduct.product.has(
-                    m.Product.SKU.ilike(f"%{report_filter.q}%")
-                )
-                | m.WarehouseProduct.warehouse.has(
-                    m.Warehouse.name.ilike(f"%{report_filter.q}%")
-                )
-                | m.WarehouseProduct.product.has(
-                    m.Product.name.ilike(f"%{report_filter.q}%")
-                )
-            )
+            count_query = count_query.where(where_stmt)
 
         if report_filter.user:
             user_groups_ids = db.session.scalars(
@@ -60,9 +59,8 @@ class ReportDataInventories(ReportData):
             )
 
         if report_filter.search_sku:
-            where_stmt = m.WarehouseProduct.product.has(
-                m.Product.SKU.ilike(f"%{report_filter.search_sku}%")
-            )
+            where_stmt = m.Product.SKU.ilike(f"%{report_filter.search_sku}%")  # type: ignore
+
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)
 
@@ -71,9 +69,17 @@ class ReportDataInventories(ReportData):
                 m.WarehouseProduct.created_at
                 >= datetime.strptime(report_filter.start_date, "%m/%d/%Y")
             )
+            count_query = count_query.where(
+                m.WarehouseProduct.created_at
+                >= datetime.strptime(report_filter.start_date, "%m/%d/%Y")
+            )
 
         if report_filter.start_date_to:
             query = query.where(
+                m.WarehouseProduct.created_at
+                <= datetime.strptime(report_filter.start_date_to, "%m/%d/%Y")
+            )
+            count_query = count_query.where(
                 m.WarehouseProduct.created_at
                 <= datetime.strptime(report_filter.start_date_to, "%m/%d/%Y")
             )
@@ -86,9 +92,19 @@ class ReportDataInventories(ReportData):
                     )
                 )
             )
+            count_query = count_query.where(
+                m.WarehouseProduct.group.has(
+                    m.Group.master_group.has(
+                        m.MasterGroup.name == report_filter.master_group
+                    )
+                )
+            )
 
         if report_filter.target_group:
             query = query.where(
+                m.WarehouseProduct.group.has(m.Group.name == report_filter.target_group)
+            )
+            count_query = count_query.where(
                 m.WarehouseProduct.group.has(m.Group.name == report_filter.target_group)
             )
 
@@ -132,7 +148,7 @@ class ReportDataInventories(ReportData):
     @classmethod
     def render(cls, pagination: sa.ScalarResult, reports: sa.ScalarResult) -> str:
         return render_template(
-            "report/inventory/reports_table.html",
+            "report/inventory/product_reports_table.html",
             page=pagination,
             inventory_reports=reports,
         )

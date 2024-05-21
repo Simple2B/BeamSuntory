@@ -60,6 +60,7 @@ interface IProductEvent {
   event: IEvent;
   group: IGroup;
   status: string;
+  warehouse?: IWarehouse;
 }
 
 interface IShipRequest {
@@ -74,15 +75,25 @@ interface IShipRequest {
   storeId: number;
   wmNotes: string;
   status: string;
+  datePickedUp: string;
+  dateDelivered: string;
+  user?: IUser;
+  
 }
 
-export interface IReportEvent {
+export interface IReportEventData {
   user: IUser;
   quantity: number;
   type: string;
   createdAt: string;
   history: string;
   shipRequest: IShipRequest;
+}
+
+export interface IReportEvent {
+  shipRequest: IShipRequest;
+  cart: IProductEvent;
+  user: IUser;
 }
 
 export interface IEventsReportResponse {
@@ -102,9 +113,16 @@ export interface IGroup {
   parentGroup: IGroup | null;
 }
 
+export interface IReportRequestShare {
+  type: string;
+  createdAtFormated: string;
+  username: IUser;
+}
+
 export interface IRequestShare {
   status: string;
   desireQuantity: number;
+  reports: IReportRequestShare[];
 
   product: IProduct;
   fromGroup: IGroup;
@@ -173,9 +191,24 @@ export interface IReportInventoryList {
   reportInventories: IReportInventory[];
 }
 
+export interface IWarehouseProductReport {
+  product: IProduct;
+  productQuantity: number;
+  warehouseName?: string;
+  groupName?: string;
+}
+
+export interface IReportInventoryProduct {
+  SKU: string;
+  name: string
+  warehouseProducts: IWarehouseProductReport[]
+
+
+}
+
 export interface IInventoriesReportResponse {
   pagination: IPagination;
-  reports: IReportInventory[];
+  reports: IReportInventoryProduct[];
 }
 
 export interface IReportAdjustResponse {
@@ -221,6 +254,8 @@ interface IProductsAllocated {
 }
 
 interface IInboundOrder {
+  finishedDate: string;
+  supplier: ISupplier;
   productsAllocated: IProductsAllocated[];
   warehouse: IWarehouse;
   title: string;
@@ -242,7 +277,7 @@ export interface IReportShipping {
 
 export interface IReportShippingResponse {
   pagination: IPagination;
-  reports: IReportShipping[];
+  reports: IShipRequest[];
 }
 
 export interface IReportAssign {
@@ -263,16 +298,15 @@ export interface IReportAssignResponse {
   reports: IReportAssign[];
 }
 
+
+
 export interface IReportShelfLife {
-  quantity: number;
-  quantityReceived: number;
-  shelfLifeStart: string;
-  shelfLifeEnd: string;
-  product: IProduct;
-  // TODO do we need this?
-  // productQuantityGroups: list[ProductGroupOut] = Field(
-  //     alias="productQuantityGroups"
-  // )
+  
+  numbOfDayLeft: number
+  SKU: string
+  qty: number
+  name: string
+  expiry_date: string
 }
 
 export interface IReportShelfLifeResponse {

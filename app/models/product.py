@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import TYPE_CHECKING
 import sqlalchemy as sa
 from sqlalchemy import orm
@@ -46,7 +47,9 @@ class Product(db.Model, ModelMixin):
     # General Info ->
     SKU: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=False, unique=True)
     low_stock_level: orm.Mapped[int] = orm.mapped_column(sa.Integer(), nullable=True)
-    expire_date: orm.Mapped[str] = orm.mapped_column(default="N/A")
+    expiry_date: orm.Mapped[datetime] = orm.mapped_column(
+        sa.DateTime, default=datetime.max
+    )
 
     program_year: orm.Mapped[int] = orm.mapped_column(sa.Integer(), nullable=True)
     package_qty: orm.Mapped[int] = orm.mapped_column(sa.Integer(), nullable=True)
@@ -89,6 +92,14 @@ class Product(db.Model, ModelMixin):
 
     def __repr__(self):
         return f"<{self.id}: {self.name}>"
+
+    @property
+    def numb_of_day_left(self):
+        return (self.expiry_date - datetime.now()).days
+
+    @property
+    def qty(self):
+        return self.get_warehouse_products_qty()
 
     def get_warehouse_products_qty(self, is_stock_own_by_me: bool = False):
         if is_stock_own_by_me:

@@ -62,7 +62,7 @@ def get_edit_form(product_id: int):
         package_qty=product.package_qty,
         numb_of_items_per_case=product.numb_of_items_per_case,
         numb_of_cases_per_outer_case=product.numb_of_cases_per_outer_case,
-        expire_date=product.expire_date,
+        expiry_date=product.expiry_date,
         comments=product.comments,
         notes_location=product.notes_location,
         weight=product.weight,

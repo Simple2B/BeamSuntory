@@ -274,7 +274,6 @@ def create():
         )
         if event_date_range and is_group_in_master_group:
             report_event = m.ReportEvent(
-                # TODO make report event type UPPERCASE (Enum)
                 type=s.ReportEventType.created.value,
                 user=current_user,
                 ship_request=ship_request,

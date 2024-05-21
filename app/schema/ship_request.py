@@ -44,6 +44,8 @@ class ShipRequest(BaseModel):
     proof_of_delivery: str | None = Field(alias="proofOfDelivery")
     tracking: str | None
     user: ShipRequestUser | None
+    date_picked_up: str = Field(alias="datePickedUp")
+    date_delivered: str = Field(alias="dateDelivered")
 
     carts: list[Cart]
 

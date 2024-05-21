@@ -21,4 +21,4 @@ ReportShippingList = RootModel[list[ReportShipping]]
 
 
 class ReportShippingResponse(ReportsBaseResponse):
-    reports: ReportShippingList
+    reports: list[ShipRequest]

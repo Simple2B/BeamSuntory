@@ -18,45 +18,37 @@ class ReportDataShelfLife(ReportData):
     @classmethod
     def get_reports(cls, report_filter: s.ReportFilter):
         # report_filter = s.FilterReportShelfLife.model_validate(dict(request.args))
-        query = m.ProductAllocated.select().order_by(m.ProductAllocated.id)
+        query = m.Product.select().order_by(m.Product.SKU.asc())
 
-        count_query = sa.select(sa.func.count()).select_from(m.ReportSKU)
+        count_query = sa.select(sa.func.count()).select_from(m.Product)
 
         if report_filter.q:
-            query = query.where(
-                m.ProductAllocated.product.has(
-                    m.Product.name.ilike(f"%{report_filter.q}%")
-                )
-            )
+            query = query.where(m.Product.name.ilike(f"%{report_filter.q}%"))
 
             count_query = count_query.where(
-                m.ProductAllocated.product.has(
-                    m.Product.name.ilike(f"%{report_filter.q}%")
-                )
+                m.Product.name.ilike(f"%{report_filter.q}%")
             )
 
         if report_filter.search_sku:
-            where_stmt = m.ProductAllocated.product.has(
-                m.Product.SKU.ilike(f"%{report_filter.search_sku}%")
-            )
+            where_stmt = m.Product.SKU.ilike(f"%{report_filter.search_sku}%")
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)
 
         if report_filter.start_date:
             query = query.where(
-                m.ProductAllocated.shelf_life_start
-                >= datetime.strptime(report_filter.created_from, "%m/%d/%Y")
+                m.Product.expiry_date
+                >= datetime.strptime(report_filter.start_date, "%m/%d/%Y")
             )
 
         if report_filter.end_date:
             query = query.where(
-                m.ProductAllocated.shelf_life_end
-                <= datetime.strptime(report_filter.created_to, "%m/%d/%Y")
+                m.Product.expiry_date
+                <= datetime.strptime(report_filter.end_date, "%m/%d/%Y")
             )
 
         if report_filter.expire_in and int(report_filter.expire_in) > 0:
             query = query.where(
-                m.ProductAllocated.shelf_life_end
+                m.Product.expiry_date
                 <= datetime.now() + timedelta(days=int(report_filter.expire_in))
             )
 
@@ -73,7 +65,7 @@ class ReportDataShelfLife(ReportData):
                 )
             ).all()
 
-            query = query.where(m.ProductAllocated.product_id.in_(mg_product_ids))
+            query = query.where(m.Product.id.in_(mg_product_ids))
 
         if report_filter.target_group:
             product_ids = db.session.scalars(
@@ -86,7 +78,7 @@ class ReportDataShelfLife(ReportData):
                 )
             ).all()
 
-            query = query.where(m.ProductAllocated.product_id.in_(product_ids))
+            query = query.where(m.Product.id.in_(product_ids))
 
         master_groups = [
             report_filter.brand,
@@ -99,17 +91,13 @@ class ReportDataShelfLife(ReportData):
             for group in master_groups:
                 if group:
                     query = query.where(
-                        m.ProductAllocated.product.has(
-                            m.Product.product_groups.any(
-                                m.ProductGroup.parent.has(m.GroupProduct.name == group)
-                            )
+                        m.Product.product_groups.any(
+                            m.ProductGroup.parent.has(m.GroupProduct.name == group)
                         )
                     )
                     count_query = count_query.where(
-                        m.ProductAllocated.product.has(
-                            m.Product.product_groups.any(
-                                m.ProductGroup.parent.has(m.GroupProduct.name == group)
-                            )
+                        m.Product.product_groups.any(
+                            m.ProductGroup.parent.has(m.GroupProduct.name == group)
                         )
                     )
 

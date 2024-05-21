@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask_wtf import FlaskForm
 from wtforms import (
     StringField,
@@ -9,6 +10,7 @@ from wtforms import (
     HiddenField,
     SelectField,
     TextAreaField,
+    DateField,
 )
 from wtforms.validators import DataRequired, Optional
 import filetype
@@ -73,11 +75,11 @@ class ProductForm(FlaskForm):
         render_kw={"placeholder": "Number of cases per outer case"},
         default=0,
     )
-    expire_date = StringField(
+    expiry_date = DateField(
         "Expire Date",
         validators=[Optional()],
         render_kw={"placeholder": "Expire Date"},
-        default="N/A",
+        default=datetime.max,
     )
     comments = StringField(
         "Comments",
@@ -188,11 +190,11 @@ class NewProductForm(FlaskForm):
         render_kw={"placeholder": "Number of items per case"},
         default=0,
     )
-    expire_date = StringField(
+    expiry_date = DateField(
         "Expire Date",
         validators=[Optional()],
         render_kw={"placeholder": "Expire Date"},
-        default="N/A",
+        default=datetime.max,
     )
     notes_location = TextAreaField(
         "Notes Location",

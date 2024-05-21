@@ -34,8 +34,21 @@ class ReportRequestShare(db.Model, ModelMixin):
     )
 
     # Relations
-    request_share: orm.Mapped["RequestShare"] = orm.relationship()
+    request_share: orm.Mapped["RequestShare"] = orm.relationship(
+        back_populates="reports"
+    )
     user: orm.Mapped["User"] = orm.relationship()
+
+    @property
+    def username(self):
+        return self.user.username
+
+    @property
+    def created_at_formated(self):
+        return self.created_at.strftime("%d/%m/%Y %H:%M:%S")
+
+    def __repr__(self):
+        return f"<ReportRequestShare {self.id}> user: {self.user.username}"
 
     @property
     def json(self):

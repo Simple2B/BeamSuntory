@@ -35,7 +35,11 @@ def get_all():
 
     role = aliased(m.Division)
     q = request.args.get("q", type=str, default=None)
-    query = m.User.select().where(m.User.is_deleted.is_(False)).order_by(m.User.id)
+    query = (
+        m.User.select()
+        .where(m.User.is_deleted.is_(False))
+        .order_by(m.User.username.asc())
+    )
     count_query = (
         sa.select(sa.func.count())
         .where(m.User.is_deleted.is_(False))

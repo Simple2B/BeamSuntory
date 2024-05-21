@@ -57,10 +57,20 @@ class ProductAllocatedOut(BaseModel):
 ProductAllocatedList = RootModel[list[ProductAllocated]]
 
 
+class ProductShellLifeOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    numb_of_day_left: int = Field(alias="numbOfDayLeft")
+    SKU: str
+    qty: int
+    name: str
+    expiry_date: str | datetime = Field("N/A", alias="expireDate")
+
+
 class ReportShelfLifeResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
     pagination: PaginationOut
-    reports: list[ProductAllocatedOut] = Field(alias="reportShelfLifeList")
+    reports: list[ProductShellLifeOut] = Field(alias="reportShelfLifeList")
 
 
 ReportShelfLifeList = RootModel[list[ProductAllocatedOut]]

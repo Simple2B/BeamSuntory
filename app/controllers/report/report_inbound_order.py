@@ -16,7 +16,14 @@ class ReportDataInboundOrders(ReportData):
 
     @classmethod
     def get_reports(cls, report_filter: s.ReportFilter):
-        query = m.ReportInboundOrder.select().order_by(sa.desc(m.ReportInboundOrder.id))
+
+        query = (
+            m.ReportInboundOrder.select()
+            .where(
+                m.ReportInboundOrder.type == s.ReportEventType.created.value
+            )  # check just created because we have created and updated
+            .order_by(sa.desc(m.ReportInboundOrder.id))
+        )
         count_query = sa.select(sa.func.count()).select_from(m.ReportInboundOrder)
 
         if report_filter.q:

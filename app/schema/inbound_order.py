@@ -22,6 +22,7 @@ class InboundOrder(BaseModel):
     order_id: str | None = Field(alias="orderId")
     active_date: date = Field(alias="activeDate")
     active_time: str = Field(alias="activeTime")
+    finished_date: str | None = Field(alias="finishedDate")
     title: str
     delivery_date: date = Field(alias="deliveryDate")
     status: InboundOrderStatus
