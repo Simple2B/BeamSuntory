@@ -3,7 +3,7 @@
 {% block content %}
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
   <button id="table-ship-request-loader" hx-trigger="click" hx-get="{{ url_for('ship_request.sort') }}"
-    hx-target="#ship-request-table" hx-indicator="#report-table-spinner" class="hidden"></button>
+    hx-target="#ship-request-table" hx-indicator="#htmx-spinner" class="hidden"></button>
 
   <div class="flex items-center justify-start py-4 bg-white dark:bg-gray-800">
     <label for="table-search" class="sr-only">Search</label>
@@ -13,14 +13,14 @@
       </div>
       <input name="q" hx-trigger="keyup changed delay:500ms" hx-target="#ship-request-table" hx-swap="innerHTML"
         hx-include="[name='ship_request_sort_locker']" hx-get="{{ url_for('ship_request.sort') }}"
-        hx-indicator="#report-table-spinner" type="search" id="table-search-assign" placeholder="Search"
+        hx-indicator="#htmx-spinner" type="search" id="table-search-assign" placeholder="Search"
         class="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
     </div>
     <!-- prettier-ignore -->
     <label class="ml-7 relative inline-flex items-center cursor-pointer">
       <input id="ship-request-show-locker-order" type="checkbox" value="true" class="sr-only peer" hx-trigger="change"
         hx-include="[name='q']" hx-swap="innerHTML" hx-target="#ship-request-table" name="ship_request_sort_locker"
-        hx-get="{{ url_for('ship_request.sort') }}" hx-indicator="#report-table-spinner">
+        hx-get="{{ url_for('ship_request.sort') }}" hx-indicator="#htmx-spinner">
       <div
         class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-400">
       </div>
@@ -29,7 +29,7 @@
   </div>
 
   <div id="ship-request-table"></div>
-  <div class="htmx-indicator flex justify-center items-center" id="report-table-spinner">
+  <div class="htmx-indicator flex justify-center items-center" id="htmx-spinner">
     {% include "icon/spinner.html" %}
   </div>
 </div>

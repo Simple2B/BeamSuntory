@@ -2,14 +2,8 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="relative overflow-visible shadow-md sm:rounded-lg overflow-x-auto min-h-half">
-    <button
-    id="table-report-loader"
-    hx-trigger="click"
-    hx-get="{{ url_for('pickup_inbound.sort') }}"
-    hx-target="#reports-table"
-    hx-indicator="#report-table-spinner"
-    class="hidden"
-  ></button>
+  <button id="table-report-loader" hx-trigger="click" hx-get="{{ url_for('pickup_inbound.sort') }}"
+    hx-target="#reports-table" hx-indicator="#htmx-spinner" class="hidden"></button>
   <div class="flex flex-wrap sm:gap-5">
     <div class="flex gap-4 items-center justify-start py-4 bg-white dark:bg-gray-800 px-4">
       <label for="table-search" class="sr-only">Search</label>
@@ -17,47 +11,30 @@
         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
           {% include "icon/eyeglass_1.html" %}
         </div>
-        <input
-          name="q"
-          hx-trigger="keyup changed delay:500ms"
-          hx-target="#reports-table"
-          hx-swap="innerHTML"
-          hx-include="[name='status']"
-          hx-get="{{ url_for('pickup_inbound.sort') }}"
-          hx-indicator="#report-table-spinner"
-          type="search"
-          id="table-search-assign"
-          placeholder="Search"
-          class="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-        />
+        <input name="q" hx-trigger="keyup changed delay:500ms" hx-target="#reports-table" hx-swap="innerHTML"
+          hx-include="[name='status']" hx-get="{{ url_for('pickup_inbound.sort') }}" hx-indicator="#htmx-spinner"
+          type="search" id="table-search-assign" placeholder="Search"
+          class="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
       </div>
     </div>
     <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800">
       <!-- prettier-ignore -->
-      <select
-        id="report-assigns-group-from"
-        hx-trigger="change"
-        hx-swap="innerHTML"
-        hx-target="#reports-table"
-        name="status"
-        hx-include="[name='q']"
-        hx-get="{{ url_for('pickup_inbound.sort') }}"
-        hx-indicator="#report-table-spinner"
-        class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-      >
-      <option value="" disabled selected>Status</option>
-      <option value="">Default Value</option>
-      {% for status in inbound_orders_status %}
+      <select id="report-assigns-group-from" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"
+        name="status" hx-include="[name='q']" hx-get="{{ url_for('pickup_inbound.sort') }}" hx-indicator="#htmx-spinner"
+        class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+        <option value="" disabled selected>Status</option>
+        <option value="">Default Value</option>
+        {% for status in inbound_orders_status %}
         <option value="{{ status.value }}">{{ status.value }}</option>
-      {% endfor %}
+        {% endfor %}
       </select>
-    </div> 
-  </div>  
-<div id="reports-table"></div>
-  <div class="htmx-indicator flex justify-center items-center" id="report-table-spinner">
-    {% include "icon/spinner.html" %}
+    </div>
   </div>
-  
+  <div id="reports-table"></div>
+  <div class="htmx-indicator flex justify-center items-center" id="htmx-spinner">
+    {% include "icon/spinner.html" %}htmx-spinner
+  </div>
+
 </div>
 
 {% include 'pickup_inbound/view.html' %}
