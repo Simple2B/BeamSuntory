@@ -206,6 +206,7 @@ def deliver(id: int):
     db.session.add(report_shipping)
     db.session.commit()
 
+    # TODO: Shipping notifications.
     msg = Message(
         subject=f"Ship request delivered {ship_request.order_numb}",
         sender=app.config["MAIL_DEFAULT_SENDER"],

@@ -103,7 +103,7 @@ def populate_one_user(client: FlaskClient):
             m.Division.role_name == s.UserRole.WAREHOUSE_MANAGER.value
         )
     ).scalar()
-    m.User(
+    user = m.User(
         username="user",
         email="user@mail.com",
         password="password",
@@ -119,6 +119,7 @@ def populate_one_user(client: FlaskClient):
         sales_rep=False,
     ).save(False)
     db.session.commit()
+    client.user = user  # type: ignore
 
     yield client
 

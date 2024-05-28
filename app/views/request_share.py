@@ -217,6 +217,7 @@ def share(id: int):
     warehouse_from_prod.product_quantity -= request_share.desire_quantity
     warehouse_from_prod.save(False)
 
+    # TODO: approved
     msg = Message(
         subject=f"Request share approved {request_share.order_numb}",
         sender=app.config["MAIL_DEFAULT_SENDER"],
@@ -318,6 +319,7 @@ def decline(id: int):
         )
         + f"?q={request_share.order_numb}"
     )
+    # TODO: declined
     msg = Message(
         subject=f"Declined request share {request_share.order_numb}",
         sender=app.config["MAIL_DEFAULT_SENDER"],

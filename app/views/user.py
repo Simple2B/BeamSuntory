@@ -10,6 +10,7 @@ from flask import (
     current_app as app,
 )
 from flask_login import login_required, current_user
+from flask_pydantic import validate
 from flask_mail import Message
 import sqlalchemy as sa
 from sqlalchemy.orm import aliased
@@ -105,6 +106,7 @@ def save():
     if not user:
         log(log.ERROR, "Not found user by id : [%s]", form.user_id.data)
         flash("Cannot save user data", "danger")
+        return redirect(url_for("user.get_all"))
 
     was_user_activated = not user.activated
 
@@ -401,4 +403,48 @@ def ship_request_notification():
         "user/ship_request_notification.html",
         ship_req_notifications=ship_req_notifications,
         new_notifications_ids=new_notifications_ids,
+    )
+
+
+@bp.route("/update-notify-status", methods=["GET"])
+@validate()
+@login_required
+def update_notify_status(query: s.NotifyStatus):
+    """htmx"""
+
+    user: m.User = current_user
+
+    is_checked = True
+    action_url_for = url_for("user.update_notify_status")
+
+    if query.is_notify_new_inventory is not None:
+
+        is_checked = query.is_notify_new_inventory
+        action_url_for = url_for(
+            "user.update_notify_status",
+            is_notify_new_inventory=not query.is_notify_new_inventory,
+        )
+        user.is_notify_new_inventory = query.is_notify_new_inventory
+
+    if query.is_notify_shipping is not None:
+
+        is_checked = query.is_notify_shipping
+        action_url_for = url_for(
+            "user.update_notify_status", is_notify_shipping=not query.is_notify_shipping
+        )
+        user.is_notify_shipping = query.is_notify_shipping
+
+    if query.is_notify_request_share_status is not None:
+
+        is_checked = query.is_notify_request_share_status
+        action_url_for = url_for(
+            "user.update_notify_status",
+            is_notify_request_share_status=not query.is_notify_request_share_status,
+        )
+        user.is_notify_request_share_status = query.is_notify_request_share_status
+
+    db.session.commit()
+
+    return render_template(
+        "user/notify_input.html", action_url_for=action_url_for, is_checked=is_checked
     )

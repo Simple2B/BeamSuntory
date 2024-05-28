@@ -9,6 +9,8 @@ from wtforms import (
 )
 from wtforms.validators import DataRequired, Email, EqualTo
 
+import sqlalchemy as sa
+
 from app import models as m
 from app.database import db
 
@@ -53,7 +55,7 @@ class UserForm(FlaskForm):
     def validate_email(self, field):
         query = (
             m.User.select()
-            .where(m.User.email == field.data)
+            .where(sa.func.lower(m.User.email) == sa.func.lower(field.data))
             .where(m.User.id != int(self.user_id.data))
         )
         if db.session.scalar(query) is not None:
@@ -97,6 +99,8 @@ class NewUserForm(FlaskForm):
             raise ValidationError("This username is taken.")
 
     def validate_email(self, field):
-        query = m.User.select().where(m.User.email == field.data)
+        query = m.User.select().where(
+            sa.func.lower(m.User.email) == sa.func.lower(field.data)
+        )
         if db.session.scalar(query) is not None:
             raise ValidationError("This email is already registered.")

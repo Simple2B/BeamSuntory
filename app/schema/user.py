@@ -50,3 +50,9 @@ class AdminCreate(BaseModel):
     region: str
     city: str
     zip_code: str
+
+
+class NotifyStatus(BaseModel):
+    is_notify_new_inventory: bool | None = None
+    is_notify_shipping: bool | None = None
+    is_notify_request_share_status: bool | None = None

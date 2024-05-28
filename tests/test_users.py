@@ -164,3 +164,35 @@ def test_request_shere_notifications(mg_g_populate: FlaskClient):
         )
     ).all()
     assert not notifications
+
+
+def test_update_notify_status(populate_one_user: FlaskClient):
+    user: m.User = populate_one_user.user  # type: ignore
+    assert user
+    login(populate_one_user, username=user.username, password="password")
+
+    assert user.is_notify_new_inventory
+    assert user.is_notify_shipping
+    assert user.is_notify_request_share_status
+
+    res = populate_one_user.get(
+        "/user/update-notify-status?is_notify_new_inventory=False"
+    )
+    assert res.status_code == 200
+    assert not user.is_notify_new_inventory
+
+    res = populate_one_user.get("/user/update-notify-status?is_notify_shipping=False")
+    assert res.status_code == 200
+    assert not user.is_notify_shipping
+
+    res = populate_one_user.get(
+        "/user/update-notify-status?is_notify_request_share_status=False"
+    )
+    assert res.status_code == 200
+    assert not user.is_notify_request_share_status
+
+    res = populate_one_user.get(
+        "/user/update-notify-status?is_notify_new_inventory=True"
+    )
+    assert res.status_code == 200
+    assert user.is_notify_new_inventory
