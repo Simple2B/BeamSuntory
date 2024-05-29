@@ -206,26 +206,27 @@ def deliver(id: int):
     db.session.add(report_shipping)
     db.session.commit()
 
-    msg = Message(
-        subject=f"Ship request delivered {ship_request.order_numb}",
-        sender=app.config["MAIL_DEFAULT_SENDER"],
-        recipients=[ship_request.user.email],
-    )
-    url = (
-        url_for(
-            "ship_request.get_all",
-            _external=True,
+    if ship_request.user.is_notify_shipping:
+        msg = Message(
+            subject=f"Ship request delivered {ship_request.order_numb}",
+            sender=app.config["MAIL_DEFAULT_SENDER"],
+            recipients=[ship_request.user.email],
         )
-        + f"?q={ship_request.order_numb}"
-    )
+        url = (
+            url_for(
+                "ship_request.get_all",
+                _external=True,
+            )
+            + f"?q={ship_request.order_numb}"
+        )
 
-    msg.html = render_template(
-        "email/ship_request.html",
-        user=ship_request.user,
-        ship_request=ship_request,
-        url=url,
-    )
-    mail.send(msg)
+        msg.html = render_template(
+            "email/ship_request.html",
+            user=ship_request.user,
+            ship_request=ship_request,
+            url=url,
+        )
+        mail.send(msg)
 
     log(log.INFO, "Ship Request delivered. Ship Request: [%s]", ship_request)
     flash("Ship Request delivered!", "success")

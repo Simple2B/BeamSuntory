@@ -90,7 +90,11 @@ def forgot_pass():
         flash(f"No registered user with this e-mail: [{form.email.data}]", "danger")
         return render_template("auth/forgot.html", form=form)
 
-    user = db.session.scalar(sa.select(m.User).where(m.User.email == form.email.data))
+    user = db.session.scalar(
+        sa.select(m.User).where(
+            sa.func.lower(m.User.email) == sa.func.lower(form.email.data)
+        )
+    )
     if not user or user.is_deleted:
         log(log.ERROR, "No registered user with this e-mail: [%s]", form.email.data)
         flash("No registered user with this e-mail", "danger")

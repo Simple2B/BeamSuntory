@@ -88,6 +88,11 @@ class User(db.Model, UserMixin, ModelMixin):
     sales_rep: orm.Mapped[bool] = orm.mapped_column(sa.Boolean, default=False)
     phone_number: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=True)
 
+    # notify
+    is_notify_new_inventory: orm.Mapped[bool] = orm.mapped_column(default=True)
+    is_notify_shipping: orm.Mapped[bool] = orm.mapped_column(default=True)
+    is_notify_request_share_status: orm.Mapped[bool] = orm.mapped_column(default=True)
+
     # Relations
     role_obj: orm.Mapped[Division] = orm.relationship(lazy="joined")
     user_groups: orm.Mapped[list[Group]] = orm.relationship(

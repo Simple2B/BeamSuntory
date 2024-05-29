@@ -130,15 +130,34 @@
             </div>
             <ul class="py-1" role="none">
               <li>
-                <a href="#"
-                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                  role="menuitem">Dashboard</a>
+                <div class="flex items-center px-4 py-2">
+                  <input {{ "checked" if current_user.is_notify_new_inventory }} type="checkbox"
+                    hx-get="{{ url_for('user.update_notify_status', is_notify_new_inventory=not current_user.is_notify_new_inventory  ) }}"
+                    hx-trigger="change" hx-swap="outerHTML" hx-indicator="#htmx-spinner"
+                    class="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                  <label for="green-checkbox" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">New
+                    inventory notifications</label>
+                </div>
               </li>
               <li>
-                <a href="#"
-                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                  role="menuitem" data-modal-target="editCurrentUserModal"
-                  data-modal-show="editCurrentUserModal">Settings</a>
+                <div class="flex items-center px-4 py-2">
+                  <input {{ "checked" if current_user.is_notify_shipping }} type="checkbox"
+                    hx-get="{{ url_for('user.update_notify_status', is_notify_shipping=not current_user.is_notify_shipping  ) }}"
+                    hx-trigger="change" hx-swap="outerHTML" hx-indicator="#htmx-spinner"
+                    class="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                  <label for="green-checkbox" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Shipping
+                    notifications</label>
+                </div>
+              </li>
+              <li>
+                <div class="flex items-center px-4 py-2">
+                  <input {{ "checked" if current_user.is_notify_request_share_status }} type="checkbox"
+                    hx-get="{{ url_for('user.update_notify_status', is_notify_request_share_status=not current_user.is_notify_request_share_status  ) }}"
+                    hx-trigger="change" hx-swap="outerHTML" hx-indicator="#htmx-spinner"
+                    class="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                  <label for="green-checkbox" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Share
+                    request notifications</label>
+                </div>
               </li>
               <li>
                 <a href="{{ url_for('auth.logout') }}"
@@ -153,5 +172,5 @@
     </div>
   </div>
 </nav>
-{% include 'user/edit_current.html' %} {% block scripts %}
+{% block scripts %}
 {% endblock %}

@@ -660,7 +660,7 @@ def delete(id: int):
         db.session.execute(m.Assign.delete().where(m.Assign.product == product))
         db.session.execute(m.Event.delete().where(m.Event.product == product))
         db.session.execute(
-            m.Event.delete().where(m.Event.cart.has(m.Product.id == product.id))
+            m.Event.delete().where(m.Event.cart.has(m.Cart.product_id == product.id))
         )
         db.session.execute(m.Cart.delete().where(m.Cart.product_id == product.id))
         db.session.execute(
@@ -962,7 +962,7 @@ def request_share():
         log(log.ERROR, "product assign errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("product.get_all", **query_params))
-    warehouse_product = db.session.scalar(
+    warehouse_product: m.WarehouseProduct | None = db.session.scalar(
         m.WarehouseProduct.select().where(
             m.WarehouseProduct.product.has(m.Product.SKU == form.sku.data),
             m.WarehouseProduct.group.has(m.Group.id == form.from_group_id.data),
