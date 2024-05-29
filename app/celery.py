@@ -43,6 +43,7 @@ def notify_users_accept_inbount(inbound_order_id: int, app_env: str, redirect_ur
             .where(
                 m.UserGroup.right_id.in_(inbound_order_groups_ids),
                 m.User.is_notify_new_inventory.is_(True),
+                m.User.is_deleted.is_(False),
             )
             .distinct()
         ).all()
@@ -103,6 +104,7 @@ def notify_users_assign(assign_id: int, app_env: str, redirect_url: str):
             .where(
                 m.User.approval_permission.is_(True),
                 m.User.is_notify_new_inventory.is_(True),
+                m.User.is_deleted.is_(False),
             )
             .distinct()
         ).all()
@@ -203,7 +205,10 @@ def notify_users_new_request_share(
             .join(m.UserGroup)
             .join(m.Division)
             .where(where_stm)
-            .where(m.User.is_notify_new_inventory.is_(True))
+            .where(
+                m.User.is_notify_new_inventory.is_(True),
+                m.User.is_deleted.is_(False),
+            )
             .distinct()
         ).all()
 
