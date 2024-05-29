@@ -217,28 +217,28 @@ def share(id: int):
     warehouse_from_prod.product_quantity -= request_share.desire_quantity
     warehouse_from_prod.save(False)
 
-    # TODO: approved
-    msg = Message(
-        subject=f"Request share approved {request_share.order_numb}",
-        sender=app.config["MAIL_DEFAULT_SENDER"],
-        recipients=[request_share.user.email],
-    )
-    url = (
-        url_for(
-            "request_share.get_all",
-            _external=True,
+    if request_share.user.is_notify_request_share_status:
+        msg = Message(
+            subject=f"Request share approved {request_share.order_numb}",
+            sender=app.config["MAIL_DEFAULT_SENDER"],
+            recipients=[request_share.user.email],
         )
-        + f"?q={request_share.order_numb}"
-    )
+        url = (
+            url_for(
+                "request_share.get_all",
+                _external=True,
+            )
+            + f"?q={request_share.order_numb}"
+        )
 
-    msg.html = render_template(
-        "email/request_share.html",
-        user=request_share.user,
-        request_share=request_share,
-        url=url,
-        action="approved",
-    )
-    mail.send(msg)
+        msg.html = render_template(
+            "email/request_share.html",
+            user=request_share.user,
+            request_share=request_share,
+            url=url,
+            action="approved",
+        )
+        mail.send(msg)
 
     m.ReportInventory(
         qty_before=warehouse_from_prod.product_quantity + request_share.desire_quantity,
@@ -319,20 +319,21 @@ def decline(id: int):
         )
         + f"?q={request_share.order_numb}"
     )
-    # TODO: declined
-    msg = Message(
-        subject=f"Declined request share {request_share.order_numb}",
-        sender=app.config["MAIL_DEFAULT_SENDER"],
-        recipients=[request_share.user.email],
-    )
-    msg.html = render_template(
-        "email/request_share.html",
-        user=request_share.user,
-        action="declined",
-        request_share=request_share,
-        url=url,
-    )
-    mail.send(msg)
+
+    if request_share.user.is_notify_request_share_status:
+        msg = Message(
+            subject=f"Declined request share {request_share.order_numb}",
+            sender=app.config["MAIL_DEFAULT_SENDER"],
+            recipients=[request_share.user.email],
+        )
+        msg.html = render_template(
+            "email/request_share.html",
+            user=request_share.user,
+            action="declined",
+            request_share=request_share,
+            url=url,
+        )
+        mail.send(msg)
 
     log(log.INFO, "Request Share declined: [%s]", request_share)
     flash("Request Share declined!", "success")

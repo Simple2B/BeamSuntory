@@ -38,21 +38,25 @@ def notify_users_accept_inbount(inbound_order_id: int, app_env: str, redirect_ur
         )
 
         users = db.session.scalars(
-            sa.select(m.UserGroup).where(
-                m.UserGroup.right_id.in_(inbound_order_groups_ids)
+            sa.select(m.User)
+            .join(m.UserGroup)
+            .where(
+                m.UserGroup.right_id.in_(inbound_order_groups_ids),
+                m.User.is_notify_new_inventory.is_(True),
             )
-        )
+            .distinct()
+        ).all()
 
-        for u in users:
+        for user in users:
             msg = Message(
                 subject=f"Inbound order accepted {inbound_order.title}",
                 sender=app.config["MAIL_DEFAULT_SENDER"],
-                recipients=[u.child.email],
+                recipients=[user.email],
             )
 
             msg.html = render_template(
                 "email/inbound_order.html",
-                user=u.child,
+                user=user,
                 inbound_order=inbound_order,
                 url=redirect_url,
             )
@@ -96,12 +100,14 @@ def notify_users_assign(assign_id: int, app_env: str, redirect_url: str):
             .join(m.UserGroup)
             .join(m.Division)
             .where(where_stm)
+            .where(
+                m.User.approval_permission.is_(True),
+                m.User.is_notify_new_inventory.is_(True),
+            )
             .distinct()
         ).all()
 
         for user in users:
-            if not user.approval_permission:
-                continue
             msg = Message(
                 subject=f"Assign {assign_obj.product.name}",
                 sender=app.config["MAIL_DEFAULT_SENDER"],
@@ -197,6 +203,7 @@ def notify_users_new_request_share(
             .join(m.UserGroup)
             .join(m.Division)
             .where(where_stm)
+            .where(m.User.is_notify_new_inventory.is_(True))
             .distinct()
         ).all()
 
