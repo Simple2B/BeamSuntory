@@ -1,8 +1,32 @@
-<input {{ "checked" if is_checked }} type="checkbox" hx-post="{{ action_url_for }}" hx-trigger="change"
-    hx-swap="outerHTML" hx-indicator="#htmx-spinner" class="w-4
-h-4 text-green-600 bg-gray-100
-border-gray-300 rounded
-focus:ring-green-500
-dark:focus:ring-green-600
-dark:ring-offset-gray-800 focus:ring-2
-dark:bg-gray-700 dark:border-gray-600">
+{% if is_checked %}
+<svg hx-get="{{ action_url_for }}" hx-trigger="click" hx-swap="outerHTML" hx-indicator="#htmx-spinner" width="42px"
+    height="42px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+    <g id="SVGRepo_iconCarrier">
+        <rect width="24" height="24" fill="white"></rect>
+        <path fill-rule="evenodd" clip-rule="evenodd"
+            d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12ZM15.7071 9.29289C16.0976 9.68342 16.0976 10.3166 15.7071 10.7071L12.0243 14.3899C11.4586 14.9556 10.5414 14.9556 9.97568 14.3899L8.29289 12.7071C7.90237 12.3166 7.90237 11.6834 8.29289 11.2929C8.68342 10.9024 9.31658 10.9024 9.70711 11.2929L11 12.5858L14.2929 9.29289C14.6834 8.90237 15.3166 8.90237 15.7071 9.29289Z"
+            fill="#323232"></path>
+    </g>
+</svg>
+{% else %}
+<svg hx-get="{{ action_url_for }}" hx-trigger="click" hx-swap="outerHTML" hx-indicator="#htmx-spinner" width="38px"
+    height="38px" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" fill="#000000">
+    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+    <g id="SVGRepo_iconCarrier">
+        <defs>
+            <style>
+                .cls-1 {
+                    fill: #9f4c4c;
+                    fill-rule: evenodd;
+                }
+            </style>
+        </defs>
+        <path class="cls-1"
+            d="M940,510a30,30,0,1,1,30-30A30,30,0,0,1,940,510Zm15-20.047A3.408,3.408,0,0,1,955,494.77l-0.221.22a3.42,3.42,0,0,1-4.833,0l-8.764-8.755a1.71,1.71,0,0,0-2.417,0l-8.741,8.747a3.419,3.419,0,0,1-4.836,0l-0.194-.193a3.408,3.408,0,0,1,.017-4.842l8.834-8.735a1.7,1.7,0,0,0,0-2.43l-8.831-8.725a3.409,3.409,0,0,1-.018-4.844l0.193-.193a3.413,3.413,0,0,1,2.418-1c0.944,0,3.255,1.835,3.872,2.455l7.286,7.287a1.708,1.708,0,0,0,2.417,0l8.764-8.748a3.419,3.419,0,0,1,4.832,0L955,465.243a3.408,3.408,0,0,1,0,4.818l-8.727,8.737a1.7,1.7,0,0,0,0,2.407Z"
+            id="uncheck" transform="translate(-910 -450)"></path>
+    </g>
+</svg>
+{% endif %}
