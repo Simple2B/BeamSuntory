@@ -51,22 +51,4 @@
     </a>
     {% endfor %}
     <div class="p-6"></div>
-
-    <script>
-        function setBell() {
-            const isNew = "{{ new_notification_ids | length }}"
-            const bell = document.querySelector("#bell-notification-red-dot")
-            if (parseInt(isNew) > 0) {
-                bell.classList.remove("invisible")
-                setTimeout(() => {
-                    bell.classList.add("invisible");
-                }, 5000);
-            } else {
-                if (!bell.classList.contains("invisible")) {
-                    bell.classList.add("invisible")
-                }
-            }
-        }
-        setBell()
-    </script>
 </div>

@@ -172,6 +172,7 @@ document.querySelector('#product-upload-save-products-btn').addEventListener('cl
 
 const dropdownSidebar = document.querySelectorAll('.dropdown-btn');
 
+
 dropdownSidebar.forEach((btn) => {
   const btnElement = btn as HTMLElement;
 
@@ -214,6 +215,19 @@ dropdownSidebar.forEach((btn) => {
     }
   });
 });
+
+// bell notification dropdown
+const bell = document.querySelector("#bell-notification-red-dot")
+const notification = document.querySelector("#dropdownNotificationButton")
+if (bell && notification) {
+  notification.addEventListener("click", () => {
+    if (!bell.classList.contains("invisible")) {
+      bell.classList.add("invisible")
+    }
+  })
+}
+
+
 
 window.addEventListener('htmx:afterSwap', (event) => {
   const eventTarget = event.target as HTMLElement;
