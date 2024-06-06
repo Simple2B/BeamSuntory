@@ -177,6 +177,16 @@ def init(app: Flask):
 
         print("admin created")
 
+    @app.cli.command("set-product-program-year")
+    def set_product_program_year():
+        """Set product program year"""
+        products = db.session.scalars(
+            sa.select(m.Product).where(m.Product.program_year.is_(None))
+        ).all()
+        for product in products:
+            product.program_year = 2024
+        db.session.commit()
+
     @app.cli.command()
     def fill_db():
         """Populate DB with basic data."""
