@@ -238,8 +238,9 @@
         </td>
         <td class=" space-x-2 flex gap-2 flex-wrap justify-center py-3">
           {% if user_role in warehouse_roles %}
-          <button type="button" data-target="{{product.json}}"
-            class="product-adjust-button inline-flex items-center w-24 px-3 py-2 text-sm font-medium text-center text-white rounded-lgfocus:outline-none bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 rounded-lg dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+          <button type="button" hx-get="{{ url_for('product.htmx.get_adjust_form', product_id=product.id) }}"
+            hx-target="body" hx-swap="beforeend" hx-indicator="#htmx-spinner" hx-trigger="click"
+            class=" inline-flex items-center w-24 px-3 py-2 text-sm font-medium text-center text-white rounded-lgfocus:outline-none bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 rounded-lg dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
               <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
@@ -381,7 +382,6 @@
 </div>
 {% endif %}
 </div>
-{% include 'product/adjust.html' %}
 <!-- prettier-ignore -->
 {% endblock %}
 <!-- prettier-ignore -->

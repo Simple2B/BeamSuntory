@@ -129,7 +129,8 @@ def get_view(ship_request_id: int):
 
     carts = db.session.scalars(
         sa.select(m.Cart).where(
-            m.Cart.ship_request_id == ship_request_id, m.Cart.status != "pending"
+            m.Cart.ship_request_id == ship_request_id,
+            m.Cart.status != s.CartStatus.PENDING.value,
         )
     ).all()
     return render_template(
@@ -193,7 +194,8 @@ def create():
 
     carts = db.session.scalars(
         sa.select(m.Cart).where(
-            m.Cart.user_id == current_user.id, m.Cart.status == "pending"
+            m.Cart.user_id == current_user.id,
+            m.Cart.status == s.CartStatus.PENDING.value,
         )
     ).all()
 
@@ -219,7 +221,7 @@ def create():
             if c.product_id == cart.product_id and cart.group_id == c.group_id
         )
 
-        if quantity > we_ho_product.product_quantity:
+        if quantity > we_ho_product.available_quantity:
             log(
                 log.INFO,
                 "There is not enough product in the warehouse: [%s]",
@@ -305,12 +307,7 @@ def create():
             status="Ship request created.",
         ).save(False)
 
-        if cart.from_warehouse_product:
-            cart.from_warehouse_product.product_quantity -= cart.quantity
-        else:
-            log(log.ERROR, "Warehouse product not found: cart_id:[%s]", cart.id)
-
-        cart.status = "submitted"
+        cart.status = s.CartStatus.SUBMITTED.value
         cart.order_numb = ship_request.order_numb
         cart.ship_request_id = ship_request.id
         cart.save()

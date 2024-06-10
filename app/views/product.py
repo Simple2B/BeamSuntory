@@ -321,11 +321,14 @@ def product_view(id: int):
         log(log.ERROR, "Not found product by id : [%s]", id)
         return render_template("error_modal.html", message="Can't find product")
 
-    total_qty = sum(
-        warehouse.product_quantity for warehouse in product.warehouse_products
-    )
     warehouses = {}
+    warehouse_products_by_group = dict()  # type: dict[str, dict[str, int]]
     for warehouse_product in product.warehouse_products:
+
+        if warehouse_product.group.name not in warehouse_products_by_group:
+            warehouse_products_by_group[warehouse_product.group.name] = (
+                warehouse_product
+            )
 
         if warehouse_product.warehouse.name not in warehouses:
             warehouses[warehouse_product.warehouse.name] = (
@@ -339,14 +342,9 @@ def product_view(id: int):
     return render_template(
         "product/modal_view.html",
         product=product,
-        total_qty=total_qty,
+        warehouse_products_by_group=warehouse_products_by_group,
         is_events=is_events,
         warehouses=warehouses,
-        required_role=[
-            s.UserRole.ADMIN.value,
-            s.UserRole.MANAGER.value,
-            s.UserRole.SALES_REP.value,
-        ],
     )
 
 
@@ -354,7 +352,6 @@ def product_view(id: int):
 @login_required
 def get_all():
     products_object = get_all_products(request)
-    adjust_form = f.AdjustProductForm()
 
     name = request.args.get("is_stocks_own_by_me", type=bool, default=False)
     url_with_params = url_for("product.get_all", name=name)
@@ -391,7 +388,6 @@ def get_all():
         target_groups=products_object["target_groups"],
         datetime=products_object["datetime"],
         url_with_params=url_with_params,
-        adjust_form=adjust_form,
     )
 
 
@@ -805,8 +801,8 @@ def assign():
         log(log.ERROR, "product assign errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("product.get_all", **query_params))
-    query = m.Product.select().where(m.Product.SKU == form.product_SKU.data)
-    product: m.Product | None = db.session.scalar(query)
+    query = sa.select(m.Product).where(m.Product.SKU == form.product_SKU.data)
+    product = db.session.scalar(query)
 
     if not product:
         log(log.ERROR, "Not found product by name : [%s]", form.name.data)
@@ -814,19 +810,19 @@ def assign():
         return redirect(url_for("product.get_all", **query_params))
 
     product_from_group: m.Group = db.session.scalar(
-        m.Group.select().where(
+        sa.select(m.Group).where(
             m.Group.name == form.from_group.data,
         )
     )
     if form.sub_group.data:
         product_to_group: m.Group = db.session.scalar(
-            m.Group.select().where(
+            sa.select(m.Group).where(
                 m.Group.name == form.sub_group.data,
             )
         )
     else:
         product_to_group: m.Group = db.session.scalar(
-            m.Group.select().where(
+            sa.select(m.Group).where(
                 m.Group.name == form.group.data,
             )
         )
@@ -844,45 +840,64 @@ def assign():
         )
         return redirect(url_for("product.get_all", **query_params))
 
+    product_warehouses_from = db.session.scalars(
+        sa.select(m.WarehouseProduct)
+        .where(
+            m.WarehouseProduct.product_id == product.id,
+            m.WarehouseProduct.group_id == product_from_group.id,
+        )
+        .order_by(m.WarehouseProduct.product_quantity.asc())
+    ).all()
+    if (
+        not product_warehouses_from
+        or product_warehouses_from[0].available_quantity < form.quantity.data
+    ):
+        log(log.ERROR, "Not enough product in warehouse")
+        flash("Not enough product in warehouse", "danger")
+        return redirect(url_for("product.get_all", **query_params))
+
     report_inventory_list = m.ReportInventoryList(
         type="Product Assigned",
         user_id=current_user.id,
     )
     report_inventory_list.save(False)
 
-    # TODO sort also by warehouse_id
-    product_warehouse: m.WarehouseProduct = db.session.execute(
-        m.WarehouseProduct.select().where(
-            m.WarehouseProduct.product_id == product.id,
-            m.WarehouseProduct.group_id == product_from_group.id,
-        )
-    ).scalar()
-    if not product_warehouse:
-        log(log.ERROR, "Product warehouse not found")
-        flash("Product warehouse not found", "danger")
-        return redirect(url_for("product.get_all", **query_params))
     # NOTE create report for inventory
-    report_inventory = m.ReportInventory(
-        qty_before=product_warehouse.product_quantity,
-        qty_after=product_warehouse.product_quantity - form.quantity.data,
-        report_inventory_list_id=report_inventory_list.id,
-        product_id=product_warehouse.product_id,
-        warehouse_product=product_warehouse,
-    )
-    report_inventory.save(False)
-    product_warehouse.product_quantity -= form.quantity.data
-    product_warehouse.save(False)
+    new_qty = form.quantity.data
+    for product_warehouse in product_warehouses_from:
+        if (
+            new_qty > product_warehouse.product_quantity
+            and product_warehouse.product_quantity != 0
+        ):
+            report_inventory = m.ReportInventory(
+                qty_before=product_warehouse.product_quantity,
+                qty_after=0,
+                report_inventory_list=report_inventory_list,
+                product_id=product_warehouse.product_id,
+                warehouse_product=product_warehouse,
+            ).save(False)
+            new_qty -= product_warehouse.product_quantity
+            product_warehouse.product_quantity = 0
+        else:
+            report_inventory = m.ReportInventory(
+                qty_before=product_warehouse.product_quantity,
+                qty_after=product_warehouse.product_quantity - new_qty,
+                report_inventory_list=report_inventory_list,
+                product_id=product_warehouse.product_id,
+                warehouse_product=product_warehouse,
+            ).save(False)
+            product_warehouse.product_quantity -= new_qty
+            break
 
-    new_product_warehouse: m.WarehouseProduct = db.session.execute(
-        m.WarehouseProduct.select().where(
+    new_product_warehouse = db.session.scalar(
+        sa.select(m.WarehouseProduct).where(
             m.WarehouseProduct.product_id == product.id,
             m.WarehouseProduct.group_id == product_to_group.id,
         )
-    ).scalar()
+    )
     if new_product_warehouse:
         qty_before = new_product_warehouse.product_quantity
         new_product_warehouse.product_quantity += form.quantity.data
-        new_product_warehouse.save(False)
     else:
         qty_before = 0
         new_product_warehouse = m.WarehouseProduct(
@@ -1039,126 +1054,106 @@ def adjust():
     form: f.AdjustProductForm = f.AdjustProductForm()
 
     query_params = get_query_params_from_headers()
-    if form.validate_on_submit():
-        adjust_item: m.Adjust = m.Adjust(
+    if not form.validate_on_submit():
+        log(log.ERROR, "Adjust product errors: [%s]", form.errors)
+        flash(f"{form.errors}", "danger")
+        return redirect(url_for("product.get_all", **query_params))
+    adjust_item: m.Adjust = m.Adjust(
+        product_id=form.product_id.data,
+        note=form.note.data,
+        user_id=current_user.id,
+    )
+    db.session.add(adjust_item)
+    is_adjust_products = False
+
+    try:
+        warehouses_groups_qty = s.ProductWarehouseAdapter.validate_json(
+            form.warehouses_groups_quantity.data
+        )
+    except ValidationError as e:
+        log(log.ERROR, "Adjust model_root validate errors: [%s]", e)
+        flash("Data is not valid", "danger")
+        return redirect(url_for("product.get_all", **query_params))
+
+    product = db.session.get(m.Product, form.product_id.data)
+
+    if not product:
+        flash("Cannot save product data", "danger")
+        log(log.ERROR, "Not found product by id : [%s]", form.product_id.data)
+        return redirect(url_for("product.get_all", **query_params))
+
+    report_inventory_list = m.ReportInventoryList(
+        type="Products Adjusted",
+        user_id=current_user.id,
+    )
+    report_inventory_list.save(False)
+
+    for warehouse_group_qty in warehouses_groups_qty:
+        product_warehouse = db.session.get(
+            m.WarehouseProduct, warehouse_group_qty.warehouse_product_id
+        )
+
+        if not product_warehouse:
+            log(log.ERROR, "Not found warehouse product: [%s]", warehouse_group_qty)
+            flash("Cannot save product data", "danger")
+            return redirect(url_for("product.get_all", **query_params))
+
+        if (
+            product_warehouse.warehouse.name
+            == s.WarehouseMandatory.warehouse_events.value
+        ):
+            log(log.ERROR, "Can't adjust product in events warehouse")
+            continue
+
+        if product_warehouse.product_quantity == warehouse_group_qty.product_quantity:
+            continue
+
+        adjust_gr_qty: m.AdjustGroupQty = m.AdjustGroupQty(
+            adjust_id=adjust_item.id,
+            quantity_before=product_warehouse.product_quantity,
+            quantity_after=warehouse_group_qty.product_quantity,
+            group_id=product_warehouse.group.id,
+            warehouse_id=product_warehouse.warehouse.id,
             product_id=form.product_id.data,
-            note=form.note.data,
-            user_id=current_user.id,
         )
-        db.session.add(adjust_item)
-        is_adjust_products = False
+        db.session.add(adjust_gr_qty)
 
-        try:
-            model_root = s.ProductWarehouseRoot.model_validate_json(
-                form.warehouses_groups_quantity.data
-            )
-            warehouses_groups_qty = model_root.root
-        except ValidationError as e:
-            log(log.ERROR, "Adjust model_root validate errors: [%s]", e)
-            flash("Data is not valid", "danger")
-            return redirect(url_for("product.get_all", **query_params))
+        m.ReportInventory(
+            report_inventory_list=report_inventory_list,
+            qty_before=product_warehouse.product_quantity,
+            qty_after=warehouse_group_qty.product_quantity,
+            product_id=product_warehouse.product_id,
+            warehouse_product=product_warehouse,
+        ).save(False)
 
-        product = db.session.get(m.Product, form.product_id.data)
-        warehouse_event: m.Warehouse = db.session.scalar(
-            m.Warehouse.select().where(
-                m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value
-            )
-        )
-        if not warehouse_event:
-            flash("Cannot save product data", "danger")
-            log(
-                log.ERROR,
-                "Not found warehouse event, product_id: [%s]",
-                form.product_id.data,
-            )
-            return redirect(url_for("product.get_all", **query_params))
-        if not product:
-            flash("Cannot save product data", "danger")
-            log(log.ERROR, "Not found product by id : [%s]", form.product_id.data)
-            return redirect(url_for("product.get_all", **query_params))
+        m.ReportSKU(
+            product_id=product_warehouse.product_id,
+            adjustment=adjust_gr_qty,
+            type=s.ReportSKUType.adjustment.value,
+            status="Adjusted quantity",
+            qty_after=warehouse_group_qty.product_quantity,
+            qty_before=product_warehouse.product_quantity,
+            warehouse_product=product_warehouse,
+        ).save(False)
 
-        report_inventory_list = m.ReportInventoryList(
-            type="Products Adjusted",
-            user_id=current_user.id,
-        )
-        report_inventory_list.save(False)
+        product_warehouse.product_quantity = warehouse_group_qty.product_quantity
 
-        for warehouse_group_qty in warehouses_groups_qty:
-            if (
-                warehouse_group_qty.group.master_group.name
-                == s.MasterGroupMandatory.events.value
-                and warehouse_group_qty.warehouse.id != warehouse_event.id
-            ):
-                continue
-            product_warehouse: m.WarehouseProduct = db.session.scalar(
-                m.WarehouseProduct.select().where(
-                    m.WarehouseProduct.product_id == form.product_id.data,
-                    m.WarehouseProduct.group_id == warehouse_group_qty.group.id,
-                    m.WarehouseProduct.warehouse_id == warehouse_group_qty.warehouse.id,
-                )
-            )
-            if not product_warehouse:
-                log(log.ERROR, "Not found warehouse product: [%s]", warehouse_group_qty)
-                flash("Cannot save product data", "danger")
-                return redirect(url_for("product.get_all", **query_params))
+        is_adjust_products = True
 
-            if (
-                product_warehouse.product_quantity
-                != warehouse_group_qty.product_quantity
-            ):
-                adjust_gr_qty: m.AdjustGroupQty = m.AdjustGroupQty(
-                    adjust_id=adjust_item.id,
-                    quantity_before=product_warehouse.product_quantity,
-                    quantity_after=warehouse_group_qty.product_quantity,
-                    group_id=warehouse_group_qty.group.id,
-                    warehouse_id=warehouse_group_qty.warehouse.id,
-                    product_id=form.product_id.data,
-                )
-                db.session.add(adjust_gr_qty)
+    if not is_adjust_products:
+        db.session.delete(adjust_item)
+        log(log.INFO, "Nothing to adjust: [%s]", form.product_id.data)
+        flash("Nothing to adjust", "danger")
+        return redirect(url_for("product.get_all", **query_params))
 
-                m.ReportInventory(
-                    qty_before=product_warehouse.product_quantity,
-                    qty_after=warehouse_group_qty.product_quantity,
-                    report_inventory_list_id=report_inventory_list.id,
-                    product_id=product_warehouse.product_id,
-                    warehouse_product=product_warehouse,
-                ).save(False)
+    db.session.commit()
 
-                m.ReportSKU(
-                    product_id=product_warehouse.product_id,
-                    adjustment=adjust_gr_qty,
-                    type=s.ReportSKUType.adjustment.value,
-                    status="Adjusted quantity",
-                    qty_after=warehouse_group_qty.product_quantity,
-                    qty_before=product_warehouse.product_quantity,
-                    warehouse_product=product_warehouse,
-                ).save(False)
-
-                product_warehouse.product_quantity = (
-                    warehouse_group_qty.product_quantity
-                )
-                db.session.add(product_warehouse)
-
-                is_adjust_products = True
-
-        if not is_adjust_products:
-            db.session.delete(adjust_item)
-            log(log.INFO, "Nothing to adjust: [%s]", form.product_id.data)
-            flash("Nothing to adjust", "danger")
-            return "not modified", HTTPStatus.NOT_MODIFIED
-
-        db.session.commit()
-
-        log(
-            log.INFO,
-            "Adjust product: [%s]",
-            form.product_id.data,
-        )
-        flash(f"Product {product.name} was adjusted", "success")
-        return "ok", HTTPStatus.OK
-
-    log(log.ERROR, "Adjust item save errors: [%s]", form.errors)
-    flash(f"{form.errors}", "danger")
+    log(
+        log.INFO,
+        "Adjust product: [%s]",
+        form.product_id.data,
+    )
+    flash(f"Product {product.name} was adjusted", "success")
     return redirect(url_for("product.get_all", **query_params))
 
 

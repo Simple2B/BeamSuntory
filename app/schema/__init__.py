@@ -12,6 +12,7 @@ from .product import (
     ProductWarehouseRoot,
     ProductCSVItem,
     ProductFullImage,
+    ProductWarehouseAdapter,
 )
 from .inbound_order import InboundOrder, InboundOrderStatus, FilterInboundOrder
 from .product_category import ProductCategory
@@ -35,7 +36,7 @@ from .group_for_product import GroupProduct, GroupProductList
 from .master_group_for_product import MasterGroupProduct, ProductMasterGroupMandatory
 from .product_group import ProductGroup
 from .delivery_agent import DeliveryAgent
-from .cart import Cart
+from .cart import Cart, CartStatus
 from .warehouse_product import WarehouseProduct
 from .package_info import (
     PackageInfo,

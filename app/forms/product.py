@@ -278,7 +278,7 @@ class RequestShareProductForm(FlaskForm):
 
 
 class AdjustProductForm(FlaskForm):
-    product_id = IntegerField("Product ID", [DataRequired()])
+    product_id = HiddenField("Product ID", [DataRequired()])
     warehouses_groups_quantity = StringField("Warehouses Groups Qty", [DataRequired()])
     note = StringField("Note")
 

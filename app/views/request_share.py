@@ -161,16 +161,15 @@ def share(id: int):
         flash("Someone already shared", "danger")
         return redirect(url_for("request_share.get_all"))
 
-    # TODO Filter by warehouse id also
     warehouse_to_prod: m.WarehouseProduct = db.session.scalar(
-        m.WarehouseProduct.select().where(
+        sa.select(m.WarehouseProduct).where(
             m.WarehouseProduct.product_id == request_share.product_id,
             m.WarehouseProduct.group_id == request_share.group_id,
         )
     )
 
     warehouse_from_prod: m.WarehouseProduct = db.session.scalar(
-        m.WarehouseProduct.select().where(
+        sa.select(m.WarehouseProduct).where(
             m.WarehouseProduct.product_id == request_share.product_id,
             m.WarehouseProduct.group_id == request_share.from_group_id,
         )
@@ -185,7 +184,7 @@ def share(id: int):
         flash("These product was depleted", "danger")
         return redirect(url_for("request_share.get_all"))
 
-    if warehouse_from_prod.product_quantity < request_share.desire_quantity:
+    if warehouse_from_prod.available_quantity < request_share.desire_quantity:
         log(
             log.INFO,
             "Not enough products in warehouse. Product id: [%s]",
@@ -214,8 +213,82 @@ def share(id: int):
         warehouse_to_prod.product_quantity += request_share.desire_quantity
         warehouse_to_prod.save(False)
 
-    warehouse_from_prod.product_quantity -= request_share.desire_quantity
-    warehouse_from_prod.save(False)
+    m.ReportInventory(
+        qty_before=qty_before,
+        qty_after=warehouse_to_prod.product_quantity,
+        report_inventory_list=report_inventory_list,
+        product_id=warehouse_to_prod.product_id,
+        warehouse_product=warehouse_to_prod,
+    ).save(False)
+
+    if request_share.desire_quantity > warehouse_from_prod.product_quantity:
+        remainder = request_share.desire_quantity - warehouse_from_prod.product_quantity
+        m.ReportInventory(
+            qty_before=warehouse_from_prod.product_quantity
+            + request_share.desire_quantity
+            - remainder,
+            qty_after=warehouse_from_prod.product_quantity,
+            report_inventory_list=report_inventory_list,
+            product_id=warehouse_from_prod.product_id,
+            warehouse_product=warehouse_from_prod,
+        ).save(False)
+        warehouse_from_prod.product_quantity = 0
+        warehouse_from_prods = db.session.scalars(
+            sa.select(m.WarehouseProduct).where(
+                m.WarehouseProduct.id != warehouse_from_prod.id,
+                m.WarehouseProduct.product_id == warehouse_from_prod.product_id,
+                m.WarehouseProduct.group_id == warehouse_from_prod.group_id,
+            )
+        ).all()
+        for warehouse_from_prod in warehouse_from_prods:
+            if warehouse_from_prod.product_quantity >= remainder:
+                warehouse_from_prod.product_quantity -= remainder
+                remainder = 0
+                break
+            else:
+                remainder -= warehouse_from_prod.product_quantity
+                warehouse_from_prod.product_quantity = 0
+            warehouse_from_prod.save(False)
+            m.ReportInventory(
+                qty_before=warehouse_from_prod.product_quantity + remainder,
+                qty_after=warehouse_from_prod.product_quantity,
+                report_inventory_list=report_inventory_list,
+                product_id=warehouse_from_prod.product_id,
+                warehouse_product=warehouse_from_prod,
+            ).save(False)
+    else:
+        warehouse_from_prod.product_quantity -= request_share.desire_quantity
+        warehouse_from_prod.save(False)
+
+        m.ReportInventory(
+            qty_before=warehouse_from_prod.product_quantity
+            + request_share.desire_quantity,
+            qty_after=warehouse_from_prod.product_quantity,
+            report_inventory_list=report_inventory_list,
+            product_id=warehouse_from_prod.product_id,
+            warehouse_product=warehouse_from_prod,
+        ).save(False)
+
+    m.ReportSKU(
+        product_id=request_share.product_id,
+        share=request_share,
+        type=s.ReportSKUType.share.value,
+        status=f"Assigned from {request_share.from_group_id} to {request_share.group_id}",
+        warehouse_product=warehouse_to_prod,
+    ).save(False)
+
+    report_request_share = m.ReportRequestShare(
+        type=s.ReportRequestShareActionType.SHARED.value,
+        user=current_user,
+        request_share=request_share,
+        history=" ".join(
+            [
+                f"from: {warehouse_from_prod.warehouse.name} ->",
+                f"to: {warehouse_to_prod.warehouse.name} -",
+                f"quantity: {request_share.desire_quantity}",
+            ]
+        ),
+    )
 
     if request_share.user.is_notify_request_share_status:
         msg = Message(
@@ -240,42 +313,6 @@ def share(id: int):
         )
         mail.send(msg)
 
-    m.ReportInventory(
-        qty_before=warehouse_from_prod.product_quantity + request_share.desire_quantity,
-        qty_after=warehouse_from_prod.product_quantity,
-        report_inventory_list=report_inventory_list,
-        product_id=warehouse_from_prod.product_id,
-        warehouse_product=warehouse_from_prod,
-    ).save(False)
-
-    m.ReportInventory(
-        qty_before=qty_before,
-        qty_after=warehouse_to_prod.product_quantity,
-        report_inventory_list=report_inventory_list,
-        product_id=warehouse_to_prod.product_id,
-        warehouse_product=warehouse_to_prod,
-    ).save(False)
-
-    m.ReportSKU(
-        product_id=request_share.product_id,
-        share=request_share,
-        type=s.ReportSKUType.share.value,
-        status=f"Assigned from {request_share.from_group_id} to {request_share.group_id}",
-        warehouse_product=warehouse_to_prod,
-    ).save(False)
-
-    report_request_share = m.ReportRequestShare(
-        type=s.ReportRequestShareActionType.SHARED.value,
-        user=current_user,
-        request_share=request_share,
-        history=" ".join(
-            [
-                f"from: {warehouse_from_prod.warehouse.name} ->",
-                f"to: {warehouse_to_prod.warehouse.name} -",
-                f"quantity: {request_share.desire_quantity}",
-            ]
-        ),
-    )
     request_share.status = "shared"
     request_share.finished_date = datetime.now().replace(microsecond=0)
     db.session.add(report_request_share)

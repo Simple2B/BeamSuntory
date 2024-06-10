@@ -261,7 +261,7 @@ def init(app: Flask):
             )
         ).scalar()
         if role:
-            wh_user = "warehouse manager 1"
+            wh_user = "wm1"
             m.User(
                 username=wh_user,
                 email="warehouseuser1@mail.com",

@@ -35,6 +35,7 @@ class Cart(db.Model, ModelMixin):
     )
     group_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("groups.id"))
 
+    # this filed is just instens of warehouse_product but to get the available quantity
     from_warehouse_product_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("warehouse_product.id")
     )
@@ -66,7 +67,7 @@ class Cart(db.Model, ModelMixin):
     @property
     def available_quantity(self):
         if self.from_warehouse_product:
-            return self.from_warehouse_product.product_quantity
+            return self.from_warehouse_product.available_quantity
         return 0
 
     @property

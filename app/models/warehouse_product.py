@@ -1,10 +1,12 @@
 from typing import TYPE_CHECKING
 from datetime import datetime
 from sqlalchemy import ForeignKey, orm
+import sqlalchemy as sa
 
 from app import schema as s
 from app.database import db
 from .utils import ModelMixin
+from .cart import Cart
 
 
 # avoid circular import during initialization
@@ -40,6 +42,31 @@ class WarehouseProduct(db.Model, ModelMixin):
     @property
     def group_name(self):
         return self.group.name
+
+    @property
+    def available_quantity(self):
+        available_quantity = (
+            db.session.execute(
+                sa.select(sa.func.sum(type(self).product_quantity)).where(
+                    type(self).product_id == self.product_id,
+                    type(self).group_id == self.group_id,
+                )
+            ).scalar()
+            or 0
+        )
+
+        cart_item_sum = (
+            db.session.execute(
+                sa.select(sa.func.sum(Cart.quantity)).where(
+                    Cart.product_id == self.product_id,
+                    Cart.group_id == self.group_id,
+                    Cart.status == s.CartStatus.SUBMITTED.value,
+                )
+            ).scalar()
+            or 0
+        )
+
+        return available_quantity - cart_item_sum
 
     @property
     def json(self):

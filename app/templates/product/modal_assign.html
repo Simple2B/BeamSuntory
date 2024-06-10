@@ -58,13 +58,13 @@
               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available Quantity</label>
             <div
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-              {{ product_warehouse.product_quantity }}
+              {{ product_warehouse.available_quantity }}
             </div>
           </div>
 
           <div class="col-span-6 sm:col-span-3">
             <label for="quantity" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
-            {{ form.quantity(max=product_warehouse.product_quantity, placeholder="Quantity", class_="shadow-sm
+            {{ form.quantity(max=product_warehouse.available_quantity, placeholder="Quantity", class_="shadow-sm
             bg-gray-50 border border-gray-300 text-gray-900
             text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600
             dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500
