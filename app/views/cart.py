@@ -41,8 +41,11 @@ def get_all():
 
     q = request.args.get("q", type=str, default=None)
     query = (
-        m.Cart.select()
-        .where(m.Cart.status == "pending", m.Cart.user_id == current_user.id)
+        sa.select(m.Cart)
+        .where(
+            m.Cart.status == s.CartStatus.PENDING.value,
+            m.Cart.user_id == current_user.id,
+        )
         .order_by(m.Cart.id)
     )
     count_query = sa.select(sa.func.count()).select_from(m.Cart)
@@ -251,30 +254,27 @@ def create():
     if warehouse_product.group.master_group.name == s.MasterGroupMandatory.events.value:
         is_event = True
 
-    if form.quantity.data > warehouse_product.product_quantity:
+    available_quantity = warehouse_product.available_quantity
+
+    if form.quantity.data > available_quantity:
         flash("Not enough products in stock", "danger")
         return redirect(url_for("product.get_all"))
 
-    cart_product_amount: list[int] = (
+    cart_product_amount = (
         db.session.execute(
             sa.select(sa.func.sum(m.Cart.quantity)).where(
                 m.Cart.user_id == current_user.id,
                 m.Cart.product_id == warehouse_product.product_id,
                 m.Cart.group_id == warehouse_product.group_id,
                 m.Cart.from_warehouse_product_id == warehouse_product.id,
-                m.Cart.status == "pending",
+                m.Cart.status == s.CartStatus.PENDING.value,
             )
-        )
-        .scalars()
-        .all()
+        ).scalar()
+        or 0
     )
     new_quantity = int(form.quantity.data)
 
-    if (
-        cart_product_amount
-        and sum(amount for amount in cart_product_amount if amount) + new_quantity
-        > warehouse_product.product_quantity
-    ):
+    if (cart_product_amount + new_quantity) > available_quantity:
         log(log.ERROR, "The cart is full,not enough products in stock")
         flash("The cart is full, not enough products in stock", "danger")
         return redirect(url_for("product.get_all"))
@@ -319,7 +319,7 @@ def save():
         flash("Cannot save item data", "danger")
         return redirect(url_for("cart.get_all"))
 
-    available_quantity = cart.from_warehouse_product.product_quantity
+    available_quantity = cart.from_warehouse_product.available_quantity
 
     if not available_quantity:
         log(log.ERROR, "Not enough products in stock")
@@ -334,17 +334,14 @@ def save():
                 m.Cart.product_id == cart.product_id,
                 m.Cart.from_warehouse_product_id == cart.from_warehouse_product_id,
                 m.Cart.group_id == cart.group_id,
-                m.Cart.status == "pending",
+                m.Cart.status == s.CartStatus.PENDING.value,
             )
-        )
-        .scalars()
-        .all()
+        ).scalar()
+        or 0
     )
     if (
-        cart_product_amount
-        and sum(amount for amount in cart_product_amount if amount) + form.quantity.data
-        > available_quantity
-    ) or form.quantity.data > available_quantity:
+        form.quantity.data > available_quantity
+    ) or cart_product_amount + form.quantity.data > available_quantity:
         log(log.ERROR, "The cart is full, not enough products in stock")
         flash("The cart is full, not enough products in stock", "danger")
         return redirect(url_for("cart.get_all"))

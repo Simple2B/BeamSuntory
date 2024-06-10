@@ -33,7 +33,7 @@ shareButtons.forEach((e) => {
             const response = await fetch(`/request_share/share/${id}`, {
                 method: 'GET',
             })
-            if (response.status == 200) {
+            if ([200, 404].includes(response.status) ) {
                 location.reload()
             }
         }

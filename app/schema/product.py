@@ -1,5 +1,5 @@
 from enum import Enum
-from pydantic import BaseModel, ConfigDict, Field, RootModel
+from pydantic import BaseModel, ConfigDict, Field, RootModel, TypeAdapter
 from pydantic.dataclasses import dataclass
 from .supplier import Supplier
 from .warehouse import Warehouse
@@ -56,6 +56,14 @@ class Product(CustomBase):
 
 
 ProductWarehouseRoot = RootModel[list[WarehouseProduct]]
+
+
+class ProductWarehouse(BaseModel):
+    warehouse_product_id: int
+    product_quantity: int
+
+
+ProductWarehouseAdapter = TypeAdapter(list[ProductWarehouse])
 
 
 class ProductWarehouses(BaseModel):

@@ -74,10 +74,12 @@ def test_edit_cart(mg_g_populate: FlaskClient):
         )
     ).first()
     assert len(carts_rows_objs) == 1
-
     cart_canada: m.Cart = db.session.scalar(
         m.Cart.select().where(m.Cart.group_id == group_canada.id)
     )
+
+    _ = db.session.query(m.Cart).filter(m.Cart.id != cart_canada.id).delete()
+    db.session.commit()
 
     response = mg_g_populate.post(
         "/cart/edit",

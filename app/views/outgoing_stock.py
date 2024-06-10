@@ -1,3 +1,5 @@
+# flake8: noqa E501
+
 from typing import Set
 from flask import (
     Blueprint,
@@ -109,7 +111,8 @@ def ship_request_view(ship_request_id: int):
         )
     carts = db.session.scalars(
         sa.select(m.Cart).where(
-            m.Cart.ship_request_id == ship_request_id, m.Cart.status != "pending"
+            m.Cart.ship_request_id == ship_request_id,
+            m.Cart.status != s.CartStatus.PENDING.value,
         )
     ).all()
 
@@ -156,11 +159,7 @@ def ship_request_edit_view(ship_request_id: int):
         proof_of_delivery=ship_request.proof_of_delivery,
         tracking=ship_request.tracking,
     )
-    carts = db.session.scalars(
-        sa.select(m.Cart).where(
-            m.Cart.ship_request_id == ship_request_id, m.Cart.status == "submitted"
-        )
-    ).all()
+    carts = ship_request.carts
 
     warehouse_product_ids: Set[int] = set()
     for cart in carts:
@@ -226,8 +225,8 @@ def save():
         return redirect(url_for("outgoing_stock.get_all"))
 
     if not products:
-        log(log.ERROR, "No products in ship request: [%s]", form.products.data)
-        flash("Cannot save item data", "danger")
+        log(log.ERROR, "No products in ship request")
+        flash("No products in ship request", "danger")
         return redirect(url_for("outgoing_stock.get_all"))
 
     report_inventory_list = m.ReportInventoryList(
@@ -256,7 +255,7 @@ def save():
         if (
             not cart
             or cart.ship_request_id != ship_request.id
-            or cart.status != "submitted"
+            or cart.status == s.CartStatus.PENDING.value
         ):
             log(log.ERROR, "Cart not found")
             flash("Cannot save item data", "danger")
@@ -274,13 +273,29 @@ def save():
         )
         db.session.add(report_shipping)
 
-        warehouse_product: m.WarehouseProduct = db.session.scalar(
-            m.WarehouseProduct.select().where(
+        warehouse_product = db.session.scalar(
+            sa.select(m.WarehouseProduct).where(
                 m.WarehouseProduct.product_id == cart.product_id,
                 m.WarehouseProduct.warehouse_id == cart.warehouse_id,
                 m.WarehouseProduct.group_id == cart.group_id,
             )
         )
+
+        if not warehouse_product:
+            log(log.ERROR, "Warehouse product not found")
+            flash(
+                f"Product [{cart.product.name}] with group [{cart.group.name}] not found in warehouse  [{warehouse.name}]",
+                "danger",
+            )
+            return redirect(url_for("outgoing_stock.get_all"))
+
+        if cart.quantity > warehouse_product.product_quantity:
+            log(log.ERROR, "Not enough product in warehouse")
+            flash(
+                f"Not enough product in \nWarehouse:[{warehouse_product.warehouse_name}] qty:[{warehouse_product.product_quantity}]\nProduct:[{cart.product.name}]: qty:[{cart.quantity}]",
+                "danger",
+            )
+            return redirect(url_for("outgoing_stock.get_all"))
 
         is_group_in_master_group = (
             db.session.query(m.Group)
@@ -292,9 +307,10 @@ def save():
             .count()
             > 0
         )
-        if warehouse_product and not is_group_in_master_group:
-            products_to_deplete: list[m.ProductAllocated] = db.session.scalars(
-                m.ProductAllocated.select()
+
+        if not is_group_in_master_group:
+            products_to_deplete = db.session.scalars(
+                sa.select(m.ProductAllocated)
                 .where(
                     m.ProductAllocated.product_id == cart.product_id,
                     m.ProductAllocated.quantity_remains > 0,
@@ -329,8 +345,10 @@ def save():
                 type=s.ReportSKUType.ship_request.value,
                 status="Ship request assigned to pickup.",
             ).save(False)
+
+        warehouse_product.product_quantity -= cart.quantity
+        cart.status = s.CartStatus.COMPLETED.value
         cart.product.notes_location = note_location
-        cart.status = "completed"
 
     ship_request.wm_notes = form.wm_notes.data
     ship_request.proof_of_delivery = form.proof_of_delivery.data
@@ -410,12 +428,23 @@ def cancel(id: int):
         flash("Ship Request already cancelled!", "danger")
         return "already cancelled", 404
 
-    carts: list[m.Cart] = db.session.execute(
-        m.Cart.select().where(m.Cart.ship_request_id == ship_request.id)
-    ).scalars()
+    carts = db.session.scalars(
+        sa.select(m.Cart).where(m.Cart.ship_request_id == ship_request.id)
+    ).all()
     for cart in carts:
-        if cart.from_warehouse_product:
-            cart.from_warehouse_product.product_quantity += cart.quantity
+        cart.status = s.CartStatus.CANCELLED.value
+        if not cart.warehouse:
+            log(log.INFO, "Cart item has no warehouse_id. Cart item: [%s]", cart.id)
+            continue
+        wh_ho_product = db.session.scalar(
+            sa.select(m.WarehouseProduct).where(
+                m.WarehouseProduct.product_id == cart.product_id,
+                m.WarehouseProduct.warehouse_id == cart.warehouse_id,
+                m.WarehouseProduct.group_id == cart.group_id,
+            )
+        )
+        if wh_ho_product:
+            wh_ho_product.product_quantity += cart.quantity
 
     ship_request.status = s.ShipRequestStatus.cancelled
     ship_request.save()
@@ -479,9 +508,16 @@ def delete_cart(cart_id: int):
         return render_template(
             "toast.html", message="There is no such product item!", category="danger"
         )
-
-    if cart.from_warehouse_product:
-        cart.from_warehouse_product.product_quantity += cart.quantity
+    if cart.warehouse and cart.ship_request.status != s.ShipRequestStatus.cancelled:
+        warehouse_product = db.session.scalar(
+            sa.select(m.WarehouseProduct).where(
+                m.WarehouseProduct.product_id == cart.product_id,
+                m.WarehouseProduct.warehouse_id == cart.warehouse_id,
+                m.WarehouseProduct.group_id == cart.group_id,
+            )
+        )
+        if warehouse_product:
+            warehouse_product.product_quantity += cart.quantity
 
     db.session.execute(m.Event.delete().where(m.Event.cart_id == cart_id))
     db.session.delete(cart)

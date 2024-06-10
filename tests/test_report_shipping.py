@@ -16,6 +16,7 @@ def test_report_shipping(mg_g_populate: FlaskClient):
     assert store
     store_category = db.session.scalar(m.StoreCategory.select())
     assert store_category
+    db.session.query(m.Cart).filter(m.Cart != 1, m.Cart != 2).delete()
 
     ship_request_before_count = db.session.scalar(sa.func.count(m.ShipRequest.id))
 

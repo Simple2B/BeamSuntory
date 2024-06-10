@@ -143,6 +143,9 @@ def test_assign_product(mg_g_populate: FlaskClient):
     to_group = "JB"
     prod_SKU = "322ewd3333rs3"
 
+    db.session.query(m.Cart).filter(m.Cart.id != 1, m.Cart != 2).delete()
+    db.session.commit()
+
     data = dict(
         product_SKU=prod_SKU,
         master_group=2,

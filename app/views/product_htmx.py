@@ -148,3 +148,24 @@ def delete_group_for_product():
     db.session.commit()
 
     return "ok", 200
+
+
+@product_htmx.route("/<int:product_id>/adjust", methods=["GET"])
+@login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+def get_adjust_form(product_id: int):
+    """htmx"""
+    product = db.session.get(m.Product, product_id)
+    if not product:
+        log(log.ERROR, "Not found product by id : [%s]", product_id)
+        return render_template(
+            "toast.html", message="Product not found", category="danger"
+        )
+
+    form: f.AdjustProductForm = f.AdjustProductForm(product_id=product.id)
+
+    return render_template(
+        "product/modal_adjust.html",
+        form=form,
+        product=product,
+    )
