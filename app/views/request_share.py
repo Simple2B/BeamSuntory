@@ -223,6 +223,7 @@ def share(id: int):
 
     if request_share.desire_quantity > warehouse_from_prod.product_quantity:
         remainder = request_share.desire_quantity - warehouse_from_prod.product_quantity
+        warehouse_from_prod.product_quantity = 0
         m.ReportInventory(
             qty_before=warehouse_from_prod.product_quantity
             + request_share.desire_quantity
@@ -232,7 +233,6 @@ def share(id: int):
             product_id=warehouse_from_prod.product_id,
             warehouse_product=warehouse_from_prod,
         ).save(False)
-        warehouse_from_prod.product_quantity = 0
         warehouse_from_prods = db.session.scalars(
             sa.select(m.WarehouseProduct).where(
                 m.WarehouseProduct.id != warehouse_from_prod.id,
@@ -242,20 +242,27 @@ def share(id: int):
         ).all()
         for warehouse_from_prod in warehouse_from_prods:
             if warehouse_from_prod.product_quantity >= remainder:
-                warehouse_from_prod.product_quantity -= remainder
                 remainder = 0
+                m.ReportInventory(
+                    qty_before=warehouse_from_prod.product_quantity,
+                    qty_after=warehouse_from_prod.product_quantity - remainder,
+                    report_inventory_list=report_inventory_list,
+                    product_id=warehouse_from_prod.product_id,
+                    warehouse_product=warehouse_from_prod,
+                ).save(False)
+                warehouse_from_prod.product_quantity -= remainder
                 break
             else:
                 remainder -= warehouse_from_prod.product_quantity
                 warehouse_from_prod.product_quantity = 0
-            warehouse_from_prod.save(False)
-            m.ReportInventory(
-                qty_before=warehouse_from_prod.product_quantity + remainder,
-                qty_after=warehouse_from_prod.product_quantity,
-                report_inventory_list=report_inventory_list,
-                product_id=warehouse_from_prod.product_id,
-                warehouse_product=warehouse_from_prod,
-            ).save(False)
+                warehouse_from_prod.save(False)
+                m.ReportInventory(
+                    qty_before=warehouse_from_prod.product_quantity + remainder,
+                    qty_after=warehouse_from_prod.product_quantity,
+                    report_inventory_list=report_inventory_list,
+                    product_id=warehouse_from_prod.product_id,
+                    warehouse_product=warehouse_from_prod,
+                ).save(False)
     else:
         warehouse_from_prod.product_quantity -= request_share.desire_quantity
         warehouse_from_prod.save(False)
