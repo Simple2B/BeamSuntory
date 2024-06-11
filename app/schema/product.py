@@ -23,6 +23,15 @@ class Currency(Enum):
     CAD = "CAD"
 
 
+class IbOrderProduct(CustomBase):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+    id: int
+    name: str
+
+    SKU: str
+    description: str
+
+
 class Product(CustomBase):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 

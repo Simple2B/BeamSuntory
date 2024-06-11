@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from pydantic import BaseModel, Field, RootModel, ConfigDict, field_validator
 
-from .product import Product
+from .product import IbOrderProduct
 from .product_group import ProductGroupOut
 from .pagination import PaginationOut
 
@@ -47,7 +47,7 @@ class ProductAllocatedOut(BaseModel):
     quantity: int
     shelf_life_start: date = Field(alias="shelfLifeStart")
     shelf_life_end: date = Field(alias="shelfLifeEnd")
-    product: Product
+    product: IbOrderProduct
     product_quantity_groups: list[ProductGroupOut] = Field(
         alias="productQuantityGroups"
     )
