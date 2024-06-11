@@ -55,8 +55,16 @@ export interface IProductQuantityGroupOut {
   packageInfo: PackageInfoOut | null;
 }
 
+export interface IbOrderProduct {
+  id: number
+  name: string
+
+  SKU: string
+  description: string
+}
+
 export interface IAllocatedProductOut extends IProductAllocatedBase {
-  product: IProduct;
+  product: IbOrderProduct;
   productQuantityGroups: IProductQuantityGroupOut[];
 }
 
