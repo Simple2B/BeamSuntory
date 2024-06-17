@@ -32,6 +32,14 @@ class IbOrderProduct(CustomBase):
     description: str
 
 
+class ProductViewColumn(CustomBase):
+    model_config = ConfigDict(from_attributes=True)
+    name: str
+
+
+AdapterProductViewColumns = TypeAdapter(list[ProductViewColumn])
+
+
 class Product(CustomBase):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 

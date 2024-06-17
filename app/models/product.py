@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 import sqlalchemy as sa
 from sqlalchemy import orm
+import json
 
 from app.database import db
 from app import schema as s
@@ -113,3 +114,17 @@ class Product(db.Model, ModelMixin):
     @property
     def json(self):
         return s.Product.model_validate(self).model_dump_json(by_alias=True)
+
+    @property
+    def json_product_master_groups(self):
+        from .master_group_for_product import MasterGroupProduct
+
+        groups = db.session.scalars(
+            sa.select(MasterGroupProduct)
+            .join(GroupProduct)
+            .join(ProductGroup)
+            .filter(ProductGroup.product_id == self.id)
+            .distinct()
+        ).all()
+
+        return json.dumps(s.AdapterProductViewColumns.dump_python(groups))

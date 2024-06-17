@@ -13,6 +13,7 @@ from .product import (
     ProductCSVItem,
     ProductFullImage,
     ProductWarehouseAdapter,
+    AdapterProductViewColumns,
 )
 from .inbound_order import InboundOrder, InboundOrderStatus, FilterInboundOrder
 from .product_category import ProductCategory
