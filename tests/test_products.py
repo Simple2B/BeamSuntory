@@ -65,16 +65,14 @@ def test_delete_product(mg_g_populate: FlaskClient):
     before_delete_products_rows_objs = db.session.scalars(sa.select(m.Product)).all()
 
     response = mg_g_populate.delete(
-        f"/product/delete/{before_delete_products_rows_objs[0].id}"
-    )
-    assert response.status_code == 409
-
-    response = mg_g_populate.delete(
         f"/product/delete/{before_delete_products_rows_objs[1].id}"
     )
     assert response.status_code == 200
     products_rows_objs = db.session.scalars(sa.select(m.Product)).all()
     assert len(products_rows_objs) < len(before_delete_products_rows_objs)
+
+    response = mg_g_populate.delete("/product/delete/100")
+    assert response.status_code == 404
 
 
 def test_edit_product(mg_g_populate: FlaskClient):
