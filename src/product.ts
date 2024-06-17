@@ -1,75 +1,11 @@
-import { Modal } from 'flowbite';
-import type { ModalOptions, ModalInterface } from 'flowbite';
-import Datepicker from 'flowbite-datepicker/Datepicker';
-import { easepick } from '@easepick/bundle';
 import { log } from 'console';
 
-interface IProduct {
-  id: number;
+interface MasterGroup {
   name: string;
-  supplier_id: number;
-  currency: string;
-  regularPrice: number;
-  retailPrice: number;
-  image: string;
-  description: string;
-  // General Info ->
-  SKU: string;
-  lowStockLevel: number;
-  programYear: number;
-  packageQty: number;
-  numbOfItemsPerCase: number;
-  numbOfCasesPerOuterCase: number;
-  comments: string;
-  notes_location: string;
-  // shipping
-  weight: number;
-  length: number;
-  width: number;
-  height: number;
-  current_user_groups: object;
-  total_available_items: {
-    [index: string]: number;
-  };
-  all_warehouses: [
-    {
-      [index: string]: number | string;
-    }
-  ];
-  warehouseProducts: IWarehouseProduct[];
-  productGroups: IProductGroup[];
-}
+} 
 
-interface IProductAdditionalInfo {
-  allWarehouses: IWarehouse[];
-  currentMasterProductGroups: IMasterGroupGroup[];
-  currentUserGroups: IMasterGroupGroupUser[];
-  masterGroupsGroups: IMasterGroupGroup[];
-  currentUserRole: string;
-}
-
-interface IMasterGroupGroup {
-  masterGroup: string;
-  groups: { groupName: string; groupId: number }[];
-}
-
-interface IMasterGroupGroupUser {
-  masterGroupName: string;
-  groups: { groupName: string; groupId?: number }[];
-}
-
-interface IProductGroup {
-  id: number;
-  productId: number;
-  groupId: number;
-  parent: IGroup;
-}
 interface FilterJsonData {
   [key: string]: string;
-}
-
-interface IProductMasterGroupGroup {
-  [index: string]: { group_name: string; group_id: number }[];
 }
 
 interface IGroup {
@@ -79,36 +15,12 @@ interface IGroup {
   masterGroupId: number;
 }
 
-interface IGroupAdditionalInfo {
-  groupId?: number;
-  groupName: string;
-}
-
 interface IMasterGroup {
   id: number;
   name: string;
   master_groups_list_groups: { [index: string]: { group_name: string; group_id: number }[] };
 }
 
-interface IWarehouseProduct {
-  id: number;
-  productId: number;
-  warehouseId: number;
-  productQuantity: number;
-  warehouse: IWarehouse;
-  group: IGroup;
-}
-
-interface IWarehouse {
-  id: number;
-  name: string;
-}
-
-interface IEventProductPromise {
-  productId: number;
-  error?: string;
-  status: boolean;
-}
 
 // global variable for mandatory event instance
 const adminRole = 'admin';
@@ -203,12 +115,12 @@ function createCustomizeViewColumn(masterGroupName: string) {
     const productItemTd = productItemReference.cloneNode(true) as HTMLElement;
     productItemTd.classList.add(`px-3`);
     productItemTd.classList.add(`product-table-item-td-${masterGroupName}`);
-    const product: IProduct = JSON.parse(productItem.getAttribute('data-target-product'));
+    const productMasterGroup: MasterGroup[] = JSON.parse(productItem.getAttribute('data-target-product-master-groups'));
 
-    const group = product.productGroups.find(
-      (group: IProductGroup) => group.parent.masterGroup.name === masterGroupName
+    const groupName = productMasterGroup.find(
+      (group: MasterGroup) => group.name === masterGroupName.replace(/_/g, ' ')
     );
-    group ? (productItemTd.innerHTML = group.parent.name) : (productItemTd.innerHTML = '-');
+    groupName ? (productItemTd.innerHTML = groupName.name) : (productItemTd.innerHTML = '-');
 
     productItem.insertBefore(productItemTd, productItemReference.nextSibling);
   });

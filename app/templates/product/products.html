@@ -188,7 +188,8 @@
       {% for product in products %}
       <tr
         class="table-product-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
-        data-target-product-sku="{{ product.SKU }}" data-target-product="{{ product.json }}">
+        data-target-product-sku="{{ product.SKU }}"
+        data-target-product-master-groups="{{ product.json_product_master_groups }}">
         <td class="w-4 p-4">
           <div class="flex items-center">
             {{ loop.index + page.skip }}
