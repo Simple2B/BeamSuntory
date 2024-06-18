@@ -61,7 +61,9 @@ class User(db.Model, UserMixin, ModelMixin):
         default=gen_password_reset_id,
     )
 
-    _user_secret: orm.Mapped[str | None] = orm.mapped_column(sa.String(512))
+    _user_secret: orm.Mapped[bytes | None] = orm.mapped_column(
+        sa.LargeBinary, nullable=True
+    )
 
     # NOTE thumbnail saved as base64 png string
     image: orm.Mapped[str] = orm.mapped_column(
