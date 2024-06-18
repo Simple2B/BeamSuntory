@@ -11,7 +11,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from app.database import db
 from app.models.division import Division
-from .utils import ModelMixin
+from .utils import ModelMixin, encrypt_data, decrypt_data
 from .group import Group
 from .user_group import UserGroup
 from .request_share_user import RequestShareUser
@@ -60,6 +60,9 @@ class User(db.Model, UserMixin, ModelMixin):
         sa.String(64),
         default=gen_password_reset_id,
     )
+
+    _user_secret: orm.Mapped[str | None] = orm.mapped_column(sa.String(512))
+
     # NOTE thumbnail saved as base64 png string
     image: orm.Mapped[str] = orm.mapped_column(
         sa.String(255), nullable=True, default="png"
@@ -130,6 +133,12 @@ class User(db.Model, UserMixin, ModelMixin):
         )
         return bool(count)
 
+    @property
+    def user_secret(self) -> str:
+        if self._user_secret is None:
+            return ""
+        return decrypt_data(self._user_secret)
+
     @hybrid_property
     def password(self):
         return self.password_hash
@@ -137,6 +146,7 @@ class User(db.Model, UserMixin, ModelMixin):
     @password.setter
     def password(self, password):
         self.password_hash = generate_password_hash(password)
+        self._user_secret = encrypt_data(password)
 
     @classmethod
     def authenticate(cls, user_id, password):

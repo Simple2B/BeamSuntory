@@ -33,6 +33,7 @@ class BaseConfig(BaseSettings, ABC):
     WTF_CSRF_ENABLED: bool = True
     VERSION: str = get_version()
     TIMEZONE: str = "EST"
+    CRYPTOGRAPHY_KEY: str
 
     # Mail config
     MAIL_SERVER: str
@@ -95,6 +96,7 @@ class TestingConfig(BaseConfig):
     WTF_CSRF_ENABLED: bool = False
     TESTING: bool = True
     PRESERVE_CONTEXT_ON_EXCEPTION: bool = False
+    CRYPTOGRAPHY_KEY: str = "test"
     ALCHEMICAL_DATABASE_URL: str = "sqlite:///" + os.path.join(
         BASE_DIR, "database-test.sqlite3"
     )
