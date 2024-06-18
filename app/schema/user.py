@@ -56,3 +56,8 @@ class NotifyStatus(BaseModel):
     is_notify_new_inventory: bool | None = None
     is_notify_shipping: bool | None = None
     is_notify_request_share_status: bool | None = None
+
+
+class QueryParamsUserSecret(BaseModel):
+    user_id: int
+    is_show: bool = True

@@ -1,6 +1,6 @@
 # flake8: noqa F401
 from .pagination import Pagination, PaginationOut
-from .user import User, UserRole, AdminCreate, NotifyStatus
+from .user import User, UserRole, AdminCreate, NotifyStatus, QueryParamsUserSecret
 from .master_group import MasterGroup, MasterGroupMandatory
 from .group import Group, GroupRoot
 from .warehouse import Warehouse, WarehouseMandatory, WarehouseList

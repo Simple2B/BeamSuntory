@@ -448,3 +448,37 @@ def update_notify_status(query: s.NotifyStatus):
     return render_template(
         "user/notify_input.html", action_url_for=action_url_for, is_checked=is_checked
     )
+
+
+@bp.route("/show-secret", methods=["GET"])
+@login_required
+@validate()
+@role_required([s.UserRole.ADMIN.value])
+def show_secret(query: s.QueryParamsUserSecret):
+    """htmx"""
+    user_id = query.user_id
+    is_show = query.is_show
+
+    log(log.INFO, "Show secret for user with id: [%s]", user_id)
+
+    user = db.session.get(m.User, user_id)
+    if not user or user.is_deleted:
+        log(log.ERROR, "User not found by id: [%s]", user_id)
+        return "User not found", 404
+
+    if not is_show:
+        return render_template(
+            "user/secret_btn.html",
+            user=user,
+            content_text="Show password",
+            is_show=True,
+        )
+
+    return render_template(
+        "user/secret_btn.html",
+        user=user,
+        content_text=(
+            user.user_secret if user.user_secret else "User hasn't changed password yet"
+        ),
+        is_show=False,
+    )

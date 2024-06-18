@@ -5,6 +5,7 @@ import sqlalchemy as sa
 from flask.testing import FlaskClient, FlaskCliRunner
 from click.testing import Result
 from app import models as m, db
+from app import schema as s
 from tests.utils import login, register
 
 
@@ -196,3 +197,26 @@ def test_update_notify_status(populate_one_user: FlaskClient):
     )
     assert res.status_code == 200
     assert user.is_notify_new_inventory
+
+
+def test_user_secret(populate_one_user: FlaskClient):
+    secret = "1231313"
+    user: m.User = populate_one_user.user  # type: ignore
+    assert user
+    assert user.user_secret
+
+    user.password = secret  # type: ignore
+    db.session.commit()
+    assert user.password != secret
+    assert user._user_secret != secret
+    assert user.user_secret == secret
+
+
+def test_show_user_secret(populate_one_user: FlaskClient):
+    user = db.session.scalar(
+        sa.select(m.User).where(m.Division.role_name == s.UserRole.ADMIN.value)
+    )
+    login(populate_one_user, username=user.username, password="password")
+    res = populate_one_user.get(f"/user/show-secret?user_id={user.id}")
+    assert res.status_code == 200
+    assert user.user_secret in res.text
