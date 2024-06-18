@@ -25,14 +25,14 @@ class ModelMixin(object):
         return self
 
 
-def encrypt_data(data: str) -> str:
+def encrypt_data(data: str) -> bytes:
     token = fernet.encrypt(f"{data}".encode())
-    return token.decode()
+    return token
 
 
-def decrypt_data(token: str):
+def decrypt_data(token: bytes) -> str:
     try:
-        data = fernet.decrypt(token.encode())
+        data = fernet.decrypt(token)
     except (InvalidToken, TypeError) as e:
         log(log.ERROR, "Can't decrypt data: %s", e)
         return ""
