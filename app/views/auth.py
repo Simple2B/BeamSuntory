@@ -136,8 +136,8 @@ def forgot_pass():
 def password_recovery(reset_password_uid):
     log(log.INFO, "Password recovery")
     if current_user.is_authenticated:
-        log(log.WARNING, "Authentication error")
-        return redirect(url_for("main.index"))
+        logout_user()
+        session.clear()
 
     query = m.User.select().where(m.User.unique_id == reset_password_uid)
     user: m.User = db.session.scalar(query)
