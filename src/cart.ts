@@ -51,7 +51,6 @@ let hasEventGroup = false;
 
 // check if cart has event group
 tableCartItems.forEach((item) => {
-  console.log('item', item);
   const group = item.getAttribute('data-target-group');
   if (group === 'Events') {
     hasEventGroup = true;
@@ -114,7 +113,6 @@ const eventButtons = document.querySelectorAll('.cart-item-event-button');
 eventButtons.forEach((btn) => {
   btn.addEventListener('click', () => {
     const cart = JSON.parse(btn.getAttribute('data-target-cart')) as ICart;
-    console.log('cart', cart);
 
     let div: HTMLDivElement = document.querySelector('#product-event-name');
     div.innerHTML = cart.product.name;
