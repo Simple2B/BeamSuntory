@@ -222,6 +222,7 @@ def downlaod_csv(product_id: int):
     data = {
         "Name": [],
         "SKU": [],
+        "Brand": [],
         "Number of days left": [],
         "Expiry Date": [],
         "Group": [],
@@ -232,6 +233,7 @@ def downlaod_csv(product_id: int):
     for we_product in product.warehouse_products:
         data["Name"].append(product.name)
         data["SKU"].append(product.SKU)
+        data["Brand"].append(product.brand)
         data["Number of days left"].append(product.numb_of_day_left)
         data["Expiry Date"].append(product.expiry_date)
         data["Group"].append(we_product.group.name)

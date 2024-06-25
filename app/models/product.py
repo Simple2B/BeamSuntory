@@ -102,6 +102,16 @@ class Product(db.Model, ModelMixin):
     def qty(self):
         return self.get_warehouse_products_qty()
 
+    @property
+    def brand(self):
+        return ",".join(
+            set(
+                group.name
+                for group in self.groups
+                if group.master_groups_for_product.name == "Brand"
+            )
+        )
+
     def get_warehouse_products_qty(self, is_stock_own_by_me: bool = False):
         if is_stock_own_by_me:
             return sum(
