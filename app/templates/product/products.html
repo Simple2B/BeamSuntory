@@ -137,6 +137,7 @@
         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4" />
       </svg></button>
     <div id="dropdownBgHover" class="z-50 hidden w-48 bg-white rounded-lg shadow dark:bg-gray-700">
+
       <ul class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownBgHoverButton">
         {% for master_group in master_group_product_name %}
         {% set master_group_no_space = master_group.replace(' ', '_') %}
@@ -178,6 +179,11 @@
         <th scope="col" class="product-table-header-item px-3 py-3">Name</th>
         <th scope="col" class="product-table-header-item px-3 py-3">SKU</th>
         <th scope="col" id="product-table-th-product-type" class="product-table-header-item px-3 py-3">Description</th>
+        {% for master_name in master_group_product_name %}
+        <th scope="col" master-group-name="{{ master_name }}"
+          class="product-table-header-master-group-item hidden px-3 py-3 max-width-100">{{ master_name }}
+        </th>
+        {% endfor %}
         <th scope="col" class="product-table-header-item px-3 py-3 max-width-100">Regular price</th>
         <th scope="col" class="product-table-header-item px-3 py-3 max-width-100">Retail price</th>
         <th scope="col" class="product-table-header-item px-3 py-3 max-width-100">Available Qty</th>
@@ -186,6 +192,7 @@
     </thead>
     <tbody>
       {% for product in products %}
+
       <tr
         class="table-product-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
         data-target-product-sku="{{ product.SKU }}"
@@ -222,11 +229,31 @@
             <div class="text-sm">{{ product.description }}</div>
           </div>
         </td>
+
+        {% for master_name in master_groups_search.keys() %}
+        <td master-group-name="{{ master_name }}"
+          class="product-groups-names-view  hidden text-base font-normal text-gray-900  dark:text-white max-width-100">
+          <div class="px-3">
+            {% if master_name in product.master_groups_names %}
+            <div class="text-sm">{{ product.get_group_by_maste_group(master_name) }}</div>
+            {% else %}
+            <div class="text-sm">-</div>
+            {% endif %}
+          </div>
+        </td>
+        {% endfor %}
+        <td master-group-name="Program_Year"
+          class="product-groups-names-view  hidden text-base font-normal text-gray-900  dark:text-white max-width-100">
+          <div class="px-3">
+            <div class="text-sm">{{ product.program_year }}</div>
+          </div>
+        </td>
         <td class="text-base font-normal text-gray-900  dark:text-white max-width-100">
           <div class="px-3">
             <div class="text-sm">{{ product.regular_price }}</div>
           </div>
         </td>
+
         <td class=" text-base font-normal text-gray-900  dark:text-white max-width-100">
           <div class="px-3">
             <div class="text-sm">{{ product.retail_price }}</div>

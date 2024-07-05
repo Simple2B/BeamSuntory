@@ -98,31 +98,46 @@ if (filterData !== null || filterData !== undefined) {
 
 
 // function to add column by filter
-function createCustomizeViewColumn(masterGroupName: string) {
+function showCustomizeViewColumn(masterGroupName: string) {
   //choose position in table
-  const positionInTable = 4;
-  const productTableHeader = document.querySelector('#product-table-header-tr');
-  const productItemTrs = document.querySelectorAll('.table-product-item-tr');
 
-  const productItemHeaderReference = productTableHeader.children[positionInTable];
-  const productItemHeader = productItemHeaderReference.cloneNode(true) as HTMLElement;
-  productItemHeader.setAttribute('id', `product-table-filter-master-group-${masterGroupName}`);
-  productItemHeader.innerHTML = masterGroupName.replace(/_/g, ' ');
-  productTableHeader.insertBefore(productItemHeader, productItemHeaderReference.nextSibling);
+  const productTableHeader = document.querySelectorAll('.product-table-header-master-group-item');
 
+  productTableHeader.forEach((productTableHeaderItem: HTMLElement) => {
+    const master_group_name = productTableHeaderItem.getAttribute('master-group-name')
+
+    if (master_group_name && master_group_name.trim().toLocaleLowerCase().replace(' ', '_') === masterGroupName.trim().toLocaleLowerCase() && productTableHeaderItem.classList.contains("hidden")) {
+      productTableHeaderItem.classList.remove('hidden');
+    }
+  })
+
+  const productItemTrs = document.querySelectorAll('.product-groups-names-view ');
   productItemTrs.forEach((productItem: HTMLTableRowElement) => {
-    const productItemReference = productItem.children[positionInTable];
-    const productItemTd = productItemReference.cloneNode(true) as HTMLElement;
-    productItemTd.classList.add(`px-3`);
-    productItemTd.classList.add(`product-table-item-td-${masterGroupName}`);
-    const productMasterGroup: MasterGroup[] = JSON.parse(productItem.getAttribute('data-target-product-master-groups'));
+    const master_group_name = productItem.getAttribute('master-group-name')
+    if (masterGroupName && master_group_name === masterGroupName.trim() && productItem.classList.contains('hidden')) {
+      productItem.classList.remove('hidden')
+    } 
+  });
+}
 
-    const groupName = productMasterGroup.find(
-      (group: MasterGroup) => group.name === masterGroupName.replace(/_/g, ' ')
-    );
-    groupName ? (productItemTd.innerHTML = groupName.name) : (productItemTd.innerHTML = '-');
+function hideCustomizeViewColumn(masterGroupName: string) {
+  //choose position in table
 
-    productItem.insertBefore(productItemTd, productItemReference.nextSibling);
+  const productTableHeader = document.querySelectorAll('.product-table-header-master-group-item');
+
+  productTableHeader.forEach((productTableHeaderItem: HTMLElement) => {
+    const master_group_name = productTableHeaderItem.getAttribute('master-group-name')
+    if (master_group_name && master_group_name.trim().toLocaleLowerCase().replace(' ', '_') === masterGroupName.trim().toLocaleLowerCase() && !productTableHeaderItem.classList.contains('hidden')) {
+      productTableHeaderItem.classList.add('hidden');
+    }
+  })
+
+  const productItemTrs = document.querySelectorAll('.product-groups-names-view ');
+  productItemTrs.forEach((productItem: HTMLTableRowElement) => {
+    const master_group_name = productItem.getAttribute('master-group-name')
+    if (masterGroupName && master_group_name === masterGroupName.trim() && !productItem.classList.contains("hidden")) {
+      productItem.classList.add('hidden')
+    } 
   });
 }
 
@@ -150,11 +165,8 @@ if (globalFilterMasterGroup && globalFilterMasterGroup.length !== 0) {
     }
   });
   for (const masterGroupName of globalFilterMasterGroup) {
-    const isGroupExist = document.querySelector(`#product-table-filter-master-group-${masterGroupName}`);
-
-    if (!isGroupExist) {
-      createCustomizeViewColumn(masterGroupName);
-    }
+      showCustomizeViewColumn(masterGroupName);
+    
   }
 }
 
@@ -165,7 +177,6 @@ checkboxFilterProductMasterGroups.forEach((checkbox) => {
     const globalFilterMasterGroup = JSON.parse(sessionStorage.getItem('globalFilterMasterGroup'));
 
     const masterGroupName = checkbox.getAttribute('data-target-group-name');
-    const productItemTrs = document.querySelectorAll('.table-product-item-tr');
 
     let isActive = (e.target as HTMLInputElement).checked;
 
@@ -174,11 +185,8 @@ checkboxFilterProductMasterGroups.forEach((checkbox) => {
         globalFilterMasterGroup.push(masterGroupName);
       }
       sessionStorage.setItem('globalFilterMasterGroup', JSON.stringify(globalFilterMasterGroup));
-      const isGroupExist = document.querySelector(`#product-table-filter-master-group-${masterGroupName}`);
-
-      if (!isGroupExist) {
-        createCustomizeViewColumn(masterGroupName);
-      }
+      showCustomizeViewColumn(masterGroupName)
+      
     }
     if (!isActive) {
       const index = globalFilterMasterGroup.indexOf(masterGroupName);
@@ -187,16 +195,8 @@ checkboxFilterProductMasterGroups.forEach((checkbox) => {
         globalFilterMasterGroup.splice(index, 1);
       }
       sessionStorage.setItem('globalFilterMasterGroup', JSON.stringify(globalFilterMasterGroup));
-      const isMasterGroupExist = document.querySelector(`#product-table-filter-master-group-${masterGroupName}`);
-      if (isMasterGroupExist) {
-        isMasterGroupExist.remove();
-        productItemTrs.forEach((productItem: HTMLTableRowElement) => {
-          const isProductFilterExist = productItem.querySelector(`.product-table-item-td-${masterGroupName}`);
-          if (isProductFilterExist) {
-            isProductFilterExist.remove();
-          }
-        });
-      }
+      hideCustomizeViewColumn(masterGroupName)
+      
     }
   });
 });

@@ -121,12 +121,21 @@ class Product(db.Model, ModelMixin):
             )
         return sum(wp.product_quantity for wp in self.warehouse_products)
 
+    def get_group_by_maste_group(self, name: str):
+        return ",".join(
+            [
+                group.name
+                for group in self.groups
+                if group.master_groups_for_product.name == name
+            ]
+        )
+
     @property
     def json(self):
         return s.Product.model_validate(self).model_dump_json(by_alias=True)
 
     @property
-    def json_product_master_groups(self):
+    def master_groups(self):
         from .master_group_for_product import MasterGroupProduct
 
         groups = db.session.scalars(
@@ -137,4 +146,13 @@ class Product(db.Model, ModelMixin):
             .distinct()
         ).all()
 
+        return groups
+
+    @property
+    def master_groups_names(self):
+        return [group.name for group in self.master_groups]
+
+    @property
+    def json_product_master_groups(self):
+        groups = self.master_groups
         return json.dumps(s.AdapterProductViewColumns.dump_python(groups))
