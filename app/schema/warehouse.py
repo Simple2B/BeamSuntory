@@ -1,9 +1,4 @@
-from enum import Enum
 from pydantic import BaseModel, Field, ConfigDict, RootModel
-
-
-class WarehouseMandatory(Enum):
-    warehouse_events: str = "Warehouse Events"
 
 
 class Warehouse(BaseModel):

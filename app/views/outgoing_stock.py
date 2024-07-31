@@ -301,7 +301,7 @@ def save():
             db.session.query(m.Group)
             .join(m.MasterGroup)
             .filter(
-                m.MasterGroup.name == s.MasterGroupMandatory.events.value,
+                m.MasterGroup.name == s.Events.name.value,
                 m.Group.name == cart.group.name,
             )
             .count()

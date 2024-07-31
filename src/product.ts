@@ -36,7 +36,6 @@ const eventStocksOwnByMeToggle = document.querySelector(
 const eventToggle = document.querySelector('#product-show-events-toggle-btn') as HTMLInputElement;
 
 const isEvent = eventCheckbox.checked || eventStockOwnByMeCheckbox.checked;
-const eventsWarehouse = 'Warehouse Events';
 const eventMasterGroup = 'Events';
 const fiveDays = 5 * 24 * 60 * 60 * 1000;
 

@@ -27,7 +27,7 @@ services:
       - db
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.routers.beamsuntory_app_proximo.rule=Host(`proximo.jildistribution.com`)'
+      - 'traefik.http.routers.beamsuntory_app_proximo.rule=Host(`devproximo.jlidistribution.com`)'
       - 'traefik.http.routers.beamsuntory_app_proximo.tls=true'
       - 'traefik.http.routers.beamsuntory_app_proximo.tls.certresolver=myresolver'
   backup:

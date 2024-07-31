@@ -69,9 +69,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
 
     reverse_event_filter = ~m.Product.warehouse_products.any(
         m.WarehouseProduct.group.has(
-            m.Group.master_group.has(
-                m.MasterGroup.name == s.MasterGroupMandatory.events.value
-            )
+            m.Group.master_group.has(m.MasterGroup.name == s.Events.name.value)
         )
     )
 
@@ -91,9 +89,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     if is_events:
         event_filter = m.Product.warehouse_products.any(
             m.WarehouseProduct.group.has(
-                m.Group.master_group.has(
-                    m.MasterGroup.name == s.MasterGroupMandatory.events.value
-                )
+                m.Group.master_group.has(m.MasterGroup.name == s.Events.name.value)
             )
         )
 
@@ -152,9 +148,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     if is_events_stocks_own_by_me:
         event_filter = m.Product.warehouse_products.any(
             m.WarehouseProduct.group.has(
-                m.Group.master_group.has(
-                    m.MasterGroup.name == s.MasterGroupMandatory.events.value
-                )
+                m.Group.master_group.has(m.MasterGroup.name == s.Events.name.value)
             )
         )
         curr_user_groups_ids = [
@@ -164,7 +158,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
                     m.UserGroup.left_id == current_user.id,
                     m.UserGroup.parent.has(
                         m.Group.master_group.has(
-                            m.MasterGroup.name == s.MasterGroupMandatory.events.value
+                            m.MasterGroup.name == s.Events.name.value
                         )
                     ),
                 )
@@ -623,7 +617,7 @@ def get_product_ship_form(warehouse_product_id: int):
     form.warehouse_product_id.data = warehouse_product_id
 
     is_event = False
-    if warehouse_product.group.master_group.name == s.MasterGroupMandatory.events.value:
+    if warehouse_product.group.master_group.name == s.Events.name.value:
         is_event = True
 
     if is_event:
@@ -1098,10 +1092,7 @@ def adjust():
             flash("Cannot save product data", "danger")
             return redirect(url_for("product.get_all", **query_params))
 
-        if (
-            product_warehouse.warehouse.name
-            == s.WarehouseMandatory.warehouse_events.value
-        ):
+        if product_warehouse.group.master_group.name == s.Events.name.value:
             log(log.ERROR, "Can't adjust product in events warehouse")
             continue
 
@@ -1486,10 +1477,12 @@ def upload():
                 )
 
             if not warehouse_product and group and product_item_data.available_quantity:
-                default_warehouse = db.session.scalar(
-                    sa.select(m.Warehouse).where(m.Warehouse.name != "Warehouse Events")
-                )
+                default_warehouse = db.session.scalar(sa.select(m.Warehouse))
                 log(log.INFO, "Warehouse product not found. Default warehouse: [%s]")
+                if not default_warehouse:
+                    log(log.ERROR, "Default warehouse not found")
+                    flash("Cannot save product data warehouse not found", "danger")
+                    return redirect(url_for("product.get_all", **query_params))
 
                 warehouse_product = m.WarehouseProduct(
                     warehouse=default_warehouse,

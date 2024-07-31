@@ -110,7 +110,7 @@ def get_all():
             "product_id": cart.product_id,
         }
         for cart in cart_items
-        if cart.group.master_group.name == s.MasterGroupMandatory.events.value
+        if cart.group.master_group.name == s.Events.name.value
     ]
 
     return render_template(
@@ -251,7 +251,7 @@ def create():
         )
 
     is_event = False
-    if warehouse_product.group.master_group.name == s.MasterGroupMandatory.events.value:
+    if warehouse_product.group.master_group.name == s.Events.name.value:
         is_event = True
 
     available_quantity = warehouse_product.available_quantity

@@ -43,7 +43,7 @@ def get_all():
 
     pagination = create_pagination(total=db.session.scalar(count_query))
     master_groups_rows = db.session.execute(sa.select(m.MasterGroup)).all()
-    master_groups_mandatory = [group.value for group in s.MasterGroupMandatory]
+    master_groups_mandatory = [s.Events.name.value]
 
     return render_template(
         "master_group/master_groups.html",
@@ -107,7 +107,7 @@ def save():
 @role_required([s.UserRole.ADMIN.value])
 def delete(id: int):
     master_group = db.session.get(m.MasterGroup, id)
-    master_groups_mandatory = [group.value for group in s.MasterGroupMandatory]
+    master_groups_mandatory = [s.Events.name.value]
 
     if not master_group:
         log(log.INFO, "There is no master group with id: [%s]", id)
