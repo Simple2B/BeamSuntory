@@ -297,18 +297,7 @@ def save():
             )
             return redirect(url_for("outgoing_stock.get_all"))
 
-        is_group_in_master_group = (
-            db.session.query(m.Group)
-            .join(m.MasterGroup)
-            .filter(
-                m.MasterGroup.name == s.Events.name.value,
-                m.Group.name == cart.group.name,
-            )
-            .count()
-            > 0
-        )
-
-        if not is_group_in_master_group:
+        if cart.group.master_group.name != s.Events.name.value:
             products_to_deplete = db.session.scalars(
                 sa.select(m.ProductAllocated)
                 .where(
@@ -319,7 +308,7 @@ def save():
             )
 
             deplete_qty = cart.quantity
-
+            # TODO why do we need this logic
             for product in products_to_deplete:
                 if product.quantity_remains >= deplete_qty:
                     product.quantity_remains -= deplete_qty

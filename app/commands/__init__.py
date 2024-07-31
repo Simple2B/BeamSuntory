@@ -9,6 +9,7 @@ from app import forms
 from app import schema as s
 from app import controllers as c
 from app.database import db
+from app.views.product import DEFUALT_IMAGE_ID
 from .add_stores import add_new_store
 from .set_courvoisier import set_counrvoisier
 from .events import add_events
@@ -434,7 +435,16 @@ def init(app: Flask):
         db.session.commit()
 
     @app.cli.command()
-    def add_events_groups():
-        """Add events groups."""
+    def init_data():
+        """Add data to db."""
         print("add events groups")
         add_events()
+
+        img = db.session.get(m.Image, DEFUALT_IMAGE_ID)
+        if not img:
+            print("add defult image")
+            m.Image(
+                name="no_picture_default",
+                path="no_picture_default.png",
+                extension="png",
+            ).save()

@@ -1,7 +1,7 @@
 sleep 2
 echo Run db upgrade
 poetry run flask db upgrade
-poetry run flask add-events-groups
+poetry run flask init-data
 # echo Run app
 # flask run -h 0.0.0.0
 echo Run app server

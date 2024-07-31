@@ -144,7 +144,7 @@ class ProductForm(FlaskForm):
 
 class NewProductForm(FlaskForm):
     name = StringField("Name", [DataRequired()], render_kw={"placeholder": "Name"})
-    supplier = IntegerField("Supplier ID", validators=[Optional()])
+    supplier = IntegerField("Supplier ID", validators=[DataRequired()])
     currency = SelectField(
         "Currency", validators=[Optional()], choices=[c.value for c in s.Currency]
     )

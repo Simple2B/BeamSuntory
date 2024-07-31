@@ -259,7 +259,7 @@ def create():
 
     for cart in carts:
 
-        if event_date_range:
+        if event_date_range and cart.group.master_group.name == s.Events.name.value:
             report_event = m.ReportEvent(
                 type=s.ReportEventType.created.value,
                 user=current_user,

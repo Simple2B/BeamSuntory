@@ -6,7 +6,6 @@ from app.database import db
 
 def add_events():
     events_name = s.Events.name.value
-    print(events_name)
     master_group = db.session.scalar(
         sa.select(m.MasterGroup).where(m.MasterGroup.name == events_name)
     )
