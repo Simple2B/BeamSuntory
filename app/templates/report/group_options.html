@@ -1,0 +1,4 @@
+<option selected value="">Target group</option>
+{% for group in groups %}
+<option value="{{ group.name }}" data-target-group-id="{{ group.id }}">{{ group.name }}</option>
+{% endfor %}

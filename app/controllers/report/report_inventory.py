@@ -152,3 +152,22 @@ class ReportDataInventories(ReportData):
             page=pagination,
             inventory_reports=reports,
         )
+
+
+def create_inventory_dataset(product: m.Product) -> dict[str, list]:
+    data = {
+        "Name": [],
+        "SKU": [],
+        "Quantity": [],
+        "Group": [],
+        "Warehouse": [],
+    }  # type: dict[str, list]
+
+    for warehouse_product in product.warehouse_products:
+        data["Name"].append(product.name)
+        data["SKU"].append(product.SKU)
+        data["Quantity"].append(warehouse_product.product_quantity)
+        data["Group"].append(warehouse_product.group_name)
+        data["Warehouse"].append(warehouse_product.warehouse_name)
+
+    return data

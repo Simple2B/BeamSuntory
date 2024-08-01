@@ -117,3 +117,28 @@ class ReportDataShelfLife(ReportData):
             page=pagination,
             shelf_life_reports=reports,
         )
+
+
+def create_shelf_life_dataset(product: m.Product):
+    data = {
+        "Name": [],
+        "SKU": [],
+        "Brand": [],
+        "Number of days left": [],
+        "Expiry Date": [],
+        "Group": [],
+        "Quantity": [],
+        "Warehouse": [],
+    }  # type: dict[str, list]
+
+    for we_product in product.warehouse_products:
+        data["Name"].append(product.name)
+        data["SKU"].append(product.SKU)
+        data["Brand"].append(product.brand)
+        data["Number of days left"].append(product.numb_of_day_left)
+        data["Expiry Date"].append(product.expiry_date.strftime("%m/%d/%Y"))
+        data["Group"].append(we_product.group.name)
+        data["Quantity"].append(we_product.product_quantity)
+        data["Warehouse"].append(we_product.warehouse.name)
+
+    return data

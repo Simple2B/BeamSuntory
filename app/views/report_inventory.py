@@ -7,6 +7,7 @@ from flask import (
     flash,
     redirect,
     url_for,
+    render_template,
 )
 import pandas as pd
 import io
@@ -16,7 +17,8 @@ from app.controllers import create_pagination, role_required
 
 from app import schema as s
 from app import models as m, db
-
+from app.controllers.report import create_inventory_dataset
+from app.logger import log
 
 report_inventory_blueprint = Blueprint(
     "report_inventory", __name__, url_prefix="/report_inventory"
@@ -258,21 +260,8 @@ def download_csv(product_id: int):
     if not product:
         flash("Report not found", "danger")
         return redirect(url_for("report.index"))
-    data = {
-        "Name": [],
-        "SKU": [],
-        "Quantity": [],
-        "Group": [],
-        "Warehouse": [],
-    }  # type: dict[str, list]
 
-    for warehouse_product in product.warehouse_products:
-        data["Name"].append(product.name)
-        data["SKU"].append(product.SKU)
-        data["Quantity"].append(warehouse_product.product_quantity)
-        data["Group"].append(warehouse_product.group_name)
-        data["Warehouse"].append(warehouse_product.warehouse_name)
-
+    data = create_inventory_dataset(product)
     df = pd.DataFrame(data)
 
     # Save the DataFrame to a CSV file in memory
@@ -286,4 +275,31 @@ def download_csv(product_id: int):
         mimetype="text/csv",
         as_attachment=True,
         download_name="report.csv",
+    )
+
+
+@report_inventory_blueprint.route("inventory/<int:product_id>/detail_modal")
+@login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
+def detail_modal(product_id: int):
+    # Create a DataFrame with sample data
+    product = db.session.get(m.Product, product_id)
+    if not product:
+        log(log.ERROR, "Report not found")
+        return render_template(
+            "toast.html", message="Report not found", category="danger"
+        )
+    data = create_inventory_dataset(product)
+
+    return render_template(
+        "report/inventory/detail_modal.html", data=data, report=product
     )

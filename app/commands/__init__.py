@@ -198,21 +198,23 @@ def init(app: Flask):
             "Mixit": ["Mixit"],
             "Key Accounts": ["Key Accounts"],
             "Sales Manager": ["Sales Manager"],
-            s.Events.name.value: [s.Events.name.value],
+            # s.Events.name.value: [s.Events.name.value],
         }
         product_master_groups = {
             "Brand": ["Brugal", "Banff Ice", "Alberta Springs"],
             "Language": ["English", "French"],
             "Premises": ["On Premises", "Off Premises"],
             "Categories": ["NLVA", "GWP", "Kit", "Bareware", "Signage"],
-            s.Events.name.value: [s.Events.name.value],
+            # s.Events.name.value: [s.Events.name.value],
         }
 
-        m.Image(
-            name="no_picture_default",
-            path="no_picture_default.png",
-            extension="png",
-        ).save(False)
+        img = db.session.get(m.Image, DEFUALT_IMAGE_ID)
+        if not img:
+            m.Image(
+                name="no_picture_default",
+                path="no_picture_default.png",
+                extension="png",
+            ).save(False)
 
         for mg in stock_master_groups:
             master_group = db.session.execute(
@@ -290,15 +292,6 @@ def init(app: Flask):
                 address="sserdda",
                 manager_id=wh_manager.id,
             ).save(False)
-
-            # wh = m.Warehouse(
-            #     name=s.WarehouseMandatory.warehouse_events.value,
-            #     phone_number="380362470344",
-            #     city="Kv",
-            #     zip="unzip",
-            #     address="street",
-            #     manager_id=wh_manager.id,
-            # ).save(False)
 
         role = db.session.execute(
             m.Division.select().where(m.Division.role_name == s.UserRole.MANAGER.value)
@@ -414,12 +407,6 @@ def init(app: Flask):
 
         m.ProductGroup(product_id=bottle.id, group_id=1).save(False)
         m.ProductGroup(product_id=cup.id, group_id=1).save(False)
-        m.WarehouseProduct(
-            warehouse_id=wh.id,
-            product_id=bottle.id,
-            group_id=1,
-            product_quantity=2000,
-        ).save(False)
 
         db.session.commit()
         print("database filled")
