@@ -151,3 +151,33 @@ class ReportDataInboundOrders(ReportData):
             page=pagination,
             reports=reports,
         )
+
+
+def create_inbound_order_dataset(
+    report: m.ReportInboundOrder, SKU: str
+) -> dict[str, list]:
+    data = {
+        "Name": [],
+        "SKU": [],
+        "Quantity": [],
+        "Group": [],
+        "Created At": [],
+        "Supplier": [],
+        "Arrived": [],
+        "Warehouse": [],
+    }  # type: dict[str, list]
+
+    for product_allocated in report.inbound_order.products_allocated:
+        if product_allocated.product.SKU != SKU:
+            continue
+        for group in product_allocated.product_quantity_groups:
+            data["Name"].append(product_allocated.product.name)
+            data["SKU"].append(product_allocated.product.SKU)
+            data["Quantity"].append(group.quantity)
+            data["Group"].append(group.group.name)
+            data["Created At"].append(report.created_at.strftime("%Y-%m-%d %H:%M:%S"))
+            data["Supplier"].append(report.inbound_order.supplier.name)
+            data["Arrived"].append(report.inbound_order.finished_date)
+            data["Warehouse"].append(report.inbound_order.warehouse.name)
+
+    return data

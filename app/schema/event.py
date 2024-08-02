@@ -1,8 +1,14 @@
+import enum
 from datetime import date
 from pydantic import BaseModel, Field, RootModel, ConfigDict
+
 from .pagination import PaginationOut
 from .product import Product
 from .user import User
+
+
+class Events(enum.Enum):
+    name: str = "Events"
 
 
 class Event(BaseModel):

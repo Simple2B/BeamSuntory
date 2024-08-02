@@ -9,8 +9,10 @@ from app import forms
 from app import schema as s
 from app import controllers as c
 from app.database import db
+from app.views.product import DEFUALT_IMAGE_ID
 from .add_stores import add_new_store
 from .set_courvoisier import set_counrvoisier
+from .events import add_events
 from config import SALES_REP_LOCKER_NAME
 
 
@@ -196,23 +198,23 @@ def init(app: Flask):
             "Mixit": ["Mixit"],
             "Key Accounts": ["Key Accounts"],
             "Sales Manager": ["Sales Manager"],
-            s.MasterGroupMandatory.events.value: [s.MasterGroupMandatory.events.value],
+            # s.Events.name.value: [s.Events.name.value],
         }
         product_master_groups = {
             "Brand": ["Brugal", "Banff Ice", "Alberta Springs"],
             "Language": ["English", "French"],
             "Premises": ["On Premises", "Off Premises"],
             "Categories": ["NLVA", "GWP", "Kit", "Bareware", "Signage"],
-            s.ProductMasterGroupMandatory.events.value: [
-                s.ProductMasterGroupMandatory.events.value
-            ],
+            # s.Events.name.value: [s.Events.name.value],
         }
 
-        m.Image(
-            name="no_picture_default",
-            path="no_picture_default.png",
-            extension="png",
-        ).save(False)
+        img = db.session.get(m.Image, DEFUALT_IMAGE_ID)
+        if not img:
+            m.Image(
+                name="no_picture_default",
+                path="no_picture_default.png",
+                extension="png",
+            ).save(False)
 
         for mg in stock_master_groups:
             master_group = db.session.execute(
@@ -288,15 +290,6 @@ def init(app: Flask):
                 city="Al",
                 zip="unzip",
                 address="sserdda",
-                manager_id=wh_manager.id,
-            ).save(False)
-
-            wh = m.Warehouse(
-                name=s.WarehouseMandatory.warehouse_events.value,
-                phone_number="380362470344",
-                city="Kv",
-                zip="unzip",
-                address="street",
                 manager_id=wh_manager.id,
             ).save(False)
 
@@ -414,12 +407,6 @@ def init(app: Flask):
 
         m.ProductGroup(product_id=bottle.id, group_id=1).save(False)
         m.ProductGroup(product_id=cup.id, group_id=1).save(False)
-        m.WarehouseProduct(
-            warehouse_id=wh.id,
-            product_id=bottle.id,
-            group_id=1,
-            product_quantity=2000,
-        ).save(False)
 
         db.session.commit()
         print("database filled")
@@ -433,3 +420,18 @@ def init(app: Flask):
     def clear_all_events():
         db.session.execute(m.Event.delete())
         db.session.commit()
+
+    @app.cli.command()
+    def init_data():
+        """Add data to db."""
+        print("add events groups")
+        add_events()
+
+        img = db.session.get(m.Image, DEFUALT_IMAGE_ID)
+        if not img:
+            print("add defult image")
+            m.Image(
+                name="no_picture_default",
+                path="no_picture_default.png",
+                extension="png",
+            ).save()

@@ -13,13 +13,13 @@ import sqlalchemy as sa
 import pandas as pd
 import io
 
-
+from app.controllers.report import create_shelf_life_dataset
 from app.controllers import create_pagination, role_required
 
 
 from app import schema as s
 from app import models as m, db
-
+from app.logger import log
 
 report_shelf_life_blueprint = Blueprint(
     "report_shelf_life", __name__, url_prefix="/report_shelf_life"
@@ -219,26 +219,7 @@ def downlaod_csv(product_id: int):
         flash("Peport not found", "danger")
         return redirect(url_for("report.index"))
 
-    data = {
-        "Name": [],
-        "SKU": [],
-        "Brand": [],
-        "Number of days left": [],
-        "Expiry Date": [],
-        "Group": [],
-        "Quantity": [],
-        "Warehouse": [],
-    }  # type: dict[str, list]
-
-    for we_product in product.warehouse_products:
-        data["Name"].append(product.name)
-        data["SKU"].append(product.SKU)
-        data["Brand"].append(product.brand)
-        data["Number of days left"].append(product.numb_of_day_left)
-        data["Expiry Date"].append(product.expiry_date)
-        data["Group"].append(we_product.group.name)
-        data["Quantity"].append(we_product.product_quantity)
-        data["Warehouse"].append(we_product.warehouse.name)
+    data = create_shelf_life_dataset(product)
 
     df = pd.DataFrame(data)
 
@@ -253,4 +234,31 @@ def downlaod_csv(product_id: int):
         mimetype="text/csv",
         as_attachment=True,
         download_name="report.csv",
+    )
+
+
+@report_shelf_life_blueprint.route("/<int:product_id>/detail-modal")
+@login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
+def detail_modal(product_id: int):
+    product = db.session.get(m.Product, product_id)
+    if not product:
+        log(log.ERROR, "Report Product not found")
+        return render_template(
+            "toast.html", message="Product not found", category="danger"
+        )
+
+    data = create_shelf_life_dataset(product)
+
+    return render_template(
+        "report/shelf_life/detail_modal.html", data=data, product=product
     )

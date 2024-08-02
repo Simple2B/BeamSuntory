@@ -121,19 +121,10 @@ def get_available_quantity():
     if not group:
         log(log.INFO, "Group not found")
         return "Group not found", 404
-    warehouse: m.Warehouse = db.session.scalar(
-        m.Warehouse.select().where(
-            m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value
-        )
-    )
-    if not warehouse:
-        log(log.INFO, "Warehouse not found")
-        return "Warehouse not found", 404
 
     warehouse_product: m.WarehouseProduct = db.session.scalar(
         m.WarehouseProduct.select().where(
             m.WarehouseProduct.product_id == product_id,
-            m.WarehouseProduct.warehouse_id == warehouse.id,
             m.WarehouseProduct.group_id == group.id,
         )
     )
@@ -205,18 +196,10 @@ def get_available_quantity_by_date():
     if not product:
         log(log.INFO, "Product not found")
         return "Product not found", 404
-    warehouse: m.Warehouse = db.session.scalar(
-        m.Warehouse.select().where(
-            m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value
-        )
-    )
-    if not warehouse:
-        log(log.INFO, "Warehouse not found")
-        return "Warehouse not found", 404
+
     warehouse_product: m.WarehouseProduct = db.session.scalar(
         m.WarehouseProduct.select().where(
             m.WarehouseProduct.product_id == product_id,
-            m.WarehouseProduct.warehouse_id == warehouse.id,
             m.WarehouseProduct.group_id == group.id,
         )
     )
@@ -304,22 +287,10 @@ def get_adjust_available_quantity():
     if not product:
         log(log.INFO, "Product not found: [%s]", filter_events.product_id)
         return "Product not found", HTTPStatus.NOT_FOUND
-    warehouse: m.Warehouse = db.session.scalar(
-        m.Warehouse.select().where(
-            m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value
-        )
-    )
-    if not warehouse:
-        log(
-            log.INFO,
-            "Warehouse not found: [%s]",
-            s.WarehouseMandatory.warehouse_events.value,
-        )
-        return "Warehouse not found", HTTPStatus.NOT_FOUND
+
     warehouse_product: m.WarehouseProduct = db.session.scalar(
         m.WarehouseProduct.select().where(
             m.WarehouseProduct.product_id == filter_events.product_id,
-            m.WarehouseProduct.warehouse_id == warehouse.id,
             m.WarehouseProduct.group_id == filter_events.group_id,
         )
     )

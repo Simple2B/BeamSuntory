@@ -1,9 +1,4 @@
-from enum import Enum
 from pydantic import BaseModel, ConfigDict
-
-
-class ProductMasterGroupMandatory(Enum):
-    events: str = "Events"
 
 
 class MasterGroupProduct(BaseModel):

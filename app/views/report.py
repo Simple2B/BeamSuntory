@@ -173,3 +173,28 @@ def report_json():
 )
 def search():
     return c.get_reports(render=True)
+
+
+@report_blueprint.route("group-oprions")
+@login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
+def group_oprions():
+    master_group_name = request.args.get("master_group", default="")
+    query = sa.select(m.Group).order_by(m.Group.name.asc())
+    if master_group_name:
+        query = query.where(
+            m.Group.master_group.has(m.MasterGroup.name == master_group_name),
+            m.Group.parent_group_id.is_(None),
+        )
+
+    groups = db.session.scalars(query).all()
+    return render_template("report/group_options.html", groups=groups)

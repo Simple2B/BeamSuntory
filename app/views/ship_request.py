@@ -257,24 +257,9 @@ def create():
 
     db.session.add(report_shipping)
 
-    warehouse_event = db.session.scalar(
-        m.Warehouse.select().where(
-            m.Warehouse.name == s.WarehouseMandatory.warehouse_events.value,
-        )
-    )
-
     for cart in carts:
-        is_group_in_master_group = (
-            db.session.query(m.Group)
-            .join(m.MasterGroup)
-            .filter(
-                m.MasterGroup.name == s.MasterGroupMandatory.events.value,
-                m.Group.name == cart.group.name,
-            )
-            .count()
-            > 0
-        )
-        if event_date_range and is_group_in_master_group:
+
+        if event_date_range and cart.group.master_group.name == s.Events.name.value:
             report_event = m.ReportEvent(
                 type=s.ReportEventType.created.value,
                 user=current_user,
@@ -297,8 +282,6 @@ def create():
             db.session.add(event)
             db.session.add(report_event)
             log(log.INFO, "Event added. Event: [%s]", event)
-
-            cart.warehouse = warehouse_event
 
         m.ReportSKU(
             product_id=cart.product_id,

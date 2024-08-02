@@ -3,16 +3,17 @@ from flask import (
     Blueprint,
     flash,
     redirect,
+    render_template,
     send_file,
     url_for,
 )
 from flask_login import login_required
 import pandas as pd
 from app.controllers import role_required
-
+from app.controllers.report import create_share_requests_dataset
 from app import schema as s
 from app import models as m, db
-
+from app.logger import log
 
 report_request_share_blueprint = Blueprint(
     "report_request_share",
@@ -41,22 +42,7 @@ def download_csv(request_share_id: int):
         flash("Report request share not found", "danger")
         return redirect(url_for("report.index"))
 
-    data = dict()  # type: dict[str, list]
-    data["Name"] = [request_share.product.name]
-    data["SKU"] = [request_share.product.SKU]
-    data["Quantity"] = [request_share.desire_quantity]
-    data["From"] = [request_share.from_group.name]
-    data["To"] = [request_share.group.name]
-    data["Status"] = [request_share.status]
-    data["Created At"] = [request_share.created_at]
-
-    for report in request_share.reports:
-        if report.type == s.ReportRequestShareActionType.SHARED.value:
-            data["Approved At"] = [report.created_at]
-            data["User Approved"] = [report.user.username]
-        if report.type == s.ReportRequestShareActionType.DECLINED.value:
-            data["Declined At"] = [report.created_at]
-            data["User Declined"] = [report.user.username]
+    data = create_share_requests_dataset(request_share)
 
     df = pd.DataFrame(data)
 
@@ -71,4 +57,33 @@ def download_csv(request_share_id: int):
         mimetype="text/csv",
         as_attachment=True,
         download_name="report.csv",
+    )
+
+
+@report_request_share_blueprint.route(
+    "/<int:request_share_id>/detail-modal", methods=["GET"]
+)
+@login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
+def detail_modal(request_share_id: int):
+    request_share = db.session.get(m.RequestShare, request_share_id)
+    if not request_share:
+        log(log.ERROR, "Report RequestShare not found")
+        return render_template(
+            "toast.html", message="Report not found", category="danger"
+        )
+
+    data = create_share_requests_dataset(request_share)
+
+    return render_template(
+        "report/request_share/detail_modal.html", data=data, request_share=request_share
     )

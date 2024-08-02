@@ -85,3 +85,26 @@ class ReportDataShareRequests(ReportData):
             page=pagination,
             reports=reports,
         )
+
+
+def create_share_requests_dataset(
+    request_share: m.RequestShare,
+):
+    data = dict()  # type: dict[str, list]
+    data["Name"] = [request_share.product.name]
+    data["SKU"] = [request_share.product.SKU]
+    data["Quantity"] = [request_share.desire_quantity]
+    data["From"] = [request_share.from_group.name]
+    data["To"] = [request_share.group.name]
+    data["Status"] = [request_share.status]
+    data["Created At"] = [request_share.created_at.strftime("%m/%d/%Y %H:%M:%S")]
+
+    for report in request_share.reports:
+        if report.type == s.ReportRequestShareActionType.SHARED.value:
+            data["Approved At"] = [report.created_at.strftime("%m/%d/%Y %H:%M:%S")]
+            data["User Approved"] = [report.user.username]
+        if report.type == s.ReportRequestShareActionType.DECLINED.value:
+            data["Declined At"] = [report.created_at.strftime("%m/%d/%Y %H:%M:%S")]
+            data["User Declined"] = [report.user.username]
+
+    return data

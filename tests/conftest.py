@@ -133,7 +133,7 @@ def mg_g_populate(client: FlaskClient, mocker):
         "Marketing",
         "Language",
         "Categories",
-        s.ProductMasterGroupMandatory.events.value,
+        s.Events.name.value,
     ]
     groups = {
         "Canada": "1",
@@ -238,7 +238,7 @@ def mg_g_populate(client: FlaskClient, mocker):
     ).save()
 
     group_event = m.Group(
-        name=s.ProductMasterGroupMandatory.events.value,
+        name=s.Events.name.value,
         master_group_id=3,
     ).save(False)
 
@@ -319,16 +319,6 @@ def mg_g_populate(client: FlaskClient, mocker):
         manager_id=1,
     )
     jw.save(False)
-
-    warehouse_events = m.Warehouse(
-        name=s.WarehouseMandatory.warehouse_events.value,
-        phone_number="380362470221",
-        city="Bagmom",
-        zip="unzip",
-        address="sserdda",
-        manager_id=1,
-    )
-    warehouse_events.save(False)
 
     m.DeliveryAgent(
         first_name="May",
@@ -525,7 +515,7 @@ def mg_g_populate(client: FlaskClient, mocker):
         product_id=event_test_product.id,
         group_id=group_event.id,
         product_quantity=200,
-        warehouse_id=warehouse_events.id,
+        warehouse_id=jw.id,
     ).save(False)
 
     inbound_order_test.products_allocated.append(
@@ -734,7 +724,7 @@ def mg_g_populate(client: FlaskClient, mocker):
             user_id=3,
             group_id=group_event.id,
             ship_request_id=sr.id,
-            warehouse_id=warehouse_events.id,
+            warehouse_id=jw.id,
             from_warehouse_product_id=1,
             status="pending",
         ).save(False)

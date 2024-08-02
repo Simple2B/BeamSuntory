@@ -41,9 +41,9 @@
             class="inventories-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             <option value="adjustment">Adjustments</option>
             <option value="assign">Assigns</option>
-            <option value="events" selected>Events</option>
+            <option value="events">Events</option>
             <option value="inbound_order">Inbound orders</option>
-            <option value="inventories">Inventories</option>
+            <option value="inventories" selected>Inventories</option>
             <option value="request_share">Share request</option>
             <option value="shelf_life">Shelf Life</option>
             <option value="shipping">Shipping</option>
@@ -178,9 +178,13 @@
     </div>
     <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800" id="master-group">
       <!-- Master groups -->
+      <button type="button" class="hidden" name="master_group_select" id="report-master-group-select"
+        hx-target="#report-target-group-select" hx-swap="innerHTML" hx-include="[name='master_group']"
+        hx-indicator="#htmx-spinner" hx-get="{{ url_for('report.group_oprions') }}"></button>
       <!-- prettier-ignore -->
       <select name="master_group" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"
         hx-include="{{all_includes}}" hx-get="{{ url_for('report.search') }}" hx-indicator="#htmx-spinner"
+        hx-on::after-request="this.parentNode.querySelector('#report-master-group-select').click()"
         class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
         <option selected value="">Master group</option>
         {% for master_group in master_groups %}
