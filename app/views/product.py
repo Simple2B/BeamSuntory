@@ -28,6 +28,7 @@ from app.controllers import (
     sort_user_groups,
     get_query_params_from_headers,
     BASE_IMAGE_PATH,
+    find_image,
 )
 
 from app import models as m, db
@@ -1426,31 +1427,38 @@ def upload():
             log(log.INFO, "Product item data name: [%s]", product_item_data.name)
             log(log.INFO, "Product: [%s]", product.SKU)
 
+        if not product.image_obj:
+            log(log.INFO, "Product image not found")
+            img = db.session.scalar(
+                sa.select(m.Image).where(sa.or_(m.Image.name == product.name))
+            )
+            if not img:
+                image_url = find_image("product", product.name)
+                if not image_url:
+                    log(log.INFO, "Image not found set default image")
+                    product.image = ""
+                    product.image_id = DEFUALT_IMAGE_ID
+                else:
+                    log(log.INFO, "Image found: [%s]", image_url)
+                    extension = image_url.split(".")[-1]
+                    new_img = m.Image(
+                        name=product.name,
+                        path=image_url,
+                        extension=extension,
+                    )
+                    product.image_obj = new_img
+                    product.image = new_img.get_base64().decode()
+            else:
+                product.image_obj = img
+                product.image = img.get_base64().decode()
+
         # updating just 'we ignore everything except qty and give the qty to this SKU to the target group selected. '
         # product.name = product_item_data.name
         # product.description = product_item_data.description
         # product.regular_price = product_item_data.regular_price
         # product.retail_price = product_item_data.retail_price
 
-        # TODO: Add creating image from csv
-        # image = db.session.scalar(
-        #     sa.select(m.Image).where(m.Image.name == product_item_data.sku)
-        # )
-        # if not image:
-        #     image = m.Image(
-        #         name=product_item_data.sku,
-        #         path=f"product/{product_item_data.sku}",
-        #         extension="png",
-        #     )
-        #     image.save(False)
-        log(log.INFO, "Product image object: [%s]", product.image_obj)
-        if not product.image_obj:
-            log(log.INFO, "Product image object not found")
-            product.image = ""
-            product.image_id = DEFUALT_IMAGE_ID
-
-        product.save(False)
-        # product.image = image.get_base64().decode()
+        # product.save(False)
 
         if form.target_group_upload.data:
             log(log.INFO, "Target group: [%s]", form.target_group_upload.data)
