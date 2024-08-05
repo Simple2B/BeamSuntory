@@ -1,4 +1,5 @@
 from urllib.parse import urlparse, parse_qs
+
 from flask import request
 from app import models as m
 from app.database import db
