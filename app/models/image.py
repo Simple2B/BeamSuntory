@@ -30,14 +30,19 @@ class Image(db.Model, ModelMixin):
 
     def get_base64(self):
         image_path = Path("app") / "static" / "img" / "product" / self.name
-        if not image_path.is_file():
+        if Path(self.path).is_file():
+            image_path = Path(self.path)
+        elif not image_path.is_file():
             image_path = Path("app") / "static" / "img" / "no_picture_default.png"
-        original_image = PilImage.open(
+
+        with PilImage.open(
             image_path,
-        ).resize((200, 200))
-        with BytesIO() as buffered:
-            original_image.save(buffered, format="PNG")
-            return base64.b64encode(buffered.getvalue())
+        ).resize((200, 200)) as original_image:
+            filename = self.name + "." + self.extension
+            with BytesIO() as buffered:
+                buffered.name = filename
+                original_image.save(buffered)
+                return base64.b64encode(buffered.getvalue())
 
     def __repr__(self):
         return f"<{self.id}: {self.name}>"

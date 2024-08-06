@@ -39,7 +39,7 @@ def find_image(directory, image_name):
 
     for root, _, files in os.walk(path):
         for file in files:
-            if file in image_name:
+            if image_name in file:
                 try:
                     # Try to open the file with PIL to ensure it's an image
                     with Image.open(os.path.join(root, file)):

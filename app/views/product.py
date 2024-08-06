@@ -460,7 +460,7 @@ def create():
             return redirect(url_for("product.get_all", **query_params))
 
         try:
-            image_path, image_string = save_image(
+            image_path, _ = save_image(
                 image=image, path=f"product/{image_name}.{kind.extension}"
             )
         except PermissionError as e:
@@ -468,13 +468,13 @@ def create():
             flash("Can't save image some problems.", "danger")
             return redirect(url_for("product.get_all", **query_params))
 
-        product.image = image_string
         new_img = m.Image(
             name=image_name,
             path=image_path,
             extension=kind.extension,
         )
         product.image_obj = new_img
+        product.image = new_img.get_base64().decode()
     else:
         product.image_id = DEFUALT_IMAGE_ID
         product.image = ""
@@ -582,6 +582,8 @@ def save():
                 extension=kind.extension,
             )
             product.image_obj = new_img
+            product.image = new_img.get_base64().decode()
+
     product.save(False)
     db.session.commit()
     product_group_ids = tuple(set(product_group_ids))
@@ -1216,8 +1218,8 @@ def upload():
             product_item_data = s.ProductCSVItem(*row)
         except ValidationError:
             log(log.ERROR, "SCV product upload validation error: %s", row)
-            flash(f"Invalid product item: {i + 1}", "danger")
-            return redirect(url_for("product.get_all", **query_params))
+            error_message += f"Invalid product item: {i + 1}\n"
+            continue
 
         product = db.session.scalar(
             sa.select(m.Product).where(
@@ -1259,11 +1261,17 @@ def upload():
             continue
 
         if not language_product_group and product_item_data.language != "":
-            language_product_group = m.GroupProduct(
-                name=product_item_data.language,
-                master_groups_for_product=language_master_group,
+            language_product_group = db.session.scalar(
+                sa.select(m.GroupProduct).where(
+                    m.GroupProduct.name == product_item_data.language,
+                )
             )
-            db.session.add(language_product_group)
+            if not language_product_group:
+                language_product_group = m.GroupProduct(
+                    name=product_item_data.language,
+                    master_groups_for_product=language_master_group,
+                )
+                db.session.add(language_product_group)
             log(
                 log.INFO,
                 "Added Language product group: [%s]",
@@ -1271,19 +1279,31 @@ def upload():
             )
 
         if not brand_product_group and product_item_data.brand != "":
-            brand_product_group = m.GroupProduct(
-                name=product_item_data.brand,
-                master_groups_for_product=brand_master_group,
+            brand_product_group = db.session.scalar(
+                sa.select(m.GroupProduct).where(
+                    m.GroupProduct.name == product_item_data.brand,
+                )
             )
-            db.session.add(brand_product_group)
+            if not brand_product_group:
+                brand_product_group = m.GroupProduct(
+                    name=product_item_data.brand,
+                    master_groups_for_product=brand_master_group,
+                )
+                db.session.add(brand_product_group)
             log(log.INFO, "Added Brand product group: [%s]", product_item_data.brand)
 
         if not category_product_group and product_item_data.categories != "":
-            category_product_group = m.GroupProduct(
-                name=product_item_data.categories,
-                master_groups_for_product=categories_master_group,
+            category_product_group = db.session.scalar(
+                sa.select(m.GroupProduct).where(
+                    m.GroupProduct.name == product_item_data.categories,
+                )
             )
-            db.session.add(category_product_group)
+            if not category_product_group:
+                category_product_group = m.GroupProduct(
+                    name=product_item_data.categories,
+                    master_groups_for_product=categories_master_group,
+                )
+                db.session.add(category_product_group)
             log(
                 log.INFO,
                 "Added Category product group: [%s]",
@@ -1426,32 +1446,31 @@ def upload():
             log(log.INFO, "Product name not changed: [%s]", product.name)
             log(log.INFO, "Product item data name: [%s]", product_item_data.name)
             log(log.INFO, "Product: [%s]", product.SKU)
-
         if not product.image_obj:
             log(log.INFO, "Product image not found")
             img = db.session.scalar(
-                sa.select(m.Image).where(sa.or_(m.Image.name == product.name))
+                sa.select(m.Image).where(m.Image.name == product.name)
             )
             if not img:
                 image_url = find_image("product", product.name)
-                if not image_url:
+                kind = filetype.guess(image_url)
+                if not image_url or not kind:
                     log(log.INFO, "Image not found set default image")
                     product.image = ""
                     product.image_id = DEFUALT_IMAGE_ID
                 else:
                     log(log.INFO, "Image found: [%s]", image_url)
-                    extension = image_url.split(".")[-1]
+
                     new_img = m.Image(
                         name=product.name,
                         path=image_url,
-                        extension=extension,
+                        extension=kind.extension,
                     )
                     product.image_obj = new_img
                     product.image = new_img.get_base64().decode()
             else:
                 product.image_obj = img
                 product.image = img.get_base64().decode()
-
         # updating just 'we ignore everything except qty and give the qty to this SKU to the target group selected. '
         # product.name = product_item_data.name
         # product.description = product_item_data.description
