@@ -84,7 +84,7 @@ class ReportDataInventories(ReportData):
                 <= datetime.strptime(report_filter.start_date_to, "%m/%d/%Y")
             )
 
-        if report_filter.master_group:
+        if report_filter.master_group and not report_filter.target_group:
             query = query.where(
                 m.WarehouseProduct.group.has(
                     m.Group.master_group.has(
@@ -146,15 +146,21 @@ class ReportDataInventories(ReportData):
         return pagination, reports
 
     @classmethod
-    def render(cls, pagination: sa.ScalarResult, reports: sa.ScalarResult) -> str:
+    def render(
+        cls,
+        pagination: sa.ScalarResult,
+        reports: sa.ScalarResult,
+        report_filter: s.ReportFilter,
+    ) -> str:
         return render_template(
             "report/inventory/product_reports_table.html",
             page=pagination,
+            target_group=report_filter.target_group,
             inventory_reports=reports,
         )
 
 
-def create_inventory_dataset(product: m.Product) -> dict[str, list]:
+def create_inventory_dataset(product: m.Product, group: str = "") -> dict[str, list]:
     data = {
         "Name": [],
         "SKU": [],
@@ -164,6 +170,8 @@ def create_inventory_dataset(product: m.Product) -> dict[str, list]:
     }  # type: dict[str, list]
 
     for warehouse_product in product.warehouse_products:
+        if group and warehouse_product.group_name != group:
+            continue
         data["Name"].append(product.name)
         data["SKU"].append(product.SKU)
         data["Quantity"].append(warehouse_product.product_quantity)

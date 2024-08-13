@@ -21,6 +21,13 @@
           <span class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">{{
             config.APP_NAME }}</span>
         </a>
+
+        {% elif config.APP_NAME == "Proxio" %}
+        <a href="https://devproximo.jlidistribution.com" class="flex ml-2 md:mr-24">
+          <span class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">{{
+            config.APP_NAME }}</span>
+        </a>
+
         {% else %}
         <a href="https://beam.jlidistribution.com" class="flex ml-2 md:mr-24">
           <img src="{{url_for('static',filename='img/logo-mini.png')}}" class="h-8 mr-3"

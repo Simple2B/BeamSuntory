@@ -361,7 +361,7 @@ const filtersIds = [
   'filter-end-date-to',
   'master-group',
   'target-group',
-  'target-sub-group',
+  'sub-group-select-container',
   'filter-group-brand',
   'filter-group-language',
   'filter-group-premises',
@@ -384,33 +384,41 @@ document.addEventListener('DOMContentLoaded', () => {
   const searchSkuHTML = document.getElementById('search-sku') as HTMLInputElement;
   const downloadCSVButton = document.getElementById('button-csv-download') as HTMLButtonElement;
 
+
+
+  function clearFilters() {
+    const allInputs = filtersIds.map((id) => document.getElementById(id));
+    console.log('allInputs', allInputs);
+    allInputs.forEach((filterHTML) => {
+      if (!filterHTML) {
+        return;
+      }
+      const inputs = filterHTML.querySelectorAll('input, select') as NodeListOf<HTMLInputElement> | NodeListOf<HTMLSelectElement>;
+      inputs.forEach((input) => {
+        input.value = '';
+      });
+    });
+    searchQueryHTML.value = '';
+    searchSkuHTML.value = '';
+    tableLoader.click();
+  }
+
   for (const [reportType, filters] of Object.entries(filtersMap)) {
     filtersMap[reportType] = filters.map((id) => document.getElementById(id as string)) as HTMLElement[];
   }
 
   // Show/remove filters when choose event report type
   reportTypeSelectHTML.addEventListener('change', (e) => {
+    clearFilters();
     const selectHTML = e.target as HTMLSelectElement;
 
     allFiltersHTML.forEach((filterHTML) => filterHTML.classList.add('hidden'));
     const visibleFilters = filtersMap[selectHTML.value] as HTMLElement[];
-    console.log('visibleFilters', visibleFilters);
-    console.log('filtersMap', filtersMap);
-    console.log('allFiltersHTML', allFiltersHTML);
-
     visibleFilters.forEach((filterHTML) => filterHTML.classList.remove('hidden'));
   });
 
   tableLoader.click();
-  clearFiltersButton.addEventListener('click', () => {
-    allFiltersHTML.forEach((filterHTML) => {
-      const input = filterHTML.querySelector('input, select') as HTMLSelectElement | HTMLInputElement;
-      input.value = '';
-    });
-    searchQueryHTML.value = '';
-    searchSkuHTML.value = '';
-    tableLoader.click();
-  });
+  clearFiltersButton.addEventListener('click', clearFilters);
   // Download csv button
   const groupSelect = document.getElementById('report-target-group-select') as HTMLSelectElement;
   const groupIdInput = document.getElementById('report-group-id-hidden') as HTMLInputElement;

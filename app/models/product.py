@@ -130,6 +130,13 @@ class Product(db.Model, ModelMixin):
             ]
         )
 
+    def get_qty_by_group(self, group_name: str):
+        return sum(
+            wp.product_quantity
+            for wp in self.warehouse_products
+            if wp.group.name == group_name
+        )
+
     @property
     def json(self):
         return s.Product.model_validate(self).model_dump_json(by_alias=True)

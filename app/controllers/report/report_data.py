@@ -14,13 +14,18 @@ class ReportData(ABC):
 
     @classmethod
     @abstractmethod
-    def render(cls, pagination: sa.ScalarResult, reports: sa.ScalarResult) -> str: ...
+    def render(
+        cls,
+        pagination: sa.ScalarResult,
+        reports: sa.ScalarResult,
+        report_filter: s.ReportFilter,
+    ) -> str: ...
 
     @classmethod
     def generate_html_response(cls, report_filter: s.ReportFilter) -> str:
         pagination, reports = cls.get_reports(report_filter)
 
-        return cls.render(pagination, reports)
+        return cls.render(pagination, reports, report_filter)
 
     @classmethod
     def generate_json_response(cls, report_filter: s.ReportFilter):

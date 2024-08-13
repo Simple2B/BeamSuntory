@@ -145,7 +145,7 @@ class ReportDataInboundOrders(ReportData):
         return pagination, reports
 
     @classmethod
-    def render(cls, pagination: sa.ScalarResult, reports: sa.ScalarResult) -> str:
+    def render(cls, pagination: sa.ScalarResult, reports: sa.ScalarResult, _) -> str:
         return render_template(
             "report/inbound_order/reports_inbound_orders_table.html",
             page=pagination,

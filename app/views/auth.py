@@ -84,7 +84,11 @@ def activate(reset_password_uid):
 @auth_blueprint.route("/forgot", methods=["GET", "POST"])
 def forgot_pass():
     log(log.INFO, "Forgot password")
+
     form = f.ForgotForm()
+    if request.method == "GET":
+        return render_template("auth/forgot.html", form=form)
+
     if not form.validate_on_submit():
         log(log.ERROR, "Form submitted error: [%s]", form.errors)
         flash(f"No registered user with this e-mail: [{form.email.data}]", "danger")
