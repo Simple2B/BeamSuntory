@@ -79,7 +79,7 @@ class ReportDataShareRequests(ReportData):
         return pagination, reports
 
     @classmethod
-    def render(cls, pagination: sa.ScalarResult, reports: sa.ScalarResult) -> str:
+    def render(cls, pagination: sa.ScalarResult, reports: sa.ScalarResult, _) -> str:
         return render_template(
             "report/request_share/reports_table.html",
             page=pagination,

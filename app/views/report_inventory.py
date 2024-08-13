@@ -256,11 +256,12 @@ def search_inventory_reports():
 def download_csv(product_id: int):
     # Create a DataFrame with sample data
     product = db.session.get(m.Product, product_id)
+    group = request.args.get("target_group", default="", type=str)
     if not product:
         flash("Report not found", "danger")
         return redirect(url_for("report.index"))
 
-    data = create_inventory_dataset(product)
+    data = create_inventory_dataset(product, group)
     df = pd.DataFrame(data)
 
     # Save the DataFrame to a CSV file in memory
@@ -292,13 +293,17 @@ def download_csv(product_id: int):
 def detail_modal(product_id: int):
     # Create a DataFrame with sample data
     product = db.session.get(m.Product, product_id)
+    target_group = request.args.get("target_group", default="", type=str)
     if not product:
         log(log.ERROR, "Report not found")
         return render_template(
             "toast.html", message="Report not found", category="danger"
         )
-    data = create_inventory_dataset(product)
+    data = create_inventory_dataset(product, target_group)
 
     return render_template(
-        "report/inventory/detail_modal.html", data=data, report=product
+        "report/inventory/detail_modal.html",
+        data=data,
+        report=product,
+        target_group=target_group,
     )

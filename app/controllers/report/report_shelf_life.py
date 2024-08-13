@@ -111,7 +111,7 @@ class ReportDataShelfLife(ReportData):
         return pagination, shelf_life_reports
 
     @classmethod
-    def render(cls, pagination: sa.ScalarResult, reports: sa.ScalarResult) -> str:
+    def render(cls, pagination: sa.ScalarResult, reports: sa.ScalarResult, _) -> str:
         return render_template(
             "report/shelf_life/reports_table.html",
             page=pagination,
