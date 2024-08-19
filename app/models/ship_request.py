@@ -1,3 +1,4 @@
+import os
 from typing import TYPE_CHECKING, List
 from datetime import datetime
 
@@ -102,7 +103,11 @@ class ShipRequest(db.Model, ModelMixin):
         return self.reports[-1].type
 
     def set_order_numb(self):
-        self.order_numb = f"Beam-OB-{START_ORDER_NUMBER + self.id}"
+        app_name = os.environ.get("APP_NAME", "Beam Suntory")
+        if os.environ.get("APP_NAME") != "Beam Suntory":
+            self.order_numb = f"{app_name}-OB-{self.id}"
+        else:
+            self.order_numb = f"Beam-OB-{START_ORDER_NUMBER + self.id}"
 
     def __repr__(self):
         return f"<{self.id}: {self.order_numb}>"

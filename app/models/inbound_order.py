@@ -1,4 +1,5 @@
 from datetime import datetime, date
+import os
 
 import sqlalchemy as sa
 from sqlalchemy import orm
@@ -72,7 +73,11 @@ class InboundOrder(db.Model, ModelMixin):
         return self.report_inventory_list.created_at.strftime("%Y-%m-%d")
 
     def set_order_id(self):
-        self.order_id = f"Beam-IB-{START_ORDER_NUMBER + self.id}"
+        app_name = os.environ.get("APP_NAME", "Beam Suntory")
+        if os.environ.get("APP_NAME") != "Beam Suntory":
+            self.order_id = f"{app_name}-OB-{self.id}"
+        else:
+            self.order_id = f"Beam-IB-{START_ORDER_NUMBER + self.id}"
 
     def __repr__(self):
         return f"<{self.id}: {self.order_id}>"

@@ -239,7 +239,14 @@
                                             <!-- prettier-ignore -->
                                             Welcome to {{ app_name }} Inventory system. If you have any questions,
                                             please
-                                            contact beamsuntory@jlitransportation.com.
+                                            contact
+                                            {% if app_name == "Beam Suntory" %}
+                                            beamsuntory@jlitransportation.com.
+                                            {% elif app_name == "Proximo" %}
+                                            proximo@jlitransportation.com.
+                                            {% else %}
+                                            orders@jlidistribution.com.
+                                            {% endif %}
                                           </h5>
                                           <table class="s-5 w-full" role="presentation" border="0" cellpadding="0"
                                             cellspacing="0" style="width: 100%" width="100%">
