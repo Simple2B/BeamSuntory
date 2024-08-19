@@ -1,4 +1,5 @@
 from flask_wtf import FlaskForm
+import sqlalchemy as sa
 from wtforms import (
     StringField,
     PasswordField,
@@ -48,7 +49,9 @@ class RegistrationForm(FlaskForm):
             raise ValidationError("This username is taken.")
 
     def validate_email(form, field):
-        query = User.select().where(User.email == field.data)
+        query = User.select().where(
+            sa.func.lower(User.email) == sa.func.lower(field.data)
+        )
         if db.session.scalar(query) is not None:
             raise ValidationError("This email is already registered.")
 
@@ -57,7 +60,9 @@ class ForgotForm(FlaskForm):
     email = StringField("Email Address", validators=[DataRequired(), Email()])
 
     def validate_email(self, email):
-        query = User.select().where(User.email == email.data)
+        query = sa.select(User).where(
+            sa.func.lower(User.email) == sa.func.lower(email.data)
+        )
         user = db.session.scalar(query)
         if not user:
             raise ValidationError("Email not found")
