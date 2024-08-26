@@ -73,10 +73,10 @@ def get_all():
 def save():
     form: f.StoreCategoryForm = f.StoreCategoryForm()
     if form.validate_on_submit():
-        query = m.StoreCategory.select().where(
+        query = sa.select(m.StoreCategory).where(
             m.StoreCategory.id == int(form.store_category_id.data)
         )
-        sc: m.StoreCategory | None = db.session.scalar(query)
+        sc = db.session.scalar(query)
         if not sc:
             log(
                 log.ERROR,
@@ -84,6 +84,14 @@ def save():
                 form.store_category_id.data,
             )
             flash("Cannot save store category data", "danger")
+            return redirect(url_for("store_category.get_all"))
+
+        query = sa.select(m.StoreCategory).where(m.StoreCategory.name == form.name.data)
+        sc_name = db.session.scalar(query)
+        if sc_name and sc_name.id != sc.id:
+            log(log.INFO, "Store category already exists: [%s]", form.name.data)
+            flash("Store category already exists", "danger")
+            return redirect(url_for("store_category.get_all"))
 
         sc.name = form.name.data
         sc.parent_category = form.parent_category.data
@@ -108,22 +116,30 @@ def save():
 @role_required(ADMIN_WAREHOUSE_ROLES)
 def create():
     form: f.NewStoreCategoryForm = f.NewStoreCategoryForm()
-    if form.validate_on_submit():
-        image = request.files["image"]
-        image_string = base64.b64encode(image.read()).decode()
-        store_category = m.StoreCategory(
-            name=form.name.data,
-            parent_category=form.parent_category.data,
-            image=image_string,
-            active=form.active.data,
-        )
-        log(log.INFO, "Form submitted. Store Category: [%s]", store_category)
-        flash("Store Category added!", "success")
-        store_category.save()
-
+    if not form.validate_on_submit():
+        flash(f"Something went wrong! [{form.errors}]", "danger")
         return redirect(url_for("store_category.get_all"))
 
-    flash("Something went wrong!", "danger")
+    store_category = db.session.scalar(
+        sa.select(m.StoreCategory).where(m.StoreCategory.name == form.name.data)
+    )
+    if store_category:
+        log(log.INFO, "Store category already exists: [%s]", form.name.data)
+        flash("Store category already exists", "danger")
+        return redirect(url_for("store_category.get_all"))
+
+    image = request.files["image"]
+    image_string = base64.b64encode(image.read()).decode()
+    store_category = m.StoreCategory(
+        name=form.name.data,
+        parent_category=form.parent_category.data,
+        image=image_string,
+        active=form.active.data,
+    )
+    log(log.INFO, "Form submitted. Store Category: [%s]", store_category)
+    flash("Store Category added!", "success")
+    store_category.save()
+
     return redirect(url_for("store_category.get_all"))
 
 
