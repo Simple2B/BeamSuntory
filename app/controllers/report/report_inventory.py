@@ -20,6 +20,7 @@ class ReportDataInventories(ReportData):
         query = (
             sa.select(m.Product)
             .join(m.WarehouseProduct)
+            .where(m.WarehouseProduct.product_quantity > 0)
             .distinct()
             .order_by(m.Product.id)
         )

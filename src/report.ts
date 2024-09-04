@@ -111,24 +111,24 @@ const generateCSVEvents = async (queryParams: URLSearchParams) => {
   const csvData = ['SKU,Name,Quantity,Group,User,Store,Date delivered,Date picked up,Order №'];
   await fetchReportAPI(queryParams, (data: IEventsReportResponse) => {
     data.reports.forEach((report) => {
-      
-        if (searchSKUInput.value && !report.cart.product.SKU.includes(searchSKUInput.value)) {
-          return;
-        }
-        csvData.push(
-          [
-            report.cart.product.SKU,
-            report.cart.product.name,
-            report.cart.quantity,
-            report.cart.group.name,
-            report.user.username,
-            report.shipRequest.store.storeName,
-            report.shipRequest.dateDelivered,
-            report.shipRequest.datePickedUp,
-            report.shipRequest.orderNumb,
-          ].join(',')
-        );
-      
+
+      if (searchSKUInput.value && !report.cart.product.SKU.includes(searchSKUInput.value)) {
+        return;
+      }
+      csvData.push(
+        [
+          report.cart.product.SKU,
+          report.cart.product.name,
+          report.cart.quantity,
+          report.cart.group.name,
+          report.user.username,
+          report.shipRequest.store.storeName,
+          report.shipRequest.dateDelivered,
+          report.shipRequest.datePickedUp,
+          report.shipRequest.orderNumb,
+        ].join(',')
+      );
+
     });
   });
   return csvData;
@@ -165,13 +165,17 @@ const generateCSVRequestShare = async (queryParams: URLSearchParams) => {
 
 const generateCSVInventories = async (queryParams: URLSearchParams) => {
   // CSV Headers
+  const groupSelect = document.getElementById('report-target-group-select') as HTMLSelectElement;
+
   const csvData = ['product_name,sku,quantity,group,warehouse'];
   await fetchReportAPI(queryParams, (data: IInventoriesReportResponse) => {
     data.reports.forEach((report) => {
-      report.warehouseProducts.forEach((warehouseProduct) => {
+
+      report.warehouseProducts.filter(wp => groupSelect.value ? groupSelect.value === wp.groupName : true).forEach((warehouseProduct) => {
+
         csvData.push(
           [
-            report.name,
+            report.name.trim(),
             report.SKU,
             warehouseProduct.productQuantity,
             warehouseProduct.groupName,
@@ -332,7 +336,7 @@ const generateCSVShelfLife = async (queryParams: URLSearchParams) => {
           report.name,
           report.qty,
           report.expiry_date,
-          
+
         ].join(',')
       );
     });
@@ -443,7 +447,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     filtersQueryParams.append('q', searchQueryHTML.value);
     filtersQueryParams.append('report_type', reportTypeSelectHTML.value);
-
     const csvData = await csvDownloadMap[reportTypeSelectHTML.value](filtersQueryParams);
     const blob = new Blob([csvData.join('\n')], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
