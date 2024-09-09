@@ -13,6 +13,7 @@ from app.views.product import DEFUALT_IMAGE_ID
 from .add_stores import add_new_store
 from .set_courvoisier import set_counrvoisier
 from .events import add_events
+from .product import update_product_descriptions
 from config import SALES_REP_LOCKER_NAME
 
 
@@ -133,6 +134,15 @@ def init(app: Flask):
         ).all()
 
         db.session.commit()
+
+    @app.cli.command("update-prod-des")
+    def update_prod_des():
+        """Update product descriptions."""
+        if app.config["APP_NAME"] != "Beam Suntory":
+            print("This command is only for Beam Suntory")
+            return
+        print("update product descriptions")
+        update_product_descriptions(db)
 
     @app.cli.command("update-admins-groups")
     def update_admins_groups():

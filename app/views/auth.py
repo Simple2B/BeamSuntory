@@ -34,11 +34,11 @@ def login():
         if user and not user.is_deleted:
             login_user(user)
             app.jinja_env.globals["user_role"] = user
-            log(log.INFO, "Login successful.")
+            log(log.INFO, "Login successful. [%s]", user.username)
             flash("Login successful.", "success")
             return redirect(url_for("main.index"))
 
-        log(log.WARNING, "Wrong user ID or password.")
+        log(log.WARNING, "Wrong user ID or password. [%s]", form.user_id.data)
         flash("Wrong user ID or password.", "danger")
 
     elif form.is_submitted():
@@ -103,6 +103,7 @@ def forgot_pass():
         log(log.ERROR, "No registered user with this e-mail: [%s]", form.email.data)
         flash("No registered user with this e-mail", "danger")
         return render_template("auth/forgot.html", form=form)
+
     msg = Message(
         subject="Reset password",
         sender=app.config["MAIL_DEFAULT_SENDER"],
