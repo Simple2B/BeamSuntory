@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from .product import Product
     from .user import User
     from .cart import Cart
+    from .group import Group
 
 
 class Event(db.Model, ModelMixin):
@@ -41,6 +42,7 @@ class Event(db.Model, ModelMixin):
     product: orm.Mapped["Product"] = orm.relationship()
     cart: orm.Mapped["Cart"] = orm.relationship(viewonly=True)
     user: orm.Mapped["User"] = orm.relationship()
+    group: orm.Mapped["Group"] = orm.relationship()
 
     def __repr__(self):
         return f"<{self.id}: {self.product_id}>"

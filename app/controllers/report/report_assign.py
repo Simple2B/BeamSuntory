@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Tuple, Type
 import sqlalchemy as sa
 
 from flask import render_template
@@ -16,6 +16,21 @@ class ReportDataAssigns(ReportData):
 
     @classmethod
     def get_reports(cls, report_filter: s.ReportFilter):
+        query, count_query = cls.get_search_result(report_filter)
+
+        pagination = create_pagination(total=db.session.scalar(count_query))
+
+        reports = db.session.scalars(
+            query.offset((pagination.page - 1) * pagination.per_page).limit(
+                pagination.per_page
+            )
+        )
+        return pagination, reports
+
+    @classmethod
+    def get_search_result(
+        cls, report_filter: s.ReportFilter
+    ) -> Tuple[sa.Select[Tuple[m.Assign]], sa.Select[Tuple[int]]]:
         query = m.Assign.select().order_by(sa.desc(m.Assign.id))
         count_query = sa.select(sa.func.count()).select_from(m.Assign)
 
@@ -105,18 +120,39 @@ class ReportDataAssigns(ReportData):
             count_query = count_query.where(
                 m.Assign.group.has(m.Group.name.ilike(f"%{report_filter.group_to}%"))
             )
-
-        pagination = create_pagination(total=db.session.scalar(count_query))
-
-        reports = db.session.scalars(
-            query.offset((pagination.page - 1) * pagination.per_page).limit(
-                pagination.per_page
-            )
-        )
-        return pagination, reports
+        return query, count_query
 
     @classmethod
     def render(cls, pagination: sa.ScalarResult, reports: sa.ScalarResult, _) -> str:
         return render_template(
             "report/assign/reports_assign_table.html", page=pagination, reports=reports
         )
+
+    @classmethod
+    def get_dataset(
+        cls,
+        report_filter: s.ReportFilter,
+    ):
+        query, _ = cls.get_search_result(report_filter)
+        # 'created_at,username,type,from_group,to_group,sku,product_name,quantity'
+        dataset = {
+            "Created_at": [],
+            "Username": [],
+            "Type": [],
+            "From_group": [],
+            "To_group": [],
+            "Sku": [],
+            "Product_name": [],
+            "Quantity": [],
+        }  # type: dict[str, list]
+        for assign in db.session.scalars(query):
+            dataset["Created_at"].append(assign.created_at)
+            dataset["Username"].append(assign.user.username)
+            dataset["Type"].append(assign.type)
+            dataset["From_group"].append(assign.from_group.name)
+            dataset["To_group"].append(assign.group.name)
+            dataset["Sku"].append(assign.product.SKU)
+            dataset["Product_name"].append(assign.product.name)
+            dataset["Quantity"].append(assign.quantity)
+
+        return dataset

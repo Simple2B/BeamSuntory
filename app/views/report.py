@@ -1,9 +1,12 @@
 from datetime import datetime
 from flask import (
     Blueprint,
+    Response,
+    redirect,
     request,
     render_template,
     jsonify,
+    url_for,
 )
 from flask_login import login_required
 import sqlalchemy as sa
@@ -18,59 +21,6 @@ report_blueprint = Blueprint(
     __name__,
     url_prefix="/report",
 )
-
-
-def get_request_share_report():
-    # Clear args from empty values
-    filter_args = {field: value for field, value in dict(request.args).items() if value}
-    filter_events = s.FilterRequestShare.model_validate(filter_args)
-    query = m.ReportRequestShare.select().order_by(m.ReportRequestShare.id)
-
-    count_query = sa.select(sa.func.count()).select_from(m.ReportRequestShare)
-
-    if filter_events.q:
-        where_stmt = (
-            m.ReportRequestShare.request_share.has(
-                m.RequestShare.product.has(m.Product.name.ilike(f"%{filter_events.q}%"))
-            )
-            | m.ReportRequestShare.user.has(
-                m.User.username.ilike(f"%{filter_events.q}%")
-            )
-            | m.ReportRequestShare.request_share.has(
-                m.RequestShare.product.has(m.Product.SKU.ilike(f"%{filter_events.q}%"))
-            )
-        )
-
-        query = query.where(where_stmt)
-        count_query = count_query.where(where_stmt)
-
-    if filter_events.created_from:
-        where_stmt = m.ReportRequestShare.created_at >= datetime.strptime(
-            filter_events.created_from, "%m/%d/%Y"
-        )
-        query = query.where(where_stmt)
-        count_query = count_query.where(where_stmt)
-
-    if filter_events.created_to:
-        where_stmt = m.ReportRequestShare.created_at <= datetime.strptime(
-            filter_events.created_to, "%m/%d/%Y"
-        )
-        query = query.where(where_stmt)
-        count_query = count_query.where(where_stmt)
-
-    if filter_events.report_type:
-        where_stmt = m.ReportRequestShare.type == filter_events.report_type.value
-        query = query.where(where_stmt)
-        count_query = count_query.where(where_stmt)
-
-    pagination = create_pagination(total=db.session.scalar(count_query))
-
-    reports = db.session.scalars(
-        query.offset((pagination.page - 1) * pagination.per_page).limit(
-            pagination.per_page
-        )
-    )
-    return pagination, reports
 
 
 @report_blueprint.route("/", methods=["GET"])
@@ -157,6 +107,45 @@ def index():
 )
 def report_json():
     return jsonify(c.get_reports())
+
+
+@report_blueprint.route("/download_htmx", methods=["GET"])
+@login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
+def download_htmx():
+    """When the user clicks the download button, the browser will send a GET request to /report/download_htmx. We can't use htmx to download a file directly, so we need to redirect the user to /report/download with the query string parameters."""
+    response = Response()
+    query_string = "&".join(
+        [f"{key}={value}" for key, value in request.args.to_dict().items()]
+    )
+    download_url = "/report/download?" + query_string
+    response.headers["HX-Redirect"] = download_url
+    return response
+
+
+@report_blueprint.route("/download", methods=["GET"])
+@login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
+def download():
+    return c.get_reports(download=True)
 
 
 @report_blueprint.route("search")

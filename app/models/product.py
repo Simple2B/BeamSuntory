@@ -130,11 +130,21 @@ class Product(db.Model, ModelMixin):
             ]
         )
 
-    def get_qty_by_group(self, group_name: str):
+    def get_qty_by_group(self, filter: s.ReportFilter):
+        if not filter.master_group and not filter.target_group:
+            return self.qty
+
+        if filter.master_group and not filter.target_group:
+            return sum(
+                wp.product_quantity
+                for wp in self.warehouse_products
+                if wp.group.master_group.name == filter.master_group
+            )
+
         return sum(
             wp.product_quantity
             for wp in self.warehouse_products
-            if wp.group.name == group_name
+            if wp.group.name == filter.target_group
         )
 
     @property

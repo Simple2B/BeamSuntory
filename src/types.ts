@@ -196,6 +196,7 @@ export interface IWarehouseProductReport {
   productQuantity: number;
   warehouseName?: string;
   groupName?: string;
+  masterGroupName?: string; 
 }
 
 export interface IReportInventoryProduct {

@@ -22,3 +22,10 @@ class AdjustGroupQty(db.Model, ModelMixin):
     group: orm.Mapped[Group] = orm.relationship()
     warehouse: orm.Mapped[Warehouse] = orm.relationship()
     product: orm.Mapped[Product] = orm.relationship()
+
+    @property
+    def delta_value(self) -> int:
+        return self.quantity_after - self.quantity_before
+
+    def __repr__(self) -> str:
+        return f"<AdjustGroupQty id={self.id} delta={self.delta}>"

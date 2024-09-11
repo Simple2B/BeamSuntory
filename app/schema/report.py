@@ -53,7 +53,7 @@ class ReportActionTypes(BaseModel):
 
 class ReportFilter(CalendarFilters, GroupFilters, ReportActionTypes):
     id: int | None = None
-    report_type: ReportType
+    report_type: ReportType = ReportType.INVENTORIES
     action_type: str | None = None
     request_share: str | None = None
     q: str | None = None

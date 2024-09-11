@@ -44,6 +44,10 @@ class WarehouseProduct(db.Model, ModelMixin):
         return self.group.name
 
     @property
+    def master_group_name(self):
+        return self.group.master_group.name
+
+    @property
     def available_quantity(self):
         available_quantity = (
             db.session.execute(

@@ -5,7 +5,7 @@
 [name='action_type_request_share'], [name='user'], [name='action_type_shipping'], [name='start_date'],
 [name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='target_group'],
 [name='brand'], [name='language'], [name='premises'], [name='categories'], [name='events'], [name='expire_in'],
-[name='product-group'], [name='search-sku']" %}
+[name='product-group'], [name='search-sku'], [name='group_from']" %}
 <!-- prettier-ignore -->
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
   <button id="table-report-loader" hx-trigger="click" hx-include="[name='report_type']"
@@ -23,6 +23,12 @@
     <div class="flex gap-4 items-center justify-start pt-4 bg-white dark:bg-gray-800 px-4">
       <div class="flex w-full justify-end">
         <button type="button" id="button-csv-download"
+          class=" px-3 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+          {% include "icon/download.html" %}
+          &nbsp Download CSV
+        </button>
+
+        <button type="button" hx-get="{{ url_for('report.download_htmx') }}" hx-trigger="click" hx-include="{{all_includes}}" hx-indicator="#htmx-spinner" hx-swap="none" 
           class=" px-3 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
           {% include "icon/download.html" %}
           &nbsp Download CSV
@@ -195,7 +201,7 @@
     <!-- Target groups-->
     <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800" id="target-group">
       <input type="text" hidden name="group_id" id="report-group-id-hidden" hx-trigger="click delay:500ms"
-        hx-target="#sub-group-select-container" hx-swap="innerHTML" hx-include="[name='group_id']"
+        hx-target="#target-sub-group" hx-swap="innerHTML" hx-include="[name='group_id']" hx-indicator="#htmx-spinner"
         hx-get="{{ url_for('sub_stock_target_group.get_sub_group', type_select=True) }}">
       <!-- prettier-ignore -->
       <select hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table" name="target_group"
@@ -210,8 +216,8 @@
     </div>
 
     <!-- Target sub groups-->
-    <div id="sub-group-select-container">
-      <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800" id="target-sub-group">
+    <div id="target-sub-group">
+      <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800 hidden" id="target-sub-group">
         <!-- prettier-ignore -->
         <select hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table" name="target_sub_group"
           hx-include="{{all_includes}}" hx-get="{{ url_for('report.search') }}" hx-indicator="#htmx-spinner"
@@ -309,10 +315,6 @@
 <script src="{{ url_for('static', filename='js/report.js') }}" type="text/javascript" defer></script>
 {% endblock %}
 <!-- prettier-ignore -->
-{% include 'report/event/view.html' %}
-{% include 'report/request_share/view.html' %}
-{% include 'report/inventory/view.html' %}
-{% include 'report/adjustment/view.html' %}
 {% include 'report/inbound_order/view.html' %}
 {% include 'report/shipping/view.html' %}
 <!-- Assign add report view -->

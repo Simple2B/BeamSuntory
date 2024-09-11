@@ -20,7 +20,14 @@ interface ICSVDownloadMap {
 
 const filtersMap: IFilterMap = {
   events: ['user-select', 'filter-start-date', 'filter-start-date-to', 'filter-end-date', 'filter-end-date-to'],
-  request_share: ['user-select', 'filter-start-date', 'filter-end-date'],
+  request_share: [
+    'user-select',
+    'filter-start-date',
+    'filter-end-date',
+    'master-group',
+    'target-group',
+    'target-sub-group',
+  ],
   inventories: [
     'user-select',
     'filter-start-date',
@@ -111,7 +118,6 @@ const generateCSVEvents = async (queryParams: URLSearchParams) => {
   const csvData = ['SKU,Name,Quantity,Group,User,Store,Date delivered,Date picked up,Order №'];
   await fetchReportAPI(queryParams, (data: IEventsReportResponse) => {
     data.reports.forEach((report) => {
-
       if (searchSKUInput.value && !report.cart.product.SKU.includes(searchSKUInput.value)) {
         return;
       }
@@ -128,93 +134,6 @@ const generateCSVEvents = async (queryParams: URLSearchParams) => {
           report.shipRequest.orderNumb,
         ].join(',')
       );
-
-    });
-  });
-  return csvData;
-};
-
-const generateCSVRequestShare = async (queryParams: URLSearchParams) => {
-  const csvData = [
-    'Name,SKU,Quantity,From,To,Status,Created At,Approved At,User Approved,Declined At, User Declined',
-  ];
-  await fetchReportAPI(queryParams, (data: IReportRequestShareResponse) => {
-    data.reports.forEach((report) => {
-      if (searchSKUInput.value && !report.requestShare.product.SKU.includes(searchSKUInput.value)) {
-        return;
-      }
-      csvData.push(
-        [
-          report.requestShare.product.name,
-          report.requestShare.product.SKU,
-          report.requestShare.desireQuantity,
-          report.requestShare.fromGroup.name,
-          report.requestShare.group.name,
-          report.requestShare.status,
-          report.createdAt,
-          report.requestShare.reports.find((r) => r.type === 'shared')?.createdAtFormated || '-',
-          report.requestShare.reports.find((r) => r.type === 'shared')?.username || '-',
-          report.requestShare.reports.find((r) => r.type === 'declined')?.createdAtFormated || '-',
-          report.requestShare.reports.find((r) => r.type === 'declined')?.username || '-',
-        ].join(',')
-      );
-    });
-  });
-  return csvData;
-};
-
-const generateCSVInventories = async (queryParams: URLSearchParams) => {
-  // CSV Headers
-  const groupSelect = document.getElementById('report-target-group-select') as HTMLSelectElement;
-
-  const csvData = ['product_name,sku,quantity,group,warehouse'];
-  await fetchReportAPI(queryParams, (data: IInventoriesReportResponse) => {
-    data.reports.forEach((report) => {
-
-      report.warehouseProducts.filter(wp => groupSelect.value ? groupSelect.value === wp.groupName : true).forEach((warehouseProduct) => {
-
-        csvData.push(
-          [
-            report.name.trim(),
-            report.SKU,
-            warehouseProduct.productQuantity,
-            warehouseProduct.groupName,
-            warehouseProduct.warehouseName,
-          ].join(',')
-        );
-      });
-    });
-  });
-  return csvData;
-};
-
-const generateCSVAdjustments = async (queryParams: URLSearchParams) => {
-  // CSV Headers
-  const csvData = [
-    'created_at,product_name,sku,username,master_group,group,warehouse,quantity_before,quantity_after,quantity_delta,note',
-  ];
-  await fetchReportAPI(queryParams, (data: IReportAdjustResponse) => {
-    data.reports.forEach((adjust) => {
-      adjust.adjustGroupQty.forEach((reportAdjust) => {
-        if (searchSKUInput.value && !adjust.product.SKU.includes(searchSKUInput.value)) {
-          return;
-        }
-        csvData.push(
-          [
-            formatDate(adjust.createdAt),
-            adjust.product.name,
-            adjust.product.SKU,
-            adjust.user.username,
-            reportAdjust.group.masterGroup.name,
-            reportAdjust.group.name,
-            reportAdjust.warehouse.name,
-            reportAdjust.quantityBefore,
-            reportAdjust.quantityAfter,
-            reportAdjust.delta,
-            adjust.note,
-          ].join(',')
-        );
-      });
     });
   });
   return csvData;
@@ -266,9 +185,7 @@ const generateCSVInboundOrder = async (queryParams: URLSearchParams) => {
 
 const generateCSVShipping = async (queryParams: URLSearchParams) => {
   // CSV Headers
-  const csvData = [
-    'SKU,Name,Quantity,Group,User,Store,Date delivered,Date picked up,Warehouse,Order №',
-  ];
+  const csvData = ['SKU,Name,Quantity,Group,User,Store,Date delivered,Date picked up,Warehouse,Order №'];
   await fetchReportAPI(queryParams, (data: IReportShippingResponse) => {
     data.reports.forEach((report) => {
       report.carts.forEach((cart) => {
@@ -296,49 +213,13 @@ const generateCSVShipping = async (queryParams: URLSearchParams) => {
   return csvData;
 };
 
-const generateCSVAssign = async (queryParams: URLSearchParams) => {
-  // CSV Headers
-  const csvData = ['created_at,username,type,from_group,to_group,sku,product_name,quantity'];
-
-  await fetchReportAPI(queryParams, (data: IReportAssignResponse) => {
-    data.reports.forEach((report) => {
-      if (searchSKUInput.value && !report.product.SKU.includes(searchSKUInput.value)) {
-        return;
-      }
-      csvData.push(
-        [
-          formatDate(report.createdAt),
-          report.user.username,
-          report.type,
-          report.fromGroup.name,
-          report.group.name,
-          report.product.SKU,
-          report.product.name,
-          report.quantity,
-        ].join(',')
-      );
-    });
-  });
-  return csvData;
-};
-
 const generateCSVShelfLife = async (queryParams: URLSearchParams) => {
   // CSV Headers
   const csvData = ['Numb Of Day Left, SKU, Name, Qty, Expire Date'];
 
   await fetchReportAPI(queryParams, (data: IReportShelfLifeResponse) => {
     data.reportShelfLifeList.forEach((report) => {
-
-      csvData.push(
-        [
-          report.numbOfDayLeft,
-          report.SKU,
-          report.name,
-          report.qty,
-          report.expiry_date,
-
-        ].join(',')
-      );
+      csvData.push([report.numbOfDayLeft, report.SKU, report.name, report.qty, report.expiry_date].join(','));
     });
   });
   return csvData;
@@ -346,10 +227,6 @@ const generateCSVShelfLife = async (queryParams: URLSearchParams) => {
 
 const csvDownloadMap: ICSVDownloadMap = {
   events: generateCSVEvents,
-  request_share: generateCSVRequestShare,
-  inventories: generateCSVInventories,
-  adjustment: generateCSVAdjustments,
-  assign: generateCSVAssign,
   inbound_order: generateCSVInboundOrder,
   shipping: generateCSVShipping,
   shelf_life: generateCSVShelfLife,
@@ -365,7 +242,7 @@ const filtersIds = [
   'filter-end-date-to',
   'master-group',
   'target-group',
-  'sub-group-select-container',
+  'target-sub-group',
   'filter-group-brand',
   'filter-group-language',
   'filter-group-premises',
@@ -388,8 +265,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const searchSkuHTML = document.getElementById('search-sku') as HTMLInputElement;
   const downloadCSVButton = document.getElementById('button-csv-download') as HTMLButtonElement;
 
-
-
   function clearFilters() {
     const allInputs = filtersIds.map((id) => document.getElementById(id));
     console.log('allInputs', allInputs);
@@ -397,7 +272,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!filterHTML) {
         return;
       }
-      const inputs = filterHTML.querySelectorAll('input, select') as NodeListOf<HTMLInputElement> | NodeListOf<HTMLSelectElement>;
+      const inputs = filterHTML.querySelectorAll('input, select') as
+        | NodeListOf<HTMLInputElement>
+        | NodeListOf<HTMLSelectElement>;
       inputs.forEach((input) => {
         input.value = '';
       });
@@ -440,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const input = filterHTML.querySelector('input, select') as HTMLSelectElement | HTMLInputElement;
       if (input.getAttribute('name') === 'group_id' && groupSelect) {
         filtersQueryParams.append('target_group', groupSelect.value);
-        return
+        return;
       }
       filtersQueryParams.append(input.getAttribute('name'), input.value);
     });

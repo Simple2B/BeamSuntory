@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Tuple, Type
 from datetime import datetime
 
 import sqlalchemy as sa
@@ -17,9 +17,39 @@ class ReportDataShareRequests(ReportData):
     ResponseModel: Type[s.ReportRequestShareResponse] = s.ReportRequestShareResponse
 
     @classmethod
-    def get_reports(cls, report_filter: s.ReportFilter):
+    def get_search_result(
+        cls, report_filter: s.ReportFilter
+    ) -> Tuple[sa.Select[Tuple[m.ReportRequestShare]], sa.Select[Tuple[int]]]:
         query = m.ReportRequestShare.select().order_by(m.ReportRequestShare.id)
         count_query = sa.select(sa.func.count()).select_from(m.ReportRequestShare)
+
+        if report_filter.master_group and not report_filter.target_group:
+            where_stmt = m.ReportRequestShare.request_share.has(
+                m.RequestShare.group.has(
+                    m.Group.master_group.has(
+                        m.MasterGroup.name == report_filter.master_group
+                    )
+                )
+            ) | m.ReportRequestShare.request_share.has(
+                m.RequestShare.from_group.has(
+                    m.Group.master_group.has(
+                        m.MasterGroup.name == report_filter.master_group
+                    )
+                )
+            )
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
+
+        if report_filter.target_group:
+            where_stmt = m.ReportRequestShare.request_share.has(
+                m.RequestShare.group.has(m.Group.name == report_filter.target_group)
+            ) | m.ReportRequestShare.request_share.has(
+                m.RequestShare.from_group.has(
+                    m.Group.name == report_filter.target_group
+                )
+            )
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
 
         if report_filter.user:
             where_stmt = m.ReportRequestShare.user.has(
@@ -68,7 +98,11 @@ class ReportDataShareRequests(ReportData):
             )
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)
+        return query, count_query
 
+    @classmethod
+    def get_reports(cls, report_filter: s.ReportFilter):
+        query, count_query = cls.get_search_result(report_filter)
         pagination = create_pagination(total=db.session.scalar(count_query))
 
         reports = db.session.scalars(
@@ -86,25 +120,66 @@ class ReportDataShareRequests(ReportData):
             reports=reports,
         )
 
+    @classmethod
+    def get_dataset(cls, report_filter: s.ReportFilter) -> dict[str, list]:
+        query, _ = cls.get_search_result(report_filter)
 
-def create_share_requests_dataset(
+        reports = db.session.scalars(query)
+        dataset = {
+            "Name": [],
+            "SKU": [],
+            "Quantity": [],
+            "From": [],
+            "To": [],
+            "Status": [],
+            "Created At": [],
+            "Approved At": [],
+            "User Approved": [],
+            "Declined At": [],
+            "User Declined": [],
+        }  # type: dict[str, list]
+
+        for request_share_report in reports:
+            add_share_requests_dataset_row(dataset, request_share_report.request_share)
+
+        return dataset
+
+
+def add_share_requests_dataset_row(
+    dataset: dict[str, list],
     request_share: m.RequestShare,
 ):
-    data = dict()  # type: dict[str, list]
-    data["Name"] = [request_share.product.name]
-    data["SKU"] = [request_share.product.SKU]
-    data["Quantity"] = [request_share.desire_quantity]
-    data["From"] = [request_share.from_group.name]
-    data["To"] = [request_share.group.name]
-    data["Status"] = [request_share.status]
-    data["Created At"] = [request_share.created_at.strftime("%m/%d/%Y %H:%M:%S")]
+    dataset["Name"].append(request_share.product.name)
+    dataset["SKU"].append(request_share.product.SKU)
+    dataset["Quantity"].append(request_share.desire_quantity)
+    dataset["From"].append(request_share.from_group.name)
+    dataset["To"].append(request_share.group.name)
+    dataset["Status"].append(request_share.status)
+    dataset["Created At"].append(request_share.created_at.strftime("%m/%d/%Y %H:%M:%S"))
 
+    approved_report = None
+    declined_report = None
     for report in request_share.reports:
         if report.type == s.ReportRequestShareActionType.SHARED.value:
-            data["Approved At"] = [report.created_at.strftime("%m/%d/%Y %H:%M:%S")]
-            data["User Approved"] = [report.user.username]
+            approved_report = report
         if report.type == s.ReportRequestShareActionType.DECLINED.value:
-            data["Declined At"] = [report.created_at.strftime("%m/%d/%Y %H:%M:%S")]
-            data["User Declined"] = [report.user.username]
+            declined_report = report
 
-    return data
+    dataset["Approved At"].append(
+        "-"
+        if not approved_report
+        else approved_report.created_at.strftime("%m/%d/%Y %H:%M:%S")
+    )
+    dataset["User Approved"].append(
+        "-" if not approved_report else approved_report.user.username
+    )
+    dataset["Declined At"].append(
+        "-"
+        if not declined_report
+        else declined_report.created_at.strftime("%m/%d/%Y %H:%M:%S")
+    )
+    dataset["User Declined"].append(
+        "-" if not declined_report else declined_report.user.username
+    )
+
+    return dataset
