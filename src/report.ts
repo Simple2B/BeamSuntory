@@ -75,6 +75,7 @@ const filtersMap: IFilterMap = {
   ],
   shipping: [
     'division-select',
+    'master-group',
     'target-group',
     'target-sub-group',
     'filter-start-date',
@@ -114,30 +115,6 @@ const fetchReportAPI = async (queryParams: URLSearchParams, callback: (data: Obj
   }
 };
 
-const generateCSVEvents = async (queryParams: URLSearchParams) => {
-  const csvData = ['SKU,Name,Quantity,Group,User,Store,Date delivered,Date picked up,Order №'];
-  await fetchReportAPI(queryParams, (data: IEventsReportResponse) => {
-    data.reports.forEach((report) => {
-      if (searchSKUInput.value && !report.cart.product.SKU.includes(searchSKUInput.value)) {
-        return;
-      }
-      csvData.push(
-        [
-          report.cart.product.SKU,
-          report.cart.product.name,
-          report.cart.quantity,
-          report.cart.group.name,
-          report.user.username,
-          report.shipRequest.store.storeName,
-          report.shipRequest.dateDelivered,
-          report.shipRequest.datePickedUp,
-          report.shipRequest.orderNumb,
-        ].join(',')
-      );
-    });
-  });
-  return csvData;
-};
 
 const generateCSVInboundOrder = async (queryParams: URLSearchParams) => {
   const csvData = ['Name,SKU,Quantity,Group,Created At,Supplier,Arrived,Warehouse'];
@@ -183,35 +160,7 @@ const generateCSVInboundOrder = async (queryParams: URLSearchParams) => {
   return csvData;
 };
 
-const generateCSVShipping = async (queryParams: URLSearchParams) => {
-  // CSV Headers
-  const csvData = ['SKU,Name,Quantity,Group,User,Store,Date delivered,Date picked up,Warehouse,Order №'];
-  await fetchReportAPI(queryParams, (data: IReportShippingResponse) => {
-    data.reports.forEach((report) => {
-      report.carts.forEach((cart) => {
-        if (searchSKUInput.value && !cart.product.SKU.includes(searchSKUInput.value)) {
-          return;
-        }
-        csvData.push(
-          [
-            cart.product.SKU,
-            cart.product.name,
-            cart.quantity,
-            cart.group.name,
-            report.user?.username || '-',
-            report.store.storeName,
-            report.dateDelivered,
-            report.datePickedUp,
-            cart.warehouse?.name || '-',
-            report.orderNumb,
-          ].join(',')
-        );
-      });
-    });
-  });
 
-  return csvData;
-};
 
 const generateCSVShelfLife = async (queryParams: URLSearchParams) => {
   // CSV Headers
@@ -226,9 +175,7 @@ const generateCSVShelfLife = async (queryParams: URLSearchParams) => {
 };
 
 const csvDownloadMap: ICSVDownloadMap = {
-  events: generateCSVEvents,
   inbound_order: generateCSVInboundOrder,
-  shipping: generateCSVShipping,
   shelf_life: generateCSVShelfLife,
 };
 

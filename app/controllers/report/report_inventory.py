@@ -201,10 +201,13 @@ def add_dataset_row(
 ):
 
     for warehouse_product in product.warehouse_products:
-        if target_group and warehouse_product.group.name != target_group:
+        if (
+            master_group
+            and not target_group
+            and warehouse_product.group.master_group.name != master_group
+        ):
             continue
-
-        if master_group and warehouse_product.group.master_group.name != master_group:
+        if target_group and warehouse_product.group.name != target_group:
             continue
 
         dataset["Name"].append(product.name)
