@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import (
     Blueprint,
     render_template,
@@ -286,6 +288,7 @@ def accept():
         allocated_product_obj.save(False)
 
     inbound_order.status = s.InboundOrderStatus.delivered
+    inbound_order.delivery_date = datetime.now().date()
     log(log.INFO, "Inbound order accepted. Inbound order: [%s]", inbound_order)
 
     db.session.commit()
