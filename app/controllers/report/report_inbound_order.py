@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Tuple, Type
 import sqlalchemy as sa
 
 from flask import render_template
@@ -15,55 +15,36 @@ class ReportDataInboundOrders(ReportData):
     ResponseModel: Type[s.ReportInboundOrderResponse] = s.ReportInboundOrderResponse
 
     @classmethod
-    def get_reports(cls, report_filter: s.ReportFilter):
-
+    def get_search_result(
+        cls, report_filter: s.ReportFilter
+    ) -> Tuple[sa.Select[Tuple[m.InboundOrder]], sa.Select[Tuple[int]]]:
         query = (
-            m.ReportInboundOrder.select()
-            .where(
-                m.ReportInboundOrder.type == s.ReportEventType.created.value
-            )  # check just created because we have created and updated
-            .order_by(sa.desc(m.ReportInboundOrder.id))
+            sa.select(m.InboundOrder)
+            .where(m.InboundOrder.status == s.InboundOrderStatus.delivered)
+            .order_by(m.InboundOrder.created_at.desc())
         )
-        count_query = sa.select(sa.func.count()).select_from(m.ReportInboundOrder)
+        count_query = (
+            sa.select(sa.func.count())
+            .where(m.InboundOrder.status == s.InboundOrderStatus.delivered)
+            .select_from(m.InboundOrder)
+        )
 
         if report_filter.q:
-            query = query.where(
-                m.ReportInboundOrder.inbound_order.has(
-                    m.InboundOrder.products_allocated.any(
-                        m.ProductAllocated.product.has(
-                            m.Product.name.ilike(f"%{report_filter.q}%")
-                        )
-                    )
-                )
-                | m.ReportInboundOrder.user.has(
-                    m.User.username.ilike(f"%{report_filter.q}%")
-                )
-                | m.ReportInboundOrder.inbound_order.has(
-                    m.InboundOrder.title.ilike(f"%{report_filter.q}%")
-                )
-            )
-            count_query = count_query.where(
-                m.ReportInboundOrder.inbound_order.has(
-                    m.InboundOrder.products_allocated.any(
-                        m.ProductAllocated.product.has(
-                            m.Product.name.ilike(f"%{report_filter.q}%")
-                        )
-                    )
-                )
-                | m.ReportInboundOrder.user.has(
-                    m.User.username.ilike(f"%{report_filter.q}%")
-                )
-                | m.ReportInboundOrder.inbound_order.has(
-                    m.InboundOrder.title.ilike(f"%{report_filter.q}%")
-                )
-            )
-
-        if report_filter.search_sku:
-            where_stmt = m.ReportInboundOrder.inbound_order.has(
+            where_stmt = sa.or_(
                 m.InboundOrder.products_allocated.any(
                     m.ProductAllocated.product.has(
-                        m.Product.SKU.ilike(f"%{report_filter.search_sku}%")
+                        m.Product.name.ilike(f"%{report_filter.q}%")
                     )
+                ),
+                m.InboundOrder.title.ilike(f"%{report_filter.q}%"),
+            )
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
+
+        if report_filter.search_sku:
+            where_stmt = m.InboundOrder.products_allocated.any(
+                m.ProductAllocated.product.has(
+                    m.Product.SKU.ilike(f"%{report_filter.search_sku}%")
                 )
             )
             query = query.where(where_stmt)
@@ -79,61 +60,61 @@ class ReportDataInboundOrders(ReportData):
             for group in master_groups:
                 if not group:
                     continue
-                query = query.where(
-                    m.ReportInboundOrder.inbound_order.has(
-                        m.InboundOrder.products_allocated.any(
-                            m.ProductAllocated.product.has(
-                                m.Product.product_groups.any(
-                                    m.ProductGroup.parent.has(
-                                        m.GroupProduct.name.ilike(f"%{group}%")
-                                    )
-                                )
+                where_stmt = m.InboundOrder.products_allocated.any(
+                    m.ProductAllocated.product.has(
+                        m.Product.product_groups.any(
+                            m.ProductGroup.parent.has(
+                                m.GroupProduct.name.ilike(f"%{group}%")
                             )
                         )
                     )
                 )
-                count_query = count_query.where(
-                    m.ReportInboundOrder.inbound_order.has(
-                        m.InboundOrder.products_allocated.any(
-                            m.ProductAllocated.product.has(
-                                m.Product.product_groups.any(
-                                    m.ProductGroup.parent.has(
-                                        m.GroupProduct.name.ilike(f"%{group}%")
-                                    )
-                                )
-                            )
-                        )
-                    )
-                )
+                query = query.where(where_stmt)
+
+                count_query = count_query.where(where_stmt)
 
         if report_filter.start_date:
-            query = query.where(
-                m.ReportInboundOrder.created_at >= report_filter.start_date
-            )
+            query = query.where(m.InboundOrder.created_at >= report_filter.start_date)
             count_query = count_query.where(
-                m.ReportInboundOrder.created_at >= report_filter.start_date
+                m.InboundOrder.created_at >= report_filter.start_date
             )
 
         if report_filter.end_date:
-            query = query.where(
-                m.ReportInboundOrder.created_at <= report_filter.end_date
-            )
+            query = query.where(m.InboundOrder.created_at <= report_filter.end_date)
             count_query = count_query.where(
-                m.ReportInboundOrder.created_at <= report_filter.end_date
+                m.InboundOrder.created_at <= report_filter.end_date
             )
-
-        if report_filter.product_group:
-            where_stmt = m.ReportInboundOrder.inbound_order.has(
-                m.InboundOrder.products_allocated.any(
-                    m.ProductAllocated.product_quantity_groups.any(
-                        m.ProductQuantityGroup.group.has(
-                            m.Group.name == report_filter.product_group
+        if report_filter.master_group and not report_filter.target_group:
+            where_stmt = m.InboundOrder.products_allocated.any(
+                m.ProductAllocated.product_quantity_groups.any(
+                    m.ProductQuantityGroup.group.has(
+                        m.Group.master_group.has(
+                            m.MasterGroup.name == report_filter.master_group
                         )
                     )
                 )
             )
+
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)
+
+        if report_filter.target_group:
+            where_stmt = m.InboundOrder.products_allocated.any(
+                m.ProductAllocated.product_quantity_groups.any(
+                    m.ProductQuantityGroup.group.has(
+                        m.Group.name == report_filter.target_group
+                    )
+                )
+            )
+
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
+
+        return query, count_query
+
+    @classmethod
+    def get_reports(cls, report_filter: s.ReportFilter):
+        query, count_query = cls.get_search_result(report_filter)
 
         pagination = create_pagination(total=db.session.scalar(count_query))
 
@@ -145,16 +126,50 @@ class ReportDataInboundOrders(ReportData):
         return pagination, reports
 
     @classmethod
-    def render(cls, pagination: sa.ScalarResult, reports: sa.ScalarResult, _) -> str:
+    def render(
+        cls,
+        pagination: sa.ScalarResult,
+        reports: sa.ScalarResult,
+        report_filter: s.ReportFilter,
+    ) -> str:
         return render_template(
             "report/inbound_order/reports_inbound_orders_table.html",
             page=pagination,
             reports=reports,
+            report_filter=report_filter,
         )
+
+    @classmethod
+    def get_dataset(
+        cls,
+        report_filter: s.ReportFilter,
+    ):
+        query, _ = cls.get_search_result(report_filter)
+
+        dataset = {
+            "Order №": [],
+            "Created At": [],
+            "Arrived": [],
+            "Warehouse": [],
+            "Supplier": [],
+        }  # type: dict[str, list]
+
+        for in_order in db.session.scalars(query):
+            cls.add_dataset_row(dataset, in_order)
+
+        return dataset
+
+    @classmethod
+    def add_dataset_row(cls, data: dict[str, list], in_order: m.InboundOrder) -> None:
+        data["Order №"].append(in_order.order_id)
+        data["Created At"].append(in_order.created_at.strftime("%Y-%m-%d %H:%M:%S"))
+        data["Arrived"].append(in_order.finished_date)
+        data["Warehouse"].append(in_order.warehouse.name)
+        data["Supplier"].append(in_order.supplier.name)
 
 
 def create_inbound_order_dataset(
-    report: m.ReportInboundOrder, SKU: str
+    report: m.InboundOrder, master_group: str = "", target_group: str = ""
 ) -> dict[str, list]:
     data = {
         "Name": [],
@@ -167,17 +182,24 @@ def create_inbound_order_dataset(
         "Warehouse": [],
     }  # type: dict[str, list]
 
-    for product_allocated in report.inbound_order.products_allocated:
-        if product_allocated.product.SKU != SKU:
-            continue
+    for product_allocated in report.products_allocated:
         for group in product_allocated.product_quantity_groups:
+            if (
+                master_group
+                and not target_group
+                and group.group.master_group.name != master_group
+            ):
+                continue
+
+            if target_group and group.group.name != target_group:
+                continue
             data["Name"].append(product_allocated.product.name)
             data["SKU"].append(product_allocated.product.SKU)
             data["Quantity"].append(group.quantity)
             data["Group"].append(group.group.name)
             data["Created At"].append(report.created_at.strftime("%Y-%m-%d %H:%M:%S"))
-            data["Supplier"].append(report.inbound_order.supplier.name)
-            data["Arrived"].append(report.inbound_order.finished_date)
-            data["Warehouse"].append(report.inbound_order.warehouse.name)
+            data["Supplier"].append(report.supplier.name)
+            data["Arrived"].append(report.delivery_date.strftime("%Y-%m-%d"))
+            data["Warehouse"].append(report.warehouse.name)
 
     return data

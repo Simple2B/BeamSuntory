@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Type
+from typing import Tuple, Type
 import sqlalchemy as sa
 
 from flask import render_template
@@ -16,69 +16,85 @@ class ReportDataShelfLife(ReportData):
     ResponseModel: Type[s.ReportShelfLifeResponse] = s.ReportShelfLifeResponse
 
     @classmethod
-    def get_reports(cls, report_filter: s.ReportFilter):
-        # report_filter = s.FilterReportShelfLife.model_validate(dict(request.args))
-        query = m.Product.select().order_by(m.Product.SKU.asc())
+    def get_search_result(
+        cls, report_filter: s.ReportFilter
+    ) -> Tuple[sa.Select[Tuple[m.ProductAllocated]], sa.Select[Tuple[int]]]:
+        query = (
+            sa.select(m.ProductAllocated)
+            .where(
+                m.ProductAllocated.shelf_life_end != sa.func.DATE("5000-01-01"),
+                m.ProductAllocated.quantity_remains.is_not(None),
+            )
+            .order_by(m.ProductAllocated.shelf_life_end.desc())
+        )
 
-        count_query = sa.select(sa.func.count()).select_from(m.Product)
+        count_query = (
+            sa.select(sa.func.count())
+            .where(
+                m.ProductAllocated.shelf_life_end != sa.func.DATE("5000-01-01"),
+                m.ProductAllocated.quantity_remains.is_not(None),
+            )
+            .select_from(m.ProductAllocated)
+        )
 
         if report_filter.q:
-            query = query.where(m.Product.name.ilike(f"%{report_filter.q}%"))
-
-            count_query = count_query.where(
+            where_stmt = m.ProductAllocated.product.has(
                 m.Product.name.ilike(f"%{report_filter.q}%")
             )
 
+            query = query.where(where_stmt)
+
+            count_query = count_query.where(where_stmt)
+
         if report_filter.search_sku:
-            where_stmt = m.Product.SKU.ilike(f"%{report_filter.search_sku}%")
+            where_stmt = m.ProductAllocated.product.has(
+                m.Product.SKU.ilike(f"%{report_filter.search_sku}%")
+            )
+
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)
 
         if report_filter.start_date:
-            query = query.where(
-                m.Product.expiry_date
-                >= datetime.strptime(report_filter.start_date, "%m/%d/%Y")
+            where_stmt = m.ProductAllocated.shelf_life_start >= datetime.strptime(
+                report_filter.start_date, "%m/%d/%Y"
             )
+            query = query.where(where_stmt)
+            count_query = count_query
 
         if report_filter.end_date:
-            query = query.where(
-                m.Product.expiry_date
-                <= datetime.strptime(report_filter.end_date, "%m/%d/%Y")
+            where_stmt = m.ProductAllocated.shelf_life_end <= datetime.strptime(
+                report_filter.end_date, "%m/%d/%Y"
             )
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
 
         if report_filter.expire_in and int(report_filter.expire_in) > 0:
-            query = query.where(
-                m.Product.expiry_date
+            where_stmt = (
+                m.ProductAllocated.shelf_life_end
                 <= datetime.now() + timedelta(days=int(report_filter.expire_in))
             )
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
 
-        if report_filter.master_group:
-            mg_product_ids = db.session.scalars(
-                m.WarehouseProduct.select()
-                .with_only_columns(m.WarehouseProduct.product_id)
-                .where(
-                    m.WarehouseProduct.group.has(
-                        m.Group.master_group.has(
-                            m.MasterGroup.name == report_filter.master_group
-                        )
+        if report_filter.master_group and not report_filter.target_group:
+            where_stmt = m.ProductAllocated.product_quantity_groups.any(
+                m.ProductQuantityGroup.group.has(
+                    m.Group.master_group.has(
+                        m.MasterGroup.name == report_filter.master_group
                     )
                 )
-            ).all()
-
-            query = query.where(m.Product.id.in_(mg_product_ids))
+            )  # type: ignore
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
 
         if report_filter.target_group:
-            product_ids = db.session.scalars(
-                m.WarehouseProduct.select()
-                .with_only_columns(m.WarehouseProduct.product_id)
-                .where(
-                    m.WarehouseProduct.group.has(
-                        m.Group.name == report_filter.target_group
-                    )
+            where_stmt = m.ProductAllocated.product_quantity_groups.any(
+                m.ProductQuantityGroup.group.has(
+                    m.Group.name == report_filter.target_group
                 )
-            ).all()
-
-            query = query.where(m.Product.id.in_(product_ids))
+            )  # type: ignore
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
 
         master_groups = [
             report_filter.brand,
@@ -90,16 +106,17 @@ class ReportDataShelfLife(ReportData):
         if master_groups.count(None) != len(master_groups):
             for group in master_groups:
                 if group:
-                    query = query.where(
-                        m.Product.product_groups.any(
-                            m.ProductGroup.parent.has(m.GroupProduct.name == group)
-                        )
-                    )
-                    count_query = count_query.where(
-                        m.Product.product_groups.any(
-                            m.ProductGroup.parent.has(m.GroupProduct.name == group)
-                        )
-                    )
+                    where_stmt = m.Product.product_groups.any(
+                        m.ProductGroup.parent.has(m.GroupProduct.name == group)
+                    )  # type: ignore
+                    query = query.where(where_stmt)
+                    count_query = count_query.where(where_stmt)
+
+        return query, count_query
+
+    @classmethod
+    def get_reports(cls, report_filter: s.ReportFilter):
+        query, count_query = cls.get_search_result(report_filter)
 
         pagination = create_pagination(total=db.session.scalar(count_query))
 
@@ -118,27 +135,50 @@ class ReportDataShelfLife(ReportData):
             shelf_life_reports=reports,
         )
 
+    @classmethod
+    def get_dataset(cls, report_filter: s.ReportFilter) -> dict[str, list]:
+        query, _ = cls.get_search_result(report_filter)
+        dataset = {
+            "SKU": [],
+            "Name": [],
+            "Brand": [],
+            "Number of days left": [],
+            "Remaining quantity": [],
+            "Date Expires": [],
+            "Data Created": [],
+        }  # type: dict[str, list]
 
-def create_shelf_life_dataset(product: m.Product):
+        for product_allc in db.session.scalars(query):
+            dataset["Name"].append(product_allc.product.name)
+            dataset["SKU"].append(product_allc.product.SKU)
+            dataset["Brand"].append(product_allc.product.brand)
+            dataset["Number of days left"].append(product_allc.numb_of_day_left)
+            dataset["Quantity received"].append(product_allc.quantity_received)
+            dataset["Remaining quantity"].append(product_allc.quantity_remains)
+            dataset["Date Expires"].append(
+                product_allc.shelf_life_end.strftime("%m/%d/%Y")
+            )
+            dataset["Data Created"].append(
+                product_allc.shelf_life_start.strftime("%m/%d/%Y")
+            )
+
+        return dataset
+
+
+def create_shelf_life_dataset(product_allocated: m.ProductAllocated) -> dict[str, list]:
     data = {
         "Name": [],
         "SKU": [],
         "Brand": [],
-        "Number of days left": [],
-        "Expiry Date": [],
         "Group": [],
-        "Quantity": [],
-        "Warehouse": [],
+        "Quantity received": [],
     }  # type: dict[str, list]
 
-    for we_product in product.warehouse_products:
-        data["Name"].append(product.name)
-        data["SKU"].append(product.SKU)
-        data["Brand"].append(product.brand)
-        data["Number of days left"].append(product.numb_of_day_left)
-        data["Expiry Date"].append(product.expiry_date.strftime("%m/%d/%Y"))
-        data["Group"].append(we_product.group.name)
-        data["Quantity"].append(we_product.product_quantity)
-        data["Warehouse"].append(we_product.warehouse.name)
+    for qty_group in product_allocated.product_quantity_groups:
+        data["Name"].append(product_allocated.product.name)
+        data["SKU"].append(product_allocated.product.SKU)
+        data["Brand"].append(product_allocated.product.brand)
+        data["Group"].append(qty_group.group.name)
+        data["Quantity received"].append(qty_group.quantity_received)
 
     return data

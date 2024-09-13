@@ -36,3 +36,10 @@ class ProductAllocated(db.Model, ModelMixin):
         cascade="all, delete-orphan",
     )
     inbound_order: orm.Mapped["InboundOrder"] = orm.relationship()
+
+    @property
+    def numb_of_day_left(self) -> int:
+        return (self.shelf_life_end - date.today()).days
+
+    def __repr__(self):
+        return f"<{self.id}: {self.product.name}>"

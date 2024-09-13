@@ -6,19 +6,19 @@
           #
         </th>
         <th scope="col" class="px-6 py-3">
-          Image
+          Order №
         </th>
         <th scope="col" class="px-6 py-3">
-          SKU
+          Created at
         </th>
         <th scope="col" class="px-6 py-3">
-          Product name
+          Arrived at
         </th>
         <th scope="col" class="px-6 py-3">
-          Quantity
+          Warehouse
         </th>
         <th scope="col" class="px-6 py-3">
-          Date
+          Supplier
         </th>
         <th scope="col" class="px-6 py-3">
           Action
@@ -29,8 +29,6 @@
       {% for report in reports %} {% set
       loop_index = loop.index %}
       <!-- prettier-ignore -->
-      {% for product_allocated, qty in report.inbound_order_products if not request.args.get('search_sku') or
-      request.args.get('search_sku') in product_allocated.product.SKU %}
       <!-- prettier-ignore -->
       <tr
         class="table-event-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
@@ -39,50 +37,40 @@
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">
-              {% if product_allocated.product.image|length > 100 %}
-              <img src="data:image/png;base64, {{ product_allocated.product.image }}"
-                alt="{{ product_allocated.product.image }}" class="w-14 object-cover">
-              {% else %}
-              <img src="{{ url_for('static', filename='img/default_image_brand.png') }}"
-                alt="{{ product_allocated.product.image }}" class="w-14 object-cover">
-              {% endif %}
-            </div>
-          </div>
-        </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="text-base font-semibold">{{ product_allocated.product.SKU }}</div>
+            <div class="text-base font-semibold">{{ report.order_id }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ product_allocated.product.name }}</div>
+            <div class="text-base font-semibold">{{ report.created_at.strftime("%Y-%m-%d %H:%M:%S") }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold" id="report-inbound-order-quantity">{{ qty }}</div>
+            <div class="text-base font-semibold">{{ report.delivery_date.strftime("%Y-%m-%d") }}</div>
           </div>
         </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ product_allocated.inbound_order.created_at.strftime('%m/%d/%Y,
-              %H:%M:%S') }}</div>
+            <div class="text-base font-semibold">{{ report.warehouse.name }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.supplier.name }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 dark:text-white">
           <div class="pl-3">
             <div class="text-base font-semibold">
               <a type="button"
-                hx-get="{{ url_for('report_inbound_orders.detail_modal', report_id=report.id, SKU=product_allocated.product.SKU) }}"
+                hx-get="{{ url_for('report_inbound_orders.detail_modal', report_id=report.id, target_group=report_filter.target_group, master_group=report_filter.master_group) }}"
                 hx-trigger="click" hx-target="body" hx-swap="beforeend" hx-indicator="#htmx-spinner"
                 class="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Details</a>
             </div>
           </div>
         </td>
       </tr>
-      {% endfor %}
       {% endfor %}
     </tbody>
   </table>

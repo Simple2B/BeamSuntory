@@ -1,7 +1,5 @@
-from datetime import datetime, timedelta
 from flask import (
     Blueprint,
-    request,
     render_template,
     redirect,
     url_for,
@@ -9,12 +7,11 @@ from flask import (
     send_file,
 )
 from flask_login import login_required
-import sqlalchemy as sa
 import pandas as pd
 import io
 
 from app.controllers.report import create_shelf_life_dataset
-from app.controllers import create_pagination, role_required
+from app.controllers import role_required
 
 
 from app import schema as s
@@ -26,99 +23,7 @@ report_shelf_life_blueprint = Blueprint(
 )
 
 
-def get_shelf_life_reports():
-    filter_shelf_lifes = s.FilterReportInventories.model_validate(dict(request.args))
-    query = m.Product.select().order_by(m.Product.id)
-
-    count_query = sa.select(sa.func.count()).select_from(m.Product)
-
-    if filter_shelf_lifes.q:
-        query = query.where(
-            m.Product.name.ilike(f"%{filter_shelf_lifes.q}%")
-            | m.Product.SKU.ilike(f"%{filter_shelf_lifes.q}%")
-        )
-
-        count_query = count_query.where(
-            m.Product.name.ilike(f"%{filter_shelf_lifes.q}%")
-            | m.Product.SKU.ilike(f"%{filter_shelf_lifes.q}%")
-        )
-
-    if filter_shelf_lifes.created_from:
-        query = query.where(
-            m.Product.expiry_date
-            >= datetime.strptime(filter_shelf_lifes.created_from, "%m/%d/%Y")
-        )
-
-    if filter_shelf_lifes.created_to:
-        query = query.where(
-            m.Product.expiry_date
-            <= datetime.strptime(filter_shelf_lifes.created_to, "%m/%d/%Y")
-        )
-
-    if filter_shelf_lifes.expire_in and int(filter_shelf_lifes.expire_in) > 0:
-        query = query.where(
-            m.Product.shelf_life_end
-            <= datetime.now() + timedelta(days=int(filter_shelf_lifes.expire_in))
-        )
-
-    if filter_shelf_lifes.master_group:
-        mg_product_ids = db.session.scalars(
-            m.WarehouseProduct.select()
-            .with_only_columns(m.WarehouseProduct.product_id)
-            .where(
-                m.WarehouseProduct.group.has(
-                    m.Group.master_group.has(
-                        m.MasterGroup.name == filter_shelf_lifes.master_group
-                    )
-                )
-            )
-        ).all()
-
-        query = query.where(m.Product.id.in_(mg_product_ids))
-
-    if filter_shelf_lifes.group:
-        product_ids = db.session.scalars(
-            m.WarehouseProduct.select()
-            .with_only_columns(m.WarehouseProduct.product_id)
-            .where(
-                m.WarehouseProduct.group.has(m.Group.name == filter_shelf_lifes.group)
-            )
-        ).all()
-
-        query = query.where(m.Product.id.in_(product_ids))
-
-    master_groups = [
-        filter_shelf_lifes.group_brand,
-        filter_shelf_lifes.group_language,
-        filter_shelf_lifes.group_categories,
-        filter_shelf_lifes.group_premises,
-    ]
-
-    if master_groups.count(None) != len(master_groups):
-        for group in master_groups:
-            if group:
-                query = query.where(
-                    m.Product.product_groups.any(
-                        m.ProductGroup.parent.has(m.GroupProduct.name == group)
-                    )
-                )
-                count_query = count_query.where(
-                    m.Product.product_groups.any(
-                        m.ProductGroup.parent.has(m.GroupProduct.name == group)
-                    )
-                )
-
-    pagination = create_pagination(total=db.session.scalar(count_query))
-
-    shelf_life_reports = db.session.scalars(
-        query.offset((pagination.page - 1) * pagination.per_page).limit(
-            pagination.per_page
-        )
-    )
-    return pagination, shelf_life_reports
-
-
-@report_shelf_life_blueprint.route("/shelf_life/api", methods=["GET"])
+@report_shelf_life_blueprint.route("/<int:product_allocated_id>/download_csv")
 @login_required
 @role_required(
     [
@@ -130,96 +35,13 @@ def get_shelf_life_reports():
     ],
     has_approval_permission=True,
 )
-def get_shelf_lifes_json():
-    pagination, shelf_life_reports = get_shelf_life_reports()
-    report_list_schema = s.ReportShelfLifeList.model_validate(shelf_life_reports)
-
-    return s.ReportShelfLifeResponse(
-        pagination=pagination, report_shelf_life_list=report_list_schema.root
-    ).model_dump_json(by_alias=True)
-
-
-@report_shelf_life_blueprint.route("/shelf_life", methods=["GET"])
-@login_required
-@role_required(
-    [
-        s.UserRole.ADMIN.value,
-        s.UserRole.SALES_REP.value,
-        s.UserRole.DELIVERY_AGENT.value,
-        s.UserRole.MANAGER.value,
-        s.UserRole.WAREHOUSE_MANAGER.value,
-    ],
-    has_approval_permission=True,
-)
-def shelf_lifes():
-    users = db.session.scalars(sa.select(m.User))
-
-    # TODO maybe move default master product groups to config
-    product_master_groups = db.session.scalars(
-        m.MasterGroupProduct.select()
-        .where(
-            m.MasterGroupProduct.name.in_(
-                ["Brand", "Language", "Categories", "Premises"]
-            )
-        )
-        .order_by(m.MasterGroupProduct.name.asc())
-    )
-    master_groups = db.session.scalars(
-        sa.select(m.MasterGroup).order_by(m.MasterGroup.name.asc())
-    )
-    groups = db.session.scalars(sa.select(m.Group).order_by(m.Group.name.asc()))
-
-    return render_template(
-        "report/shelf_life/shelf_lifes.html",
-        users=users,
-        master_groups=master_groups,
-        groups=groups,
-        product_master_groups=product_master_groups,
-        report_types_enum=s.ReportSKUType,
-    )
-
-
-@report_shelf_life_blueprint.route("shelf_life/search")
-@login_required
-@role_required(
-    [
-        s.UserRole.ADMIN.value,
-        s.UserRole.SALES_REP.value,
-        s.UserRole.DELIVERY_AGENT.value,
-        s.UserRole.MANAGER.value,
-        s.UserRole.WAREHOUSE_MANAGER.value,
-    ],
-    has_approval_permission=True,
-)
-def search_shelf_life_reports():
-    pagination, shelf_life_reports = get_shelf_life_reports()
-
-    return render_template(
-        "report/shelf_life/reports_table.html",
-        page=pagination,
-        shelf_life_reports=shelf_life_reports,
-    )
-
-
-@report_shelf_life_blueprint.route("/<int:product_id>/download_csv")
-@login_required
-@role_required(
-    [
-        s.UserRole.ADMIN.value,
-        s.UserRole.SALES_REP.value,
-        s.UserRole.DELIVERY_AGENT.value,
-        s.UserRole.MANAGER.value,
-        s.UserRole.WAREHOUSE_MANAGER.value,
-    ],
-    has_approval_permission=True,
-)
-def downlaod_csv(product_id: int):
-    product = db.session.get(m.Product, product_id)
-    if not product:
+def downlaod_csv(product_allocated_id: int):
+    product_allocated = db.session.get(m.ProductAllocated, product_allocated_id)
+    if not product_allocated:
         flash("Peport not found", "danger")
         return redirect(url_for("report.index"))
 
-    data = create_shelf_life_dataset(product)
+    data = create_shelf_life_dataset(product_allocated)
 
     df = pd.DataFrame(data)
 
@@ -237,7 +59,7 @@ def downlaod_csv(product_id: int):
     )
 
 
-@report_shelf_life_blueprint.route("/<int:product_id>/detail-modal")
+@report_shelf_life_blueprint.route("/<int:product_allocated_id>/detail-modal")
 @login_required
 @role_required(
     [
@@ -249,16 +71,18 @@ def downlaod_csv(product_id: int):
     ],
     has_approval_permission=True,
 )
-def detail_modal(product_id: int):
-    product = db.session.get(m.Product, product_id)
-    if not product:
-        log(log.ERROR, "Report Product not found")
+def detail_modal(product_allocated_id: int):
+    product_allocated = db.session.get(m.ProductAllocated, product_allocated_id)
+    if not product_allocated:
+        log(log.ERROR, "Report product_allocated not found")
         return render_template(
             "toast.html", message="Product not found", category="danger"
         )
 
-    data = create_shelf_life_dataset(product)
+    data = create_shelf_life_dataset(product_allocated)
 
     return render_template(
-        "report/shelf_life/detail_modal.html", data=data, product=product
+        "report/shelf_life/detail_modal.html",
+        data=data,
+        product_allocated=product_allocated,
     )

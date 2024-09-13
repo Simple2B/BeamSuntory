@@ -1,16 +1,21 @@
-from datetime import datetime
+import io
 from flask import (
     Blueprint,
+    flash,
+    redirect,
     request,
     render_template,
+    send_file,
+    url_for,
 )
 from flask_login import login_required
-import sqlalchemy as sa
-from app.controllers import create_pagination, role_required
+import pandas as pd
+from app.controllers import role_required
 
 from app import schema as s
 from app import models as m, db
-
+from app.controllers.report import create_shipping_modal_dataset
+from app.logger import log
 
 report_shipping_blueprint = Blueprint(
     "report_shipping",
@@ -19,85 +24,7 @@ report_shipping_blueprint = Blueprint(
 )
 
 
-def get_shipping_report():
-    # Clear args from empty values
-    filter_args = {field: value for field, value in dict(request.args).items() if value}
-    filter = s.FilterReportShipping.model_validate(filter_args)
-    query = m.ReportShipping.select().order_by(m.ReportShipping.id)
-
-    count_query = sa.select(sa.func.count()).select_from(m.ReportShipping)
-
-    if filter.q:
-        where_stmt = m.ReportShipping.ship_request.has(
-            m.ShipRequest.store.has(m.Store.store_name.ilike(f"%{filter.q}%"))
-        ) | m.ReportShipping.user.has(m.User.username.ilike(f"%{filter.q}%"))
-
-        query = query.where(where_stmt)
-        count_query = count_query.where(where_stmt)
-
-    if filter.division:
-        where_stmt = m.ReportShipping.user.has(
-            m.User.role == filter.division,
-        )
-        query = query.where(where_stmt)
-        count_query = count_query.where(where_stmt)
-
-    if filter.created_from:
-        where_stmt = m.ReportShipping.created_at >= datetime.strptime(
-            filter.created_from, "%m/%d/%Y"
-        )
-        query = query.where(where_stmt)
-        count_query = count_query.where(where_stmt)
-
-    if filter.created_to:
-        where_stmt = m.ReportShipping.created_at <= datetime.strptime(
-            filter.created_to, "%m/%d/%Y"
-        )
-        query = query.where(where_stmt)
-        count_query = count_query.where(where_stmt)
-
-    if filter.report_type:
-        where_stmt = m.ReportShipping.type == filter.report_type.value
-        query = query.where(where_stmt)
-        count_query = count_query.where(where_stmt)
-
-    if filter.target_group:
-        where_stmt = m.ReportShipping.ship_request.has(
-            m.ShipRequest.carts.any(m.Cart.group == filter.target_group)
-        )
-        query = query.where(where_stmt)
-        count_query = count_query.where(where_stmt)
-
-    for group_id in (
-        filter.brand,
-        filter.language,
-        filter.categories,
-        filter.premise,
-    ):
-        if group_id:
-            where_stmt = m.ReportShipping.ship_request.has(
-                m.ShipRequest.carts.any(
-                    m.Cart.product.has(
-                        m.Product.product_groups.any(
-                            m.ProductGroup.group_id == group_id
-                        )
-                    )
-                )
-            )
-            query = query.where(where_stmt)
-            count_query = count_query.where(where_stmt)
-
-    pagination = create_pagination(total=db.session.scalar(count_query))
-
-    reports = db.session.scalars(
-        query.offset((pagination.page - 1) * pagination.per_page).limit(
-            pagination.per_page
-        )
-    )
-    return pagination, reports
-
-
-@report_shipping_blueprint.route("/", methods=["GET"])
+@report_shipping_blueprint.route("<int:ship_id>/download-csv", methods=["GET"])
 @login_required
 @role_required(
     [
@@ -109,57 +36,61 @@ def get_shipping_report():
     ],
     has_approval_permission=True,
 )
-def index():
-    divisions = db.session.scalars(m.Division.select())
-    target_groups = db.session.scalars(m.Group.select())
+def download_csv(ship_id: int):
+    # Create a DataFrame with sample data
+    ship_request = db.session.get(m.ShipRequest, ship_id)
+    master_group = request.args.get("master_group", default="", type=str)
+    target_group = request.args.get("target_group", default="", type=str)
+    if not ship_request:
+        flash("Report not found", "danger")
+        return redirect(url_for("report.index"))
 
-    languages = db.session.scalars(
-        m.GroupProduct.select()
-        .where(
-            m.GroupProduct.master_groups_for_product.has(
-                m.MasterGroupProduct.name == "Language"
-            )
-        )
-        .order_by(m.GroupProduct.name.asc())
+    dataset = create_shipping_modal_dataset(ship_request, master_group, target_group)
+    df = pd.DataFrame(dataset)
+
+    # Save the DataFrame to a CSV file in memory
+    csv_buffer = io.StringIO()
+    df.to_csv(csv_buffer, index=False)
+    csv_buffer.seek(0)
+
+    # Send the CSV file as a response
+    return send_file(
+        io.BytesIO(csv_buffer.getvalue().encode("utf-8")),
+        mimetype="text/csv",
+        as_attachment=True,
+        download_name="report.csv",
     )
 
-    brands = db.session.scalars(
-        m.GroupProduct.select()
-        .where(
-            m.GroupProduct.master_groups_for_product.has(
-                m.MasterGroupProduct.name == "Brand"
-            )
-        )
-        .order_by(m.GroupProduct.name.asc())
-    )
 
-    categories = db.session.scalars(
-        m.GroupProduct.select()
-        .where(
-            m.GroupProduct.master_groups_for_product.has(
-                m.MasterGroupProduct.name == "Categories"
-            )
+@report_shipping_blueprint.route("<int:ship_id>/detail_modal")
+@login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.DELIVERY_AGENT.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ],
+    has_approval_permission=True,
+)
+def detail_modal(ship_id: int):
+    # Create a DataFrame with sample data
+    ship_request = db.session.get(m.ShipRequest, ship_id)
+    target_group = request.args.get("target_group", default="", type=str)
+    master_group = request.args.get("master_group", default="", type=str)
+    if not ship_request:
+        log(log.ERROR, "Report not found")
+        return render_template(
+            "toast.html", message="Report not found", category="danger"
         )
-        .order_by(m.GroupProduct.name.asc())
-    )
 
-    premises = db.session.scalars(
-        m.GroupProduct.select()
-        .where(
-            m.GroupProduct.master_groups_for_product.has(
-                m.MasterGroupProduct.name == "Premises"
-            )
-        )
-        .order_by(m.GroupProduct.name.asc())
-    )
+    dataset = create_shipping_modal_dataset(ship_request, master_group, target_group)
 
     return render_template(
-        "report/shipping/index.html",
-        report_types=s.ReportShipRequestActionType,
-        divisions=divisions,
-        target_groups=target_groups,
-        languages=languages,
-        brands=brands,
-        categories=categories,
-        premises=premises,
+        "report/shipping/detail_modal.html",
+        data=dataset,
+        ship_request=ship_request,
+        target_group=target_group,
+        master_group=master_group,
     )

@@ -26,6 +26,7 @@ class WarehouseProduct(BaseModel):
     product_quantity: int = Field(alias="productQuantity")
     warehouse_name: str | None = Field(None, alias="warehouseName")
     group_name: str | None = Field(None, alias="groupName")
+    master_group_name: str | None = Field(None, alias="masterGroupName")
 
 
 class ReportInventoryProduct(BaseModel):

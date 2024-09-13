@@ -162,6 +162,15 @@ def create():
             )
             return redirect(url_for("inbound_order.get_all"))
         # Allocate product with all data
+
+        if product_data.shelf_life_start > product_data.shelf_life_end:
+            flash("Shelf life start date is greater than end date")
+            log(
+                log.INFO,
+                "Inbound order validation failed: shelf life start date is greater than end date",
+            )
+            return redirect(url_for("inbound_order.get_all"))
+
         inbound_order.products_allocated.append(
             m.ProductAllocated(
                 product=product,
@@ -352,12 +361,6 @@ def save():
             )
         )
 
-        for product_group in product_quantity_group.product_allocated_groups:
-            group = db.session.get(m.Group, product_group.group_id)
-            history_modified.append(
-                f"""Group: {group.name} to product: {product_allocated.product.name.upper()}"""
-            )
-
         for quantity_group in product_quantity_group.product_allocated_groups:
             # Search for group by id
             group = db.session.get(m.Group, quantity_group.group_id)
@@ -374,6 +377,9 @@ def save():
                         current_order_uuid=inbound_order.uuid,
                     )
                 )
+            history_modified.append(
+                f"""Group: {group.name} to product: {product_allocated.product.name.upper()}"""
+            )
 
             # set package info
             package_info = db.session.execute(

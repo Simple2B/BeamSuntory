@@ -29,6 +29,7 @@ flask-pydantic = "^0.12.0"
 celery = "^5.4.0"
 redis = "^5.0.3"
 cryptography = "^42.0.8"
+pandas-stubs = "^2.2.2.240909"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.1"
@@ -38,6 +39,7 @@ black = "^22.3.0"
 [tool.poetry.group.dev.dependencies]
 faker = "^18.3.1"
 pytest-mock = "^3.12.0"
+mypy = "^1.11.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

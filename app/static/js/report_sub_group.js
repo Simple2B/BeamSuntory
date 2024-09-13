@@ -1,0 +1,1 @@
+document.addEventListener("DOMContentLoaded",(function(){var e=document.getElementById("report-target-group-select"),t=document.getElementById("report-group-id-hidden");e.addEventListener("change",(function(){var n=e.querySelector('option[value="'.concat(e.value,'"]'));n&&(t.value=n.getAttribute("data-target-group-id"),t.click())}))}));

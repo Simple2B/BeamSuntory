@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Tuple, Type
 from datetime import datetime
 import sqlalchemy as sa
 
@@ -16,7 +16,9 @@ class ReportDataEvents(ReportData):
     ResponseModel: Type[s.ReportEventResponse] = s.ReportEventResponse
 
     @classmethod
-    def get_reports(cls, report_filter: s.ReportFilter):
+    def get_search_result(
+        cls, report_filter: s.ReportFilter
+    ) -> Tuple[sa.Select[Tuple[m.Event]], sa.Select[Tuple[int]]]:
         query = m.Event.select().order_by(m.Event.id)
         count_query = sa.select(sa.func.count()).select_from(m.Event)
 
@@ -66,6 +68,12 @@ class ReportDataEvents(ReportData):
         if report_filter.user:
             query = query.where(m.Event.user.has(m.User.username == report_filter.user))
 
+        return query, count_query
+
+    @classmethod
+    def get_reports(cls, report_filter: s.ReportFilter):
+        query, count_query = cls.get_search_result(report_filter)
+
         pagination = create_pagination(total=db.session.scalar(count_query))
 
         reports = db.session.scalars(
@@ -80,3 +88,32 @@ class ReportDataEvents(ReportData):
         return render_template(
             "report/event/reports_table.html", page=pagination, reports=reports
         )
+
+    @classmethod
+    def get_dataset(cls, report_filter: s.ReportFilter):
+        # ['SKU,Name,Quantity,Group,User,Store,Date delivered,Date picked up,Order №'];
+        query, _ = cls.get_search_result(report_filter)
+        dataset = {
+            "SKU": [],
+            "Name": [],
+            "Quantity": [],
+            "Group": [],
+            "User": [],
+            "Store": [],
+            "Date_delivered": [],
+            "Date_picked_up": [],
+            "Order №": [],
+        }  # type: dict[str, list]
+
+        for event in db.session.scalars(query):
+            dataset["SKU"].append(event.cart.product.SKU)
+            dataset["Name"].append(event.cart.product.name)
+            dataset["Quantity"].append(event.cart.quantity)
+            dataset["Group"].append(event.group.name)
+            dataset["User"].append(event.user.username)
+            dataset["Store"].append(event.ship_request.store.store_name)
+            dataset["Date_delivered"].append(event.ship_request.date_delivered)
+            dataset["Date_picked_up"].append(event.ship_request.date_picked_up)
+            dataset["Order №"].append(event.ship_request.order_numb)
+
+        return dataset

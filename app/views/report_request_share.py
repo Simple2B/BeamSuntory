@@ -10,7 +10,7 @@ from flask import (
 from flask_login import login_required
 import pandas as pd
 from app.controllers import role_required
-from app.controllers.report import create_share_requests_dataset
+from app.controllers.report import add_share_requests_dataset_row
 from app import schema as s
 from app import models as m, db
 from app.logger import log
@@ -41,8 +41,21 @@ def download_csv(request_share_id: int):
     if not request_share:
         flash("Report request share not found", "danger")
         return redirect(url_for("report.index"))
+    dataset = {
+        "Name": [],
+        "SKU": [],
+        "Quantity": [],
+        "From": [],
+        "To": [],
+        "Status": [],
+        "Created At": [],
+        "Approved At": [],
+        "User Approved": [],
+        "Declined At": [],
+        "User Declined": [],
+    }  # type: dict[str, list]
 
-    data = create_share_requests_dataset(request_share)
+    data = add_share_requests_dataset_row(dataset, request_share)
 
     df = pd.DataFrame(data)
 
@@ -82,7 +95,21 @@ def detail_modal(request_share_id: int):
             "toast.html", message="Report not found", category="danger"
         )
 
-    data = create_share_requests_dataset(request_share)
+    dataset = {
+        "Name": [],
+        "SKU": [],
+        "Quantity": [],
+        "From": [],
+        "To": [],
+        "Status": [],
+        "Created At": [],
+        "Approved At": [],
+        "User Approved": [],
+        "Declined At": [],
+        "User Declined": [],
+    }  # type: dict[str, list]
+
+    data = add_share_requests_dataset_row(dataset, request_share)
 
     return render_template(
         "report/request_share/detail_modal.html", data=data, request_share=request_share

@@ -19,14 +19,14 @@ REPORT_GENERATORS: tuple[ReportData] = (
     ReportDataInboundOrders,
     ReportDataShipping,
     ReportDataShelfLife,
-)
+)  # type: ignore
 
 REPORT_DISPATCHERS = {
     report_dispatcher.type: report_dispatcher for report_dispatcher in REPORT_GENERATORS
 }
 
 
-def get_reports(render: True = False) -> str:
+def get_reports(render: bool = False, download: bool = False) -> str:
     # clear query params from empty values
     query_params = {}
     for query_key, query_value in request.args.items():
@@ -43,5 +43,8 @@ def get_reports(render: True = False) -> str:
 
     if render:
         return report_dispatcher.generate_html_response(report_filter)
+
+    if download:
+        return report_dispatcher.generate_csv_response(report_filter)
 
     return report_dispatcher.generate_json_response(report_filter)

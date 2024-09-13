@@ -282,75 +282,19 @@ const eventConfig = {
   },
 };
 
-const reportEventConfig = {
+
+
+const report_sub_group = {
   entry: {
-    main: './src/report_event.ts',
+    main: './src/report_sub_group.ts',
   },
   output: {
     path: path.resolve(__dirname, './app/static'),
-    filename: 'js/report_event.js', // <--- Will be compiled to this single file
+    filename: 'js/report_sub_group.js', // <--- Will be compiled to this single file
   },
 };
 
-const reportInventoryConfig = {
-  entry: {
-    main: './src/report_inventory.ts',
-  },
-  output: {
-    path: path.resolve(__dirname, './app/static'),
-    filename: 'js/report_inventory.js', // <--- Will be compiled to this single file
-  },
-};
 
-const reportRequestShareConfig = {
-  entry: {
-    main: './src/report_share_request.ts',
-  },
-  output: {
-    path: path.resolve(__dirname, './app/static'),
-    filename: 'js/report_share_request.js', // <--- Will be compiled to this single file
-  },
-};
-
-const reportAdjustmentConfig = {
-  entry: {
-    main: './src/report_adjustment.ts',
-  },
-  output: {
-    path: path.resolve(__dirname, './app/static'),
-    filename: 'js/report_adjustment.js', // <--- Will be compiled to this single file
-  },
-};
-
-const reportShipping = {
-  entry: {
-    main: './src/report_shipping.ts',
-  },
-  output: {
-    path: path.resolve(__dirname, './app/static'),
-    filename: 'js/report_shipping.js', // <--- Will be compiled to this single file
-  },
-};
-
-const reportSku = {
-  entry: {
-    main: './src/report_sku.ts',
-  },
-  output: {
-    path: path.resolve(__dirname, './app/static'),
-    filename: 'js/report_sku.js', // <--- Will be compiled to this single file
-  },
-};
-
-const reportShelfLife = {
-  entry: {
-    main: './src/report_shelf_life.ts',
-  },
-  output: {
-    path: path.resolve(__dirname, './app/static'),
-    filename: 'js/report_shelf_life.js', // <--- Will be compiled to this single file
-  },
-};
 const reportConfig = {
   entry: {
     main: './src/report.ts',
@@ -389,14 +333,7 @@ const configs = [
   adjustConfig,
   eventConfig,
   reportConfig,
-  // TODO remove else reports
-  reportEventConfig,
-  reportRequestShareConfig,
-  reportInventoryConfig,
-  reportAdjustmentConfig,
-  reportShipping,
-  reportSku,
-  reportShelfLife,
+  report_sub_group,
   subGroupConfig,
 ].map((conf) => merge(defaultConfig, conf));
 

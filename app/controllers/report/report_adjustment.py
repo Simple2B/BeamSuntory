@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Type
+from typing import Tuple, Type
 import sqlalchemy as sa
 
 from flask import render_template
@@ -16,7 +16,9 @@ class ReportDataAdjustments(ReportData):
     ResponseModel: Type[s.AdjustResponse] = s.AdjustResponse
 
     @classmethod
-    def get_reports(cls, report_filter: s.ReportFilter):
+    def get_search_result(
+        cls, report_filter: s.ReportFilter
+    ) -> Tuple[sa.Select[Tuple[m.Adjust]], sa.Select[Tuple[int]]]:
         query = m.Adjust.select().order_by(m.Adjust.id)
         count_query = sa.select(sa.func.count()).select_from(m.Adjust)
 
@@ -114,6 +116,11 @@ class ReportDataAdjustments(ReportData):
                             )
                         )
                     )
+        return query, count_query
+
+    @classmethod
+    def get_reports(cls, report_filter: s.ReportFilter):
+        query, count_query = cls.get_search_result(report_filter)
 
         pagination = create_pagination(total=db.session.scalar(count_query))
 
@@ -131,3 +138,40 @@ class ReportDataAdjustments(ReportData):
             page=pagination,
             reports=reports,
         )
+
+    @classmethod
+    def get_dataset(cls, report_filter: s.ReportFilter) -> dict[str, list]:
+        query, _ = cls.get_search_result(report_filter)
+
+        reports = db.session.scalars(query)
+        # 'created_at,product_name,sku,username,master_group,group,warehouse,quantity_before,quantity_after,quantity_delta,note',
+        dataset = {
+            "created_at": [],
+            "product_name": [],
+            "sku": [],
+            "username": [],
+            "master_group": [],
+            "group": [],
+            "warehouse": [],
+            "quantity_before": [],
+            "quantity_after": [],
+            "quantity_delta": [],
+            "note": [],
+        }  # type: dict[str, list]
+
+        for adjust in reports:
+            for report_adjust in adjust.adjust_group_qty:
+
+                dataset["created_at"].append(adjust.created_at)
+                dataset["product_name"].append(adjust.product.name)
+                dataset["sku"].append(adjust.product.SKU)
+                dataset["username"].append(adjust.user.username)
+                dataset["master_group"].append(report_adjust.group.master_group.name)
+                dataset["group"].append(report_adjust.group.name)
+                dataset["warehouse"].append(report_adjust.warehouse.name)
+                dataset["quantity_before"].append(report_adjust.quantity_before)
+                dataset["quantity_after"].append(report_adjust.quantity_after)
+                dataset["quantity_delta"].append(report_adjust.delta_value)
+                dataset["note"].append(adjust.note)
+
+        return dataset

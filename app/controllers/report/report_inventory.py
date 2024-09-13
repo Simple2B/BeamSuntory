@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Type
+from typing import Tuple, Type
 import sqlalchemy as sa
 
 from flask import render_template
@@ -16,7 +16,9 @@ class ReportDataInventories(ReportData):
     ResponseModel: Type[s.ReportInventoryListResponse] = s.ReportInventoryListResponse
 
     @classmethod
-    def get_reports(cls, report_filter: s.ReportFilter):
+    def get_search_result(
+        cls, report_filter: s.ReportFilter
+    ) -> Tuple[sa.Select[Tuple[m.Product]], sa.Select[Tuple[int]]]:
         query = (
             sa.select(m.Product)
             .join(m.WarehouseProduct)
@@ -135,6 +137,11 @@ class ReportDataInventories(ReportData):
                             )
                         )
                     )
+        return query, count_query
+
+    @classmethod
+    def get_reports(cls, report_filter: s.ReportFilter):
+        query, count_query = cls.get_search_result(report_filter)
 
         pagination = create_pagination(total=db.session.scalar(count_query))
 
@@ -156,27 +163,57 @@ class ReportDataInventories(ReportData):
         return render_template(
             "report/inventory/product_reports_table.html",
             page=pagination,
-            target_group=report_filter.target_group,
+            report_filter=report_filter,
             inventory_reports=reports,
         )
 
+    @classmethod
+    def get_dataset(
+        cls,
+        report_filter: s.ReportFilter,
+    ):
+        query, _ = cls.get_search_result(report_filter)
 
-def create_inventory_dataset(product: m.Product, group: str = "") -> dict[str, list]:
-    data = {
-        "Name": [],
-        "SKU": [],
-        "Quantity": [],
-        "Group": [],
-        "Warehouse": [],
-    }  # type: dict[str, list]
+        dataset = {
+            "Name": [],
+            "SKU": [],
+            "Quantity": [],
+            "Group": [],
+            "Warehouse": [],
+        }  # type: dict[str, list]
+
+        for product in db.session.scalars(query):
+            add_dataset_row(
+                dataset,
+                product,
+                master_group=report_filter.master_group,
+                target_group=report_filter.target_group,
+            )
+
+        return dataset
+
+
+def add_dataset_row(
+    dataset: dict[str, list],
+    product: m.Product,
+    master_group: str | None,
+    target_group: str | None,
+):
 
     for warehouse_product in product.warehouse_products:
-        if group and warehouse_product.group_name != group:
+        if (
+            master_group
+            and not target_group
+            and warehouse_product.group.master_group.name != master_group
+        ):
             continue
-        data["Name"].append(product.name)
-        data["SKU"].append(product.SKU)
-        data["Quantity"].append(warehouse_product.product_quantity)
-        data["Group"].append(warehouse_product.group_name)
-        data["Warehouse"].append(warehouse_product.warehouse_name)
+        if target_group and warehouse_product.group.name != target_group:
+            continue
 
-    return data
+        dataset["Name"].append(product.name)
+        dataset["SKU"].append(product.SKU)
+        dataset["Quantity"].append(warehouse_product.product_quantity)
+        dataset["Group"].append(warehouse_product.group_name)
+        dataset["Warehouse"].append(warehouse_product.warehouse_name)
+
+    return dataset
