@@ -19,7 +19,6 @@ class ReportDataShelfLife(ReportData):
     def get_search_result(
         cls, report_filter: s.ReportFilter
     ) -> Tuple[sa.Select[Tuple[m.ProductAllocated]], sa.Select[Tuple[int]]]:
-
         query = (
             sa.select(m.ProductAllocated)
             .where(
@@ -89,7 +88,11 @@ class ReportDataShelfLife(ReportData):
             count_query = count_query.where(where_stmt)
 
         if report_filter.target_group:
-            where_stmt = m.ProductAllocated.product_quantity_groups.any(m.ProductQuantityGroup.group.has(m.Group.name == report_filter.target_group))  # type: ignore
+            where_stmt = m.ProductAllocated.product_quantity_groups.any(
+                m.ProductQuantityGroup.group.has(
+                    m.Group.name == report_filter.target_group
+                )
+            )  # type: ignore
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)
 
@@ -163,7 +166,6 @@ class ReportDataShelfLife(ReportData):
 
 
 def create_shelf_life_dataset(product_allocated: m.ProductAllocated) -> dict[str, list]:
-
     data = {
         "Name": [],
         "SKU": [],

@@ -164,7 +164,7 @@ def create():
         # Allocate product with all data
 
         if product_data.shelf_life_start > product_data.shelf_life_end:
-            flash(f"Shelf life start date is greater than end date")
+            flash("Shelf life start date is greater than end date")
             log(
                 log.INFO,
                 "Inbound order validation failed: shelf life start date is greater than end date",

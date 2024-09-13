@@ -1,16 +1,13 @@
-from datetime import datetime
 from flask import (
     Blueprint,
     Response,
-    redirect,
     request,
     render_template,
     jsonify,
-    url_for,
 )
 from flask_login import login_required
 import sqlalchemy as sa
-from app.controllers import create_pagination, role_required
+from app.controllers import role_required
 
 from app import schema as s
 from app import models as m, db
@@ -122,7 +119,11 @@ def report_json():
     has_approval_permission=True,
 )
 def download_htmx():
-    """When the user clicks the download button, the browser will send a GET request to /report/download_htmx. We can't use htmx to download a file directly, so we need to redirect the user to /report/download with the query string parameters."""
+    """
+    When the user clicks the download button, the browser will send a GET request to /report/download_htmx.
+    We can't use htmx to download a file directly,
+    so we need to redirect the user to /report/download with the query string parameters.
+    """
     response = Response()
     query_string = "&".join(
         [f"{key}={value}" for key, value in request.args.to_dict().items()]
