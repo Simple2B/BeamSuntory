@@ -26,7 +26,7 @@ class ReportDataInboundOrders(ReportData):
         count_query = (
             sa.select(sa.func.count())
             .where(m.InboundOrder.status == s.InboundOrderStatus.delivered)
-            .select_from(m.ReportInboundOrder)
+            .select_from(m.InboundOrder)
         )
 
         if report_filter.q:
@@ -84,12 +84,25 @@ class ReportDataInboundOrders(ReportData):
             count_query = count_query.where(
                 m.InboundOrder.created_at <= report_filter.end_date
             )
-
-        if report_filter.product_group:
+        if report_filter.master_group and not report_filter.target_group:
             where_stmt = m.InboundOrder.products_allocated.any(
                 m.ProductAllocated.product_quantity_groups.any(
                     m.ProductQuantityGroup.group.has(
-                        m.Group.name == report_filter.product_group
+                        m.Group.master_group.has(
+                            m.MasterGroup.name == report_filter.master_group
+                        )
+                    )
+                )
+            )
+
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
+
+        if report_filter.target_group:
+            where_stmt = m.InboundOrder.products_allocated.any(
+                m.ProductAllocated.product_quantity_groups.any(
+                    m.ProductQuantityGroup.group.has(
+                        m.Group.name == report_filter.target_group
                     )
                 )
             )

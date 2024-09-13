@@ -36,7 +36,7 @@ report_inbound_orders_blueprint = Blueprint(
     has_approval_permission=True,
 )
 def download_csv(report_id: int):
-    report = db.session.get(m.ReportInboundOrder, report_id)
+    report = db.session.get(m.InboundOrder, report_id)
     target_group = request.args.get("target_group", default="", type=str)
     master_group = request.args.get("master_group", default="", type=str)
     if not report:

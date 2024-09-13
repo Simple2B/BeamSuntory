@@ -21,7 +21,13 @@
           Brand
         </th>
         <th scope="col" class="px-6 py-3">
-          Quantity
+          Quantity received
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Remaining quantity
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Data Created
         </th>
         <th scope="col" class="px-6 py-3">
           Date Expires
@@ -33,8 +39,7 @@
     </thead>
     <tbody>
       <!-- prettier-ignore -->
-      {% for report in shelf_life_reports if not request.args.get('search_sku') or request.args.get('search_sku') in
-      report.SKU %}
+      {% for report in shelf_life_reports  %}
       <!-- prettier-ignore -->
       <tr
         class="table-shelf-life-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
@@ -44,8 +49,8 @@
         <td scope="row"
           class="product-full-image-anchor   text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            {% if report.image|length > 100 %}
-            <img src="data:image/png;base64, {{ report.image }}" alt="{{ report.name }}" class="w-14 object-cover">
+            {% if report.product.image|length > 100 %}
+            <img src="data:image/png;base64, {{ report.product.image }}" alt="{{ report.product.name }}" class="w-14 object-cover">
             {% else %}
             <img src="{{ url_for('static', filename='img/default_image_brand.png') }}" alt="{{ report.name }}"
               class="w-14 object-cover">
@@ -59,33 +64,43 @@
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.SKU }}</div>
+            <div class="text-base font-semibold">{{ report.product.SKU }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900  dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.name }}</div>
+            <div class="text-base font-semibold">{{ report.product.name }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900  dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.brand }}</div>
+            <div class="text-base font-semibold">{{ report.product.brand }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.get_warehouse_products_qty() }}</div>
+            <div class="text-base font-semibold">{{ report.quantity_received }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.expiry_date.strftime('%m/%d/%Y') }}</div>
+            <div class="text-base font-semibold">{{ report.quantity_remains }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.shelf_life_start.strftime('%m/%d/%Y') }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.shelf_life_end.strftime('%m/%d/%Y') }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
             <button type="button" hx-trigger="click" hx-target="body" hx-swap="beforeend" hx-indicator="#htmx-spinner"
-              hx-get="{{ url_for('report_shelf_life.detail_modal', product_id=report.id) }}"
+            hx-get="{{ url_for('report_shelf_life.detail_modal', product_allocated_id=report.id) }}"
               class="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Details</button>
           </div>
         </td>

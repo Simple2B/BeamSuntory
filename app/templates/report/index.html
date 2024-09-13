@@ -22,11 +22,6 @@
     <!-- prettier-ignore -->
     <div class="flex gap-4 items-center justify-start pt-4 bg-white dark:bg-gray-800 px-4">
       <div class="flex w-full justify-end">
-        <button type="button" id="button-csv-download"
-          class=" px-3 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-          {% include "icon/download.html" %}
-          &nbsp Download CSV
-        </button>
 
         <button type="button" hx-get="{{ url_for('report.download_htmx') }}" hx-trigger="click" hx-include="{{all_includes}}" hx-indicator="#htmx-spinner" hx-swap="none" 
           class=" px-3 py-2 ml-4 text-xs text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
@@ -283,9 +278,9 @@
       </select>
     </div>
     {% endfor %}
-    <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800" id="shelf-life-filter-expire-in">
+    <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800"  >
       <!-- prettier-ignore -->
-      <select id="shelf-life-filter-expire-in" hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"
+      <select  hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"  id="shelf-life-filter-expire-in"
         name="expire_in" hx-include="{{all_includes}}" hx-get="{{ url_for('report.search') }}"
         hx-indicator="#htmx-spinner"
         class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">

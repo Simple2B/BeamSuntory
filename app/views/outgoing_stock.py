@@ -298,26 +298,25 @@ def save():
             return redirect(url_for("outgoing_stock.get_all"))
 
         if cart.group.master_group.name != s.Events.name.value:
-            # products_to_deplete = db.session.scalars(
-            #     sa.select(m.ProductAllocated)
-            #     .where(
-            #         m.ProductAllocated.product_id == cart.product_id,
-            #         m.ProductAllocated.quantity_remains > 0,
-            #     )
-            #     .order_by(m.ProductAllocated.shelf_life_end.asc())
-            # )
+            products_to_deplete = db.session.scalars(
+                sa.select(m.ProductAllocated)
+                .where(
+                    m.ProductAllocated.product_id == cart.product_id,
+                    m.ProductAllocated.quantity_remains > 0,
+                )
+                .order_by(m.ProductAllocated.shelf_life_end.asc())
+            )
 
-            # deplete_qty = cart.quantity
-            # # TODO why do we need this logic
-            # for product in products_to_deplete:
-            #     if product.quantity_remains >= deplete_qty:
-            #         product.quantity_remains -= deplete_qty
-            #         product.save(False)
-            #         break
-            #     else:
-            #         deplete_qty -= product.quantity_remains
-            #         product.quantity_remains = 0
-            #         product.save(False)
+            deplete_qty = cart.quantity
+            for product in products_to_deplete:
+                if product.quantity_remains >= deplete_qty:
+                    product.quantity_remains -= deplete_qty
+                    product.save(False)
+                    break
+                else:
+                    deplete_qty -= product.quantity_remains
+                    product.quantity_remains = 0
+                    product.save(False)
 
             report_inventory = m.ReportInventory(
                 qty_before=warehouse_product.product_quantity,
