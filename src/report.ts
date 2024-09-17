@@ -134,15 +134,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Show/remove filters when choose event report type
-  function showReportFilters(e: Event) {
-    clearFilters();
+  function changeReportType(e: Event) {
+    // clearFilters();
     const selectHTML = e.target as HTMLSelectElement;
 
     allFiltersHTML.forEach((filterHTML) => !filterHTML.classList.contains("hidden") && filterHTML.classList.add('hidden'));
     const visibleFilters = filtersMap[selectHTML.value] as HTMLElement[];
     visibleFilters.forEach((filterHTML) => filterHTML.classList.remove('hidden'));
   }
-  reportTypeSelectHTML.addEventListener('change', showReportFilters);
+  reportTypeSelectHTML.addEventListener('change', changeReportType);
   allFiltersHTML.forEach((filterHTML) => !filterHTML.classList.contains("hidden") && filterHTML.classList.add('hidden'));
   const visibleFilters = filtersMap[reportTypeSelectHTML.value] as HTMLElement[];
   visibleFilters.forEach((filterHTML) => filterHTML.classList.remove('hidden'));
