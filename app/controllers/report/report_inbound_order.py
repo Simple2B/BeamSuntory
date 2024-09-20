@@ -110,6 +110,16 @@ class ReportDataInboundOrders(ReportData):
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)
 
+        if report_filter.brand:
+            where_stmt = m.InboundOrder.products_allocated.any(
+                m.ProductAllocated.product.has(
+                    m.Product.groups.any(m.GroupProduct.name == report_filter.brand)
+                )
+            )
+
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
+
         return query, count_query
 
     @classmethod
@@ -174,6 +184,7 @@ def create_inbound_order_dataset(
     data = {
         "Name": [],
         "SKU": [],
+        "Brand": [],
         "Quantity": [],
         "Group": [],
         "Created At": [],
@@ -195,6 +206,7 @@ def create_inbound_order_dataset(
                 continue
             data["Name"].append(product_allocated.product.name)
             data["SKU"].append(product_allocated.product.SKU)
+            data["Brand"].append(product_allocated.product.brand)
             data["Quantity"].append(group.quantity)
             data["Group"].append(group.group.name)
             data["Created At"].append(report.created_at.strftime("%Y-%m-%d %H:%M:%S"))

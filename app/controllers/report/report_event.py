@@ -19,19 +19,17 @@ class ReportDataEvents(ReportData):
     def get_search_result(
         cls, report_filter: s.ReportFilter
     ) -> Tuple[sa.Select[Tuple[m.Event]], sa.Select[Tuple[int]]]:
-        query = m.Event.select().order_by(m.Event.id)
+        query = sa.select(m.Event).order_by(m.Event.id)
         count_query = sa.select(sa.func.count()).select_from(m.Event)
 
         if report_filter.q:
-            query = query.where(
+            where_stmt = sa.or_(
                 m.Event.product.has(m.Product.name.ilike(f"%{report_filter.q}%"))
                 | m.Event.user.has(m.User.username.ilike(f"%{report_filter.q}%"))
             )
+            query = query.where(where_stmt)
 
-            count_query = count_query.where(
-                m.Event.product.has(m.Product.name.ilike(f"%{report_filter.q}%"))
-                | m.Event.user.has(m.User.username.ilike(f"%{report_filter.q}%"))
-            )
+            count_query = count_query.where(where_stmt)
 
         if report_filter.search_sku:
             where_stmt = m.Event.product.has(
@@ -42,31 +40,48 @@ class ReportDataEvents(ReportData):
             count_query = count_query.where(where_stmt)
 
         if report_filter.start_date:
-            query = query.where(
+            where_stmt = sa.and_(
                 m.Event.date_from
                 >= datetime.strptime(report_filter.start_date, "%m/%d/%Y")
             )
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
 
         if report_filter.start_date_to:
-            query = query.where(
+            where_stmt = sa.and_(
                 m.Event.date_from
                 <= datetime.strptime(report_filter.start_date_to, "%m/%d/%Y")
             )
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
 
         if report_filter.end_date:
-            query = query.where(
+            where_stmt = sa.and_(
                 m.Event.date_from
-                >= datetime.strptime(report_filter.end_date, "%m/%d/%Y")
+                <= datetime.strptime(report_filter.end_date, "%m/%d/%Y")
             )
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
 
         if report_filter.end_date_to:
-            query = query.where(
+            where_stmt = sa.and_(
                 m.Event.date_from
                 <= datetime.strptime(report_filter.end_date_to, "%m/%d/%Y")
             )
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
 
         if report_filter.user:
-            query = query.where(m.Event.user.has(m.User.username == report_filter.user))
+            where_stmt = m.Event.user.has(m.User.username == report_filter.user)
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
+
+        if report_filter.brand:
+            where_stmt = m.Event.product.has(
+                m.Product.groups.any(m.GroupProduct.name == report_filter.brand)
+            )
+            query = query.where()
+            count_query = count_query.where(where_stmt)
 
         return query, count_query
 
@@ -96,6 +111,7 @@ class ReportDataEvents(ReportData):
         dataset = {
             "SKU": [],
             "Name": [],
+            "Brand": [],
             "Quantity": [],
             "Group": [],
             "User": [],
@@ -108,6 +124,7 @@ class ReportDataEvents(ReportData):
         for event in db.session.scalars(query):
             dataset["SKU"].append(event.cart.product.SKU)
             dataset["Name"].append(event.cart.product.name)
+            dataset["Brand"].append(event.cart.product.brand)
             dataset["Quantity"].append(event.cart.quantity)
             dataset["Group"].append(event.group.name)
             dataset["User"].append(event.user.username)

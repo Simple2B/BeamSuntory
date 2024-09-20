@@ -103,14 +103,14 @@ class ReportDataShelfLife(ReportData):
             report_filter.premises,
         ]
 
-        if master_groups.count(None) != len(master_groups):
-            for group in master_groups:
-                if group:
-                    where_stmt = m.Product.product_groups.any(
-                        m.ProductGroup.parent.has(m.GroupProduct.name == group)
-                    )  # type: ignore
-                    query = query.where(where_stmt)
-                    count_query = count_query.where(where_stmt)
+        for group in master_groups:
+            if not group:
+                continue
+            where_stmt = m.ProductAllocated.product.has(
+                m.Product.groups.any(m.GroupProduct.name == group)
+            )  # type: ignore
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
 
         return query, count_query
 

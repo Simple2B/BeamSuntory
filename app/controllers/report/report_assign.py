@@ -31,7 +31,7 @@ class ReportDataAssigns(ReportData):
     def get_search_result(
         cls, report_filter: s.ReportFilter
     ) -> Tuple[sa.Select[Tuple[m.Assign]], sa.Select[Tuple[int]]]:
-        query = m.Assign.select().order_by(sa.desc(m.Assign.id))
+        query = sa.select(m.Assign).order_by(sa.desc(m.Assign.id))
         count_query = sa.select(sa.func.count()).select_from(m.Assign)
 
         if report_filter.q:
@@ -71,26 +71,27 @@ class ReportDataAssigns(ReportData):
             report_filter.premises,
         ]
 
-        if master_groups.count(None) != len(master_groups):
-            for group in master_groups:
-                query = query.where(
-                    m.Assign.product.has(
-                        m.Product.product_groups.any(
-                            m.ProductGroup.parent.has(
-                                m.GroupProduct.name.ilike(f"%{group}%")
-                            )
+        for group in master_groups:
+            if not group:
+                continue
+            query = query.where(
+                m.Assign.product.has(
+                    m.Product.product_groups.any(
+                        m.ProductGroup.parent.has(
+                            m.GroupProduct.name.ilike(f"%{group}%")
                         )
                     )
                 )
-                count_query = count_query.where(
-                    m.Assign.product.has(
-                        m.Product.product_groups.any(
-                            m.ProductGroup.parent.has(
-                                m.GroupProduct.name.ilike(f"%{group}%")
-                            )
+            )
+            count_query = count_query.where(
+                m.Assign.product.has(
+                    m.Product.product_groups.any(
+                        m.ProductGroup.parent.has(
+                            m.GroupProduct.name.ilike(f"%{group}%")
                         )
                     )
                 )
+            )
 
         if report_filter.start_date:
             query = query.where(m.Assign.created_at >= report_filter.start_date)
@@ -120,6 +121,7 @@ class ReportDataAssigns(ReportData):
             count_query = count_query.where(
                 m.Assign.group.has(m.Group.name.ilike(f"%{report_filter.group_to}%"))
             )
+
         return query, count_query
 
     @classmethod
@@ -136,23 +138,25 @@ class ReportDataAssigns(ReportData):
         query, _ = cls.get_search_result(report_filter)
         # 'created_at,username,type,from_group,to_group,sku,product_name,quantity'
         dataset = {
-            "Created_at": [],
-            "Username": [],
-            "Type": [],
-            "From_group": [],
-            "To_group": [],
-            "Sku": [],
-            "Product_name": [],
-            "Quantity": [],
+            "created_at": [],
+            "username": [],
+            "type": [],
+            "from_group": [],
+            "to_group": [],
+            "SKU": [],
+            "product_name": [],
+            "brand": [],
+            "quantity": [],
         }  # type: dict[str, list]
         for assign in db.session.scalars(query):
-            dataset["Created_at"].append(assign.created_at)
-            dataset["Username"].append(assign.user.username)
-            dataset["Type"].append(assign.type)
-            dataset["From_group"].append(assign.from_group.name)
-            dataset["To_group"].append(assign.group.name)
-            dataset["Sku"].append(assign.product.SKU)
-            dataset["Product_name"].append(assign.product.name)
-            dataset["Quantity"].append(assign.quantity)
+            dataset["created_at"].append(assign.created_at)
+            dataset["username"].append(assign.user.username)
+            dataset["type"].append(assign.type)
+            dataset["from_group"].append(assign.from_group.name)
+            dataset["to_group"].append(assign.group.name)
+            dataset["SKU"].append(assign.product.SKU)
+            dataset["product_name"].append(assign.product.name)
+            dataset["brand"].append(assign.product.brand)
+            dataset["quantity"].append(assign.quantity)
 
         return dataset
