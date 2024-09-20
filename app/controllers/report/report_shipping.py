@@ -106,17 +106,16 @@ class ReportDataShipping(ReportData):
             report_filter.categories,
             report_filter.premises,
         ):
-            if group_name:
-                where_stmt = m.ShipRequest.carts.any(
-                    m.Cart.product.has(
-                        m.Product.product_groups.any(
-                            m.ProductGroup.parent.has(m.GroupProduct.name == group_name)
-                        )
-                    )
-                )  # type: ignore
+            if not group_name:
+                continue
+            where_stmt = m.ShipRequest.carts.any(
+                m.Cart.product.has(
+                    m.Product.groups.any(m.GroupProduct.name == group_name)
+                )
+            )  # type: ignore
 
-                query = query.where(where_stmt)
-                count_query = count_query.where(where_stmt)
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
 
         return query, count_query
 
@@ -178,6 +177,7 @@ def create_shipping_modal_dataset(
     dataset = {
         "SKU": [],
         "Name": [],
+        "Brand": [],
         "Quantity": [],
         "Group": [],
         "Warehouse": [],
@@ -199,6 +199,7 @@ def create_shipping_modal_dataset(
             continue
         dataset["SKU"].append(cart.product.SKU)
         dataset["Name"].append(cart.product.name)
+        dataset["Brand"].append(cart.product.brand)
         dataset["Quantity"].append(cart.quantity)
         dataset["Group"].append(cart.group.name)
         dataset["Warehouse"].append(cart.warehouse.name)

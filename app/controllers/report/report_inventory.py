@@ -179,6 +179,7 @@ class ReportDataInventories(ReportData):
             "SKU": [],
             "Quantity": [],
             "Group": [],
+            "Brand": [],
             "Warehouse": [],
         }  # type: dict[str, list]
 
@@ -214,6 +215,7 @@ def add_dataset_row(
         dataset["SKU"].append(product.SKU)
         dataset["Quantity"].append(warehouse_product.product_quantity)
         dataset["Group"].append(warehouse_product.group_name)
+        dataset["Brand"].append(warehouse_product.product.brand)
         dataset["Warehouse"].append(warehouse_product.warehouse_name)
 
     return dataset

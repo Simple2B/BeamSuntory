@@ -19,7 +19,7 @@ class ReportDataAdjustments(ReportData):
     def get_search_result(
         cls, report_filter: s.ReportFilter
     ) -> Tuple[sa.Select[Tuple[m.Adjust]], sa.Select[Tuple[int]]]:
-        query = m.Adjust.select().order_by(m.Adjust.id)
+        query = sa.select(m.Adjust).order_by(m.Adjust.id)
         count_query = sa.select(sa.func.count()).select_from(m.Adjust)
 
         if report_filter.q:
@@ -91,31 +91,18 @@ class ReportDataAdjustments(ReportData):
             report_filter.events,
         ]
 
-        if master_groups.count(None) != len(master_groups):
-            for group in master_groups:
-                if group:
-                    query = query.where(
-                        m.Adjust.adjust_group_qty.any(
-                            m.AdjustGroupQty.product.has(
-                                m.Product.product_groups.any(
-                                    m.ProductGroup.parent.has(
-                                        m.GroupProduct.name == group
-                                    )
-                                )
-                            )
-                        )
+        for group in master_groups:
+            if not group:
+                continue
+            where_stmt = m.Adjust.adjust_group_qty.any(
+                m.AdjustGroupQty.product.has(
+                    m.Product.groups.any(
+                        m.ProductGroup.parent.has(m.GroupProduct.name == group)
                     )
-                    count_query = count_query.where(
-                        m.Adjust.adjust_group_qty.any(
-                            m.AdjustGroupQty.product.has(
-                                m.Product.product_groups.any(
-                                    m.ProductGroup.parent.has(
-                                        m.GroupProduct.name == group
-                                    )
-                                )
-                            )
-                        )
-                    )
+                )
+            )
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
         return query, count_query
 
     @classmethod
@@ -149,6 +136,7 @@ class ReportDataAdjustments(ReportData):
             "created_at": [],
             "product_name": [],
             "sku": [],
+            "brand": [],
             "username": [],
             "master_group": [],
             "group": [],
@@ -165,6 +153,7 @@ class ReportDataAdjustments(ReportData):
                 dataset["created_at"].append(adjust.created_at)
                 dataset["product_name"].append(adjust.product.name)
                 dataset["sku"].append(adjust.product.SKU)
+                dataset["brand"].append(adjust.product.brand)
                 dataset["username"].append(adjust.user.username)
                 dataset["master_group"].append(report_adjust.group.master_group.name)
                 dataset["group"].append(report_adjust.group.name)

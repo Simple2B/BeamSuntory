@@ -20,7 +20,7 @@ class ReportDataShareRequests(ReportData):
     def get_search_result(
         cls, report_filter: s.ReportFilter
     ) -> Tuple[sa.Select[Tuple[m.ReportRequestShare]], sa.Select[Tuple[int]]]:
-        query = m.ReportRequestShare.select().order_by(m.ReportRequestShare.id)
+        query = sa.select(m.ReportRequestShare).order_by(m.ReportRequestShare.id)
         count_query = sa.select(sa.func.count()).select_from(m.ReportRequestShare)
 
         if report_filter.master_group and not report_filter.target_group:
@@ -54,7 +54,7 @@ class ReportDataShareRequests(ReportData):
         if report_filter.user:
             where_stmt = m.ReportRequestShare.user.has(
                 m.User.username == report_filter.user
-            )
+            )  # type: ignore
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)
 
@@ -73,31 +73,41 @@ class ReportDataShareRequests(ReportData):
                 m.RequestShare.product.has(
                     m.Product.SKU.ilike(f"%{report_filter.search_sku}%")
                 )
-            )
+            )  # type: ignore
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)
 
         if report_filter.start_date:
             where_stmt = m.ReportRequestShare.created_at >= datetime.strptime(
                 report_filter.start_date, "%m/%d/%Y"
-            )
+            )  # type: ignore
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)
 
         if report_filter.end_date:
             where_stmt = m.ReportRequestShare.created_at <= datetime.strptime(
                 report_filter.end_date, "%m/%d/%Y"
-            )
+            )  # type: ignore
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)
 
         if report_filter.action_type_request_share:
-            where_stmt = (
+            where_stmt = sa.and_(
                 m.ReportRequestShare.type
                 == report_filter.action_type_request_share.value
-            )
+            )  # type: ignore
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)
+
+        if report_filter.brand:
+            where_stmt = m.ReportRequestShare.request_share.has(
+                m.RequestShare.product.has(
+                    m.Product.groups.any(m.GroupProduct.name == report_filter.brand)
+                )
+            )  # type: ignore
+            query = query.where(where_stmt)
+            count_query = count_query.where(where_stmt)
+
         return query, count_query
 
     @classmethod
@@ -128,6 +138,7 @@ class ReportDataShareRequests(ReportData):
         dataset = {
             "Name": [],
             "SKU": [],
+            "Brand": [],
             "Quantity": [],
             "From": [],
             "To": [],
@@ -151,6 +162,7 @@ def add_share_requests_dataset_row(
 ):
     dataset["Name"].append(request_share.product.name)
     dataset["SKU"].append(request_share.product.SKU)
+    dataset["Brand"].append(request_share.product.brand)
     dataset["Quantity"].append(request_share.desire_quantity)
     dataset["From"].append(request_share.from_group.name)
     dataset["To"].append(request_share.group.name)

@@ -7,7 +7,7 @@ interface IFilterMap {
 
 
 const filtersMap: IFilterMap = {
-  events: ['user-select', 'filter-start-date', 'filter-start-date-to', 'filter-end-date', 'filter-end-date-to'],
+  events: ['user-select', 'filter-start-date', 'filter-start-date-to', 'filter-end-date', 'filter-end-date-to', 'filter-group-brand'],
   request_share: [
     'user-select',
     'filter-start-date',
@@ -15,6 +15,7 @@ const filtersMap: IFilterMap = {
     'master-group',
     'target-group',
     'target-sub-group',
+    'filter-group-brand',
   ],
   inventories: [
     'user-select',
