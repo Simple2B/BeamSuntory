@@ -32,10 +32,9 @@ class IncomingStockProduct(db.Model, ModelMixin):
     )
     # Relationships
     product: orm.Mapped[Product] = orm.relationship()
-    incoming_stock_notification: orm.Mapped[IncomingStockNotification] = (
+    incoming_stock_notification: orm.Mapped["IncomingStockNotification"] = (
         orm.relationship(back_populates="products")
     )
 
-    @property
     def __repr__(self):
         return f"<Incoming Stock Product {self.id}>"

@@ -40,3 +40,5 @@ from .report_shipping import ReportShipping
 from .report_sku import ReportSKU
 from .image import Image
 from .ship_request_notification import ShipRequestNotification
+from .incoming_stock_notification import IncomingStockNotification
+from .incoming_stock_product import IncomingStockProduct

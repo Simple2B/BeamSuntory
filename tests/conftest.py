@@ -743,6 +743,31 @@ def mg_g_populate(client: FlaskClient, mocker):
         ).save(False)
         db.session.commit()
 
+    stock_notify = m.IncomingStockNotification(
+        description="test",
+        approx_arrival_date=datetime.datetime.now().date() + datetime.timedelta(days=1),
+        user_id=db.session.scalar(
+            m.User.select().where(
+                m.User.role_obj.has(m.Division.role_name == "manager")
+            )
+        ).id,
+    )
+    db.session.add(stock_notify)
+
+    new_stock_prod = m.IncomingStockProduct(
+        product_id=populate_test_product.id,
+        incoming_stock_notification=stock_notify,
+        quantity=100,
+    )
+    db.session.add(new_stock_prod)
+    new_stock_prod_two = m.IncomingStockProduct(
+        product_id=populate_test_product.id,
+        incoming_stock_notification=stock_notify,
+        quantity=100,
+    )
+    db.session.add(new_stock_prod_two)
+    db.session.commit()
+
     yield client
 
 

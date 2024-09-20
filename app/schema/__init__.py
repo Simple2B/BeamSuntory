@@ -111,4 +111,8 @@ from .outgoing_stock import (
     CartProductData,
 )
 
-from .incoming_stock_notification import IncomingStockNotificationStatus
+from .incoming_stock_notification import (
+    IncomingStockNotificationStatus,
+    IncomingStockNotifyProduct,
+    AdapterIncomingStockProducts,
+)

@@ -1,3 +1,4 @@
+from typing import TYPE_CHECKING, List
 from datetime import datetime
 
 import sqlalchemy as sa
@@ -6,7 +7,10 @@ from sqlalchemy import orm
 from app.database import db
 from .utils import ModelMixin, generate_uuid
 from app import schema as s
-from .product import Product
+
+if TYPE_CHECKING:
+    from .user import User
+    from .incoming_stock_product import IncomingStockProduct
 
 
 class IncomingStockNotification(db.Model, ModelMixin):
@@ -31,10 +35,10 @@ class IncomingStockNotification(db.Model, ModelMixin):
         default=datetime.now,
     )
     # Relationships
-    products: orm.Mapped[Product] = orm.relationship(
+    products: orm.Mapped[List["IncomingStockProduct"]] = orm.relationship(
         back_populates="incoming_stock_notification"
     )
+    user: orm.Mapped["User"] = orm.relationship()
 
-    @property
     def __repr__(self):
         return f"<Incoming Stock Notification {self.id}>"
