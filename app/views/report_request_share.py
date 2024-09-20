@@ -44,6 +44,7 @@ def download_csv(request_share_id: int):
     dataset = {
         "Name": [],
         "SKU": [],
+        "Brand": [],
         "Quantity": [],
         "From": [],
         "To": [],
@@ -98,6 +99,7 @@ def detail_modal(request_share_id: int):
     dataset = {
         "Name": [],
         "SKU": [],
+        "Brand": [],
         "Quantity": [],
         "From": [],
         "To": [],

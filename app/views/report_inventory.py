@@ -51,6 +51,7 @@ def download_csv(product_id: int):
         "SKU": [],
         "Quantity": [],
         "Group": [],
+        "Brand": [],
         "Warehouse": [],
     }  # type: dict[str, list]
 
@@ -103,6 +104,7 @@ def detail_modal(product_id: int):
         "SKU": [],
         "Quantity": [],
         "Group": [],
+        "Brand": [],
         "Warehouse": [],
     }  # type: dict[str, list]
 
