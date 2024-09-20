@@ -1,30 +1,17 @@
 <!-- View inbound order modal -->
 <!-- prettier-ignore-->
-<div tabindex="-1" id="inbound-order-modal-view" hx-get="{{ url_for('main.no_content') }}" hx-trigger="click"
-  hx-swap="delete" hx-target="#inbound-order-modal-view" hx-indicator="#htmx-spinner"
+<div tabindex="-1" id="incoming-stock-notification-modal-add" hx-get="{{ url_for('main.no_content') }}"
+  hx-trigger="click" hx-swap="delete" hx-target="#incoming-stock-notification-modal-add" hx-indicator="#htmx-spinner"
   class="fixed bg-opacity-80 bg-gray-600 top-0 left-0 right-0 z-50 items-center justify-center w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full max-h-full justify-end items-end flex">
   <div class="relative w-full max-w-screen-2xl max-h-full" onclick="event.stopPropagation();">
     <!-- Modal content -->
     <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-      <input type="hidden" name="next_url" id="inbound-order-view-next_url" value="" />
       <!-- Modal header -->
       <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
-        <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> View inbound order </h3>
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Add </h3>
         <div class="flex align-baseline gap-4">
-          <button type="button" onclick="copyCurrentLink()"
-            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
-            <svg class="h-5 w-5 text-[currentColor]" width="24" height="24" viewBox="0 0 24 24" stroke-width="2"
-              stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-              <path stroke="none" d="M0 0h24v24H0z" />
-              <circle cx="6" cy="12" r="3" />
-              <circle cx="18" cy="6" r="3" />
-              <circle cx="18" cy="18" r="3" />
-              <line x1="8.7" y1="10.7" x2="15.3" y2="7.3" />
-              <line x1="8.7" y1="13.3" x2="15.3" y2="16.7" />
-            </svg>
-          </button>
           <button type="button" hx-get="{{ url_for('main.no_content') }}" hx-trigger="click" hx-swap="delete"
-            hx-target="#inbound-order-modal-view" hx-indicator="#htmx-spinner"
+            hx-target="#incoming-stock-notification-modal-add" hx-indicator="#htmx-spinner"
             class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
             <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -34,157 +21,71 @@
         </div>
       </div>
       <!-- Modal body -->
-      <div class="p-6 space-y-6">
+      <form class="p-6 space-y-6">
+        {{ form.hidden_tag() }}
         <div class="grid grid-cols-6 gap-6">
           <div class="col-span-6 sm:col-span-3">
-            <label for="order_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Order ID</label>
-            <div
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-              {{ inbound_order.order_id }}</div>
+            <label for="approx_arrival_date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Approx
+              arrival date</label>
+            <input type="datetime" name="approx_arrival_date"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="Approx arrival date" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status</label>
-            <div
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-              {{ inbound_order.status.value }}</div>
-          </div>
-          <div class="col-span-6 sm:col-span-3">
-            <label for="active_date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Active
-              date</label>
-            <div
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-              {{ inbound_order.active_date.strftime('%Y-%m-%d')}}</div>
-          </div>
-          <div class="col-span-6 sm:col-span-3">
-            <label for="active_time" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Active
-              time</label>
-            <div
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-              {{ inbound_order.active_time }}</div>
-          </div>
-          <div class="col-span-6 sm:col-span-3">
-            <label for="order_title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Order
-              title</label>
-            <div
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-              {{ inbound_order.title }}</div>
-          </div>
-          <div class="col-span-6 sm:col-span-3">
-            <label for="delivery_date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Delivery
-              date</label>
-            <div
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-              {{ inbound_order.delivery_date.strftime('%Y-%m-%d') }}</div>
-          </div>
-          <div class="col-span-6 sm:col-span-3">
-            <label for="warehouse_id"
-              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Warehouse</label>
-            <div
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-              {{ inbound_order.warehouse.name }}</div>
+            <label for="description"
+              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
+            <input type="text" name="description"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="Description" required />
           </div>
         </div>
-        <div class="grid grid-cols-6 gap-6 border-t py-6">
-          <div class="col-span-6 sm:col-span-3">
-            <label for="supplier_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Supplier
-              name</label>
-            <div
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-              {{ inbound_order.supplier.name }}</div>
+
+        <input type="text" name="products_data" class="hidden" />
+
+        <div class="grid grid-cols-12 gap-2">
+          <div class="col-span-4">
+            <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product</label>
+            <input list="product-list" name="add_product" id="inbound-order-add-add-product-select"
+              placeholder="Product" required autocomplete="off"
+              class="product-allocated-add inbound-order-add-add-product shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+            <datalist id="product-list">
+              {% for product in products %}
+              <option value="{{ product.SKU }}" data-product-id="{{ product.id }}">{{product.name}}</option>
+              {% endfor %}
+            </datalist>
           </div>
-          <div class="col-span-6 sm:col-span-3">
-            <label for="supplier_address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Supplier
-              address</label>
-            <div
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-              {{ inbound_order.supplier.address }}</div>
+          <div class="col-span-4">
+            <label for="add_quantity"
+              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
+            <input type="number" min="1" name="quantity" placeholder="Quantity" required
+              class="product-allocated-quantity inbound-order-add-add-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
           </div>
-        </div>
-        <div>
-          <div class="grid grid-cols-12 gap-5 product-allocated-groups-container items-end">
-            {% for prod_allocated in inbound_order.products_allocated %}
-            <div class="col-span-6 sm:col-span-3">
-              <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product to
-                allocate</label>
-              <div type="text"
-                class="inbound-order-edit-check-product shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                {{ prod_allocated.product.name }}</div>
+          <div class="col-span-4">
+            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Actions</label>
+            <div class="flex justify-between gap-4">
+              <button type="button"
+                class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300 justify-center w-full">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M64 80c-8.8 0-16 7.2-16 16V416c0 8.8 7.2 16 16 16H384c8.8 0 16-7.2 16-16V96c0-8.8-7.2-16-16-16H64zM0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96zM200 344V280H136c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H248v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z">
+                  </path>
+                </svg>
+              </button>
+              <button type="button" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-400 justify-center w-full" >
+                <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
+                </svg>
+              </button>
             </div>
-            <div class="col-span-6 sm:col-span-3">
-              <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product SKU</label>
-              <div
-                class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                {{ prod_allocated.product.SKU }}</div>
-            </div>
-            <div class="col-span-6 sm:col-span-3">
-              <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Available
-                Quantity</label>
-              <div
-                class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                {{ prod_allocated.quantity }}</div>
-            </div>
-            <div class="col-span-6 sm:col-span-3">
-              <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Total
-                Quantity</label>
-              <div
-                class=" shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                {{ prod_allocated.quantity }}</div>
-            </div>
-            <div class="col-span-12 sm:col-span-6">
-              <label for="status"
-                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
-              <div
-                class=" shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                {{ prod_allocated.product.description }}</div>
-            </div>
-            <div class="col-span-12 sm:col-span-6">
-              <label for="shelf_life_start" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Shelf
-                life</label>
-              <div class="flex items-center">
-                <div
-                  class=" shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                  {{ prod_allocated.shelf_life_start.strftime('%Y-%m-%d') }}</div>
-                <span class="mx-4 text-gray-500">to</span>
-                <div
-                  class=" shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                  {{ prod_allocated.shelf_life_end.strftime('%Y-%m-%d') }}</div>
-              </div>
-            </div>
-            <div class="col-span-6"><label
-                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label></div>
-            <div class="col-span-6">
-              <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
-            </div>
-            {% for allocated_group in prod_allocated.product_quantity_groups %}
-            <div class="col-span-6">
-              <div
-                class=" shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                {{ allocated_group.group.name }}
-              </div>
-            </div>
-            <div class="col-span-6">
-              <div
-                class=" shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                {{ allocated_group.quantity}}
-              </div>
-            </div>
-            {% endfor %}
-            {% endfor %}
           </div>
         </div>
-      </div>
+
+          <button type="submit"
+            class="col-span-12 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Save</button>
+
+      </form>
     </div>
   </div>
   <script>
-    function copyCurrentLink() {
-      console.log('copyCurrentLink');
-      const currentURL = window.location.href;
-      const tempInput = document.createElement('input');
-      tempInput.value = currentURL;
-      document.body.appendChild(tempInput);
-      tempInput.select();
-      document.execCommand('copy');
-      document.body.removeChild(tempInput);
-    }
   </script>
 </div>

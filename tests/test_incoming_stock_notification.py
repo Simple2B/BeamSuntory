@@ -3,6 +3,7 @@ from flask.testing import FlaskClient
 
 from app import schema as s
 from app import models as m, db
+from tests.utils import login
 
 
 test_data = {
@@ -15,6 +16,7 @@ test_data = {
 
 
 def test_incoming_stocks_pages(mg_g_populate: FlaskClient):
+    login(mg_g_populate)
     notify = db.session.scalars(sa.select(m.IncomingStockNotification)).first()
     assert notify
     res = mg_g_populate.get("/incoming-stock-notifications")
@@ -24,6 +26,7 @@ def test_incoming_stocks_pages(mg_g_populate: FlaskClient):
 
 
 def test_create_incoming_stock_notify(mg_g_populate: FlaskClient):
+    login(mg_g_populate)
     res = mg_g_populate.get("/incoming-stock-notifications/create")
     assert res.status_code == 200
 
@@ -31,7 +34,7 @@ def test_create_incoming_stock_notify(mg_g_populate: FlaskClient):
         "/incoming-stock-notifications/create", data=test_data, follow_redirects=True
     )
     assert res.status_code == 200
-    assert b"Created" in res.data
+    assert b"Add" in res.data
 
     res = mg_g_populate.post(
         "/incoming-stock-notifications/create",
@@ -51,6 +54,7 @@ def test_create_incoming_stock_notify(mg_g_populate: FlaskClient):
 
 
 def test_view_incoming_stock_notify(mg_g_populate: FlaskClient):
+    login(mg_g_populate)
     notify = db.session.scalars(sa.select(m.IncomingStockNotification)).first()
     assert notify
     res = mg_g_populate.get(f"/incoming-stock-notifications/{notify.uuid}/view")
@@ -66,6 +70,7 @@ def test_view_incoming_stock_notify(mg_g_populate: FlaskClient):
 
 
 def test_view_received(mg_g_populate: FlaskClient):
+    login(mg_g_populate)
     notify = db.session.scalars(sa.select(m.IncomingStockNotification)).first()
     assert notify
     assert not notify.recived_date

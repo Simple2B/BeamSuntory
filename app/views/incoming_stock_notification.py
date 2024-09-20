@@ -25,7 +25,7 @@ from app.logger import log
 
 
 incoming_stock_notifications_bp = Blueprint(
-    "incoming_stock_notifications", __name__, url_prefix="/incoming_stock_notifications"
+    "incoming_stock_notifications", __name__, url_prefix="/incoming-stock-notifications"
 )
 
 
@@ -40,7 +40,7 @@ incoming_stock_notifications_bp = Blueprint(
 )
 def get_all():
     query = sa.select(m.IncomingStockNotification).order_by(
-        desc(m.IncomingStockNotification.approx_arrival_date.desc())
+        m.IncomingStockNotification.approx_arrival_date.desc()
     )
     count_query = sa.select(sa.func.count()).select_from(m.IncomingStockNotification)
 
@@ -69,7 +69,10 @@ def get_all():
 )
 def get_create_modal():
     form = f.IncomingStockNotificationCreateForm()
-    return render_template("incoming_stock_notification/modal_create.html", form=form)
+    products = db.session.scalars(sa.select(m.Product))
+    return render_template(
+        "incoming_stock_notification/modal_add.html", form=form, products=products
+    )
 
 
 @incoming_stock_notifications_bp.route("/create", methods=["POST"])
