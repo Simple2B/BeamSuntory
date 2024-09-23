@@ -21,15 +21,13 @@
         </div>
       </div>
       <!-- Modal body -->
-      <form class="p-6 space-y-6">
+      <form class="p-6 space-y-6" id="add-incoming-stock-notify-form" action="{{ url_for('incoming_stock_notifications.create') }}"  method="POST">
         {{ form.hidden_tag() }}
         <div class="grid grid-cols-6 gap-6">
           <div class="col-span-6 sm:col-span-3">
             <label for="approx_arrival_date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Approx
               arrival date</label>
-            <input type="datetime" name="approx_arrival_date"
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Approx arrival date" required />
+              {{ form.approx_arrival_date(class_='shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500') }}
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="description"
@@ -40,52 +38,45 @@
           </div>
         </div>
 
-        <input type="text" name="products_data" class="hidden" />
+        <input type="text" name="products_data" class="hidden"  />
 
-        <div class="grid grid-cols-12 gap-2">
-          <div class="col-span-4">
-            <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product</label>
-            <input list="product-list" name="add_product" id="inbound-order-add-add-product-select"
-              placeholder="Product" required autocomplete="off"
-              class="product-allocated-add inbound-order-add-add-product shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-            <datalist id="product-list">
-              {% for product in products %}
-              <option value="{{ product.SKU }}" data-product-id="{{ product.id }}">{{product.name}}</option>
-              {% endfor %}
-            </datalist>
-          </div>
-          <div class="col-span-4">
-            <label for="add_quantity"
-              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
-            <input type="number" min="1" name="quantity" placeholder="Quantity" required
-              class="product-allocated-quantity inbound-order-add-add-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-          </div>
-          <div class="col-span-4">
-            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Actions</label>
-            <div class="flex justify-between gap-4">
-              <button type="button"
-                class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300 justify-center w-full">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    d="M64 80c-8.8 0-16 7.2-16 16V416c0 8.8 7.2 16 16 16H384c8.8 0 16-7.2 16-16V96c0-8.8-7.2-16-16-16H64zM0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96zM200 344V280H136c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H248v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z">
-                  </path>
-                </svg>
-              </button>
-              <button type="button" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-400 justify-center w-full" >
-                <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
+        {% include 'incoming_stock_notification/product_input.html' %}
 
-          <button type="submit"
-            class="col-span-12 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Save</button>
+        <button type="button" onclick="onClickSumbitBtn()"
+          class="col-span-12 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Save</button>
 
       </form>
     </div>
   </div>
   <script>
+    function onClickSumbitBtn() {
+      const form = document.getElementById('add-incoming-stock-notify-form');
+      if (!form) return;
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const productDataInput = form.querySelector('input[name="products_data"]');
+      if (!productDataInput) return;
+      
+      const products = Array.from(form.querySelectorAll('.product_input')).map((div) => {
+        const product = div.querySelector('input[name="add_product"]');
+        const quantity = div.querySelector('input[name="quantity"]');
+        return {
+          productSKU: product.value,
+          quantity: quantity.value,
+        };
+      });
+      if (products.length === 0) {
+        alert('Please add at least one product');
+        return;
+      }
+      productDataInput.value = JSON.stringify(products);
+      form.submit();
+      e.disabled = true;
+    }
   </script>
+  {% include "spinner.html" %}
 </div>

@@ -6,20 +6,11 @@ from app import models as m, db
 from tests.utils import login
 
 
-test_data = {
-    "products_data": s.AdapterIncomingStockProducts.dump_json(
-        [{"productId": 1, "quantity": 10}]
-    ),
-    "approx_arrival_date": "2022-01-01",
-    "description": "test description",
-}
-
-
 def test_incoming_stocks_pages(mg_g_populate: FlaskClient):
     login(mg_g_populate)
     notify = db.session.scalars(sa.select(m.IncomingStockNotification)).first()
     assert notify
-    res = mg_g_populate.get("/incoming-stock-notifications")
+    res = mg_g_populate.get("/incoming-stock-notifications/")
     assert res.status_code == 200
     assert notify.user.username in res.data.decode()
     assert notify.uuid in res.data.decode()
@@ -29,6 +20,20 @@ def test_create_incoming_stock_notify(mg_g_populate: FlaskClient):
     login(mg_g_populate)
     res = mg_g_populate.get("/incoming-stock-notifications/create")
     assert res.status_code == 200
+
+    res = mg_g_populate.get("/incoming-stock-notifications/create")
+    assert res.status_code == 200
+    assert b"Add" in res.data
+
+    product = db.session.scalar(sa.select(m.Product))
+    assert product
+    test_data = {
+        "products_data": s.AdapterIncomingStockProducts.dump_json(
+            [{"productSKU": product.SKU, "quantity": 10}]  # type: ignore
+        ),
+        "approx_arrival_date": "2022-01-01",
+        "description": "test description",
+    }
 
     res = mg_g_populate.post(
         "/incoming-stock-notifications/create", data=test_data, follow_redirects=True
@@ -69,10 +74,15 @@ def test_view_incoming_stock_notify(mg_g_populate: FlaskClient):
     assert b"Not found" in res.data
 
 
-def test_view_received(mg_g_populate: FlaskClient):
-    login(mg_g_populate)
+def test_view_and_received(mg_g_populate: FlaskClient):
+    login(mg_g_populate, username="meng@mail.com", password="password")
     notify = db.session.scalars(sa.select(m.IncomingStockNotification)).first()
     assert notify
+
+    res = mg_g_populate.get(f"/incoming-stock-notifications/{notify.uuid}/view")
+    assert res.status_code == 200
+    assert "View " in res.data.decode()
+
     assert not notify.recived_date
     res = mg_g_populate.post(
         "/incoming-stock-notifications/received",
@@ -90,4 +100,4 @@ def test_view_received(mg_g_populate: FlaskClient):
         follow_redirects=True,
     )
     assert res.status_code == 200
-    assert b"Not found" in res.data
+    assert b"Notification not found" in res.data

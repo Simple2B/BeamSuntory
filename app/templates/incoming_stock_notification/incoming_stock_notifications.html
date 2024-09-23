@@ -7,6 +7,7 @@
 
     <!-- prettier-ignore -->
      <div class="m-2">
+      {% if not current_user.role_obj.role_name  == 'warehouse_manager' %}
       <button itype="button" hx-get="{{ url_for('incoming_stock_notifications.get_create_modal') }}" hx-trigger="click" hx-swap="beforeend" hx-target="body" hx-indicator="#htmx-spinner"
       class=" inline-flex items-center justify-center  px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 sm:w-auto dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
       <svg class="w-5 h-5 mr-2 " fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -16,6 +17,7 @@
       </svg>
       Add
     </button>
+    {% endif %}
      </div>
       
   </div>
@@ -23,9 +25,11 @@
     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
       <tr>
         <th scope="col" class="px-6 py-3">#</th>
+        <th scope="col" class="px-6 py-3">From user</th>
         <th scope="col" class="px-6 py-3">Approx arrival date</th>
         <th scope="col" class="px-6 py-3">Description</th>
         <th scope="col" class="px-6 py-3">Status</th>
+        <th scope="col" class="px-6 py-3">Recived Data</th>
         <th scope="col" class="px-6 py-3">Actions</th>
       </tr>
     </thead>
@@ -33,12 +37,14 @@
       {% for incoming_stock_notification in incoming_stock_notifications %}
       <tr>
         <td class="px-6 py-4">{{ loop.index + page.skip }}</td>
-        <td class="px-6 py-4">{{ incoming_stock_notification.approx_arrival_date }}</td>
+        <td class="px-6 py-4">{{ incoming_stock_notification.user.username }}</td>
+        <td class="px-6 py-4">{{ incoming_stock_notification.approx_arrival_date.strftime('%Y-%m-%d') }}</td>
         <td class="px-6 py-4">{{ incoming_stock_notification.description }}</td>
         <td class="px-6 py-4">{{ incoming_stock_notification.status }}</td>
+        <td class="px-6 py-4">{{ incoming_stock_notification.recived_date.strftime('%Y-%m-%d') if incoming_stock_notification.recived_date else '-' }}</td>
         <td class="px-6 py-4">
           <div>
-            View
+            <button type="button" hx-get="{{ url_for('incoming_stock_notifications.view_modal', notify_uuid=incoming_stock_notification.uuid) }}" hx-swap="beforeend" hx-indicator="#htmx-spinner"   hx-target="body" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">View</button>
           </div>
         </td>
       </tr>

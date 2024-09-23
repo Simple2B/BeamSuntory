@@ -8,8 +8,8 @@ class IncomingStockNotificationStatus(enum.Enum):
 
 
 class IncomingStockNotifyProduct(BaseModel):
-    product_id: int = Field(alias="productId")
-    quantity: int
+    product_sku: str = Field(alias="productSKU", min_length=1)
+    quantity: int = Field(gt=0)
 
 
 AdapterIncomingStockProducts = TypeAdapter(list[IncomingStockNotifyProduct])

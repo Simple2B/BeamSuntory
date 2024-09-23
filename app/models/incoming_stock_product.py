@@ -7,7 +7,6 @@ from sqlalchemy import orm
 
 from app.database import db
 from .utils import ModelMixin, generate_uuid
-from app import schema as s
 from .product import Product
 
 if TYPE_CHECKING:
