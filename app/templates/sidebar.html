@@ -53,6 +53,15 @@
           <span class="flex-1 ml-3 whitespace-nowrap">Inbound Orders</span>
         </a>
       </li>
+      
+      {% endif %}
+      {% if user_role in warehouse_roles or user_role == "meneder" %}
+      <li>
+        <a href="{{ url_for('incoming_stock_notifications.get_all') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+          {% include "icon/incoming_stock_notify.html" %}
+          <span class="flex-1 ml-4 whitespace-nowrap">Notify of incoming stock</span>
+        </a>
+      </li>
       {% endif %}
       <li>
         <!-- prettier-ignore -->
@@ -263,6 +272,8 @@
         </div>
       </li>
       {% endif %}
+
+      
       {% if user_role in admin_warehouse_roles %}
       <li>
         <!-- prettier-ignore -->
