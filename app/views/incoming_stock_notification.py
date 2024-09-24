@@ -5,6 +5,7 @@ from flask import (
     render_template,
     flash,
     redirect,
+    request,
     url_for,
     current_app as app,
 )
@@ -36,10 +37,39 @@ incoming_stock_notifications_bp = Blueprint(
     ]
 )
 def get_all():
-    query = sa.select(m.IncomingStockNotification).order_by(
-        m.IncomingStockNotification.approx_arrival_date.desc()
+
+    status = request.args.get("status", type=str, default="")
+    q = request.args.get("q", type=str, default="")
+
+    where_stmt = sa.true()
+    if status:
+        where_stmt = sa.and_(where_stmt, m.IncomingStockNotification.status == status)
+
+    if q:
+        where_stmt = sa.and_(
+            where_stmt,
+            sa.or_(
+                m.IncomingStockNotification.description.ilike(f"%{q}%"),
+                m.IncomingStockNotification.user.has(m.User.username.ilike(f"%{q}%")),
+                m.IncomingStockNotification.products.any(
+                    m.IncomingStockProduct.product.has(m.Product.name.ilike(f"%{q}%"))
+                ),
+                m.IncomingStockNotification.products.any(
+                    m.IncomingStockProduct.product.has(m.Product.SKU.ilike(f"%{q}%"))
+                ),
+            ),
+        )
+
+    query = (
+        sa.select(m.IncomingStockNotification)
+        .where(where_stmt)
+        .order_by(m.IncomingStockNotification.approx_arrival_date.desc())
     )
-    count_query = sa.select(sa.func.count()).select_from(m.IncomingStockNotification)
+    count_query = (
+        sa.select(sa.func.count())
+        .where(where_stmt)
+        .select_from(m.IncomingStockNotification)
+    )
 
     pagination = create_pagination(total=db.session.scalar(count_query))
     incoming_stock_notifications = db.session.scalars(
@@ -52,6 +82,8 @@ def get_all():
         "incoming_stock_notification/incoming_stock_notifications.html",
         page=pagination,
         incoming_stock_notifications=incoming_stock_notifications,
+        q=q,
+        status=status,
     )
 
 
@@ -154,7 +186,7 @@ def create():
             notify=notify,
             user=user,
         )
-        mail.send(msg)
+        # mail.send(msg)
 
     return redirect(url_for("incoming_stock_notifications.get_all"))
 

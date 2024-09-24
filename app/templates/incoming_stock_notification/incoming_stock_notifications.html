@@ -2,10 +2,39 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg min-h-half">
-  <div class="flex items-center justify-end py-4 bg-white dark:bg-gray-800 flex-wrap gap-4">
+  <div class="flex items-center justify-between py-4 bg-white dark:bg-gray-800 flex-wrap gap-4">
 
 
     <!-- prettier-ignore -->
+     <div class="flex flex-row mx-2 ">
+      <form class="w-80 flex gap-4">   
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+    
+            <!-- prettier-ignore -->
+            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd"
+                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                clip-rule="evenodd"></path>
+            </svg>
+          </div>
+          <!-- prettier-ignore -->
+          <input {% if q %}value={{ q }}{% endif %} type="text" name="q"
+            class="ml-2 block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            placeholder="Search" />
+        </div>
+        <button type="submit" class="text-white  bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button>
+        <div class="inline-flex rounded-md shadow-sm">
+          <input name="" type="submit" value="All" name="status"  class=" px-4 py-2 text-sm {{ 'text-blue-700 dark:bg-gray-700'  if not status else 'text-gray-900 dark:bg-gray-800' }} font-medium bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700  dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
+          <input type="submit" name="status" value="PENDING" class="px-4 py-2 text-sm font-medium {{ 'text-blue-700 dark:bg-gray-700'  if status == 'PENDING' else 'text-gray-900 dark:bg-gray-800' }} bg-white border-t border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700  dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
+            
+          <input type="submit" name="status" value="RECEIVED" class="px-4 py-2 text-sm font-medium {{ 'text-blue-700 dark:bg-gray-700'  if status == 'RECEIVED' else 'text-gray-900 dark:bg-gray-800' }} bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700  dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
+        </div>
+    </form>
+
+      
+     </div>
      <div class="m-2">
       {% if not current_user.role_obj.role_name  == 'warehouse_manager' %}
       <button itype="button" hx-get="{{ url_for('incoming_stock_notifications.get_create_modal') }}" hx-trigger="click" hx-swap="beforeend" hx-target="body" hx-indicator="#htmx-spinner"
@@ -60,7 +89,7 @@
     <ul class="inline-flex items-center -space-x-px">
       <li>
         <!-- prettier-ignore -->
-        <a href="{{ url_for('incoming_stock_notifications.get_all') }}?page=1&q={{page.query}}"
+        <a href="{{ url_for('incoming_stock_notifications.get_all') }}?page=1&q={{page.query}}&status={{status}}"
           class="block px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
           <span class="sr-only">First</span>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
@@ -72,7 +101,7 @@
       </li>
       <li>
         <!-- prettier-ignore -->
-        <a href="{{ url_for('incoming_stock_notifications.get_all') }}?page={{page.page-1 if page.page > 1 else 1}}&q={{page.query}}"
+        <a href="{{ url_for('incoming_stock_notifications.get_all') }}?page={{page.page-1 if page.page > 1 else 1}}&q={{page.query}}&status={{status}}"
           class="block px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
           <span class="sr-only">Previous</span>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
@@ -90,12 +119,12 @@
         {% if p == page.page %}
         <!-- prettier-ignore -->
 
-        <a href="{{ url_for('incoming_stock_notifications.get_all') }}?page={{p}}&q={{page.query}}" aria-current="page"
+        <a href="{{ url_for('incoming_stock_notifications.get_all') }}?page={{p}}&q={{page.query}}&status={{status}}" aria-current="page"
           class="z-10 px-3 py-2 leading-tight text-blue-600 border border-blue-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">{{
           p }}</a>
         {% else %}
         <!-- prettier-ignore -->
-        <a href="{{ url_for('incoming_stock_notifications.get_all') }}?page={{p}}&q={{page.query}}"
+        <a href="{{ url_for('incoming_stock_notifications.get_all') }}?page={{p}}&q={{page.query}}&status={{status}}"
           class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">{{
           p }}</a>
         {% endif %}
@@ -104,7 +133,7 @@
 
       <li>
         <!-- prettier-ignore -->
-        <a href="{{ url_for('incoming_stock_notifications.get_all') }}?page={{page.page+1 if page.page < page.pages else page.pages}}&q={{page.query}}"
+        <a href="{{ url_for('incoming_stock_notifications.get_all') }}?page={{page.page+1 if page.page < page.pages else page.pages}}&q={{page.query}}&status={{status}}"
           class="block px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
           <!-- prettier-ignore -->
           <span class="sr-only">Next</span>
@@ -117,7 +146,7 @@
       </li>
       <li>
         <!-- prettier-ignore -->
-        <a href="{{ url_for('incoming_stock_notifications.get_all') }}?page={{page.pages}}&q={{page.query}}"
+        <a href="{{ url_for('incoming_stock_notifications.get_all') }}?page={{page.pages}}&q={{page.query}}&status={{status}}"
           class="block px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
           <!-- prettier-ignore -->
           <span class="sr-only">Last</span>
