@@ -186,7 +186,7 @@ def create():
             notify=notify,
             user=user,
         )
-        # mail.send(msg)
+        mail.send(msg)
 
     return redirect(url_for("incoming_stock_notifications.get_all"))
 
