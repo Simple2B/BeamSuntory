@@ -15,6 +15,7 @@ from app.controllers import role_required
 from app import schema as s
 from app import models as m, db
 from app.controllers.report.report_inventory import add_dataset_row
+from app.controllers.report import send_xlsx_response
 from app.logger import log
 
 report_inventory_blueprint = Blueprint(
@@ -64,17 +65,7 @@ def download_csv(product_id: int):
     df = pd.DataFrame(dataset)
 
     # Save the DataFrame to a CSV file in memory
-    csv_buffer = io.StringIO()
-    df.to_csv(csv_buffer, index=False)
-    csv_buffer.seek(0)
-
-    # Send the CSV file as a response
-    return send_file(
-        io.BytesIO(csv_buffer.getvalue().encode("utf-8")),
-        mimetype="text/csv",
-        as_attachment=True,
-        download_name="report.csv",
-    )
+    return send_xlsx_response(df)
 
 
 @report_inventory_blueprint.route("inventory/<int:product_id>/detail_modal")

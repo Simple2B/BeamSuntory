@@ -10,7 +10,7 @@ from flask import (
 from flask_login import login_required
 import pandas as pd
 from app.controllers import role_required
-from app.controllers.report import add_share_requests_dataset_row
+from app.controllers.report import add_share_requests_dataset_row, send_xlsx_response
 from app import schema as s
 from app import models as m, db
 from app.logger import log
@@ -61,17 +61,7 @@ def download_csv(request_share_id: int):
     df = pd.DataFrame(data)
 
     # Save the DataFrame to a CSV file in memory
-    csv_buffer = io.StringIO()
-    df.to_csv(csv_buffer, index=False)
-    csv_buffer.seek(0)
-
-    # Send the CSV file as a response
-    return send_file(
-        io.BytesIO(csv_buffer.getvalue().encode("utf-8")),
-        mimetype="text/csv",
-        as_attachment=True,
-        download_name="report.csv",
-    )
+    return send_xlsx_response(df)
 
 
 @report_request_share_blueprint.route(

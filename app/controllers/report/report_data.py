@@ -55,15 +55,23 @@ class ReportData(ABC):
         data = cls.get_dataset(report_filter)
         df = pd.DataFrame(data)
 
-        # Save the DataFrame to a CSV file in memory
-        csv_buffer = io.StringIO()
-        df.to_csv(csv_buffer, index=False)
-        csv_buffer.seek(0)
+        return send_xlsx_response(df)
 
-        # Send the CSV file as a response
-        return send_file(
-            io.BytesIO(csv_buffer.getvalue().encode("utf-8")),
-            mimetype="text/csv",
-            as_attachment=True,
-            download_name="report.csv",
-        )
+
+def send_xlsx_response(df: pd.DataFrame):
+    # Save the DataFrame to a CSV file in memory
+    excel_buffer = io.BytesIO()
+
+    # Write the DataFrame to the buffer in Excel format
+    df.to_excel(
+        excel_buffer, index=False, engine="openpyxl"
+    )  # Use 'openpyxl' for .xlsx format
+    excel_buffer.seek(0)
+
+    # Send the CSV file as a response
+    return send_file(
+        excel_buffer,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name="report.xlsx",
+    )
