@@ -29,7 +29,7 @@ def test_create_incoming_stock_notify(mg_g_populate: FlaskClient):
     assert product
     test_data = {
         "products_data": s.AdapterIncomingStockProducts.dump_json(
-            [{"productSKU": product.SKU, "quantity": 10}]  # type: ignore
+            [{"productInfo": product.SKU, "quantity": 10}, {"productInfo": "dadad", "quantity": 10}]  # type: ignore
         ),
         "approx_arrival_date": "2022-01-01",
         "description": "test description",
@@ -65,7 +65,7 @@ def test_view_incoming_stock_notify(mg_g_populate: FlaskClient):
     res = mg_g_populate.get(f"/incoming-stock-notifications/{notify.uuid}/view")
     assert res.status_code == 200
     for product in notify.products:
-        assert product.product.name in res.data.decode()
+        assert product.product_info in res.data.decode()
         assert str(product.quantity) in res.data.decode()
     assert notify.user.username in res.data.decode()
 

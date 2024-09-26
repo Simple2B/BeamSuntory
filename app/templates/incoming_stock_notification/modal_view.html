@@ -49,24 +49,17 @@
 
         </div>
         <div class="grid grid-cols-12 gap-3">
-          <label for="status" class="col-span-4 block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
-          <label for="status" class="col-span-4 block mb-2 text-sm font-medium text-gray-900 dark:text-white">SKU</label>
+          <label for="status" class="col-span-4 block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product info</label>
           <label for="add_quantity"
               class="col-span-4 block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
           {% for notify_product in notify.products %}
-          <div class="col-span-4">
+          <div class="col-span-6">
             <div
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-              {{ notify_product.product.name }}
+              {{ notify_product.product_info }}
             </div>
           </div>
-          <div class="col-span-4">
-            <div
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-              {{ notify_product.product.SKU }}
-            </div>
-          </div>
-          <div class="col-span-4">
+          <div class="col-span-6">
             <div
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
               {{ notify_product.quantity }}

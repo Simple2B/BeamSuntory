@@ -755,12 +755,14 @@ def mg_g_populate(client: FlaskClient, mocker):
     db.session.add(stock_notify)
 
     new_stock_prod = m.IncomingStockProduct(
+        product_info="test 1",
         product_id=populate_test_product.id,
         incoming_stock_notification=stock_notify,
         quantity=100,
     )
     db.session.add(new_stock_prod)
     new_stock_prod_two = m.IncomingStockProduct(
+        product_info="test 2",
         product_id=populate_test_product.id,
         incoming_stock_notification=stock_notify,
         quantity=100,

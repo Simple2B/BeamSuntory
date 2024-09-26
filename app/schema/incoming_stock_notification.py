@@ -8,7 +8,7 @@ class IncomingStockNotificationStatus(enum.Enum):
 
 
 class IncomingStockNotifyProduct(BaseModel):
-    product_sku: str = Field(alias="productSKU", min_length=1)
+    product_info: str = Field(alias="productInfo", min_length=1)
     quantity: int = Field(gt=0)
 
 

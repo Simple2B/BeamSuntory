@@ -2,17 +2,15 @@ from flask import (
     Blueprint,
     redirect,
     request,
-    send_file,
     url_for,
     flash,
     render_template,
 )
 from flask_login import login_required
 import pandas as pd
-import io
 from app.controllers import role_required
 
-from app.controllers.report import create_inbound_order_dataset
+from app.controllers.report import create_inbound_order_dataset, send_xlsx_response
 from app import schema as s
 from app import models as m, db
 from app.logger import log
@@ -49,17 +47,7 @@ def download_csv(report_id: int):
     df = pd.DataFrame(data)
 
     # Save the DataFrame to a CSV file in memory
-    csv_buffer = io.StringIO()
-    df.to_csv(csv_buffer, index=False)
-    csv_buffer.seek(0)
-
-    # Send the CSV file as a response
-    return send_file(
-        io.BytesIO(csv_buffer.getvalue().encode("utf-8")),
-        mimetype="text/csv",
-        as_attachment=True,
-        download_name="report.csv",
-    )
+    return send_xlsx_response(df)
 
 
 @report_inbound_orders_blueprint.route("/<int:report_id>/detail_modal", methods=["GET"])

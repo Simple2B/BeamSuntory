@@ -107,7 +107,7 @@ def forgot_pass():
     msg = Message(
         subject="Reset password",
         sender=app.config["MAIL_DEFAULT_SENDER"],
-        recipients=["nazarr.kobryn@gmail.com"],
+        recipients=[user.email],
     )
     url = url_for(
         "auth.password_recovery",

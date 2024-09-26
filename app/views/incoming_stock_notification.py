@@ -152,17 +152,18 @@ def create():
     products = s.AdapterIncomingStockProducts.validate_json(form.products_data.data)
     for product_data in products:
         product = db.session.scalar(
-            sa.select(m.Product).where(m.Product.SKU == product_data.product_sku)
-        )
-        if not product:
-            log(log.ERROR, "Product with SKU [%s] not found", product_data.product_sku)
-            flash(
-                f"Product with sku [{product_data.product_sku}] not found",
-                category="danger",
+            sa.select(m.Product).where(
+                sa.or_(
+                    m.Product.SKU.ilike(f"%{product_data.product_info}%"),
+                    m.Product.name.ilike(f"%{product_data.product_info}%"),
+                    m.Product.description.ilike(f"%{product_data.product_info}%"),
+                )
             )
-            return redirect(url_for("incoming_stock_notifications.get_all"))
+        )
+
         notify_product = m.IncomingStockProduct(
-            product_id=product.id,
+            product_info=product_data.product_info,
+            product_id=product.id if product else None,
             quantity=product_data.quantity,
         )
         notify.products.append(notify_product)
