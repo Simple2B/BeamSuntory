@@ -59,6 +59,7 @@ def create_app(environment="development"):
     app.jinja_env.globals["form_product_upload"] = forms.UploadProductForm
     app.jinja_env.globals["admin_roles"] = [s.UserRole.ADMIN.value]
     app.jinja_env.globals["admin_warehouse_roles"] = ADMIN_WAREHOUSE_ROLES
+
     app.jinja_env.globals["warehouse_roles"] = [
         # TODO: delete admin role after testing
         s.UserRole.ADMIN.value,
@@ -75,6 +76,14 @@ def create_app(environment="development"):
         s.UserRole.MANAGER.value,
         s.UserRole.WAREHOUSE_MANAGER.value,
     ]
+
+    app.jinja_env.globals["all_role_without_sale_rep"] = [
+        s.UserRole.ADMIN.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+        s.UserRole.DELIVERY_AGENT.value,
+    ]
+
     app.jinja_env.globals["all_main_user_roles"] = [
         s.UserRole.ADMIN.value,
         s.UserRole.SALES_REP.value,

@@ -55,7 +55,7 @@
       </li>
       
       {% endif %}
-      {% if user_role in warehouse_roles or user_role == "meneder" %}
+      {% if user_role in all_role_without_sale_rep  %}
       <li>
         <a href="{{ url_for('incoming_stock_notifications.get_all') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
           {% include "icon/incoming_stock_notify.html" %}

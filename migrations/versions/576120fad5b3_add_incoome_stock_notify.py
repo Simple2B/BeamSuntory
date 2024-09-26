@@ -1,8 +1,8 @@
 """add incoome stock notify
 
-Revision ID: 041b4d437353
+Revision ID: 576120fad5b3
 Revises: b7d195d3cad9
-Create Date: 2024-09-20 09:02:02.615678
+Create Date: 2024-09-26 09:25:25.949198
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '041b4d437353'
+revision = '576120fad5b3'
 down_revision = 'b7d195d3cad9'
 branch_labels = None
 depends_on = None
@@ -33,8 +33,9 @@ def upgrade():
     op.create_table('incoming_stock_products',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('uuid', sa.String(length=64), nullable=False),
-    sa.Column('product_id', sa.Integer(), nullable=False),
+    sa.Column('product_id', sa.Integer(), nullable=True),
     sa.Column('stock_notify_id', sa.Integer(), nullable=False),
+    sa.Column('product_info', sa.String(length=256), nullable=False),
     sa.Column('quantity', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['product_id'], ['products.id'], name=op.f('fk_incoming_stock_products_product_id_products')),
