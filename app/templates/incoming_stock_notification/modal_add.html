@@ -75,7 +75,7 @@
       }
       productDataInput.value = JSON.stringify(products);
       form.submit();
-      e.disabled = true;
+      form.querySelector('button').disabled = true;
     }
   </script>
   {% include "spinner.html" %}
