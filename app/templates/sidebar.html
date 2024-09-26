@@ -63,15 +63,6 @@
         </a>
       </li>
       {% endif %}
-      
-      {% if current_user.has_access_bulk_ship %}
-      <li>
-        <a href="" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
-          {% include "icon/inbound_order.html" %}
-          <span class="flex-1 ml-4 whitespace-nowrap">Bulk ship</span>
-        </a>
-      </li>
-      {% endif %}
       <li>
         <!-- prettier-ignore -->
         <div
