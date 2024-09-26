@@ -91,6 +91,18 @@ def get_all():
     )
 
 
+@bp.route("/modal-add", methods=["GET"])
+@login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+def get_add_user_modal():
+    groups = db.session.scalars(sa.select(m.Group)).all()
+    divisions = db.session.scalars(sa.select(m.Division)).all()
+    form = f.NewUserForm()
+    return render_template(
+        "user/modal_add.html", form=form, groups=groups, divisions=divisions
+    )
+
+
 @bp.route("/save", methods=["POST"])
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
@@ -122,6 +134,8 @@ def save():
     user.approval_permission = form.approval_permission.data
     user.sales_rep = form.sales_rep.data
     user.phone_number = form.phone_number.data
+    user.has_access_bulk_ship = form.has_access_bulk_ship.data
+    user.has_access_bulk_assign = form.has_access_bulk_assign.data
     if form.password.data.strip("*\n "):
         user.password = form.password.data
 
@@ -219,6 +233,8 @@ def create():
         approval_permission=form.approval_permission.data,
         sales_rep=form.sales_rep.data,
         phone_number=form.phone_number.data,
+        has_access_bulk_ship=form.has_access_bulk_ship.data,
+        has_access_bulk_assign=form.has_access_bulk_assign.data,
     )
     user.save()
 

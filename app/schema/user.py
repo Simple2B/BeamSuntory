@@ -37,6 +37,8 @@ class User(BaseModel):
     city: str
     zip_code: str = Field(alias="zipCode")
     sales_rep: bool = Field(alias="salesRep")
+    has_access_bulk_ship: bool
+    has_access_bulk_assign: bool
 
 
 class AdminCreate(BaseModel):

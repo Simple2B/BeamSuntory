@@ -1,16 +1,19 @@
 <!-- Adding user modal -->
 <!-- prettier-ignore-->
-<div id="add-user-modal" tabindex="-1" aria-hidden="true"
-  class="fixed top-0 left-0 right-0 z-50 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
-  <div class="relative w-full max-w-2xl max-h-full">
-    <!-- Modal content -->
-    <form action="{{url_for('user.create')}}" method="post"
+ <!-- TODO not finished -->
+<div tabindex="-1" id="ship-request-view-modal-element" hx-get="{{ url_for('main.no_content') }}" hx-trigger="click"
+  hx-swap="delete" hx-target="#ship-request-view-modal-element" hx-indicator="#htmx-spinner"
+  class="fixed bg-opacity-80 bg-gray-600 top-0 left-0 right-0 z-50 items-center justify-center w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full max-h-full justify-end items-end flex">
+  <div class="relative w-full max-w-screen-2xl max-h-full" onclick="event.stopPropagation();">
+    <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+      <form action="{{url_for('user.create')}}" method="post"
       class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-      {{ form_create.hidden_tag() }}
+      {{ form.hidden_tag() }}
       <!-- Modal header -->
       <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-white"> Add new user </h3>
-        <button data-modal-hide="add-user-modal" type="button"
+        <button type="button" hx-get="{{ url_for('main.no_content') }}" hx-trigger="click" hx-swap="delete"
+          hx-target="#add-user-model-html" hx-indicator="#htmx-spinner"
           class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
           <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -22,75 +25,76 @@
       <div class="p-6 space-y-6">
         <div class="grid grid-cols-6 gap-6">
           <div class="col-span-6 sm:col-span-3">
-            <label for="username" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Username</label>
-            <input type="text" name="username" id="user-add-username"
+            <label for="username" class="flex mb-2 text-sm font-medium text-gray-900 dark:text-white">Username</label>
+            <input type="text" name="username" 
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Name" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
-            <input type="email" name="email" id="user-add-email"
+            <label for="email" class="flex mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
+            <input type="email" name="email" 
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="example@company.com" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="role" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Role</label>
-            <select type="text" name="role" id="user-add-role"
+            <label for="role" class="flex mb-2 text-sm font-medium text-gray-900 dark:text-white">Role</label>
+            <select type="text" name="role"  id="user-select-role"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Street Address" required>
               <option selected="selected" value="" disabled>Choose Role</option>
               {% for division in divisions %}
               {% if division.label_role_name %}
-              <option value="{{ division.id }}">{{ division.label_role_name }}</option>
+              <option value="{{ division.id }}"  >{{ division.label_role_name }}</option>
               {% else %}
-              <option value="{{ division.id }}">{{ division.role_name }}</option>
+              <option value="{{ division.id }}" >{{ division.role_name }}</option>
               {% endif %}
               {% endfor %}
             </select>
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="phone_number" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Phone
+            <label for="phone_number" class="flex mb-2 text-sm font-medium text-gray-900 dark:text-white">Phone
               Number</label>
-            <input type="text" name="phone_number" id="user-add-phone_number"
+            <input type="text" name="phone_number" 
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Phone Number" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="country" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Country</label>
-            <input type="text" name="country" id="user-add-country"
+            <label for="country" class="flex mb-2 text-sm font-medium text-gray-900 dark:text-white">Country</label>
+            <input type="text" name="country" 
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Country" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="region"
-              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Region/Province</label>
-            <input type="text" name="region" id="user-add-region"
+              class="flex mb-2 text-sm font-medium text-gray-900 dark:text-white">Region/Province</label>
+            <input type="text" name="region" 
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Region or Province" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="city" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">City</label>
-            <input type="text" name="city" id="user-add-city"
+            <label for="city" class="flex mb-2 text-sm font-medium text-gray-900 dark:text-white">City</label>
+            <input type="text" name="city" 
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="City" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="zip-code" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Zip Code/Postal
+            <label for="zip-code" class="flex mb-2 text-sm font-medium text-gray-900 dark:text-white">Zip Code/Postal
               Code</label>
-            <input type="text" name="zip_code" id="user-add-zip_code"
+            <input type="text" name="zip_code" 
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Zip Code or Postal Code" required />
           </div>
           <div class="col-span-6 sm:col-span-3">
-            <label for="street-address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Street
+            <label for="street-address" class="flex mb-2 text-sm font-medium text-gray-900 dark:text-white">Street
               Address</label>
-            <input type="text" name="street_address" id="user-add-street_address"
+            <input type="text" name="street_address"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Street Address" required />
           </div>
           <div class="col-span-6 sm:col-span-3 relative">
-            <label for="group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label>
+            <label for="group" class="flex mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label>
             <input type="text" name="group" id="user-add-group" hidden>
+            <select name="" class="cursor-pointer shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></select>
             <div id="user-add-dropdown-btn"
               class="cursor-pointer shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Street Address" required>
@@ -105,74 +109,77 @@
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="approval_permission"
-              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Approval Permission</label>
-            <input type="checkbox" name="approval_permission" id="user-add-approval_permission"
+              class="flex mb-2 text-sm font-medium text-gray-900 dark:text-white">Approval Permission</label>
+            <input type="checkbox" name="approval_permission" 
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="activated"
-              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Activated</label>
-            <input type="checkbox" name="activated" id="user-add-activated"
+              class="flex mb-2 text-sm font-medium text-gray-900 dark:text-white">Activated</label>
+            <input type="checkbox" name="activated" 
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block  p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="approval_permission"
-              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Access to bulk ship</label>
+              class="flex mb-2 text-sm font-medium text-gray-900 dark:text-white">Access to bulk ship</label>
             <input type="checkbox" name="has_access_bulk_ship" id="checkbox-access-bulk-ship"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
           </div>
           <div class="col-span-6 sm:col-span-3">
             <label for="approval_permission"
-              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Access to bulk assign</label>
+              class="flex mb-2 text-sm font-medium text-gray-900 dark:text-white">Access to bulk assign</label>
             <input type="checkbox" name="has_access_bulk_assign" id="checkbox-access-bulk-assign"
-              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-          </div>
-          <div id="user-add-sales_rep-container" class="col-span-6 sm:col-span-3">
-            <label for="sales_rep" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Same As Store
-              Locator Address</label>
-            <input type="checkbox" name="sales_rep" id="user-add-sales_rep-checkbox"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
           </div>
         </div>
       </div>
-      <div id="user-add-locker-address-container" class="">
-        <div class="flex items-start justify-between p-4 border-t rounded-t dark:border-gray-600">
-          <h4 class="text-xl font-semibold text-gray-900 dark:text-white">Store Locator / Shipping Address :</h4>
+      
+      <div id="user-add-locker-address-container" class="hidden" >
+          <div class="p-6 flex gap-4 w-full" >
+            <input type="checkbox" name="sales_rep" id="user-add-sales-rep-checkbox"
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+            <label for="sales_rep" class="flask mb-2 text-sm font-medium text-gray-900 dark:text-white">Same As Store
+              Locator Address</label>
         </div>
-        <div class="p-6 space-y-6">
+        
+        <div class="p-6 space-y-6" id="user-add-locker-address-container-body">
+          <div class="flex items-start justify-between p-4 gap-4 border-t rounded-t dark:border-gray-600">
+            <h4 class="text-xl font-semibold text-gray-900 dark:text-white w-full">Store Locator / Shipping Address :</h4>
+            
+          </div>
           <div class="grid grid-cols-6 gap-6">
             <div class="col-span-6 sm:col-span-3">
-              <label for="country" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Country</label>
+              <label for="country" class="flex mb-2 text-sm font-medium text-gray-900 dark:text-white">Country</label>
               <input type="text" name="locker_country" id="user-add-locker-country"
                 class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="Country" />
+                placeholder="Country" required/>
             </div>
             <div class="col-span-6 sm:col-span-3">
               <label for="region"
-                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Region/Province</label>
-              <input type="text" name="locker_region" id="user-add-locker-region"
+                class="flex mb-2 text-sm font-medium text-gray-900 dark:text-white">Region/Province</label>
+              <input type="text" name="locker_region"
                 class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="Region or Province" />
+                placeholder="Region or Province" required />
             </div>
             <div class="col-span-6 sm:col-span-3">
-              <label for="city" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">City</label>
-              <input type="text" name="locker_city" id="user-add-locker-city"
+              <label for="city" class="flex mb-2 text-sm font-medium text-gray-900 dark:text-white">City</label>
+              <input type="text" name="locker_city" 
                 class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="City" />
+                placeholder="City" required />
             </div>
             <div class="col-span-6 sm:col-span-3">
-              <label for="zip-code" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Zip Code/Postal
+              <label for="zip-code" class="flex mb-2 text-sm font-medium text-gray-900 dark:text-white">Zip Code/Postal
                 Code</label>
-              <input type="text" name="locker_zip_code" id="user-add-locker-zip_code"
+              <input type="text" name="locker_zip_code" 
                 class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="Zip Code or Postal Code" />
+                placeholder="Zip Code or Postal Code" required />
             </div>
             <div class="col-span-6 sm:col-span-3">
-              <label for="street-address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Street
+              <label for="street-address" class="flex mb-2 text-sm font-medium text-gray-900 dark:text-white">Street
                 Address</label>
-              <input type="text" name="locker_street_address" id="user-add-locker-street_address"
+              <input type="text" name="locker_street_address"
                 class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="Street Address" />
+                placeholder="Street Address" required />
             </div>
           </div>
         </div>
@@ -184,5 +191,7 @@
           Save all </button>
       </div>
     </form>
+    </div>
   </div>
+  <script src="{{ url_for('static', filename='js/user/modal_add.js') }}" type="text/javascript" defer></script>
 </div>

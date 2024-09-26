@@ -26,7 +26,17 @@ const baseConfig = {
   },
 };
 
-const userConfig = {
+const userConfig = [
+  {
+    entry: {
+      main: './src/user/modal_add.ts',
+    },
+    output: {
+      path: path.resolve(__dirname, './app/static'),
+      filename: 'js/user/modal_add.js', // <--- Will be compiled to this single file
+    },
+  },
+  {
   entry: {
     main: './src/user.ts',
   },
@@ -34,7 +44,7 @@ const userConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/user.js', // <--- Will be compiled to this single file
   },
-};
+}];
 
 const groupConfig = {
   entry: {
@@ -307,7 +317,7 @@ const reportConfig = {
 
 const configs = [
   baseConfig,
-  userConfig,
+  ...userConfig,
   groupConfig,
   masterGroupConfig,
   productConfig,

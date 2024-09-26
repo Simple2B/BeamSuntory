@@ -41,7 +41,7 @@ def test_create_admin(runner: FlaskCliRunner):
     assert db.session.scalar(query)
 
 
-def test_create_user(client):
+def test_create_user(client: FlaskClient):
     register("test", "tes@gmail.com")
     login(client, "test")
 
@@ -60,18 +60,16 @@ def test_create_user(client):
             street_address="test_street_address",
             approval_permission=True,
             sales_rep=True,
+            has_access_bulk_shipe=True,
+            has_access_bulk_assign=False,
         ),
+        follow_redirects=True,
     )
-    assert response.status_code == 302
-    assert "/user/" in response.text
-    user_rows_objs = db.session.execute(m.User.select()).all()
-    assert len(user_rows_objs) > 1
-    query = m.User.select().where(m.User.username == "test_name")
+    assert response.status_code == 200
+    query = sa.select(m.User).where(m.User.username == "test_name")
     user = db.session.scalar(query)
-    user = db.session.execute(
-        m.User.select().where(m.User.username == "test_name")
-    ).first()
-    assert user[0].username == "test_name"
+    assert user.email in response.text
+    assert user.username == "test_name"
 
 
 def test_populate_db(runner: FlaskCliRunner):
