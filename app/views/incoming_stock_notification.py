@@ -182,7 +182,7 @@ def create():
         msg = Message(
             subject="Customer Incoming Stock",
             sender=app.config["MAIL_DEFAULT_SENDER"],
-            recipients=["nazarr.kobryn@gmail.com"],
+            recipients=[user.email],
         )
 
         msg.html = render_template(
