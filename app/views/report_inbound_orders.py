@@ -2,14 +2,12 @@ from flask import (
     Blueprint,
     redirect,
     request,
-    send_file,
     url_for,
     flash,
     render_template,
 )
 from flask_login import login_required
 import pandas as pd
-import io
 from app.controllers import role_required
 
 from app.controllers.report import create_inbound_order_dataset, send_xlsx_response

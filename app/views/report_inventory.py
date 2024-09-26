@@ -2,13 +2,11 @@ from flask import (
     Blueprint,
     request,
     render_template,
-    send_file,
     flash,
     redirect,
     url_for,
 )
 import pandas as pd
-import io
 from flask_login import login_required
 from app.controllers import role_required
 

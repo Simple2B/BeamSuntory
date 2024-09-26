@@ -4,12 +4,9 @@ from flask import (
     redirect,
     url_for,
     flash,
-    send_file,
 )
 from flask_login import login_required
 import pandas as pd
-import io
-
 from app.controllers.report import create_shelf_life_dataset
 from app.controllers import role_required
 

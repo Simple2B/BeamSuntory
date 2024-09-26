@@ -1,10 +1,8 @@
-import io
 from flask import (
     Blueprint,
     flash,
     redirect,
     render_template,
-    send_file,
     url_for,
 )
 from flask_login import login_required
