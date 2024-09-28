@@ -116,3 +116,4 @@ from .incoming_stock_notification import (
     IncomingStockNotifyProduct,
     AdapterIncomingStockProducts,
 )
+from .bulk_ship import BulkShipStatus

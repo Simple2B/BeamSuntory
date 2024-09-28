@@ -34,6 +34,7 @@ incoming_stock_notifications_bp = Blueprint(
         s.UserRole.ADMIN.value,
         s.UserRole.WAREHOUSE_MANAGER.value,
         s.UserRole.MANAGER.value,
+        s.UserRole.DELIVERY_AGENT.value,
     ]
 )
 def get_all():
@@ -94,6 +95,7 @@ def get_all():
         s.UserRole.ADMIN.value,
         s.UserRole.WAREHOUSE_MANAGER.value,
         s.UserRole.MANAGER.value,
+        s.UserRole.DELIVERY_AGENT.value,
     ]
 )
 def get_create_modal():
@@ -115,6 +117,7 @@ def get_create_modal():
         s.UserRole.ADMIN.value,
         s.UserRole.WAREHOUSE_MANAGER.value,
         s.UserRole.MANAGER.value,
+        s.UserRole.DELIVERY_AGENT.value,
     ]
 )
 def get_product_input():
@@ -132,6 +135,7 @@ def get_product_input():
         s.UserRole.ADMIN.value,
         s.UserRole.WAREHOUSE_MANAGER.value,
         s.UserRole.MANAGER.value,
+        s.UserRole.DELIVERY_AGENT.value,
     ]
 )
 def create():
@@ -202,6 +206,7 @@ def create():
         s.UserRole.ADMIN.value,
         s.UserRole.WAREHOUSE_MANAGER.value,
         s.UserRole.MANAGER.value,
+        s.UserRole.DELIVERY_AGENT.value,
     ]
 )
 def view_modal(notify_uuid):
@@ -230,6 +235,7 @@ def view_modal(notify_uuid):
         s.UserRole.ADMIN.value,
         s.UserRole.WAREHOUSE_MANAGER.value,
         s.UserRole.MANAGER.value,
+        s.UserRole.DELIVERY_AGENT.value,
     ]
 )
 def received():

@@ -98,8 +98,12 @@ class User(db.Model, UserMixin, ModelMixin):
     is_notify_shipping: orm.Mapped[bool] = orm.mapped_column(default=True)
     is_notify_request_share_status: orm.Mapped[bool] = orm.mapped_column(default=True)
 
-    has_access_bulk_ship: orm.Mapped[bool] = orm.mapped_column(default=False)
-    has_access_bulk_assign: orm.Mapped[bool] = orm.mapped_column(default=False)
+    has_access_bulk_ship: orm.Mapped[bool] = orm.mapped_column(
+        default=False, server_default="0"
+    )
+    has_access_bulk_assign: orm.Mapped[bool] = orm.mapped_column(
+        default=False, server_default="0"
+    )
 
     # Relations
     role_obj: orm.Mapped[Division] = orm.relationship(lazy="joined")

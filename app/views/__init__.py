@@ -34,6 +34,7 @@ from .report import report_blueprint
 from .report_sku import report_sku_blueprint
 from .report_shelf_life import report_shelf_life_blueprint
 from .incoming_stock_notification import incoming_stock_notifications_bp
+from .bulk_ship import bulk_ship_bp
 
 BLUEPRINTS = (
     main_blueprint,
@@ -71,4 +72,5 @@ BLUEPRINTS = (
     report_sku_blueprint,
     report_shelf_life_blueprint,
     incoming_stock_notifications_bp,
+    bulk_ship_bp,
 )
