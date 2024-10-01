@@ -150,6 +150,7 @@ def create():
         user_id=current_user.id,
         approx_arrival_date=form.approx_arrival_date.data,
         description=form.description.data,
+        carrier=form.carrier.data,
     )
 
     db.session.add(notify)

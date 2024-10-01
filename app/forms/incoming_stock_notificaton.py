@@ -19,6 +19,7 @@ class IncomingStockNotificationCreateForm(FlaskForm):
     )
     description = StringField("Description", [DataRequired(), Length(max=256)])
     products_data = StringField("Products data", [DataRequired()])
+    carrier = StringField("Carrier", [Length(max=128)], default=0)
     submit = SubmitField("Save")
 
     def validate_products_data(self, field) -> list[s.IncomingStockNotifyProduct]:
