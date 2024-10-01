@@ -27,7 +27,7 @@ class BulkShipItem(db.Model, ModelMixin):
     )
     store_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("stores.id"))
     product_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("products.id"))
-    grop_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("groups.id"))
+    group_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("groups.id"))
     quantity: orm.Mapped[int] = orm.mapped_column(sa.Integer)
 
     created_at: orm.Mapped[datetime] = orm.mapped_column(

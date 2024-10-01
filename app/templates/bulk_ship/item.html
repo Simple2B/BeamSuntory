@@ -1,4 +1,4 @@
-<div class="bulk_ship_item_inputs relative w-full grid grid-cols-12 gap-2 border-t dark:border-gray-700 p-2">
+<div class="bulk_ship_item_input relative w-full grid grid-cols-12 gap-2 border-t dark:border-gray-700 p-2">
   {% if delete_btn %}
   <div hx-get="{{ url_for('main.no_content') }}" hx-trigger="click" hx-swap="delete"
     hx-target="closest .bulk_ship_item_inputs" hx-indicator="#htmx-spinner"
@@ -15,39 +15,11 @@
   </div>
   {% endif %}
   <div class="col-span-12 grid grid-cols-6 gap-2">
-    <div class="col-span-2">
-      <label for="master_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Master
-        group</label>
-      <select hx-get="{{ url_for('bulk_ship.get_groups') }}" hx-swap="outerHTML" hx-target="next .group_select"
-        hx-trigger="change" hx-indicator="#htmx-spinner" name="master_group_id"
-        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-        <option selected>Select master group</option>
-        {% for master_group in master_groups %}
-        <option value="{{ master_group.id }}">{{ master_group.name }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <div class="group_select col-span-4 grid grid-cols-4 gap-2">
-      <div class="col-span-2">
-        <label for="group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label>
-        <select disabled name="master_group"
-          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-          <option selected>Select group</option>
-          {% for master_group in master_groups %}
-          <option value="{{ master_group.id }}">{{ master_group.name }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="sub_group_select col-span-2">
-      </div>
-    </div>
-
-  </div>
-  <div class="col-span-12 grid grid-cols-6 gap-2">
     <div class="col-span-3">
       <label for="product" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product SKU</label>
-      <input list="product-list" name="product_sku" placeholder="Product" required autocomplete="off"
-        class=" shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+      <input hx-get="{{ url_for('bulk_ship.get_master_groups') }}" hx-swap="innerHTML" hx-target="next .master_group_select"
+      hx-trigger="change" hx-indicator="#htmx-spinner" list="product-list" name="product_sku" placeholder="Product" required autocomplete="off"
+        class="bulk-ship-product shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
       <datalist id="product-list">
         {% for product in products %}
         <option value="{{ product.SKU }}" data-product-id="{{ product.id }}">{{product.name}}</option>
@@ -61,6 +33,10 @@
         placeholder="0" required />
     </div>
   </div>
+  <div class="master_group_select col-span-12 grid grid-cols-6 gap-2">
+    
+  </div>
+  
 
   <div class="col-span-12 grid grid-cols-6 gap-2">
     <div class="col-span-3">

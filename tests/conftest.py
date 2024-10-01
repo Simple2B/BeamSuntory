@@ -681,7 +681,6 @@ def mg_g_populate(client: FlaskClient, mocker):
         group_id=group_canada.id,
         warehouse_id=jw.id,
         ship_request_id=sr_atp.id,
-        from_warehouse_product_id=1,
     ).save(False)
 
     m.Cart(
@@ -689,7 +688,6 @@ def mg_g_populate(client: FlaskClient, mocker):
         quantity=11,
         user_id=1,
         group_id=group_jb.id,
-        from_warehouse_product_id=1,
     ).save(False)
 
     m.Cart(
@@ -699,7 +697,6 @@ def mg_g_populate(client: FlaskClient, mocker):
         group_id=group_canada.id,
         warehouse_id=jw.id,
         ship_request_id=waiting_ship.id,
-        from_warehouse_product_id=1,
         status="submitted",
     ).save(False)
 
@@ -725,7 +722,6 @@ def mg_g_populate(client: FlaskClient, mocker):
             group_id=group_event.id,
             ship_request_id=sr.id,
             warehouse_id=jw.id,
-            from_warehouse_product_id=1,
             status="pending",
         ).save(False)
 

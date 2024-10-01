@@ -315,6 +315,18 @@ const reportConfig = {
   },
 };
 
+const bulkShipConfig = [{
+  entry: {
+    main: './src/bulk_ship/bulk_ship.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/bulk_ship.js', // <--- Will be compiled to this single file
+  },
+}];
+
+
+
 const configs = [
   baseConfig,
   ...userConfig,
@@ -345,6 +357,7 @@ const configs = [
   reportConfig,
   report_sub_group,
   subGroupConfig,
+  ...bulkShipConfig,
 ].map((conf) => merge(defaultConfig, conf));
 
 module.exports = configs;
