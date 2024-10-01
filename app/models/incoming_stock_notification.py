@@ -27,6 +27,7 @@ class IncomingStockNotification(db.Model, ModelMixin):
     recived_date: orm.Mapped[datetime | None] = orm.mapped_column(
         sa.DateTime, default=None
     )
+    carrier: orm.Mapped[str] = orm.mapped_column(sa.String(128), default="")
     status: orm.Mapped[str] = orm.mapped_column(
         sa.String(64), default=s.IncomingStockNotificationStatus.PENDING.value
     )
