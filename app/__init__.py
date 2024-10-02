@@ -4,9 +4,11 @@ from flask import Flask, render_template
 from flask_login import LoginManager
 from werkzeug.exceptions import HTTPException
 from flask_migrate import Migrate
-from flask_mail import Mail
+
+# from flask_mail import Mail
 
 from app.logger import log
+from app.controllers import CustomMail
 from .database import db
 from .constants import (
     DELIVERY_AGENT_ROLES,
@@ -17,7 +19,7 @@ from .constants import (
 # instantiate extensions
 login_manager = LoginManager()
 migration = Migrate()
-mail = Mail()
+mail = CustomMail()
 
 
 def create_app(environment="development"):
