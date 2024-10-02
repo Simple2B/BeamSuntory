@@ -8,7 +8,11 @@ from flask_mail import Mail
 
 from app.logger import log
 from .database import db
-from .constants import DELIVERY_AGENT_ROLES, ADMIN_WAREHOUSE_ROLES
+from .constants import (
+    DELIVERY_AGENT_ROLES,
+    ADMIN_WAREHOUSE_ROLES,
+    ALL_ROLE_WITHOUT_SALE_REP,
+)
 
 # instantiate extensions
 login_manager = LoginManager()
@@ -77,12 +81,7 @@ def create_app(environment="development"):
         s.UserRole.WAREHOUSE_MANAGER.value,
     ]
 
-    app.jinja_env.globals["all_role_without_sale_rep"] = [
-        s.UserRole.ADMIN.value,
-        s.UserRole.MANAGER.value,
-        s.UserRole.WAREHOUSE_MANAGER.value,
-        s.UserRole.DELIVERY_AGENT.value,
-    ]
+    app.jinja_env.globals["all_role_without_sale_rep"] = ALL_ROLE_WITHOUT_SALE_REP
 
     app.jinja_env.globals["all_main_user_roles"] = [
         s.UserRole.ADMIN.value,

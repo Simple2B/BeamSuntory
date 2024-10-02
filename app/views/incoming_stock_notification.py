@@ -19,6 +19,7 @@ from app.controllers import create_pagination, role_required
 from app import models as m, db, mail
 from app import schema as s
 from app import forms as f
+from app.constants import ALL_ROLE_WITHOUT_SALE_REP
 from app.logger import log
 
 
@@ -29,19 +30,20 @@ incoming_stock_notifications_bp = Blueprint(
 
 @incoming_stock_notifications_bp.route("/", methods=["GET"])
 @login_required
-@role_required(
-    [
-        s.UserRole.ADMIN.value,
-        s.UserRole.WAREHOUSE_MANAGER.value,
-        s.UserRole.MANAGER.value,
-    ]
-)
+@role_required(ALL_ROLE_WITHOUT_SALE_REP)
 def get_all():
 
     status = request.args.get("status", type=str, default="")
     q = request.args.get("q", type=str, default="")
 
-    where_stmt = sa.true()
+    where_stmt = sa.and_(m.IncomingStockNotification.user_id == current_user.id)
+
+    if current_user.role_obj.role_name in (
+        s.UserRole.ADMIN.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ):
+        where_stmt = sa.true()
+
     if status:
         where_stmt = sa.and_(where_stmt, m.IncomingStockNotification.status == status)
 
@@ -89,13 +91,7 @@ def get_all():
 
 @incoming_stock_notifications_bp.route("/create", methods=["GET"])
 @login_required
-@role_required(
-    [
-        s.UserRole.ADMIN.value,
-        s.UserRole.WAREHOUSE_MANAGER.value,
-        s.UserRole.MANAGER.value,
-    ]
-)
+@role_required(ALL_ROLE_WITHOUT_SALE_REP)
 def get_create_modal():
     """htmx"""
     form = f.IncomingStockNotificationCreateForm()
@@ -110,13 +106,7 @@ def get_create_modal():
 
 @incoming_stock_notifications_bp.route("/get-product-input", methods=["GET"])
 @login_required
-@role_required(
-    [
-        s.UserRole.ADMIN.value,
-        s.UserRole.WAREHOUSE_MANAGER.value,
-        s.UserRole.MANAGER.value,
-    ]
-)
+@role_required(ALL_ROLE_WITHOUT_SALE_REP)
 def get_product_input():
     """htmx"""
     products = db.session.scalars(sa.select(m.Product))
@@ -127,13 +117,7 @@ def get_product_input():
 
 @incoming_stock_notifications_bp.route("/create", methods=["POST"])
 @login_required
-@role_required(
-    [
-        s.UserRole.ADMIN.value,
-        s.UserRole.WAREHOUSE_MANAGER.value,
-        s.UserRole.MANAGER.value,
-    ]
-)
+@role_required(ALL_ROLE_WITHOUT_SALE_REP)
 def create():
     form = f.IncomingStockNotificationCreateForm()
 
@@ -152,19 +136,19 @@ def create():
     db.session.add(notify)
     products = s.AdapterIncomingStockProducts.validate_json(form.products_data.data)
     for product_data in products:
-        product = db.session.scalar(
-            sa.select(m.Product).where(
-                sa.or_(
-                    m.Product.SKU.ilike(f"%{product_data.product_info}%"),
-                    m.Product.name.ilike(f"%{product_data.product_info}%"),
-                    m.Product.description.ilike(f"%{product_data.product_info}%"),
-                )
-            )
-        )
+        # product = db.session.scalar(
+        #     sa.select(m.Product).where(
+        #         sa.or_(
+        #             m.Product.SKU.ilike(f"%{product_data.product_info}%"),
+        #             m.Product.name.ilike(f"%{product_data.product_info}%"),
+        #             m.Product.description.ilike(f"%{product_data.product_info}%"),
+        #         )
+        #     )
+        # )
 
         notify_product = m.IncomingStockProduct(
             product_info=product_data.product_info,
-            product_id=product.id if product else None,
+            product_id=None,
             quantity=product_data.quantity,
         )
         notify.products.append(notify_product)
@@ -198,13 +182,7 @@ def create():
 
 @incoming_stock_notifications_bp.route("/<notify_uuid>/view", methods=["GET"])
 @login_required
-@role_required(
-    [
-        s.UserRole.ADMIN.value,
-        s.UserRole.WAREHOUSE_MANAGER.value,
-        s.UserRole.MANAGER.value,
-    ]
-)
+@role_required(ALL_ROLE_WITHOUT_SALE_REP)
 def view_modal(notify_uuid):
     notify = db.session.scalar(
         sa.select(m.IncomingStockNotification).where(
@@ -226,13 +204,7 @@ def view_modal(notify_uuid):
 
 @incoming_stock_notifications_bp.route("/received", methods=["POST"])
 @login_required
-@role_required(
-    [
-        s.UserRole.ADMIN.value,
-        s.UserRole.WAREHOUSE_MANAGER.value,
-        s.UserRole.MANAGER.value,
-    ]
-)
+@role_required(ALL_ROLE_WITHOUT_SALE_REP)
 def received():
 
     form = f.IncomingStockNotificationReceivedForm()

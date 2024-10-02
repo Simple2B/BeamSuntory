@@ -24,7 +24,7 @@ class IncomingStockProduct(db.Model, ModelMixin):
         sa.ForeignKey("incoming_stock_notifications.id")
     )
     # Columns
-    product_info: orm.Mapped[str] = orm.mapped_column(sa.String(256))
+    product_info: orm.Mapped[str] = orm.mapped_column(sa.String(256), default="")
     quantity: orm.Mapped[int] = orm.mapped_column(sa.Integer)
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
