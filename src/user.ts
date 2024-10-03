@@ -141,7 +141,15 @@ function editUser(user: IUser) {
   const userRole: HTMLInputElement = document.querySelector('#user-edit-role');
   const salesRep: HTMLInputElement = document.querySelector('#user-edit-sales_rep');
   const salesRepContainer = document.querySelector('#user-edit-sales_rep-container');
-  console.log(userRole);
+  const userAddDropdownBtn = document.querySelector('#user-edit-dropdown-btn');
+  const optionItems = document.querySelectorAll('.user-edit-dropdown-option');
+  const options = document.querySelector('#user-edit-dropdown-options');
+  const selectedOptions: string[] = [];
+
+  if (user.group_name) {
+    const groupNames = user.group_name.split(', ');
+    selectedOptions.push(...groupNames);
+  }
 
   // function to show locker address only for sales rep
   if (userRole.value !== UserRole.SalesRep) {
@@ -152,31 +160,7 @@ function editUser(user: IUser) {
     salesRepContainer.classList.remove('hidden');
   }
 
-  userRole.addEventListener('change', () => {
-    const role = userRole.value;
 
-    if (role !== UserRole.SalesRep) {
-      lockerAddressContainer.classList.add('hidden');
-      salesRepContainer.classList.add('hidden');
-    } else {
-      lockerAddressContainer.classList.remove('hidden');
-      salesRepContainer.classList.remove('hidden');
-    }
-  });
-
-  salesRep.addEventListener('click', () => {
-    lockerAddressContainer.classList.toggle('dropdown-close');
-  });
-
-  // function to select and add group in dropdown list
-  const userAddDropdownBtn = document.querySelector('#user-edit-dropdown-btn');
-  const optionItems = document.querySelectorAll('.user-edit-dropdown-option');
-  const selectedOptions: string[] = [];
-  if (user.group_name) {
-    const groupNames = user.group_name.split(', ');
-    selectedOptions.push(...groupNames);
-  }
-  const options = document.querySelector('#user-edit-dropdown-options');
 
   userAddDropdownBtn.addEventListener('click', showHideGroupUserOptions);
 
@@ -208,6 +192,44 @@ function editUser(user: IUser) {
       userAddDropdownBtn.innerHTML = joinedOptions;
     });
   });
+
+
+
+  userRole.addEventListener('change', () => {
+    const role = userRole.value;
+
+    if (role !== UserRole.SalesRep) {
+      lockerAddressContainer.classList.add('hidden');
+      salesRepContainer.classList.add('hidden');
+    } else {
+      lockerAddressContainer.classList.remove('hidden');
+      salesRepContainer.classList.remove('hidden');
+    }
+
+
+
+
+    if (role === UserRole.Admin) {
+      let input: HTMLInputElement = document.getElementById('user-edit-group') as HTMLInputElement;
+      optionItems.forEach((item) => {
+        const group = item.textContent.trim()
+        if (!selectedOptions.includes(group)) {
+          selectedOptions.push(group);
+        }
+
+      });
+      const joinedValues = selectedOptions.join(', ');
+      input.value = joinedValues
+      userAddDropdownBtn.innerHTML = joinedValues;
+    }
+
+
+  });
+
+  salesRep.addEventListener('click', () => {
+    lockerAddressContainer.classList.toggle('dropdown-close');
+  });
+
 
   let input: HTMLInputElement = document.querySelector('#user-edit-username');
   input.value = user.username;

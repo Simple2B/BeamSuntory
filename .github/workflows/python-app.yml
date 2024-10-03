@@ -82,8 +82,39 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-  deploy-staging:
-    name: Deploy to staging
+  # deploy-staging:
+  #   name: Deploy to staging
+  #   runs-on: Linux
+  #   needs:
+  #     - build
+  #     - on-develop-branch-check
+  #   if: ${{ needs.on-develop-branch-check.outputs.on_develop == 'true' }}
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - name: copy file via ssh password
+  #       uses: appleboy/scp-action@v0.1.4
+  #       with:
+  #         host: ${{ secrets.SSH_HOST_IP_CLIENT_PROD }}
+  #         username: ${{ secrets.SSH_PROD_USER }}
+  #         key: ${{ secrets.SSH_PROD_KEY }}
+  #         port: ${{ secrets.SSH_PROD_PORT }}
+  #         source: 'docker-compose.staging.yml'
+  #         target: '~/beam_suntory_staging'
+  #     - name: Deploy beam-suntory-app to staging
+  #       uses: appleboy/ssh-action@master
+  #       with:
+  #         host: ${{ secrets.SSH_HOST_IP_CLIENT_PROD }}
+  #         username: ${{ secrets.SSH_PROD_USER }}
+  #         key: ${{ secrets.SSH_PROD_KEY }}
+  #         port: ${{ secrets.SSH_PROD_PORT }}
+  #         script: |
+  #           cd beam_suntory_staging &&
+  #           mv docker-compose.staging.yml docker-compose.yml &&
+  #           docker compose pull &&
+  #           docker compose up -d &&
+  # TODO temperory disabled
+  deploy-prod:
+    name: Deploy to prod
     runs-on: Linux
     needs:
       - build
@@ -98,9 +129,9 @@ jobs:
           username: ${{ secrets.SSH_PROD_USER }}
           key: ${{ secrets.SSH_PROD_KEY }}
           port: ${{ secrets.SSH_PROD_PORT }}
-          source: 'docker-compose.staging.yml'
-          target: '~/beam_suntory_staging'
-      - name: Deploy beam-suntory-app to staging
+          source: 'docker-compose.prod.yml'
+          target: '~/beam_suntory'
+      - name: Deploy beam-suntory-app to prod
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST_IP_CLIENT_PROD }}
@@ -108,101 +139,70 @@ jobs:
           key: ${{ secrets.SSH_PROD_KEY }}
           port: ${{ secrets.SSH_PROD_PORT }}
           script: |
-            cd beam_suntory_staging &&
-            mv docker-compose.staging.yml docker-compose.yml &&
+            cd beam_suntory &&
+            mv docker-compose.prod.yml docker-compose.yml &&
             docker compose pull &&
             docker compose up -d &&
-  # TODO temperory disabled
-  # deploy-prod:
-  #   name: Deploy to prod
-  #   runs-on: Linux
-  #   needs:
-  #     - build
-  #     - on-develop-branch-check
-  #   if: ${{ needs.on-develop-branch-check.outputs.on_develop == 'true' }}
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: copy file via ssh password
-  #       uses: appleboy/scp-action@v0.1.4
-  #       with:
-  #         host: ${{ secrets.SSH_HOST_IP_CLIENT_PROD }}
-  #         username: ${{ secrets.SSH_PROD_USER }}
-  #         key: ${{ secrets.SSH_PROD_KEY }}
-  #         port: ${{ secrets.SSH_PROD_PORT }}
-  #         source: 'docker-compose.prod.yml'
-  #         target: '~/beam_suntory'
-  #     - name: Deploy beam-suntory-app to prod
-  #       uses: appleboy/ssh-action@master
-  #       with:
-  #         host: ${{ secrets.SSH_HOST_IP_CLIENT_PROD }}
-  #         username: ${{ secrets.SSH_PROD_USER }}
-  #         key: ${{ secrets.SSH_PROD_KEY }}
-  #         port: ${{ secrets.SSH_PROD_PORT }}
-  #         script: |
-  #           cd beam_suntory &&
-  #           mv docker-compose.prod.yml docker-compose.yml &&
-  #           docker compose pull &&
-  #           docker compose up -d &&
-  #           docker system prune -f
-  # deploy-campari:
-  #   name: Deploy to campari
-  #   runs-on: Linux
-  #   needs:
-  #     - build
-  #     - on-develop-branch-check
-  #   if: ${{ needs.on-develop-branch-check.outputs.on_develop == 'true' }}
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: copy file via ssh password
-  #       uses: appleboy/scp-action@v0.1.4
-  #       with:
-  #         host: ${{ secrets.SSH_HOST_IP_CLIENT_PROD }}
-  #         username: ${{ secrets.SSH_PROD_USER }}
-  #         key: ${{ secrets.SSH_PROD_KEY }}
-  #         port: ${{ secrets.SSH_PROD_PORT }}
-  #         source: 'docker-compose.campari.yml'
-  #         target: '~/beam_campari'
-  #     - name: Deploy beam-suntory-app to campari
-  #       uses: appleboy/ssh-action@master
-  #       with:
-  #         host: ${{ secrets.SSH_HOST_IP_CLIENT_PROD }}
-  #         username: ${{ secrets.SSH_PROD_USER }}
-  #         key: ${{ secrets.SSH_PROD_KEY }}
-  #         port: ${{ secrets.SSH_PROD_PORT }}
-  #         script: |
-  #           cd beam_campari &&
-  #           mv docker-compose.campari.yml docker-compose.yml &&
-  #           docker compose pull &&
-  #           docker compose up -d &&
-  #           docker system prune -f
-  # deploy-proximo:
-  #   name: Deploy to proximo
-  #   runs-on: Linux
-  #   needs:
-  #     - build
-  #     - on-develop-branch-check
-  #   if: ${{ needs.on-develop-branch-check.outputs.on_develop == 'true' }}
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: copy file via ssh password
-  #       uses: appleboy/scp-action@v0.1.4
-  #       with:
-  #         host: ${{ secrets.SSH_HOST_IP_CLIENT_PROD }}
-  #         username: ${{ secrets.SSH_PROD_USER }}
-  #         key: ${{ secrets.SSH_PROD_KEY }}
-  #         port: ${{ secrets.SSH_PROD_PORT }}
-  #         source: 'docker-compose.proximo.yml'
-  #         target: '~/beam_proximo'
-  #     - name: Deploy beam-suntory-app to proximo
-  #       uses: appleboy/ssh-action@master
-  #       with:
-  #         host: ${{ secrets.SSH_HOST_IP_CLIENT_PROD }}
-  #         username: ${{ secrets.SSH_PROD_USER }}
-  #         key: ${{ secrets.SSH_PROD_KEY }}
-  #         port: ${{ secrets.SSH_PROD_PORT }}
-  #         script: |
-  #           cd beam_proximo &&
-  #           mv docker-compose.proximo.yml docker-compose.yml &&
-  #           docker compose pull &&
-  #           docker compose up -d &&
-  #           docker system prune -f
+            docker system prune -f
+  deploy-campari:
+    name: Deploy to campari
+    runs-on: Linux
+    needs:
+      - build
+      - on-develop-branch-check
+    if: ${{ needs.on-develop-branch-check.outputs.on_develop == 'true' }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: copy file via ssh password
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST_IP_CLIENT_PROD }}
+          username: ${{ secrets.SSH_PROD_USER }}
+          key: ${{ secrets.SSH_PROD_KEY }}
+          port: ${{ secrets.SSH_PROD_PORT }}
+          source: 'docker-compose.campari.yml'
+          target: '~/beam_campari'
+      - name: Deploy beam-suntory-app to campari
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST_IP_CLIENT_PROD }}
+          username: ${{ secrets.SSH_PROD_USER }}
+          key: ${{ secrets.SSH_PROD_KEY }}
+          port: ${{ secrets.SSH_PROD_PORT }}
+          script: |
+            cd beam_campari &&
+            mv docker-compose.campari.yml docker-compose.yml &&
+            docker compose pull &&
+            docker compose up -d &&
+            docker system prune -f
+  deploy-proximo:
+    name: Deploy to proximo
+    runs-on: Linux
+    needs:
+      - build
+      - on-develop-branch-check
+    if: ${{ needs.on-develop-branch-check.outputs.on_develop == 'true' }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: copy file via ssh password
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST_IP_CLIENT_PROD }}
+          username: ${{ secrets.SSH_PROD_USER }}
+          key: ${{ secrets.SSH_PROD_KEY }}
+          port: ${{ secrets.SSH_PROD_PORT }}
+          source: 'docker-compose.proximo.yml'
+          target: '~/beam_proximo'
+      - name: Deploy beam-suntory-app to proximo
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST_IP_CLIENT_PROD }}
+          username: ${{ secrets.SSH_PROD_USER }}
+          key: ${{ secrets.SSH_PROD_KEY }}
+          port: ${{ secrets.SSH_PROD_PORT }}
+          script: |
+            cd beam_proximo &&
+            mv docker-compose.proximo.yml docker-compose.yml &&
+            docker compose pull &&
+            docker compose up -d &&
+            docker system prune -f
