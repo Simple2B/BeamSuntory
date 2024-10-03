@@ -9,4 +9,5 @@ class CustomMail(Mail):
             super().send(message)
             log(log.INFO, "Email send")
         except Exception as e:
-            log(log.ERROR, "Error during send email [%x]", e)
+            log(log.ERROR, "Error during send email")
+            print(e, "Error during send email")
