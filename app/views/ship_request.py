@@ -337,8 +337,7 @@ def create():
             url=url,
         )
         try:
-            # mail.send(msg)
-            pass
+            mail.send(msg)
         except Exception as e:
             log(
                 log.ERROR,

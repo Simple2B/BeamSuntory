@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 import sqlalchemy as sa
 from sqlalchemy import orm
 import json
