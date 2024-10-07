@@ -1,6 +1,12 @@
+import enum
+
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
 from .master_group_for_product import MasterGroupProduct
+
+
+class Brand(enum.Enum):
+    name = "Brand"
 
 
 class GroupProduct(BaseModel):

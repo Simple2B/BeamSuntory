@@ -9,7 +9,7 @@ from app import schema as s, models as m
 from app.database import db
 from app.controllers.pagination import create_pagination
 
-from .report_data import ReportData
+from .report_data import ReportData, add_product_groups
 
 
 class ReportDataShareRequests(ReportData):
@@ -136,6 +136,8 @@ class ReportDataShareRequests(ReportData):
     def get_dataset(cls, report_filter: s.ReportFilter) -> dict[str, list]:
         query, _ = cls.get_search_result(report_filter)
 
+        master_groups = cls.get_product_master_groups()
+
         reports = db.session.scalars(query)
         dataset = {
             "Name": [],
@@ -145,6 +147,7 @@ class ReportDataShareRequests(ReportData):
             "From": [],
             "To": [],
             "Status": [],
+            "Created At": [],
             "Last transaction data": [],
             "Approved At": [],
             "User Approved": [],
@@ -153,7 +156,9 @@ class ReportDataShareRequests(ReportData):
         }  # type: dict[str, list]
 
         for request_share_report in reports:
-            add_share_requests_dataset_row(dataset, request_share_report.request_share)
+            add_share_requests_dataset_row(
+                dataset, request_share_report.request_share, master_groups, True
+            )
 
         return dataset
 
@@ -161,17 +166,23 @@ class ReportDataShareRequests(ReportData):
 def add_share_requests_dataset_row(
     dataset: dict[str, list],
     request_share: m.RequestShare,
+    master_groups: list[m.MasterGroupProduct],
+    download: bool = False,
 ):
     dataset["Name"].append(request_share.product.name)
     dataset["SKU"].append(request_share.product.SKU)
-    dataset["Brand"].append(request_share.product.brand)
+
     dataset["Quantity"].append(request_share.desire_quantity)
     dataset["From"].append(request_share.from_group.name)
     dataset["To"].append(request_share.group.name)
     dataset["Status"].append(request_share.status)
-    dataset["Last transaction data"].append(
-        request_share.created_at.strftime("%m/%d/%Y %H:%M:%S")
-    )
+    dataset["Created At"].append(request_share.created_at.strftime("%m/%d/%Y %H:%M:%S"))
+    dataset["Last transaction data"].append(request_share.product.last_transaction_data)
+
+    if download:
+        add_product_groups(dataset, request_share.product, master_groups)
+    else:
+        dataset["Brand"].append(request_share.product.brand)
 
     approved_report = None
     declined_report = None

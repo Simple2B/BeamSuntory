@@ -136,27 +136,30 @@ class ReportDataAssigns(ReportData):
         report_filter: s.ReportFilter,
     ):
         query, _ = cls.get_search_result(report_filter)
+        maste_groups = cls.get_product_master_groups()
         # 'created_at,username,type,from_group,to_group,sku,product_name,quantity'
         dataset = {
-            "username": [],
-            "type": [],
-            "from_group": [],
-            "to_group": [],
+            "Username": [],
+            "Type": [],
+            "From group": [],
+            "To group": [],
             "SKU": [],
-            "product_name": [],
-            "brand": [],
-            "quantity": [],
-            "last_transaction_data": [],
+            "Product name": [],
+            "Quantity": [],
+            "Last transaction data": [],
         }  # type: dict[str, list]
         for assign in db.session.scalars(query):
-            dataset["username"].append(assign.user.username)
-            dataset["type"].append(assign.type)
-            dataset["from_group"].append(assign.from_group.name)
-            dataset["to_group"].append(assign.group.name)
+            dataset["Username"].append(assign.user.username)
+            dataset["Type"].append(assign.type)
+            dataset["From group"].append(assign.from_group.name)
+            dataset["To group"].append(assign.group.name)
             dataset["SKU"].append(assign.product.SKU)
-            dataset["product_name"].append(assign.product.name)
-            dataset["brand"].append(assign.product.brand)
-            dataset["quantity"].append(assign.quantity)
-            dataset["last_transaction_data"].append(assign.created_at)
+            dataset["Product name"].append(assign.product.name)
+            dataset["Quantity"].append(assign.quantity)
+            dataset["Last transaction data"].append(
+                assign.product.last_transaction_data
+            )
+
+            cls.add_product_groups(dataset, assign.product, maste_groups)
 
         return dataset

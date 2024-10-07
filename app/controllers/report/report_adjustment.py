@@ -131,36 +131,40 @@ class ReportDataAdjustments(ReportData):
         query, _ = cls.get_search_result(report_filter)
 
         reports = db.session.scalars(query)
+        master_groups = cls.get_product_master_groups()
         # 'created_at,product_name,sku,username,master_group,group,warehouse,quantity_before,quantity_after,quantity_delta,note',
         dataset = {
-            "created_at": [],
-            "product_name": [],
-            "sku": [],
-            "brand": [],
-            "username": [],
-            "master_group": [],
-            "group": [],
-            "warehouse": [],
-            "quantity_before": [],
-            "quantity_after": [],
-            "quantity_delta": [],
-            "note": [],
+            "Created at": [],
+            "Product name": [],
+            "SKU": [],
+            "Username": [],
+            "Master group": [],
+            "Group": [],
+            "Warehouse": [],
+            "Quantity before": [],
+            "Quantity after": [],
+            "Quantity delta": [],
+            "Note": [],
+            "Last transaction data": [],
         }  # type: dict[str, list]
 
         for adjust in reports:
             for report_adjust in adjust.adjust_group_qty:
 
-                dataset["created_at"].append(adjust.created_at)
-                dataset["product_name"].append(adjust.product.name)
-                dataset["sku"].append(adjust.product.SKU)
-                dataset["brand"].append(adjust.product.brand)
-                dataset["username"].append(adjust.user.username)
-                dataset["master_group"].append(report_adjust.group.master_group.name)
-                dataset["group"].append(report_adjust.group.name)
-                dataset["warehouse"].append(report_adjust.warehouse.name)
-                dataset["quantity_before"].append(report_adjust.quantity_before)
-                dataset["quantity_after"].append(report_adjust.quantity_after)
-                dataset["quantity_delta"].append(report_adjust.delta_value)
-                dataset["note"].append(adjust.note)
+                dataset["Created at"].append(adjust.created_at)
+                dataset["Product name"].append(adjust.product.name)
+                dataset["SKU"].append(adjust.product.SKU)
+                dataset["Username"].append(adjust.user.username)
+                dataset["Master group"].append(report_adjust.group.master_group.name)
+                dataset["Group"].append(report_adjust.group.name)
+                dataset["Warehouse"].append(report_adjust.warehouse.name)
+                dataset["Quantity before"].append(report_adjust.quantity_before)
+                dataset["Quantity after"].append(report_adjust.quantity_after)
+                dataset["Quantity delta"].append(report_adjust.delta_value)
+                dataset["Note"].append(adjust.note)
+                dataset["Last transaction data"].append(
+                    adjust.product.last_transaction_data
+                )
+                cls.add_product_groups(dataset, adjust.product, master_groups)
 
         return dataset

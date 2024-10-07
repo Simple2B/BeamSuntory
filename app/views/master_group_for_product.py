@@ -45,7 +45,7 @@ def get_all():
 
     pagination = create_pagination(total=db.session.scalar(count_query))
     master_groups_rows = db.session.execute(sa.select(m.MasterGroupProduct)).all()
-    master_groups_mandatory = [s.Events.name.value]
+    master_groups_mandatory = [s.Events.name.value, s.Brand.name.value]
 
     return render_template(
         "master_group_for_product/master_groups_for_product.html",
@@ -100,6 +100,16 @@ def save():
         )
         flash("Cannot save master group data", "danger")
         return redirect(url_for("master_group_product.get_all"))
+
+    if master_group.name == s.Brand.name.value:
+        log(
+            log.ERROR,
+            "Can edit brand master group: [%s]",
+            form.master_group_product_id.data,
+        )
+        flash("Can edit brand group", "danger")
+        return redirect(url_for("master_group_product.get_all"))
+
     master_group.name = form.name.data
     master_group.save()
     if form.next_url.data:
@@ -111,7 +121,7 @@ def save():
 @login_required
 @role_required([s.UserRole.ADMIN.value])
 def delete(id: int):
-    master_groups_mandatory = [s.Events.name.value]
+    master_groups_mandatory = [s.Events.name.value, s.Brand.name.value]
     master_group = db.session.get(m.MasterGroupProduct, id)
     if not master_group:
         log(log.INFO, "There is no master group with id: [%s]", id)
@@ -125,7 +135,15 @@ def delete(id: int):
             id,
         )
         flash("Can not delete master group, while master group is mandatory", "danger")
-        return redirect(url_for("master_group.get_all"))
+        return redirect(url_for("master_group_product.get_all"))
+
+    if master_group.name == s.Brand.name.value:
+        log(
+            log.ERROR,
+            "Can edit brand master group",
+        )
+        flash("Can edit brand group", "danger")
+        return redirect(url_for("master_group_product.get_all"))
 
     query_group = db.session.scalar(
         m.GroupProduct.select().where(m.GroupProduct.master_group_id == master_group.id)

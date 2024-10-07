@@ -7,7 +7,7 @@ from app import schema as s, models as m
 from app.database import db
 from app.controllers.pagination import create_pagination
 
-from .report_data import ReportData
+from .report_data import ReportData, add_product_groups
 
 
 class ReportDataInboundOrders(ReportData):
@@ -179,18 +179,29 @@ class ReportDataInboundOrders(ReportData):
 
 
 def create_inbound_order_dataset(
-    report: m.InboundOrder, master_group: str = "", target_group: str = ""
+    report: m.InboundOrder,
+    master_group: str = "",
+    target_group: str = "",
+    download: bool = False,
 ) -> dict[str, list]:
+
+    master_groups = db.session.scalars(
+        sa.select(m.MasterGroupProduct).where(
+            m.MasterGroupProduct.name != s.Events.name.value
+        )
+    ).all()
+
     data = {
         "Name": [],
         "SKU": [],
-        "Brand": [],
         "Quantity": [],
         "Group": [],
+        "Brand": [],
         "Created At": [],
         "Supplier": [],
         "Arrived": [],
         "Warehouse": [],
+        "Last transaction data": [],
     }  # type: dict[str, list]
 
     for product_allocated in report.products_allocated:
@@ -206,12 +217,19 @@ def create_inbound_order_dataset(
                 continue
             data["Name"].append(product_allocated.product.name)
             data["SKU"].append(product_allocated.product.SKU)
-            data["Brand"].append(product_allocated.product.brand)
             data["Quantity"].append(group.quantity)
             data["Group"].append(group.group.name)
             data["Created At"].append(report.created_at.strftime("%Y-%m-%d %H:%M:%S"))
             data["Supplier"].append(report.supplier.name)
             data["Arrived"].append(report.delivery_date.strftime("%Y-%m-%d"))
             data["Warehouse"].append(report.warehouse.name)
+            data["Last transaction data"].append(
+                product_allocated.product.last_transaction_data
+            )
+
+            if download:
+                add_product_groups(data, product_allocated.product, master_groups)
+            else:
+                data["Brand"].append(product_allocated.product.brand)
 
     return data

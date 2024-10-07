@@ -12,7 +12,7 @@ from app.controllers import role_required
 
 from app import schema as s
 from app import models as m, db
-from app.controllers.report.report_inventory import add_dataset_row
+from app.controllers.report.report_inventory import create_inventory_dataset
 from app.controllers.report import send_xlsx_response
 from app.logger import log
 
@@ -45,21 +45,7 @@ def download_csv(product_id: int):
         return redirect(url_for("report.index"))
 
     # data = create_inventory_dataset(product, group, master_group)
-    dataset = {
-        "Name": [],
-        "SKU": [],
-        "Quantity": [],
-        "Group": [],
-        "Brand": [],
-        "Warehouse": [],
-    }  # type: dict[str, list]
-
-    add_dataset_row(
-        dataset,
-        product,
-        target_group=group,
-        master_group=master_group,
-    )
+    dataset = create_inventory_dataset(product, group, master_group, download=True)
     df = pd.DataFrame(dataset)
 
     # Save the DataFrame to a CSV file in memory
@@ -88,21 +74,7 @@ def detail_modal(product_id: int):
         return render_template(
             "toast.html", message="Report not found", category="danger"
         )
-    dataset = {
-        "Name": [],
-        "SKU": [],
-        "Quantity": [],
-        "Group": [],
-        "Brand": [],
-        "Warehouse": [],
-    }  # type: dict[str, list]
-
-    add_dataset_row(
-        dataset,
-        product,
-        target_group=target_group,
-        master_group=master_group,
-    )
+    dataset = create_inventory_dataset(product, target_group, master_group)
 
     return render_template(
         "report/inventory/detail_modal.html",

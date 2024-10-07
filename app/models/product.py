@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 import sqlalchemy as sa
 from sqlalchemy import orm
 import json
@@ -17,6 +17,7 @@ from .image import Image
 
 if TYPE_CHECKING:
     from .supplier import Supplier
+    from .report_sku import ReportSKU
 
 
 class Product(db.Model, ModelMixin):
@@ -91,6 +92,16 @@ class Product(db.Model, ModelMixin):
         order_by=GroupProduct.name.asc(),
     )
 
+    report_sku: orm.Mapped["ReportSKU"] = orm.relationship(
+        order_by="ReportSKU.created_at.desc()", uselist=False
+    )
+
+    @property
+    def last_transaction_data(self):
+        if not self.report_sku:
+            return "-"
+        return f"{self.report_sku.type} ({self.report_sku.created_at.strftime('%d/%m/%Y, %H:%M:%S')})"
+
     def __repr__(self):
         return f"<{self.id}: {self.name}>"
 
@@ -108,7 +119,7 @@ class Product(db.Model, ModelMixin):
             set(
                 group.name
                 for group in self.groups
-                if group.master_groups_for_product.name == "Brand"
+                if group.master_groups_for_product.name == s.Brand.name.value
             )
         )
 

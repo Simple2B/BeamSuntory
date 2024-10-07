@@ -49,6 +49,9 @@
         <th scope="col" class="px-6 py-3">
           Notes
         </th>
+        <th scope="col" class="px-6 py-3">
+          Last transaction data
+        </th>
       </tr>
     </thead>
     <tbody>
@@ -133,6 +136,11 @@
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
             <div class="text-base font-semibold">{{ report.note if report.note else "-" }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.product.last_transaction_data }}</div>
           </div>
         </td>
       </tr>
