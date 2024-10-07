@@ -20,7 +20,9 @@ class ReportDataShareRequests(ReportData):
     def get_search_result(
         cls, report_filter: s.ReportFilter
     ) -> Tuple[sa.Select[Tuple[m.ReportRequestShare]], sa.Select[Tuple[int]]]:
-        query = sa.select(m.ReportRequestShare).order_by(m.ReportRequestShare.id)
+        query = sa.select(m.ReportRequestShare).order_by(
+            m.ReportRequestShare.created_at.desc()
+        )
         count_query = sa.select(sa.func.count()).select_from(m.ReportRequestShare)
 
         if report_filter.master_group and not report_filter.target_group:
@@ -143,7 +145,7 @@ class ReportDataShareRequests(ReportData):
             "From": [],
             "To": [],
             "Status": [],
-            "Created At": [],
+            "Last transaction data": [],
             "Approved At": [],
             "User Approved": [],
             "Declined At": [],
@@ -167,7 +169,9 @@ def add_share_requests_dataset_row(
     dataset["From"].append(request_share.from_group.name)
     dataset["To"].append(request_share.group.name)
     dataset["Status"].append(request_share.status)
-    dataset["Created At"].append(request_share.created_at.strftime("%m/%d/%Y %H:%M:%S"))
+    dataset["Last transaction data"].append(
+        request_share.created_at.strftime("%m/%d/%Y %H:%M:%S")
+    )
 
     approved_report = None
     declined_report = None

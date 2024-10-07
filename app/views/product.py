@@ -396,11 +396,6 @@ def create():
         log(log.ERROR, "Product creation errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
         return redirect(url_for("product.get_all", **query_params))
-    query = m.Product.select().where(m.Product.name == form.name.data)
-    gr: m.Product | None = db.session.scalar(query)
-    if gr:
-        flash("This product name is already taken.", "danger")
-        return redirect(url_for("product.get_all", **query_params))
 
     try:
         product_group_ids = adapter.validate_json(form.product_groups.data)
