@@ -42,7 +42,9 @@ def download_csv(report_id: int):
         flash("Report not found", "error")
         return redirect(url_for("report.index"))
 
-    data = create_inbound_order_dataset(report, master_group, target_group)
+    data = create_inbound_order_dataset(
+        report, master_group, target_group, download=True
+    )
 
     df = pd.DataFrame(data)
 

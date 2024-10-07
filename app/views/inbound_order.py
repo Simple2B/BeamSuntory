@@ -149,7 +149,14 @@ def create():
     )
 
     # save delivered product quantity, so this product would be available in warehouse
-    products_data = s.ProductAllocatedList.model_validate_json(form.products.data)
+
+    try:
+        products_data = s.ProductAllocatedList.model_validate_json(form.products.data)
+    except ValidationError:
+        log(log.INFO, "Inbound order validation failed: [%s]", form.products.data)
+        flash("Inbound order validation failed: wrong product data", "danger")
+        return redirect(url_for("inbound_order.get_all"))
+
     for product_data in products_data.root:
         product = db.session.get(m.Product, product_data.id)
         # Find product

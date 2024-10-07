@@ -12,7 +12,7 @@ from app.database import db
 from app.views.product import DEFUALT_IMAGE_ID
 from .add_stores import add_new_store
 from .set_courvoisier import set_counrvoisier
-from .events import add_events
+from .events import add_extra_groups
 from .product import update_product_descriptions
 from config import SALES_REP_LOCKER_NAME
 
@@ -435,7 +435,7 @@ def init(app: Flask):
     def init_data():
         """Add data to db."""
         print("add events groups")
-        add_events()
+        add_extra_groups()
 
         img = db.session.get(m.Image, DEFUALT_IMAGE_ID)
         if not img:

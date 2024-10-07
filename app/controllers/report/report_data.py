@@ -5,6 +5,8 @@ from flask import send_file
 import pandas as pd
 import sqlalchemy as sa
 from app import schema as s
+from app.database import db
+import app.models as m
 
 
 class ReportData(ABC):
@@ -57,6 +59,23 @@ class ReportData(ABC):
 
         return send_xlsx_response(df)
 
+    @classmethod
+    def get_product_master_groups(cls) -> list[m.MasterGroupProduct]:
+        return db.session.scalars(
+            sa.select(m.MasterGroupProduct).where(
+                m.MasterGroupProduct.name != s.Events.name.value
+            )
+        ).all()
+
+    @classmethod
+    def add_product_groups(
+        cls,
+        dataset: dict[str, list],
+        product: m.Product,
+        master_groups: list[m.MasterGroupProduct],
+    ):
+        add_product_groups(dataset, product, master_groups)
+
 
 def send_xlsx_response(df: pd.DataFrame):
     # Save the DataFrame to a CSV file in memory
@@ -75,3 +94,18 @@ def send_xlsx_response(df: pd.DataFrame):
         as_attachment=True,
         download_name="report.xlsx",
     )
+
+
+def add_product_groups(
+    dataset: dict[str, list],
+    product: m.Product,
+    master_groups: list[m.MasterGroupProduct],
+):
+
+    for master_group in master_groups:
+        if master_group.name not in dataset:
+            dataset[master_group.name] = []
+
+        dataset[master_group.name].append(
+            product.get_group_by_maste_group(master_group.name)
+        )

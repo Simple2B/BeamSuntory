@@ -39,7 +39,7 @@ def downlaod_csv(product_allocated_id: int):
         flash("Peport not found", "danger")
         return redirect(url_for("report.index"))
 
-    data = create_shelf_life_dataset(product_allocated)
+    data = create_shelf_life_dataset(product_allocated, download=True)
 
     df = pd.DataFrame(data)
 

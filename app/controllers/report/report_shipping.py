@@ -8,7 +8,7 @@ from app import schema as s, models as m
 from app.database import db
 from app.controllers.pagination import create_pagination
 
-from .report_data import ReportData
+from .report_data import ReportData, add_product_groups
 
 
 class ReportDataShipping(ReportData):
@@ -153,7 +153,7 @@ class ReportDataShipping(ReportData):
             "Order №": [],
             "User": [],
             "Store": [],
-            "Last transaction data": [],
+            "Created At": [],
             "Date delivered": [],
             "Date picked up": [],
         }  # type: dict[str, list]
@@ -169,16 +169,23 @@ def add_dataset_row(dataset: dict[str, list], report: m.ShipRequest):
     dataset["Store"].append(report.store.store_name)
     dataset["Date delivered"].append(report.date_delivered)
     dataset["Date picked up"].append(report.date_picked_up)
-    dataset["Last transaction data"].append(
-        report.created_at.strftime("%m/%d/%Y %H:%M:%S")
-    )
+    dataset["Created At"].append(report.created_at.strftime("%m/%d/%Y %H:%M:%S"))
 
     return dataset
 
 
 def create_shipping_modal_dataset(
-    report: m.ShipRequest, master_group: str = "", target_group: str = ""
+    report: m.ShipRequest,
+    master_group: str = "",
+    target_group: str = "",
+    download: bool = False,
 ) -> dict[str, list]:
+
+    master_groups = db.session.scalars(
+        sa.select(m.MasterGroupProduct).where(
+            m.MasterGroupProduct.name != s.Events.name.value
+        )
+    ).all()
     dataset = {
         "SKU": [],
         "Name": [],
@@ -191,6 +198,7 @@ def create_shipping_modal_dataset(
         "Store": [],
         "Date delivered": [],
         "Date picked up": [],
+        "Last transaction data": [],
     }  # type: dict[str, list]
 
     for cart in report.carts:
@@ -204,7 +212,6 @@ def create_shipping_modal_dataset(
             continue
         dataset["SKU"].append(cart.product.SKU)
         dataset["Name"].append(cart.product.name)
-        dataset["Brand"].append(cart.product.brand)
         dataset["Quantity"].append(cart.quantity)
         dataset["Group"].append(cart.group.name)
         dataset["Warehouse"].append(cart.warehouse.name)
@@ -213,5 +220,11 @@ def create_shipping_modal_dataset(
         dataset["Store"].append(report.store.store_name)
         dataset["Date delivered"].append(report.date_delivered)
         dataset["Date picked up"].append(report.date_picked_up)
+        dataset["Last transaction data"].append(cart.product.last_transaction_data)
+
+        if download:
+            add_product_groups(dataset, cart.product, master_groups)
+        else:
+            dataset["Brand"].append(cart.product.brand)
 
     return dataset
