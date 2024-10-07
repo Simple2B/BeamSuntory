@@ -63,7 +63,6 @@
         </a>
       </li>
       {% endif %}
-      {% endif %}
       {% if current_user.has_access_bulk_ship %}
       <li>
         <a href="{{ url_for('bulk_ship.get_all') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">

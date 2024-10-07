@@ -37,6 +37,8 @@ class StoreCategory(db.Model, ModelMixin):
         default=datetime.now,
     )
 
+    stores: orm.Mapped[list["Store"]] = orm.relationship()
+
     def __repr__(self):
         return f"<{self.id}: {self.name}>"
 

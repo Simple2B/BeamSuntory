@@ -9,3 +9,4 @@ from .utils import (
     sort_user_groups,
     get_query_params_from_headers,
 )
+from .mail import CustomMail

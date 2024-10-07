@@ -32,10 +32,7 @@ class BulkShip(db.Model, ModelMixin):
         sa.DateTime,
         default=datetime.now,
     )
-
-    items: orm.Mapped[List["BulkShipItem"]] = orm.relationship(
-        back_populates="bulk_ship",
-    )
+    excel_file: orm.Mapped[str] = orm.mapped_column(sa.String(512))
 
     def __repr__(self):
         return f"<{self.id}>"
