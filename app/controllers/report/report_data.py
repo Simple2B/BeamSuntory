@@ -51,7 +51,7 @@ class ReportData(ABC):
         ).model_dump_json(by_alias=True)
 
     @classmethod
-    def generate_csv_response(cls, report_filter: s.ReportFilter):
+    def generate_xlsx_response(cls, report_filter: s.ReportFilter):
         data = cls.get_dataset(report_filter)
         df = pd.DataFrame(data)
 

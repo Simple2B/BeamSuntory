@@ -92,7 +92,7 @@ def detail_modal(request_share_id: int):
         "From": [],
         "To": [],
         "Status": [],
-        "Created At": [],
+        "Last transaction data": [],
         "Approved At": [],
         "User Approved": [],
         "Declined At": [],

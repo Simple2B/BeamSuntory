@@ -31,7 +31,7 @@ class ReportDataAssigns(ReportData):
     def get_search_result(
         cls, report_filter: s.ReportFilter
     ) -> Tuple[sa.Select[Tuple[m.Assign]], sa.Select[Tuple[int]]]:
-        query = sa.select(m.Assign).order_by(sa.desc(m.Assign.id))
+        query = sa.select(m.Assign).order_by(sa.desc(m.Assign.created_at))
         count_query = sa.select(sa.func.count()).select_from(m.Assign)
 
         if report_filter.q:
@@ -138,7 +138,6 @@ class ReportDataAssigns(ReportData):
         query, _ = cls.get_search_result(report_filter)
         # 'created_at,username,type,from_group,to_group,sku,product_name,quantity'
         dataset = {
-            "created_at": [],
             "username": [],
             "type": [],
             "from_group": [],
@@ -147,9 +146,9 @@ class ReportDataAssigns(ReportData):
             "product_name": [],
             "brand": [],
             "quantity": [],
+            "last_transaction_data": [],
         }  # type: dict[str, list]
         for assign in db.session.scalars(query):
-            dataset["created_at"].append(assign.created_at)
             dataset["username"].append(assign.user.username)
             dataset["type"].append(assign.type)
             dataset["from_group"].append(assign.from_group.name)
@@ -158,5 +157,6 @@ class ReportDataAssigns(ReportData):
             dataset["product_name"].append(assign.product.name)
             dataset["brand"].append(assign.product.brand)
             dataset["quantity"].append(assign.quantity)
+            dataset["last_transaction_data"].append(assign.created_at)
 
         return dataset

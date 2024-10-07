@@ -45,6 +45,6 @@ def get_reports(render: bool = False, download: bool = False) -> str:
         return report_dispatcher.generate_html_response(report_filter)
 
     if download:
-        return report_dispatcher.generate_csv_response(report_filter)
+        return report_dispatcher.generate_xlsx_response(report_filter)
 
     return report_dispatcher.generate_json_response(report_filter)

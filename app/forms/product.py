@@ -134,13 +134,6 @@ class ProductForm(FlaskForm):
         if db.session.scalar(query) is not None:
             raise ValidationError("This SKU is taken.")
 
-    def validate_name(self, field):
-        query = m.Product.select().where(
-            m.Product.name == field.data, m.Product.id != int(self.product_id.data)
-        )
-        if db.session.scalar(query) is not None:
-            raise ValidationError("This product name is taken.")
-
 
 class NewProductForm(FlaskForm):
     name = StringField("Name", [DataRequired()], render_kw={"placeholder": "Name"})
@@ -245,11 +238,6 @@ class NewProductForm(FlaskForm):
         query = m.Product.select().where(m.Product.SKU == field.data)
         if db.session.scalar(query) is not None:
             raise ValidationError("This SKU is taken.")
-
-    def validate_name(self, field):
-        query = m.Product.select().where(m.Product.name == field.data)
-        if db.session.scalar(query) is not None:
-            raise ValidationError("This product name is taken.")
 
     def validate_image(self, field):
         if field.data.content_type == "application/octet-stream":

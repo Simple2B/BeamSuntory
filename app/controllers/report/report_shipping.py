@@ -153,6 +153,7 @@ class ReportDataShipping(ReportData):
             "Order №": [],
             "User": [],
             "Store": [],
+            "Last transaction data": [],
             "Date delivered": [],
             "Date picked up": [],
         }  # type: dict[str, list]
@@ -168,6 +169,10 @@ def add_dataset_row(dataset: dict[str, list], report: m.ShipRequest):
     dataset["Store"].append(report.store.store_name)
     dataset["Date delivered"].append(report.date_delivered)
     dataset["Date picked up"].append(report.date_picked_up)
+    dataset["Last transaction data"].append(
+        report.created_at.strftime("%m/%d/%Y %H:%M:%S")
+    )
+
     return dataset
 
 
