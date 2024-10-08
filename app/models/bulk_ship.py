@@ -1,4 +1,3 @@
-from typing import List, TYPE_CHECKING
 from datetime import datetime
 
 import sqlalchemy as sa
@@ -8,15 +7,13 @@ from app.database import db
 from .utils import ModelMixin, generate_uuid
 from app import schema as s
 
-if TYPE_CHECKING:
-    from .bulk_ship_item import BulkShipItem
-
 
 class BulkShip(db.Model, ModelMixin):
     __tablename__ = "bulk_ships"
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
 
+    user_id: orm.Mapped[int] = orm.mapped_column(sa.Integer, sa.ForeignKey("users.id"))
     uuid: orm.Mapped[str] = orm.mapped_column(
         sa.String(36),
         default=generate_uuid,

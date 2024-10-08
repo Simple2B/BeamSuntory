@@ -1,80 +1,44 @@
 
+async function downloadBulkTemplate(e: Event) {
+    const target = e.target as HTMLElement
+    const spinner = target.querySelector('svg');
+    console.log(spinner);
+    if (!spinner) {
+        return
 
-// interface IAvailableQtyRes {
-//     avaivableQty: number;
-// }
+    }
+    spinner.classList.remove("hidden");
 
-
-// async function getAvaivableQty(
-//     product_id: number,
-//     group_id: number
-// ): Promise<IAvailableQtyRes> {
-//     const res = await fetch(`/bulk-ship/available-qty?product_id=${product_id}&group_id=${group_id}`);
-
-//     if (res.ok) {
-//         const data: IAvailableQtyRes = await res.json();
-//         return data;
-//     }
-//     return { avaivableQty: 0 };
-
-// }
-
-
-const handlerOnSubmit = (e: Event) => {
-    const form = document.getElementById('bulk-ship-form') as HTMLFormElement;
-    if (!form) {
-        console.error('Form not found');
-        return;
+    let url = "/bulk-ship/download-template";
+    const bulkShipUuid = target.getAttribute("bulk-ship-uuid");
+    if (bulkShipUuid) {
+        console.log(bulkShipUuid);
+        url = `/bulk-ship/${bulkShipUuid}/download-template`;
     }
 
-    if (!form.checkValidity()) {
-        form.reportValidity();
-        console.error('Form is not valid');
-        return;
+    console.log(url);
+    const response = await fetch(url)
+    if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'bulk_ship_template.xlsx'; // Set the desired filename
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+
+    } else {
+        location.reload();
     }
-
-    const itemsData: HTMLInputElement = form.querySelector('input[name="items_data"]');
-    if (!itemsData) {
-        console.error('Items data not found');
-        return;
-    }
-
-
-    const items = Array.from(form.querySelectorAll('.bulk_ship_item_input')).map((div) => {
-        const groups: NodeListOf<HTMLSelectElement> = div.querySelectorAll('select[name="group_id"]');
-        const group_id = groups.length > 1 && groups[1].value !== "Select group" ? groups[1] : groups[0];
-        const productSKU: HTMLInputElement = div.querySelector('input[name="product_sku"]');
-        const quantity: HTMLInputElement = div.querySelector('input[name="qty"]');
-        const store_id: HTMLSelectElement = div.querySelector('select[name="store_id"]');
-
-        if (group_id.value === "Select group" || store_id.value === "Select store") {
-            throw new Error("Invalid group_id or store_id");
-        }
-
-        return {
-            groupId: group_id.value,
-            productSKU: productSKU.value,
-            qty: quantity.value,
-            storeId: store_id.value
-        };
-
-    });
-
-    itemsData.value = JSON.stringify(items);
-
-    form.submit();
-    const btn = e.target as HTMLButtonElement;
-    btn.disabled = true;
-};
-
-
-function main() {
-    const submitBtn = document.getElementById('bulk-ship-submit');
-    if (!submitBtn) {
-        console.error('Submit button not found');
-        return;
-    }
-    submitBtn.addEventListener('click', handlerOnSubmit);
+    spinner.classList.add("hidden");
 }
 
-main();
+
+window.addEventListener('DOMContentLoaded', () => {
+    const downloadButtons = document.querySelectorAll('.download-bulk-ship-template');
+    downloadButtons.forEach((button) => {
+        console.log(button);
+        button.addEventListener('click', downloadBulkTemplate);
+    });
+});

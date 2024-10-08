@@ -49,9 +49,11 @@
 
       </form>
       {% if errors %}
+      <p class="px-6 py-1 text-sm text-gray-500 dark:text-gray-300">We have some errors, please fix them, upload again</p>
       <div class="px-6 py-2" >
+        
         {% for key, mes in errors.items() %}
-        <div class="text-red-500 flex">{{ key | capitalize }}:
+        <div class="text-xs text-red-600 dark:text-red-400 font-medium flex">{{ key | capitalize }}:
           {% for m in mes %}
             <div class="text-red-600" >{{ m }}</div>
             {% endfor %}

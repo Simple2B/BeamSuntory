@@ -1,6 +1,8 @@
 import io
+import os
 import json
 from datetime import datetime
+from pathlib import Path
 
 from flask import (
     Blueprint,
@@ -10,6 +12,8 @@ from flask import (
     redirect,
     send_file,
     url_for,
+    send_from_directory,
+    current_app as app,
 )
 
 from flask_login import login_required, current_user
@@ -23,13 +27,17 @@ from pydantic import ValidationError
 from openpyxl.utils import quote_sheetname
 from openpyxl.workbook.defined_name import DefinedName
 
-from app.controllers import create_pagination, role_required
+from app.controllers import (
+    create_pagination,
+    role_required,
+    create_ship_requests_by_address,
+    save_exel_file,
+)
 
 from app import models as m, db
 from app import schema as s
 from app import forms as f
 from app.controllers import validate_bulk_ship_exel
-from app.controllers.report import send_xlsx_response
 from app.logger import log
 from .utils import create_metch
 
@@ -42,23 +50,23 @@ bulk_ship_bp = Blueprint("bulk_ship", __name__, url_prefix="/bulk-ship")
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def get_all():
 
-    # where_stmt = sa.and_(m.BulkShip.is_deleted.is_(False))
+    where_stmt = sa.and_(m.BulkShip.is_deleted.is_(False))
 
-    # query = (
-    #     sa.select(m.BulkShip).where(where_stmt).order_by(m.BulkShip.created_at.desc())
-    # )
-    # count_query = sa.select(sa.func.count()).where(where_stmt).select_from(m.BulkShip)
+    query = (
+        sa.select(m.BulkShip).where(where_stmt).order_by(m.BulkShip.created_at.desc())
+    )
+    count_query = sa.select(sa.func.count()).where(where_stmt).select_from(m.BulkShip)
 
-    pagination = create_pagination(total=0)
-    # bulk_ships = db.session.scalars(
-    #     query.offset((pagination.page - 1) * pagination.per_page).limit(
-    #         pagination.per_page
-    #     )
-    # )
+    pagination = create_pagination(total=db.session.scalar(count_query))
+    bulk_ships = db.session.scalars(
+        query.offset((pagination.page - 1) * pagination.per_page).limit(
+            pagination.per_page
+        )
+    )
 
     return render_template(
         "bulk_ship/bulk_ships.html",
-        bulk_ships=[],
+        bulk_ships=bulk_ships,
         page=pagination,
     )
 
@@ -192,114 +200,6 @@ def get_create_modal():
     return render_template("bulk_ship/modal_add.html", form=form)
 
 
-# @bulk_ship_bp.route("/add-item", methods=["GET"])
-# @login_required
-# @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
-# def get_item_inputs():
-#     """htmx"""
-#     products = db.session.scalars(sa.select(m.Product)).all()
-#     master_groups = db.session.scalars(sa.select(m.MasterGroup)).all()
-#     store_categories = db.session.scalars(sa.select(m.StoreCategory)).all()
-#     return render_template(
-#         "bulk_ship/item.html",
-#         products=products,
-#         master_groups=master_groups,
-#         store_categories=store_categories,
-#         delete_btn=True,
-#     )
-
-
-# @bulk_ship_bp.route("/get-master-groups", methods=["GET"])
-# @login_required
-# @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
-# def get_master_groups():
-#     """htmx"""
-#     product_sku = request.args.get("product_sku", default=None, type=str)
-
-#     master_groups = []
-#     if product_sku:
-#         master_groups = db.session.scalars(
-#             sa.select(m.MasterGroup).where(
-#                 m.MasterGroup.groups.any(
-#                     m.Group.warehouse_product.any(
-#                         m.WarehouseProduct.product.has(m.Product.SKU == product_sku)
-#                     )
-#                 )
-#             )
-#         ).all()
-
-#     return render_template(
-#         "bulk_ship/master_group_select.html", master_groups=master_groups
-#     )
-
-
-# @bulk_ship_bp.route("/get-groups", methods=["GET"])
-# @login_required
-# @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
-# def get_groups():
-#     """htmx"""
-#     master_group_id = request.args.get("master_group_id", default=None, type=int)
-#     # group_id = request.args.get("group_id", default=None, type=int)
-#     product_sku = request.args.get("product_sku", default=None, type=str)
-
-#     wh_products = []
-
-#     if master_group_id:
-#         wh_products = db.session.scalars(
-#             sa.select(m.WarehouseProduct).where(
-#                 m.WarehouseProduct.product.has(m.Product.SKU == product_sku),
-#                 m.WarehouseProduct.group.has(
-#                     m.Group.master_group_id == master_group_id
-#                 ),
-#             )
-#         ).all()
-
-#     # if group_id:
-#     #     groups = db.session.scalars(
-#     #         sa.select(m.WarehouseProduct).where(
-#     #             m.WarehouseProduct.product.has(m.Product.SKU == product_sku),
-#     #             m.WarehouseProduct.group.has(
-#     #                 m.Group.child_groups.any(m.Group.id == group_id)
-#     #             ),
-#     #         )
-#     #     ).all()
-#     #     return render_template("bulk_ship/sub_group_select.html", wh_products=groups)
-
-#     return render_template("bulk_ship/group_select.html", wh_products=wh_products)
-
-
-# @bulk_ship_bp.route("/get-available-qty", methods=["GET"])
-# @login_required
-# @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
-# def get_available_qty():
-#     product_id = request.args.get("product_id", default=None, type=int)
-#     group_id = request.args.get("group_id", default=None, type=int)
-
-#     wh_product = db.session.scalar(
-#         sa.select(m.WarehouseProduct).where(
-#             m.WarehouseProduct.product_id == product_id,
-#             m.WarehouseProduct.group_id == group_id,
-#         )
-#     )
-
-#     res = s.AvailableQtyRes(available_qty=wh_product and wh_product.qty or 0)
-#     return res.model_dump_json()
-
-
-# @bulk_ship_bp.route("/get-stores", methods=["GET"])
-# @login_required
-# @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
-# def get_stores():
-#     """htmx"""
-#     store_category_id = request.args.get("store_category_id", default=None, type=int)
-
-#     stores = db.session.scalars(
-#         sa.select(m.Store).where(m.Store.store_category_id == store_category_id)
-#     ).all()
-
-#     return render_template("bulk_ship/store_select.html", stores=stores)
-
-
 @bulk_ship_bp.route("/create", methods=["POST"])
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
@@ -313,24 +213,69 @@ def create():
             "bulk_ship/modal_add.html", form=form, errors=form.errors
         )
 
-    errors = validate_bulk_ship_exel()
-    if errors:
-        log(log.ERROR, "Exel validation failed", errors)
-        return render_template("bulk_ship/modal_add.html", form=form, errors=errors)
+    file = request.files.get("exel_file")
+    if not file:
+        log(log.ERROR, "Form validation failed", form.errors)
+        return render_template(
+            "bulk_ship/modal_add.html", form=form, errors={"file": ["File is required"]}
+        )
+
+    result = s.ValidateBulkShipResult(errors=dict())
+    file.seek(0)
+
+    wh_products = validate_bulk_ship_exel(file, result)
+    file_path = save_exel_file(file, result)
+
+    if result.errors:
+        log(log.ERROR, "Exel validation failed", result.errors)
+        return render_template(
+            "bulk_ship/modal_add.html", form=form, errors=result.errors
+        )
+
+    try:
+        create_ship_requests_by_address(wh_products)
+    except Exception as e:
+        log(log.ERROR, "Bulk ship creation failed", str(e))
+        return render_template(
+            "toast.html", message="Bulk ship creation failed", category="error"
+        )
+
+    m.BulkShip(
+        user_id=current_user.id,
+        status=s.BulkShipStatus.DRAFT.value,
+        name=form.name.data,
+        excel_file=str(file_path),
+    ).save()
 
     return render_template(
         "toast.html", message="Bulk ship created successfully", category="success"
     )
 
 
-@bulk_ship_bp.route("/<uuid>/edit", methods=["GET"])
+@bulk_ship_bp.route("/<uuid>/download-template", methods=["GET"])
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
-def get_edit_modal(uuid: str):
-    """htmx"""
+def bulk_ship_template_download(uuid: str):
 
-    return render_template(
-        "bulk_ship/modal_edit.html",
+    bulk_ship = db.session.scalar(sa.select(m.BulkShip).where(m.BulkShip.uuid == uuid))
+    if not bulk_ship:
+        log(log.ERROR, "Bulk ship not found [%s]", uuid)
+        flash("Bulk ship not found", category="danger")
+        return "", 404
+
+    # Path does not work and I don't know why
+    file_path = bulk_ship.excel_file
+
+    if not os.path.exists(file_path):
+        log(log.ERROR, "File not found [%s]", file_path)
+        flash("File not found", category="danger")
+        return "", 404
+
+    return send_file(
+        file_path,
+        as_attachment=True,
+        download_name=f"{bulk_ship.name}_bulk_ship_template.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
 
 
