@@ -27,7 +27,7 @@
           Group to
         </th>
         <th scope="col" class="px-6 py-3">
-          Date
+          Last transaction data
         </th>
       </tr>
     </thead>
@@ -86,7 +86,7 @@
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold"> {{report.created_at.strftime('%m/%d/%Y, %H:%M:%S')}} </div>
+            <div class="text-base font-semibold"> {{report.product.last_transaction_data }} </div>
           </div>
         </td>
       </tr>

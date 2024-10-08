@@ -43,7 +43,9 @@ def download_csv(ship_id: int):
         flash("Report not found", "danger")
         return redirect(url_for("report.index"))
 
-    dataset = create_shipping_modal_dataset(ship_request, master_group, target_group)
+    dataset = create_shipping_modal_dataset(
+        ship_request, master_group, target_group, download=True
+    )
     df = pd.DataFrame(dataset)
 
     # Save the DataFrame to a CSV file in memory

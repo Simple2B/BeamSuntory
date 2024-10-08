@@ -1,8 +1,8 @@
 <!-- Adding user modal -->
 <!-- prettier-ignore-->
  <!-- TODO not finished -->
-<div tabindex="-1" id="ship-request-view-modal-element" hx-get="{{ url_for('main.no_content') }}" hx-trigger="click"
-  hx-swap="delete" hx-target="#ship-request-view-modal-element" hx-indicator="#htmx-spinner"
+<div tabindex="-1" id="add-user-model-html" hx-get="{{ url_for('main.no_content') }}" hx-trigger="click"
+  hx-swap="delete" hx-target="#add-user-model-html" hx-indicator="#htmx-spinner"
   class="fixed bg-opacity-80 bg-gray-600 top-0 left-0 right-0 z-50 items-center justify-center w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full max-h-full justify-end items-end flex">
   <div class="relative w-full max-w-screen-2xl max-h-full" onclick="event.stopPropagation();">
     <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
@@ -92,9 +92,8 @@
               placeholder="Street Address" required />
           </div>
           <div class="col-span-6 sm:col-span-3 relative">
-            <label for="group" class="flex mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label>
+            <label for="group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label>
             <input type="text" name="group" id="user-add-group" hidden>
-            <select name="" class="cursor-pointer shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></select>
             <div id="user-add-dropdown-btn"
               class="cursor-pointer shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Street Address" required>
@@ -134,7 +133,7 @@
         </div>
       </div>
       
-      <div id="user-add-locker-address-container" class="hidden" >
+      <div id="user-add-locker-address-container-div" class="hidden" >
           <div class="p-6 flex gap-4 w-full" >
             <input type="checkbox" name="sales_rep" id="user-add-sales-rep-checkbox"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />

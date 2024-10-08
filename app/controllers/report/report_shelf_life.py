@@ -8,7 +8,7 @@ from app import schema as s, models as m
 from app.database import db
 from app.controllers.pagination import create_pagination
 
-from .report_data import ReportData
+from .report_data import ReportData, add_product_groups
 
 
 class ReportDataShelfLife(ReportData):
@@ -138,20 +138,21 @@ class ReportDataShelfLife(ReportData):
     @classmethod
     def get_dataset(cls, report_filter: s.ReportFilter) -> dict[str, list]:
         query, _ = cls.get_search_result(report_filter)
+        master_groups = cls.get_product_master_groups()
         dataset = {
             "SKU": [],
             "Name": [],
-            "Brand": [],
             "Number of days left": [],
+            "Quantity received": [],
             "Remaining quantity": [],
             "Date Expires": [],
             "Data Created": [],
+            "Last transaction data": [],
         }  # type: dict[str, list]
 
         for product_allc in db.session.scalars(query):
             dataset["Name"].append(product_allc.product.name)
             dataset["SKU"].append(product_allc.product.SKU)
-            dataset["Brand"].append(product_allc.product.brand)
             dataset["Number of days left"].append(product_allc.numb_of_day_left)
             dataset["Quantity received"].append(product_allc.quantity_received)
             dataset["Remaining quantity"].append(product_allc.quantity_remains)
@@ -161,24 +162,42 @@ class ReportDataShelfLife(ReportData):
             dataset["Data Created"].append(
                 product_allc.shelf_life_start.strftime("%m/%d/%Y")
             )
+            dataset["Last transaction data"].append(
+                product_allc.product.last_transaction_data
+            )
+            cls.add_product_groups(dataset, product_allc.product, master_groups)
 
         return dataset
 
 
-def create_shelf_life_dataset(product_allocated: m.ProductAllocated) -> dict[str, list]:
+def create_shelf_life_dataset(
+    product_allocated: m.ProductAllocated, download: bool = False
+) -> dict[str, list]:
+    master_groups = db.session.scalars(
+        sa.select(m.MasterGroupProduct).where(
+            m.MasterGroupProduct.name != s.Events.name.value
+        )
+    ).all()
     data = {
         "Name": [],
         "SKU": [],
         "Brand": [],
         "Group": [],
         "Quantity received": [],
+        "Last transaction data": [],
     }  # type: dict[str, list]
 
     for qty_group in product_allocated.product_quantity_groups:
         data["Name"].append(product_allocated.product.name)
         data["SKU"].append(product_allocated.product.SKU)
-        data["Brand"].append(product_allocated.product.brand)
         data["Group"].append(qty_group.group.name)
         data["Quantity received"].append(qty_group.quantity_received)
+        data["Last transaction data"].append(
+            product_allocated.product.last_transaction_data
+        )
+        if download:
+            add_product_groups(data, product_allocated.product, master_groups)
+        else:
+            data["Brand"].append(product_allocated.product.brand)
 
     return data

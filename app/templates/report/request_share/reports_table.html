@@ -12,7 +12,14 @@
         <th scope="col" class="px-6 py-3">Group from</th>
         <th scope="col" class="px-6 py-3">Group to</th>
         <th scope="col" class="px-6 py-3">Status</th>
+        <th scope="col" class="px-6 py-3">
+          Created at
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Last transaction data
+        </th>
         <th scope="col" class="px-6 py-3">Action</th>
+        
       </tr>
     </thead>
     <tbody>
@@ -70,6 +77,16 @@
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
             <div class="text-base font-semibold">{{ report.request_share.status }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold"> {{report.created_at.strftime('%m/%d/%Y, %H:%M:%S')}} </div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold"> {{report.request_share.product.last_transaction_data }} </div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">

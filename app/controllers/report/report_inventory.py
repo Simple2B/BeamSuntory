@@ -8,7 +8,7 @@ from app import schema as s, models as m
 from app.database import db
 from app.controllers.pagination import create_pagination
 
-from .report_data import ReportData
+from .report_data import ReportData, add_product_groups
 
 
 class ReportDataInventories(ReportData):
@@ -181,6 +181,7 @@ class ReportDataInventories(ReportData):
             "Group": [],
             "Brand": [],
             "Warehouse": [],
+            "Last transaction data": [],
         }  # type: dict[str, list]
 
         for product in db.session.scalars(query):
@@ -189,6 +190,7 @@ class ReportDataInventories(ReportData):
                 product,
                 master_group=report_filter.master_group,
                 target_group=report_filter.target_group,
+                download=True,
             )
 
         return dataset
@@ -199,7 +201,13 @@ def add_dataset_row(
     product: m.Product,
     master_group: str | None,
     target_group: str | None,
+    download: bool = False,
 ):
+    master_groups = db.session.scalars(
+        sa.select(m.MasterGroupProduct).where(
+            m.MasterGroupProduct.name != s.Events.name.value
+        )
+    ).all()
 
     for warehouse_product in product.warehouse_products:
         if (
@@ -215,7 +223,36 @@ def add_dataset_row(
         dataset["SKU"].append(product.SKU)
         dataset["Quantity"].append(warehouse_product.product_quantity)
         dataset["Group"].append(warehouse_product.group_name)
-        dataset["Brand"].append(warehouse_product.product.brand)
         dataset["Warehouse"].append(warehouse_product.warehouse_name)
+        dataset["Last transaction data"].append(product.last_transaction_data)
+
+        if download:
+            add_product_groups(dataset, product, master_groups)
+        else:
+            dataset["Brand"].append(warehouse_product.product.brand)
+
+    return dataset
+
+
+def create_inventory_dataset(
+    product: m.Product, group: str, master_group: str, download: bool = False
+) -> dict[str, list]:
+    dataset = {
+        "Name": [],
+        "SKU": [],
+        "Quantity": [],
+        "Group": [],
+        "Brand": [],
+        "Warehouse": [],
+        "Last transaction data": [],
+    }  # type: dict[str, list]
+
+    add_dataset_row(
+        dataset,
+        product,
+        target_group=group,
+        master_group=master_group,
+        download=download,
+    )
 
     return dataset
