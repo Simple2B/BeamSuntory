@@ -93,7 +93,7 @@ class Product(db.Model, ModelMixin):
     )
 
     report_sku: orm.Mapped["ReportSKU"] = orm.relationship(
-        order_by="ReportSKU.created_at.desc()", uselist=False
+        order_by="ReportSKU.created_at.desc()", uselist=False, viewonly=True
     )
 
     @property

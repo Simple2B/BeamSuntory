@@ -28,8 +28,10 @@ from app.controllers import create_pagination, role_required
 from app import models as m, db
 from app import schema as s
 from app import forms as f
+from app.controllers import validate_bulk_ship_exel
 from app.controllers.report import send_xlsx_response
 from app.logger import log
+from .utils import create_metch
 
 
 bulk_ship_bp = Blueprint("bulk_ship", __name__, url_prefix="/bulk-ship")
@@ -73,58 +75,103 @@ countries = {
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def download_template():
 
-    buffer = io.BytesIO()
+    wb = Workbook()
+    main_sheet = wb.active
+    main_sheet.title = "Main"
 
-    columns = ["countries", "Owner", "Address", "Quantity", "Carrier"]
-    empty_form = pd.DataFrame(columns=columns)
+    # Create the product sheet
+    products = db.session.scalars(sa.select(m.Product))
+    product_count = db.session.scalar(sa.select(sa.func.count()).select_from(m.Product))
+    groups_sheet = wb.create_sheet(title="Groups")
+    for col, product in enumerate(products, start=1):
+        col_letter = get_column_letter(col)
+        groups_sheet[f"{col_letter}1"] = product.SKU
+        for row, wh_product in enumerate(product.warehouse_products, start=2):
+            groups_sheet[f"{col_letter}{row}"] = (
+                f"{wh_product.group.name} ({wh_product.available_quantity})"
+            )
 
-    # Save the empty DataFrame into the buffer as an Excel file
-    empty_form.to_excel(buffer, index=False, engine="openpyxl")
+    store_categories = db.session.scalars(sa.select(m.StoreCategory))
+    count_store_categories = db.session.scalar(
+        sa.select(sa.func.count()).select_from(m.StoreCategory)
+    )
 
-    # Reset buffer position to the beginning after writing
-    buffer.seek(0)
+    # Create the store categories sheet
+    store_categories_sheet = wb.create_sheet(title="Stores")
+    for col, store_category in enumerate(store_categories, start=1):
+        col_letter = get_column_letter(col)
+        store_categories_sheet[f"{col_letter}1"] = store_category.name
+        for row, store in enumerate(store_category.stores, start=2):
+            store_categories_sheet[f"{col_letter}{row}"] = store.store_name
 
-    # Step 2: Use openpyxl to add dependent dropdowns
-    wb = load_workbook(buffer)
-    ws = wb.active
-    count_str = ",".join(countries.keys())
+    # Set up the main form sheet
+    main_sheet["A1"] = "SKU"
+    main_sheet["B1"] = "Group"
+    main_sheet["C1"] = "Quantity"
+    main_sheet["D1"] = "Store Category"
+    main_sheet["E1"] = "Store name"
 
-    dv = DataValidation(type="list", formula1=f'"{count_str}"', showDropDown=True)
+    # Add dropdowns for product SKUs
+    last_let = get_column_letter(product_count)
+    country_dv = DataValidation(
+        type="list",
+        formula1=f"{groups_sheet.title}!$A$1:${last_let}$1",
+        showDropDown=False,
+        allowBlank=False,
+        showErrorMessage=True,
+    )
+    country_dv.error = "Please select a valid SKUs"
+    country_dv.errorTitle = "Invalid SKU"
+    main_sheet.add_data_validation(country_dv)
+    country_dv.add("A2:A100")
 
-    dv.error = "Your entry is not in the list"
-    dv.errorTitle = "Invalid Entry"
+    # Add dropdowns for store category
+    store_last_let = get_column_letter(count_store_categories)
+    store_category_dv = DataValidation(
+        type="list",
+        formula1=f"{store_categories_sheet.title}!$A$1:${store_last_let}$1",
+        showDropDown=False,
+        allowBlank=False,
+        showErrorMessage=True,
+    )
+    store_category_dv.error = "Please select a valid store category"
+    store_category_dv.errorTitle = "Invalid store category"
+    main_sheet.add_data_validation(store_category_dv)
+    store_category_dv.add("D2:D100")
 
-    # Optionally set a custom prompt message
-    dv.prompt = "Please select from the list"
-    dv.promptTitle = "List Selection"
-    ws.add_data_validation(dv)
-    dv.add("A2:A100")
+    # Create data validation for cities using named ranges
+    # offset( reference, rows, cols, height, width)
+    # OFFSET(Data!A1,1,MATCH(A2,Data!A1:C1,0) -1,10,1)"
 
-    for idx, (country, cities) in enumerate(countries.items(), start=2):
-        col_idx = idx + 2  # Start adding cities in columns after the form data columns
-        ws.cell(row=1, column=col_idx, value=country)  # Country name as header
-        for row, city in enumerate(cities, start=2):
-            ws.cell(row=row, column=col_idx, value=city)
+    # Create the named ranges
+    for row in range(2, 100):
+        store_category_dv = DataValidation(
+            type="list",
+            formula1=f"OFFSET({store_categories_sheet.title}!A1,1,{create_metch('D' + str(row), store_categories_sheet.title, count_store_categories)},500,1)",
+            showDropDown=False,
+            allow_blank=False,
+            showErrorMessage=True,
+        )
+        store_category_dv.error = "Please select a valid store"
+        store_category_dv.errorTitle = "Invalid store"
+        main_sheet.add_data_validation(store_category_dv)
+        store_category_dv.add(f"E{row}")
 
-        # Define named ranges for the cities using the proper Excel formula format
-        city_range = f"${chr(64 + col_idx)}$2:${chr(64 + col_idx)}${len(cities) + 1}"
-        wb.create_named_range(country, ws, city_range)
+        groups_dv = DataValidation(
+            type="list",
+            formula1=f"OFFSET({groups_sheet.title}!A1,1,{create_metch('A' + str(row),groups_sheet.title, product_count)},30,1)",
+            showDropDown=False,
+            allow_blank=False,
+            showErrorMessage=True,
+        )
+        groups_dv.error = "Please select a valid group"
+        groups_dv.errorTitle = "Invalid group"
+        main_sheet.add_data_validation(groups_dv)
+        groups_dv.add(f"B{row}")
 
-    # Step 5: Add city dropdown based on the country selected
-    for row in range(2, 101):
-        formula = f"INDIRECT(A{row})"
-        dv_cities = DataValidation(type="list", formula1=formula, showDropDown=True)
-        dv_cities.error = "Your entry is not in the list"
-        dv_cities.errorTitle = "Invalid Entry"
-        dv_cities.prompt = "Please select a city based on the country"
-        dv_cities.promptTitle = "City Selection"
-        ws.add_data_validation(dv_cities)
-        dv_cities.add(f"B{row}")
-
+    # Save the workbook to a BytesIO object
     output = io.BytesIO()
     wb.save(output)
-
-    # Reset buffer position to the beginning after writing
     output.seek(0)
 
     # Step 7: Serve the Excel file as a download
@@ -142,92 +189,83 @@ def download_template():
 def get_create_modal():
     """htmx"""
     form = f.NewBulkShipForm()
-    products = db.session.scalars(sa.select(m.Product)).all()
-    master_groups = db.session.scalars(sa.select(m.MasterGroup)).all()
-    store_categories = db.session.scalars(sa.select(m.StoreCategory)).all()
-    return render_template(
-        "bulk_ship/modal_add.html",
-        form=form,
-        products=products,
-        master_groups=master_groups,
-        store_categories=store_categories,
-    )
+    return render_template("bulk_ship/modal_add.html", form=form)
 
 
-@bulk_ship_bp.route("/add-item", methods=["GET"])
-@login_required
-@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
-def get_item_inputs():
-    """htmx"""
-    products = db.session.scalars(sa.select(m.Product)).all()
-    master_groups = db.session.scalars(sa.select(m.MasterGroup)).all()
-    store_categories = db.session.scalars(sa.select(m.StoreCategory)).all()
-    return render_template(
-        "bulk_ship/item.html",
-        products=products,
-        master_groups=master_groups,
-        store_categories=store_categories,
-        delete_btn=True,
-    )
+# @bulk_ship_bp.route("/add-item", methods=["GET"])
+# @login_required
+# @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+# def get_item_inputs():
+#     """htmx"""
+#     products = db.session.scalars(sa.select(m.Product)).all()
+#     master_groups = db.session.scalars(sa.select(m.MasterGroup)).all()
+#     store_categories = db.session.scalars(sa.select(m.StoreCategory)).all()
+#     return render_template(
+#         "bulk_ship/item.html",
+#         products=products,
+#         master_groups=master_groups,
+#         store_categories=store_categories,
+#         delete_btn=True,
+#     )
 
 
-@bulk_ship_bp.route("/get-master-groups", methods=["GET"])
-@login_required
-@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
-def get_master_groups():
-    """htmx"""
-    product_sku = request.args.get("product_sku", default=None, type=str)
+# @bulk_ship_bp.route("/get-master-groups", methods=["GET"])
+# @login_required
+# @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+# def get_master_groups():
+#     """htmx"""
+#     product_sku = request.args.get("product_sku", default=None, type=str)
 
-    master_groups = []
-    if product_sku:
-        master_groups = db.session.scalars(
-            sa.select(m.MasterGroup).where(
-                m.MasterGroup.groups.any(
-                    m.Group.warehouse_product.any(
-                        m.WarehouseProduct.product.has(m.Product.SKU == product_sku)
-                    )
-                )
-            )
-        ).all()
+#     master_groups = []
+#     if product_sku:
+#         master_groups = db.session.scalars(
+#             sa.select(m.MasterGroup).where(
+#                 m.MasterGroup.groups.any(
+#                     m.Group.warehouse_product.any(
+#                         m.WarehouseProduct.product.has(m.Product.SKU == product_sku)
+#                     )
+#                 )
+#             )
+#         ).all()
 
-    return render_template(
-        "bulk_ship/master_group_select.html", master_groups=master_groups
-    )
+#     return render_template(
+#         "bulk_ship/master_group_select.html", master_groups=master_groups
+#     )
 
 
-@bulk_ship_bp.route("/get-groups", methods=["GET"])
-@login_required
-@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
-def get_groups():
-    """htmx"""
-    master_group_id = request.args.get("master_group_id", default=None, type=int)
-    # group_id = request.args.get("group_id", default=None, type=int)
-    product_sku = request.args.get("product_sku", default=None, type=str)
+# @bulk_ship_bp.route("/get-groups", methods=["GET"])
+# @login_required
+# @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+# def get_groups():
+#     """htmx"""
+#     master_group_id = request.args.get("master_group_id", default=None, type=int)
+#     # group_id = request.args.get("group_id", default=None, type=int)
+#     product_sku = request.args.get("product_sku", default=None, type=str)
 
-    wh_products = []
+#     wh_products = []
 
-    if master_group_id:
-        wh_products = db.session.scalars(
-            sa.select(m.WarehouseProduct).where(
-                m.WarehouseProduct.product.has(m.Product.SKU == product_sku),
-                m.WarehouseProduct.group.has(
-                    m.Group.master_group_id == master_group_id
-                ),
-            )
-        ).all()
+#     if master_group_id:
+#         wh_products = db.session.scalars(
+#             sa.select(m.WarehouseProduct).where(
+#                 m.WarehouseProduct.product.has(m.Product.SKU == product_sku),
+#                 m.WarehouseProduct.group.has(
+#                     m.Group.master_group_id == master_group_id
+#                 ),
+#             )
+#         ).all()
 
-    # if group_id:
-    #     groups = db.session.scalars(
-    #         sa.select(m.WarehouseProduct).where(
-    #             m.WarehouseProduct.product.has(m.Product.SKU == product_sku),
-    #             m.WarehouseProduct.group.has(
-    #                 m.Group.child_groups.any(m.Group.id == group_id)
-    #             ),
-    #         )
-    #     ).all()
-    #     return render_template("bulk_ship/sub_group_select.html", wh_products=groups)
+#     # if group_id:
+#     #     groups = db.session.scalars(
+#     #         sa.select(m.WarehouseProduct).where(
+#     #             m.WarehouseProduct.product.has(m.Product.SKU == product_sku),
+#     #             m.WarehouseProduct.group.has(
+#     #                 m.Group.child_groups.any(m.Group.id == group_id)
+#     #             ),
+#     #         )
+#     #     ).all()
+#     #     return render_template("bulk_ship/sub_group_select.html", wh_products=groups)
 
-    return render_template("bulk_ship/group_select.html", wh_products=wh_products)
+#     return render_template("bulk_ship/group_select.html", wh_products=wh_products)
 
 
 # @bulk_ship_bp.route("/get-available-qty", methods=["GET"])
@@ -248,18 +286,18 @@ def get_groups():
 #     return res.model_dump_json()
 
 
-@bulk_ship_bp.route("/get-stores", methods=["GET"])
-@login_required
-@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
-def get_stores():
-    """htmx"""
-    store_category_id = request.args.get("store_category_id", default=None, type=int)
+# @bulk_ship_bp.route("/get-stores", methods=["GET"])
+# @login_required
+# @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+# def get_stores():
+#     """htmx"""
+#     store_category_id = request.args.get("store_category_id", default=None, type=int)
 
-    stores = db.session.scalars(
-        sa.select(m.Store).where(m.Store.store_category_id == store_category_id)
-    ).all()
+#     stores = db.session.scalars(
+#         sa.select(m.Store).where(m.Store.store_category_id == store_category_id)
+#     ).all()
 
-    return render_template("bulk_ship/store_select.html", stores=stores)
+#     return render_template("bulk_ship/store_select.html", stores=stores)
 
 
 @bulk_ship_bp.route("/create", methods=["POST"])
@@ -270,96 +308,19 @@ def create():
     form = f.NewBulkShipForm()
     if not form.validate_on_submit():
         log(log.ERROR, "Form validation failed", form.errors)
-        flash("Form validation failed", "danger")
-        return redirect(url_for("bulk_ship.get_all"))
 
-    try:
-        bulk_ship_items = s.bulk_ship_items_ad.validate_json(form.items_data.data)
-    except ValidationError as e:
-        log(log.ERROR, "Validation error %s", e.json())
-        flash("Input data is not valid", "danger")
-        return redirect(url_for("bulk_ship.get_all"))
+        return render_template(
+            "bulk_ship/modal_add.html", form=form, errors=form.errors
+        )
 
-    bulk_ship = m.BulkShip(
-        status=s.BulkShipStatus.DRAFT.value,
-        name=form.name.data,
+    errors = validate_bulk_ship_exel()
+    if errors:
+        log(log.ERROR, "Exel validation failed", errors)
+        return render_template("bulk_ship/modal_add.html", form=form, errors=errors)
+
+    return render_template(
+        "toast.html", message="Bulk ship created successfully", category="success"
     )
-    db.session.add(bulk_ship)
-    store_ids = {item.store_id for item in bulk_ship_items}
-    bulk_sh_items: list[m.BulkShipItem] = []
-    for item in bulk_ship_items:
-
-        wh_product = db.session.scalar(
-            sa.select(m.WarehouseProduct).where(
-                m.WarehouseProduct.product.has(m.Product.SKU == item.product_sku),
-                m.WarehouseProduct.group_id == item.group_id,
-            )
-        )
-        total_qty = sum(
-            it.qty
-            for it in bulk_ship_items
-            if it.group_id == item.group_id and it.product_sku == item.product_sku
-        )
-        if not wh_product or wh_product.available_quantity < total_qty:
-            flash(f"Insufficient quantity for {item.product_sku}", "danger")
-            return redirect(url_for("bulk_ship.get_all"))
-
-        store = db.session.scalar(sa.select(m.Store).where(m.Store.id == item.store_id))
-        if not store:
-            log(log.ERROR, "Store not found")
-            flash("Store not found", "danger")
-            return redirect(url_for("bulk_ship.get_all"))
-
-        bulk_item = m.BulkShipItem(
-            bulk_ship=bulk_ship,
-            group_id=item.group_id,
-            product_id=wh_product.product_id,
-            quantity=item.qty,
-            store_id=item.store_id,
-        )
-        bulk_sh_items.append(bulk_item)
-        db.session.add_all(bulk_sh_items)
-
-    db.session.commit()
-
-    for store_id in store_ids:
-        ship_request = m.ShipRequest(
-            status=s.ShipRequestStatus.waiting_for_warehouse,
-            store=store,
-            store_category=store.store_category,
-            comment="",
-            order_type="bulk_ship",
-            user_id=current_user.id,
-        )
-
-        ship_request.save()
-        ship_request.set_order_numb()
-        db.session.commit()
-        report_shipping = m.ReportShipping(
-            type=s.ReportShipRequestActionType.CREATED.value,
-            ship_request=ship_request,
-            user=current_user,
-        )
-
-        db.session.add(report_shipping)
-
-        for item in bulk_sh_items:
-            if store_id != item.store_id:
-                continue
-            db.session.add(
-                m.Cart(
-                    product_id=item.product_id,
-                    group_id=item.group_id,
-                    quantity=item.quantity,
-                    status=s.CartStatus.SUBMITTED.value,
-                    ship_request_id=ship_request.id,
-                )
-            )
-        db.session.commit()
-
-    flash("Bulk ship created successfully", "success")
-
-    return redirect(url_for("bulk_ship.get_all"))
 
 
 @bulk_ship_bp.route("/<uuid>/edit", methods=["GET"])
