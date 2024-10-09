@@ -107,5 +107,5 @@ def add_product_groups(
             dataset[master_group.name] = []
 
         dataset[master_group.name].append(
-            product.get_group_by_maste_group(master_group.name)
+            product.get_groups_by_maste_group(master_group.name)
         )

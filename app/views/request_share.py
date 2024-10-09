@@ -45,7 +45,11 @@ def get_all():
     )
     if current_user.role == s.UserRole.ADMIN.value:
         stm_where = sa.true()
-    query = m.RequestShare.select().where(stm_where).order_by(m.RequestShare.id)
+    query = (
+        sa.select(m.RequestShare)
+        .where(stm_where)
+        .order_by(m.RequestShare.created_at.desc())
+    )
     count_query = (
         sa.select(sa.func.count()).where(stm_where).select_from(m.RequestShare)
     )
@@ -154,12 +158,12 @@ def share(id: int):
     if not request_share:
         log(log.INFO, "There is no request_share with id: [%s]", id)
         flash("There is no such request_share", "danger")
-        return redirect(url_for("request_share.get_all"))
+        return "", 404
 
     if request_share.status == "shared":
         log(log.INFO, "Request_share already shared id: [%s]", id)
         flash("Someone already shared", "danger")
-        return redirect(url_for("request_share.get_all"))
+        return "", 404
 
     warehouse_to_prod: m.WarehouseProduct = db.session.scalar(
         sa.select(m.WarehouseProduct).where(
@@ -182,7 +186,7 @@ def share(id: int):
             request_share.from_group_id,
         )
         flash("These product was depleted", "danger")
-        return redirect(url_for("request_share.get_all"))
+        return "", 404
 
     if warehouse_from_prod.available_quantity < request_share.desire_quantity:
         log(
@@ -191,7 +195,7 @@ def share(id: int):
             request_share.from_group_id,
         )
         flash("Not enough products in warehouse", "danger")
-        return redirect(url_for("request_share.get_all"))
+        return "", 404
 
     report_inventory_list = m.ReportInventoryList(
         type="Product Shared",

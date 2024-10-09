@@ -198,10 +198,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     )
     get_all_filters_time = datetime.now()
 
-    groups_for_products_obj = db.session.scalars(
-        sa.select(m.GroupProduct).order_by(m.GroupProduct.name.asc())
-    ).all()
-
     pagination = create_pagination(total=db.session.scalar(count_query))
 
     master_groups = db.session.scalars(
@@ -222,7 +218,6 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         "Product get_all mastr_for_prods_groups_for_prods finished in [%s]",
         datetime.now() - get_all_groups_time,
     )
-    get_all_mastr_grps_names = datetime.now()
 
     # get all product_groups to list and compare in view.html
     product_groups = db.session.scalars(
@@ -240,35 +235,14 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         .order_by(m.Group.name.asc())
     ).all()
 
-    master_groups_search = {}
-    for group in groups_for_products_obj:
-        if group.master_groups_for_product.name not in master_groups_search:
-            master_groups_search[group.master_groups_for_product.name] = [group.name]
-        else:
-            master_groups_search[group.master_groups_for_product.name].append(
-                group.name
-            )
-
-    log(
-        log.DEBUG,
-        "Product get_all master_groups_search finished in [%s]",
-        datetime.now() - get_all_mastr_grps_names,
-    )
-    get_all_master_groups_search = datetime.now()
+    master_groups_search = db.session.scalars(sa.select(m.MasterGroupProduct)).all()
 
     master_group_product_name = [
-        mgp.name for mgp in db.session.scalars(m.MasterGroupProduct.select())
+        maste_group.name for maste_group in master_groups_search
     ]
-
     suppliers = db.session.scalars(
         sa.select(m.Supplier).order_by(m.Supplier.name.asc())
     ).all()
-
-    log(
-        log.DEBUG,
-        "Product get_all warehouse_products finished in [%s]",
-        datetime.now() - get_all_master_groups_search,
-    )
 
     target_groups = db.session.scalars(m.Group.select().order_by(m.Group.name))
 

@@ -2,7 +2,7 @@ import { log } from 'console';
 
 interface MasterGroup {
   name: string;
-} 
+}
 
 interface FilterJsonData {
   [key: string]: string;
@@ -105,7 +105,7 @@ function showCustomizeViewColumn(masterGroupName: string) {
   productTableHeader.forEach((productTableHeaderItem: HTMLElement) => {
     const master_group_name = productTableHeaderItem.getAttribute('master-group-name')
 
-    if (master_group_name && master_group_name.trim().toLocaleLowerCase().replace(' ', '_') === masterGroupName.trim().toLocaleLowerCase() && productTableHeaderItem.classList.contains("hidden")) {
+    if (master_group_name && master_group_name.trim().toLocaleLowerCase() === masterGroupName.trim().toLocaleLowerCase() && productTableHeaderItem.classList.contains("hidden")) {
       productTableHeaderItem.classList.remove('hidden');
     }
   })
@@ -115,7 +115,7 @@ function showCustomizeViewColumn(masterGroupName: string) {
     const master_group_name = productItem.getAttribute('master-group-name')
     if (masterGroupName && master_group_name === masterGroupName.trim() && productItem.classList.contains('hidden')) {
       productItem.classList.remove('hidden')
-    } 
+    }
   });
 }
 
@@ -126,7 +126,7 @@ function hideCustomizeViewColumn(masterGroupName: string) {
 
   productTableHeader.forEach((productTableHeaderItem: HTMLElement) => {
     const master_group_name = productTableHeaderItem.getAttribute('master-group-name')
-    if (master_group_name && master_group_name.trim().toLocaleLowerCase().replace(' ', '_') === masterGroupName.trim().toLocaleLowerCase() && !productTableHeaderItem.classList.contains('hidden')) {
+    if (master_group_name && master_group_name.trim() === masterGroupName.trim() && !productTableHeaderItem.classList.contains('hidden')) {
       productTableHeaderItem.classList.add('hidden');
     }
   })
@@ -136,7 +136,7 @@ function hideCustomizeViewColumn(masterGroupName: string) {
     const master_group_name = productItem.getAttribute('master-group-name')
     if (masterGroupName && master_group_name === masterGroupName.trim() && !productItem.classList.contains("hidden")) {
       productItem.classList.add('hidden')
-    } 
+    }
   });
 }
 
@@ -164,8 +164,8 @@ if (globalFilterMasterGroup && globalFilterMasterGroup.length !== 0) {
     }
   });
   for (const masterGroupName of globalFilterMasterGroup) {
-      showCustomizeViewColumn(masterGroupName);
-    
+    showCustomizeViewColumn(masterGroupName);
+
   }
 }
 
@@ -185,7 +185,7 @@ checkboxFilterProductMasterGroups.forEach((checkbox) => {
       }
       sessionStorage.setItem('globalFilterMasterGroup', JSON.stringify(globalFilterMasterGroup));
       showCustomizeViewColumn(masterGroupName)
-      
+
     }
     if (!isActive) {
       const index = globalFilterMasterGroup.indexOf(masterGroupName);
@@ -195,7 +195,7 @@ checkboxFilterProductMasterGroups.forEach((checkbox) => {
       }
       sessionStorage.setItem('globalFilterMasterGroup', JSON.stringify(globalFilterMasterGroup));
       hideCustomizeViewColumn(masterGroupName)
-      
+
     }
   });
 });
