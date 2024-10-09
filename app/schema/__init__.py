@@ -118,10 +118,6 @@ from .incoming_stock_notification import (
 )
 from .bulk_ship import (
     BulkShipStatus,
-    AvailableQtyRes,
-    BulkShipItem,
-    bulk_ship_items_ad,
-    BulkShipItem,
     WhProduct,
     ValidateBulkShipResult,
 )

@@ -1,2 +1,1 @@
-declare const handlerOnSubmit: (e: Event) => void;
-declare function main(): void;
+declare function downloadBulkTemplate(e: Event): Promise<void>;
