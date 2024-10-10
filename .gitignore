@@ -16,5 +16,4 @@ backup/
 /*.sqlite3
 .DS_Store
 celerybeat-schedule.db
-
 app/static/uploads/*

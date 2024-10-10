@@ -93,16 +93,14 @@ class Product(db.Model, ModelMixin):
     )
 
     report_sku: orm.Mapped["ReportSKU"] = orm.relationship(
-        order_by="ReportSKU.created_at.desc()", uselist=False
+        order_by="ReportSKU.created_at.desc()", uselist=False, viewonly=True
     )
 
     @property
     def last_transaction_data(self):
         if not self.report_sku:
             return "-"
-        return (
-            f"{self.report_sku.created_at.strftime('%Y/%m/%d')}, {self.report_sku.type}"
-        )
+        return f"{self.report_sku.created_at.strftime('%Y/%m/%d')},./ {self.report_sku.type}"
 
     def __repr__(self):
         return f"<{self.id}: {self.name}>"
