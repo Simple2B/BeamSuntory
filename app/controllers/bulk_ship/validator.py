@@ -30,7 +30,11 @@ def validate_bulk_ship_exel(
         result.errors["file"] = ["File must be in xlsx format."]
         return []
 
-    product_sheets = pd.read_excel(file)
+    try:
+        product_sheets = pd.read_excel(file)
+    except Exception:
+        result.errors["file"] = ["File is not valid. Try to upload another one."]
+        return []
 
     if product_sheets.empty:
         result.errors["file"] = ["File is empty."]

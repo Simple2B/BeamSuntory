@@ -37,8 +37,9 @@ def save_exel_file(file: FileStorage, result: s.ValidateBulkShipResult) -> Path:
 
     file_path = BASE_FILE_PATH / file_name
 
-    with open(file_path, "wb") as f:
-        read = file.read()
-        f.write(read)
+    try:
+        file.save(file_path)
+    finally:
+        file.close()
 
-    return file_path
+    return Path("static/uploads") / file_name
