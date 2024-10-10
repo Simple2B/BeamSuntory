@@ -15,3 +15,4 @@ from .bulk_ship import (
     create_ship_requests_by_address,
     save_exel_file,
 )
+from .mail import CustomMail

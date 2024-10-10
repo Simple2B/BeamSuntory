@@ -33,7 +33,7 @@ shareButtons.forEach((e) => {
             const response = await fetch(`/request_share/share/${id}`, {
                 method: 'GET',
             })
-            if ([200, 404].includes(response.status) ) {
+            if ([200, 404].includes(response.status)) {
                 location.reload()
             }
         }
@@ -49,7 +49,7 @@ removeButtons.forEach((e) => {
             const response = await fetch(`/request_share/delete/${id}`, {
                 method: 'GET',
             })
-            if (response.status == 200) {
+            if ([200, 404].includes(response.status)) {
                 location.reload()
             }
         }
@@ -65,7 +65,7 @@ declineButtons.forEach((e) => {
             const response = await fetch(`/request_share/decline/${id}`, {
                 method: 'GET',
             })
-            if (response.status == 200) {
+            if ([200, 404].includes(response.status)) {
                 location.reload()
             }
         }

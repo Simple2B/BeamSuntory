@@ -7,13 +7,13 @@
   <div id="product-filter-form" class="flex flex-wrap py-4 gap-5 bg-white dark:bg-gray-800">
     <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800 gap-4 items-center">
 
-      <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800">
+      <div class="p-2 flex flex-wrap py-4 bg-white dark:bg-gray-800">
         {% for master_group_search in master_groups_search %}
         <select id="product-search-master-group-{{master_group_search}}"
           class="product-search-master-group- mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-          <option selected value="">{{ master_group_search }} group</option>
-          {% for group in master_groups_search[master_group_search] %}
-          <option value="{{ group }}">{{ group }}</option>
+          <option selected value="">{{ master_group_search.name }} group</option>
+          {% for group in master_group_search.groups_for_product %}
+          <option value="{{ group.name }}">{{ group.name }}</option>
           {% endfor %}
         </select>
         {% endfor %}
@@ -140,14 +140,12 @@
 
       <ul class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownBgHoverButton">
         {% for master_group in master_group_product_name %}
-        {% set master_group_no_space = master_group.replace(' ', '_') %}
         <li>
           <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
-            <input id="products-filter-product-master-group-checkbox-{{ master_group_no_space }}" type="checkbox"
-              value="{{ master_group_no_space }}" data-target-group-name="{{ master_group_no_space }}"
-              data-target-product-mg-g="{{ product_mg_g }}"
+            <input type="checkbox"
+              value="{{ master_group }}" data-target-group-name="{{ master_group }}"
               class="products-filter-product-master-group-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-            <label for="products-filter-product-master-group-checkbox-{{ master_group_no_space }}"
+            <label 
               class="w-full ml-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300">{{ master_group
               }}</label>
           </div>
@@ -230,24 +228,14 @@
           </div>
         </td>
 
-        {% for master_name in master_groups_search.keys() %}
+        {% for master_name in master_group_product_name %}
         <td master-group-name="{{ master_name }}"
           class="product-groups-names-view  hidden text-base font-normal text-gray-900  dark:text-white max-width-100">
           <div class="px-3">
-            {% if master_name in product.master_groups_names %}
-            <div class="text-sm">{{ product.get_group_by_maste_group(master_name) }}</div>
-            {% else %}
-            <div class="text-sm">-</div>
-            {% endif %}
+            <div class="text-sm">{{ product.get_groups_by_maste_group(master_name) }}</div>
           </div>
         </td>
         {% endfor %}
-        <td master-group-name="Program_Year"
-          class="product-groups-names-view  hidden text-base font-normal text-gray-900  dark:text-white max-width-100">
-          <div class="px-3">
-            <div class="text-sm">{{ product.program_year }}</div>
-          </div>
-        </td>
         <td class="text-base font-normal text-gray-900  dark:text-white max-width-100">
           <div class="px-3">
             <div class="text-sm">{{ product.regular_price }}</div>

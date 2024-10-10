@@ -100,6 +100,18 @@ class Product(db.Model, ModelMixin):
     def last_transaction_data(self):
         if not self.report_sku:
             return "-"
+        return (
+            f"{self.report_sku.created_at.strftime('%Y/%m/%d')}, {self.report_sku.type}"
+        )
+
+    report_sku: orm.Mapped["ReportSKU"] = orm.relationship(
+        order_by="ReportSKU.created_at.desc()", uselist=False, viewonly=True
+    )
+
+    @property
+    def last_transaction_data(self):
+        if not self.report_sku:
+            return "-"
         return f"{self.report_sku.created_at.strftime('%Y/%m/%d')},./ {self.report_sku.type}"
 
     def __repr__(self):
@@ -132,13 +144,17 @@ class Product(db.Model, ModelMixin):
             )
         return sum(wp.product_quantity for wp in self.warehouse_products)
 
-    def get_group_by_maste_group(self, name: str):
-        return ",".join(
+    def get_groups_by_maste_group(self, name: str):
+        groups = ",".join(
             [
                 group.name
                 for group in self.groups
                 if group.master_groups_for_product.name == name
             ]
+        )
+
+        return (
+            f"{self.program_year} {groups}" if name == "Program Year" else groups or "-"
         )
 
     def get_qty_by_group(self, filter: s.ReportFilter):
