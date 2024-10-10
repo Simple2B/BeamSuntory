@@ -16,18 +16,20 @@ BASE_FILE_PATH = Path(UPLOAD_FOLDER)
 MAX_FILE_SIZE = 2 * 1024 * 1024  # 2 MB limit
 
 
-def save_exel_file(file: FileStorage, result: s.ValidateBulkShipResult) -> Path:
+def save_exel_file(
+    file: FileStorage, result: s.ValidateBulkShipResult
+) -> tuple[Path, Path]:
     """Save file to disk and return the path and extension."""
     log(log.INFO, "Saving file.")
     kind = filetype.guess(file)
 
     if not kind:
         result.errors["File"] = ["File type is not supported."]
-        return Path()
+        return Path(), Path()
 
     if MAX_FILE_SIZE < file.content_length:
         result.errors["File"] = ["File is too large."]
-        return Path()
+        return Path(), Path()
 
     file_name = (
         f"{str(uuid.uuid4())}_{file.filename}"
@@ -37,9 +39,7 @@ def save_exel_file(file: FileStorage, result: s.ValidateBulkShipResult) -> Path:
 
     file_path = BASE_FILE_PATH / file_name
 
-    try:
-        file.save(file_path)
-    finally:
-        file.close()
+    file.save(file_path)
 
-    return Path("static/uploads") / file_name
+    # return absolute path and upload path
+    return file_path, Path("static/uploads") / file_name

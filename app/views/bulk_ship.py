@@ -1,31 +1,23 @@
 import io
 import os
-import json
 from datetime import datetime
 from pathlib import Path
 
 from flask import (
     Blueprint,
     render_template,
+    render_template_string,
     request,
     flash,
-    redirect,
     send_file,
-    url_for,
-    send_from_directory,
-    current_app as app,
 )
 
 from flask_login import login_required, current_user
 import pandas as pd
-from openpyxl import Workbook, load_workbook
+from openpyxl import Workbook
 from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.utils import get_column_letter
 import sqlalchemy as sa
-from sqlalchemy import desc
-from pydantic import ValidationError
-from openpyxl.utils import quote_sheetname
-from openpyxl.workbook.defined_name import DefinedName
 
 from app.controllers import (
     create_pagination,
@@ -39,7 +31,7 @@ from app import schema as s
 from app import forms as f
 from app.controllers import validate_bulk_ship_exel
 from app.logger import log
-from .utils import create_metch
+from .utils import RELOAD_PAGE_SCRIPT, create_metch
 
 
 bulk_ship_bp = Blueprint("bulk_ship", __name__, url_prefix="/bulk-ship")
@@ -99,7 +91,9 @@ def download_template():
                 f"{wh_product.group.name} ({wh_product.available_quantity})"
             )
 
-    store_categories = db.session.scalars(sa.select(m.StoreCategory))
+    store_categories = db.session.scalars(
+        sa.select(m.StoreCategory).where(m.StoreCategory.name != s.Events.name.value)
+    )
     count_store_categories = db.session.scalar(
         sa.select(sa.func.count()).select_from(m.StoreCategory)
     )
@@ -214,6 +208,7 @@ def create():
         )
 
     file = request.files.get("exel_file")
+
     if not file:
         log(log.ERROR, "Form validation failed", form.errors)
         return render_template(
@@ -223,11 +218,19 @@ def create():
     result = s.ValidateBulkShipResult(errors=dict())
     file.seek(0)
 
+    # why we forst save the file and then validate it because after validation file change and save not work properly
+    absolute_file_path, upload_file_path = save_exel_file(file, result)
+    if result.errors:
+        log(log.ERROR, "Exel save failed", result.errors)
+        return render_template(
+            "bulk_ship/modal_add.html", form=form, errors=result.errors
+        )
+
     wh_products = validate_bulk_ship_exel(file, result)
-    file_path = save_exel_file(file, result)
 
     if result.errors:
         log(log.ERROR, "Exel validation failed", result.errors)
+        os.remove(absolute_file_path)
         return render_template(
             "bulk_ship/modal_add.html", form=form, errors=result.errors
         )
@@ -244,12 +247,13 @@ def create():
         user_id=current_user.id,
         status=s.BulkShipStatus.DRAFT.value,
         name=form.name.data,
-        excel_file=str(file_path),
+        absolute_file_path=str(absolute_file_path),
+        uploaded_file_path=str(upload_file_path),
     ).save()
 
-    return render_template(
-        "toast.html", message="Bulk ship created successfully", category="success"
-    )
+    flash("Bulk ship created successfully", category="success")
+
+    return render_template_string(RELOAD_PAGE_SCRIPT)
 
 
 @bulk_ship_bp.route("/<uuid>/download-template", methods=["GET"])
@@ -258,30 +262,60 @@ def create():
 def bulk_ship_template_download(uuid: str):
 
     bulk_ship = db.session.scalar(sa.select(m.BulkShip).where(m.BulkShip.uuid == uuid))
-    if not bulk_ship:
+    if not bulk_ship or bulk_ship.is_deleted:
         log(log.ERROR, "Bulk ship not found [%s]", uuid)
         flash("Bulk ship not found", category="danger")
         return "", 404
 
-    # Path does not work and I don't know why
-    file_path = bulk_ship.excel_file
-
-    if not os.path.exists(file_path):
-        log(log.ERROR, "File not found [%s]", file_path)
+    if not os.path.exists(bulk_ship.absolute_file_path):
+        log(log.ERROR, "File not found [%s]", bulk_ship.absolute_file_path)
         flash("File not found", category="danger")
         return "", 404
 
     return send_file(
-        file_path,
+        bulk_ship.uploaded_file_path,
         as_attachment=True,
-        download_name=f"{bulk_ship.name}_bulk_ship_template.xlsx",
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
 
 
-@bulk_ship_bp.route("/<uuid>/edit", methods=["POST"])
+@bulk_ship_bp.route("/<uuid>/view", methods=["GET"])
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
-def edit(uuid: str):
+def view(uuid: str):
+    """htmx"""
+    bulk_ship = db.session.scalar(sa.select(m.BulkShip).where(m.BulkShip.uuid == uuid))
+    if not bulk_ship or bulk_ship.is_deleted:
+        log(log.ERROR, "Bulk ship not found [%s]", uuid)
+        flash("Bulk ship not found", category="danger")
+        return render_template_string(RELOAD_PAGE_SCRIPT)
 
-    return redirect(url_for("bulk_ship.get_all"))
+    if not os.path.exists(bulk_ship.absolute_file_path):
+        log(log.ERROR, "File not found [%s]", bulk_ship.absolute_file_path)
+        flash("File not found", category="danger")
+        return "", 404
+
+    df = pd.read_excel(Path("app") / bulk_ship.excel_file)
+    excel_html = df.to_html(
+        index=False,
+    )
+
+    return render_template("bulk_ship/modal_view.html", excel_html=excel_html)
+
+
+@bulk_ship_bp.route("/<uuid>/delete", methods=["DELETE"])
+@login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+def delete(uuid: str):
+    bulk_ship = db.session.scalar(sa.select(m.BulkShip).where(m.BulkShip.uuid == uuid))
+    if not bulk_ship or bulk_ship.is_deleted:
+        log(log.ERROR, "Bulk ship not found [%s]", uuid)
+        flash("Bulk ship not found", category="danger")
+        return "", 404
+
+    bulk_ship.is_deleted = True
+    bulk_ship.name = f"{bulk_ship.name} - Deleted at {datetime.now()}"
+    db.session.commit()
+
+    flash("Bulk ship deleted successfully", category="success")
+    return "", 204

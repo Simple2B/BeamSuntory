@@ -29,7 +29,8 @@ class BulkShip(db.Model, ModelMixin):
         sa.DateTime,
         default=datetime.now,
     )
-    excel_file: orm.Mapped[str] = orm.mapped_column(sa.String(512))
+    absolute_file_path: orm.Mapped[str] = orm.mapped_column(sa.String(512))
+    uploaded_file_path: orm.Mapped[str] = orm.mapped_column(sa.String(512))
 
     def __repr__(self):
         return f"<{self.id}>"
