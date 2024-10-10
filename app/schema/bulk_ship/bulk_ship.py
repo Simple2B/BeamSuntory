@@ -1,6 +1,4 @@
 import enum
-from typing import List
-from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
 
 class BulkShipStatus(enum.Enum):

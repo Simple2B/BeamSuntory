@@ -2,7 +2,6 @@ import datetime
 import os
 from pathlib import Path
 
-import filetype
 import pytest
 from flask import Flask
 from flask.testing import FlaskClient
@@ -35,6 +34,14 @@ def client(app: Flask, mocker):
         return_value=("test", "test"),
     )
     mocker.patch(
+        "app.views.bulk_ship.send_file",
+        return_value=(""),
+    )
+    mocker.patch(
+        "app.views.bulk_ship.save_exel_file",
+        return_value=("", ""),
+    )
+    mocker.patch(
         "app.views.incoming_stock.notify_users_accept_inbount.delay",
     )
     mocker.patch(
@@ -46,9 +53,6 @@ def client(app: Flask, mocker):
     mocker.patch(
         "app.views.product.notify_users_new_request_share.delay",
     )
-    kind = filetype.guess("tests/data/no_picture_default.png")
-    mocker.patch.object(filetype, "guess", return_value=kind)
-    mocker.patch.object(filetype, "is_image", return_value=True)
     with app.test_client() as client:
         with app.app_context():
             db.drop_all()
@@ -765,6 +769,15 @@ def mg_g_populate(client: FlaskClient, mocker):
     )
     db.session.add(new_stock_prod_two)
     db.session.commit()
+
+    upload_path = Path("tests/data/test.xlsx")
+    m.BulkShip(
+        user_id=1,
+        status=s.BulkShipStatus.DRAFT.value,
+        name="test",
+        absolute_file_path=str(upload_path),
+        uploaded_file_path=str(upload_path),
+    ).save()
 
     yield client
 

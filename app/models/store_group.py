@@ -6,7 +6,6 @@ from sqlalchemy import orm
 
 from app.database import db
 from .utils import ModelMixin
-from app import schema as s
 
 if TYPE_CHECKING:
     from .store_master_group import StoreMasterGroup

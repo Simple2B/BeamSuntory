@@ -1,5 +1,5 @@
+# flake8: noqa E501
 from typing import List
-from flask import request
 import filetype
 import re
 from pydantic import ValidationError
@@ -24,7 +24,6 @@ ALLOW_FORMATS = [
 def validate_bulk_ship_exel(
     file: FileStorage, result: s.ValidateBulkShipResult
 ) -> List[s.WhProduct]:
-
     kind = filetype.guess(file)
     if not kind or kind.extension not in ALLOW_FORMATS:
         result.errors["file"] = ["File must be in xlsx format."]
@@ -74,7 +73,6 @@ def validate_bulk_ship_exel(
                 f"Store: {prod.store_name} not found"
             ]
         prod.store_id = store.id
-        result.stores_ids.add(store.id)
 
         product = db.session.scalar(
             sa.select(m.WarehouseProduct).where(
@@ -96,7 +94,7 @@ def validate_bulk_ship_exel(
         )
         if total_qty > product.available_quantity:
             result.errors[f"Invalid data row:{idx}"] = [
-                f"Not enough quantity for SKU: {prod.sku} in group: {prod.group}, available: {product.available_quantity}"
+                f"Not enough quantity for SKU: {prod.sku} in group:  {prod.group}, available: {product.available_quantity}"
             ]
             continue
 

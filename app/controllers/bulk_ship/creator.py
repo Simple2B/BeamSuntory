@@ -3,7 +3,6 @@ from typing import List
 from flask_login import current_user
 import app.schema as s
 import app.models as m
-import sqlalchemy as sa
 
 from app.database import db
 from app.logger import log

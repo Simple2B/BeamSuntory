@@ -39,6 +39,8 @@ class User(BaseModel):
     sales_rep: bool = Field(alias="salesRep")
     has_access_bulk_ship: bool
     has_access_bulk_assign: bool
+    group_name: str = ""
+    role_name: str = ""
 
 
 class AdminCreate(BaseModel):

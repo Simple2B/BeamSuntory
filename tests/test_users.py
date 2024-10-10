@@ -50,7 +50,7 @@ def test_create_user(client: FlaskClient):
         data=dict(
             username="test_name",
             email="test_mail@gmail.com",
-            role="ADMIN",
+            role=1,
             password="test_password",
             activated=True,
             country="test_country",
@@ -60,7 +60,7 @@ def test_create_user(client: FlaskClient):
             street_address="test_street_address",
             approval_permission=True,
             sales_rep=True,
-            has_access_bulk_shipe=True,
+            has_access_bulk_ship=True,
             has_access_bulk_assign=False,
         ),
         follow_redirects=True,

@@ -3,7 +3,6 @@ from wtforms import (
     StringField,
     SubmitField,
     ValidationError,
-    IntegerField,
 )
 from wtforms.validators import DataRequired, Length
 import sqlalchemy as sa
@@ -11,36 +10,6 @@ import sqlalchemy as sa
 from app.controllers.utils import replace_underscore
 from app import models as m
 from app.database import db
-
-
-# class GroupForm(FlaskForm):
-#     next_url = StringField("next_url")
-#     group_id = StringField("group_id", [DataRequired()])
-#     name = StringField("Name", [DataRequired()])
-#     master_group = StringField("Master Group", [DataRequired()])
-
-#     submit = SubmitField("Save")
-
-#     def validate_name(self, field):
-#         query = m.Group.select().where(
-#             m.Group.name == field.data, m.Group.id != int(self.group_id.data)
-#         )
-#         if db.session.scalar(query) is not None:
-#             raise ValidationError("This group name is taken.")
-#         replace_underscore(self, field)
-
-
-# class NewGroupForm(FlaskForm):
-#     name = StringField("Name", [DataRequired()])
-#     master_group = StringField("Master Group", [DataRequired()])
-
-#     submit = SubmitField("Add group")
-
-#     def validate_name(self, field):
-#         query = m.Group.select().where(m.Group.name == field.data)
-#         if db.session.scalar(query) is not None:
-#             raise ValidationError("This group name is taken.")
-#         replace_underscore(self, field)
 
 
 class MasterGroupForm(FlaskForm):

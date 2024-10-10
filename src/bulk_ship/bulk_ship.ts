@@ -59,7 +59,6 @@ async function deleteBulkShip(e: Event) {
 
 
 window.addEventListener('DOMContentLoaded', () => {
-    console.log('DOMContentLoaded');
     const downloadButtons = document.querySelectorAll('.download-bulk-ship-template');
     downloadButtons.forEach((button) => {
         button.addEventListener('click', downloadBulkTemplate);

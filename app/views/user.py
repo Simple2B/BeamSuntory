@@ -362,7 +362,7 @@ def request_share_notification():
         sa.select(m.RequestShareUser)
         .join(m.RequestShare)
         .where(
-            sa.func.date(m.RequestShareUser.reviewed_datetime) >= now.date(),
+            m.RequestShareUser.reviewed_datetime >= now.date(),
             sa.and_(
                 m.RequestShare.from_group_id.in_(
                     [group.id for group in current_user.user_groups]
@@ -400,7 +400,7 @@ def ship_request_notification():
         sa.select(m.ShipRequestNotification)
         .join(m.ShipRequest)
         .where(
-            sa.func.date(m.ShipRequestNotification.reviewed_datetime) >= now.date(),
+            m.ShipRequestNotification.reviewed_datetime >= now.date(),
             m.ShipRequestNotification.user_id == current_user.id,
             m.ShipRequest.status == s.ShipRequestStatus.waiting_for_warehouse,
         )

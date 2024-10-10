@@ -1,6 +1,5 @@
 from typing import TYPE_CHECKING
 from datetime import datetime
-import json
 from typing import List
 
 import sqlalchemy as sa
@@ -8,7 +7,6 @@ from sqlalchemy import orm
 
 from app.database import db
 from .utils import ModelMixin, generate_uuid
-from app import schema as s
 from app import models as m
 
 if TYPE_CHECKING:

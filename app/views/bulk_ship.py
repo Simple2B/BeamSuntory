@@ -1,7 +1,8 @@
+# flake8: noqa E501
+
 import io
 import os
 from datetime import datetime
-from pathlib import Path
 
 from flask import (
     Blueprint,
@@ -39,10 +40,27 @@ bulk_ship_bp = Blueprint("bulk_ship", __name__, url_prefix="/bulk-ship")
 
 @bulk_ship_bp.route("/", methods=["GET"])
 @login_required
-@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value], has_bulk_ship=True
+)
 def get_all():
 
-    where_stmt = sa.and_(m.BulkShip.is_deleted.is_(False))
+    q = request.args.get("q", type=str, default="")
+
+    where_stmt = sa.and_(
+        m.BulkShip.is_deleted.is_(False), m.BulkShip.user_id == current_user.id
+    )
+
+    if current_user.role_obj.role_name == s.UserRole.ADMIN.value:
+        where_stmt = sa.and_(m.BulkShip.is_deleted.is_(False))
+
+    if q:
+        where_stmt = sa.and_(
+            where_stmt,
+            sa.or_(
+                m.BulkShip.name.ilike(f"%{q}%"),
+            ),
+        )
 
     query = (
         sa.select(m.BulkShip).where(where_stmt).order_by(m.BulkShip.created_at.desc())
@@ -60,19 +78,15 @@ def get_all():
         "bulk_ship/bulk_ships.html",
         bulk_ships=bulk_ships,
         page=pagination,
+        q=q,
     )
-
-
-countries = {
-    "USA": ["New York", "Los Angeles", "Chicago"],
-    "Canada": ["Toronto", "Vancouver", "Montreal"],
-    "UK": ["London", "Manchester", "Birmingham"],
-}
 
 
 @bulk_ship_bp.route("/download-template", methods=["GET"])
 @login_required
-@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value], has_bulk_ship=True
+)
 def download_template():
 
     wb = Workbook()
@@ -92,7 +106,7 @@ def download_template():
             )
 
     store_categories = db.session.scalars(
-        sa.select(m.StoreCategory).where(m.StoreCategory.name != s.Events.name.value)
+        sa.select(m.StoreCategory).where(m.StoreCategory.name.not_ilike("%Event%"))
     )
     count_store_categories = db.session.scalar(
         sa.select(sa.func.count()).select_from(m.StoreCategory)
@@ -187,7 +201,9 @@ def download_template():
 
 @bulk_ship_bp.route("/create", methods=["GET"])
 @login_required
-@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value], has_bulk_ship=True
+)
 def get_create_modal():
     """htmx"""
     form = f.NewBulkShipForm()
@@ -196,7 +212,9 @@ def get_create_modal():
 
 @bulk_ship_bp.route("/create", methods=["POST"])
 @login_required
-@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value], has_bulk_ship=True
+)
 def create():
 
     form = f.NewBulkShipForm()
@@ -258,7 +276,9 @@ def create():
 
 @bulk_ship_bp.route("/<uuid>/download-template", methods=["GET"])
 @login_required
-@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value], has_bulk_ship=True
+)
 def bulk_ship_template_download(uuid: str):
 
     bulk_ship = db.session.scalar(sa.select(m.BulkShip).where(m.BulkShip.uuid == uuid))
@@ -281,7 +301,9 @@ def bulk_ship_template_download(uuid: str):
 
 @bulk_ship_bp.route("/<uuid>/view", methods=["GET"])
 @login_required
-@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value], has_bulk_ship=True
+)
 def view(uuid: str):
     """htmx"""
     bulk_ship = db.session.scalar(sa.select(m.BulkShip).where(m.BulkShip.uuid == uuid))
@@ -295,7 +317,7 @@ def view(uuid: str):
         flash("File not found", category="danger")
         return "", 404
 
-    df = pd.read_excel(Path("app") / bulk_ship.excel_file)
+    df = pd.read_excel(bulk_ship.absolute_file_path)
     excel_html = df.to_html(
         index=False,
     )
@@ -305,7 +327,9 @@ def view(uuid: str):
 
 @bulk_ship_bp.route("/<uuid>/delete", methods=["DELETE"])
 @login_required
-@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+@role_required(
+    [s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value], has_bulk_ship=True
+)
 def delete(uuid: str):
     bulk_ship = db.session.scalar(sa.select(m.BulkShip).where(m.BulkShip.uuid == uuid))
     if not bulk_ship or bulk_ship.is_deleted:
