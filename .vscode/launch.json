@@ -5,6 +5,13 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Launch Chrome",
+      "request": "launch",
+      "type": "chrome",
+      "url": "http://localhost:5005",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
       "name": "Python: Flask",
       "type": "python",
       "request": "launch",
@@ -14,7 +21,7 @@
         "APP_ENV": "development",
         "FLASK_DEBUG": "1"
       },
-      "args": ["run", "--port", "5000"],
+      "args": ["run", "--port", "5005"],
       "jinja": true,
       "justMyCode": false
     },

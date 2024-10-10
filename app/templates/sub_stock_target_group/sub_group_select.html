@@ -1,0 +1,16 @@
+{% set all_includes = "[name='search_sku'], [name='q'], [name='division'], [name='group_to'], [name='report_type'],
+[name='action_type_request_share'], [name='user'], [name='action_type_shipping'], [name='start_date'],
+[name='start_date_to'], [name='end_date'], [name='end_date_to'], [name='master_group'], [name='target_group'],
+[name='brand'], [name='language'], [name='premises'], [name='categories'], [name='events'], [name='expire_in'],
+[name='product-group'], [name='search-sku']" %}
+
+<select hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table" name="target_group"
+  hx-include="{{all_includes}}" hx-get="{{ url_for('report.search') }}" hx-indicator="#htmx-spinner"
+  class="events-filter-status mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+  <option selected value="">Sub group</option>
+  {% for group in sub_groups %}
+  <option value="{{ group.name }}">{{ group.name }}</option>
+  {% endfor %}
+</select>
+
+<script src="{{ url_for('static', filename='js/report_sub_group.js') }}" type="text/javascript" defer></script>

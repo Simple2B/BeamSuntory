@@ -1,8 +1,9 @@
 [tool.poetry]
-name = "flask.app"
-version = "0.1.0"
+name = "beam-suntory"
+
+version = "1.0.161"
 description = ""
-authors = ["denys <denysburimov@gmail.com>"]
+authors = ["petro <xavrais312@gmail.com>", "andrii <andrey.berezyanskiy@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -15,8 +16,20 @@ python-dotenv = "^1.0.0"
 click = "^8.1.3"
 email-validator = "^1.3.1"
 psycopg2-binary = "^2.9.5"
-pydantic = "^1.10.7"
+pydantic = "^2.3.0"
 alchemical = "^0.7.1"
+pandas = "^2.0.3"
+pydantic-settings = "^2.0.3"
+beautifulsoup4 = "^4.12.2"
+filetype = "^1.2.0"
+pillow = "^10.0.1"
+openpyxl = "^3.1.2"
+weasyprint = "^61.2"
+flask-pydantic = "^0.12.0"
+celery = "^5.4.0"
+redis = "^5.0.3"
+cryptography = "^42.0.8"
+pandas-stubs = "^2.2.2.240909"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.1"
@@ -25,6 +38,8 @@ black = "^22.3.0"
 
 [tool.poetry.group.dev.dependencies]
 faker = "^18.3.1"
+pytest-mock = "^3.12.0"
+mypy = "^1.11.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

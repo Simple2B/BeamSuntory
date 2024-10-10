@@ -1,4 +1,19 @@
-from app import db
+import uuid
+from app.database import db
+from cryptography.fernet import Fernet, InvalidToken
+
+from config import APP_ENV, config
+from app.logger import log
+
+conf = config(APP_ENV)
+
+
+START_ORDER_NUMBER = 10000
+fernet = Fernet(conf.CRYPTOGRAPHY_KEY.encode())
+
+
+def generate_uuid() -> str:
+    return str(uuid.uuid4())
 
 
 class ModelMixin(object):
@@ -10,4 +25,15 @@ class ModelMixin(object):
         return self
 
 
-# Add your own utility classes and functions here.
+def encrypt_data(data: str) -> bytes:
+    token = fernet.encrypt(f"{data}".encode())
+    return token
+
+
+def decrypt_data(token: bytes) -> str:
+    try:
+        data = fernet.decrypt(token)
+    except (InvalidToken, TypeError) as e:
+        log(log.ERROR, "Can't decrypt data: %s", e)
+        return ""
+    return data.decode()

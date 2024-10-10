@@ -1,0 +1,1 @@
+(()=>{var n=document.querySelector("#table-search-inventory"),o=document.querySelector("#table-search-inventory-button");o&&n&&o.addEventListener("click",(function(){window.location.href="".concat(window.location.origin).concat(window.location.pathname,"?q=").concat(n.value)}))})();

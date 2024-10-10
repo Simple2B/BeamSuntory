@@ -1,0 +1,23 @@
+<!-- Image product modal -->
+<!-- prettier-ignore-->
+<div id="product-image-modal" tabindex="-1" aria-hidden="true"
+  class="full-image-z-index fixed top-0 left-0 right-0 items-center justify-center hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
+  <div class="relative w-full max-w-4xl max-h-full">
+    <!-- Modal content -->
+    <!-- TODO change action for image form -->
+    <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+      <!-- Modal header -->
+      <div class="flex items-center justify-center p-4 border-b rounded-t dark:border-gray-600">
+        <h3 id="product-image-name" class="text-xl font-semibold text-gray-900 dark:text-white"> Product Name </h3>
+      </div>
+      <!-- Modal body -->
+      <div class="flex justify-center p-2 space-y-2">
+        <!-- prettier-ignore -->
+        <img id="product-image-full-img" class="hidden w-full h-full object-cover">
+        <p id="product-image-not-found-img" class="hidden text-base font-normal text-gray-900   dark:text-white">Image
+          not found</p>
+      </div>
+      <!-- Modal footer -->
+    </div>
+  </div>
+</div>

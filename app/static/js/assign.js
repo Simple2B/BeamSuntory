@@ -1,0 +1,1 @@
+(()=>{var e=document.querySelector("#table-search-assign"),a=document.querySelector("#table-search-assign-button");a&&e&&a.addEventListener("click",(function(){var a=new URL(window.location.href);a.searchParams.set("q",e.value),window.location.href="".concat(a.href)}))})();

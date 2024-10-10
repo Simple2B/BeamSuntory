@@ -1,0 +1,174 @@
+<div tabindex="-1" id="incoming-stock-view-accept-goods-modal" hx-get="{{ url_for('main.no_content') }}"
+  hx-trigger="click" hx-swap="delete" hx-target="#incoming-stock-view-accept-goods-modal" hx-indicator="#htmx-spinner"
+  class="fixed bg-opacity-80 bg-gray-600 top-0 left-0 right-0 z-50 items-center justify-center w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full max-h-full justify-end items-end flex">
+  <div class="relative w-full max-w-4xl max-h-full" onclick="event.stopPropagation();">
+    <!-- Modal content -->
+    <form action="{{ url_for('incoming_stock.accept') }}" id="incoming-stock-accept-goods-form" method="post"
+      class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+      {{ form.hidden_tag() }}
+      {{ form.inbound_order_id }}
+      {{ form.received_products }}
+      <!-- Modal header -->
+      <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Edit incoming stock</h3>
+      </div>
+      <!-- Modal body -->
+      <div>
+        {% for product_allocated in inbound_order.products_allocated %}
+        <div product-allocated-id="{{ product_allocated.id }}" class="product_allocated_data">
+          <div class="flex gap-4 p-4 h-full  border-t-[3px] border-gray-200">
+            <div data-target-product-id="{{ product_allocated.product.id }}" class="w-1/2 product-full-image-anchor">
+              {% if product_allocated.product.image and product_allocated.product.image | length > 100 %}
+              <img src="data:image/png;base64, {{ product_allocated.product.image }}" class="h-[16rem] object-cover" />
+              {% else %}
+              <img
+                src="https://raw.githubusercontent.com/Simple2B/BeamSuntory/develop/app/static/img/no_picture_default.png"
+                class="h-[16rem] object-cover" />
+              {% endif %}
+            </div>
+            <div class="flex flex-col gap-4  w-full">
+              <div class="col-span-6 row-span-2">
+                <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product
+                  Name</label>
+                <div
+                  class=" shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  {{ product_allocated.product.name }}</div>
+              </div>
+              <div class="col-span-6 row-span-2">
+                <label for="SKU" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">SKU</label>
+                <div
+                  class=" shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  {{ product_allocated.product.SKU }}</div>
+              </div>
+              <div class="col-span-6 row-span-2">
+                <label for="package_qty" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Total
+                  ordered</label>
+                <div
+                  class="product-incoming-stock-edit-total-quantity shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  {{ product_allocated.quantity }}</div>
+              </div>
+            </div>
+          </div>
+          {% for product_quantity_group in product_allocated.product_quantity_groups %}
+          <div
+            class="product_allocated_quantity_group {{ 'bg-slate-100' if loop.cycle('odd', 'even') == 'odd' else '' }}"
+            product-quantity-group-id="{{ product_quantity_group.id }}">
+            <div class="grid grid-cols-12 gap-4 p-4">
+              <div class="col-span-6 sm:col-span-4">
+                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group name</label>
+                <div
+                  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  {{ product_quantity_group.group.name }}</div>
+              </div>
+              <div class="col-span-6 sm:col-span-4">
+                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group ordered
+                  quantity</label>
+                <div
+                  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  {{ product_quantity_group.quantity }}</div>
+              </div>
+              <div class="col-span-6 sm:col-span-4">
+                <label class=" block mb-2 text-sm font-medium text-gray-900 dark:text-white">Received
+                  quantity</label>
+                <input type="number" value="{{ product_quantity_group.quantity }}" placeholder="0" required
+                  class="received_quantity_input shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              </div>
+
+            </div>
+            {% if product_quantity_group.package_info %}
+            <div class="grid grid-cols-12 gap-4 p-4">
+              <div class="col-span-6 sm:col-span-4">
+                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity Per Wrap</label>
+                <input type="number" placeholder="Quantity Per Wrap" required
+                  value="{{ product_quantity_group.package_info.quantity_per_wrap }}"
+                  class="quantity_per_wrap_input shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              </div>
+
+              <div class="col-span-6 sm:col-span-4 ">
+                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity Wrap Carton</label>
+                <input type="number" placeholder="Quantity Wrap Carton" required
+                  value="{{ product_quantity_group.package_info.quantity_wrap_carton }}"
+                  class="quantity_wrap_carton_input shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              </div>
+
+              <div class="col-span-6 sm:col-span-4 quantity-container">
+                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity Carton
+                  Master</label>
+                <input type="number" placeholder="Quantity Carton Master"
+                  value="{{ product_quantity_group.package_info.quantity_carton_master }}"
+                  class="quantity_carton_maste_input shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              </div>
+            </div>
+            {% else %}
+            <div class="grid grid-cols-12 gap-4 p-4">
+              <div class="col-span-6 sm:col-span-4 quantity-container">
+                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity Per Wrap</label>
+                <input type="number" placeholder="Quantity Per Wrap" required
+                  class="quantity_per_wrap_input shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              </div>
+
+              <div class="col-span-6 sm:col-span-4 quantity-container">
+                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity Wrap Carton</label>
+                <input type="number" placeholder="Quantity Wrap Carton" required
+                  class="quantity_wrap_carton_input shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              </div>
+
+              <div class="col-span-6 sm:col-span-4 quantity-container">
+                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity Carton
+                  Master</label>
+                <input type="number" placeholder="Quantity Carton Master"
+                  class="quantity_carton_maste_input shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              </div>
+            </div>
+            {% endif %}
+
+          </div>
+          {% endfor %}
+
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Modal footer -->
+      <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+        <button type="submit" class="hidden"></button>
+        <button type="button" onclick="acceptGoods(this)"
+          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+          Accept goods
+        </button>
+      </div>
+    </form>
+  </div>
+  <script>
+    function acceptGoods(e) {
+      const form = document.getElementById('incoming-stock-accept-goods-form');
+      if (!form) return;
+      const submitButton = form.querySelector('button[type="submit"]');
+      const receivedProductsInput = form.querySelector('input[name="received_products"]');
+      if (!receivedProductsInput || !submitButton) return;
+      const productAllocatedData = Array.from(form.querySelectorAll('.product_allocated_data')).map((productAllocated) => {
+        const allocatedProductId = productAllocated.getAttribute('product-allocated-id');
+        const productQuantityGroup = productAllocated.querySelectorAll('.product_allocated_quantity_group');
+        return {
+          allocatedProductId,
+          packages: Array.from(productQuantityGroup).map((quantityContainer) => {
+            return {
+              productQuantityGroupId: quantityContainer.getAttribute('product-quantity-group-id'),
+              quantityPerWrap: quantityContainer.querySelector('.quantity_per_wrap_input').value,
+              quantityWrapCarton: quantityContainer.querySelector('.quantity_wrap_carton_input').value,
+              quantityCartonMaster: quantityContainer.querySelector('.quantity_carton_maste_input').value,
+              quantityReceived: quantityContainer.querySelector('.received_quantity_input').value,
+
+            };
+          }),
+        };
+      });
+
+      receivedProductsInput.value = JSON.stringify(productAllocatedData);
+      submitButton.click();
+      if (form.checkValidity()) {
+        e.disabled = true;
+      }
+    }
+  </script>
+</div>

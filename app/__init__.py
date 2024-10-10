@@ -4,25 +4,30 @@ from flask import Flask, render_template
 from flask_login import LoginManager
 from werkzeug.exceptions import HTTPException
 from flask_migrate import Migrate
-from flask_mail import Mail
+
+# from flask_mail import Mail
 
 from app.logger import log
+from app.controllers import CustomMail
 from .database import db
+from .constants import (
+    DELIVERY_AGENT_ROLES,
+    ADMIN_WAREHOUSE_ROLES,
+    ALL_ROLE_WITHOUT_SALE_REP,
+)
 
 # instantiate extensions
 login_manager = LoginManager()
 migration = Migrate()
-mail = Mail()
+mail = CustomMail()
 
 
 def create_app(environment="development"):
     from config import config
-    from app.views import (
-        main_blueprint,
-        auth_blueprint,
-        user_blueprint,
-    )
-    from app import models as m
+    from app.views import BLUEPRINTS
+    from app import controllers
+    from app import models as m, forms
+    from app import schema as s
 
     # Instantiate app.
     app = Flask(__name__)
@@ -30,6 +35,7 @@ def create_app(environment="development"):
     # Set app config.
     env = os.environ.get("APP_ENV", environment)
     configuration = config(env)
+    os.environ["TZ"] = configuration.TIMEZONE
     app.config.from_object(configuration)
     configuration.configure(app)
     log(log.INFO, "Configuration: [%s]", configuration.ENV)
@@ -41,9 +47,8 @@ def create_app(environment="development"):
     mail.init_app(app)
 
     # Register blueprints.
-    app.register_blueprint(auth_blueprint)
-    app.register_blueprint(main_blueprint)
-    app.register_blueprint(user_blueprint)
+    for blueprint in BLUEPRINTS:
+        app.register_blueprint(blueprint)
 
     # Set up flask login.
     @login_manager.user_loader
@@ -54,6 +59,40 @@ def create_app(environment="development"):
     login_manager.login_view = "auth.login"
     login_manager.login_message_category = "info"
     login_manager.anonymous_user = m.AnonymousUser
+
+    app.jinja_env.globals["get_all_groups"] = controllers.get_all_groups
+
+    app.jinja_env.globals["form_product_upload"] = forms.UploadProductForm
+    app.jinja_env.globals["admin_roles"] = [s.UserRole.ADMIN.value]
+    app.jinja_env.globals["admin_warehouse_roles"] = ADMIN_WAREHOUSE_ROLES
+
+    app.jinja_env.globals["warehouse_roles"] = [
+        # TODO: delete admin role after testing
+        s.UserRole.ADMIN.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ]
+    app.jinja_env.globals["admin_manager_roles"] = [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.MANAGER.value,
+    ]
+    app.jinja_env.globals["admin_warehouse_manager_roles"] = [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+    ]
+
+    app.jinja_env.globals["all_role_without_sale_rep"] = ALL_ROLE_WITHOUT_SALE_REP
+
+    app.jinja_env.globals["all_main_user_roles"] = [
+        s.UserRole.ADMIN.value,
+        s.UserRole.SALES_REP.value,
+        s.UserRole.MANAGER.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+        s.UserRole.DELIVERY_AGENT.value,
+    ]
+    app.jinja_env.globals["delivery_agent_roles"] = DELIVERY_AGENT_ROLES
 
     # Error handlers.
     @app.errorhandler(HTTPException)

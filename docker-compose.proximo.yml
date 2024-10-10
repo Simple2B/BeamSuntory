@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:14
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: db
+      PGDATABASE: db
+      PGPASSWORD: ${POSTGRES_PASSWORD:-passwd}
+      PGUSER: ${POSTGRES_USER:-postgres}
+
+  app:
+    image: simple2b/beam-suntory-app:latest
+    restart: always
+    volumes:
+      - ./product:/home/app/app/static/img/product
+    env_file:
+      - .env
+    depends_on:
+      - db
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.beamsuntory_app_proximo.rule=Host(`proximo.jlidistribution.com`)'
+      - 'traefik.http.routers.beamsuntory_app_proximo.tls=true'
+      - 'traefik.http.routers.beamsuntory_app_proximo.tls.certresolver=myresolver'
+  backup:
+    image: simple2b/pg-backup:1.0
+    links:
+      - db
+    volumes:
+      - ./backup:/backup
+    environment:
+      SCHEDULE_HOUR: ${SCHEDULE_HOUR:-0}
+      SCHEDULE_MINUTE: ${SCHEDULE_MINUTE:-0}
+      SCHEDULE_SECOND: ${SCHEDULE_SECOND:-0}
+      POSTGRES_HOST: db
+      POSTGRES_DATABASE: db
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-passwd}
+      POSTGRES_EXTRA_OPTS: '--schema=public --blobs'
+      DAYS_HISTORY: 30
+
+
+  celery:
+    image: simple2b/beam-suntory-app:latest
+    restart: always
+    env_file:
+      - .env
+    command: 'poetry run celery -A app.worker:celery_worker worker --loglevel=INFO'
+    depends_on:
+      - db
+      - redis
+
+  redis:
+    image: redis:6.2-alpine
+    restart: always
+    env_file:
+      - .env
+    command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASSWORD}
+
+networks:
+  default:
+    name: beamsuntory_network_proximo
+
+volumes:
+  db_data:
+  product:

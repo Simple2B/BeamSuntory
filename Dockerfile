@@ -7,6 +7,7 @@ USER app
 WORKDIR /home/app
 
 # set environment varibles
+ENV APP_ENV production
 ENV PYTHONFAULTHANDLER 1
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONHASHSEED random
@@ -22,9 +23,12 @@ COPY --chown=app:app poetry.lock .
 COPY --chown=app:app pyproject.toml .
 COPY --chown=app:app poetry.toml .
 
-RUN poetry install --no-dev --no-interaction --no-ansi
+RUN poetry install --without dev --no-interaction --no-ansi
 # add gunicorn
 RUN poetry add gunicorn
 
+EXPOSE 8000
+
 COPY --chown=app:app . .
 RUN chmod +x ./start_server.sh
+CMD ["sh", "./start_server.sh"]

@@ -1,0 +1,28 @@
+<div {% if not sub_groups %} class="invisible" {% endif %}>
+  <label for="group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Sub Group</label>
+  <!-- TODO: remove after accept milestone -->
+  <!-- <input list="assign-sub-group-list" id="product-assign-sub-group" {% if not sub_groups %}
+    placeholder="Group does not have sub group" disabled {% else %} placeholder="Select sub group" {% endif %}
+    class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"> -->
+  <!-- <datalist id="assign-sub-group-list">
+    <option value="" data-group-id="" selected disabled>Group</option>
+    {% for sub_group in sub_groups %}
+    <option value="{{ sub_group.name }}" assign-data-sub-group-id="{{ sub_group.id }}" class="product-assign-to-group">
+      {{
+      sub_group.name }}
+    </option>
+    {% endfor %}
+  </datalist> -->
+  <select id="product-assign-sub-group"
+    class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+    <option selected value="">Choose sub group</option>
+    {% for group in sub_groups %}
+    <option value="{{ group.id }}">{{ group.name }}</option>
+    {% endfor %}
+  </select>
+  <input type="hidden" name="sub-group" id="product-assign-sub-group-hidden">
+</div>
+
+
+
+<script src="{{ url_for('static', filename='js/product.js') }}" type="text/javascript" defer></script>

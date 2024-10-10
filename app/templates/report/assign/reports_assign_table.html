@@ -1,0 +1,97 @@
+<div id="report-assign-table">
+  <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+      <tr>
+        <th scope="col" class="px-6 py-3">
+          #
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Image
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Product SKU
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Product name
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Brand
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Quantity
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Group from
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Group to
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Last transaction data
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- prettier-ignore -->
+      {% for report in reports if not request.args.get('search_sku') or request.args.get('search_sku') in
+      report.product.SKU %}
+      <!-- prettier-ignore -->
+      <tr
+        class="table-event-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+        <td class="w-4 p-4">
+          <div class="flex items-center">{{ loop.index + page.skip }}</div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">
+              {% if report.product.image|length > 100 %}
+              <img src="data:image/png;base64, {{ report.product.image }}" alt="{{ report.product.image }}"
+                class="w-14 object-cover">
+              {% else %}
+              <img src="{{ url_for('static', filename='img/default_image_brand.png') }}"
+                alt="{{ report.product.image }}" class="w-14 object-cover">
+              {% endif %}
+            </div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.product.SKU }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900  dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.product.name }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900  dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.product.brand }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.quantity }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.from_group.name }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.group.name }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold"> {{report.product.last_transaction_data }} </div>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% include "report/pagination_bar_report.html"%}
+</div>

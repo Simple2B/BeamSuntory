@@ -1,0 +1,121 @@
+<div id="shelf-lifes-table">
+  <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+      <tr>
+        <th scope="col" class="px-6 py-3">
+          #
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Image
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Number of days left
+        </th>
+        <th scope="col" class="px-6 py-3">
+          SKU
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Name
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Brand
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Quantity received
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Remaining quantity
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Data Created
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Date Expires
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Last transaction data
+        </th>
+
+        <th scope="col" class="px-6 py-3">
+          Action
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- prettier-ignore -->
+      {% for report in shelf_life_reports  %}
+      <!-- prettier-ignore -->
+      <tr
+        class="table-shelf-life-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+        <td class="w-4 p-4">
+          <div class="flex items-center">{{ loop.index + page.skip }}</div>
+        </td>
+        <td scope="row"
+          class="product-full-image-anchor   text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            {% if report.product.image|length > 100 %}
+            <img src="data:image/png;base64, {{ report.product.image }}" alt="{{ report.product.name }}" class="w-14 object-cover">
+            {% else %}
+            <img src="{{ url_for('static', filename='img/default_image_brand.png') }}" alt="{{ report.name }}"
+              class="w-14 object-cover">
+            {% endif %}
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.numb_of_day_left }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.product.SKU }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900  dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.product.name }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900  dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.product.brand }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.quantity_received }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.quantity_remains }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.shelf_life_start.strftime('%m/%d/%Y') }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.shelf_life_end.strftime('%m/%d/%Y') }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.product.last_transaction_data }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <button type="button" hx-trigger="click" hx-target="body" hx-swap="beforeend" hx-indicator="#htmx-spinner"
+            hx-get="{{ url_for('report_shelf_life.detail_modal', product_allocated_id=report.id) }}"
+              class="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Details</button>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% include "report/pagination_bar_report.html" %}
+</div>

@@ -1,0 +1,62 @@
+<div id="selec-cart-container" class="w-full flex flex-col gap-4">
+    <div class="w-full flex gap-5">
+        <div class="">
+            <label for="cart-store-request-category-select"
+                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select Category</label>
+            <select type="text" name="store_category" hx-get="{{ url_for('cart.get_stores_options') }}"
+                hx-target="#cart-store-options" hx-indicator="#htmx-spinner" hx-swap="outerHTML"
+                hx-include="[name='is_favorites']"
+                class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                placeholder="Currency" required>
+                <option value="" disabled selected>Select store category</option>
+                {% for store_category in store_categories %}
+                <option value="{{ store_category.id }}">
+                    {{ store_category.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        {% if is_locker_store_category %}
+        <div>
+            <label class="top-1/2 ml-7 flex-grow-0 relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" name="to_locker_store" class="sr-only peer"
+                    hx-get="{{ url_for('cart.get_ship_to_locker') }}" hx-target="#selec-cart-container"
+                    hx-indicator="#htmx-spinner" hx-swap="outerHTML" hx-trigger="change" />
+                <div
+                    class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-400">
+                </div>
+                <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Ship to my locker</span>
+            </label>
+        </div>
+        {% endif %}
+    </div>
+    <div class="w-full flex gap-5">
+        <div class="">
+            <label for="cart-store-select" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select
+                Store</label>
+            <select type="text" name="store" id="cart-store-options"
+                class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                placeholder="Currency" required>
+                <option value="" disabled selected>Select store</option>
+                {% for store in stores %}
+                <option class="cart-store-option" value="{{ store.id }}">
+                    {{ store.store_name }} ({{ store.address }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="top-1/2 ml-7 flex-grow-0 relative inline-flex items-center cursor-pointer">
+                <input name="is_favorites" type="checkbox" class="sr-only peer"
+                    hx-get="{{ url_for('cart.get_stores_options') }}" hx-target="#cart-store-options"
+                    hx-indicator="#htmx-spinner" hx-swap="outerHTML" hx-trigger="change"
+                    hx-include="[name='store_category'], [name='is_favorites']" />
+                <div
+                    class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-400">
+                </div>
+                <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Show Favorite
+                    Stores</span>
+            </label>
+        </div>
+    </div>
+</div>

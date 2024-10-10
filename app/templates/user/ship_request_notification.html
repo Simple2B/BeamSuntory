@@ -1,0 +1,47 @@
+<div id="notification-list-conteiner" class="overflow-y-scroll h-[40rem]">
+    {% for notifications in ship_req_notifications %}
+    <a href="{{ url_for('outgoing_stock.get_all', q=notifications.ship_request.order_numb) }}"
+        class="flex px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700">
+        <div class="w-full pl-3">
+            <div class="text-gray-500 text-sm mb-1.5 dark:text-gray-400">
+                New
+                <span class="font-semibold text-gray-900 dark:text-white">Ship request</span> created: Order number
+                -
+                <span
+                    class="font-semibold text-gray-900 dark:text-white">{{notifications.ship_request.order_numb}}</span>,
+                User - <span class="font-semibold text-gray-900 dark:text-white">{{
+                    notifications.ship_request.user.username }}</span>, Store category - <span
+                    class="font-semibold text-gray-900 dark:text-white">{{notifications.ship_request.store_category.name}}</span>,
+                Store - <span
+                    class="font-semibold text-gray-900 dark:text-white">{{notifications.ship_request.store.store_name}}</span>,
+                Status - <span
+                    class="font-semibold text-gray-900 dark:text-white">{{notifications.ship_request.status.value}}</span>
+            </div>
+            <div class="flex justify-between">
+                <div class="text-xs text-blue-600 dark:text-blue-500">
+                    {{ notifications.ship_request.created_at.strftime('%Y-%m-%d %H:%M') }}
+                </div>
+                {% if notifications.id in new_notifications_ids %}
+                <div class="text-xs text-blue-600 dark:text-blue-500">
+                    <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="#D1D5DB" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M5 11.917 9.724 16.5 19 7.5" />
+                    </svg>
+                </div>
+                {% else %}
+                <div class="text-xs text-blue-600 dark:text-blue-500">
+                    <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="#22c55e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M5 11.917 9.724 16.5 19 7.5" />
+                    </svg>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </a>
+    {% endfor %}
+    <div class="p-6"></div>
+</div>

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class Pagination(BaseModel):
@@ -11,3 +11,12 @@ class Pagination(BaseModel):
     skip: int  # number items on all previous pages
     pages: int  # total pages
     pages_for_links: list[int]  # number of links
+
+
+class PaginationOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    page: int
+    pages: int
+    per_page: int
+    total: int

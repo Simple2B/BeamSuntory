@@ -1,0 +1,152 @@
+<div id="adjustment-table">
+  <!-- hidden input query params -->
+  <div>
+    <input hidden type="text" name="" id="adjustment-filter-params-input" value="{{ filter_adjustments }}" />
+  </div>
+
+  <table class="w-full overflow-x-auto text-sm text-left text-gray-500 dark:text-gray-400">
+    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+      <tr>
+        <th scope="col" class="px-6 py-3">
+          #
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Image
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Product Name
+        </th>
+        <th scope="col" class="px-6 py-3">
+          SKU
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Brand
+        </th>
+        <th scope="col" class="px-6 py-3">
+          User
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Date
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Master<br />Group
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Group
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Warehouse
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Quantity<br />Before
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Quantity<br />After
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Quantity<br />Delta
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Notes
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Last transaction data
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- prettier-ignore -->
+      {% for report in reports if not request.args.get('search_sku') or request.args.get('search_sku') in
+      report.product.SKU %}
+      {% set report_index = loop.index %}
+      {% for adjust in report.adjust_group_qty %}
+      <!-- prettier-ignore -->
+      <tr
+        class="table-event-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+        <td class="w-4 p-4">
+          <div class="flex items-center">{{ report_index + page.skip }}</div>
+        </td>
+        <!-- TODO: ask client about image -->
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            {% if report.product.image|length > 100 %}
+            <img src="data:image/png;base64, {{ report.product.image }}" alt="{{ report.product.name }}"
+              class="w-14 object-cover">
+            {% else %}
+            <img src="{{ url_for('static', filename='img/default_image_brand.png') }}" class="w-14 object-cover"
+              alt="{{ report.product.name }}">
+            {% endif %}
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.product.name }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.product.SKU }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.product.brand }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.user.username }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.created_at.strftime('%m/%d/%Y') }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ adjust.group.master_group.name }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ adjust.group.name }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ adjust.warehouse.name }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ adjust.quantity_before }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ adjust.quantity_after }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ adjust.quantity_after - adjust.quantity_before }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.note if report.note else "-" }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.product.last_transaction_data }}</div>
+          </div>
+        </td>
+      </tr>
+      {% endfor %} {% endfor %}
+    </tbody>
+  </table>
+  <!-- prettier-ignore -->
+  {% include "report/pagination_bar_report.html" %}
+</div>

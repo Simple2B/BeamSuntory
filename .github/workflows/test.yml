@@ -1,0 +1,31 @@
+
+
+name: Test app
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  tests:
+    runs-on: Linux
+    steps:
+      - uses: actions/checkout@v3.5.2
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: Set up Poetry
+        uses: abatilo/actions-poetry@v2.3.0
+        with:
+          poetry-version: 1.5.1
+      - name: Install dependencies
+        run: |
+          poetry install
+      - name: Lint with flake8
+        run: |
+          poetry run flake8 . --count --show-source --statistics
+          poetry run flake8 . --count --exit-zero --max-complexity=10 --statistics
+      - name: Run Flask tests
+        run: |
+          poetry run pytest

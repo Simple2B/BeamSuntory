@@ -1,16 +1,39 @@
-from app.models import User
+from app.models import User, Division
+from app import schema as s
+from app.database import db
 
 TEST_ADMIN_NAME = "bob"
 TEST_ADMIN_EMAIL = "bob@test.com"
 TEST_ADMIN_PASSWORD = "password"
+TEST_ADMIN_FULL_NAME = "bob suntory"
 
 
 def register(
-    username=TEST_ADMIN_NAME, email=TEST_ADMIN_EMAIL, password=TEST_ADMIN_PASSWORD
+    username=TEST_ADMIN_NAME,
+    email=TEST_ADMIN_EMAIL,
+    password=TEST_ADMIN_PASSWORD,
+    role_name=s.UserRole.ADMIN.value,
 ):
-    user = User(username=username, email=email)
+    create_default_divisions()
+
+    role = db.session.scalar(Division.select().where(Division.role_name == role_name))
+
+    user = User(
+        username=username,
+        email=email,
+        role_obj=role,
+        activated=True,
+        approval_permission=True,
+        street_address="street",
+        phone_number="123456789",
+        country="UK",
+        region="Lv",
+        city="Dro",
+        zip_code="82100",
+    )
     user.password = password
     user.save()
+
     return user.id
 
 
@@ -22,3 +45,19 @@ def login(client, username=TEST_ADMIN_NAME, password=TEST_ADMIN_PASSWORD):
 
 def logout(client):
     return client.get("/logout", follow_redirects=True)
+
+
+def create_default_divisions():
+    # TODO Manager?
+    # for role in [
+    #     BaseConfig.Config.ADMIN,
+    #     BaseConfig.Config.SALES_REP,
+    #     BaseConfig.Config.WAREHOUSE_MANAGER,
+    #     "Manager",
+    # ]:
+    for role in s.UserRole:
+        check_role = db.session.execute(
+            Division.select().where(Division.role_name == role.value)
+        ).scalar()
+        if not check_role:
+            Division(role_name=role.value, activated=True).save()

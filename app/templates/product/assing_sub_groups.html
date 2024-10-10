@@ -1,0 +1,15 @@
+{% if sub_groups | length > 0 %}
+<div class="col-span-6 sm:col-span-2" id="sub-group-element">
+  <label for="sub_group" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Sub Group</label>
+  <input type="text" list="assign-sub-group-list-data" autocomplete="off" name="sub_group" placeholder="Select group"
+    class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+  <datalist id="assign-sub-group-list-data">
+    <option value="" selected disabled>Sub Group</option>
+    {% for group in sub_groups %}
+    <option value="{{ group.name }}">
+      {% endfor %}
+  </datalist>
+</div>
+{% else %}
+<div class="col-span-6 sm:col-span-2" id="sub-group-element"></div>
+{% endif %}

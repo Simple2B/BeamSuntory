@@ -4,8 +4,17 @@ env/
 .venv/
 .pytest_cache/
 node_modules/
+product_images/
+products/
+app/static/img/product
+backup/
+
 
 # ignore files
 .env
 *.pyc
 /*.sqlite3
+.DS_Store
+celerybeat-schedule.db
+
+app/static/uploads/*

@@ -1,0 +1,122 @@
+<div id="events-table">
+  <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+      <tr>
+        <th scope="col" class="px-6 py-3">
+          #
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Image
+        </th>
+        <th scope="col" class="px-6 py-3">
+          SKU
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Product name
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Brand
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Quantity
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Group
+        </th>
+        <th scope="col" class="px-6 py-3">
+          User
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Store
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Date delivered
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Date picked up
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Order: №
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- prettier-ignore -->
+      {% for report in reports %}
+      {% set report_index = loop.index + page.skip%}
+      <!-- prettier-ignore -->
+      <tr
+        class="table-event-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+        <td class="w-4 p-4">
+          <div class="flex items-center">{{ report_index }}</div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">
+              {% if report.cart.product.image|length > 100 %}
+              <img src="data:image/png;base64, {{ report.cart.product.image }}" alt="{{ report.cart.product.image }}"
+                class="w-14 object-cover">
+              {% else %}
+              <img src="{{ url_for('static', filename='img/default_image_brand.png') }}"
+                alt="{{ report.cart.product.image }}" class="w-14 object-cover">
+              {% endif %}
+            </div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900  dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{report.cart.product.SKU}}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900  dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{report.cart.product.name}}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900  dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{report.cart.product.brand}}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{report.cart.quantity}}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{report.cart.group.name}}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.user.username }}</div>
+          </div>
+        </td>
+
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{report.cart.ship_request.store.store_name}} </div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.cart.ship_request.date_delivered }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.cart.ship_request.date_picked_up }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.cart.ship_request.order_numb }}</div>
+          </div>
+        </td>
+      </tr> {% endfor %}
+    </tbody>
+  </table>
+  <!-- prettier-ignore -->
+  {% include "report/pagination_bar_report.html" %}
+</div>

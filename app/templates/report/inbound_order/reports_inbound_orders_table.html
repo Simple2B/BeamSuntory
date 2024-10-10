@@ -1,0 +1,79 @@
+<div id="report-inbound-order-table">
+  <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+      <tr>
+        <th scope="col" class="px-6 py-3">
+          #
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Order №
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Created at
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Arrived at
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Warehouse
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Supplier
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Action
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for report in reports %} {% set
+      loop_index = loop.index %}
+      <!-- prettier-ignore -->
+      <!-- prettier-ignore -->
+      <tr
+        class="table-event-item-tr bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+        <td class="w-4 p-4">
+          <div class="flex items-center">{{ loop_index + page.skip }}</div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.order_id }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.created_at.strftime("%Y-%m-%d %H:%M:%S") }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.delivery_date.strftime("%Y-%m-%d") }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.warehouse.name }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.supplier.name }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900 dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">
+              <a type="button"
+                hx-get="{{ url_for('report_inbound_orders.detail_modal', report_id=report.id, target_group=report_filter.target_group, master_group=report_filter.master_group) }}"
+                hx-trigger="click" hx-target="body" hx-swap="beforeend" hx-indicator="#htmx-spinner"
+                class="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Details</a>
+            </div>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <!-- prettier-ignore -->
+  {% include "report/pagination_bar_report.html"%}
+</div>

@@ -2,7 +2,174 @@
 @tailwind components;
 @tailwind utilities;
 
-
 .text-danger {
     color: red;
 }
+
+.dropdown-close {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-out;
+}
+
+.dropdown-open {
+    max-height: 800px;
+    overflow: hidden;
+    transition: max-height 0.5s ease-in;
+}
+
+.close {
+    display: none;
+}
+
+.max-height-image-container {
+    max-height: 164px;
+}
+
+.full-image-z-index {
+    z-index: 60;
+}
+
+label:has(+ *:required):after,
+label:has(~ div *:required):after {
+  content: ' *';
+  color: red;
+}
+
+.relative .transparent-offset-ring{
+    --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) rgba(0, 0, 0, 0);
+}
+
+
+input[type="checkbox"]:checked,  input[type="radio"]:checked{
+    background-color: rgba(255, 255, 255, 0.144) !important;
+    background-image: url(../img/checkmark.png) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+.gap-4{
+    gap:16px;
+}
+
+.z-51{
+    z-index: 51;
+}
+
+button:disabled,
+button[disabled]{
+  background-color: rgb(124, 138, 168) !important;
+}
+
+.datepicker::placeholder {
+    color: rgb(255, 255, 255) !important;
+}
+
+.margin-b-5{
+    margin-bottom: 20px;
+}
+
+.packageInfoContainer-border{ 
+    border-bottom: dashed 1px rgb(107 114 128);
+}
+
+.no-m-l{
+    margin-left: 0px !important;
+}
+
+.w-24-important{
+    width: 96px !important;
+}
+.max-width-100 {
+    max-width: 100px;
+    text-overflow: ellipsis;
+}
+
+#editIncomingStockModal > div{
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+}
+  
+.bell-notification-product-image{
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+}
+
+.border-error-red{
+    border: 1px solid red !important;
+}
+
+.text-red{
+    color: #ef4444 !important;
+}
+.underlined{
+    text-decoration: underline;
+}
+
+.status-delivered{
+    color:green;
+}
+
+.status-assigned{
+    color:orange;
+}
+
+.status-in_transit, .status-pending{
+    color:blue;
+}
+
+.status-cancelled{
+    color:red;
+}
+
+.status-waiting_for_warehouse{
+    color:purple;
+}
+
+.text-white{
+    color: white !important;
+}
+
+.width-250px{
+    width: 250px;
+}
+
+.max-w-screen{
+    max-width: 100vw;
+}
+
+.full-shadow{
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+}
+
+.cropped-text{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.min-h-half{
+    min-height: 50vh;
+}
+
+.product-table td, .product-table th, .product-table td * { 
+    text-align: center;
+}
+
+.toast-position{
+    z-index: 500 !important;
+}
+
+.htmx-indicator{
+    display: none;
+}
+.htmx-request .htmx-indicator{
+    display:inline;
+}
+.htmx-request.htmx-indicator{
+    display:inline;
+}
+
+.incorrect_qty:focus {
+    --tw-ring-color: red;
+    border-color: red;
+  }
