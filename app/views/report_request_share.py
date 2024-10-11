@@ -48,7 +48,7 @@ def download_csv(request_share_id: int):
     ).all()
 
     dataset = {
-        "Name": [],
+        "Untis of Measure": [],
         "SKU": [],
         "Brand": [],
         "Quantity": [],
@@ -101,7 +101,7 @@ def detail_modal(request_share_id: int):
         )
     ).all()
     dataset = {
-        "Name": [],
+        "Untis of Measure": [],
         "SKU": [],
         "Brand": [],
         "Quantity": [],

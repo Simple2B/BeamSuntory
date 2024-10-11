@@ -141,7 +141,7 @@ class ReportDataShelfLife(ReportData):
         master_groups = cls.get_product_master_groups()
         dataset = {
             "SKU": [],
-            "Name": [],
+            "Untis of Measure": [],
             "Number of days left": [],
             "Quantity received": [],
             "Remaining quantity": [],
@@ -151,7 +151,7 @@ class ReportDataShelfLife(ReportData):
         }  # type: dict[str, list]
 
         for product_allc in db.session.scalars(query):
-            dataset["Name"].append(product_allc.product.name)
+            dataset["Untis of Measure"].append(product_allc.product.name)
             dataset["SKU"].append(product_allc.product.SKU)
             dataset["Number of days left"].append(product_allc.numb_of_day_left)
             dataset["Quantity received"].append(product_allc.quantity_received)
@@ -179,7 +179,7 @@ def create_shelf_life_dataset(
         )
     ).all()
     data = {
-        "Name": [],
+        "Untis of Measure": [],
         "SKU": [],
         "Brand": [],
         "Group": [],
@@ -188,7 +188,7 @@ def create_shelf_life_dataset(
     }  # type: dict[str, list]
 
     for qty_group in product_allocated.product_quantity_groups:
-        data["Name"].append(product_allocated.product.name)
+        data["Untis of Measure"].append(product_allocated.product.name)
         data["SKU"].append(product_allocated.product.SKU)
         data["Group"].append(qty_group.group.name)
         data["Quantity received"].append(qty_group.quantity_received)

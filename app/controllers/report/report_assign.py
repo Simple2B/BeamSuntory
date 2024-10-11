@@ -144,7 +144,7 @@ class ReportDataAssigns(ReportData):
             "From group": [],
             "To group": [],
             "SKU": [],
-            "Product name": [],
+            "Untis of Measure": [],
             "Quantity": [],
             "Last transaction data": [],
         }  # type: dict[str, list]
@@ -154,7 +154,7 @@ class ReportDataAssigns(ReportData):
             dataset["From group"].append(assign.from_group.name)
             dataset["To group"].append(assign.group.name)
             dataset["SKU"].append(assign.product.SKU)
-            dataset["Product name"].append(assign.product.name)
+            dataset["Untis of Measure"].append(assign.product.name)
             dataset["Quantity"].append(assign.quantity)
             dataset["Last transaction data"].append(
                 assign.product.last_transaction_data
