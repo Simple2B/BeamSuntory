@@ -9,7 +9,7 @@
 
       <div class="p-2 flex flex-wrap py-4 bg-white dark:bg-gray-800">
         {% for master_group_search in master_groups_search %}
-        <select id="product-search-master-group-{{master_group_search}}"
+        <select id="product-search-master-group-{{master_group_search.name}}"
           class="product-search-master-group- mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
           <option selected value="">{{ master_group_search.name }} group</option>
           {% for group in master_group_search.groups_for_product %}
@@ -174,7 +174,7 @@
       <tr id="product-table-header-tr">
         <th scope="col" class="product-table-header-item px-3 py-3">#</th>
         <th scope="col" class="product-table-header-item px-3 py-3">Image</th>
-        <th scope="col" class="product-table-header-item px-3 py-3">Name</th>
+        <th scope="col" class="product-table-header-item px-3 py-3">Untis of Measure</th>
         <th scope="col" class="product-table-header-item px-3 py-3">SKU</th>
         <th scope="col" id="product-table-th-product-type" class="product-table-header-item px-3 py-3">Description</th>
         {% for master_name in master_group_product_name %}

@@ -175,7 +175,7 @@ class ReportDataInventories(ReportData):
         query, _ = cls.get_search_result(report_filter)
 
         dataset = {
-            "Name": [],
+            "Untis of Measure": [],
             "SKU": [],
             "Quantity": [],
             "Group": [],
@@ -219,7 +219,7 @@ def add_dataset_row(
         if target_group and warehouse_product.group.name != target_group:
             continue
 
-        dataset["Name"].append(product.name)
+        dataset["Untis of Measure"].append(product.name)
         dataset["SKU"].append(product.SKU)
         dataset["Quantity"].append(warehouse_product.product_quantity)
         dataset["Group"].append(warehouse_product.group_name)
@@ -238,7 +238,7 @@ def create_inventory_dataset(
     product: m.Product, group: str, master_group: str, download: bool = False
 ) -> dict[str, list]:
     dataset = {
-        "Name": [],
+        "Untis of Measure": [],
         "SKU": [],
         "Quantity": [],
         "Group": [],

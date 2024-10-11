@@ -253,6 +253,10 @@ if (sessionStorage.getItem('masterGroupValues')) {
   const masterGroupValues = JSON.parse(sessionStorage.getItem('masterGroupValues')) as { [key: string]: string };
   for (const [key, value] of Object.entries(masterGroupValues)) {
     const selector = document.querySelector(`#${key}`) as HTMLSelectElement as HTMLSelectElement;
+    // TODO: update it
+    if (!selector) {
+      continue;
+    }
     selector.value = value;
   }
 }
