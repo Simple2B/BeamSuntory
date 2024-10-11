@@ -109,7 +109,7 @@ const modalOptions: ModalOptions = {
   onHide: () => {
     console.log('modal has been hidden');
   },
-  onShow: () => {},
+  onShow: () => { },
   onToggle: () => {
     console.log('modal has been toggled');
   },
@@ -232,12 +232,12 @@ if (bell && notification) {
 window.addEventListener('htmx:afterSwap', (event) => {
   const eventTarget = event.target as HTMLElement;
   const imagesElenemts = eventTarget.querySelectorAll('.product-full-image-anchor');
-      imagesElenemts.forEach((e) => {
-        e.addEventListener('click', () => {
-          const productId = e.getAttribute('data-target-product-id');
-          if (productId) getFullImage(productId);
-        });
-      });
+  imagesElenemts.forEach((e) => {
+    e.addEventListener('click', () => {
+      const productId = e.getAttribute('data-target-product-id');
+      if (productId) getFullImage(productId);
+    });
+  });
 });
 
 
@@ -260,6 +260,7 @@ const spinner = `<div tabindex="-1"
 window.addEventListener('submit', (event: Event) => {
   const target = event.target as HTMLFormElement;
   const method = target.method;
-  if (method.toLocaleLowerCase() === "get") return;
+  console.log(target);
+  if (method.toLocaleLowerCase() === "get" || target.hasAttribute("hx-post")) return;
   document.body.insertAdjacentHTML('beforeend', spinner);
 });

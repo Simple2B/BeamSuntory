@@ -1,6 +1,7 @@
 import io
 from pathlib import Path
 
+import filetype
 from flask.testing import FlaskClient
 import sqlalchemy as sa
 
@@ -23,7 +24,10 @@ def test_products_pages(mg_g_populate: FlaskClient):
     assert response.status_code == 405
 
 
-def test_create_product(client: FlaskClient):
+def test_create_product(client: FlaskClient, mocker):
+    kind = filetype.guess("tests/data/no_picture_default.png")
+    mocker.patch.object(filetype, "guess", return_value=kind)
+    mocker.patch.object(filetype, "is_image", return_value=True)
     register("samg", "samg@test.com")
     login(client, "samg")
     data = dict(
@@ -76,7 +80,10 @@ def test_create_product(client: FlaskClient):
 #     assert response.status_code == 404
 
 
-def test_edit_product(mg_g_populate: FlaskClient):
+def test_edit_product(mg_g_populate: FlaskClient, mocker):
+    kind = filetype.guess("tests/data/no_picture_default.png")
+    mocker.patch.object(filetype, "guess", return_value=kind)
+    mocker.patch.object(filetype, "is_image", return_value=True)
     login(mg_g_populate)
     data = dict(
         product_id=1,
@@ -211,7 +218,10 @@ def test_assign_product(mg_g_populate: FlaskClient):
     assert len(report_assign_objs) == 2
 
 
-def test_upload_product(mg_g_populate: FlaskClient):
+def test_upload_product(mg_g_populate: FlaskClient, mocker):
+    kind = filetype.guess("tests/data/no_picture_default.png")
+    mocker.patch.object(filetype, "guess", return_value=kind)
+    mocker.patch.object(filetype, "is_image", return_value=True)
     login(mg_g_populate)
 
     # CSV_NAME = "All Products part 5.csv"
