@@ -27,9 +27,13 @@ def test_create_incoming_stock_notify(mg_g_populate: FlaskClient):
 
     product = db.session.scalar(sa.select(m.Product))
     assert product
+
     test_data = {
         "products_data": s.AdapterIncomingStockProducts.dump_json(
-            [{"productInfo": product.SKU, "quantity": 10}, {"productInfo": "dadad", "quantity": 10}]  # type: ignore
+            [
+                s.IncomingStockNotifyProduct(productInfo=product.SKU, quantity=10),
+                s.IncomingStockNotifyProduct(productInfo="adada", quantity=10),
+            ]  # type: ignore
         ),
         "approx_arrival_date": "2022-01-01",
         "description": "test description",
