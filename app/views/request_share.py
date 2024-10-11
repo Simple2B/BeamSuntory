@@ -301,6 +301,11 @@ def share(id: int):
         ),
     )
 
+    request_share.status = "shared"
+    request_share.finished_date = datetime.now().replace(microsecond=0)
+    db.session.add(report_request_share)
+    db.session.commit()
+
     if request_share.user.is_notify_request_share_status:
         msg = Message(
             subject=f"Request share approved {request_share.order_numb}",
@@ -324,10 +329,6 @@ def share(id: int):
         )
         mail.send(msg)
 
-    request_share.status = "shared"
-    request_share.finished_date = datetime.now().replace(microsecond=0)
-    db.session.add(report_request_share)
-    db.session.commit()
     log(log.INFO, "Request Share share: [%s]", request_share)
     flash("Request Share shared!", "success")
     return redirect(url_for("request_share.get_all"))
