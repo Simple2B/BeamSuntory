@@ -8,7 +8,12 @@ from app import schema as s, models as m
 from app.database import db
 from app.controllers.pagination import create_pagination
 
-from .report_data import ReportData, add_product_groups
+from .report_data import (
+    ReportData,
+    add_product_groups,
+    add_product_exta_fields,
+    order_fields_dataset,
+)
 
 
 class ReportDataShelfLife(ReportData):
@@ -167,7 +172,7 @@ class ReportDataShelfLife(ReportData):
             )
             cls.add_product_groups(dataset, product_allc.product, master_groups)
 
-        return dataset
+        return order_fields_dataset(dataset)
 
 
 def create_shelf_life_dataset(
@@ -197,6 +202,7 @@ def create_shelf_life_dataset(
         )
         if download:
             add_product_groups(data, product_allocated.product, master_groups)
+            add_product_exta_fields(data, product_allocated.product)
         else:
             data["Brand"].append(product_allocated.product.brand)
 

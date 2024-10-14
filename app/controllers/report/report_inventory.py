@@ -8,7 +8,12 @@ from app import schema as s, models as m
 from app.database import db
 from app.controllers.pagination import create_pagination
 
-from .report_data import ReportData, add_product_groups
+from .report_data import (
+    ReportData,
+    add_product_groups,
+    add_product_exta_fields,
+    order_fields_dataset,
+)
 
 
 class ReportDataInventories(ReportData):
@@ -228,6 +233,8 @@ def add_dataset_row(
 
         if download:
             add_product_groups(dataset, product, master_groups)
+            add_product_exta_fields(dataset, product)
+
         else:
             dataset["Brand"].append(warehouse_product.product.brand)
 
@@ -255,4 +262,4 @@ def create_inventory_dataset(
         download=download,
     )
 
-    return dataset
+    return order_fields_dataset(dataset)

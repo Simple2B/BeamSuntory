@@ -7,7 +7,7 @@ from app import schema as s, models as m
 from app.database import db
 from app.controllers.pagination import create_pagination
 
-from .report_data import ReportData
+from .report_data import ReportData, order_fields_dataset
 
 
 class ReportDataAssigns(ReportData):
@@ -139,12 +139,13 @@ class ReportDataAssigns(ReportData):
         maste_groups = cls.get_product_master_groups()
         # 'created_at,username,type,from_group,to_group,sku,product_name,quantity'
         dataset = {
+            "SKU": [],
+            "Brand": [],
+            "Untis of Measure": [],
             "Username": [],
             "Type": [],
             "From group": [],
             "To group": [],
-            "SKU": [],
-            "Untis of Measure": [],
             "Quantity": [],
             "Last transaction data": [],
         }  # type: dict[str, list]
@@ -162,4 +163,4 @@ class ReportDataAssigns(ReportData):
 
             cls.add_product_groups(dataset, assign.product, maste_groups)
 
-        return dataset
+        return order_fields_dataset(dataset)
