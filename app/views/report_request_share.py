@@ -10,6 +10,7 @@ import pandas as pd
 import sqlalchemy as sa
 from app.controllers import role_required
 from app.controllers.report import add_share_requests_dataset_row, send_xlsx_response
+from app.controllers.report.report_data import order_fields_dataset
 from app import schema as s
 from app import models as m, db
 from app.logger import log
@@ -67,6 +68,8 @@ def download_csv(request_share_id: int):
         dataset, request_share, master_groups, download=True
     )
 
+    data = order_fields_dataset(dataset=data)
+
     df = pd.DataFrame(data)
 
     # Save the DataFrame to a CSV file in memory
@@ -117,6 +120,8 @@ def detail_modal(request_share_id: int):
     }  # type: dict[str, list]
 
     data = add_share_requests_dataset_row(dataset, request_share, master_groups)
+
+    data = order_fields_dataset(dataset=data)
 
     return render_template(
         "report/request_share/detail_modal.html", data=data, request_share=request_share

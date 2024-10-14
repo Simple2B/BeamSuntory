@@ -9,7 +9,11 @@ from app import schema as s, models as m
 from app.database import db
 from app.controllers.pagination import create_pagination
 
-from .report_data import ReportData, add_product_groups
+from .report_data import (
+    ReportData,
+    add_product_groups,
+    add_product_exta_fields,
+)
 
 
 class ReportDataShareRequests(ReportData):
@@ -181,6 +185,7 @@ def add_share_requests_dataset_row(
 
     if download:
         add_product_groups(dataset, request_share.product, master_groups)
+        add_product_exta_fields(dataset, request_share.product)
     else:
         dataset["Brand"].append(request_share.product.brand)
 

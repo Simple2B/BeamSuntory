@@ -8,7 +8,12 @@ from app import schema as s, models as m
 from app.database import db
 from app.controllers.pagination import create_pagination
 
-from .report_data import ReportData, add_product_groups
+from .report_data import (
+    ReportData,
+    add_product_groups,
+    add_product_exta_fields,
+    order_fields_dataset,
+)
 
 
 class ReportDataShipping(ReportData):
@@ -224,7 +229,8 @@ def create_shipping_modal_dataset(
 
         if download:
             add_product_groups(dataset, cart.product, master_groups)
+            add_product_exta_fields(dataset, cart.product)
         else:
             dataset["Brand"].append(cart.product.brand)
 
-    return dataset
+    return order_fields_dataset(dataset)
