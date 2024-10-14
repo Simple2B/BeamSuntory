@@ -140,7 +140,8 @@ def add_product_exta_fields(dataset: dict[str, list], product: m.Product):
 
 
 def order_fields_dataset(dataset: dict[str, list]):
-    # SKU, Brand, Description (changed to  Units of measure), Group, Category, program year ,premises ,language, unit of measure, qty, warehouse
+    # SKU, Brand, Description (changed to  Units of measure), Group,
+    # Category, program year ,premises ,language, unit of measure, qty, warehouse
     custom_order = {
         "SKU": 1,
         "Brand": 2,
