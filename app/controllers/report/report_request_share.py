@@ -147,6 +147,7 @@ class ReportDataShareRequests(ReportData):
             "Untis of Measure": [],
             "SKU": [],
             "Brand": [],
+            "Description": [],
             "Quantity": [],
             "From": [],
             "To": [],
@@ -175,6 +176,7 @@ def add_share_requests_dataset_row(
 ):
     dataset["Untis of Measure"].append(request_share.product.name)
     dataset["SKU"].append(request_share.product.SKU)
+    dataset["Description"].append(request_share.product.description)
 
     dataset["Quantity"].append(request_share.desire_quantity)
     dataset["From"].append(request_share.from_group.name)

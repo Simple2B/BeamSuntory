@@ -185,6 +185,7 @@ class ReportDataInventories(ReportData):
             "Quantity": [],
             "Group": [],
             "Brand": [],
+            "Description": [],
             "Warehouse": [],
             "Last transaction data": [],
         }  # type: dict[str, list]
@@ -230,6 +231,7 @@ def add_dataset_row(
         dataset["Group"].append(warehouse_product.group_name)
         dataset["Warehouse"].append(warehouse_product.warehouse_name)
         dataset["Last transaction data"].append(product.last_transaction_data)
+        dataset["Description"].append(product.description)
 
         if download:
             add_product_groups(dataset, product, master_groups)
@@ -250,6 +252,7 @@ def create_inventory_dataset(
         "Quantity": [],
         "Group": [],
         "Brand": [],
+        "Description": [],
         "Warehouse": [],
         "Last transaction data": [],
     }  # type: dict[str, list]
