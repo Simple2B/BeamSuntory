@@ -141,6 +141,7 @@ class ReportDataAssigns(ReportData):
         dataset = {
             "SKU": [],
             "Brand": [],
+            "Description": [],
             "Untis of Measure": [],
             "Username": [],
             "Type": [],
@@ -152,6 +153,7 @@ class ReportDataAssigns(ReportData):
         for assign in db.session.scalars(query):
             dataset["Username"].append(assign.user.username)
             dataset["Type"].append(assign.type)
+            dataset["Description"].append(assign.product.description)
             dataset["From group"].append(assign.from_group.name)
             dataset["To group"].append(assign.group.name)
             dataset["SKU"].append(assign.product.SKU)

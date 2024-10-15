@@ -112,6 +112,7 @@ class ReportDataEvents(ReportData):
             "SKU": [],
             "Untis of Measure": [],
             "Brand": [],
+            "Description": [],
             "Quantity": [],
             "Group": [],
             "User": [],
@@ -125,6 +126,7 @@ class ReportDataEvents(ReportData):
             dataset["SKU"].append(event.cart.product.SKU)
             dataset["Untis of Measure"].append(event.cart.product.name)
             dataset["Brand"].append(event.cart.product.brand)
+            dataset["Description"].append(event.cart.product.description)
             dataset["Quantity"].append(event.cart.quantity)
             dataset["Group"].append(event.group.name)
             dataset["User"].append(event.user.username)

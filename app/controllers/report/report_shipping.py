@@ -195,6 +195,7 @@ def create_shipping_modal_dataset(
         "SKU": [],
         "Untis of Measure": [],
         "Brand": [],
+        "Description": [],
         "Quantity": [],
         "Group": [],
         "Warehouse": [],
@@ -218,6 +219,7 @@ def create_shipping_modal_dataset(
         dataset["SKU"].append(cart.product.SKU)
         dataset["Untis of Measure"].append(cart.product.name)
         dataset["Quantity"].append(cart.quantity)
+        dataset["Description"].append(cart.product.description)
         dataset["Group"].append(cart.group.name)
         dataset["Warehouse"].append(cart.warehouse.name)
         dataset["Order №"].append(report.order_numb)

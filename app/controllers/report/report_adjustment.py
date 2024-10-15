@@ -137,6 +137,7 @@ class ReportDataAdjustments(ReportData):
             "SKU": [],
             "Untis of Measure": [],
             "Created at": [],
+            "Description": [],
             "Username": [],
             "Master group": [],
             "Group": [],
@@ -155,6 +156,7 @@ class ReportDataAdjustments(ReportData):
                 dataset["Untis of Measure"].append(adjust.product.name)
                 dataset["SKU"].append(adjust.product.SKU)
                 dataset["Username"].append(adjust.user.username)
+                dataset["Description"].append(adjust.product.description)
                 dataset["Master group"].append(report_adjust.group.master_group.name)
                 dataset["Group"].append(report_adjust.group.name)
                 dataset["Warehouse"].append(report_adjust.warehouse.name)

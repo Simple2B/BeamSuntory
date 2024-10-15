@@ -202,6 +202,7 @@ def create_inbound_order_dataset(
         "Quantity": [],
         "Group": [],
         "Brand": [],
+        "Description": [],
         "Created At": [],
         "Supplier": [],
         "Arrived": [],
@@ -223,6 +224,7 @@ def create_inbound_order_dataset(
             data["Untis of Measure"].append(product_allocated.product.name)
             data["SKU"].append(product_allocated.product.SKU)
             data["Quantity"].append(group.quantity)
+            data["Description"].append(product_allocated.product.description)
             data["Group"].append(group.group.name)
             data["Created At"].append(report.created_at.strftime("%Y-%m-%d %H:%M:%S"))
             data["Arrived"].append(report.delivery_date.strftime("%Y-%m-%d"))
