@@ -197,7 +197,7 @@ def create_inbound_order_dataset(
     ).all()
 
     data = {
-        "Untis of Measure": [],
+        "Units of Measure": [],
         "SKU": [],
         "Quantity": [],
         "Group": [],
@@ -221,7 +221,7 @@ def create_inbound_order_dataset(
 
             if target_group and group.group.name != target_group:
                 continue
-            data["Untis of Measure"].append(product_allocated.product.name)
+            data["Units of Measure"].append(product_allocated.product.name)
             data["SKU"].append(product_allocated.product.SKU)
             data["Quantity"].append(group.quantity)
             data["Description"].append(product_allocated.product.description)

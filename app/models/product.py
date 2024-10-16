@@ -69,6 +69,10 @@ class Product(db.Model, ModelMixin):
     width: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
     height: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
 
+    is_deleted: orm.Mapped[bool] = orm.mapped_column(
+        sa.Boolean(), default=False, server_default=sa.sql.expression.false()
+    )
+
     # Relationships
     image_obj: orm.Mapped["Image"] = orm.relationship()
     supplier: orm.Mapped["Supplier"] = orm.relationship()

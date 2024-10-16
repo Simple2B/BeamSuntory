@@ -144,7 +144,7 @@ class ReportDataShareRequests(ReportData):
 
         reports = db.session.scalars(query)
         dataset = {
-            "Untis of Measure": [],
+            "Units of Measure": [],
             "SKU": [],
             "Brand": [],
             "Description": [],
@@ -174,7 +174,7 @@ def add_share_requests_dataset_row(
     master_groups: list[m.MasterGroupProduct],
     download: bool = False,
 ):
-    dataset["Untis of Measure"].append(request_share.product.name)
+    dataset["Units of Measure"].append(request_share.product.name)
     dataset["SKU"].append(request_share.product.SKU)
     dataset["Description"].append(request_share.product.description)
 

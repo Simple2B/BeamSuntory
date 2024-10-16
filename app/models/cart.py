@@ -39,7 +39,7 @@ class Cart(db.Model, ModelMixin):
     quantity: orm.Mapped[int] = orm.mapped_column(sa.Integer)
     order_numb: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=True)
     status: orm.Mapped[str] = orm.mapped_column(
-        sa.String(64), default="pending"
+        sa.String(64), default=s.CartStatus.PENDING.value
     )  # in progress, completed, removed
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,

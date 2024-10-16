@@ -193,7 +193,7 @@ def get_available_quantity_by_date():
         log(log.INFO, "Group not found")
         return "Group not found", 404
     product: m.Product = db.session.get(m.Product, product_id)
-    if not product:
+    if not product or product.is_deleted:
         log(log.INFO, "Product not found")
         return "Product not found", 404
 
@@ -284,7 +284,7 @@ def get_adjust_available_quantity():
         return "Group not found", HTTPStatus.NOT_FOUND
 
     product: m.Product = db.session.get(m.Product, filter_events.product_id)
-    if not product:
+    if not product or product.is_deleted:
         log(log.INFO, "Product not found: [%s]", filter_events.product_id)
         return "Product not found", HTTPStatus.NOT_FOUND
 
