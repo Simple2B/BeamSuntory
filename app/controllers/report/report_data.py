@@ -151,7 +151,7 @@ def order_fields_dataset(dataset: dict[str, list]):
         "Program Year": 6,
         "Premises": 7,
         "Language": 8,
-        "Untis of Measure": 9,
+        "Units of Measure": 9,
         "Quantity": 10,
         "Warehouse": 11,
     }

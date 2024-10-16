@@ -135,7 +135,7 @@ class ReportDataAdjustments(ReportData):
         # 'created_at,product_name,sku,username,master_group,group,warehouse,quantity_before,quantity_after,quantity_delta,note',
         dataset = {
             "SKU": [],
-            "Untis of Measure": [],
+            "Units of Measure": [],
             "Created at": [],
             "Description": [],
             "Username": [],
@@ -153,7 +153,7 @@ class ReportDataAdjustments(ReportData):
             for report_adjust in adjust.adjust_group_qty:
 
                 dataset["Created at"].append(adjust.created_at)
-                dataset["Untis of Measure"].append(adjust.product.name)
+                dataset["Units of Measure"].append(adjust.product.name)
                 dataset["SKU"].append(adjust.product.SKU)
                 dataset["Username"].append(adjust.user.username)
                 dataset["Description"].append(adjust.product.description)

@@ -68,7 +68,6 @@ def get_all():
         search_query=q,
         suppliers=db.session.scalars(m.Supplier.select().order_by(m.Supplier.id)),
         warehouses=db.session.scalars(m.Warehouse.select().order_by(m.Warehouse.id)),
-        products=db.session.scalars(m.Product.select().order_by(m.Product.id)),
         form_sort=form_sort,
         filtered=filtered,
         inbound_orders_status=s.InboundOrderStatus,
@@ -384,7 +383,6 @@ def sort():
         warehouses=db.session.scalars(
             m.Warehouse.select().order_by(m.Warehouse.id)
         ).all(),
-        products=db.session.scalars(m.Product.select().order_by(m.Product.id)).all(),
         form_sort=form_sort,
         filtered=filtered,
         inbound_orders_status=s.InboundOrderStatus,
