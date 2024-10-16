@@ -20,7 +20,6 @@ from pydantic import ValidationError
 from pydantic import TypeAdapter
 
 import sqlalchemy as sa
-from sqlalchemy.exc import SQLAlchemyError
 from app.controllers import (
     create_pagination,
     save_image,
