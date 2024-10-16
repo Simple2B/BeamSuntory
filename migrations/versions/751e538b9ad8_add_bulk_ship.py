@@ -1,8 +1,8 @@
 """add bulk ship
 
-Revision ID: 033c702da05b
-Revises: b649899cbad3
-Create Date: 2024-10-10 15:24:55.066328
+Revision ID: 751e538b9ad8
+Revises: 0891c3be73b4
+Create Date: 2024-10-16 10:10:51.259870
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '033c702da05b'
-down_revision = 'b649899cbad3'
+revision = '751e538b9ad8'
+down_revision = '0891c3be73b4'
 branch_labels = None
 depends_on = None
 
