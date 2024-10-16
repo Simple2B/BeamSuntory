@@ -95,11 +95,9 @@ def get_all():
 def get_create_modal():
     """htmx"""
     form = f.IncomingStockNotificationCreateForm()
-    products = db.session.scalars(sa.select(m.Product))
     return render_template(
         "incoming_stock_notification/modal_add.html",
         form=form,
-        products=products,
         first_input=True,
     )
 
@@ -109,10 +107,7 @@ def get_create_modal():
 @role_required(ALL_ROLE_WITHOUT_SALE_REP)
 def get_product_input():
     """htmx"""
-    products = db.session.scalars(sa.select(m.Product))
-    return render_template(
-        "incoming_stock_notification/product_input.html", products=products
-    )
+    return render_template("incoming_stock_notification/product_input.html")
 
 
 @incoming_stock_notifications_bp.route("/create", methods=["POST"])
@@ -136,6 +131,7 @@ def create():
     db.session.add(notify)
     products = s.AdapterIncomingStockProducts.validate_json(form.products_data.data)
     for product_data in products:
+        # can be without product
         # product = db.session.scalar(
         #     sa.select(m.Product).where(
         #         sa.or_(
