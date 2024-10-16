@@ -142,7 +142,7 @@ class ReportDataAssigns(ReportData):
             "SKU": [],
             "Brand": [],
             "Description": [],
-            "Untis of Measure": [],
+            "Units of Measure": [],
             "Username": [],
             "Type": [],
             "From group": [],
@@ -157,7 +157,7 @@ class ReportDataAssigns(ReportData):
             dataset["From group"].append(assign.from_group.name)
             dataset["To group"].append(assign.group.name)
             dataset["SKU"].append(assign.product.SKU)
-            dataset["Untis of Measure"].append(assign.product.name)
+            dataset["Units of Measure"].append(assign.product.name)
             dataset["Quantity"].append(assign.quantity)
             dataset["Last transaction data"].append(
                 assign.product.last_transaction_data

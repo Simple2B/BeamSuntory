@@ -147,7 +147,7 @@ class ReportDataShelfLife(ReportData):
         dataset = {
             "SKU": [],
             "Description": [],
-            "Untis of Measure": [],
+            "Units of Measure": [],
             "Number of days left": [],
             "Quantity received": [],
             "Remaining quantity": [],
@@ -157,7 +157,7 @@ class ReportDataShelfLife(ReportData):
         }  # type: dict[str, list]
 
         for product_allc in db.session.scalars(query):
-            dataset["Untis of Measure"].append(product_allc.product.name)
+            dataset["Units of Measure"].append(product_allc.product.name)
             dataset["Description"].append(product_allc.product.description)
             dataset["SKU"].append(product_allc.product.SKU)
             dataset["Number of days left"].append(product_allc.numb_of_day_left)
@@ -186,7 +186,7 @@ def create_shelf_life_dataset(
         )
     ).all()
     data = {
-        "Untis of Measure": [],
+        "Units of Measure": [],
         "SKU": [],
         "Brand": [],
         "Description": [],
@@ -196,7 +196,7 @@ def create_shelf_life_dataset(
     }  # type: dict[str, list]
 
     for qty_group in product_allocated.product_quantity_groups:
-        data["Untis of Measure"].append(product_allocated.product.name)
+        data["Units of Measure"].append(product_allocated.product.name)
         data["SKU"].append(product_allocated.product.SKU)
         data["Description"].append(product_allocated.product.description)
         data["Group"].append(qty_group.group.name)

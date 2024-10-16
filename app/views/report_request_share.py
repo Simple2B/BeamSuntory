@@ -49,7 +49,7 @@ def download_csv(request_share_id: int):
     ).all()
 
     dataset = {
-        "Untis of Measure": [],
+        "Units of Measure": [],
         "SKU": [],
         "Brand": [],
         "Description": [],
@@ -105,7 +105,7 @@ def detail_modal(request_share_id: int):
         )
     ).all()
     dataset = {
-        "Untis of Measure": [],
+        "Units of Measure": [],
         "SKU": [],
         "Brand": [],
         "Description": [],

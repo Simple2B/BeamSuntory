@@ -193,7 +193,7 @@ def create_shipping_modal_dataset(
     ).all()
     dataset = {
         "SKU": [],
-        "Untis of Measure": [],
+        "Units of Measure": [],
         "Brand": [],
         "Description": [],
         "Quantity": [],
@@ -217,7 +217,7 @@ def create_shipping_modal_dataset(
         if target_group and cart.group.name != target_group:
             continue
         dataset["SKU"].append(cart.product.SKU)
-        dataset["Untis of Measure"].append(cart.product.name)
+        dataset["Units of Measure"].append(cart.product.name)
         dataset["Quantity"].append(cart.quantity)
         dataset["Description"].append(cart.product.description)
         dataset["Group"].append(cart.group.name)
