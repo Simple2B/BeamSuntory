@@ -283,6 +283,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
 @product_blueprint.route("/<id>/view", methods=["GET"])
 @login_required
 def product_view(id: int):
+    """htmx"""
     product = db.session.get(m.Product, id)
     is_events = request.args.get("is_events", type=str, default="False") == "True"
 
