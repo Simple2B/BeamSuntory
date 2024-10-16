@@ -8,7 +8,12 @@ from app import schema as s, models as m
 from app.database import db
 from app.controllers.pagination import create_pagination
 
-from .report_data import ReportData, add_product_groups
+from .report_data import (
+    ReportData,
+    add_product_groups,
+    add_product_exta_fields,
+    order_fields_dataset,
+)
 
 
 class ReportDataShipping(ReportData):
@@ -188,8 +193,9 @@ def create_shipping_modal_dataset(
     ).all()
     dataset = {
         "SKU": [],
-        "Name": [],
+        "Untis of Measure": [],
         "Brand": [],
+        "Description": [],
         "Quantity": [],
         "Group": [],
         "Warehouse": [],
@@ -211,8 +217,9 @@ def create_shipping_modal_dataset(
         if target_group and cart.group.name != target_group:
             continue
         dataset["SKU"].append(cart.product.SKU)
-        dataset["Name"].append(cart.product.name)
+        dataset["Untis of Measure"].append(cart.product.name)
         dataset["Quantity"].append(cart.quantity)
+        dataset["Description"].append(cart.product.description)
         dataset["Group"].append(cart.group.name)
         dataset["Warehouse"].append(cart.warehouse.name)
         dataset["Order №"].append(report.order_numb)
@@ -224,7 +231,8 @@ def create_shipping_modal_dataset(
 
         if download:
             add_product_groups(dataset, cart.product, master_groups)
+            add_product_exta_fields(dataset, cart.product)
         else:
             dataset["Brand"].append(cart.product.brand)
 
-    return dataset
+    return order_fields_dataset(dataset)

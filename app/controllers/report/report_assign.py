@@ -7,7 +7,7 @@ from app import schema as s, models as m
 from app.database import db
 from app.controllers.pagination import create_pagination
 
-from .report_data import ReportData
+from .report_data import ReportData, order_fields_dataset
 
 
 class ReportDataAssigns(ReportData):
@@ -139,22 +139,25 @@ class ReportDataAssigns(ReportData):
         maste_groups = cls.get_product_master_groups()
         # 'created_at,username,type,from_group,to_group,sku,product_name,quantity'
         dataset = {
+            "SKU": [],
+            "Brand": [],
+            "Description": [],
+            "Untis of Measure": [],
             "Username": [],
             "Type": [],
             "From group": [],
             "To group": [],
-            "SKU": [],
-            "Product name": [],
             "Quantity": [],
             "Last transaction data": [],
         }  # type: dict[str, list]
         for assign in db.session.scalars(query):
             dataset["Username"].append(assign.user.username)
             dataset["Type"].append(assign.type)
+            dataset["Description"].append(assign.product.description)
             dataset["From group"].append(assign.from_group.name)
             dataset["To group"].append(assign.group.name)
             dataset["SKU"].append(assign.product.SKU)
-            dataset["Product name"].append(assign.product.name)
+            dataset["Untis of Measure"].append(assign.product.name)
             dataset["Quantity"].append(assign.quantity)
             dataset["Last transaction data"].append(
                 assign.product.last_transaction_data
@@ -162,4 +165,4 @@ class ReportDataAssigns(ReportData):
 
             cls.add_product_groups(dataset, assign.product, maste_groups)
 
-        return dataset
+        return order_fields_dataset(dataset)

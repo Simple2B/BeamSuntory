@@ -13,7 +13,7 @@ from app.views.product import DEFUALT_IMAGE_ID
 from .add_stores import add_new_store
 from .set_courvoisier import set_counrvoisier
 from .events import add_extra_groups
-from .product import update_product_descriptions
+from .product import update_product_name_to_unit_of_measure
 from config import SALES_REP_LOCKER_NAME
 
 
@@ -135,14 +135,14 @@ def init(app: Flask):
 
         db.session.commit()
 
-    @app.cli.command("update-prod-des")
-    def update_prod_des():
-        """Update product descriptions."""
+    @app.cli.command("update-prod-names")
+    def update_prod_names():
+        """Update product name to units of measure."""
         if app.config["APP_NAME"] != "Beam Suntory":
             print("This command is only for Beam Suntory")
             return
-        print("update product descriptions")
-        update_product_descriptions(db)
+        print("update product names")
+        update_product_name_to_unit_of_measure(db)
 
     @app.cli.command("update-admins-groups")
     def update_admins_groups():

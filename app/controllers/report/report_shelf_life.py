@@ -8,7 +8,12 @@ from app import schema as s, models as m
 from app.database import db
 from app.controllers.pagination import create_pagination
 
-from .report_data import ReportData, add_product_groups
+from .report_data import (
+    ReportData,
+    add_product_groups,
+    add_product_exta_fields,
+    order_fields_dataset,
+)
 
 
 class ReportDataShelfLife(ReportData):
@@ -141,7 +146,8 @@ class ReportDataShelfLife(ReportData):
         master_groups = cls.get_product_master_groups()
         dataset = {
             "SKU": [],
-            "Name": [],
+            "Description": [],
+            "Untis of Measure": [],
             "Number of days left": [],
             "Quantity received": [],
             "Remaining quantity": [],
@@ -151,7 +157,8 @@ class ReportDataShelfLife(ReportData):
         }  # type: dict[str, list]
 
         for product_allc in db.session.scalars(query):
-            dataset["Name"].append(product_allc.product.name)
+            dataset["Untis of Measure"].append(product_allc.product.name)
+            dataset["Description"].append(product_allc.product.description)
             dataset["SKU"].append(product_allc.product.SKU)
             dataset["Number of days left"].append(product_allc.numb_of_day_left)
             dataset["Quantity received"].append(product_allc.quantity_received)
@@ -167,7 +174,7 @@ class ReportDataShelfLife(ReportData):
             )
             cls.add_product_groups(dataset, product_allc.product, master_groups)
 
-        return dataset
+        return order_fields_dataset(dataset)
 
 
 def create_shelf_life_dataset(
@@ -179,17 +186,19 @@ def create_shelf_life_dataset(
         )
     ).all()
     data = {
-        "Name": [],
+        "Untis of Measure": [],
         "SKU": [],
         "Brand": [],
+        "Description": [],
         "Group": [],
         "Quantity received": [],
         "Last transaction data": [],
     }  # type: dict[str, list]
 
     for qty_group in product_allocated.product_quantity_groups:
-        data["Name"].append(product_allocated.product.name)
+        data["Untis of Measure"].append(product_allocated.product.name)
         data["SKU"].append(product_allocated.product.SKU)
+        data["Description"].append(product_allocated.product.description)
         data["Group"].append(qty_group.group.name)
         data["Quantity received"].append(qty_group.quantity_received)
         data["Last transaction data"].append(
@@ -197,6 +206,7 @@ def create_shelf_life_dataset(
         )
         if download:
             add_product_groups(data, product_allocated.product, master_groups)
+            add_product_exta_fields(data, product_allocated.product)
         else:
             data["Brand"].append(product_allocated.product.brand)
 

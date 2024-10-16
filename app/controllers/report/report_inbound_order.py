@@ -7,7 +7,12 @@ from app import schema as s, models as m
 from app.database import db
 from app.controllers.pagination import create_pagination
 
-from .report_data import ReportData, add_product_groups
+from .report_data import (
+    ReportData,
+    add_product_groups,
+    order_fields_dataset,
+    add_product_exta_fields,
+)
 
 
 class ReportDataInboundOrders(ReportData):
@@ -192,11 +197,12 @@ def create_inbound_order_dataset(
     ).all()
 
     data = {
-        "Name": [],
+        "Untis of Measure": [],
         "SKU": [],
         "Quantity": [],
         "Group": [],
         "Brand": [],
+        "Description": [],
         "Created At": [],
         "Supplier": [],
         "Arrived": [],
@@ -215,12 +221,12 @@ def create_inbound_order_dataset(
 
             if target_group and group.group.name != target_group:
                 continue
-            data["Name"].append(product_allocated.product.name)
+            data["Untis of Measure"].append(product_allocated.product.name)
             data["SKU"].append(product_allocated.product.SKU)
             data["Quantity"].append(group.quantity)
+            data["Description"].append(product_allocated.product.description)
             data["Group"].append(group.group.name)
             data["Created At"].append(report.created_at.strftime("%Y-%m-%d %H:%M:%S"))
-            data["Supplier"].append(report.supplier.name)
             data["Arrived"].append(report.delivery_date.strftime("%Y-%m-%d"))
             data["Warehouse"].append(report.warehouse.name)
             data["Last transaction data"].append(
@@ -229,7 +235,9 @@ def create_inbound_order_dataset(
 
             if download:
                 add_product_groups(data, product_allocated.product, master_groups)
+                add_product_exta_fields(data, product_allocated.product)
             else:
+                data["Supplier"].append(report.supplier.name)
                 data["Brand"].append(product_allocated.product.brand)
 
-    return data
+    return order_fields_dataset(data)

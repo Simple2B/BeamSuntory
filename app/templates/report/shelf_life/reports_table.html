@@ -15,10 +15,13 @@
           SKU
         </th>
         <th scope="col" class="px-6 py-3">
-          Name
+          Untis of Measure
         </th>
         <th scope="col" class="px-6 py-3">
           Brand
+        </th>
+        <th scope="col" class="px-6 py-3">
+          Description
         </th>
         <th scope="col" class="px-6 py-3">
           Quantity received
@@ -79,6 +82,11 @@
         <td scope="row" class="p-4 text-base font-normal text-gray-900  dark:text-white">
           <div class="pl-3">
             <div class="text-base font-semibold">{{ report.product.brand }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900  dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.product.description }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">

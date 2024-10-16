@@ -97,6 +97,10 @@ class Product(db.Model, ModelMixin):
     )
 
     @property
+    def supplier_name(self):
+        return self.supplier.name if self.supplier else "-"
+
+    @property
     def last_transaction_data(self):
         if not self.report_sku:
             return "-"
