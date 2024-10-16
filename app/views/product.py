@@ -628,6 +628,7 @@ def delete(id: int):
     now = datetime.now().strftime("%Y%m%d%H%M%S")
     product.is_deleted = True
     product.SKU = f"{product.SKU}_deleted_at_{now}"
+
     carts = db.session.scalars(
         sa.select(m.Cart).where(
             m.Cart.product_id == product.id, m.Cart.status == s.CartStatus.PENDING.value
@@ -635,6 +636,7 @@ def delete(id: int):
     ).all()
 
     for cart in carts:
+        # we don't need to reduce from stock, because it's not shipped yet
         cart.status = s.CartStatus.CANCELLED.value
 
     db.session.commit()
