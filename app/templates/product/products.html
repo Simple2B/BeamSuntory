@@ -137,16 +137,15 @@
         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4" />
       </svg></button>
     <div id="dropdownBgHover" class="z-50 hidden w-48 bg-white rounded-lg shadow dark:bg-gray-700">
-
       <ul class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownBgHoverButton">
-        {% for master_group in master_group_product_name %}
+        {% for col_name in customized_view_columns_names %}
         <li>
           <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
             <input type="checkbox"
-              value="{{ master_group }}" data-target-group-name="{{ master_group }}"
+              value="{{ col_name }}" data-target-group-name="{{ col_name }}"
               class="products-filter-product-master-group-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
             <label 
-              class="w-full ml-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300">{{ master_group
+              class="w-full ml-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300">{{ col_name
               }}</label>
           </div>
         </li>
@@ -174,16 +173,17 @@
       <tr id="product-table-header-tr">
         <th scope="col" class="product-table-header-item px-3 py-3">#</th>
         <th scope="col" class="product-table-header-item px-3 py-3">Image</th>
-        <th scope="col" class="product-table-header-item px-3 py-3">Units of Measure</th>
         <th scope="col" class="product-table-header-item px-3 py-3">SKU</th>
         <th scope="col" id="product-table-th-product-type" class="product-table-header-item px-3 py-3">Description</th>
-        {% for master_name in master_group_product_name %}
-        <th scope="col" master-group-name="{{ master_name }}"
-          class="product-table-header-master-group-item hidden px-3 py-3 max-width-100">{{ master_name }}
-        </th>
-        {% endfor %}
-        <th scope="col" class="product-table-header-item px-3 py-3 max-width-100">Regular price</th>
         <th scope="col" class="product-table-header-item px-3 py-3 max-width-100">Retail price</th>
+        
+        <th scope="col" class="product-table-header-master-group-item hidden px-3 py-3 max-width-100">Regular price</th>
+        {% for col_name in customized_view_columns_names %}
+        <th scope="col" master-group-name="{{ col_name }}"
+        class="product-table-header-master-group-item hidden px-3 py-3 max-width-100">{{ col_name }}
+      </th>
+      {% endfor %}
+      <th scope="col" class="product-table-header-item px-3 py-3">Units of Measure</th>
         <th scope="col" class="product-table-header-item px-3 py-3 max-width-100">Available Qty</th>
         <th scope="col" class="product-table-header-item px-3 py-3 text-center">Actions</th>
       </tr>
@@ -212,11 +212,7 @@
             {% endif %}
           </div>
         </td>
-        <td scope="row" class="text-base font-normal text-gray-900   dark:text-white">
-          <div class="px-3">
-            <div class="text-sm">{{ product.name }}</div>
-          </div>
-        </td>
+        
         <td scope="row" class="  text-base font-normal text-gray-900   dark:text-white">
           <div class="px-3">
             <div class="text-sm">{{ product.SKU }}</div>
@@ -225,6 +221,17 @@
         <td class="text-base font-normal text-gray-900 dark:text-white">
           <div class="px-3">
             <div class="text-sm">{{ product.description }}</div>
+          </div>
+        </td>
+        <td class="text-base font-normal text-gray-900  dark:text-white max-width-100">
+          <div class="px-3">
+            <div class="text-sm">{{ product.regular_price }}</div>
+          </div>
+        </td>
+        <!-- retail price is not in master group but it must be in Customize view columns  -->
+        <td master-group-name="Regular Price" class="product-groups-names-view  hidden text-base font-normal text-gray-900  dark:text-white max-width-100">
+          <div class="px-3">
+            <div class="text-sm">{{ product.retail_price }}</div>
           </div>
         </td>
 
@@ -236,15 +243,12 @@
           </div>
         </td>
         {% endfor %}
-        <td class="text-base font-normal text-gray-900  dark:text-white max-width-100">
-          <div class="px-3">
-            <div class="text-sm">{{ product.regular_price }}</div>
-          </div>
-        </td>
+        
 
-        <td class=" text-base font-normal text-gray-900  dark:text-white max-width-100">
+        
+        <td scope="row" class="text-base font-normal text-gray-900   dark:text-white">
           <div class="px-3">
-            <div class="text-sm">{{ product.retail_price }}</div>
+            <div class="text-sm">{{ product.name }}</div>
           </div>
         </td>
         <td class=" text-base font-normal text-gray-900 dark:text-white max-width-100">

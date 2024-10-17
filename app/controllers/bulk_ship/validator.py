@@ -89,17 +89,25 @@ def validate_bulk_ship_exel(
 
         prod.store_id = store.id
 
-        product = db.session.scalar(
+        products = db.session.scalars(
             sa.select(m.WarehouseProduct).where(
                 m.WarehouseProduct.product.has(m.Product.SKU == prod.sku),
-                m.WarehouseProduct.group.has(m.Group.name == prod.group.strip()),
-            )
-        )
-        if not product:
+                m.WarehouseProduct.group.has(
+                    sa.func.TRIM(m.Group.name) == prod.group.strip()
+                ),
+            ),
+        ).all()
+
+        # we can have same wh product on different warehouses
+        if not products:
             result.errors[f"Invalid data row:{idx}"] = [
                 f"SKU: {prod.sku} not found in group: {prod.group}"
             ]
             continue
+
+        # we can have same product on different warehouses
+        product = products[0]
+
         total_qty = sum(
             [
                 p.qty
