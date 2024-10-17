@@ -145,6 +145,10 @@ def mg_g_populate(client: FlaskClient, mocker):
         "Bombay": "2",
     }
     create_default_divisions()
+    m.StoreCategory(
+        name=s.DefultStoreCategory.BULK_SHIP.value, active=True, image=""
+    ).save()
+
     role = db.session.execute(
         m.Division.select().where(
             m.Division.role_name == s.UserRole.WAREHOUSE_MANAGER.value
