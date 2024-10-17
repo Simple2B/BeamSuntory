@@ -140,10 +140,7 @@ def download_template():
         formula1=f"{groups_sheet.title}!$A$1:${last_let}$1",
         allow_blank=True,
         showDropDown=False,
-        showErrorMessage=True,
     )
-    country_dv.error = "Please select a valid SKUs"
-    country_dv.errorTitle = "Invalid SKU"
     main_sheet.add_data_validation(country_dv)
     country_dv.add("A2:A100")
 
