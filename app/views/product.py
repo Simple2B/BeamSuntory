@@ -333,6 +333,11 @@ def get_all():
     name = request.args.get("is_stocks_own_by_me", type=bool, default=False)
     url_with_params = url_for("product.get_all", name=name)
 
+    customized_view_columns_names = [
+        n for n in products_object["master_product_groups_name"]
+    ]
+    customized_view_columns_names.insert(0, "Regular Price")
+
     return render_template(
         "product/products.html",
         products=db.session.execute(
@@ -361,6 +366,7 @@ def get_all():
         ],
         master_groups_search=products_object["master_groups_search"],
         master_group_product_name=products_object["master_product_groups_name"],
+        customized_view_columns_names=customized_view_columns_names,
         suppliers=products_object["suppliers"],
         target_groups=products_object["target_groups"],
         datetime=products_object["datetime"],
