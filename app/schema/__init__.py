@@ -48,7 +48,7 @@ from .package_info import (
 from .division import Division
 from .assign import Assign
 from .request_share import RequestShare
-from .store_category import StoreCategory
+from .store_category import StoreCategory, DefultStoreCategory
 from .adjust import Adjust, AdjustResponse, AdjustList
 from .adjust_group_quantity import AdjustGroupQty
 from .event import (
@@ -115,4 +115,9 @@ from .incoming_stock_notification import (
     IncomingStockNotificationStatus,
     IncomingStockNotifyProduct,
     AdapterIncomingStockProducts,
+)
+from .bulk_ship import (
+    BulkShipStatus,
+    WhProduct,
+    ValidateBulkShipResult,
 )

@@ -27,7 +27,7 @@ def create_admin(admin_data: s.AdminCreate):
     db.session.commit()
 
 
-def role_required(required_role, has_approval_permission=False):
+def role_required(required_role, has_approval_permission=False, has_bulk_ship=False):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -53,6 +53,15 @@ def role_required(required_role, has_approval_permission=False):
                         log.ERROR,
                         "User with role :[%s] does not have approval permission to access route: [%s]",
                         current_user.approval_permission,
+                        request.path,
+                    )
+                    abort(403)
+            if has_bulk_ship:
+                if not current_user.has_access_bulk_ship:
+                    log(
+                        log.ERROR,
+                        "User with role :[%s] does not have bulk ship permission to access route: [%s]",
+                        current_user.has_access_bulk_ship,
                         request.path,
                     )
                     abort(403)
