@@ -17,3 +17,4 @@ class WhProduct(BaseModel):
 class ValidateBulkShipResult(BaseModel):
     errors: dict
     wh_products: List[WhProduct] = []
+    new_stores_ids: List[int] = []

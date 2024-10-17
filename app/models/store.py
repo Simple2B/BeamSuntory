@@ -33,22 +33,25 @@ class Store(db.Model, ModelMixin):
     contact_person: orm.Mapped[str] = orm.mapped_column(
         sa.String(128),
         nullable=False,
+        default="",
     )
     email: orm.Mapped[str] = orm.mapped_column(
         sa.String(128),
         nullable=False,
+        default="",
     )
     phone_numb: orm.Mapped[str] = orm.mapped_column(
         sa.String(128),
         nullable=False,
+        default="",
     )
-    country: orm.Mapped[str] = orm.mapped_column(sa.String(128))
-    region: orm.Mapped[str] = orm.mapped_column(sa.String(128))
-    city: orm.Mapped[str] = orm.mapped_column(sa.String(128))
+    country: orm.Mapped[str] = orm.mapped_column(sa.String(128), default="")
+    region: orm.Mapped[str] = orm.mapped_column(sa.String(128), default="")
+    city: orm.Mapped[str] = orm.mapped_column(sa.String(128), default="")
     # must check if address already exists
-    address: orm.Mapped[str] = orm.mapped_column(sa.String(512))
-    zip: orm.Mapped[str] = orm.mapped_column(sa.String(128))
-    active: orm.Mapped[bool] = orm.mapped_column(sa.Boolean())
+    address: orm.Mapped[str] = orm.mapped_column(sa.String(512), default="")
+    zip: orm.Mapped[str] = orm.mapped_column(sa.String(128), default="")
+    active: orm.Mapped[bool] = orm.mapped_column(sa.Boolean(), default=True)
 
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,

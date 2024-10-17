@@ -43,6 +43,7 @@ def create_ship_requests_by_address(wh_products: List[s.WhProduct]):
             ).save(False)
 
             m.Cart(
+                user_id=current_user.id,
                 product_id=wh_product.product_id,
                 quantity=wh_product.qty,
                 group_id=wh_product.group_id,

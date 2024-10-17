@@ -25,6 +25,14 @@ def validate_bulk_ship_exel(
     file: FileStorage, result: s.ValidateBulkShipResult
 ) -> List[s.WhProduct]:
     kind = filetype.guess(file)
+    bulk_ship_category = db.session.scalar(
+        sa.select(m.StoreCategory).where(
+            m.StoreCategory.name == s.DefultStoreCategory.BULK_SHIP.value
+        )
+    )
+    if not bulk_ship_category:
+        result.errors["file"] = ["Bulk ship category not found."]
+        return []
     if not kind or kind.extension not in ALLOW_FORMATS:
         result.errors["file"] = ["File must be in xlsx format."]
         return []
@@ -50,7 +58,9 @@ def validate_bulk_ship_exel(
                 sku=row["SKU"],
                 group=group,
                 qty=row["Quantity"],
-                store_category=row["Store Category"],
+                store_category=(
+                    "" if pd.isna(row["Store Category"]) else row["Store Category"]
+                ),
                 store_name=row["Store name"],
             )
         except ValidationError as e:
@@ -69,9 +79,13 @@ def validate_bulk_ship_exel(
             sa.select(m.Store).where(m.Store.store_name == prod.store_name)
         )
         if not store:
-            result.errors[f"Invalid data row:{idx}"] = [
-                f"Store: {prod.store_name} not found"
-            ]
+            store = m.Store(
+                store_name=prod.store_name,
+                store_category_id=bulk_ship_category.id,
+            )
+            db.session.add(store)
+            result.new_stores_ids.append(store.id)
+
         prod.store_id = store.id
 
         product = db.session.scalar(

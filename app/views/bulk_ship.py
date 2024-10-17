@@ -100,7 +100,13 @@ def download_template():
     for col, product in enumerate(products, start=1):
         col_letter = get_column_letter(col)
         groups_sheet[f"{col_letter}1"] = product.SKU
-        for row, wh_product in enumerate(product.warehouse_products, start=2):
+        wh_products = [
+            wh_prod
+            for wh_prod in product.warehouse_products
+            if wh_prod.available_quantity != 0
+            and wh_prod.group.name != s.Events.name.value
+        ]
+        for row, wh_product in enumerate(wh_products, start=2):
             groups_sheet[f"{col_letter}{row}"] = (
                 f"{wh_product.group.name} ({wh_product.available_quantity})"
             )
@@ -132,8 +138,8 @@ def download_template():
     country_dv = DataValidation(
         type="list",
         formula1=f"{groups_sheet.title}!$A$1:${last_let}$1",
+        allow_blank=True,
         showDropDown=False,
-        allowBlank=False,
         showErrorMessage=True,
     )
     country_dv.error = "Please select a valid SKUs"
@@ -146,12 +152,9 @@ def download_template():
     store_category_dv = DataValidation(
         type="list",
         formula1=f"{store_categories_sheet.title}!$A$1:${store_last_let}$1",
+        allow_blank=True,
         showDropDown=False,
-        allowBlank=False,
-        showErrorMessage=True,
     )
-    store_category_dv.error = "Please select a valid store category"
-    store_category_dv.errorTitle = "Invalid store category"
     main_sheet.add_data_validation(store_category_dv)
     store_category_dv.add("D2:D100")
 
@@ -165,17 +168,14 @@ def download_template():
             type="list",
             formula1=f"OFFSET({store_categories_sheet.title}!A1,1,{create_metch('D' + str(row), store_categories_sheet.title, count_store_categories)},500,1)",
             showDropDown=False,
-            allow_blank=False,
-            showErrorMessage=True,
+            allow_blank=True,
         )
-        store_category_dv.error = "Please select a valid store"
-        store_category_dv.errorTitle = "Invalid store"
         main_sheet.add_data_validation(store_category_dv)
         store_category_dv.add(f"E{row}")
 
         groups_dv = DataValidation(
             type="list",
-            formula1=f"OFFSET({groups_sheet.title}!A1,1,{create_metch('A' + str(row),groups_sheet.title, product_count)},30,1)",
+            formula1=f"OFFSET({groups_sheet.title}!A1,1,{create_metch('A' + str(row),groups_sheet.title, product_count)},50,1)",
             showDropDown=False,
             allow_blank=False,
             showErrorMessage=True,
@@ -216,7 +216,7 @@ def get_create_modal():
     [s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value], has_bulk_ship=True
 )
 def create():
-
+    """htmx"""
     form = f.NewBulkShipForm()
     if not form.validate_on_submit():
         log(log.ERROR, "Form validation failed", form.errors)
@@ -248,7 +248,14 @@ def create():
 
     if result.errors:
         log(log.ERROR, "Exel validation failed", result.errors)
+
         os.remove(absolute_file_path)
+
+        for stor_id in result.new_stores_ids:
+            db.session.delete(
+                db.session.scalar(sa.select(m.Store).where(m.Store.id == stor_id))
+            )
+            db.session.commit()
         return render_template(
             "bulk_ship/modal_add.html", form=form, errors=result.errors
         )
@@ -260,6 +267,8 @@ def create():
         return render_template(
             "toast.html", message="Bulk ship creation failed", category="error"
         )
+
+    # TODO mybe we need to notify warehouse manager about new bulk ship
 
     m.BulkShip(
         user_id=current_user.id,

@@ -15,6 +15,7 @@ from app.controllers import create_pagination, role_required
 
 from app import models as m, db
 from app import forms as f
+from app import schema as s
 from app.logger import log
 
 
@@ -56,6 +57,8 @@ def get_all():
         ).scalars()
     ]
 
+    defult_category_name = s.DefultStoreCategory.BULK_SHIP.value
+
     return render_template(
         "store_category/store_categories.html",
         store_categories=store_categories,
@@ -64,6 +67,7 @@ def get_all():
         form_create=form_create,
         form_edit=form_edit,
         current_user_id=current_user.id,
+        defult_category_name=defult_category_name,
     )
 
 
