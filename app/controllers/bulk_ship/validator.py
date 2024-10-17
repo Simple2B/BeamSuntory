@@ -84,6 +84,7 @@ def validate_bulk_ship_exel(
                 store_category_id=bulk_ship_category.id,
             )
             db.session.add(store)
+            db.session.commit()  # we can escape this commit
             result.new_stores_ids.append(store.id)
 
         prod.store_id = store.id

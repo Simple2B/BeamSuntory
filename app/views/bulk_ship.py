@@ -249,9 +249,10 @@ def create():
         os.remove(absolute_file_path)
 
         for stor_id in result.new_stores_ids:
-            db.session.delete(
-                db.session.scalar(sa.select(m.Store).where(m.Store.id == stor_id))
-            )
+            store = db.session.get(m.Store, int(stor_id))
+            if store:
+                db.session.delete(store)
+
             db.session.commit()
         return render_template(
             "bulk_ship/modal_add.html", form=form, errors=result.errors
