@@ -194,12 +194,9 @@
               <tr>
                 <th scope="col" class="px-6 py-3">#</th>
                 <th scope="col" class="px-6 py-3">Image</th>
-                <th scope="col" class="px-6 py-3">Name</th>
+                <th scope="col" class="px-6 py-3">Description</th>
                 <th scope="col" class="px-6 py-3">SKU</th>
-                <th scope="col" class="px-6 py-3">Regular price</th>
-                <th scope="col" class="px-6 py-3">Retail price</th>
-                <th scope="col" class="px-6 py-3">Start Date</th>
-                <th scope="col" class="px-6 py-3">End Date</th>
+                <th scope="col" class="px-6 py-3">Units of measure</th>
                 <th scope="col" class="px-6 py-3">Comments</th>
                 <th scope="col" class="px-6 py-3">Notes Location</th>
                 <th scope="col" class="px-6 py-3">Group</th>
@@ -221,12 +218,9 @@
                     class="w-14 h-14 object-cover" />
                   {% endif %}
                 </td>
-                <td class="px-6 py-4">{{ cart.product.name }}</td>
+                <td class="px-6 py-4">{{ cart.product.description }}</td>
                 <td class="px-6 py-4">{{ cart.product.SKU }}</td>
-                <td class="px-6 py-4">{{ cart.product.regular_price }}</td>
-                <td class="px-6 py-4">{{ cart.product.retail_price }}</td>
-                <td class="px-6 py-4">{{ cart.event.date_from if cart.event else '-' }}</td>
-                <td class="px-6 py-4">{{ cart.event.date_to if cart.event else '-' }}</td>
+                <td class="px-6 py-4">{{ cart.product.name }}</td>
                 <td class="px-6 py-4">{{ cart.product.comments }}</td>
                 <td class="px-6 py-4"><input type="text" name="note_location" value="{{ cart.product.notes_location }}"
                     cart_id="{{ cart.id }}" placeholder="Enter note location"
