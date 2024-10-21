@@ -203,89 +203,101 @@ def get_all():
 #     )
 
 
-# @bulk_ship_bp.route("/create", methods=["GET"])
-# @login_required
-# @role_required(
-#     [s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value], has_bulk_ship=True
-# )
-# def get_create_modal():
-#     """htmx"""
-#     form = f.NewBulkShipForm()
-#     return render_template("bulk_ship/modal_add.html", form=form)
+@bulk_assign_bp.route("/create", methods=["GET"])
+@login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+        s.UserRole.SALES_REP.value,
+    ],
+    has_bulk_assign=True,
+)
+def get_create_modal():
+    """htmx"""
+    form = f.NewBulkAssignForm()
+    return render_template("bulk_assign/modal_add.html", form=form)
 
 
-# @bulk_ship_bp.route("/create", methods=["POST"])
-# @login_required
-# @role_required(
-#     [s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value], has_bulk_ship=True
-# )
-# def create():
-#     """htmx"""
-#     form = f.NewBulkShipForm()
-#     if not form.validate_on_submit():
-#         log(log.ERROR, "Form validation failed", form.errors)
+@bulk_assign_bp.route("/create", methods=["POST"])
+@login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+        s.UserRole.SALES_REP.value,
+    ],
+    has_bulk_assign=True,
+)
+def create():
+    """htmx"""
+    form = f.NewBulkAssignForm()
+    if not form.validate_on_submit():
+        log(log.ERROR, "Form validation failed", form.errors)
 
-#         return render_template(
-#             "bulk_ship/modal_add.html", form=form, errors=form.errors
-#         )
+        return render_template(
+            "bulk_assign/modal_add.html", form=form, errors=form.errors
+        )
 
-#     file = request.files.get("exel_file")
+    file = request.files.get("exel_file")
 
-#     if not file:
-#         log(log.ERROR, "Form validation failed", form.errors)
-#         return render_template(
-#             "bulk_ship/modal_add.html", form=form, errors={"file": ["File is required"]}
-#         )
+    if not file:
+        log(log.ERROR, "Form validation failed", form.errors)
+        return render_template(
+            "bulk_assign/modal_add.html",
+            form=form,
+            errors={"file": ["File is required"]},
+        )
 
-#     result = s.ValidateBulkShipResult(errors=dict())
-#     file.seek(0)
+    result = s.ValidateBulkShipResult(errors=dict())
+    file.seek(0)
 
-#     # why we forst save the file and then validate it because after validation file change and save not work properly
-#     absolute_file_path, upload_file_path = save_exel_file(file, result)
-#     if result.errors:
-#         log(log.ERROR, "Exel save failed", result.errors)
-#         return render_template(
-#             "bulk_ship/modal_add.html", form=form, errors=result.errors
-#         )
+    # why we forst save the file and then validate it because after validation file change and save not work properly
+    absolute_file_path, upload_file_path = save_exel_file(file, result)
+    if result.errors:
+        log(log.ERROR, "Exel save failed", result.errors)
+        return render_template(
+            "bulk_ship/modal_add.html", form=form, errors=result.errors
+        )
 
-#     wh_products = validate_bulk_ship_exel(file, result)
+    wh_products = validate_bulk_ship_exel(file, result)
 
-#     if result.errors:
-#         log(log.ERROR, "Exel validation failed", result.errors)
+    if result.errors:
+        log(log.ERROR, "Exel validation failed", result.errors)
 
-#         os.remove(absolute_file_path)
+        os.remove(absolute_file_path)
 
-#         for stor_id in result.new_stores_ids:
-#             store = db.session.get(m.Store, int(stor_id))
-#             if store:
-#                 db.session.delete(store)
+        for stor_id in result.new_stores_ids:
+            store = db.session.get(m.Store, int(stor_id))
+            if store:
+                db.session.delete(store)
 
-#             db.session.commit()
-#         return render_template(
-#             "bulk_ship/modal_add.html", form=form, errors=result.errors
-#         )
+            db.session.commit()
+        return render_template(
+            "bulk_ship/modal_add.html", form=form, errors=result.errors
+        )
 
-#     try:
-#         create_ship_requests_by_address(wh_products)
-#     except Exception as e:
-#         log(log.ERROR, "Bulk ship creation failed", str(e))
-#         return render_template(
-#             "toast.html", message="Bulk ship creation failed", category="error"
-#         )
+    try:
+        create_ship_requests_by_address(wh_products)
+    except Exception as e:
+        log(log.ERROR, "Bulk ship creation failed", str(e))
+        return render_template(
+            "toast.html", message="Bulk ship creation failed", category="error"
+        )
 
-#     # TODO mybe we need to notify warehouse manager about new bulk ship
+    # TODO mybe we need to notify warehouse manager about new bulk ship
 
-#     m.BulkShip(
-#         user_id=current_user.id,
-#         status=s.BulkShipStatus.DRAFT.value,
-#         name=form.name.data,
-#         absolute_file_path=str(absolute_file_path),
-#         uploaded_file_path=str(upload_file_path),
-#     ).save()
+    m.BulkShip(
+        user_id=current_user.id,
+        status=s.BulkShipStatus.DRAFT.value,
+        name=form.name.data,
+        absolute_file_path=str(absolute_file_path),
+        uploaded_file_path=str(upload_file_path),
+    ).save()
 
-#     flash("Bulk ship created successfully", category="success")
+    flash("Bulk ship created successfully", category="success")
 
-#     return render_template_string(RELOAD_PAGE_SCRIPT)
+    return render_template_string(RELOAD_PAGE_SCRIPT)
 
 
 # @bulk_ship_bp.route("/<uuid>/download-template", methods=["GET"])
