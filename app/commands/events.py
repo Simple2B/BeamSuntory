@@ -4,7 +4,7 @@ import app.schema as s
 from app.database import db
 
 
-def add_extra_groups():
+def add_extra_data():
     brand = s.Brand.name.value
     events_name = s.Events.name.value
     master_group = db.session.scalar(
@@ -34,3 +34,13 @@ def add_extra_groups():
     )
     if not product_group:
         m.GroupProduct(name=events_name, master_group_id=product_muster_group.id).save()
+
+    category = db.session.scalar(
+        sa.select(m.StoreCategory).where(
+            m.StoreCategory.name == s.DefultStoreCategory.BULK_SHIP.value
+        )
+    )
+    if not category:
+        m.StoreCategory(
+            name=s.DefultStoreCategory.BULK_SHIP.value, active=True, image=""
+        ).save()

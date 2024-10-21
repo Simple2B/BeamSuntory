@@ -73,7 +73,6 @@ def get_all():
             m.DeliveryAgent.select().order_by(m.DeliveryAgent.id)
         ),
         warehouses=db.session.scalars(m.Warehouse.select().order_by(m.Warehouse.id)),
-        products=db.session.scalars(m.Product.select().order_by(m.Product.id)),
         inbound_orders_status=s.InboundOrderStatus,
     )
 

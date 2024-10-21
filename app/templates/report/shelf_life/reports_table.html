@@ -1,42 +1,89 @@
 <div id="shelf-lifes-table">
-  <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+  <table
+    class="w-full text-sm text-left text-gray-500 dark:text-gray-400"
+  >
+    <thead
+      class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
+    >
       <tr>
-        <th scope="col" class="px-6 py-3">
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
           #
         </th>
-        <th scope="col" class="px-6 py-3">
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
           Image
         </th>
-        <th scope="col" class="px-6 py-3">
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
           Number of days left
         </th>
-        <th scope="col" class="px-6 py-3">
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
           SKU
         </th>
-        <th scope="col" class="px-6 py-3">
-          Name
+
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
+          Description
         </th>
-        <th scope="col" class="px-6 py-3">
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
           Brand
         </th>
-        <th scope="col" class="px-6 py-3">
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
+          Units of Measure
+        </th>
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
           Quantity received
         </th>
-        <th scope="col" class="px-6 py-3">
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
           Remaining quantity
         </th>
-        <th scope="col" class="px-6 py-3">
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
           Data Created
         </th>
-        <th scope="col" class="px-6 py-3">
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
           Date Expires
         </th>
-        <th scope="col" class="px-6 py-3">
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
           Last transaction data
         </th>
 
-        <th scope="col" class="px-6 py-3">
+        <th
+          scope="col"
+          class="px-6 py-3"
+        >
           Action
         </th>
       </tr>
@@ -71,14 +118,20 @@
             <div class="text-base font-semibold">{{ report.product.SKU }}</div>
           </div>
         </td>
+
         <td scope="row" class="p-4 text-base font-normal text-gray-900  dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.product.name }}</div>
+            <div class="text-base font-semibold">{{ report.product.description }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900  dark:text-white">
           <div class="pl-3">
             <div class="text-base font-semibold">{{ report.product.brand }}</div>
+          </div>
+        </td>
+        <td scope="row" class="p-4 text-base font-normal text-gray-900  dark:text-white">
+          <div class="pl-3">
+            <div class="text-base font-semibold">{{ report.product.name }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
@@ -117,5 +170,6 @@
       {% endfor %}
     </tbody>
   </table>
-  {% include "report/pagination_bar_report.html" %}
+  {% include
+  "report/pagination_bar_report.html" %}
 </div>

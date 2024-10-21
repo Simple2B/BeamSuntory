@@ -43,7 +43,7 @@ def get_add_form():
 def get_edit_form(product_id: int):
     """htmx"""
     product = db.session.get(m.Product, product_id)
-    if not product:
+    if not product or product.is_deleted:
         log(log.ERROR, "Not found product by id : [%s]", product_id)
         return render_template(
             "toast.html", message="Product not found", category="danger"
@@ -156,7 +156,7 @@ def delete_group_for_product():
 def get_adjust_form(product_id: int):
     """htmx"""
     product = db.session.get(m.Product, product_id)
-    if not product:
+    if not product or product.is_deleted:
         log(log.ERROR, "Not found product by id : [%s]", product_id)
         return render_template(
             "toast.html", message="Product not found", category="danger"

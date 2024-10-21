@@ -266,7 +266,6 @@ def create():
                 m.Cart.user_id == current_user.id,
                 m.Cart.product_id == warehouse_product.product_id,
                 m.Cart.group_id == warehouse_product.group_id,
-                m.Cart.from_warehouse_product_id == warehouse_product.id,
                 m.Cart.status == s.CartStatus.PENDING.value,
             )
         ).scalar()
@@ -283,7 +282,6 @@ def create():
         product_id=warehouse_product.product_id,
         group_id=warehouse_product.group_id,
         quantity=new_quantity,
-        from_warehouse_product_id=warehouse_product.id,
         user_id=current_user.id,
     )
     log(log.INFO, "Form submitted. Cart: [%s]", item)
@@ -319,7 +317,7 @@ def save():
         flash("Cannot save item data", "danger")
         return redirect(url_for("cart.get_all"))
 
-    available_quantity = cart.from_warehouse_product.available_quantity
+    available_quantity = cart.available_quantity
 
     if not available_quantity:
         log(log.ERROR, "Not enough products in stock")
@@ -332,7 +330,6 @@ def save():
                 m.Cart.id != cart.id,
                 m.Cart.user_id == current_user.id,
                 m.Cart.product_id == cart.product_id,
-                m.Cart.from_warehouse_product_id == cart.from_warehouse_product_id,
                 m.Cart.group_id == cart.group_id,
                 m.Cart.status == s.CartStatus.PENDING.value,
             )

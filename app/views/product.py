@@ -20,7 +20,6 @@ from pydantic import ValidationError
 from pydantic import TypeAdapter
 
 import sqlalchemy as sa
-from sqlalchemy.exc import SQLAlchemyError
 from app.controllers import (
     create_pagination,
     save_image,
@@ -75,9 +74,17 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     )
 
     if query is None or count_query is None:
-        query = m.Product.select().order_by(m.Product.SKU.asc())
+        query = (
+            sa.select(m.Product)
+            .where(m.Product.is_deleted.is_(False))
+            .order_by(m.Product.SKU.asc())
+        )
 
-        count_query = sa.select(sa.func.count()).select_from(m.Product)
+        count_query = (
+            sa.select(sa.func.count())
+            .where(m.Product.is_deleted.is_(False))
+            .select_from(m.Product)
+        )
 
     if master_groups:
         for group in master_groups_list:
@@ -283,10 +290,11 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
 @product_blueprint.route("/<id>/view", methods=["GET"])
 @login_required
 def product_view(id: int):
+    """htmx"""
     product = db.session.get(m.Product, id)
     is_events = request.args.get("is_events", type=str, default="False") == "True"
 
-    if not product:
+    if not product or product.is_deleted:
         log(log.ERROR, "Not found product by id : [%s]", id)
         return render_template("error_modal.html", message="Can't find product")
 
@@ -325,6 +333,11 @@ def get_all():
     name = request.args.get("is_stocks_own_by_me", type=bool, default=False)
     url_with_params = url_for("product.get_all", name=name)
 
+    customized_view_columns_names = [
+        n for n in products_object["master_product_groups_name"]
+    ]
+    customized_view_columns_names.insert(0, "Regular Price")
+
     return render_template(
         "product/products.html",
         products=db.session.execute(
@@ -353,6 +366,7 @@ def get_all():
         ],
         master_groups_search=products_object["master_groups_search"],
         master_group_product_name=products_object["master_product_groups_name"],
+        customized_view_columns_names=customized_view_columns_names,
         suppliers=products_object["suppliers"],
         target_groups=products_object["target_groups"],
         datetime=products_object["datetime"],
@@ -481,7 +495,7 @@ def save():
         return redirect(url_for("product.get_all", **query_params))
 
     product = db.session.get(m.Product, form.product_id.data)
-    if not product:
+    if not product or product.is_deleted:
         log(log.ERROR, "Not found product by id : [%s]", form.product_id.data)
         flash("Cannot save product data", "danger")
         return redirect(url_for("product.get_all", **query_params))
@@ -609,76 +623,28 @@ def get_product_ship_form(warehouse_product_id: int):
 @login_required
 @role_required([s.UserRole.ADMIN.value])
 def delete(id: int):
+    """htmx"""
     product: m.Product = db.session.get(m.Product, id)
-    if not product:
+    if not product or product.is_deleted:
         log(log.INFO, "There is no product with id: [%s]", id)
         flash("There is no such product", "danger")
         return "no product", 404
-    try:
-        db.session.execute(
-            m.AdjustGroupQty.delete().where(m.AdjustGroupQty.product == product)
-        )
-        db.session.execute(m.Adjust.delete().where(m.Adjust.product == product))
-        db.session.execute(m.Assign.delete().where(m.Assign.product == product))
-        db.session.execute(m.Event.delete().where(m.Event.product == product))
-        db.session.execute(
-            m.Event.delete().where(m.Event.cart.has(m.Cart.product_id == product.id))
-        )
-        db.session.execute(m.Cart.delete().where(m.Cart.product_id == product.id))
-        db.session.execute(
-            m.ProductQuantityGroup.delete().where(
-                m.ProductAllocated.product_quantity_groups.any(
-                    m.ProductAllocated.product == product  # type: ignore
-                )
-            )
-        )
-        db.session.execute(
-            m.ProductAllocated.delete().where(m.ProductAllocated.product == product)
-        )
-        db.session.execute(
-            m.ProductGroup.delete().where(m.ProductGroup.product_id == product.id)
-        )
-        db.session.execute(
-            m.WarehouseProduct.delete().where(
-                m.WarehouseProduct.product_id == product.id
-            )
-        )
-        db.session.execute(
-            m.ReportInventory.delete().where(m.ReportInventory.product == product)
-        )
-        db.session.execute(m.ReportSKU.delete().where(m.ReportSKU.product == product))
 
-        db.session.execute(
-            m.ReportRequestShare.delete().where(
-                m.ReportRequestShare.request_share.has(product_id=product.id)
-            )
-        )
-        db.session.execute(
-            m.RequestShareUser.delete().where(
-                m.ReportRequestShare.request_share.has(product=product)
-            )
-        )
-        db.session.execute(
-            m.RequestShare.delete().where(m.RequestShare.product == product)
-        )
+    now = datetime.now().strftime("%Y%m%d%H%M%S")
+    product.is_deleted = True
+    product.SKU = f"{product.SKU}_deleted_at_{now}"
 
-        db.session.delete(product)
-        db.session.commit()
-    except SQLAlchemyError as e:
-        log(
-            log.ERROR,
-            "Unable to delete a product, the product has dependencies to other instance: [%s]",
-            e,
+    carts = db.session.scalars(
+        sa.select(m.Cart).where(
+            m.Cart.product_id == product.id, m.Cart.status == s.CartStatus.PENDING.value
         )
-        db.session.rollback()
-        flash(
-            "Unable to delete a product, the product has dependencies to other instance",
-            "danger",
-        )
-        return (
-            "Unable to delete a product, the product has dependencies to other instance",
-            409,
-        )
+    ).all()
+
+    for cart in carts:
+        # we don't need to reduce from stock, because it's not shipped yet
+        cart.status = s.CartStatus.CANCELLED.value
+
+    db.session.commit()
     log(log.INFO, "Product deleted. Product: [%s]", product)
     flash("Product deleted!", "success")
     return "ok", 200
@@ -770,7 +736,7 @@ def assign():
     query = sa.select(m.Product).where(m.Product.SKU == form.product_SKU.data)
     product = db.session.scalar(query)
 
-    if not product:
+    if not product or product.is_deleted:
         log(log.ERROR, "Not found product by name : [%s]", form.name.data)
         flash("Cannot save product data", "danger")
         return redirect(url_for("product.get_all", **query_params))
@@ -1043,7 +1009,7 @@ def adjust():
 
     product = db.session.get(m.Product, form.product_id.data)
 
-    if not product:
+    if not product or product.is_deleted:
         flash("Cannot save product data", "danger")
         log(log.ERROR, "Not found product by id : [%s]", form.product_id.data)
         return redirect(url_for("product.get_all", **query_params))
@@ -1518,7 +1484,7 @@ def upload():
 def full_image(id: int):
     log(log.INFO, "Get full image [%s]", id)
     product: m.Product = db.session.execute(
-        m.Product.select().where(m.Product.id == id)
+        m.Product.select().where(m.Product.id == id, m.Product.is_deleted.is_(False))
     ).scalar()
 
     if not product.image_obj:
@@ -1602,6 +1568,16 @@ def get_additional_info(product_id):
         for mg in master_group_product
     ]
     prod = db.session.get(m.Product, product_id)
+
+    if not prod:
+        log(log.ERROR, "Product not found by id: [%s]", product_id)
+        return s.ProductAdditionalInfo(
+            current_user_groups=current_user_groups,
+            all_warehouses=all_warehouses,
+            master_groups_groups=master_groups_groups,
+            current_master_product_groups=[],
+            current_user_role=current_user.role_obj.role_name,
+        ).model_dump_json(by_alias=True)
 
     current_product_master_groups = db.session.scalars(
         m.MasterGroupProduct.select().where(
