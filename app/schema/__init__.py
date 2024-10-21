@@ -121,3 +121,4 @@ from .bulk_ship import (
     WhProduct,
     ValidateBulkShipResult,
 )
+from .bulk_assign import BulkAssign

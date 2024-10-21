@@ -44,3 +44,4 @@ from .incoming_stock_notification import IncomingStockNotification
 from .incoming_stock_product import IncomingStockProduct
 
 from .bulk_ship import BulkShip
+from .bulk_assign import BulkAssign

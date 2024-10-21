@@ -1,9 +1,12 @@
-{% set user_role = current_user.role_obj.role_name %}
-<aside aria-label="Sidebar" id="logo-sidebar"
-  class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700">
-  <div class="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
+{% set user_role =
+current_user.role_obj.role_name %}
+<!-- prettier-ignore -->
+<aside aria-label="Sidebar" id="logo-sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700" >
+  <!-- prettier-ignore -->
+  <div class="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800" >
     <ul class="space-y-2 font-medium">
-      {% if user_role in admin_warehouse_roles %}
+      {% if user_role in
+      admin_warehouse_roles %}
       <li>
         <!-- prettier-ignore -->
         <a href="#"
@@ -12,7 +15,8 @@
           <span class="flex-1 ml-3 whitespace-nowrap">WareHouse</span>
           <div class="dropdown-arrow">{% include "icon/right_arrow.html" %}</div>
         </a>
-        <div class="dropdown-container dropdown-close">
+        <!-- prettier-ignore -->
+        <div class="dropdown-container dropdown-close" >
           <ul class="text-white">
             <li>
               <!-- prettier-ignore -->
@@ -34,6 +38,7 @@
         </div>
       </li>
       {% endif %}
+      <!-- prettier-ignore -->
       {% if user_role in warehouse_roles %}
       <li>
         <!-- prettier-ignore -->
@@ -44,6 +49,7 @@
         </a>
       </li>
       {% endif %}
+      <!-- prettier-ignore -->
       {% if user_role in warehouse_roles %}
       <li>
         <!-- prettier-ignore -->
@@ -53,21 +59,33 @@
           <span class="flex-1 ml-3 whitespace-nowrap">Inbound Orders</span>
         </a>
       </li>
-      
+
       {% endif %}
-      {% if user_role in all_role_without_sale_rep  %}
+      <!-- prettier-ignore -->
+       {% if user_role in all_role_without_sale_rep %}
       <li>
-        <a href="{{ url_for('incoming_stock_notifications.get_all') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+        <a href="{{ url_for('incoming_stock_notifications.get_all') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700" >
+          <!-- prettier-ignore -->
           {% include "icon/incoming_stock_notify.html" %}
-          <span class="flex-1 ml-4 whitespace-nowrap">Notify of incoming stock</span>
+          <span class="flex-1 ml-4 whitespace-nowrap" >Notify of incoming stock</span >
         </a>
       </li>
       {% endif %}
+      <!-- prettier-ignore -->
       {% if current_user.has_access_bulk_ship %}
       <li>
-        <a href="{{ url_for('bulk_ship.get_all') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+        <a href="{{ url_for('bulk_ship.get_all') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700" >
           {% include "icon/inbound_order.html" %}
-          <span class="flex-1 ml-4 whitespace-nowrap">Bulk ship</span>
+          <span class="flex-1 ml-4 whitespace-nowrap" >Bulk ship</span >
+        </a>
+      </li>
+      {% endif %}
+      <!-- prettier-ignore -->
+      {% if current_user.has_access_bulk_assign %}
+      <li>
+        <a href="{{ url_for('bulk_assign.get_all') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700" >
+          {% include "icon/inbound_order.html" %}
+          <span class="flex-1 ml-4 whitespace-nowrap" >Bulk assign</span >
         </a>
       </li>
       {% endif %}
@@ -79,8 +97,9 @@
           <span class="flex-1 ml-3 whitespace-nowrap">Products</span>
           <div class="dropdown-arrow">{% include "icon/right_arrow.html" %}</div>
         </div>
-        <div class="dropdown-container dropdown-close">
-          <ul class="text-white flex flex-col">
+        <!-- prettier-ignore -->
+        <div class="dropdown-container dropdown-close" >
+          <ul class="text-white flex flex-col" >
             <li>
               <!-- prettier-ignore -->
               <a href="{{ url_for('product.get_all') }}"
@@ -92,18 +111,17 @@
             {% if user_role in admin_roles %}
             <li>
               <!-- prettier-ignore -->
-              <a data-modal-toggle="upload-product-modal"
-                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+              <a data-modal-toggle="upload-product-modal" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
                 {% include "icon/circle.html" %}
                 <span class="flex-1 ml-4 whitespace-nowrap">Upload Products</span>
               </a>
             </li>
             {% endif %}
-            {% if user_role in admin_warehouse_roles %}
+            <!-- prettier-ignore -->
+             {% if user_role in admin_warehouse_roles %}
             <li>
               <!-- prettier-ignore -->
-              <a href="{{ url_for('event.get_all') }}"
-                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+              <a href="{{ url_for('event.get_all') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
                 {% include "icon/circle.html" %}
                 <span class="flex-1 ml-4 whitespace-nowrap">Event products</span>
               </a>
@@ -114,14 +132,13 @@
       </li>
       <li>
         <!-- prettier-ignore -->
-        <div
-          class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dropdown-btn">
+        <div class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dropdown-btn">
           {% include "icon/store.html" %}
           <span class="flex-1 ml-3 whitespace-nowrap">Stores</span>
           <div class="dropdown-arrow">{% include "icon/right_arrow.html" %}</div>
         </div>
-        <div class="dropdown-container dropdown-close">
-          <ul class="text-white flex flex-col">
+        <div class="dropdown-container dropdown-close" >
+          <ul class="text-white flex flex-col" >
             <li>
               <!-- prettier-ignore -->
               <a href="{{ url_for('store.get_all') }}"
@@ -144,11 +161,11 @@
         </div>
       </li>
       {% if user_role in admin_manager_roles %}
-      {% set is_adjust = user_role in warehouse_roles %}
+      <!-- prettier-ignore -->
+        {% set is_adjust = user_role in warehouse_roles %}
       <li>
         <!-- prettier-ignore -->
-        <a href="#"
-          class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dropdown-btn">
+        <a href="#" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dropdown-btn">
           {% include "icon/store_2.html" %}
           {% if is_adjust %}
           <span class="flex-1 ml-3 whitespace-nowrap">Assign/Share/Adjust</span>
@@ -159,8 +176,8 @@
             {% include "icon/right_arrow.html" %}
           </div>
         </a>
-        <div class="dropdown-container dropdown-close">
-          <ul class="text-white flex flex-col">
+        <div class="dropdown-container dropdown-close" >
+          <ul class="text-white flex flex-col" >
             <li>
               <!-- prettier-ignore -->
               <a href="{{ url_for('assign.get_all') }}"
@@ -191,32 +208,31 @@
         </div>
       </li>
       {% endif %}
+      <!-- prettier-ignore -->
       {% if user_role in admin_manager_roles %}
       <li>
         <!-- prettier-ignore -->
-        <a href="{{ url_for('ship_request.get_all') }}"
-          class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+        <a href="{{ url_for('ship_request.get_all') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
           {% include "icon/table_list.html" %}
           <span class="flex-1 ml-3 whitespace-nowrap">Ship Request List</span>
         </a>
       </li>
       {% endif %}
-      {% if user_role in admin_roles %}
+      <!-- prettier-ignore -->
+       {% if user_role in admin_roles %}
       <li>
         <!-- supplier -->
         <!-- prettier-ignore -->
-        <a href="#"
-          class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dropdown-btn">
+        <a href="#" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dropdown-btn">
           {% include "icon/person_in_window.html" %}
           <span class="flex-1 ml-3 whitespace-nowrap">Supplier</span>
           <div class="dropdown-arrow">{% include "icon/right_arrow.html" %}</div>
         </a>
-        <div class="dropdown-container dropdown-close">
-          <ul class="text-white flex flex-col">
+        <div class="dropdown-container dropdown-close" >
+          <ul class="text-white flex flex-col" >
             <li>
               <!-- prettier-ignore -->
-              <a href="{{ url_for('supplier.get_all') }}"
-                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+              <a href="{{ url_for('supplier.get_all') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
                 {% include "icon/circle.html" %}
                 <span class="flex-1 ml-4 whitespace-nowrap">All Suppliers</span>
               </a>
@@ -226,52 +242,46 @@
       </li>
       <li>
         <!-- prettier-ignore -->
-        <a href="#"
-          class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dropdown-btn">
+        <a href="#" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dropdown-btn">
           {% include "icon/group.html" %}
           <span class="flex-1 ml-3 whitespace-nowrap">Group</span>
           <div class="dropdown-arrow">
             {% include "icon/right_arrow.html" %}
           </div>
         </a>
-        <div class="dropdown-container dropdown-close">
-          <ul class="text-white flex flex-col">
+        <div class="dropdown-container dropdown-close" >
+          <ul class="text-white flex flex-col" >
             <li>
               <!-- prettier-ignore -->
-              <a href="{{ url_for('master_group.get_all') }}"
-                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+              <a href="{{ url_for('master_group.get_all') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
                 {% include "icon/circle.html" %}
                 <span class="flex-1 ml-4 whitespace-nowrap">Master Groups</span>
               </a>
             </li>
             <li>
               <!-- prettier-ignore -->
-              <a href="{{ url_for('stock_target_group.get_all') }}"
-                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+              <a href="{{ url_for('stock_target_group.get_all') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
                 {% include "icon/circle.html" %}
                 <span class="flex-1 ml-4 whitespace-nowrap">Stock Target Groups</span>
               </a>
             </li>
             <li>
               <!-- prettier-ignore -->
-              <a href="{{ url_for('sub_stock_target_group.get_all') }}"
-                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+              <a href="{{ url_for('sub_stock_target_group.get_all') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
                 {% include "icon/circle.html" %}
                 <span class="flex-1 ml-4 whitespace-nowrap">Sub Stock Target Groups</span>
               </a>
             </li>
             <li>
               <!-- prettier-ignore -->
-              <a href="{{ url_for('master_group_product.get_all') }}"
-                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+              <a href="{{ url_for('master_group_product.get_all') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
                 {% include "icon/circle.html" %}
                 <span class="flex-1 ml-4 whitespace-nowrap">Product Master Groups</span>
               </a>
             </li>
             <li>
               <!-- prettier-ignore -->
-              <a href="{{ url_for('group_product.get_all') }}"
-                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+              <a href="{{ url_for('group_product.get_all') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
                 {% include "icon/circle.html" %}
                 <span class="flex-1 ml-4 whitespace-nowrap">Product Groups</span>
               </a>
@@ -280,34 +290,31 @@
         </div>
       </li>
       {% endif %}
-
-      
-      {% if user_role in admin_warehouse_roles %}
+      <!-- prettier-ignore -->
+       {% if user_role in admin_warehouse_roles %}
       <li>
         <!-- prettier-ignore -->
-        <a href="#"
-          class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dropdown-btn">
+        <a href="#" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dropdown-btn">
           {% include "icon/role.html" %}
           <span class="flex-1 ml-3 whitespace-nowrap">Roles/Division</span>
           <div class="dropdown-arrow">{% include "icon/right_arrow.html" %}</div>
         </a>
-        <div class="dropdown-container dropdown-close">
-          <ul class="text-white flex flex-col">
+        <div class="dropdown-container dropdown-close" >
+          <ul class="text-white flex flex-col" >
             {% if user_role in admin_roles %}
             <li>
               <!-- prettier-ignore -->
-              <a href="{{ url_for('division.get_all') }}"
-                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+              <a href="{{ url_for('division.get_all') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
                 {% include "icon/circle.html" %}
                 <span class="flex-1 ml-4 whitespace-nowrap">All Roles/Division</span>
               </a>
             </li>
             {% endif %}
-            {% if user_role in admin_warehouse_roles %}
+            <!-- prettier-ignore -->
+             {% if user_role in admin_warehouse_roles %}
             <li>
               <!-- prettier-ignore -->
-              <a href="{{ url_for('user.get_all') }}"
-                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+              <a href="{{ url_for('user.get_all') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
                 {% include "icon/circle.html" %}
                 <span class="flex-1 ml-4 whitespace-nowrap">All Users</span>
               </a>
@@ -317,21 +324,20 @@
         </div>
       </li>
       {% endif %}
-      {% if user_role in admin_roles %}
+      <!-- prettier-ignore -->
+       {% if user_role in admin_roles %}
       <li>
         <!-- prettier-ignore -->
-        <a href="#"
-          class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dropdown-btn">
+        <a href="#" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dropdown-btn">
           {% include "icon/delivery_agent.html" %}
           <span class="flex-1 ml-3 whitespace-nowrap">Delivery Agent</span>
           <div class="dropdown-arrow">{% include "icon/right_arrow.html" %}</div>
         </a>
-        <div class="dropdown-container dropdown-close">
-          <ul class="text-white flex flex-col">
+        <div class="dropdown-container dropdown-close" >
+          <ul class="text-white flex flex-col" >
             <li>
               <!-- prettier-ignore -->
-              <a href="{{ url_for('delivery_agent.get_all') }}"
-                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+              <a href="{{ url_for('delivery_agent.get_all') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
                 {% include "icon/circle.html" %}
                 <span class="flex-1 ml-4 whitespace-nowrap">All Delivery Agents</span>
               </a>
@@ -340,48 +346,46 @@
         </div>
       </li>
       {% endif %}
-      {% if user_role in warehouse_roles %}
+      <!-- prettier-ignore -->
+       {% if user_role in warehouse_roles %}
       <li>
         <!-- prettier-ignore -->
-        <a href="{{ url_for('incoming_stock.get_all') }}"
-          class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+        <a href="{{ url_for('incoming_stock.get_all') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
           {% include "icon/car.html" %}
           <span class="flex-1 ml-3 whitespace-nowrap">Incoming stock</span>
         </a>
       </li>
       <li>
         <!-- prettier-ignore -->
-        <a href="{{ url_for('outgoing_stock.get_all') }}"
-          class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+        <a href="{{ url_for('outgoing_stock.get_all') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
           {% include "icon/car.html" %}
           <span class="flex-1 ml-3 whitespace-nowrap">Outgoing stock</span>
         </a>
       </li>
       {% endif %}
-      {% if user_role in delivery_agent_roles %}
+      <!-- prettier-ignore -->
+       {% if user_role in delivery_agent_roles %}
       <li>
         <!-- prettier-ignore -->
-        <a href="{{ url_for('pickup_order.get_all') }}"
-          class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+        <a href="{{ url_for('pickup_order.get_all') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
           {% include "icon/car.html" %}
           <span class="flex-1 ml-3 whitespace-nowrap">Pickup order</span>
         </a>
       </li>
       <li>
         <!-- prettier-ignore -->
-        <a href="{{ url_for('pickup_inbound.get_all') }}"
-          class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+        <a href="{{ url_for('pickup_inbound.get_all') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
           {% include "icon/car.html" %}
           <span class="flex-1 ml-3 whitespace-nowrap">Pickup inbound</span>
         </a>
       </li>
       {% endif %}
-      {% if user_role in admin_roles or current_user.approval_permission %}
+      <!-- prettier-ignore -->
+       {% if user_role in admin_roles or current_user.approval_permission %}
       <!-- Reports -->
       <li>
         <!-- prettier-ignore -->
-        <a href="{{ url_for('report.index') }}"
-          class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+        <a href="{{ url_for('report.index') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
           {% include "icon/report.html" %}
           <span class="flex-1 ml-3 whitespace-nowrap">Reports</span>
         </a>
