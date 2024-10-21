@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import TYPE_CHECKING
 
 import sqlalchemy as sa
 from sqlalchemy import orm
@@ -10,10 +9,6 @@ from app import schema as s
 from .product import Product
 from .group import Group
 from .user import User
-
-
-if TYPE_CHECKING:
-    from .bulk_assign import BulkAssign
 
 
 class Assign(db.Model, ModelMixin):
