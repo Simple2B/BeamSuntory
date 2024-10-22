@@ -25,14 +25,7 @@ def validate_bulk_ship_exel(
     file: FileStorage, result: s.ValidateBulkShipResult
 ) -> List[s.WhProduct]:
     kind = filetype.guess(file)
-    bulk_ship_category = db.session.scalar(
-        sa.select(m.StoreCategory).where(
-            m.StoreCategory.name == s.DefultStoreCategory.BULK_SHIP.value
-        )
-    )
-    if not bulk_ship_category:
-        result.errors["file"] = ["Bulk ship category not found."]
-        return []
+
     if not kind or kind.extension not in ALLOW_FORMATS:
         result.errors["file"] = ["File must be in xlsx format."]
         return []
@@ -126,3 +119,23 @@ def validate_bulk_ship_exel(
         prod.product_id = product.product_id
 
     return [prod for prod in wh_products if prod]
+
+
+def validate_bulk_assign_excel(file: FileStorage, result: s.ValidateBulkAssignResult):
+    kind = filetype.guess(file)
+
+    if not kind or kind.extension not in ALLOW_FORMATS:
+        result.errors["file"] = ["File must be in xlsx format."]
+        return []
+
+    try:
+        assigns = pd.read_excel(file)
+    except Exception:
+        result.errors["file"] = ["File is not valid. Try to upload another one."]
+        return []
+
+    if assigns.empty:
+        result.errors["file"] = ["File is empty."]
+        return []
+    # TODO: Implement validation logic
+    pass

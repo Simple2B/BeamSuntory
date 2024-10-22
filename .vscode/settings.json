@@ -22,6 +22,7 @@
     "htmx",
     "ilike",
     "isnot",
+    "iterrows",
     "jsonify",
     "Mixit",
     "NLVA",
