@@ -53,3 +53,4 @@ from .incoming_stock_notificaton import (
     IncomingStockNotificationReceivedForm,
 )
 from .bulk_ship import NewBulkShipForm, EditBulkShipForm
+from .bulk_assign import NewBulkAssignForm, EditBulkAssignForm

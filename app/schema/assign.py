@@ -16,5 +16,6 @@ class Assign(BaseModel):
     group: Group
     from_group: Group = Field(alias="fromGroup")
     created_at: datetime = Field(alias="createdAt")
+    bulk_assign_id: int | None = Field(alias="bulkAssignId")
     user: User
     type: str

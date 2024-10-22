@@ -20,6 +20,9 @@ class Assign(db.Model, ModelMixin):
     from_group_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("groups.id"))
     group_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("groups.id"))
     user_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("users.id"))
+    bulk_assign_id: orm.Mapped[int | None] = orm.mapped_column(
+        sa.ForeignKey("bulk_assigns.id")
+    )
     # Columns
     quantity: orm.Mapped[int] = orm.mapped_column(sa.Integer)
     type: orm.Mapped[str] = orm.mapped_column(sa.String(64))
