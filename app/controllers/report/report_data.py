@@ -144,8 +144,8 @@ def order_fields_dataset(dataset: dict[str, list]):
     # Category, program year ,premises ,language, unit of measure, qty, warehouse
     custom_order = {
         "SKU": 1,
-        "Brand": 2,
-        "Description": 3,
+        "Description": 2,
+        "Brand": 3,
         "Group": 4,
         "Categories": 5,
         "Program Year": 6,
