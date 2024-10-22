@@ -180,12 +180,12 @@ class ReportDataInventories(ReportData):
         query, _ = cls.get_search_result(report_filter)
 
         dataset = {
-            "Units of Measure": [],
             "SKU": [],
+            "Description": [],
+            "Brand": [],
+            "Units of Measure": [],
             "Quantity": [],
             "Group": [],
-            "Brand": [],
-            "Description": [],
             "Warehouse": [],
             "Last transaction data": [],
         }  # type: dict[str, list]

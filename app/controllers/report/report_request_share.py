@@ -144,10 +144,10 @@ class ReportDataShareRequests(ReportData):
 
         reports = db.session.scalars(query)
         dataset = {
-            "Units of Measure": [],
             "SKU": [],
-            "Brand": [],
             "Description": [],
+            "Brand": [],
+            "Units of Measure": [],
             "Quantity": [],
             "From": [],
             "To": [],
