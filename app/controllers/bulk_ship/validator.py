@@ -126,3 +126,7 @@ def validate_bulk_ship_exel(
         prod.product_id = product.product_id
 
     return [prod for prod in wh_products if prod]
+
+
+def validate_bulk_assign_excel(file: FileStorage, result: s.ValidateBulkAssignResult):
+    pass

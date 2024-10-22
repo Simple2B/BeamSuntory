@@ -252,12 +252,12 @@ def create():
     result = s.ValidateBulkShipResult(errors=dict())
     file.seek(0)
 
-    # why we forst save the file and then validate it because after validation file change and save not work properly
+    # why we forse saving the file and then validate it because after validation file change and save not work properly
     absolute_file_path, upload_file_path = save_exel_file(file, result)
     if result.errors:
         log(log.ERROR, "Exel save failed", result.errors)
         return render_template(
-            "bulk_ship/modal_add.html", form=form, errors=result.errors
+            "bulk_assign/modal_add.html", form=form, errors=result.errors
         )
 
     wh_products = validate_bulk_ship_exel(file, result)
@@ -267,14 +267,8 @@ def create():
 
         os.remove(absolute_file_path)
 
-        for stor_id in result.new_stores_ids:
-            store = db.session.get(m.Store, int(stor_id))
-            if store:
-                db.session.delete(store)
-
-            db.session.commit()
         return render_template(
-            "bulk_ship/modal_add.html", form=form, errors=result.errors
+            "bulk_assign/modal_add.html", form=form, errors=result.errors
         )
 
     try:
@@ -284,8 +278,6 @@ def create():
         return render_template(
             "toast.html", message="Bulk ship creation failed", category="error"
         )
-
-    # TODO mybe we need to notify warehouse manager about new bulk ship
 
     m.BulkShip(
         user_id=current_user.id,
