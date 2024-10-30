@@ -189,6 +189,10 @@ class User(db.Model, UserMixin, ModelMixin):
         ujs.role_name = self.role_obj.role_name
         return ujs.model_dump_json()
 
+    @property
+    def user_group_names(self):
+        return [group.name for group in self.user_groups]
+
 
 class AnonymousUser(AnonymousUserMixin):
     role_obj = "anonymous"
