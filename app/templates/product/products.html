@@ -177,7 +177,7 @@
         <th scope="col" id="product-table-th-product-type" class="product-table-header-item px-3 py-3">Description</th>
         <th scope="col" id="product-table-th-product-type" class="product-table-header-item px-3 py-3">Brand</th>
 
-        <th scope="col" class="product-table-header-item px-3 hidden py-3 max-width-100">Retail price</th>
+        <th scope="col" class="product-table-header-item px-3 py-3 max-width-100">Retail price</th>
         <th scope="col" class="product-table-header-master-group-item hidden px-3 py-3 max-width-100">Regular price</th>
         {% for col_name in customized_view_columns_names %}
         <th scope="col" master-group-name="{{ col_name }}"
@@ -231,7 +231,7 @@
         </td>
         <!-- retail price is not in master group but it must be in Customize view columns  -->
 
-        <td master-group-name="Retail Price" class="product-groups-names-view  hidden text-base font-normal text-gray-900  dark:text-white max-width-100">
+        <td master-group-name="Retail Price" class="product-groups-names-view text-base font-normal text-gray-900  dark:text-white max-width-100">
           <div class="px-3">
             <div class="text-sm">{{ product.retail_price }}</div>
           </div>
