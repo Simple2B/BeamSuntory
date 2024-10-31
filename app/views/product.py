@@ -218,11 +218,11 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     )
     get_all_groups_time = datetime.now()
 
-    mastr_for_prods_groups_for_prods = {}
+    master_for_prods_groups_for_prods = {}
 
     log(
         log.DEBUG,
-        "Product get_all mastr_for_prods_groups_for_prods finished in [%s]",
+        "Product get_all master_for_prods_groups_for_prods finished in [%s]",
         datetime.now() - get_all_groups_time,
     )
 
@@ -245,7 +245,9 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
     master_groups_search = db.session.scalars(sa.select(m.MasterGroupProduct)).all()
 
     master_group_product_name = [
-        maste_group.name for maste_group in master_groups_search
+        master_group.name
+        for master_group in master_groups_search
+        if master_group.name != s.Brand.name.value
     ]
     suppliers = db.session.scalars(
         sa.select(m.Supplier).order_by(m.Supplier.name.asc())
@@ -262,7 +264,7 @@ def get_all_products(request, query=None, count_query=None, my_stocks=False):
         "master_groups": master_groups,
         "product_groups": product_groups,
         "current_user_groups_rows": current_user_groups_rows,
-        "mastr_for_prods_groups_for_prods": mastr_for_prods_groups_for_prods,
+        "master_for_prods_groups_for_prods": master_for_prods_groups_for_prods,
         "master_groups_list": master_groups_list,
         "q": q,
         "is_events_stocks_own_by_me": is_events_stocks_own_by_me,
@@ -336,6 +338,7 @@ def get_all():
     customized_view_columns_names = [
         n for n in products_object["master_product_groups_name"]
     ]
+    customized_view_columns_names.insert(0, "Retail Price")
     customized_view_columns_names.insert(0, "Regular Price")
 
     return render_template(
@@ -362,7 +365,7 @@ def get_all():
         current_user_groups=products_object["current_user_groups_rows"],
         current_user_groups_names=products_object["current_user_groups_names"],
         master_groups_groups_available=products_object[
-            "mastr_for_prods_groups_for_prods"
+            "master_for_prods_groups_for_prods"
         ],
         master_groups_search=products_object["master_groups_search"],
         master_group_product_name=products_object["master_product_groups_name"],

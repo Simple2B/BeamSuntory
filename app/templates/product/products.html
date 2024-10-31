@@ -144,7 +144,7 @@
             <input type="checkbox"
               value="{{ col_name }}" data-target-group-name="{{ col_name }}"
               class="products-filter-product-master-group-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-            <label 
+            <label
               class="w-full ml-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300">{{ col_name
               }}</label>
           </div>
@@ -175,8 +175,9 @@
         <th scope="col" class="product-table-header-item px-3 py-3">Image</th>
         <th scope="col" class="product-table-header-item px-3 py-3">SKU</th>
         <th scope="col" id="product-table-th-product-type" class="product-table-header-item px-3 py-3">Description</th>
-        <th scope="col" class="product-table-header-item px-3 py-3 max-width-100">Retail price</th>
-        
+        <th scope="col" id="product-table-th-product-type" class="product-table-header-item px-3 py-3">Brand</th>
+
+        <th scope="col" class="product-table-header-item px-3 hidden py-3 max-width-100">Retail price</th>
         <th scope="col" class="product-table-header-master-group-item hidden px-3 py-3 max-width-100">Regular price</th>
         {% for col_name in customized_view_columns_names %}
         <th scope="col" master-group-name="{{ col_name }}"
@@ -212,7 +213,7 @@
             {% endif %}
           </div>
         </td>
-        
+
         <td scope="row" class="  text-base font-normal text-gray-900   dark:text-white">
           <div class="px-3">
             <div class="text-sm">{{ product.SKU }}</div>
@@ -225,11 +226,16 @@
         </td>
         <td class="text-base font-normal text-gray-900  dark:text-white max-width-100">
           <div class="px-3">
-            <div class="text-sm">{{ product.regular_price }}</div>
+            <div class="text-sm">{{ product.brand }}</div>
           </div>
         </td>
         <!-- retail price is not in master group but it must be in Customize view columns  -->
         <td master-group-name="Regular Price" class="product-groups-names-view  hidden text-base font-normal text-gray-900  dark:text-white max-width-100">
+          <div class="px-3">
+            <div class="text-sm">{{ product.regular_price }}</div>
+          </div>
+        </td>
+        <td master-group-name="Retail Price" class="product-groups-names-view  hidden text-base font-normal text-gray-900  dark:text-white max-width-100">
           <div class="px-3">
             <div class="text-sm">{{ product.retail_price }}</div>
           </div>
@@ -243,9 +249,9 @@
           </div>
         </td>
         {% endfor %}
-        
 
-        
+
+
         <td scope="row" class="text-base font-normal text-gray-900   dark:text-white">
           <div class="px-3">
             <div class="text-sm">{{ product.name }}</div>
