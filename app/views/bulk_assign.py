@@ -131,6 +131,21 @@ def download_template():
         )
     )
     groups_sheet = wb.create_sheet(title="Groups")
+    master_group_sheet = wb.create_sheet(title="Master Groups")
+
+    master_groups = db.session.scalars(sa.select(m.MasterGroup))
+
+    for col, master_group in enumerate(master_groups, start=1):
+        mg_col_letter = get_column_letter(col)
+        master_group_sheet[f"{mg_col_letter}1"] = master_group.name
+        groups = [
+            group
+            for group in master_group.groups
+            if group.name not in s.Events.name.value
+            and group.name in current_user.user_group_names
+        ]
+        for row, group in enumerate(groups, start=2):
+            master_group_sheet[f"{mg_col_letter}{row}"] = group.name
 
     for col, product in enumerate(products, start=1):
         col_letter = get_column_letter(col)
