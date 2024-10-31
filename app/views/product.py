@@ -339,7 +339,6 @@ def get_all():
         n for n in products_object["master_product_groups_name"]
     ]
     customized_view_columns_names.insert(0, "Regular Price")
-    customized_view_columns_names.insert(0, "Retail Price")
 
     return render_template(
         "product/products.html",
