@@ -19,7 +19,7 @@ services:
     restart: always
     volumes:
       - ./product:/home/app/app/static/img/product
-      - ./uploads:/home/app/app/static/img/uploads
+      - ./uploads:/home/app/app/static/uploads
     env_file:
       - .env
     depends_on:
