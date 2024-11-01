@@ -21,6 +21,7 @@ services:
     restart: always
     volumes:
       - ./product:/home/app/app/static/img/product
+      - ./uploads:/home/app/app/static/img/uploads
     env_file:
       - .env
     depends_on:
@@ -46,7 +47,6 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-passwd}
       POSTGRES_EXTRA_OPTS: '--schema=public --blobs'
       DAYS_HISTORY: 30
-
 
   celery:
     image: simple2b/beam-suntory-app:latest
