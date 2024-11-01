@@ -42,3 +42,5 @@ from .image import Image
 from .ship_request_notification import ShipRequestNotification
 from .incoming_stock_notification import IncomingStockNotification
 from .incoming_stock_product import IncomingStockProduct
+
+from .bulk_ship import BulkShip

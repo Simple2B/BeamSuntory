@@ -25,6 +25,8 @@ interface IUser {
   phone_number: string;
   sales_rep: boolean;
   group_name: string;
+  has_access_bulk_ship: boolean;
+  has_access_bulk_assign: boolean;
 }
 
 interface IDivision {
@@ -270,6 +272,14 @@ function editUser(user: IUser) {
   input.checked = user.sales_rep;
   input = document.querySelector('#user-edit-approval_permission');
   input.checked = user.approval_permission;
+
+  input = document.querySelector('#edit-checkbox-access-bulk-ship');
+  input.checked = user.has_access_bulk_ship
+  input = document.querySelector('#edit-checkbox-access-bulk-assign');
+  input.checked = user.has_access_bulk_assign
+
+
+
   input = document.querySelector('#user-edit-next_url');
   input.value = window.location.href;
   modal.show();

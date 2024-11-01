@@ -1,7 +1,5 @@
 from datetime import datetime
 from uuid import uuid4
-import json
-from typing import List
 
 from flask_login import UserMixin, AnonymousUserMixin
 import sqlalchemy as sa
@@ -98,6 +96,13 @@ class User(db.Model, UserMixin, ModelMixin):
     is_notify_shipping: orm.Mapped[bool] = orm.mapped_column(default=True)
     is_notify_request_share_status: orm.Mapped[bool] = orm.mapped_column(default=True)
 
+    has_access_bulk_ship: orm.Mapped[bool] = orm.mapped_column(
+        default=False, server_default="0"
+    )
+    has_access_bulk_assign: orm.Mapped[bool] = orm.mapped_column(
+        default=False, server_default="0"
+    )
+
     # Relations
     role_obj: orm.Mapped[Division] = orm.relationship(lazy="joined")
     user_groups: orm.Mapped[list[Group]] = orm.relationship(
@@ -174,33 +179,15 @@ class User(db.Model, UserMixin, ModelMixin):
     @property
     def json(self):
         # insert group_name to result json
-        ujs = s.User.model_validate(self).model_dump_json()
-        u_dict = json.loads(ujs)
+        ujs = s.User.model_validate(self)
 
-        user_group: List[UserGroup] = [
-            ug
-            for ug in db.session.execute(
-                UserGroup.select().where(UserGroup.left_id == u_dict["id"])
-            ).scalars()
-        ]
-
-        if len(user_group) > 0:
-            groups_obj: Group = db.session.execute(
-                Group.select().where(
-                    Group.id.in_([ugid.right_id for ugid in user_group])
-                )
-            ).scalars()
-            u_dict["group_name"] = ", ".join([g.name for g in groups_obj])
+        if self.user_groups:
+            ujs.group_name = ", ".join([g.name for g in self.user_groups])
         else:
-            u_dict["group_name"] = "Without group"
+            ujs.group_name = "Without group"
 
-        u_dict["role_name"] = (
-            db.session.execute(Division.select().where(Division.id == u_dict["role"]))
-            .scalars()
-            .first()
-            .role_name
-        )
-        return json.dumps(u_dict)
+        ujs.role_name = self.role_obj.role_name
+        return ujs.model_dump_json()
 
 
 class AnonymousUser(AnonymousUserMixin):

@@ -69,6 +69,10 @@ class Product(db.Model, ModelMixin):
     width: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
     height: orm.Mapped[float] = orm.mapped_column(sa.Float(), nullable=True)
 
+    is_deleted: orm.Mapped[bool] = orm.mapped_column(
+        sa.Boolean(), default=False, server_default=sa.sql.expression.false()
+    )
+
     # Relationships
     image_obj: orm.Mapped["Image"] = orm.relationship()
     supplier: orm.Mapped["Supplier"] = orm.relationship()
@@ -93,16 +97,18 @@ class Product(db.Model, ModelMixin):
     )
 
     report_sku: orm.Mapped["ReportSKU"] = orm.relationship(
-        order_by="ReportSKU.created_at.desc()", uselist=False
+        order_by="ReportSKU.created_at.desc()", uselist=False, viewonly=True
     )
+
+    @property
+    def supplier_name(self):
+        return self.supplier.name if self.supplier else "-"
 
     @property
     def last_transaction_data(self):
         if not self.report_sku:
             return "-"
-        return (
-            f"{self.report_sku.created_at.strftime('%Y/%m/%d')}, {self.report_sku.type}"
-        )
+        return f"{self.report_sku.created_at.strftime('%Y/%m/%d')},./ {self.report_sku.type}"
 
     def __repr__(self):
         return f"<{self.id}: {self.name}>"

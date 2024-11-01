@@ -110,8 +110,9 @@ class ReportDataEvents(ReportData):
         query, _ = cls.get_search_result(report_filter)
         dataset = {
             "SKU": [],
-            "Name": [],
+            "Units of Measure": [],
             "Brand": [],
+            "Description": [],
             "Quantity": [],
             "Group": [],
             "User": [],
@@ -123,8 +124,9 @@ class ReportDataEvents(ReportData):
 
         for event in db.session.scalars(query):
             dataset["SKU"].append(event.cart.product.SKU)
-            dataset["Name"].append(event.cart.product.name)
+            dataset["Units of Measure"].append(event.cart.product.name)
             dataset["Brand"].append(event.cart.product.brand)
+            dataset["Description"].append(event.cart.product.description)
             dataset["Quantity"].append(event.cart.quantity)
             dataset["Group"].append(event.group.name)
             dataset["User"].append(event.user.username)

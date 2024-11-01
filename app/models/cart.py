@@ -35,16 +35,11 @@ class Cart(db.Model, ModelMixin):
     )
     group_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey("groups.id"))
 
-    # this filed is just instens of warehouse_product but to get the available quantity
-    from_warehouse_product_id: orm.Mapped[int] = orm.mapped_column(
-        sa.ForeignKey("warehouse_product.id")
-    )
-
     # Column
     quantity: orm.Mapped[int] = orm.mapped_column(sa.Integer)
     order_numb: orm.Mapped[str] = orm.mapped_column(sa.String(64), nullable=True)
     status: orm.Mapped[str] = orm.mapped_column(
-        sa.String(64), default="pending"
+        sa.String(64), default=s.CartStatus.PENDING.value
     )  # in progress, completed, removed
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
@@ -56,7 +51,6 @@ class Cart(db.Model, ModelMixin):
     # Relationship
     product: orm.Mapped["Product"] = orm.relationship()
     warehouse: orm.Mapped["Warehouse"] = orm.relationship()
-    from_warehouse_product: orm.Mapped["WarehouseProduct"] = orm.relationship()
     ship_request: orm.Mapped["ShipRequest"] = orm.relationship(back_populates="carts")
     event: orm.Mapped["Event"] = orm.relationship()
     group: orm.Mapped["Group"] = orm.relationship()
@@ -66,8 +60,16 @@ class Cart(db.Model, ModelMixin):
 
     @property
     def available_quantity(self):
-        if self.from_warehouse_product:
-            return self.from_warehouse_product.available_quantity
+        from .warehouse_product import WarehouseProduct
+
+        wh_product = db.session.scalar(
+            sa.select(WarehouseProduct).where(
+                WarehouseProduct.product_id == self.product_id,
+                WarehouseProduct.group_id == self.group_id,
+            )
+        )
+        if wh_product:
+            return wh_product.available_quantity
         return 0
 
     @property

@@ -79,6 +79,12 @@ def get_all():
         m.Group.select().where(m.Group.parent_group_id.is_(None)).order_by(m.Group.name)
     ).all()
 
+    products = db.session.scalars(
+        sa.select(m.Product)
+        .where(m.Product.is_deleted.is_(False))
+        .order_by(m.Product.name)
+    ).all()
+
     return render_template(
         "inbound_order/inbound_orders.html",
         current_inbound_order=current_inbound_order,
@@ -96,7 +102,7 @@ def get_all():
         warehouses=db.session.scalars(
             m.Warehouse.select().order_by(m.Warehouse.name)
         ).all(),
-        products=db.session.scalars(m.Product.select().order_by(m.Product.name)).all(),
+        products=products,
         groups=groups,
         form_create=form_create,
         form_edit=form_edit,
@@ -547,6 +553,12 @@ def sort():
         ]
     )
 
+    products = db.session.scalars(
+        sa.select(m.Product)
+        .where(m.Product.is_deleted.is_(False))
+        .order_by(m.Product.id)
+    ).all()
+
     return render_template(
         "inbound_order/inbound_orders.html",
         inbound_orders=db.session.scalars(
@@ -561,7 +573,7 @@ def sort():
         warehouses=db.session.scalars(
             m.Warehouse.select().order_by(m.Warehouse.id)
         ).all(),
-        products=db.session.scalars(m.Product.select().order_by(m.Product.id)).all(),
+        products=products,
         groups=db.session.scalars(m.Group.select().order_by(m.Group.id)).all(),
         form_create=form_create,
         form_edit=form_edit,

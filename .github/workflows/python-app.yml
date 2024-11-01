@@ -25,6 +25,19 @@ jobs:
         with:
           reference: 'develop'
           tag: '${{ github.ref }}'
+  on-prod-branch-check:
+    runs-on: Linux
+    outputs:
+      on_prod: ${{ steps.contains_tag.outputs.retval }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: rickstaa/action-contains-tag@v1
+        id: contains_tag
+        with:
+          reference: 'prod'
+          tag: '${{ github.ref }}'
   tests:
     runs-on: Linux
     steps:
@@ -48,7 +61,7 @@ jobs:
         run: |
           poetry run pytest
   build:
-    name: Build and push
+    name: Build and push image
     runs-on: Linux
     needs: tests
     steps:
@@ -112,13 +125,14 @@ jobs:
             mv docker-compose.staging.yml docker-compose.yml &&
             docker compose pull &&
             docker compose up -d &&
+
   deploy-prod:
     name: Deploy to prod
     runs-on: Linux
     needs:
       - build
-      - on-develop-branch-check
-    if: ${{ needs.on-develop-branch-check.outputs.on_develop == 'true' }}
+      - on-prod-branch-check
+    if: ${{ needs.on-prod-branch-check.outputs.on_prod == 'true' }}
     steps:
       - uses: actions/checkout@v3
       - name: copy file via ssh password
@@ -148,8 +162,8 @@ jobs:
     runs-on: Linux
     needs:
       - build
-      - on-develop-branch-check
-    if: ${{ needs.on-develop-branch-check.outputs.on_develop == 'true' }}
+      - on-prod-branch-check
+    if: ${{ needs.on-prod-branch-check.outputs.on_prod == 'true' }}
     steps:
       - uses: actions/checkout@v3
       - name: copy file via ssh password
@@ -179,8 +193,8 @@ jobs:
     runs-on: Linux
     needs:
       - build
-      - on-develop-branch-check
-    if: ${{ needs.on-develop-branch-check.outputs.on_develop == 'true' }}
+      - on-prod-branch-check
+    if: ${{ needs.on-prod-branch-check.outputs.on_prod == 'true' }}
     steps:
       - uses: actions/checkout@v3
       - name: copy file via ssh password

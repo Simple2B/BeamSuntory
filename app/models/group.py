@@ -11,6 +11,7 @@ from app import schema as s
 if TYPE_CHECKING:
     from .master_group import MasterGroup
     from .user_group import UserGroup
+    from .warehouse_product import WarehouseProduct
 
 
 class Group(db.Model, ModelMixin):
@@ -51,6 +52,10 @@ class Group(db.Model, ModelMixin):
     )
     # TODO refactor add users relationship through secondary
     user_obj: orm.Mapped[List["UserGroup"]] = orm.relationship()
+
+    warehouse_product: orm.Mapped[List["WarehouseProduct"]] = orm.relationship(
+        viewonly=True
+    )
 
     def __repr__(self):
         return f"<{self.id}: {self.name}>"

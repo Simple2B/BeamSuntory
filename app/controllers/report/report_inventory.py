@@ -8,7 +8,12 @@ from app import schema as s, models as m
 from app.database import db
 from app.controllers.pagination import create_pagination
 
-from .report_data import ReportData, add_product_groups
+from .report_data import (
+    ReportData,
+    add_product_groups,
+    add_product_exta_fields,
+    order_fields_dataset,
+)
 
 
 class ReportDataInventories(ReportData):
@@ -175,11 +180,12 @@ class ReportDataInventories(ReportData):
         query, _ = cls.get_search_result(report_filter)
 
         dataset = {
-            "Name": [],
             "SKU": [],
+            "Description": [],
+            "Brand": [],
+            "Units of Measure": [],
             "Quantity": [],
             "Group": [],
-            "Brand": [],
             "Warehouse": [],
             "Last transaction data": [],
         }  # type: dict[str, list]
@@ -219,15 +225,18 @@ def add_dataset_row(
         if target_group and warehouse_product.group.name != target_group:
             continue
 
-        dataset["Name"].append(product.name)
+        dataset["Units of Measure"].append(product.name)
         dataset["SKU"].append(product.SKU)
         dataset["Quantity"].append(warehouse_product.product_quantity)
         dataset["Group"].append(warehouse_product.group_name)
         dataset["Warehouse"].append(warehouse_product.warehouse_name)
         dataset["Last transaction data"].append(product.last_transaction_data)
+        dataset["Description"].append(product.description)
 
         if download:
             add_product_groups(dataset, product, master_groups)
+            add_product_exta_fields(dataset, product)
+
         else:
             dataset["Brand"].append(warehouse_product.product.brand)
 
@@ -238,11 +247,12 @@ def create_inventory_dataset(
     product: m.Product, group: str, master_group: str, download: bool = False
 ) -> dict[str, list]:
     dataset = {
-        "Name": [],
+        "Units of Measure": [],
         "SKU": [],
         "Quantity": [],
         "Group": [],
         "Brand": [],
+        "Description": [],
         "Warehouse": [],
         "Last transaction data": [],
     }  # type: dict[str, list]
@@ -255,4 +265,4 @@ def create_inventory_dataset(
         download=download,
     )
 
-    return dataset
+    return order_fields_dataset(dataset)

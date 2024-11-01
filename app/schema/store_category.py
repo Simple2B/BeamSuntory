@@ -1,5 +1,11 @@
+import enum
+
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
+
+
+class DefultStoreCategory(enum.Enum):
+    BULK_SHIP = "Bulk Ship"
 
 
 class StoreCategory(BaseModel):

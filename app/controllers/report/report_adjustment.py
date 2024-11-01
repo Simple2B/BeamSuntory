@@ -8,7 +8,7 @@ from app import schema as s, models as m
 from app.database import db
 from app.controllers.pagination import create_pagination
 
-from .report_data import ReportData
+from .report_data import ReportData, order_fields_dataset
 
 
 class ReportDataAdjustments(ReportData):
@@ -134,9 +134,10 @@ class ReportDataAdjustments(ReportData):
         master_groups = cls.get_product_master_groups()
         # 'created_at,product_name,sku,username,master_group,group,warehouse,quantity_before,quantity_after,quantity_delta,note',
         dataset = {
-            "Created at": [],
-            "Product name": [],
             "SKU": [],
+            "Units of Measure": [],
+            "Created at": [],
+            "Description": [],
             "Username": [],
             "Master group": [],
             "Group": [],
@@ -152,9 +153,10 @@ class ReportDataAdjustments(ReportData):
             for report_adjust in adjust.adjust_group_qty:
 
                 dataset["Created at"].append(adjust.created_at)
-                dataset["Product name"].append(adjust.product.name)
+                dataset["Units of Measure"].append(adjust.product.name)
                 dataset["SKU"].append(adjust.product.SKU)
                 dataset["Username"].append(adjust.user.username)
+                dataset["Description"].append(adjust.product.description)
                 dataset["Master group"].append(report_adjust.group.master_group.name)
                 dataset["Group"].append(report_adjust.group.name)
                 dataset["Warehouse"].append(report_adjust.warehouse.name)
@@ -167,4 +169,4 @@ class ReportDataAdjustments(ReportData):
                 )
                 cls.add_product_groups(dataset, adjust.product, master_groups)
 
-        return dataset
+        return order_fields_dataset(dataset)

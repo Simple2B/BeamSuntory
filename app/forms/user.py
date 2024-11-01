@@ -42,6 +42,8 @@ class UserForm(FlaskForm):
     phone_number = StringField("Phone Number")
     submit = SubmitField("Save")
     sales_rep = BooleanField("Sales Rep")
+    has_access_bulk_ship = BooleanField("Has access bulk shipe")
+    has_access_bulk_assign = BooleanField("Has access bulk assign")
 
     def validate_username(self, field):
         query = (
@@ -90,6 +92,9 @@ class NewUserForm(FlaskForm):
     locker_city = StringField("Locker City")
     locker_zip_code = StringField("Locker Zip Code")
     locker_street_address = StringField("Locker Street Address")
+
+    has_access_bulk_ship = BooleanField("Has access bulk shipe", default=False)
+    has_access_bulk_assign = BooleanField("Has access bulk assign", default=False)
 
     submit = SubmitField("Save")
 

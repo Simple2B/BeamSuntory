@@ -26,7 +26,17 @@ const baseConfig = {
   },
 };
 
-const userConfig = {
+const userConfig = [
+  {
+    entry: {
+      main: './src/user/modal_add.ts',
+    },
+    output: {
+      path: path.resolve(__dirname, './app/static'),
+      filename: 'js/user/modal_add.js', // <--- Will be compiled to this single file
+    },
+  },
+  {
   entry: {
     main: './src/user.ts',
   },
@@ -34,7 +44,7 @@ const userConfig = {
     path: path.resolve(__dirname, './app/static'),
     filename: 'js/user.js', // <--- Will be compiled to this single file
   },
-};
+}];
 
 const groupConfig = {
   entry: {
@@ -305,9 +315,21 @@ const reportConfig = {
   },
 };
 
+const bulkShipConfig = [{
+  entry: {
+    main: './src/bulk_ship/bulk_ship.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/bulk_ship.js', // <--- Will be compiled to this single file
+  },
+}];
+
+
+
 const configs = [
   baseConfig,
-  userConfig,
+  ...userConfig,
   groupConfig,
   masterGroupConfig,
   productConfig,
@@ -335,6 +357,7 @@ const configs = [
   reportConfig,
   report_sub_group,
   subGroupConfig,
+  ...bulkShipConfig,
 ].map((conf) => merge(defaultConfig, conf));
 
 module.exports = configs;
