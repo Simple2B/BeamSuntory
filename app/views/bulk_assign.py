@@ -2,8 +2,6 @@
 
 import io
 import os
-from datetime import datetime
-
 from flask import (
     Blueprint,
     render_template,
@@ -13,11 +11,9 @@ from flask import (
     send_file,
 )
 
+
 from flask_login import login_required, current_user
-import pandas as pd
 from openpyxl import Workbook
-from openpyxl.worksheet.datavalidation import DataValidation
-from openpyxl.utils import get_column_letter
 import sqlalchemy as sa
 
 from app.controllers import (
@@ -31,8 +27,13 @@ from app import models as m, db
 from app import schema as s
 from app import forms as f
 from app.controllers import validate_bulk_assign_excel
+from app.controllers.excel import (
+    create_group_sheet,
+    create_store_sheet,
+    create_master_group_sheet,
+)
 from app.logger import log
-from .utils import RELOAD_PAGE_SCRIPT, create_metch
+from .utils import RELOAD_PAGE_SCRIPT
 
 
 bulk_assign_bp = Blueprint("bulk_assign", __name__, url_prefix="/bulk-assign")
@@ -101,66 +102,15 @@ def get_all():
 )
 def download_template():
 
+    GROUP_NAMES = [u.name for u in current_user.user_groups]
+
     wb = Workbook()
     main_sheet = wb.active
     main_sheet.title = "Main"
 
-    # Create the product sheet
-    group_names = [u.name for u in current_user.user_groups]
-    products = db.session.scalars(
-        sa.select(m.Product).where(
-            m.Product.warehouse_products.any(
-                sa.and_(
-                    m.WarehouseProduct.available_quantity != 0,
-                    m.WarehouseProduct.group.has(m.Group.name.in_(group_names)),
-                )
-            )
-        )
-    )
-
-    product_count = db.session.scalar(
-        sa.select(sa.func.count())
-        .select_from(m.Product)
-        .where(
-            m.Product.warehouse_products.any(
-                sa.and_(
-                    m.WarehouseProduct.available_quantity != 0,
-                    m.WarehouseProduct.group.has(m.Group.name.in_(group_names)),
-                )
-            )
-        )
-    )
-    groups_sheet = wb.create_sheet(title="Groups")
-    master_group_sheet = wb.create_sheet(title="Master Groups")
-
-    master_groups = db.session.scalars(sa.select(m.MasterGroup))
-
-    for col, master_group in enumerate(master_groups, start=1):
-        mg_col_letter = get_column_letter(col)
-        master_group_sheet[f"{mg_col_letter}1"] = master_group.name
-        groups = [
-            group
-            for group in master_group.groups
-            if group.name not in s.Events.name.value
-            and group.name in current_user.user_group_names
-        ]
-        for row, group in enumerate(groups, start=2):
-            master_group_sheet[f"{mg_col_letter}{row}"] = group.name
-
-    for col, product in enumerate(products, start=1):
-        col_letter = get_column_letter(col)
-        groups_sheet[f"{col_letter}1"] = product.SKU
-        wh_products = [
-            wh_prod
-            for wh_prod in product.warehouse_products
-            if wh_prod.available_quantity != 0
-            and wh_prod.group.name != s.Events.name.value
-            and wh_prod.group.name in current_user.user_group_names
-        ]
-        for row, wh_product in enumerate(wh_products, start=2):
-            groups_sheet[f"{col_letter}{row}"] = (
-                f"{wh_product.group.name} ({wh_product.available_quantity})"
-            )
+    create_group_sheet(wb, main_sheet, GROUP_NAMES)
+    create_store_sheet(wb, main_sheet, GROUP_NAMES)
+    create_master_group_sheet(wb, main_sheet, GROUP_NAMES)
 
     # Set up the main form sheet
     main_sheet["A1"] = "SKU"
@@ -168,70 +118,6 @@ def download_template():
     main_sheet["C1"] = "Master group to"
     main_sheet["D1"] = "Product group to"
     main_sheet["E1"] = "Quantity"
-
-    # Add dropdowns for product SKUs
-    last_let = get_column_letter(product_count)
-    country_dv = DataValidation(
-        type="list",
-        formula1=f"{groups_sheet.title}!$A$1:${last_let}$1",
-        allow_blank=True,
-        showDropDown=False,
-    )
-    main_sheet.add_data_validation(country_dv)
-    country_dv.add("A2:A100")
-
-    store_categories = db.session.scalars(
-        sa.select(m.StoreCategory).where(m.StoreCategory.name.not_ilike("%Event%"))
-    )
-    count_store_categories = db.session.scalar(
-        sa.select(sa.func.count()).select_from(m.StoreCategory)
-    )
-
-    # Create the store categories sheet
-    store_categories_sheet = wb.create_sheet(title="Stores")
-    for col, store_category in enumerate(store_categories, start=1):
-        col_letter = get_column_letter(col)
-        store_categories_sheet[f"{col_letter}1"] = store_category.name
-        for row, store in enumerate(store_category.stores, start=2):
-            store_categories_sheet[f"{col_letter}{row}"] = store.store_name
-
-    # # Add dropdowns for store category
-    # store_last_let = get_column_letter(count_store_categories)
-    # store_category_dv = DataValidation(
-    #     type="list",
-    #     formula1=f"{store_categories_sheet.title}!$A$1:${store_last_let}$1",
-    #     allow_blank=True,
-    #     showDropDown=False,
-    # )
-    # main_sheet.add_data_validation(store_category_dv)
-    # store_category_dv.add("D2:D100")
-
-    # Create data validation for cities using named ranges
-    # offset( reference, rows, cols, height, width)
-    # OFFSET(Data!A1,1,MATCH(A2,Data!A1:C1,0) -1,10,1)"
-
-    # Create the named ranges
-    for row in range(2, 100):
-        store_category_dv = DataValidation(
-            type="list",
-            formula1=f"OFFSET({store_categories_sheet.title}!A1,1,{create_metch('D' + str(row), store_categories_sheet.title, count_store_categories)},500,1)",
-            showDropDown=False,
-            allow_blank=True,
-        )
-        main_sheet.add_data_validation(store_category_dv)
-        store_category_dv.add(f"E{row}")
-
-        groups_dv = DataValidation(
-            type="list",
-            formula1=f"OFFSET({groups_sheet.title}!A1,1,{create_metch('A' + str(row),groups_sheet.title, product_count)},50,1)",
-            showDropDown=False,
-            allow_blank=False,
-            showErrorMessage=True,
-        )
-        groups_dv.error = "Please select a valid group"
-        groups_dv.errorTitle = "Invalid group"
-        main_sheet.add_data_validation(groups_dv)
-        groups_dv.add(f"B{row}")
 
     # Save the workbook to a BytesIO object
     output = io.BytesIO()

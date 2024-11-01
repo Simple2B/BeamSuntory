@@ -32,7 +32,7 @@ from app import schema as s
 from app import forms as f
 from app.controllers import validate_bulk_ship_exel
 from app.logger import log
-from .utils import RELOAD_PAGE_SCRIPT, create_metch
+from .utils import RELOAD_PAGE_SCRIPT, create_match
 
 
 bulk_ship_bp = Blueprint("bulk_ship", __name__, url_prefix="/bulk-ship")
@@ -163,7 +163,7 @@ def download_template():
     for row in range(2, 100):
         store_category_dv = DataValidation(
             type="list",
-            formula1=f"OFFSET({store_categories_sheet.title}!A1,1,{create_metch('D' + str(row), store_categories_sheet.title, count_store_categories)},500,1)",
+            formula1=f"OFFSET({store_categories_sheet.title}!A1,1,{create_match('D' + str(row), store_categories_sheet.title, count_store_categories)},500,1)",
             showDropDown=False,
             allow_blank=True,
         )
@@ -172,7 +172,7 @@ def download_template():
 
         groups_dv = DataValidation(
             type="list",
-            formula1=f"OFFSET({groups_sheet.title}!A1,1,{create_metch('A' + str(row),groups_sheet.title, product_count)},50,1)",
+            formula1=f"OFFSET({groups_sheet.title}!A1,1,{create_match('A' + str(row),groups_sheet.title, product_count)},50,1)",
             showDropDown=False,
             allow_blank=False,
             showErrorMessage=True,
