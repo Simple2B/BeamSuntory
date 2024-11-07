@@ -1,5 +1,6 @@
 # flake8: noqa E501
 
+from datetime import datetime
 import io
 import os
 from flask import (
@@ -11,15 +12,14 @@ from flask import (
     send_file,
 )
 
-
 from flask_login import login_required, current_user
 from openpyxl import Workbook
+import pandas as pd
 import sqlalchemy as sa
 
 from app.controllers import (
     create_pagination,
     role_required,
-    create_ship_requests_by_address,
     save_exel_file,
 )
 
@@ -27,6 +27,7 @@ from app import models as m, db
 from app import schema as s
 from app import forms as f
 from app.controllers import validate_bulk_assign_excel
+from app.controllers.bulk_assign import create_assigns
 from app.controllers.excel import (
     create_group_sheet,
     create_store_sheet,
@@ -113,11 +114,11 @@ def download_template():
     create_master_group_sheet(wb, main_sheet, GROUP_NAMES)
 
     # Set up the main form sheet
-    main_sheet["A1"] = "SKU"
-    main_sheet["B1"] = "Group from"
-    main_sheet["C1"] = "Master group to"
-    main_sheet["D1"] = "Product group to"
-    main_sheet["E1"] = "Quantity"
+    main_sheet["A1"] = s.BulkAssignFields.SKU.value
+    main_sheet["B1"] = s.BulkAssignFields.GROUP_FROM.value
+    main_sheet["D1"] = s.BulkAssignFields.PRODUCT_GROUP_TO.value
+    main_sheet["E1"] = s.BulkAssignFields.QUANTITY.value
+    main_sheet["C1"] = s.BulkAssignFields.MASTER_GROUP_TO.value
 
     # Save the workbook to a BytesIO object
     output = io.BytesIO()
@@ -161,7 +162,7 @@ def get_create_modal():
 )
 def create():
     """htmx"""
-    form = f.NewBulkAssignForm()
+    form: f.NewBulkAssignForm = f.NewBulkAssignForm()
     if not form.validate_on_submit():
         log(log.ERROR, "Form validation failed", form.errors)
 
@@ -179,7 +180,7 @@ def create():
             errors={"file": ["File is required"]},
         )
 
-    result = s.ValidateBulkShipResult(errors=dict())
+    result = s.ValidateBulkAssignResult(errors=dict())
     file.seek(0)
 
     # why we forse saving the file and then validate it because after validation file change and save not work properly
@@ -190,7 +191,7 @@ def create():
             "bulk_assign/modal_add.html", form=form, errors=result.errors
         )
 
-    wh_products = validate_bulk_assign_excel(file, result)
+    assigns = validate_bulk_assign_excel(file, result)
 
     if result.errors:
         log(log.ERROR, "Exel validation failed", result.errors)
@@ -200,24 +201,23 @@ def create():
         return render_template(
             "bulk_assign/modal_add.html", form=form, errors=result.errors
         )
-
-    try:
-        create_ship_requests_by_address(wh_products)
-    except Exception as e:
-        log(log.ERROR, "Bulk ship creation failed", str(e))
-        return render_template(
-            "toast.html", message="Bulk ship creation failed", category="error"
-        )
-
-    m.BulkShip(
+    bulk_assign = m.BulkAssign(
         user_id=current_user.id,
-        status=s.BulkShipStatus.DRAFT.value,
+        type=s.BulkShipStatus.DRAFT.value,
         name=form.name.data,
         absolute_file_path=str(absolute_file_path),
         uploaded_file_path=str(upload_file_path),
     ).save()
 
-    flash("Bulk ship created successfully", category="success")
+    try:
+        create_assigns(assigns, bulk_assign)
+    except Exception as e:
+        log(log.ERROR, "Bulk assign creation failed", str(e))
+        return render_template(
+            "toast.html", message="Bulk assign creation failed", category="error"
+        )
+
+    flash("Bulk assign created successfully", category="success")
 
     return render_template_string(RELOAD_PAGE_SCRIPT)
 
@@ -254,47 +254,34 @@ def bulk_assign_template_download(uuid: str):
     )
 
 
-# @bulk_ship_bp.route("/<uuid>/view", methods=["GET"])
-# @login_required
-# @role_required(
-#     [s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value], has_bulk_ship=True
-# )
-# def view(uuid: str):
-#     """htmx"""
-#     bulk_ship = db.session.scalar(sa.select(m.BulkShip).where(m.BulkShip.uuid == uuid))
-#     if not bulk_ship or bulk_ship.is_deleted:
-#         log(log.ERROR, "Bulk ship not found [%s]", uuid)
-#         flash("Bulk ship not found", category="danger")
-#         return render_template_string(RELOAD_PAGE_SCRIPT)
+@bulk_assign_bp.route("/<uuid>/view", methods=["GET"])
+@login_required
+@role_required(
+    [
+        s.UserRole.ADMIN.value,
+        s.UserRole.WAREHOUSE_MANAGER.value,
+        s.UserRole.SALES_REP.value,
+    ],
+    has_bulk_assign=True,
+)
+def view(uuid: str):
+    """htmx"""
+    bulk_assign = db.session.scalar(
+        sa.select(m.BulkAssign).where(m.BulkAssign.uuid == uuid)
+    )
+    if not bulk_assign or bulk_assign.is_deleted:
+        log(log.ERROR, "Bulk assign not found [%s]", uuid)
+        flash("Bulk assign not found", category="danger")
+        return render_template_string(RELOAD_PAGE_SCRIPT)
 
-#     if not os.path.exists(bulk_ship.absolute_file_path):
-#         log(log.ERROR, "File not found [%s]", bulk_ship.absolute_file_path)
-#         flash("File not found", category="danger")
-#         return "", 404
+    if not os.path.exists(bulk_assign.absolute_file_path):
+        log(log.ERROR, "File not found [%s]", bulk_assign.absolute_file_path)
+        flash("File not found", category="danger")
+        return "", 404
 
-#     df = pd.read_excel(bulk_ship.absolute_file_path)
-#     excel_html = df.to_html(
-#         index=False,
-#     )
+    df = pd.read_excel(bulk_assign.absolute_file_path)
+    excel_html = df.to_html(
+        index=False,
+    )
 
-#     return render_template("bulk_ship/modal_view.html", excel_html=excel_html)
-
-
-# @bulk_ship_bp.route("/<uuid>/delete", methods=["DELETE"])
-# @login_required
-# @role_required(
-#     [s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value], has_bulk_ship=True
-# )
-# def delete(uuid: str):
-#     bulk_ship = db.session.scalar(sa.select(m.BulkShip).where(m.BulkShip.uuid == uuid))
-#     if not bulk_ship or bulk_ship.is_deleted:
-#         log(log.ERROR, "Bulk ship not found [%s]", uuid)
-#         flash("Bulk ship not found", category="danger")
-#         return "", 404
-
-#     bulk_ship.is_deleted = True
-#     bulk_ship.name = f"{bulk_ship.name} - Deleted at {datetime.now()}"
-#     db.session.commit()
-
-#     flash("Bulk ship deleted successfully", category="success")
-#     return "", 204
+    return render_template("bulk_assign/modal_view.html", excel_html=excel_html)

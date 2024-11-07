@@ -1,8 +1,5 @@
 # flake8: noqa E501
-from typing import List
 import filetype
-import re
-from pydantic import ValidationError
 import pandas as pd
 from werkzeug.datastructures import FileStorage
 import sqlalchemy as sa
@@ -21,121 +18,76 @@ ALLOW_FORMATS = [
 ]
 
 
-def validate_bulk_ship_exel(
-    file: FileStorage, result: s.ValidateBulkShipResult
-) -> List[s.WhProduct]:
-    kind = filetype.guess(file)
+def remove_quantity_from_group_name(group_name: str) -> str:
+    return " ".join(group_name.split()[:-1])
 
-    if not kind or kind.extension not in ALLOW_FORMATS:
-        result.errors["file"] = ["File must be in xlsx format."]
-        return []
 
-    try:
-        product_sheets = pd.read_excel(file)
-    except Exception:
-        result.errors["file"] = ["File is not valid. Try to upload another one."]
-        return []
-
-    if product_sheets.empty:
-        result.errors["file"] = ["File is empty."]
-        return []
-
-    wh_products: List[s.WhProduct | None] = []
-    start_idx = 2
-    for i, row in product_sheets.iterrows():
-        start_idx += i  # type: ignore
-        wh_product = None
-        try:
-            group = re.sub(pattern, "", row["Group"]).strip()
-            wh_product = s.WhProduct(
-                sku=row["SKU"],
-                group=group,
-                qty=row["Quantity"],
-                store_category=(
-                    "" if pd.isna(row["Store Category"]) else row["Store Category"]
-                ),
-                store_name=row["Store name"],
-            )
-        except ValidationError as e:
-            result.errors[f"Invalid row:{start_idx}"] = [
-                err["msg"] for err in e.errors()
-            ]
-        except KeyError:
-            result.errors[f"Invalid row:{start_idx}"] = ["Invalid columns."]
-
-        wh_products.append(wh_product)
-
-    for idx, prod in enumerate(wh_products, start=2):
-        if not prod:
-            continue
-        store = db.session.scalar(
-            sa.select(m.Store).where(m.Store.store_name == prod.store_name)
-        )
-        if not store:
-            store = m.Store(
-                store_name=prod.store_name,
-                store_category_id=bulk_ship_category.id,
-            )
-            db.session.add(store)
-            db.session.commit()  # we can escape this commit
-            result.new_stores_ids.append(store.id)
-
-        prod.store_id = store.id
-
-        products = db.session.scalars(
+def is_invalid_quantity_assigns(assign: s.AssignInfo, checked_quantity: int) -> bool:
+    available_quantity = (
+        db.session.scalar(
             sa.select(m.WarehouseProduct).where(
-                m.WarehouseProduct.product.has(m.Product.SKU == prod.sku),
+                m.WarehouseProduct.product.has(m.Product.SKU == assign.product_SKU),
                 m.WarehouseProduct.group.has(
-                    sa.func.TRIM(m.Group.name) == prod.group.strip()
+                    sa.func.TRIM(m.Group.name) == assign.group_name_from.strip()
                 ),
             ),
-        ).all()
+        ).available_quantity
+        or 0
+    )
 
-        # we can have same wh product on different warehouses
-        if not products:
-            result.errors[f"Invalid data row:{idx}"] = [
-                f"SKU: {prod.sku} not found in group: {prod.group}"
-            ]
-            continue
-
-        # we can have same product on different warehouses
-        product = products[0]
-
-        total_qty = sum(
-            [
-                p.qty
-                for p in wh_products
-                if p and prod.sku == p.sku and prod.group == p.group
-            ]
-        )
-        if total_qty > product.available_quantity:
-            result.errors[f"Invalid data row:{idx}"] = [
-                f"Not enough quantity for SKU: {prod.sku} in group:  {prod.group}, available: {product.available_quantity}"
-            ]
-            continue
-
-        prod.store_category_id = store.store_category_id
-        prod.group_id = product.group_id
-        prod.product_id = product.product_id
-
-    return [prod for prod in wh_products if prod]
+    return checked_quantity > available_quantity
 
 
 def validate_bulk_assign_excel(file: FileStorage, result: s.ValidateBulkAssignResult):
-    kind = filetype.guess(file)
-
-    if not kind or kind.extension not in ALLOW_FORMATS:
-        result.errors["file"] = ["File must be in xlsx format."]
-        return []
-
     try:
+        kind = filetype.guess(file)
+        if not kind or kind.extension not in ALLOW_FORMATS:
+            result.errors["file"] = ["File must be in xlsx format."]
+            return []
         assigns = pd.read_excel(file)
+        if assigns.empty:
+            result.errors["file"] = ["File is empty."]
+            return []
+        validated_assigns_info = []
+        quantity_assigns_dict = {}
+        for i, row in assigns.iterrows():
+            valid_assign_info = s.AssignInfo(
+                product_SKU=row[s.BulkAssignFields.SKU.value],
+                group_name_from=remove_quantity_from_group_name(
+                    row[s.BulkAssignFields.GROUP_FROM.value]
+                ),
+                master_group_to_name=row[s.BulkAssignFields.MASTER_GROUP_TO.value],
+                product_group_to_name=row[s.BulkAssignFields.PRODUCT_GROUP_TO.value],
+                quantity=row[s.BulkAssignFields.QUANTITY.value],
+            )
+            if valid_assign_info.quantity < 1:
+                result.errors[f"Invalid row:{i}"] = ["Quantity must be positive"]
+                return []
+            #
+            if (
+                valid_assign_info.group_name_from
+                == valid_assign_info.product_group_to_name
+            ):
+                result.errors[f"Invalid row:{i}"] = [
+                    "Group from and group to must be different"
+                ]
+                return []
+            if valid_assign_info.quantity_assigns_key not in quantity_assigns_dict:
+                quantity_assigns_dict[valid_assign_info.quantity_assigns_key] = (
+                    valid_assign_info.quantity
+                )
+            else:
+                quantity_assigns_dict[
+                    valid_assign_info.quantity_assigns_key
+                ] += valid_assign_info.quantity
+            if is_invalid_quantity_assigns(
+                valid_assign_info,
+                quantity_assigns_dict[valid_assign_info.quantity_assigns_key],
+            ):
+                result.errors[f"Invalid row:{i}"] = ["Invalid quantity"]
+                return []
+            validated_assigns_info.append(valid_assign_info)
+        return validated_assigns_info
     except Exception:
         result.errors["file"] = ["File is not valid. Try to upload another one."]
         return []
-
-    if assigns.empty:
-        result.errors["file"] = ["File is empty."]
-        return []
-    # TODO: Implement validation logic
-    pass

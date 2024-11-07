@@ -26,8 +26,7 @@ class BulkAssign(db.Model, ModelMixin):
     uuid: orm.Mapped[str] = orm.mapped_column(sa.String(64), default=generate_uuid)
     # Relationships
     user: orm.Mapped[User] = orm.relationship("User")
-    assigns: orm.Mapped[Assign] = orm.relationship("Assign", backref="bulk_assign")
-
+    assigns: orm.Mapped[list[Assign]] = orm.relationship(cascade="all, delete-orphan")
     # Files
     absolute_file_path: orm.Mapped[str] = orm.mapped_column(sa.String(512))
     uploaded_file_path: orm.Mapped[str] = orm.mapped_column(sa.String(512))
