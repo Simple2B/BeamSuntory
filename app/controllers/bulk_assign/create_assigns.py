@@ -9,7 +9,7 @@ import sqlalchemy as sa
 
 def create_assigns(assigns: list[s.AssignInfo], bulk_assign: m.BulkAssign):
     log(log.INFO, "Creating assigns")
-
+    log(log.INFO, f"Iterating over {len(assigns)} assigns")
     for assign in assigns:
         # Get the warehouse product
         warehouse_product = db.session.scalar(
@@ -20,6 +20,9 @@ def create_assigns(assigns: list[s.AssignInfo], bulk_assign: m.BulkAssign):
                 ),
             ),
         )
+        if not warehouse_product:
+            log(log.ERROR, "Warehouse product not found")
+            continue
 
         # Create the assign
         assign = m.Assign(
@@ -32,6 +35,7 @@ def create_assigns(assigns: list[s.AssignInfo], bulk_assign: m.BulkAssign):
             user_id=current_user.id,
         )
         bulk_assign.assigns.append(assign)
+        log(log.INFO, "Assign created, bulk_assign_id: %s", bulk_assign.id)
         db.session.add(assign)
 
     db.session.commit()

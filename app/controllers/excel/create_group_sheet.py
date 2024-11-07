@@ -5,11 +5,13 @@ import sqlalchemy as sa
 from openpyxl.utils import get_column_letter
 from app import schema as s
 from openpyxl.worksheet.datavalidation import DataValidation
+from app.logger import log
 
 from app.views.utils import create_match
 
 
 def create_group_sheet(wb: Workbook, main_sheet, group_names):
+    log(log.INFO, "Creating group sheet")
     groups_sheet = wb.create_sheet(title="Groups")
 
     products = db.session.scalars(
@@ -23,7 +25,7 @@ def create_group_sheet(wb: Workbook, main_sheet, group_names):
         )
     ).all()
     product_count = len(products)
-
+    log(log.INFO, f"Found {product_count} products")
     for col, product in enumerate(products, start=1):
         col_letter = get_column_letter(col)
         groups_sheet[f"{col_letter}1"] = product.SKU
@@ -49,6 +51,7 @@ def create_group_sheet(wb: Workbook, main_sheet, group_names):
     )
     main_sheet.add_data_validation(country_dv)
     country_dv.add("A2:A100")
+    log(log.INFO, "Added dropdowns for product SKUs")
 
     # Create the named ranges
     for row in range(2, 100):
@@ -64,3 +67,4 @@ def create_group_sheet(wb: Workbook, main_sheet, group_names):
         groups_dv.errorTitle = "Invalid group"
         main_sheet.add_data_validation(groups_dv)
         groups_dv.add(f"B{row}")
+    log(log.INFO, "Added dropdowns for groups")

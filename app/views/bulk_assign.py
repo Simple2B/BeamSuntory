@@ -1,6 +1,5 @@
 # flake8: noqa E501
 
-from datetime import datetime
 import io
 import os
 from flask import (
@@ -33,6 +32,7 @@ from app.controllers.excel import (
     create_store_sheet,
     create_master_group_sheet,
 )
+from app.controllers.user import requires_bulk_assign
 from app.logger import log
 from .utils import RELOAD_PAGE_SCRIPT
 
@@ -48,8 +48,8 @@ bulk_assign_bp = Blueprint("bulk_assign", __name__, url_prefix="/bulk-assign")
         s.UserRole.WAREHOUSE_MANAGER.value,
         s.UserRole.SALES_REP.value,
     ],
-    has_bulk_assign=True,
 )
+@requires_bulk_assign
 def get_all():
 
     q = request.args.get("q", type=str, default="")
@@ -57,9 +57,6 @@ def get_all():
     where_stmt = sa.and_(
         m.BulkAssign.is_deleted.is_(False), m.BulkAssign.user_id == current_user.id
     )
-
-    if current_user.role_obj.role_name == s.UserRole.ADMIN.value:
-        where_stmt = sa.and_(m.BulkAssign.is_deleted.is_(False))
 
     if q:
         where_stmt = sa.and_(
@@ -99,8 +96,8 @@ def get_all():
         s.UserRole.WAREHOUSE_MANAGER.value,
         s.UserRole.SALES_REP.value,
     ],
-    has_bulk_assign=True,
 )
+@requires_bulk_assign
 def download_template():
 
     GROUP_NAMES = [u.name for u in current_user.user_groups]
@@ -142,8 +139,8 @@ def download_template():
         s.UserRole.WAREHOUSE_MANAGER.value,
         s.UserRole.SALES_REP.value,
     ],
-    has_bulk_assign=True,
 )
+@requires_bulk_assign
 def get_create_modal():
     """htmx"""
     form = f.NewBulkAssignForm()
@@ -158,8 +155,8 @@ def get_create_modal():
         s.UserRole.WAREHOUSE_MANAGER.value,
         s.UserRole.SALES_REP.value,
     ],
-    has_bulk_assign=True,
 )
+@requires_bulk_assign
 def create():
     """htmx"""
     form: f.NewBulkAssignForm = f.NewBulkAssignForm()
@@ -230,8 +227,8 @@ def create():
         s.UserRole.WAREHOUSE_MANAGER.value,
         s.UserRole.SALES_REP.value,
     ],
-    has_bulk_assign=True,
 )
+@requires_bulk_assign
 def bulk_assign_template_download(uuid: str):
 
     bulk_assign = db.session.scalar(
@@ -262,8 +259,8 @@ def bulk_assign_template_download(uuid: str):
         s.UserRole.WAREHOUSE_MANAGER.value,
         s.UserRole.SALES_REP.value,
     ],
-    has_bulk_assign=True,
 )
+@requires_bulk_assign
 def view(uuid: str):
     """htmx"""
     bulk_assign = db.session.scalar(

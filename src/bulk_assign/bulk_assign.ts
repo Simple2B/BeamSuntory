@@ -33,32 +33,3 @@ async function downloadBulkAssignTemplate(e: Event) {
   target.innerHTML = btnText;
   target.disabled = false;
 }
-
-async function deleteBulkAssign(e: Event) {
-  const target = e.target as HTMLButtonElement;
-  const bulkAssignUuid = target.getAttribute('bulk-assign-uuid');
-  if (!bulkAssignUuid) {
-    return;
-  }
-  if (!confirm('Are you sure you want to delete this bulk assign?')) {
-    return;
-  }
-  const url = `/bulk-assign/${bulkAssignUuid}/delete`;
-  const response = await fetch(url, {
-    method: 'DELETE',
-  });
-  if ([204, 404].includes(response.status)) {
-    location.reload();
-  }
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-  const downloadButtons = document.querySelectorAll('.download-bulk-assign-template');
-  downloadButtons.forEach((button) => {
-    button.addEventListener('click', downloadBulkAssignTemplate);
-  });
-  const deleteButtons = document.querySelectorAll('.delete-bulk-assign-btn');
-  deleteButtons.forEach((button) => {
-    button.addEventListener('click', deleteBulkAssign);
-  });
-});

@@ -5,23 +5,16 @@ import sqlalchemy as sa
 from openpyxl.utils import get_column_letter
 from app import schema as s
 from openpyxl.worksheet.datavalidation import DataValidation
+from app.logger import log
 
 from app.views.utils import create_match
 
 
 def create_master_group_sheet(wb: Workbook, main_sheet, group_names):
+    log(log.INFO, "Creating master group sheet")
     master_group_sheet = wb.create_sheet(title="Master_Groups")
 
     master_groups = db.session.scalars(sa.select(m.MasterGroup)).all()
-
-    # groups_count = len(
-    #     [
-    #         group
-    #         for group in master_group.groups
-    #         if group.name not in s.Events.name.value
-    #         and group.name in current_user.user_group_names
-    #     ]
-    # )
 
     for col, master_group in enumerate(master_groups, start=1):
         mg_col_letter = get_column_letter(col)
@@ -45,7 +38,7 @@ def create_master_group_sheet(wb: Workbook, main_sheet, group_names):
     )
     main_sheet.add_data_validation(master_group_dv)
     master_group_dv.add("C2:C100")
-
+    log(log.DEBUG, "Master group dropdowns added")
     # create a named range for the master groups
     for row in range(2, 100):
         group_row_match = create_match(
@@ -74,3 +67,5 @@ def create_master_group_sheet(wb: Workbook, main_sheet, group_names):
         )
         main_sheet.add_data_validation(quantity_dv)
         quantity_dv.add(f"E{row}")
+
+    log(log.INFO, "Master group sheet created")
