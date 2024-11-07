@@ -52,3 +52,7 @@ class MasterGroup(db.Model, ModelMixin):
                 )
         mg_dict["master_groups_list_groups"] = master_groups_list_groups
         return json.dumps(mg_dict)
+
+    @property
+    def group_names(self):
+        return [group.name for group in self.groups]

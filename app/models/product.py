@@ -196,3 +196,7 @@ class Product(db.Model, ModelMixin):
     def json_product_master_groups(self):
         groups = self.master_groups
         return json.dumps(s.AdapterProductViewColumns.dump_python(groups))
+
+    @property
+    def group_names(self):
+        return [group.name for group in self.groups]
