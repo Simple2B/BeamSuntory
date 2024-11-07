@@ -33,3 +33,10 @@ async function downloadBulkAssignTemplate(e: Event) {
   target.innerHTML = btnText;
   target.disabled = false;
 }
+
+window.addEventListener('DOMContentLoaded', () => {
+  const downloadButtons = document.querySelectorAll('.download-bulk-assign-template');
+  downloadButtons.forEach((button) => {
+    button.addEventListener('click', downloadBulkAssignTemplate);
+  });
+});
