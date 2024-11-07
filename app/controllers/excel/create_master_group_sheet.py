@@ -48,9 +48,12 @@ def create_master_group_sheet(wb: Workbook, main_sheet, group_names):
 
     # create a named range for the master groups
     for row in range(2, 100):
+        group_row_match = create_match(
+            "C" + str(row), master_group_sheet.title, len(master_groups)
+        )
         groups_dv = DataValidation(
             type="list",
-            formula1=f"OFFSET({master_group_sheet.title}!A1,1,{create_match('C' + str(row),master_group_sheet.title, len(master_groups))},100,1)",
+            formula1=f"OFFSET({master_group_sheet.title}!A1,1,{group_row_match},100,1)",
             showDropDown=False,
             allow_blank=False,
             showErrorMessage=True,
@@ -62,7 +65,7 @@ def create_master_group_sheet(wb: Workbook, main_sheet, group_names):
 
         quantity_dv = DataValidation(
             type="custom",
-            formula1=f'AND(ISNUMBER(E{row}), E{row} <= MID(B{row}, FIND("(", B{row}) + 1, FIND(")", B{row}) - FIND("(", B{row}) - 1) * 1)',
+            formula1=f'AND(ISNUMBER(E{row}), E{row} <= MID(B{row}, FIND("(", B{row}) + 1, FIND(")", B{row}) - FIND("(", B{row}) - 1) * 1)',  # noqa: E501
             showDropDown=False,
             allow_blank=False,
             showErrorMessage=True,

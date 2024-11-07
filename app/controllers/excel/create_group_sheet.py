@@ -23,18 +23,6 @@ def create_group_sheet(wb: Workbook, main_sheet, group_names):
         )
     ).all()
     product_count = len(products)
-    # product_count = db.session.scalar(
-    #     sa.select(sa.func.count())
-    #     .select_from(m.Product)
-    #     .where(
-    #         m.Product.warehouse_products.any(
-    #             sa.and_(
-    #                 m.WarehouseProduct.available_quantity != 0,
-    #                 m.WarehouseProduct.group.has(m.Group.name.in_(group_names)),
-    #             )
-    #         )
-    #     )
-    # )
 
     for col, product in enumerate(products, start=1):
         col_letter = get_column_letter(col)
@@ -64,9 +52,10 @@ def create_group_sheet(wb: Workbook, main_sheet, group_names):
 
     # Create the named ranges
     for row in range(2, 100):
+        row_match = create_match("A" + str(row), groups_sheet.title, product_count)
         groups_dv = DataValidation(
             type="list",
-            formula1=f"OFFSET({groups_sheet.title}!A1,1,{create_match('A' + str(row),groups_sheet.title, product_count)},50,1)",
+            formula1=f"OFFSET({groups_sheet.title}!A1,1,{row_match},50,1)",
             showDropDown=False,
             allow_blank=False,
             showErrorMessage=True,
