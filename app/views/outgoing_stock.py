@@ -478,10 +478,23 @@ def print(query: s.OutgoingStockQueryParamsDownload):
         )
 
     ship_requests = db.session.scalars(sql_query).all()
-
+    # total value shod be rounded
+    total_value = sum(
+        [
+            sum(
+                [
+                    cart.product.retail_price * cart.quantity
+                    for cart in ship_request.carts
+                ]
+            )
+            for ship_request in ship_requests
+        ]
+    )
+    total_value = round(total_value, 2)
     return render_template(
         "outgoing_stock/pdf_template.html",
         ship_requests=ship_requests,
+        total_value=total_value,
     )
 
 
