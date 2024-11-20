@@ -292,7 +292,7 @@ def save():
         if cart.quantity > warehouse_product.product_quantity:
             log(log.ERROR, "Not enough product in warehouse")
             flash(
-                f"Not enough product in \nWarehouse:[{warehouse_product.warehouse_name}] qty:[{warehouse_product.product_quantity}]\nProduct:[{cart.product.name}]: qty:[{cart.quantity}]",
+                f"Not enough product in \nWarehouse:[{warehouse_product.warehouse_name}] qty:[{warehouse_product.product_quantity}]\nProduct:[{cart.product.SKU}]: qty:[{cart.quantity}]",
                 "danger",
             )
             return redirect(url_for("outgoing_stock.get_all"))
