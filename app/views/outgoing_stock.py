@@ -31,7 +31,7 @@ outgoing_stock_blueprint = Blueprint(
 
 
 notes_location_adapter = TypeAdapter(list[s.CartNoteLocation])
-cart_prodcuts_data_adapter = TypeAdapter(list[s.CartProductData])
+cart_products_data_adapter = TypeAdapter(list[s.CartProductData])
 
 
 @outgoing_stock_blueprint.route("/", methods=["GET"])
@@ -216,7 +216,7 @@ def save():
         return redirect(url_for("outgoing_stock.get_all"))
 
     try:
-        products = cart_prodcuts_data_adapter.validate_json(
+        products = cart_products_data_adapter.validate_json(
             form.cart_products_data.data
         )
     except ValidationError as e:
@@ -237,10 +237,10 @@ def save():
     )
     report_inventory_list.save(False)
 
-    for prodcut_data in products:
-        cart_id = prodcut_data.cart_id
-        warehouse_id = prodcut_data.warehouse_id
-        note_location = prodcut_data.note_location
+    for product_data in products:
+        cart_id = product_data.cart_id
+        warehouse_id = product_data.warehouse_id
+        note_location = product_data.note_location
 
         warehouse = db.session.get(
             m.Warehouse,
@@ -292,7 +292,7 @@ def save():
         if cart.quantity > warehouse_product.product_quantity:
             log(log.ERROR, "Not enough product in warehouse")
             flash(
-                f"Not enough product in \nWarehouse:[{warehouse_product.warehouse_name}] qty:[{warehouse_product.product_quantity}]\nProduct:[{cart.product.name}]: qty:[{cart.quantity}]",
+                f"Not enough product in \nWarehouse:[{warehouse_product.warehouse_name}] qty:[{warehouse_product.product_quantity}]\nProduct:[{cart.product.SKU}]: qty:[{cart.quantity}]",
                 "danger",
             )
             return redirect(url_for("outgoing_stock.get_all"))
