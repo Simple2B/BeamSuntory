@@ -31,6 +31,7 @@ services:
       - 'traefik.http.routers.beamsuntory_app.tls.certresolver=myresolver'
   backup:
     image: simple2b/pg-backup:1.0
+    restart: always
     links:
       - db
     volumes:

@@ -15,4 +15,5 @@ from .bulk_ship import (
     create_ship_requests_by_address,
     save_exel_file,
 )
+from .bulk_assign import validate_bulk_assign_excel
 from .mail import CustomMail

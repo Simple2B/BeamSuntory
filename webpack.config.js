@@ -37,14 +37,15 @@ const userConfig = [
     },
   },
   {
-  entry: {
-    main: './src/user.ts',
+    entry: {
+      main: './src/user.ts',
+    },
+    output: {
+      path: path.resolve(__dirname, './app/static'),
+      filename: 'js/user.js', // <--- Will be compiled to this single file
+    },
   },
-  output: {
-    path: path.resolve(__dirname, './app/static'),
-    filename: 'js/user.js', // <--- Will be compiled to this single file
-  },
-}];
+];
 
 const groupConfig = {
   entry: {
@@ -235,7 +236,6 @@ const divisionConfig = {
   },
 };
 
-
 const requestShareConfig = {
   entry: {
     main: './src/request_share.ts',
@@ -292,8 +292,6 @@ const eventConfig = {
   },
 };
 
-
-
 const report_sub_group = {
   entry: {
     main: './src/report_sub_group.ts',
@@ -303,7 +301,6 @@ const report_sub_group = {
     filename: 'js/report_sub_group.js', // <--- Will be compiled to this single file
   },
 };
-
 
 const reportConfig = {
   entry: {
@@ -315,17 +312,28 @@ const reportConfig = {
   },
 };
 
-const bulkShipConfig = [{
-  entry: {
-    main: './src/bulk_ship/bulk_ship.ts',
+const bulkShipConfig = [
+  {
+    entry: {
+      main: './src/bulk_ship/bulk_ship.ts',
+    },
+    output: {
+      path: path.resolve(__dirname, './app/static'),
+      filename: 'js/bulk_ship.js', // <--- Will be compiled to this single file
+    },
   },
-  output: {
-    path: path.resolve(__dirname, './app/static'),
-    filename: 'js/bulk_ship.js', // <--- Will be compiled to this single file
+];
+const bulkAssignConfig = [
+  {
+    entry: {
+      main: './src/bulk_assign/bulk_assign.ts',
+    },
+    output: {
+      path: path.resolve(__dirname, './app/static'),
+      filename: 'js/bulk_assign.js', // <--- Will be compiled to this single file
+    },
   },
-}];
-
-
+];
 
 const configs = [
   baseConfig,
@@ -358,6 +366,7 @@ const configs = [
   report_sub_group,
   subGroupConfig,
   ...bulkShipConfig,
+  ...bulkAssignConfig,
 ].map((conf) => merge(defaultConfig, conf));
 
 module.exports = configs;

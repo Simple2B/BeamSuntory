@@ -46,7 +46,7 @@ from .package_info import (
     IncomingStocksLists,
 )
 from .division import Division
-from .assign import Assign
+from .assign import Assign, AssignInfo
 from .request_share import RequestShare
 from .store_category import StoreCategory, DefultStoreCategory
 from .adjust import Adjust, AdjustResponse, AdjustList
@@ -121,3 +121,4 @@ from .bulk_ship import (
     WhProduct,
     ValidateBulkShipResult,
 )
+from .bulk_assign import BulkAssign, ValidateBulkAssignResult, BulkAssignFields

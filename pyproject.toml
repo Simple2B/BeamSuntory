@@ -1,9 +1,12 @@
 [tool.poetry]
 name = "beam-suntory"
 
-version = "2.3.1"
+version = "2.4.8"
 description = ""
-authors = ["petro <xavrais312@gmail.com>", "andrii <andrey.berezyanskiy@gmail.com>"]
+authors = [
+    "petro <xavrais312@gmail.com>",
+    "andrii <andrey.berezyanskiy@gmail.com>",
+]
 
 [tool.poetry.dependencies]
 python = "^3.11"

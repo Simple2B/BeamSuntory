@@ -41,7 +41,7 @@ def test_view_incoming_stock(mg_g_populate: FlaskClient):
 
     res = mg_g_populate.get(f"/incoming_stock/{1000}/view")
     assert res.status_code == 200
-    assert "Can&#39;t find inbound order" in res.data.decode("utf-8")
+    assert "'t find inbound order" in res.data.decode("utf-8")
 
 
 def test_view_accept_goods_incoming_stock(mg_g_populate: FlaskClient):
@@ -58,7 +58,7 @@ def test_view_accept_goods_incoming_stock(mg_g_populate: FlaskClient):
 
     res = mg_g_populate.get(f"/incoming_stock/{1000}/view-accept-goods")
     assert res.status_code == 200
-    assert "Can&#39;t find inbound order" in res.data.decode("utf-8")
+    assert "'t find inbound order" in res.data.decode("utf-8")
 
 
 def test_cancel_incoming_stock(mg_g_populate: FlaskClient):

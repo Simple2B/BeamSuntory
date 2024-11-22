@@ -161,6 +161,7 @@ class ReportDataShipping(ReportData):
             "Created At": [],
             "Date delivered": [],
             "Date picked up": [],
+            "Quantity": [],
         }  # type: dict[str, list]
 
         for report in db.session.scalars(query):
@@ -175,6 +176,7 @@ def add_dataset_row(dataset: dict[str, list], report: m.ShipRequest):
     dataset["Date delivered"].append(report.date_delivered)
     dataset["Date picked up"].append(report.date_picked_up)
     dataset["Created At"].append(report.created_at.strftime("%m/%d/%Y %H:%M:%S"))
+    dataset["Quantity"].append(sum(cart.quantity for cart in report.carts))
 
     return dataset
 

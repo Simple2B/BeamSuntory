@@ -31,7 +31,7 @@ outgoing_stock_blueprint = Blueprint(
 
 
 notes_location_adapter = TypeAdapter(list[s.CartNoteLocation])
-cart_prodcuts_data_adapter = TypeAdapter(list[s.CartProductData])
+cart_products_data_adapter = TypeAdapter(list[s.CartProductData])
 
 
 @outgoing_stock_blueprint.route("/", methods=["GET"])
@@ -216,7 +216,7 @@ def save():
         return redirect(url_for("outgoing_stock.get_all"))
 
     try:
-        products = cart_prodcuts_data_adapter.validate_json(
+        products = cart_products_data_adapter.validate_json(
             form.cart_products_data.data
         )
     except ValidationError as e:
@@ -237,10 +237,10 @@ def save():
     )
     report_inventory_list.save(False)
 
-    for prodcut_data in products:
-        cart_id = prodcut_data.cart_id
-        warehouse_id = prodcut_data.warehouse_id
-        note_location = prodcut_data.note_location
+    for product_data in products:
+        cart_id = product_data.cart_id
+        warehouse_id = product_data.warehouse_id
+        note_location = product_data.note_location
 
         warehouse = db.session.get(
             m.Warehouse,
@@ -273,15 +273,28 @@ def save():
         )
         db.session.add(report_shipping)
 
-        warehouse_product = db.session.scalar(
+        warehouse_products = db.session.scalars(
             sa.select(m.WarehouseProduct).where(
                 m.WarehouseProduct.product_id == cart.product_id,
                 m.WarehouseProduct.warehouse_id == cart.warehouse_id,
                 m.WarehouseProduct.group_id == cart.group_id,
             )
-        )
+        ).all()
 
-        if not warehouse_product:
+        needed_wh_product = None
+        for wh_product in warehouse_products:
+            if wh_product.product_quantity >= cart.quantity:
+                needed_wh_product = wh_product
+                break
+        else:
+            log(log.ERROR, "Not enough product in warehouse")
+            flash(
+                f"Not enough product in warehouse [{warehouse.name}] for product [{cart.product.SKU}]",
+                "danger",
+            )
+            return redirect(url_for("outgoing_stock.get_all"))
+
+        if not needed_wh_product:
             log(log.ERROR, "Warehouse product not found")
             flash(
                 f"Product [{cart.product.name}] with group [{cart.group.name}] not found in warehouse  [{warehouse.name}]",
@@ -289,10 +302,10 @@ def save():
             )
             return redirect(url_for("outgoing_stock.get_all"))
 
-        if cart.quantity > warehouse_product.product_quantity:
+        if cart.quantity > needed_wh_product.product_quantity:
             log(log.ERROR, "Not enough product in warehouse")
             flash(
-                f"Not enough product in \nWarehouse:[{warehouse_product.warehouse_name}] qty:[{warehouse_product.product_quantity}]\nProduct:[{cart.product.SKU}]: qty:[{cart.quantity}]",
+                f"Not enough product in <br>Warehouse:[{needed_wh_product.warehouse_name} {needed_wh_product.group_name}] qty:[{needed_wh_product.product_quantity}]<br>Product:[{cart.product.SKU}]: qty:[{cart.quantity}]",
                 "danger",
             )
             return redirect(url_for("outgoing_stock.get_all"))
@@ -319,22 +332,22 @@ def save():
                     product.save(False)
 
             report_inventory = m.ReportInventory(
-                qty_before=warehouse_product.product_quantity,
-                qty_after=warehouse_product.product_quantity - cart.quantity,
+                qty_before=needed_wh_product.product_quantity,
+                qty_after=needed_wh_product.product_quantity - cart.quantity,
                 report_inventory_list_id=report_inventory_list.id,
-                product_id=warehouse_product.product_id,
-                warehouse_product=warehouse_product,
+                product_id=needed_wh_product.product_id,
+                warehouse_product=needed_wh_product,
             )
             report_inventory.save(False)
 
             m.ReportSKU(
-                product_id=warehouse_product.product_id,
+                product_id=needed_wh_product.product_id,
                 ship_request=ship_request,
                 type=s.ReportSKUType.ship_request.value,
                 status="Ship request assigned to pickup.",
             ).save(False)
 
-        warehouse_product.product_quantity -= cart.quantity
+        needed_wh_product.product_quantity -= cart.quantity
         cart.status = s.CartStatus.COMPLETED.value
         cart.product.notes_location = note_location
 
@@ -478,10 +491,23 @@ def print(query: s.OutgoingStockQueryParamsDownload):
         )
 
     ship_requests = db.session.scalars(sql_query).all()
-
+    # total value shod be rounded
+    total_value = sum(
+        [
+            sum(
+                [
+                    cart.product.retail_price * cart.quantity
+                    for cart in ship_request.carts
+                ]
+            )
+            for ship_request in ship_requests
+        ]
+    )
+    total_value = round(total_value, 2)
     return render_template(
         "outgoing_stock/pdf_template.html",
         ship_requests=ship_requests,
+        total_value=total_value,
     )
 
 
