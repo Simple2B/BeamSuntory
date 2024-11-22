@@ -50,7 +50,8 @@
   <!-- prettier-ignore -->
   {% endif %}
   <div class="ml-3 text-sm font-normal">
-    {{message|safe}}
+    <<<<<<< HEAD {{message|safe}}
+    ======= {{message}} >>>>>>> prod
   </div>
   <!-- prettier-ignore -->
   <button type="button" hx-triger="click" hx-swap="delete" hx-target="#custom-toast-{{category}}"
