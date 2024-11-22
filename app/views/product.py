@@ -311,12 +311,12 @@ def product_view(id: int):
 
         if warehouse_product.warehouse.name not in warehouses:
             warehouses[warehouse_product.warehouse.name] = (
-                warehouse_product.product_quantity
+                warehouse_product.available_quantity
             )
         else:
             warehouses[
                 warehouse_product.warehouse.name
-            ] += warehouse_product.product_quantity
+            ] += warehouse_product.available_quantity
 
     return render_template(
         "product/modal_view.html",
