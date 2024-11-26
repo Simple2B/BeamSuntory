@@ -77,6 +77,16 @@ const masterGroupConfig = {
   },
 };
 
+const masterBillableGroupConfig = {
+  entry: {
+    main: './src/master_billable_group.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/master_billable_group.js', // <--- Will be compiled to this single file
+  },
+};
+
 const productConfig = {
   entry: {
     main: './src/product.ts',
@@ -364,6 +374,7 @@ const configs = [
   eventConfig,
   reportConfig,
   report_sub_group,
+  masterBillableGroupConfig,
   subGroupConfig,
   ...bulkShipConfig,
   ...bulkAssignConfig,

@@ -54,3 +54,4 @@ from .incoming_stock_notificaton import (
 )
 from .bulk_ship import NewBulkShipForm, EditBulkShipForm
 from .bulk_assign import NewBulkAssignForm, EditBulkAssignForm
+from .billable_group import NewMasterBillableGroupForm, MasterBillableGroupForm

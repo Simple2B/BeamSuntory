@@ -122,3 +122,5 @@ from .bulk_ship import (
     ValidateBulkShipResult,
 )
 from .bulk_assign import BulkAssign, ValidateBulkAssignResult, BulkAssignFields
+from .master_billable_group import MasterBillableGroup
+from .billable_group import BillableGroup
