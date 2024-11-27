@@ -1,5 +1,4 @@
 from flask_wtf import FlaskForm
-from pydantic import BaseModel, ConfigDict, RootModel
 from wtforms import (
     StringField,
     SubmitField,
