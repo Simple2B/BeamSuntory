@@ -59,4 +59,5 @@ from .billable_group import (
     MasterBillableGroupForm,
     NewBillableGroupForm,
     BillableGroupForm,
+    NewBillableGroupsForm,
 )

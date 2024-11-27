@@ -80,19 +80,7 @@ class NewMasterBillableGroupForm(FlaskForm):
         replace_underscore(self, field)
 
 
-class GroupAllocated(BaseModel):
-    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+class NewBillableGroupsForm(FlaskForm):
+    master_billable_group_id = StringField("Master Billable Group", [DataRequired()])
 
-    name: str
-    rate: float
-    assigned_to_inbound: bool
-    assigned_to_outbound: bool
-
-    def validate_name(self, field):
-        query = m.BillableGroup.select().where(m.BillableGroup.name == field.data)
-        if db.session.scalar(query) is not None:
-            raise ValidationError("This billable_group name is taken.")
-        replace_underscore(self, field)
-
-
-GroupAllocatedList = RootModel[list[GroupAllocated]]
+    groups = StringField("Groups", [DataRequired()])

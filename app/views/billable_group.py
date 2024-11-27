@@ -7,9 +7,9 @@ from flask import (
     url_for,
 )
 from flask_login import login_required
+from pydantic import ValidationError
 import sqlalchemy as sa
 from sqlalchemy.orm import aliased
-from sqlalchemy.exc import IntegrityError
 from app.controllers import create_pagination, role_required
 
 from app import models as m, db
@@ -157,7 +157,7 @@ def delete(id: int):
 @login_required
 @role_required([s.UserRole.WAREHOUSE_MANAGER.value])
 def create_many():
-    form: f.NewBillableGroupForm = f.NewBillableGroupsForm()
+    form: f.NewBillableGroupsForm = f.NewBillableGroupsForm()
     if not form.validate_on_submit():
         log(log.ERROR, "Billable group creation errors: [%s]", form.errors)
         flash(f"{form.errors}", "danger")
@@ -167,14 +167,26 @@ def create_many():
             m.MasterBillableGroup.id == form.master_billable_group_id.data
         )
     )
-    billable_group = m.BillableGroup(
-        name=form.name.data,
-        master_billable_group=master_group,
-        rate=form.rate.data,
-        assigned_to_inbound=form.assigned_to_inbound.data,
-        assigned_to_outbound=form.assigned_to_outbound.data,
-    )
-    log(log.INFO, "Form submitted. master_group: [%s]", master_group)
-    billable_group.save()
-    flash("Billable group added!", "success")
+    try:
+        groups_data = s.GroupAllocatedList.model_validate_json(form.groups.data)
+    except ValidationError:
+        log(
+            log.INFO,
+            "Billable multiple creating validation failed: [%s]",
+            form.groups.data,
+        )
+        flash("Billable multiple creating validation: wrong group data", "danger")
+        return redirect(url_for("billable_group.get_all"))
+
+    for group_data in groups_data.root:
+        billable_group = m.BillableGroup(
+            name=group_data.name,
+            master_billable_group=master_group,
+            rate=group_data.rate,
+            assigned_to_inbound=group_data.assigned_to_inbound,
+            assigned_to_outbound=group_data.assigned_to_outbound,
+        )
+        log(log.INFO, "Billable group created. master_group: [%s]", master_group)
+        billable_group.save()
+    flash("Billable groups added!", "success")
     return redirect(url_for("billable_group.get_all"))
