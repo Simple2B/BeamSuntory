@@ -30,8 +30,9 @@ class BillableGroup(db.Model, ModelMixin):
     )
     rate: orm.Mapped[float] = orm.mapped_column(sa.Float)
 
-    assigned_to: orm.Mapped[str | None] = orm.mapped_column(
-        sa.String(32),
+    assigned_to_inbound: orm.Mapped[bool] = orm.mapped_column(sa.Boolean, default=False)
+    assigned_to_outbound: orm.Mapped[bool] = orm.mapped_column(
+        sa.Boolean, default=False
     )
 
     master_billable_group_id: orm.Mapped[int] = orm.mapped_column(

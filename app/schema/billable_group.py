@@ -7,4 +7,6 @@ class BillableGroup(BaseModel):
     id: int
     name: str
     rate: float
-    assigned_to: str | None = None
+    master_billable_group_id: int
+    assigned_to_inbound: bool
+    assigned_to_outbound: bool
