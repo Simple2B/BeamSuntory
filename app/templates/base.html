@@ -1,80 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>{{ config.APP_NAME }}</title>
+    <!-- meta -->
+    <meta
+      name="description"
+      content="Beam Suntory"
+    />
+    <meta
+      name="author"
+      content="Beam Suntory"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1"
+    />
 
-<head>
-  <meta charset="utf-8" />
-  <title>{{ config.APP_NAME }}</title>
-  <!-- meta -->
-  <meta name="description" content="Beam Suntory" />
-  <meta name="author" content="Beam Suntory" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-
-
-  {% block meta %}{% endblock %}
-  <!-- styles -->
-  <!-- prettier-ignore -->
-  <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" />
-
-  <!-- prettier-ignore -->
-  <script>
-    // On page load or when changing themes, best to add inline in `head` to avoid FOUC
-    if (
-      localStorage.getItem("color-theme") === "dark" ||
-      (!("color-theme" in localStorage) &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches)
-    ) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  </script>
-  <!-- prettier-ignore -->
-  {% block links %}
+    {% block meta %}{% endblock %}
+    <!-- styles -->
+    <!-- prettier-ignore -->
+    <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" />
+    <!-- prettier-ignore -->
+    {% block links %}
   {% endblock %}
-</head>
+  </head>
 
-<body class="bg-white dark:bg-gray-800">
-  <!-- Header -->
-  <!-- prettier-ignore -->
-  {% include 'header.html' %}
-  <!-- Flash Messages -->
-  <!-- prettier-ignore -->
-  {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-  {% for category, message in messages %}
-  <!-- Flash message markup -->
-  <!-- prettier-ignore -->
-  <!-- prettier-ignore -->
-  {% include 'toast.html' %}
+  <body
+    class="bg-white dark:bg-gray-800"
+  >
+    <!-- Header -->
+    <!-- prettier-ignore -->
+    {% include 'header.html' %}
+    <!-- Flash Messages -->
+    <!-- prettier-ignore -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+    <!-- Flash message markup -->
+    <!-- prettier-ignore -->
+    <!-- prettier-ignore -->
+    {% include 'toast.html' %}
 
-
-  <!-- prettier-ignore -->
-  {% endfor %}
-  {% endif %}
+    <!-- prettier-ignore -->
+    {% endfor %}
+    {% endif %}
   {% endwith %}
 
   {% block body %}
 
-  <!-- SideBar -->
-  <!-- prettier-ignore -->
-  {% include 'sidebar.html' %}
+    <!-- SideBar -->
+    <!-- prettier-ignore -->
+    {% include 'sidebar.html' %}
   {% include 'product/image.html' %}
   {% include 'icon/spinner_modal.html' %}
 
-  <div class="sm:ml-64 mt-14 h-full">
-    <!-- Main Content -->
-    {% block content %}{% endblock %}
-  </div>
-  {% endblock %}
-  <!-- scripts -->
+    <div class="sm:ml-64 mt-14 h-full">
+      <!-- Main Content -->
+      {% block content %}{% endblock %}
+    </div>
+    {% endblock %}
+    <!-- scripts -->
 
-  <!-- prettier-ignore -->
+    <!-- prettier-ignore -->
 
-  <script src="{{ url_for('static', filename='js/lib/htmx.js') }}" type="text/javascript"></script>
-  <script src="{{ url_for('static', filename='js/base.js') }}" type="text/javascript" defer></script>
-  {% block scripts %} {% endblock %}
-  {% include 'spinner.html' %}
-  <div id="product-modal-element"></div>
-</body>
-
+    <script src="{{ url_for('static', filename='js/lib/htmx.js') }}" type="text/javascript"></script>
+    <script
+      src="{{ url_for('static', filename='js/base.js') }}"
+      type="text/javascript"
+      defer
+    ></script>
+    {% block scripts %} {% endblock %}
+    {% include 'spinner.html' %}
+    <div
+      id="product-modal-element"
+    ></div>
+  </body>
 </html>

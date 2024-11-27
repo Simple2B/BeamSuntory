@@ -355,6 +355,8 @@ const bulkAssignConfig = [
 ];
 
 const configs = [
+  masterBillableGroupConfig,
+  billableGroupConfig,
   baseConfig,
   ...userConfig,
   groupConfig,
@@ -383,8 +385,6 @@ const configs = [
   eventConfig,
   reportConfig,
   report_sub_group,
-  masterBillableGroupConfig,
-  billableGroupConfig,
   subGroupConfig,
   ...bulkShipConfig,
   ...bulkAssignConfig,

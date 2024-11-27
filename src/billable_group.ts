@@ -1,13 +1,6 @@
 import { Modal } from 'flowbite';
 import type { ModalOptions, ModalInterface } from 'flowbite';
 
-// /*
-//  * $editGroupProductModal: required
-//  * options: optional
-//  */
-
-// // For your js code
-
 interface IBillableGroup {
   id: number;
   name: string;
@@ -159,20 +152,11 @@ const createMultipleBillableGroupsHandler = () => {
         '.group-allocated-assign-to-outbound'
       ) as HTMLInputElement;
 
-      console.log(groupAllocatedAssignToInboundCheckbox, groupAllocatedAssignToOutboundCheckbox);
-
       // Retrieve values from Nodes
       const groupAllocatedName = groupAllocatedNameInput.value;
       const groupAllocatedRate = parseFloat(groupAllocatedRateInput.value);
       const groupAllocatedAssignToInbound = groupAllocatedAssignToInboundCheckbox.checked;
       const groupAllocatedAssignToOutbound = groupAllocatedAssignToOutboundCheckbox.checked;
-
-      console.log(
-        groupAllocatedName,
-        groupAllocatedRate,
-        groupAllocatedAssignToInbound,
-        groupAllocatedAssignToOutbound
-      );
 
       allocatedGroupsData.push({
         name: groupAllocatedName,
