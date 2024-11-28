@@ -4,6 +4,7 @@ import { initAddInboundOrderModal } from './add';
 import { initEditOrderModal } from './edit';
 import { easepick } from '@easepick/bundle';
 import Datepicker from 'flowbite-datepicker/Datepicker';
+import { addDeleteEvent } from '../utils';
 
 //global variables for datepicker
 const currentDate = new Date();
@@ -35,17 +36,7 @@ if (searchInputButton && searchInput) {
 const deleteButtons = document.querySelectorAll('.delete-inbound-order-btn');
 
 deleteButtons.forEach((e) => {
-  e.addEventListener('click', async () => {
-    if (confirm('Are sure?')) {
-      let id = e.getAttribute('data-inbound-order-id');
-      const response = await fetch(`/inbound_order/delete/${id}`, {
-        method: 'DELETE',
-      });
-      if (response.status == 200 || response.status == 404) {
-        location.reload();
-      }
-    }
-  });
+  addDeleteEvent(e, `/inbound_order/delete/${e.getAttribute('data-inbound-order-id')}`);
 });
 
 const openCurrentOrder = () => {

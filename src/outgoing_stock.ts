@@ -1,4 +1,4 @@
-import { IGroup } from "./types";
+import { IGroup } from './types';
 
 interface IEvent {
   dateFrom: string;
@@ -31,7 +31,6 @@ interface ShipRequestUser {
   region: string | null;
   city: string | null;
   zipCode: string | null;
-
 }
 
 export interface IShipRequest {
@@ -53,7 +52,6 @@ export interface IShipRequest {
   carts: ICart[];
   store: IStore;
   user: ShipRequestUser | null;
-  
 }
 
 interface IProduct {
@@ -97,9 +95,7 @@ printBtn.addEventListener('click', async (e) => {
   window.document.body.innerHTML = resData;
   window.print();
   location.reload();
-  
 });
-
 
 const cancelButtons = document.querySelectorAll('.cancel-outgoing-stock-btn');
 
@@ -116,7 +112,6 @@ cancelButtons.forEach((e) => {
     }
   });
 });
-
 
 // function to filter order by status
 const orderFilterInputs = document.querySelectorAll('.outgoing-stock-filter-input');
@@ -142,25 +137,21 @@ orderFilterInputs.forEach((input: HTMLInputElement) => {
   });
 });
 
-
 // observer for outgoing stock view, edit modal
 const body = document.querySelector('body');
-
 
 const handleOrderView = () => {
   const orderView = document.querySelector('#outgoing-stock-ship-request-edit') as HTMLDivElement;
   if (orderView) {
     selectAllWarehouseHandler(orderView);
   }
-}
+};
 const observer = new MutationObserver(handleOrderView);
 const config: MutationObserverInit = { childList: true, subtree: true };
 observer.observe(body, config);
 
-
-
-function setWarehouseIdsForInputs (div: HTMLDivElement, id: number) {
-  const warehouseInputs =  div.querySelectorAll('select[name="warehouse_id"]') as NodeListOf<HTMLSelectElement>;
+function setWarehouseIdsForInputs(div: HTMLDivElement, id: number) {
+  const warehouseInputs = div.querySelectorAll('select[name="warehouse_id"]') as NodeListOf<HTMLSelectElement>;
   warehouseInputs.forEach((selectElement) => {
     const options = selectElement.options;
     for (let i = 0; i < options.length; i++) {
@@ -179,10 +170,9 @@ function selectAllWarehouseHandler(div: HTMLDivElement) {
   selectWarehouse.addEventListener('change', () => {
     if (!chechboxSelectAll.checked || !selectWarehouse.value) return;
     setWarehouseIdsForInputs(div, parseInt(selectWarehouse.value));
-    
-  })
+  });
   chechboxSelectAll.addEventListener('change', () => {
-    if (!chechboxSelectAll.checked || !selectWarehouse.value)  return;
+    if (!chechboxSelectAll.checked || !selectWarehouse.value) return;
     setWarehouseIdsForInputs(div, parseInt(selectWarehouse.value));
   });
 }

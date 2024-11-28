@@ -1,7 +1,7 @@
 import HTMXDispatcher from './htmx';
-import { Dismiss, Modal } from 'flowbite';
-import type { DismissOptions, DismissInterface, ModalInterface } from 'flowbite';
-import { modalOptions } from './utils';
+import { Dismiss } from 'flowbite';
+import type { DismissOptions, DismissInterface } from 'flowbite';
+import { initModal } from './utils';
 
 const themeToggleDarkIcons = document.querySelectorAll('#theme-toggle-dark-icon');
 const themeToggleLightIcons = document.querySelectorAll('#theme-toggle-light-icon');
@@ -100,8 +100,8 @@ if ($targetEl && $triggerEl) {
 const $viewImageModalElement: HTMLElement = document.querySelector('#product-image-modal');
 const $spinnerModalElement: HTMLElement = document.querySelector('#spinner-modal');
 
-const viewModal: ModalInterface = new Modal($viewImageModalElement, modalOptions);
-const spinnerModal: ModalInterface = new Modal($spinnerModalElement, modalOptions);
+const viewModal = initModal($viewImageModalElement);
+const spinnerModal = initModal($spinnerModalElement);
 
 const productImageAnchors = document.querySelectorAll('.product-full-image-anchor');
 productImageAnchors.forEach((e) => {

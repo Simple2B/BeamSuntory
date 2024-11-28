@@ -1,12 +1,4 @@
-import {Modal} from 'flowbite';
-import type {ModalOptions, ModalInterface} from 'flowbite';
-
-// /*
-//  * $editSupplierModal: required
-//  * options: optional
-//  */
-
-// // For your js code
+import { addDeleteEvent, initModal } from './utils';
 
 interface ISupplier {
   id: number;
@@ -22,52 +14,26 @@ interface ISupplier {
 }
 
 const $modalElement: HTMLElement = document.querySelector('#editSupplierModal');
-const $addSupplierModalElement: HTMLElement = document.querySelector(
-  '#add-supplier-modal',
-);
+const $addSupplierModalElement: HTMLElement = document.querySelector('#add-supplier-modal');
 
-const modalOptions: ModalOptions = {
-  placement: 'bottom-right',
-  backdrop: 'dynamic',
-  backdropClasses:
-    'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
-  closable: true,
-  onHide: () => {
-    console.log('modal is hidden');
-  },
-  onShow: () => {
-    console.log('supplier id: ');
-  },
-  onToggle: () => {
-    console.log('modal has been toggled');
-  },
-};
+const modal = initModal($modalElement);
+const addModal = initModal($addSupplierModalElement);
 
-const modal: ModalInterface = new Modal($modalElement, modalOptions);
-const addModal: ModalInterface = new Modal(
-  $addSupplierModalElement,
-  modalOptions,
-);
-
-const closingEditModalButton = document.getElementById('edit-suppler-modal-close-btn')
+const closingEditModalButton = document.getElementById('edit-suppler-modal-close-btn');
 closingEditModalButton.addEventListener('click', () => {
   modal.hide();
-})
+});
 
 const $buttonElements = document.querySelectorAll('.supplier-edit-button');
-$buttonElements.forEach(e =>
+$buttonElements.forEach((e) =>
   e.addEventListener('click', () => {
     editSupplier(JSON.parse(e.getAttribute('data-target')));
-  }),
+  })
 );
 
 // search flow
-const searchInput: HTMLInputElement = document.querySelector(
-  '#table-search-suppliers',
-);
-const searchInputButton = document.querySelector(
-  '#table-search-supplier-button',
-);
+const searchInput: HTMLInputElement = document.querySelector('#table-search-suppliers');
+const searchInputButton = document.querySelector('#table-search-supplier-button');
 if (searchInputButton && searchInput) {
   searchInputButton.addEventListener('click', () => {
     window.location.href = `${window.location.origin}${window.location.pathname}?q=${searchInput.value}`;
@@ -75,18 +41,8 @@ if (searchInputButton && searchInput) {
 }
 const deleteButtons = document.querySelectorAll('.delete-supplier-btn');
 
-deleteButtons.forEach(e => {
-  e.addEventListener('click', async () => {
-    if (confirm('Are sure?')) {
-      let id = e.getAttribute('data-supplier-id');
-      const response = await fetch(`/supplier/delete/${id}`, {
-        method: 'DELETE',
-      });
-      if (response.status == 200) {
-        location.reload();
-      }
-    }
-  });
+deleteButtons.forEach((e) => {
+  addDeleteEvent(e, `/supplier/delete/${e.getAttribute('data-supplier-id')}`);
 });
 
 function editSupplier(supplier: ISupplier) {

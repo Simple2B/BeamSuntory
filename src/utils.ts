@@ -1,4 +1,6 @@
 import { ModalOptions } from 'flowbite';
+import { Modal } from 'flowbite';
+import type { ModalInterface } from 'flowbite';
 
 export const formatDate = (date: string) => {
   if (!date) {
@@ -19,13 +21,25 @@ export const modalOptions: ModalOptions = {
   backdrop: 'dynamic',
   backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
   closable: true,
-  onHide: () => {
-    console.log('modal is hidden');
-  },
-  onShow: () => {
-    console.log('warehouse id: ');
-  },
-  onToggle: () => {
-    console.log('modal has been toggled');
-  },
+  onHide: () => {},
+  onShow: () => {},
+  onToggle: () => {},
+};
+
+export const initModal = (el: HTMLElement) => {
+  const modal: ModalInterface = new Modal(el, modalOptions);
+  return modal;
+};
+
+export const addDeleteEvent = (e: Element, url: string) => {
+  e.addEventListener('click', async () => {
+    if (confirm('Are sure?')) {
+      const response = await fetch(url, {
+        method: 'DELETE',
+      });
+      if ([200, 202, 404].includes(response.status)) {
+        location.reload();
+      }
+    }
+  });
 };

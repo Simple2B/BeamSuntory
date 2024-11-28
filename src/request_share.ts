@@ -1,7 +1,5 @@
-import { Modal } from 'flowbite';
-import type { ModalOptions, ModalInterface } from 'flowbite';
 import { IRequestShare } from './types';
-import { modalOptions as modalEditOptions } from './utils';
+import { initModal } from './utils';
 // TODO need refactoring
 interface IRequestShareDepricated extends IRequestShare {
   id: number;
@@ -78,7 +76,7 @@ $buttonEditElements.forEach((e) =>
 
 const $modalEditElement: HTMLElement = document.querySelector('#editRequestShareModal');
 
-const editModal: ModalInterface = new Modal($modalEditElement, modalEditOptions);
+const editModal = initModal($modalEditElement);
 
 function editShareRequest(requestShare: IRequestShareDepricated) {
   let input: HTMLInputElement = document.querySelector('#request-share-edit-quantity');

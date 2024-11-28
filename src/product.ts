@@ -1,4 +1,5 @@
 import { log } from 'console';
+import { addDeleteEvent } from './utils';
 
 interface MasterGroup {
   name: string;
@@ -20,7 +21,6 @@ interface IMasterGroup {
   name: string;
   master_groups_list_groups: { [index: string]: { group_name: string; group_id: number }[] };
 }
-
 
 // global variable for mandatory event instance
 const adminRole = 'admin';
@@ -95,7 +95,6 @@ if (filterData !== null || filterData !== undefined) {
   }
 }
 
-
 // function to add column by filter
 function showCustomizeViewColumn(masterGroupName: string) {
   //choose position in table
@@ -103,18 +102,22 @@ function showCustomizeViewColumn(masterGroupName: string) {
   const productTableHeader = document.querySelectorAll('.product-table-header-master-group-item');
 
   productTableHeader.forEach((productTableHeaderItem: HTMLElement) => {
-    const master_group_name = productTableHeaderItem.getAttribute('master-group-name')
+    const master_group_name = productTableHeaderItem.getAttribute('master-group-name');
 
-    if (master_group_name && master_group_name.trim().toLocaleLowerCase() === masterGroupName.trim().toLocaleLowerCase() && productTableHeaderItem.classList.contains("hidden")) {
+    if (
+      master_group_name &&
+      master_group_name.trim().toLocaleLowerCase() === masterGroupName.trim().toLocaleLowerCase() &&
+      productTableHeaderItem.classList.contains('hidden')
+    ) {
       productTableHeaderItem.classList.remove('hidden');
     }
-  })
+  });
 
   const productItemTrs = document.querySelectorAll('.product-groups-names-view ');
   productItemTrs.forEach((productItem: HTMLTableRowElement) => {
-    const master_group_name = productItem.getAttribute('master-group-name')
+    const master_group_name = productItem.getAttribute('master-group-name');
     if (masterGroupName && master_group_name === masterGroupName.trim() && productItem.classList.contains('hidden')) {
-      productItem.classList.remove('hidden')
+      productItem.classList.remove('hidden');
     }
   });
 }
@@ -125,17 +128,21 @@ function hideCustomizeViewColumn(masterGroupName: string) {
   const productTableHeader = document.querySelectorAll('.product-table-header-master-group-item');
 
   productTableHeader.forEach((productTableHeaderItem: HTMLElement) => {
-    const master_group_name = productTableHeaderItem.getAttribute('master-group-name')
-    if (master_group_name && master_group_name.trim() === masterGroupName.trim() && !productTableHeaderItem.classList.contains('hidden')) {
+    const master_group_name = productTableHeaderItem.getAttribute('master-group-name');
+    if (
+      master_group_name &&
+      master_group_name.trim() === masterGroupName.trim() &&
+      !productTableHeaderItem.classList.contains('hidden')
+    ) {
       productTableHeaderItem.classList.add('hidden');
     }
-  })
+  });
 
   const productItemTrs = document.querySelectorAll('.product-groups-names-view ');
   productItemTrs.forEach((productItem: HTMLTableRowElement) => {
-    const master_group_name = productItem.getAttribute('master-group-name')
-    if (masterGroupName && master_group_name === masterGroupName.trim() && !productItem.classList.contains("hidden")) {
-      productItem.classList.add('hidden')
+    const master_group_name = productItem.getAttribute('master-group-name');
+    if (masterGroupName && master_group_name === masterGroupName.trim() && !productItem.classList.contains('hidden')) {
+      productItem.classList.add('hidden');
     }
   });
 }
@@ -165,7 +172,6 @@ if (globalFilterMasterGroup && globalFilterMasterGroup.length !== 0) {
   });
   for (const masterGroupName of globalFilterMasterGroup) {
     showCustomizeViewColumn(masterGroupName);
-
   }
 }
 
@@ -184,8 +190,7 @@ checkboxFilterProductMasterGroups.forEach((checkbox) => {
         globalFilterMasterGroup.push(masterGroupName);
       }
       sessionStorage.setItem('globalFilterMasterGroup', JSON.stringify(globalFilterMasterGroup));
-      showCustomizeViewColumn(masterGroupName)
-
+      showCustomizeViewColumn(masterGroupName);
     }
     if (!isActive) {
       const index = globalFilterMasterGroup.indexOf(masterGroupName);
@@ -194,12 +199,10 @@ checkboxFilterProductMasterGroups.forEach((checkbox) => {
         globalFilterMasterGroup.splice(index, 1);
       }
       sessionStorage.setItem('globalFilterMasterGroup', JSON.stringify(globalFilterMasterGroup));
-      hideCustomizeViewColumn(masterGroupName)
-
+      hideCustomizeViewColumn(masterGroupName);
     }
   });
 });
-
 
 let fetchedAmountByDate = [] as { date: string; quantity: number }[];
 
@@ -222,7 +225,7 @@ searchInputButton.addEventListener('click', () => {
   searchParamsToDelete.forEach((param) => url.searchParams.delete(param));
 
   url.searchParams.set('q', searchInput.value);
-  url.searchParams.delete("page")
+  url.searchParams.delete('page');
   allStocksInInventoryToggle.checked && url.searchParams.set('is_all_stocks_in_inventory', 'true');
   stocksByMeToggle.checked && url.searchParams.set('is_stocks_own_by_me', 'true');
   eventStocksOwnByMeToggle.checked && url.searchParams.set('is_events_stocks_own_by_me', 'true');
@@ -308,21 +311,8 @@ clearFilterButton.addEventListener('click', () => {
 const deleteButtons = document.querySelectorAll('.delete-product-btn');
 
 deleteButtons.forEach((e) => {
-  e.addEventListener('click', async () => {
-    if (confirm('Are sure?')) {
-      let id = e.getAttribute('data-product-id');
-      const response = await fetch(`/product/delete/${id}`, {
-        method: 'DELETE',
-      });
-      if ([200, 404, 409].includes(response.status)) {
-        location.reload();
-      }
-    }
-  });
+  addDeleteEvent(e, `/product/delete/${e.getAttribute('data-product-id')}`);
 });
-
-
-
 
 const filterProductButton = document.querySelector('#product-filter-button') as HTMLButtonElement;
 
@@ -330,9 +320,7 @@ filterProductButton.addEventListener('click', (e) => {
   searchInputButton.click();
 });
 
-
-
-const autoswitchAllStocksToggle = () => {
+const autoSwitchAllStocksToggle = () => {
   if (!allStocksInInventoryToggle.checked && !stocksByMeToggle.checked && !eventStocksOwnByMeToggle.checked) {
     allStocksInInventoryToggle.checked = false;
     stocksByMeToggle.checked = false;
@@ -351,7 +339,7 @@ allStocksInInventoryToggle.addEventListener('change', () => {
     eventToggle.checked = false;
     searchInputButton.click();
   }
-  autoswitchAllStocksToggle();
+  autoSwitchAllStocksToggle();
 });
 
 stocksByMeToggle.addEventListener('change', () => {
@@ -362,7 +350,7 @@ stocksByMeToggle.addEventListener('change', () => {
     eventToggle.checked = false;
     searchInputButton.click();
   }
-  autoswitchAllStocksToggle();
+  autoSwitchAllStocksToggle();
 });
 
 eventStocksOwnByMeToggle.addEventListener('change', () => {
@@ -373,7 +361,7 @@ eventStocksOwnByMeToggle.addEventListener('change', () => {
     eventToggle.checked = false;
     searchInputButton.click();
   }
-  autoswitchAllStocksToggle();
+  autoSwitchAllStocksToggle();
 });
 
 allStocksToggle.addEventListener('change', () => {
@@ -383,7 +371,7 @@ allStocksToggle.addEventListener('change', () => {
     eventStocksOwnByMeToggle.checked = false;
     searchInputButton.click();
   }
-  autoswitchAllStocksToggle();
+  autoSwitchAllStocksToggle();
 });
 
 eventToggle.addEventListener('change', () => {

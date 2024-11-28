@@ -1,6 +1,6 @@
 import { Modal } from 'flowbite';
 import type { ModalInterface } from 'flowbite';
-import { modalOptions } from './utils';
+import { addDeleteEvent, initModal, modalOptions } from './utils';
 
 interface IBillableGroup {
   id: number;
@@ -21,8 +21,8 @@ export interface IGroupAllocatedBase {
 const $modalElement: HTMLElement = document.querySelector('#editBillableGroupModal');
 const addBillableGroupModalElement: HTMLElement = document.querySelector('#add-billable-group-modal');
 
-const modal: ModalInterface = new Modal($modalElement, modalOptions);
-const addModal: ModalInterface = new Modal(addBillableGroupModalElement, modalOptions);
+const modal = initModal($modalElement);
+const addModal = initModal(addBillableGroupModalElement);
 
 const editGroupProductCloseModalButton: HTMLButtonElement = document.querySelector(
   '#edit-billable-group-modal-close-btn'
@@ -49,17 +49,7 @@ if (searchInputButton && searchInput) {
 const deleteButtons = document.querySelectorAll('.delete-billable-group-btn');
 
 deleteButtons.forEach((e) => {
-  e.addEventListener('click', async () => {
-    if (confirm('Are sure?')) {
-      let id = e.getAttribute('data-billable-group-id');
-      const response = await fetch(`/billable_group/delete/${id}`, {
-        method: 'DELETE',
-      });
-      if ([200, 404, 409].includes(response.status)) {
-        location.reload();
-      }
-    }
-  });
+  addDeleteEvent(e, `/billable_group/delete/${e.getAttribute('data-billable-group-id')}`);
 });
 
 function editBillableGroup(billableGroup: IBillableGroup) {

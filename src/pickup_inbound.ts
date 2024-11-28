@@ -1,6 +1,5 @@
 import { ModalOptions, Modal } from 'flowbite';
 import HTMXDispatcher from './htmx';
-import { IInboundOrderBase } from './types';
 import { IInboundOrderOut } from './inbound_order/types';
 
 // initialize htmx listener

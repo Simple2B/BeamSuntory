@@ -1,6 +1,5 @@
-import { Modal, ModalInterface } from 'flowbite';
 import { IProductAllocatedBase } from './types';
-import { modalOptions as addModalOptions } from '../utils';
+import { initModal } from '../utils';
 
 const createInboundOrderHandler = () => {
   const createInboundOrderBtn = document.getElementById('inbound-order-create-btn') as HTMLButtonElement;
@@ -58,7 +57,7 @@ export const initAddInboundOrderModal = () => {
   const addModalButton = document.querySelector('#inbound-order-add-modal-button');
   const addInboundOrderModalElement: HTMLElement = document.querySelector('#add-inbound-order-modal');
 
-  const addModal: ModalInterface = new Modal(addInboundOrderModalElement, addModalOptions);
+  const addModal = initModal(addInboundOrderModalElement);
   addModalButton.addEventListener('click', () => {
     addModal.show();
   });

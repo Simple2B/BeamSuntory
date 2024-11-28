@@ -1,6 +1,4 @@
-import { Modal } from 'flowbite';
-import type { ModalInterface } from 'flowbite';
-import { modalOptions } from './utils';
+import { addDeleteEvent, initModal } from './utils';
 
 interface IWarehouse {
   id: number;
@@ -15,8 +13,8 @@ interface IWarehouse {
 const $modalElement: HTMLElement = document.querySelector('#editWarehouseModal');
 const $addWarehouseModalElement: HTMLElement = document.querySelector('#add-warehouse-modal');
 
-const modal: ModalInterface = new Modal($modalElement, modalOptions);
-const addModal: ModalInterface = new Modal($addWarehouseModalElement, modalOptions);
+const modal = initModal($modalElement);
+const addModal = initModal($addWarehouseModalElement);
 
 const $buttonElements = document.querySelectorAll('.warehouse-edit-button');
 $buttonElements.forEach((e) =>
@@ -57,17 +55,7 @@ if (searchInputButton && searchInput) {
 const deleteButtons = document.querySelectorAll('.delete-warehouse-btn');
 
 deleteButtons.forEach((e) => {
-  e.addEventListener('click', async () => {
-    if (confirm('Are sure?')) {
-      let id = e.getAttribute('data-warehouse-id');
-      const response = await fetch(`/warehouse/delete/${id}`, {
-        method: 'DELETE',
-      });
-      if (response.status == 200) {
-        location.reload();
-      }
-    }
-  });
+  addDeleteEvent(e, `/warehouse/delete/${e.getAttribute('data-warehouse-id')}`);
 });
 
 function editWarehouse(warehouse: IWarehouse) {

@@ -1,7 +1,5 @@
-import { formatDate } from './utils';
-import { ModalInterface, Modal } from 'flowbite';
+import { formatDate, initModal } from './utils';
 import { IEventsResponse } from './types';
-import { modalOptions as modalEditOptions } from './utils';
 
 function getFilterValues() {
   const url = new URL(window.location.href);
@@ -126,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const $modalEditElement: HTMLElement = document.querySelector('#event-edit-modal');
-const editModal: ModalInterface = new Modal($modalEditElement, modalEditOptions);
+const editModal = initModal($modalEditElement);
 
 const editModalCloseButton = document.querySelector('#edit-event-modal-close-btn');
 editModalCloseButton.addEventListener('click', () => {

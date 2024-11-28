@@ -1,13 +1,4 @@
-import { Modal } from 'flowbite';
-import type { ModalInterface } from 'flowbite';
-import { modalOptions } from './utils';
-
-// /*
-//  * $editGroupModal: required
-//  * options: optional
-//  */
-
-// // For your js code
+import { addDeleteEvent, initModal } from './utils';
 
 interface IGroup {
   id: number;
@@ -18,7 +9,7 @@ interface IGroup {
 
 const $modalElement: HTMLElement = document.querySelector('#edit-sub-group-modal');
 
-const modal: ModalInterface = new Modal($modalElement, modalOptions);
+const modal = initModal($modalElement);
 
 const closingEditModalButton = document.getElementById('edit-stock-target-group-modal-close-btn');
 closingEditModalButton.addEventListener('click', () => {
@@ -43,17 +34,7 @@ if (searchInputButton && searchInput) {
 const deleteButtons = document.querySelectorAll('.delete-group-btn');
 
 deleteButtons.forEach((e) => {
-  e.addEventListener('click', async () => {
-    if (confirm('Are sure?')) {
-      let id = e.getAttribute('data-group-id');
-      const response = await fetch(`/sub_stock_target_group/delete/${id}`, {
-        method: 'DELETE',
-      });
-      if (response.status == 200) {
-        location.reload();
-      }
-    }
-  });
+  addDeleteEvent(e, `/sub_stock_target_group/delete/${e.getAttribute('data-group-id')}`);
 });
 
 function editGroup(group: IGroup) {

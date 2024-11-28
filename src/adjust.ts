@@ -1,6 +1,4 @@
-import { Modal } from 'flowbite';
-import type { ModalInterface } from 'flowbite';
-import { modalOptions } from './utils';
+import { initModal } from './utils';
 
 interface IAdjust {
   id: number;
@@ -41,7 +39,7 @@ const defaultBrandImage =
 // adjust modals
 const $viewAdjustModalElement: HTMLElement = document.querySelector('#view-adjust-modal');
 
-const viewModal: ModalInterface = new Modal($viewAdjustModalElement, modalOptions);
+const viewModal = initModal($viewAdjustModalElement);
 
 const $viewButtonElements = document.querySelectorAll('.adjust-view-button');
 $viewButtonElements.forEach((e) =>

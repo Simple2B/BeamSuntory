@@ -1,12 +1,6 @@
 import { Modal } from 'flowbite';
 import type { ModalOptions, ModalInterface } from 'flowbite';
-
-// /*
-//  * $editUserModal: required
-//  * options: optional
-//  */
-
-// // For your js code
+import { addDeleteEvent } from './utils';
 
 interface IUser {
   id: number;
@@ -104,17 +98,7 @@ if (searchInputButton && searchInput) {
 const deleteButtons = document.querySelectorAll('.delete-user-btn');
 
 deleteButtons.forEach((e) => {
-  e.addEventListener('click', async () => {
-    if (confirm('Are sure?')) {
-      let id = e.getAttribute('data-user-id');
-      const response = await fetch(`/user/delete/${id}`, {
-        method: 'DELETE',
-      });
-      if (response.status == 200) {
-        location.reload();
-      }
-    }
-  });
+  addDeleteEvent(e, `/user/delete/${e.getAttribute('data-user-id')}`);
 });
 
 const resetPasswordButtons = document.querySelectorAll('.reset-password-user-btn');
@@ -162,8 +146,6 @@ function editUser(user: IUser) {
     salesRepContainer.classList.remove('hidden');
   }
 
-
-
   userAddDropdownBtn.addEventListener('click', showHideGroupUserOptions);
 
   optionItems.forEach((optionItem: HTMLElement) => {
@@ -195,8 +177,6 @@ function editUser(user: IUser) {
     });
   });
 
-
-
   userRole.addEventListener('change', () => {
     const role = userRole.value;
 
@@ -208,30 +188,23 @@ function editUser(user: IUser) {
       salesRepContainer.classList.remove('hidden');
     }
 
-
-
-
     if (role === UserRole.Admin) {
       let input: HTMLInputElement = document.getElementById('user-edit-group') as HTMLInputElement;
       optionItems.forEach((item) => {
-        const group = item.textContent.trim()
+        const group = item.textContent.trim();
         if (!selectedOptions.includes(group)) {
           selectedOptions.push(group);
         }
-
       });
       const joinedValues = selectedOptions.join(', ');
-      input.value = joinedValues
+      input.value = joinedValues;
       userAddDropdownBtn.innerHTML = joinedValues;
     }
-
-
   });
 
   salesRep.addEventListener('click', () => {
     lockerAddressContainer.classList.toggle('dropdown-close');
   });
-
 
   let input: HTMLInputElement = document.querySelector('#user-edit-username');
   input.value = user.username;
@@ -274,11 +247,9 @@ function editUser(user: IUser) {
   input.checked = user.approval_permission;
 
   input = document.querySelector('#edit-checkbox-access-bulk-ship');
-  input.checked = user.has_access_bulk_ship
+  input.checked = user.has_access_bulk_ship;
   input = document.querySelector('#edit-checkbox-access-bulk-assign');
-  input.checked = user.has_access_bulk_assign
-
-
+  input.checked = user.has_access_bulk_assign;
 
   input = document.querySelector('#user-edit-next_url');
   input.value = window.location.href;
