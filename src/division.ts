@@ -1,4 +1,4 @@
-import { addDeleteEvent, initModal } from './utils';
+import { addDeleteEvent, addSearchEvent, initModal } from './utils';
 
 interface IDivision {
   role_name: string;
@@ -30,11 +30,8 @@ $buttonElements.forEach((e) =>
 const searchInput: HTMLInputElement = document.querySelector('#table-search-divisions');
 const searchInputButton = document.querySelector('#table-search-division-button');
 
-if (searchInputButton && searchInput) {
-  searchInputButton.addEventListener('click', () => {
-    window.location.href = `${window.location.origin}${window.location.pathname}?q=${searchInput.value}`;
-  });
-}
+addSearchEvent(searchInput, searchInputButton);
+
 const deleteButtons = document.querySelectorAll('.delete-division-btn');
 
 deleteButtons.forEach((e) => {

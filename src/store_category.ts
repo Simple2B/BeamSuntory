@@ -1,4 +1,4 @@
-import { addDeleteEvent, initModal } from './utils';
+import { addDeleteEvent, addSearchEvent, initModal } from './utils';
 
 interface IStoreCategory {
   id: number;
@@ -24,11 +24,8 @@ $buttonElements.forEach((e) =>
 // search flow
 const searchInput: HTMLInputElement = document.querySelector('#table-search-store-categories');
 const searchInputButton = document.querySelector('#table-search-store-category-button');
-if (searchInputButton && searchInput) {
-  searchInputButton.addEventListener('click', () => {
-    window.location.href = `${window.location.origin}${window.location.pathname}?q=${searchInput.value}`;
-  });
-}
+addSearchEvent(searchInput, searchInputButton);
+
 const deleteButtons = document.querySelectorAll('.delete-store-category-btn');
 
 deleteButtons.forEach((e) => {

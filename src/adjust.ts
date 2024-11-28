@@ -1,4 +1,4 @@
-import { initModal } from './utils';
+import { addSearchEvent, initModal } from './utils';
 
 interface IAdjust {
   id: number;
@@ -120,10 +120,4 @@ function createGroupQtyItem(groupQty: IAdjustGroupQty) {
 // search flow
 const searchAdjustInput: HTMLInputElement = document.querySelector('#table-search-adjust');
 const searchAdjustInputButton = document.querySelector('#table-search-adjust-button');
-if (searchAdjustInputButton && searchAdjustInput) {
-  searchAdjustInputButton.addEventListener('click', () => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('q', searchAdjustInput.value);
-    window.location.href = `${url.href}`;
-  });
-}
+addSearchEvent(searchAdjustInput, searchAdjustInputButton);

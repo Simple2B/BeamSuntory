@@ -43,3 +43,13 @@ export const addDeleteEvent = (e: Element, url: string) => {
     }
   });
 };
+
+export const addSearchEvent = (searchInput: HTMLInputElement, searchButton: Element) => {
+  if (searchButton && searchInput) {
+    searchButton.addEventListener('click', () => {
+      const url = new URL(window.location.href);
+      url.searchParams.set('q', searchInput.value);
+      window.location.href = `${url.href}`;
+    });
+  }
+};

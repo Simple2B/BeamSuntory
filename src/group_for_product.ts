@@ -1,4 +1,4 @@
-import { addDeleteEvent, initModal } from './utils';
+import { addDeleteEvent, addSearchEvent, initModal } from './utils';
 
 interface IGroupProduct {
   id: number;
@@ -29,11 +29,8 @@ $buttonElements.forEach((e) =>
 // search flow
 const searchInput: HTMLInputElement = document.querySelector('#table-search-groups-product');
 const searchInputButton = document.querySelector('#table-search-group-product-button');
-if (searchInputButton && searchInput) {
-  searchInputButton.addEventListener('click', () => {
-    window.location.href = `${window.location.origin}${window.location.pathname}?q=${searchInput.value}`;
-  });
-}
+addSearchEvent(searchInput, searchInputButton);
+
 const deleteButtons = document.querySelectorAll('.delete-group-product-btn');
 
 deleteButtons.forEach((e) => {

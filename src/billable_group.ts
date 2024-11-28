@@ -1,6 +1,6 @@
 import { Modal } from 'flowbite';
 import type { ModalInterface } from 'flowbite';
-import { addDeleteEvent, initModal, modalOptions } from './utils';
+import { addDeleteEvent, addSearchEvent, initModal, modalOptions } from './utils';
 
 interface IBillableGroup {
   id: number;
@@ -41,11 +41,8 @@ $buttonElements.forEach((e) => {
 // search flow
 const searchInput: HTMLInputElement = document.querySelector('#table-search-billable-groups');
 const searchInputButton = document.querySelector('#table-search-billable-group-button');
-if (searchInputButton && searchInput) {
-  searchInputButton.addEventListener('click', () => {
-    window.location.href = `${window.location.origin}${window.location.pathname}?q=${searchInput.value}`;
-  });
-}
+addSearchEvent(searchInput, searchInputButton);
+
 const deleteButtons = document.querySelectorAll('.delete-billable-group-btn');
 
 deleteButtons.forEach((e) => {

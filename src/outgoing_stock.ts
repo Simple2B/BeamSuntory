@@ -1,4 +1,5 @@
 import { IGroup } from './types';
+import { addSearchEvent } from './utils';
 
 interface IEvent {
   dateFrom: string;
@@ -77,13 +78,7 @@ interface IWarehouse {
 // search flow
 const searchOutgoingInput: HTMLInputElement = document.querySelector('#table-search-outgoing-stock');
 const searchOutgoingInputButton = document.querySelector('#table-search-outgoing-stock-button');
-if (searchOutgoingInputButton && searchOutgoingInput) {
-  searchOutgoingInputButton.addEventListener('click', () => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('q', searchOutgoingInput.value);
-    window.location.href = `${url.href}`;
-  });
-}
+addSearchEvent(searchOutgoingInput, searchOutgoingInputButton);
 
 const printBtn = document.querySelector('#print-outgoing-stock');
 printBtn.addEventListener('click', async (e) => {

@@ -1,6 +1,7 @@
 import { Modal } from 'flowbite';
 import type { ModalOptions, ModalInterface } from 'flowbite';
 import { IShipRequest } from './outgoing_stock';
+import { addSearchEvent } from './utils';
 
 interface IProduct {
   id: number;
@@ -95,7 +96,6 @@ const editModal: ModalInterface = new Modal($modalEditElement, modalEditOptions)
 const viewPickupOrderButtonElements = document.querySelectorAll('.pickup-order-view-button');
 viewPickupOrderButtonElements.forEach((e) =>
   e.addEventListener('click', () => {
-
     const shipRequest: IShipRequest = JSON.parse(e.getAttribute('data-target'));
     console.log(shipRequest);
     const store = JSON.parse(e.getAttribute('data-target-store'));
@@ -115,10 +115,9 @@ viewPickupOrderButtonElements.forEach((e) =>
     shipRequest.wmNotes ? (div.innerHTML = shipRequest.wmNotes) : (div.innerHTML = 'No comments');
 
     const proofOfDelivery = document.querySelector('#pickup-order-view-proof-of-delivery') as HTMLInputElement;
-    proofOfDelivery.value = shipRequest.proofOfDelivery ?? ''
+    proofOfDelivery.value = shipRequest.proofOfDelivery ?? '';
     const trecing = document.querySelector('#pickup-order-view-tracking-data') as HTMLInputElement;
-    trecing.value = shipRequest.tracking ?? ''
-
+    trecing.value = shipRequest.tracking ?? '';
 
     div = document.querySelector('#pickup-order-view-store');
     div.innerHTML = shipRequest.store.storeName;
@@ -344,13 +343,8 @@ function createPickupOrderItemTable(shipRequest: IShipRequest, typeModal: string
 // search flow
 const searchPickupInput: HTMLInputElement = document.querySelector('#table-search-pickup-order');
 const searchPickupInputButton = document.querySelector('#table-search-pickup-order-button');
-if (searchPickupInputButton && searchPickupInput) {
-  searchPickupInputButton.addEventListener('click', () => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('q', searchPickupInput.value);
-    window.location.href = `${url.href}`;
-  });
-}
+addSearchEvent(searchPickupInput, searchPickupInputButton);
+
 const updateNotesButtons = document.querySelectorAll('.pickup-order-view-notes-btn');
 
 updateNotesButtons.forEach((e) => {

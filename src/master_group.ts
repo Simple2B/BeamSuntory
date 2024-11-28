@@ -1,4 +1,4 @@
-import { addDeleteEvent, initModal } from './utils';
+import { addDeleteEvent, addSearchEvent, initModal } from './utils';
 
 interface IMasterGroup {
   id: number;
@@ -42,11 +42,8 @@ if (addModalCloseBtn) {
 // search flow
 const searchInput: HTMLInputElement = document.querySelector('#table-search-master-groups');
 const searchInputButton = document.querySelector('#table-search-master-group-button');
-if (searchInputButton && searchInput) {
-  searchInputButton.addEventListener('click', () => {
-    window.location.href = `${window.location.origin}${window.location.pathname}?q=${searchInput.value}`;
-  });
-}
+addSearchEvent(searchInput, searchInputButton);
+
 const deleteButtons = document.querySelectorAll('.delete-master-group-btn');
 
 deleteButtons.forEach((e) => {

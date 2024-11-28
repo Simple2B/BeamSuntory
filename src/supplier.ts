@@ -1,4 +1,4 @@
-import { addDeleteEvent, initModal } from './utils';
+import { addDeleteEvent, addSearchEvent, initModal } from './utils';
 
 interface ISupplier {
   id: number;
@@ -34,11 +34,8 @@ $buttonElements.forEach((e) =>
 // search flow
 const searchInput: HTMLInputElement = document.querySelector('#table-search-suppliers');
 const searchInputButton = document.querySelector('#table-search-supplier-button');
-if (searchInputButton && searchInput) {
-  searchInputButton.addEventListener('click', () => {
-    window.location.href = `${window.location.origin}${window.location.pathname}?q=${searchInput.value}`;
-  });
-}
+addSearchEvent(searchInput, searchInputButton);
+
 const deleteButtons = document.querySelectorAll('.delete-supplier-btn');
 
 deleteButtons.forEach((e) => {
