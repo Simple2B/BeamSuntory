@@ -1,5 +1,6 @@
 import { Modal } from 'flowbite';
-import type { ModalOptions, ModalInterface } from 'flowbite';
+import type { ModalInterface } from 'flowbite';
+import { modalOptions } from './utils';
 
 // /*
 //  * $editGroupModal: required
@@ -16,22 +17,6 @@ interface IGroup {
 }
 
 const $modalElement: HTMLElement = document.querySelector('#edit-sub-group-modal');
-
-const modalOptions: ModalOptions = {
-  placement: 'bottom-right',
-  backdrop: 'dynamic',
-  backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
-  closable: true,
-  onHide: () => {
-    console.log('modal is hidden');
-  },
-  onShow: () => {
-    console.log('group id: ');
-  },
-  onToggle: () => {
-    console.log('modal has been toggled');
-  },
-};
 
 const modal: ModalInterface = new Modal($modalElement, modalOptions);
 
@@ -77,7 +62,7 @@ function editGroup(group: IGroup) {
   input = document.querySelector('#group-edit-id');
   input.value = group.id.toString();
   input = document.querySelector('#group-edit-master_group');
-  input.value =group.parent_group.id.toString();
+  input.value = group.parent_group.id.toString();
   input = document.querySelector('#group-edit-next_url');
   input.value = window.location.href;
   modal.show();

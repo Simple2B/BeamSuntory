@@ -1,12 +1,10 @@
-import { ModalOptions, Modal } from 'flowbite'
-import HTMXDispatcher from './htmx'
+import { ModalOptions, Modal } from 'flowbite';
+import HTMXDispatcher from './htmx';
 import { IInboundOrderBase } from './types';
 import { IInboundOrderOut } from './inbound_order/types';
 
-
 // initialize htmx listener
 const htmxDispatcher = new HTMXDispatcher();
-
 
 document.addEventListener('DOMContentLoaded', () => {
   const buttonLoadEventsTable = document.querySelector('#table-report-loader') as HTMLButtonElement;
@@ -20,16 +18,16 @@ document.addEventListener('DOMContentLoaded', () => {
     backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
     closable: true,
     onHide: () => {
-      const productItems = document.querySelectorAll('.product-item') as NodeListOf<HTMLTableColElement>
+      const productItems = document.querySelectorAll('.product-item') as NodeListOf<HTMLTableColElement>;
       productItems.forEach((productItem) => productItem.remove());
     },
-  }
+  };
 
   const viewModal = new Modal(viewReportEventsModal, viewModalOptions);
   const closingViewModalButton = document.querySelector('#buttonClosingViewPickupInboundModal') as HTMLButtonElement;
   closingViewModalButton.addEventListener('click', () => {
     viewModal.hide();
-  })
+  });
 
   // view buttons click
   const orderTitleId = document.getElementById('pickup-inbound-view-order-id') as HTMLDivElement;
@@ -41,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const orderDeliveryDate = document.getElementById('pickup-inbound-view-delivery-date') as HTMLDivElement;
   const supplierName = document.getElementById('pickup-inbound-view-supplier-id') as HTMLDivElement;
   const supplierAddress = document.getElementById('pickup-inbound-view-supplier-address') as HTMLDivElement;
-  const orderId= document.getElementById('pickup-inbound-view-inbound-order-id') as HTMLInputElement;
+  const orderId = document.getElementById('pickup-inbound-view-inbound-order-id') as HTMLInputElement;
   const pickupInboundButton = document.querySelector('.pickup-inbound-btn') as HTMLButtonElement;
   const deliverAgentNotes = document.getElementById('pickup-inbound-view-da-notes') as HTMLDivElement;
   const warehouseManagerNotes = document.getElementById('pickup-inbound-view-wm-notes') as HTMLDivElement;
@@ -53,9 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const reportViewButtons: NodeListOf<HTMLButtonElement> = target.querySelectorAll('.pickup-inbound-view-button');
     reportViewButtons.forEach((btn) => {
       btn.addEventListener('click', () => {
-        const orderProductContainerView = document.getElementById('product-items-container') as HTMLDivElement;  
+        const orderProductContainerView = document.getElementById('product-items-container') as HTMLDivElement;
         const orderProductAllocatedBaseView = document.getElementById('product-allocated-container') as HTMLDivElement;
-
 
         const reportAssign: IInboundOrderOut = JSON.parse(btn.getAttribute('data-target'));
 
@@ -72,27 +69,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
         proofOfDelivery.innerHTML = reportAssign.proofOfDelivery ?? '';
         tracking.innerHTML = reportAssign.tracking ?? '';
-        
+
         deliverAgentNotes.innerHTML = reportAssign.daNotes;
         warehouseManagerNotes.innerHTML = reportAssign.wmNotes;
 
-
-        reportAssign.productsAllocated.forEach((productsAllocated) => {                
+        reportAssign.productsAllocated.forEach((productsAllocated) => {
           const productAllocatedContainer = orderProductAllocatedBaseView.cloneNode(true) as HTMLDivElement;
           productAllocatedContainer.classList.remove('hidden');
           productAllocatedContainer.classList.add('grid');
           productAllocatedContainer.classList.add('product-item');
-           
-          const orderProductNamesView: HTMLDivElement = productAllocatedContainer.querySelector('#pickup-inbound-view-product-name');
-          const orderProductQuantitiesView: HTMLDivElement = productAllocatedContainer.querySelector('#pickup-inbound-view-product-quantity');
-          const orderProductSkuView: HTMLDivElement = productAllocatedContainer.querySelector('#pickup-inbound-view-product-sku');
+
+          const orderProductNamesView: HTMLDivElement = productAllocatedContainer.querySelector(
+            '#pickup-inbound-view-product-name'
+          );
+          const orderProductQuantitiesView: HTMLDivElement = productAllocatedContainer.querySelector(
+            '#pickup-inbound-view-product-quantity'
+          );
+          const orderProductSkuView: HTMLDivElement = productAllocatedContainer.querySelector(
+            '#pickup-inbound-view-product-sku'
+          );
 
           orderProductNamesView.innerHTML = productsAllocated.product.name;
           orderProductQuantitiesView.innerHTML = productsAllocated.quantity.toString();
           orderProductSkuView.innerHTML = productsAllocated.product.SKU;
-                    
-          orderProductContainerView.appendChild(productAllocatedContainer);          
-        })      
+
+          orderProductContainerView.appendChild(productAllocatedContainer);
+        });
 
         pickupInboundButton.classList.add('hidden');
 
@@ -101,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         viewModal.show();
-      })
+      });
     });
   });
-})
+});

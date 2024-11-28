@@ -1,12 +1,6 @@
 import { Modal } from 'flowbite';
-import type { ModalOptions, ModalInterface } from 'flowbite';
-
-// /*
-//  * $editMasterGroupProductModal: required
-//  * options: optional
-//  */
-
-// // For your js code
+import type { ModalInterface } from 'flowbite';
+import { modalOptions } from './utils';
 
 interface IMasterGroup {
   id: number;
@@ -15,22 +9,6 @@ interface IMasterGroup {
 
 const $modalElement: HTMLElement = document.querySelector('#editMasterBillableGroupModal');
 const addMasterBillableGroupModalElement: HTMLElement = document.querySelector('#add-master-billable-group-modal');
-
-const modalOptions: ModalOptions = {
-  placement: 'bottom-right',
-  backdrop: 'dynamic',
-  backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
-  closable: true,
-  onHide: () => {
-    console.log('modal is hidden');
-  },
-  onShow: () => {
-    console.log('master billable group id: ');
-  },
-  onToggle: () => {
-    console.log('modal has been toggled');
-  },
-};
 
 const modal: ModalInterface = new Modal($modalElement, modalOptions);
 const addModal: ModalInterface = new Modal(addMasterBillableGroupModalElement, modalOptions);

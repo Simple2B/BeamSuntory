@@ -73,22 +73,49 @@ def test_delete_group(client: FlaskClient):
     assert len(master_groups_rows_objs) == 0
 
 
-# def test_edit_group(mg_g_populate: FlaskClient):
-#     login(mg_g_populate)
+def test_edit_group(client: FlaskClient):
+    register("samg", "samg@test.com", "Stolyar7*", "warehouse_manager")
+    response = login(client, "samg", "Stolyar7*")
+    assert b"Login successful." in response.data
 
-#     response = mg_g_populate.post(
-#         "/master_group/edit", data=dict(master_group_id=1, name="Premise")
-#     )
-#     assert response.status_code == 302
-#     assert "master_group" in response.text
-#     master_groups_rows_objs = db.session.execute(m.MasterGroup.select()).all()
-#     assert len(master_groups_rows_objs) > 0
-#     assert master_groups_rows_objs[0][0].name == "Premise"
+    response = client.post("/master_billable_group/create", data=dict(name="Boxes"))
+    assert response.status_code == 302
+    master_groups_rows_objs = db.session.execute(m.MasterBillableGroup.select()).all()
+    assert len(master_groups_rows_objs) == 1
 
-#     response = mg_g_populate.post(
-#         "/stock_target_group/edit", data=dict(group_id=1, name="BJ", master_group="1")
-#     )
-#     assert response.status_code == 302
-#     assert "group" in response.text
-#     groups_rows_objs = db.session.execute(m.Group.select()).all()
-#     assert len(groups_rows_objs) > 0
+    master_billable_group = master_groups_rows_objs[0][0]
+
+    response = client.post(
+        "/master_billable_group/edit",
+        data=dict(master_billable_group_id=master_billable_group.id, name="Boxes1"),
+    )
+    assert response.status_code == 302
+    master_groups_rows_objs = db.session.execute(m.MasterBillableGroup.select()).all()
+    assert master_groups_rows_objs[0][0].name == "Boxes1"
+
+    response = client.post(
+        "/billable_group/create",
+        data=dict(name="Small Box", master_billable_group_id="1", rate="10"),
+    )
+    assert response.status_code == 302
+
+    billable_groups = db.session.execute(m.BillableGroup.select()).all()
+    assert len(billable_groups) == 1
+
+    billable_group = billable_groups[0][0]
+
+    response = client.post(
+        "/billable_group/edit",
+        data=dict(
+            billable_group_id=billable_group.id,
+            name="Small Box1",
+            master_billable_group_id="1",
+            rate="20",
+        ),
+    )
+
+    assert response.status_code == 302
+    billable_groups = db.session.execute(m.BillableGroup.select()).all()
+    assert len(billable_groups) == 1
+    assert billable_groups[0][0].name == "Small Box1"
+    assert billable_groups[0][0].rate == 20

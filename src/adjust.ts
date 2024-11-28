@@ -1,6 +1,6 @@
-import { create } from '@easepick/bundle';
 import { Modal } from 'flowbite';
-import type { ModalOptions, ModalInterface } from 'flowbite';
+import type { ModalInterface } from 'flowbite';
+import { modalOptions } from './utils';
 
 interface IAdjust {
   id: number;
@@ -41,20 +41,6 @@ const defaultBrandImage =
 // adjust modals
 const $viewAdjustModalElement: HTMLElement = document.querySelector('#view-adjust-modal');
 
-const modalOptions: ModalOptions = {
-  placement: 'bottom-right',
-  backdrop: 'dynamic',
-  backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
-  closable: true,
-  onHide: () => {
-    const GroupQtyContainer = document.querySelector('#adjust-view-group-quantity-container');
-    GroupQtyContainer.innerHTML = '';
-  },
-  onShow: () => {},
-  onToggle: () => {
-    console.log('modal has been toggled');
-  },
-};
 const viewModal: ModalInterface = new Modal($viewAdjustModalElement, modalOptions);
 
 const $viewButtonElements = document.querySelectorAll('.adjust-view-button');

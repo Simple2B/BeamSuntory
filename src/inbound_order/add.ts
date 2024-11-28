@@ -1,33 +1,40 @@
-import {Modal, ModalInterface, ModalOptions } from "flowbite";
-import { IProductAllocatedBase } from "./types";
+import { Modal, ModalInterface } from 'flowbite';
+import { IProductAllocatedBase } from './types';
+import { modalOptions as addModalOptions } from '../utils';
 
 const createInboundOrderHandler = () => {
   const createInboundOrderBtn = document.getElementById('inbound-order-create-btn') as HTMLButtonElement;
   const createInboundOrderBtnSubmit = document.getElementById('inbound-order-add-submit-btn') as HTMLButtonElement;
-  if(!createInboundOrderBtn) {
-    console.log("Error: no create inbound order button");
+  if (!createInboundOrderBtn) {
+    console.log('Error: no create inbound order button');
     return;
   }
   createInboundOrderBtn.addEventListener('click', () => {
-    const allocatedProductsData: IProductAllocatedBase[] = []
+    const allocatedProductsData: IProductAllocatedBase[] = [];
     // Set products as JSON to field
     const productsAllocatedContainers = document.querySelectorAll('.product-allocated');
 
     productsAllocatedContainers.forEach((productContainer) => {
       // Get HTML nodes with product values
-      const productAllocatedQuantityInput = productContainer.querySelector('.product-allocated-quantity') as HTMLInputElement;
-      const productAllocatedShelfLifeStartInput = productContainer.querySelector('.product-allocated-shelf-life-start') as HTMLInputElement;
-      const productAllocatedShelfLifeEndInput = productContainer.querySelector('.product-allocated-shelf-life-end') as HTMLInputElement;
+      const productAllocatedQuantityInput = productContainer.querySelector(
+        '.product-allocated-quantity'
+      ) as HTMLInputElement;
+      const productAllocatedShelfLifeStartInput = productContainer.querySelector(
+        '.product-allocated-shelf-life-start'
+      ) as HTMLInputElement;
+      const productAllocatedShelfLifeEndInput = productContainer.querySelector(
+        '.product-allocated-shelf-life-end'
+      ) as HTMLInputElement;
 
-      let productId;      
+      let productId;
       const inputField = productContainer.querySelector('#inbound-order-add-add-product-select') as HTMLInputElement;
       const selectedOption = productContainer.querySelector(`#product-list option[value="${inputField.value}"]`);
 
-      if(!selectedOption) {
+      if (!selectedOption) {
         event.preventDefault();
         alert('Please select a valid product from the list');
-      }           
-      productId = parseInt(selectedOption.getAttribute('data-product-id')) ?? 0 ;     
+      }
+      productId = parseInt(selectedOption.getAttribute('data-product-id')) ?? 0;
       // Retrieve values from Nodes
       const productAllocatedQuantity = parseInt(productAllocatedQuantityInput.value);
       const productAllocatedShelfLifeStart = productAllocatedShelfLifeStartInput.value;
@@ -38,43 +45,28 @@ const createInboundOrderHandler = () => {
         quantity: productAllocatedQuantity,
         shelfLifeStart: productAllocatedShelfLifeStart,
         shelfLifeEnd: productAllocatedShelfLifeEnd,
-      })
+      });
     });
 
-    const inputProducts: HTMLInputElement = document.querySelector(`#inbound-order-add-products`)
-    inputProducts.value = JSON.stringify(allocatedProductsData)
-    createInboundOrderBtnSubmit.click()
+    const inputProducts: HTMLInputElement = document.querySelector(`#inbound-order-add-products`);
+    inputProducts.value = JSON.stringify(allocatedProductsData);
+    createInboundOrderBtnSubmit.click();
   });
-}
+};
 
 export const initAddInboundOrderModal = () => {
   const addModalButton = document.querySelector('#inbound-order-add-modal-button');
-  const addInboundOrderModalElement: HTMLElement = document.querySelector('#add-inbound-order-modal')
-  const addModalOptions: ModalOptions = {
-    placement: 'bottom-right',
-    backdrop: 'dynamic',
-    backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
-    closable: true,
-    onHide: () => {
-      console.log('inbound-order id: ')
-    },
-    onShow: () => {
-      console.log('inbound-order id: ')
-    },
-    onToggle: () => {
-      console.log('modal has been toggled')
-    },
-  }
+  const addInboundOrderModalElement: HTMLElement = document.querySelector('#add-inbound-order-modal');
 
   const addModal: ModalInterface = new Modal(addInboundOrderModalElement, addModalOptions);
-  addModalButton.addEventListener('click', () => {    
+  addModalButton.addEventListener('click', () => {
     addModal.show();
   });
 
   const addModalCloseButton = document.querySelector('#add-modal-btn-hide') as HTMLButtonElement;
   addModalCloseButton.addEventListener('click', () => {
     addModal.hide();
-  })
+  });
 
   createInboundOrderHandler();
-}
+};

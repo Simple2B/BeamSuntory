@@ -1,12 +1,6 @@
-import {Modal} from 'flowbite';
-import type {ModalOptions, ModalInterface} from 'flowbite';
-
-// /*
-//  * $editWarehouseModal: required
-//  * options: optional
-//  */
-
-// // For your js code
+import { Modal } from 'flowbite';
+import type { ModalInterface } from 'flowbite';
+import { modalOptions } from './utils';
 
 interface IWarehouse {
   id: number;
@@ -18,47 +12,23 @@ interface IWarehouse {
   manager_id: number;
 }
 
-const $modalElement: HTMLElement = document.querySelector(
-  '#editWarehouseModal',
-);
-const $addWarehouseModalElement: HTMLElement = document.querySelector(
-  '#add-warehouse-modal',
-);
-
-const modalOptions: ModalOptions = {
-  placement: 'bottom-right',
-  backdrop: 'dynamic',
-  backdropClasses:
-    'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
-  closable: true,
-  onHide: () => {
-    console.log('modal is hidden');
-  },
-  onShow: () => {
-    console.log('warehouse id: ');
-  },
-  onToggle: () => {
-    console.log('modal has been toggled');
-  },
-};
+const $modalElement: HTMLElement = document.querySelector('#editWarehouseModal');
+const $addWarehouseModalElement: HTMLElement = document.querySelector('#add-warehouse-modal');
 
 const modal: ModalInterface = new Modal($modalElement, modalOptions);
-const addModal: ModalInterface = new Modal(
-  $addWarehouseModalElement,
-  modalOptions,
-);
+const addModal: ModalInterface = new Modal($addWarehouseModalElement, modalOptions);
 
 const $buttonElements = document.querySelectorAll('.warehouse-edit-button');
-$buttonElements.forEach(e =>
+$buttonElements.forEach((e) =>
   e.addEventListener('click', () => {
     editWarehouse(JSON.parse(e.getAttribute('data-target')));
-  }),
+  })
 );
 
-const closingEditModalButton = document.getElementById('edit-warehouse-modal-close-btn')
+const closingEditModalButton = document.getElementById('edit-warehouse-modal-close-btn');
 closingEditModalButton.addEventListener('click', () => {
-  modal.hide()
-})
+  modal.hide();
+});
 
 // closing add edit modal
 const $buttonClose = document.querySelector('#modalCloseButton');
@@ -77,12 +47,8 @@ if (addModalCloseBtn) {
 }
 
 // search flow
-const searchInput: HTMLInputElement = document.querySelector(
-  '#table-search-warehouses',
-);
-const searchInputButton = document.querySelector(
-  '#table-search-warehouse-button',
-);
+const searchInput: HTMLInputElement = document.querySelector('#table-search-warehouses');
+const searchInputButton = document.querySelector('#table-search-warehouse-button');
 if (searchInputButton && searchInput) {
   searchInputButton.addEventListener('click', () => {
     window.location.href = `${window.location.origin}${window.location.pathname}?q=${searchInput.value}`;
@@ -90,7 +56,7 @@ if (searchInputButton && searchInput) {
 }
 const deleteButtons = document.querySelectorAll('.delete-warehouse-btn');
 
-deleteButtons.forEach(e => {
+deleteButtons.forEach((e) => {
   e.addEventListener('click', async () => {
     if (confirm('Are sure?')) {
       let id = e.getAttribute('data-warehouse-id');

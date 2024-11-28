@@ -199,7 +199,7 @@ export const initEditOrderModal = () => {
         const productAllocatedNameDiv = currentProductAllocatedContainer.querySelector(
           '.inbound-order-edit-check-product'
         ) as HTMLDivElement;
-        const productAllocatedDescription= currentProductAllocatedContainer.querySelector(
+        const productAllocatedDescription = currentProductAllocatedContainer.querySelector(
           '.inbound-order-edit-product-description'
         ) as HTMLDivElement;
         const productAllocatedSKUDiv = currentProductAllocatedContainer.querySelector(
@@ -229,7 +229,6 @@ export const initEditOrderModal = () => {
         productAllocatedTotalQuantityInput.value = productAllocated.quantity.toString();
         productAllocatedShelfLifeFromDiv.innerHTML = getDatepickerDateFormat(productAllocated.shelfLifeStart);
         productAllocatedShelfLifeToDiv.innerHTML = getDatepickerDateFormat(productAllocated.shelfLifeEnd);
-
 
         const buttonAddNewGroup = orderEditAddGroupButtonTemplate.cloneNode(true) as HTMLButtonElement;
         // current point
@@ -283,7 +282,7 @@ export const initEditOrderModal = () => {
           productAllocatedQuantityDiv.innerHTML = newQuantity;
           productAllocatedQuantityDiv.setAttribute('data-quantity', newQuantity);
           setNewQuantityView(currentProductAllocatedContainer as HTMLDivElement);
-        })
+        });
       });
 
       if (inboundOrderData.status !== 'Assigned to pickup' && inboundOrderData.status !== 'Draft') {
@@ -320,7 +319,9 @@ export const initEditOrderModal = () => {
 
     productAllocatedGroupsContainers.forEach((productGroupContainer) => {
       const productAllocatedIdInput = productGroupContainer.querySelector('.product-allocated-id') as HTMLInputElement;
-      const productAllocatedQuantityInput = productGroupContainer.querySelector('.inbound-order-edit-total-quantity') as HTMLInputElement;
+      const productAllocatedQuantityInput = productGroupContainer.querySelector(
+        '.inbound-order-edit-total-quantity'
+      ) as HTMLInputElement;
 
       const productAllocatedQuantity = parseInt(productAllocatedQuantityInput.value);
 
