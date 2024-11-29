@@ -20,6 +20,7 @@ from .report_inventory import ReportInventoryList
 
 if TYPE_CHECKING:
     from .report_shipping import ReportShipping
+    from .ship_request_billable import ShipRequestBillable
 
 
 class ShipRequest(db.Model, ModelMixin):
@@ -79,6 +80,9 @@ class ShipRequest(db.Model, ModelMixin):
         back_populates="ship_request"
     )
     user: orm.Mapped[User] = orm.relationship()
+    ship_request_billables: orm.Mapped[List["ShipRequestBillable"]] = orm.relationship(
+        back_populates="ship_request"
+    )
 
     @property
     def date_picked_up(self):

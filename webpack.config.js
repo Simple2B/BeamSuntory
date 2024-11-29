@@ -354,10 +354,23 @@ const bulkAssignConfig = [
   },
 ];
 
+const outgoingBillableGroupsConfig = [
+  {
+    entry: {
+      main: './src/outgoing_stock_billable_groups_add.ts',
+    },
+    output: {
+      path: path.resolve(__dirname, './app/static'),
+      filename: 'js/outgoing_stock_billable_groups_add.js', // <--- Will be compiled to this single file
+    },
+  },
+];
+
 const configs = [
+  ...outgoingBillableGroupsConfig,
+  baseConfig,
   masterBillableGroupConfig,
   billableGroupConfig,
-  baseConfig,
   ...userConfig,
   groupConfig,
   masterGroupConfig,

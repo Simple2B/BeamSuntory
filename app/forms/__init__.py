@@ -32,6 +32,7 @@ from .ship_request import (
     ShipRequestOutgoingForm,
     ShipRequestOutgoingNotesForm,
     ProductShipRequestForm,
+    BillableGroupOutgoingStockForm,
 )
 from .supplier import SupplierForm, NewSupplierForm
 from .cart import CartForm, NewCartForm

@@ -20,3 +20,15 @@ class GroupAllocated(BaseModel):
 
 
 GroupAllocatedList = RootModel[list[GroupAllocated]]
+
+
+class OutgoingStockBillableGroup(BaseModel):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    master_billable_group_id: int
+    billable_group_id: int
+    quantity: int
+    total: float
+
+
+OutgoingStockBillableGroupList = RootModel[list[OutgoingStockBillableGroup]]
