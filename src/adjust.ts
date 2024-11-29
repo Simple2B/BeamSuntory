@@ -50,8 +50,6 @@ $viewButtonElements.forEach((e) =>
 
 // ----view adjust modal-----
 function viewAdjust(adjust: IAdjust) {
-  console.log(adjust);
-
   let div: HTMLDivElement = document.querySelector('#adjust-view-product-name');
   div.innerHTML = adjust.product.name;
   div = document.querySelector('#adjust-view-product-SKU');

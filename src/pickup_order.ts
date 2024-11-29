@@ -53,7 +53,6 @@ const modalViewOptions: ModalOptions = {
   backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
   closable: true,
   onHide: () => {
-    console.log('modal is hidden');
     const tableShipRequestBody = document.querySelector('#table-pickup-order-body-view');
     while (tableShipRequestBody.firstChild) {
       tableShipRequestBody.removeChild(tableShipRequestBody.firstChild);
@@ -65,9 +64,7 @@ const modalViewOptions: ModalOptions = {
     });
   },
   onShow: () => {},
-  onToggle: () => {
-    console.log('modal has been toggled');
-  },
+  onToggle: () => {},
 };
 
 const modalEditOptions: ModalOptions = {
@@ -76,16 +73,13 @@ const modalEditOptions: ModalOptions = {
   backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
   closable: true,
   onHide: () => {
-    console.log('modal is hidden');
     const tableShipRequestBody = document.querySelector('#table-pickup-order-body-edit');
     while (tableShipRequestBody.firstChild) {
       tableShipRequestBody.removeChild(tableShipRequestBody.firstChild);
     }
   },
   onShow: () => {},
-  onToggle: () => {
-    console.log('modal has been toggled');
-  },
+  onToggle: () => {},
 };
 
 const viewModal: ModalInterface = new Modal($modalViewElement, modalViewOptions);
@@ -97,7 +91,6 @@ const viewPickupOrderButtonElements = document.querySelectorAll('.pickup-order-v
 viewPickupOrderButtonElements.forEach((e) =>
   e.addEventListener('click', () => {
     const shipRequest: IShipRequest = JSON.parse(e.getAttribute('data-target'));
-    console.log(shipRequest);
     const store = JSON.parse(e.getAttribute('data-target-store'));
     let div: HTMLDivElement = document.querySelector('#pickup-order-view-order-number');
     div.innerHTML = shipRequest.orderNumb;
@@ -211,7 +204,6 @@ function editShipRequest(shipRequest: IShipRequest, store: IStore) {
   div.innerHTML = store.zip;
 
   createPickupOrderItemTable(shipRequest, 'edit');
-  console.log('shipRequest: ', shipRequest);
 
   editModal.show();
 }
@@ -407,7 +399,6 @@ if (sortByNamePickupOrderStorage) {
 orderFilterPickupOrderInputs.forEach((input: HTMLInputElement) => {
   const hiddenInput = document.querySelector('#sort_by') as HTMLInputElement;
   input.addEventListener('change', () => {
-    console.log('input changed', input.checked);
     if (input.checked) {
       hiddenInput.value = input.value;
       sessionStorage.setItem('sortByNamePickupOrder', JSON.stringify(input.value));

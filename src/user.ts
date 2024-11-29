@@ -46,14 +46,9 @@ const modalOptions: ModalOptions = {
   closable: true,
   onHide: () => {
     document.querySelector('#user-edit-dropdown-btn').removeEventListener('click', showHideGroupUserOptions);
-    console.log('modal is hidden');
   },
-  onShow: () => {
-    console.log('user id: ');
-  },
-  onToggle: () => {
-    console.log('modal has been toggled');
-  },
+  onShow: () => {},
+  onToggle: () => {},
 };
 
 const modal: ModalInterface = new Modal($modalElement, modalOptions);
@@ -259,7 +254,6 @@ viewUserButtonElements.forEach((e) =>
   e.addEventListener('click', () => {
     const user: IUser = JSON.parse(e.getAttribute('data-target'));
     const lockerAddressContainer = document.querySelector('#user-view-locker-address-container');
-    console.log(user);
 
     if (user.role !== 'sales_rep') {
       lockerAddressContainer.classList.add('hidden');

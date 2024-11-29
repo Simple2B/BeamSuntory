@@ -74,9 +74,7 @@ const options: DismissOptions = {
   timing: 'ease-out',
 
   // callback functions
-  onHide: (context, targetEl) => {
-    console.log('element has been dismissed');
-  },
+  onHide: (context, targetEl) => {},
 };
 
 /*
@@ -119,7 +117,6 @@ export async function getFullImage(id: string) {
     image.classList.add('hidden');
 
     const response = await fetch(`/product/full_image/${id}`);
-    console.log(response);
     const data = await response.json();
 
     spinnerModal.hide();
@@ -243,7 +240,6 @@ const spinner = `<div tabindex="-1"
 window.addEventListener('submit', (event: Event) => {
   const target = event.target as HTMLFormElement;
   const method = target.method;
-  console.log(target);
   if (method.toLocaleLowerCase() === 'get' || target.hasAttribute('hx-post')) return;
   document.body.insertAdjacentHTML('beforeend', spinner);
 });

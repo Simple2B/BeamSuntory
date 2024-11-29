@@ -74,7 +74,6 @@ const downloadCSV = async function () {
     const url = [`api?page={page}`, queryTail].join('&');
     const res = await fetch(url);
     const data: IEventsResponse = await res.json();
-    console.log(data.events);
 
     data.events.forEach((event) => {
       csvData.push(

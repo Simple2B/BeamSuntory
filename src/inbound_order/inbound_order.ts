@@ -39,7 +39,6 @@ deleteButtons.forEach((e) => {
 const openCurrentOrder = () => {
   const urlParams = new URLSearchParams(window.location.search);
   const orderUuid = urlParams.get('current_order_uuid');
-  console.log(orderUuid);
   if (!orderUuid) {
     return;
   }

@@ -56,7 +56,6 @@ deleteButtons.forEach((e) => {
 });
 
 function editWarehouse(warehouse: IWarehouse) {
-  console.log(warehouse);
   let input: HTMLInputElement = document.querySelector('#warehouse-edit-name');
   input.value = warehouse.name;
   input = document.querySelector('#warehouse-edit-id');
@@ -71,9 +70,7 @@ function editWarehouse(warehouse: IWarehouse) {
   input.value = warehouse.zip;
   input = document.querySelector('#warehouse-edit-address');
   input.value = warehouse.address;
-  console.log(document.querySelector('#warehouse-edit-manager_id'));
   input = document.querySelector('#warehouse-edit-manager_id');
-  console.log(input, warehouse.manager_id.toString());
   input.value = warehouse.manager_id.toString();
   modal.show();
 }
