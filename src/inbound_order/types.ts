@@ -1,4 +1,4 @@
-import { IGroup, IInboundOrderBase, ISupplier, IWarehouse } from "../types"
+import { IGroup, IInboundOrderBase, ISupplier, IWarehouse } from '../types';
 
 export interface IProductAllocatedGroup {
   groupId: number;
@@ -34,7 +34,6 @@ export interface IWarehouseProduct {
   group: IGroup;
 }
 
-
 export interface IProductAllocatedBase {
   id: number;
   quantity: number;
@@ -56,11 +55,11 @@ export interface IProductQuantityGroupOut {
 }
 
 export interface IbOrderProduct {
-  id: number
-  name: string
+  id: number;
+  name: string;
 
-  SKU: string
-  description: string
+  SKU: string;
+  description: string;
 }
 
 export interface IAllocatedProductOut extends IProductAllocatedBase {
@@ -68,11 +67,18 @@ export interface IAllocatedProductOut extends IProductAllocatedBase {
   productQuantityGroups: IProductQuantityGroupOut[];
 }
 
+interface shipRequestBillableOut {
+  master_billable_group_name: string;
+  billable_group_name: string;
+  quantity: number;
+  total: number;
+}
 
 export interface IInboundOrderOut extends IInboundOrderBase {
   id: number;
   uuid: string;
   productsAllocated: IAllocatedProductOut[];
+  shipRequestBillables: shipRequestBillableOut[];
 }
 
 export interface IPagination {

@@ -150,11 +150,13 @@
                   {{ prod_allocated.shelf_life_end.strftime('%Y-%m-%d') }}</div>
               </div>
             </div>
+            {% if prod_allocated.product_quantity_groups|length > 0 %}
             <div class="col-span-6"><label
                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Group</label></div>
             <div class="col-span-6">
               <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
             </div>
+            {% endif %}
             {% for allocated_group in prod_allocated.product_quantity_groups %}
             <div class="col-span-6">
               <div
@@ -172,6 +174,45 @@
             {% endfor %}
           </div>
         </div>
+        <div>
+          <div class="grid grid-cols-12 gap-5 items-end">
+            {% if inbound_order.ship_request_billables|length >0 %}
+            <div class="col-span-12">
+              <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Billables</label>
+            </div>
+              {% for billable in inbound_order.ship_request_billables%}
+              <div class="col-span-6 sm:col-span-3">
+                <label for="master_billable_group_name"
+                  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Master billable group name</label>
+                <div class=" shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  {{ billable.master_billable_group_name }}
+                </div>
+              </div>
+              <div class="col-span-6 sm:col-span-3">
+                <label for="billable_group_name"
+                  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Billable group name</label>
+                <div class=" shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  {{ billable.billable_group_name }}
+                </div>
+              </div>
+              <div class="col-span-6 sm:col-span-3">
+                <label for="quantity"
+                  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
+                <div class=" shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  {{ billable.quantity }}
+                </div>
+              </div>
+              <div class="col-span-6 sm:col-span-3">
+                <label for="total"
+                  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Total</label>
+                <div class=" shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  {{ billable.total }} $
+                </div>
+              </div>
+             {% endfor %}
+            {% endif %}
+            </div>
+            </div>
       </div>
     </div>
   </div>

@@ -366,8 +366,20 @@ const outgoingBillableGroupsConfig = [
   },
 ];
 
+const inboundOrderBillableGroupsAddConfig = [
+  {
+    entry: {
+      main: './src/inbound_order_billable_groups_add.ts',
+    },
+    output: {
+      path: path.resolve(__dirname, './app/static'),
+      filename: 'js/inbound_order_billable_groups_add.js', // <--- Will be compiled to this single file
+    },
+  },
+];
 const configs = [
   ...outgoingBillableGroupsConfig,
+  ...inboundOrderBillableGroupsAddConfig,
   baseConfig,
   masterBillableGroupConfig,
   billableGroupConfig,

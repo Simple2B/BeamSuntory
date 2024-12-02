@@ -6,6 +6,7 @@ from flask import (
     render_template,
     flash,
     redirect,
+    request,
     url_for,
 )
 from flask_login import login_required, current_user
@@ -569,6 +570,24 @@ def get_billable_group(id: int):
     )
     if not master_billable_group:
         log(log.ERROR, "Master Billable Group not found: [%s]", id)
+        return "Master Billable Group not found", 404
+    groups_json = [
+        {"id": f"{group.id}", "name": f"{group.name}", "rate": f"{group.rate}"}
+        for group in master_billable_group.billable_groups
+    ]
+    return groups_json
+
+
+@outgoing_stock_blueprint.route("/get_billable_group_by_name", methods=["GET"])
+@login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+def get_billable_group_by_name():
+    name = request.args.get("master_group_name")
+    master_billable_group = db.session.scalar(
+        sa.select(m.MasterBillableGroup).where(m.MasterBillableGroup.name == name)
+    )
+    if not master_billable_group:
+        log(log.ERROR, "Master Billable Group not found: [%s]", name)
         return "Master Billable Group not found", 404
     groups_json = [
         {"id": f"{group.id}", "name": f"{group.name}", "rate": f"{group.rate}"}

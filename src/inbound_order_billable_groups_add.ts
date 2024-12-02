@@ -1,6 +1,6 @@
 import { deleteAllocatedGroup, generateHtml, recalculateGrandTotal } from './utils';
 
-const createAllocationBillableGroupContainer = async (e: MouseEvent) => {
+const createAddInboundGroupContainer = async (e: MouseEvent) => {
   const btn = e.currentTarget as HTMLButtonElement;
   const groupAllocatedContainer = document.querySelector('.group-allocated') as HTMLDivElement;
   const grandTotal = document.querySelector('#grand-total');
@@ -34,9 +34,9 @@ const createAllocationBillableGroupContainer = async (e: MouseEvent) => {
   });
 };
 
-const buttonAllocateProduct = document.getElementById(
-  'outgoing-stock-billable-groups-allocate-btn'
+const buttonAllocateAddGroups = document.getElementById(
+  'inbound-order-billable-groups-adding-btn'
 ) as HTMLButtonElement;
-if (buttonAllocateProduct) {
-  buttonAllocateProduct.addEventListener('click', createAllocationBillableGroupContainer);
+if (buttonAllocateAddGroups) {
+  buttonAllocateAddGroups.addEventListener('click', createAddInboundGroupContainer);
 }

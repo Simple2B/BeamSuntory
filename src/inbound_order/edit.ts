@@ -3,6 +3,171 @@ import { IInboundOrderOut, IProductGroupCreate } from './types';
 import { getDatepickerDateFormat } from './utils';
 import { IGroup } from '../types';
 
+interface BillableOut {
+  master_billable_group_name: string;
+  billable_group_name: string;
+  quantity: number;
+  total: number;
+}
+
+interface IBillableGroupIn {
+  master_billable_group_id: number;
+  billable_group_id: number;
+  quantity: number;
+  total: number;
+}
+
+export function recalculateInboundGrandTotal() {
+  const totalInputs = document.querySelectorAll('.total') as NodeListOf<HTMLInputElement>;
+  let grandTotal = 0;
+  totalInputs.forEach((totalInput) => {
+    const value = parseFloat(totalInput.value);
+    if (isNaN(value)) {
+      return;
+    }
+    grandTotal += value;
+  });
+  const grandTotalElement = document.querySelector('#inbound-grand-total') as HTMLInputElement;
+  grandTotalElement.value = `${grandTotal.toFixed(2).toString()} $`;
+}
+
+export function deleteAllocatedGroup(e: MouseEvent) {
+  const groupAllocatedContainer = (e.currentTarget as HTMLDivElement).closest('.group-container') as HTMLDivElement;
+  groupAllocatedContainer.remove();
+  recalculateInboundGrandTotal();
+}
+
+async function addDeleteActions() {
+  const billableGroupsContainer = document.querySelector('#inbound-order-group-allocated') as HTMLDivElement;
+  const deleteButtons = billableGroupsContainer.querySelectorAll('.group-allocated-delete-button');
+  deleteButtons.forEach((button) => {
+    button.addEventListener('click', deleteAllocatedGroup);
+  });
+  const grandTotal = document.querySelector('#inbound-grand-total');
+  if (billableGroupsContainer.children.length > 0) {
+    grandTotal.classList.remove('invisible');
+  } else {
+    grandTotal.classList.add('invisible');
+  }
+
+  const quantityInputs = billableGroupsContainer.querySelectorAll('.quantity') as NodeListOf<HTMLInputElement>;
+  quantityInputs.forEach((quantityInput) => {
+    const totalInput = quantityInput.closest('.group-container').querySelector('.total') as HTMLInputElement;
+
+    quantityInput.addEventListener('input', (e) => {
+      const qty = e.currentTarget as HTMLInputElement;
+      const rate = parseFloat(totalInput.getAttribute('data-rate'))
+        ? parseFloat(totalInput.getAttribute('data-rate'))
+        : 0;
+      const quantity = parseFloat(qty.value);
+      if (quantity > 0) {
+        totalInput.value = `${(quantity * rate).toFixed(2).toString()} $`;
+      }
+      recalculateInboundGrandTotal();
+    });
+  });
+  recalculateInboundGrandTotal();
+}
+
+async function addBillable(billableGroupsContainer: HTMLDivElement, billable: BillableOut) {
+  let masterBillableGroups: any[] = [];
+  await fetch('/outgoing_stock/get_master_billable_groups')
+    .then((res) => res.json())
+    .then((data) => {
+      masterBillableGroups = data;
+    });
+  const masterBillableGroupOptions = masterBillableGroups
+    .map(
+      (group) =>
+        `<option ${billable.master_billable_group_name == group.name ? 'selected' : null} value="${group.id}">${
+          group.name
+        }</option>`
+    )
+    .join('');
+
+  let billableGroups: any[] = [];
+  await fetch(`/outgoing_stock/get_billable_group_by_name?master_group_name=${billable.master_billable_group_name}`)
+    .then((res) => res.json())
+    .then((data) => {
+      billableGroups = data;
+    });
+
+  const billableGroupOptions = billableGroups
+    .map(
+      (group) =>
+        `<option ${billable.billable_group_name == group.name ? 'selected' : null} value="${group.id}">${
+          group.name
+        }</option>`
+    )
+    .join('');
+
+  const newGroupContainer = document.createElement('div');
+  newGroupContainer.classList.add('p-6', 'relative', 'group-container');
+  newGroupContainer.innerHTML = `
+    <div class="group-allocated-delete-button absolute top-[15%] left-[97%] bg-red-600 hover:bg-red-800 rounded-lg cursor-pointer">
+      <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6.99486 7.00636C6.60433 7.39689 6.60433 8.03005 6.99486 8.42058L10.58 12.0057L6.99486 15.5909C6.60433 15.9814 6.60433 16.6146 6.99486 17.0051C7.38538 17.3956 8.01855 17.3956 8.40907 17.0051L11.9942 13.4199L15.5794 17.0051C15.9699 17.3956 16.6031 17.3956 16.9936 17.0051C17.3841 16.6146 17.3841 15.9814 16.9936 15.5909L13.4084 12.0057L16.9936 8.42059C17.3841 8.03007 17.3841 7.3969 16.9936 7.00638C16.603 6.61585 15.9699 6.61585 15.5794 7.00638L11.9942 10.5915L8.40907 7.00636C8.01855 6.61584 7.38538 6.61584 6.99486 7.00636Z" fill="#ffffff"></path>
+      </svg>
+    </div>
+    <div class="flex gap-6">
+      <!--billable selectors  -->
+      <select data-selected-master-group-name=${billable.master_billable_group_name} onchange="masterGroupChange(this)" name="master_billable_group_id"  class="master_billable_group_selector w-1/4 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+        <option value="">Select Master Billable Group</option>
+        ${masterBillableGroupOptions}
+      </select>
+      <select data-selected-billable-group-name=${billable.billable_group_name} onchange="billableGroupChange(this)" name="billable_group_id" class="billable_group_selector w-1/4 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+        <option value="">Select Billable Group</option>
+        ${billableGroupOptions}
+      </select>
+      <!--billable selectors  -->
+      <input type="number" class="w-1/6 quantity bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Quantity" value=${billable.quantity} disabled />
+      <input type="text" class="total w-1/6 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Total" value="${billable.total} $" disabled />
+    </div>
+  `;
+
+  billableGroupsContainer.appendChild(newGroupContainer);
+  await addDeleteActions();
+}
+
+async function addEmptyBillableGroup() {
+  const billableGroupsContainer = document.querySelector('#inbound-order-group-allocated') as HTMLDivElement;
+  let masterBillableGroups: any[] = [];
+  await fetch('/outgoing_stock/get_master_billable_groups')
+    .then((res) => res.json())
+    .then((data) => {
+      masterBillableGroups = data;
+    });
+  const masterBillableGroupOptions = masterBillableGroups
+    .map((group) => `<option value="${group.id}">${group.name}</option>`)
+    .join('');
+
+  const newGroupContainer = document.createElement('div');
+  newGroupContainer.classList.add('p-6', 'relative', 'group-container');
+  newGroupContainer.innerHTML = `
+    <div class="group-allocated-delete-button absolute top-[15%] left-[97%] bg-red-600 hover:bg-red-800 rounded-lg cursor-pointer">
+      <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6.99486 7.00636C6.60433 7.39689 6.60433 8.03005 6.99486 8.42058L10.58 12.0057L6.99486 15.5909C6.60433 15.9814 6.60433 16.6146 6.99486 17.0051C7.38538 17.3956 8.01855 17.3956 8.40907 17.0051L11.9942 13.4199L15.5794 17.0051C15.9699 17.3956 16.6031 17.3956 16.9936 17.0051C17.3841 16.6146 17.3841 15.9814 16.9936 15.5909L13.4084 12.0057L16.9936 8.42059C17.3841 8.03007 17.3841 7.3969 16.9936 7.00638C16.603 6.61585 15.9699 6.61585 15.5794 7.00638L11.9942 10.5915L8.40907 7.00636C8.01855 6.61584 7.38538 6.61584 6.99486 7.00636Z" fill="#ffffff"></path>
+      </svg>
+    </div>
+    <div class="flex gap-6">
+      <!--billable selectors  -->
+      <select onchange="masterGroupChange(this)" name="master_billable_group_id"  class="master_billable_group_selector w-1/4 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+        <option value="">Select Master Billable Group</option>
+        ${masterBillableGroupOptions}
+      </select>
+      <select onchange="billableGroupChange(this)" name="billable_group_id" class="billable_group_selector w-1/4 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+        <option value="">Select Billable Group</option>
+      </select>
+      <!--billable selectors  -->
+      <input type="number" class="w-1/6 quantity bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Quantity" disabled />
+      <input type="text" class="total w-1/6 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Total" disabled />
+    </div>
+  `;
+
+  billableGroupsContainer.appendChild(newGroupContainer);
+  await addDeleteActions();
+}
+
 const setNewQuantityView = (quantityGroupContainer: HTMLDivElement) => {
   const quantitiesPerGroup = quantityGroupContainer.querySelectorAll(
     '.inbound-order-edit-add-quantity'
@@ -285,6 +450,13 @@ export const initEditOrderModal = () => {
         });
       });
 
+      const billableGroupsContainer = document.querySelector('#inbound-order-group-allocated') as HTMLDivElement;
+      if (billableGroupsContainer && billableGroupsContainer.children.length === 0) {
+        inboundOrderData.shipRequestBillables.forEach(async (billable) => {
+          await addBillable(billableGroupsContainer, billable);
+        });
+      }
+
       if (inboundOrderData.status !== 'Assigned to pickup' && inboundOrderData.status !== 'Draft') {
         saveButton.classList.add('hidden');
         orderStatusDiv.classList.remove('hidden');
@@ -297,6 +469,11 @@ export const initEditOrderModal = () => {
       }
       orderEditModal.show();
     });
+  });
+
+  const addGroupButton = document.querySelector('#inbound-order-billable-groups-allocate-btn') as HTMLButtonElement;
+  addGroupButton.addEventListener('click', async () => {
+    await addEmptyBillableGroup();
   });
 
   // submit update order
@@ -358,6 +535,37 @@ export const initEditOrderModal = () => {
       '#inbound-order-edit-product-quantities'
     ) as HTMLInputElement;
     productGroupsQuantitiesInput.value = JSON.stringify(productGroups);
+
+    // Billable groups
+    const billableGroupsContainer = document.querySelector('#inbound-order-group-allocated') as HTMLDivElement;
+    const billableGroups: IBillableGroupIn[] = [];
+
+    const billableGroupsItems = billableGroupsContainer.querySelectorAll(
+      '.group-container'
+    ) as NodeListOf<HTMLDivElement>;
+    billableGroupsItems.forEach((billableGroup) => {
+      const masterBillableGroupSelect = billableGroup.querySelector(
+        '.master_billable_group_selector'
+      ) as HTMLSelectElement;
+      const billableGroupSelect = billableGroup.querySelector('.billable_group_selector') as HTMLSelectElement;
+      const quantityInput = billableGroup.querySelector('.quantity') as HTMLInputElement;
+      const totalInput = billableGroup.querySelector('.total') as HTMLInputElement;
+
+      const masterBillableGroupId = parseInt(masterBillableGroupSelect.value);
+      const billableGroupId = parseInt(billableGroupSelect.value);
+      const quantity = parseInt(quantityInput.value);
+      const total = parseFloat(totalInput.value);
+
+      billableGroups.push({
+        master_billable_group_id: masterBillableGroupId,
+        billable_group_id: billableGroupId,
+        quantity: quantity,
+        total: total,
+      });
+    });
+
+    const billableGroupsInput = document.querySelector('#inbound-edit-billable-groups-input') as HTMLInputElement;
+    billableGroupsInput.value = JSON.stringify(billableGroups);
 
     const buttonSubmit = document.querySelector('#inbound-order-submit-btn') as HTMLButtonElement;
     buttonSubmit.click();

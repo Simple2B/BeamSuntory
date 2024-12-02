@@ -1,6 +1,13 @@
 import { IProductAllocatedBase } from './types';
 import { initModal } from '../utils';
 
+interface IInboundBillableGroup {
+  master_billable_group_id: number;
+  billable_group_id: number;
+  quantity: number;
+  total: number;
+}
+
 const createInboundOrderHandler = () => {
   const createInboundOrderBtn = document.getElementById('inbound-order-create-btn') as HTMLButtonElement;
   const createInboundOrderBtnSubmit = document.getElementById('inbound-order-add-submit-btn') as HTMLButtonElement;
@@ -49,6 +56,36 @@ const createInboundOrderHandler = () => {
 
     const inputProducts: HTMLInputElement = document.querySelector(`#inbound-order-add-products`);
     inputProducts.value = JSON.stringify(allocatedProductsData);
+    const allocatedGroupsData: IInboundBillableGroup[] = [];
+    const billableGroupsDivs = document.querySelectorAll('.group-allocated');
+
+    billableGroupsDivs.forEach((groupContainer) => {
+      // Get HTML nodes with product values
+      const groupAllocatedMasterGroupIdInput = groupContainer.querySelector(
+        '.master_billable_group_selector'
+      ) as HTMLSelectElement;
+      const groupAllocatedBillableGroupId = groupContainer.querySelector(
+        '.billable_group_selector'
+      ) as HTMLSelectElement;
+      const groupAllocatedQuantityInput = groupContainer.querySelector('.quantity') as HTMLInputElement;
+      const groupAllocatedTotalInput = groupContainer.querySelector('.total') as HTMLInputElement;
+      // Retrieve values from Nodes
+      const groupAllocatedMasterGroupId = parseInt(groupAllocatedMasterGroupIdInput.value);
+      const groupAllocatedRate = parseInt(groupAllocatedBillableGroupId.value);
+      const groupAllocatedQuantity = parseInt(groupAllocatedQuantityInput.value);
+      const groupAllocatedTotal = parseInt(groupAllocatedTotalInput.value);
+
+      allocatedGroupsData.push({
+        master_billable_group_id: groupAllocatedMasterGroupId,
+        billable_group_id: groupAllocatedRate,
+        quantity: groupAllocatedQuantity,
+        total: groupAllocatedTotal,
+      });
+    });
+
+    const inputGroups: HTMLInputElement = document.querySelector(`#inbound-order-add-billable-groups`);
+    inputGroups.value = JSON.stringify(allocatedGroupsData);
+
     createInboundOrderBtnSubmit.click();
   });
 };
