@@ -17,7 +17,7 @@
 <script>
     function masterGroupChange(select) {
         let master_billable_group_id = select.value;
-        let url = `/outgoing_stock/get_billable_group/${master_billable_group_id}`;
+        let url = `/outgoing_stock/get_billable_group_for_inbound/${master_billable_group_id}`;
         fetch(url)
             .then(response => response.json())
             .then(data => {

@@ -511,6 +511,11 @@ def print(query: s.OutgoingStockQueryParamsDownload):
         ]
     )
     total_value = round(total_value, 2)
+    for ship_request in ship_requests:
+        if ship_request.ship_request_billables:
+            total_value += sum(
+                [billable.total for billable in ship_request.ship_request_billables]
+            )
     return render_template(
         "outgoing_stock/pdf_template.html",
         ship_requests=ship_requests,
@@ -561,10 +566,12 @@ def get_master_billable_groups():
     return groups_json
 
 
-@outgoing_stock_blueprint.route("/get_billable_group/<int:id>", methods=["GET"])
+@outgoing_stock_blueprint.route(
+    "/get_billable_group_for_outgoing/<int:id>", methods=["GET"]
+)
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
-def get_billable_group(id: int):
+def get_billable_group_for_outgoing(id: int):
     master_billable_group = db.session.scalar(
         sa.select(m.MasterBillableGroup).where(m.MasterBillableGroup.id == id)
     )
@@ -574,6 +581,27 @@ def get_billable_group(id: int):
     groups_json = [
         {"id": f"{group.id}", "name": f"{group.name}", "rate": f"{group.rate}"}
         for group in master_billable_group.billable_groups
+        if group.assigned_to_outbound
+    ]
+    return groups_json
+
+
+@outgoing_stock_blueprint.route(
+    "/get_billable_group_for_incoming/<int:id>", methods=["GET"]
+)
+@login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+def get_billable_group_for_incoming(id: int):
+    master_billable_group = db.session.scalar(
+        sa.select(m.MasterBillableGroup).where(m.MasterBillableGroup.id == id)
+    )
+    if not master_billable_group:
+        log(log.ERROR, "Master Billable Group not found: [%s]", id)
+        return "Master Billable Group not found", 404
+    groups_json = [
+        {"id": f"{group.id}", "name": f"{group.name}", "rate": f"{group.rate}"}
+        for group in master_billable_group.billable_groups
+        if group.assigned_to_inbound
     ]
     return groups_json
 
