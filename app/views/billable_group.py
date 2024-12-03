@@ -190,3 +190,27 @@ def create_many():
         billable_group.save()
     flash("Billable groups added!", "success")
     return redirect(url_for("billable_group.get_all"))
+
+
+@billable_group_bp.route("/increase_costs", methods=["POST"])
+@login_required
+@role_required([s.UserRole.WAREHOUSE_MANAGER.value])
+def increase_costs():
+    data = request.get_json()
+    validated_data = s.BillableGroupIncreaseCostRequest.model_validate(data)
+    if not validated_data:
+        log(log.ERROR, "Increase costs validation failed: [%s]", data)
+        flash("Increase costs validation failed", "danger")
+        return "validation failed", 400
+    cost = validated_data.cost
+    billable_groups = db.session.scalars(sa.select(m.BillableGroup)).all()
+    if not billable_groups:
+        log(log.INFO, "There is no billable groups")
+        flash("There is no billable groups", "danger")
+        return "no billable groups", 404
+    for group in billable_groups:
+        group.rate *= 1 + cost / 100
+        group.rate = round(group.rate, 2)
+        group.save()
+    db.session.commit()
+    return "ok", 200

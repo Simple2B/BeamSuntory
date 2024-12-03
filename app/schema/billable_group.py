@@ -10,3 +10,9 @@ class BillableGroup(BaseModel):
     master_billable_group_id: int
     assigned_to_inbound: bool
     assigned_to_outbound: bool
+
+
+class BillableGroupIncreaseCostRequest(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    cost: float

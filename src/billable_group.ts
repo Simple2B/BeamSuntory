@@ -1,6 +1,4 @@
-import { Modal } from 'flowbite';
-import type { ModalInterface } from 'flowbite';
-import { addDeleteEvent, addSearchEvent, initModal, modalOptions } from './utils';
+import { addDeleteEvent, addSearchEvent, initModal } from './utils';
 
 interface IBillableGroup {
   id: number;
@@ -64,7 +62,30 @@ function editBillableGroup(billableGroup: IBillableGroup) {
   select.value = billableGroup.master_billable_group_id.toString();
   modal.show();
 }
+// for cost increasing
 
+const costIncreaseBtn = document.getElementById('table-increase-costs-billable-groups-button');
+const costIncreaseInput = document.getElementById('table-increase-costs-billable-groups') as HTMLInputElement;
+
+if (costIncreaseBtn && costIncreaseInput && costIncreaseInput.value != '') {
+  console.log('costIncreaseBtn', costIncreaseBtn);
+  costIncreaseBtn.addEventListener('click', async () => {
+    const url = '/billable_group/increase_costs';
+    const data = { cost: parseFloat(costIncreaseInput.value) };
+    if (confirm('Are sure?')) {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if ([200, 202, 404].includes(response.status)) {
+        location.reload();
+      }
+    }
+  });
+}
 // for multiple creating
 
 const deleteAllocatedGroup = (e: MouseEvent) => {
