@@ -37,6 +37,7 @@ from .bulk_ship import bulk_ship_bp
 from .bulk_assign import bulk_assign_bp
 from .master_billable_group import master_billable_group_bp
 from .billable_group import billable_group_bp
+from .report_billable import report_billable_blueprint
 
 BLUEPRINTS = (
     main_blueprint,
@@ -77,4 +78,5 @@ BLUEPRINTS = (
     bulk_assign_bp,
     master_billable_group_bp,
     billable_group_bp,
+    report_billable_blueprint,
 )

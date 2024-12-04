@@ -36,10 +36,16 @@ class ReportDataShipping(ReportData):
         )
 
         if report_filter.q:
-            where_stmt = m.ShipRequest.store.has(
-                m.Store.store_name.ilike(f"%{report_filter.q}%")
-            ) | m.ShipRequest.reports.any(
-                m.ReportShipping.user.has(m.User.username.ilike(f"%{report_filter.q}%"))
+            where_stmt = (
+                m.ShipRequest.store.has(
+                    m.Store.store_name.ilike(f"%{report_filter.q}%")
+                )
+                | m.ShipRequest.reports.any(
+                    m.ReportShipping.user.has(
+                        m.User.username.ilike(f"%{report_filter.q}%")
+                    )
+                )
+                | m.ShipRequest.order_numb.ilike(f"%{report_filter.q}%")
             )
 
             query = query.where(where_stmt)

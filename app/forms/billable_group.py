@@ -25,7 +25,10 @@ class BillableGroupForm(FlaskForm):
     submit = SubmitField("Add group")
 
     def validate_name(self, field):
-        query = m.BillableGroup.select().where(m.BillableGroup.name == field.data)
+        query = m.BillableGroup.select().where(
+            m.BillableGroup.name == field.data,
+            m.BillableGroup.id != self.billable_group_id.data,
+        )
         if db.session.scalar(query) is not None:
             raise ValidationError("This billable_group name is taken.")
         replace_underscore(self, field)

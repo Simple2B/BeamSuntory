@@ -66,6 +66,17 @@ function editBillableGroup(billableGroup: IBillableGroup) {
 function costIncreasing() {
   const costIncreaseBtn = document.getElementById('table-increase-costs-billable-groups-button');
   const costIncreaseInput = document.getElementById('table-increase-costs-billable-groups') as HTMLInputElement;
+  if (costIncreaseInput) {
+    costIncreaseInput.addEventListener('input', (e) => {
+      const value = (e.target as HTMLInputElement).value;
+      if (isNaN(parseFloat(value))) {
+        (e.target as HTMLInputElement).value = '';
+      } else if (value == '0') {
+        (e.target as HTMLInputElement).value = '';
+      }
+    });
+  }
+
   if (costIncreaseBtn && costIncreaseInput) {
     costIncreaseBtn.addEventListener('click', async () => {
       const url = '/billable_group/increase_costs';
