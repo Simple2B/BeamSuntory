@@ -1,10 +1,11 @@
 # flake8: noqa W291
 import filetype
-from flask.testing import FlaskClient
-from app import models as m, db
-from app import schema as s
 import sqlalchemy as sa
-from tests.utils import login, register, logout
+from flask.testing import FlaskClient
+
+from app import db
+from app import models as m
+from tests.utils import login
 
 
 def get_test_data(
