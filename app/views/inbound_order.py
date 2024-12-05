@@ -115,7 +115,7 @@ def get_all():
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def create():
-    form = f.InboundOrderCreateForm()
+    form: f.InboundOrderCreateForm = f.InboundOrderCreateForm()
 
     if not form.validate_on_submit():
         flash(f"Inbound order validation failed: {form.errors}", "danger")
@@ -199,6 +199,51 @@ def create():
             status="Allocation created",
         ).save(False)
 
+    if form.billable_groups.data:
+        try:
+            billable_groups = s.OutgoingStockBillableGroupList.model_validate_json(
+                form.billable_groups.data
+            )
+        except ValidationError:
+            log(
+                log.INFO,
+                "Inbound order validation failed: [%s]",
+                form.billable_groups.data,
+            )
+            flash(
+                "Inbound order validation failed: wrong billable groups data", "danger"
+            )
+            return redirect(url_for("inbound_order.get_all"))
+        if not billable_groups:
+            log(log.INFO, "Inbound order validation failed: no billable groups")
+            flash("Inbound order validation failed: no billable groups", "danger")
+            return redirect(url_for("inbound_order.get_all"))
+
+        for billable_group_info in billable_groups.root:
+            billable_group = db.session.get(
+                m.BillableGroup, billable_group_info.billable_group_id
+            )
+            if not billable_group:
+                log(
+                    log.INFO,
+                    "Inbound order validation failed: cannot find billable group with id [%s]",
+                    billable_group.billable_group_id,
+                )
+                flash(
+                    f"Billable group with id: {billable_group.billable_group_id} not found"
+                )
+                return redirect(url_for("inbound_order.get_all"))
+            ship_request_billable = m.ShipRequestBillable(
+                billable_group_id=billable_group.id,
+                quantity=billable_group_info.quantity,
+                inbound_order_id=inbound_order.id,
+                total=billable_group_info.total,
+                incoming=True,
+            )
+            ship_request_billable.save()
+            inbound_order.ship_request_billables.append(ship_request_billable)
+        db.session.commit()
+
     inbound_order.save()
     inbound_order.set_order_id()
     db.session.commit()
@@ -238,7 +283,7 @@ def get_view(inbound_order_id: int):
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
 def save():
-    form = f.InboundOrderUpdateForm()
+    form: f.InboundOrderUpdateForm = f.InboundOrderUpdateForm()
 
     if not form.validate_on_submit():
         log(log.ERROR, "inbound_order save errors: [%s]", form.errors)
@@ -446,6 +491,49 @@ def save():
                         current_order_uuid=inbound_order.uuid,
                     )
                 )
+
+    if form.billable_groups.data:
+        try:
+            groups = s.OutgoingStockBillableGroupList.model_validate_json(
+                form.billable_groups.data
+            )
+        except ValidationError:
+            log(
+                log.INFO,
+                "Billable groups adding failed: [%s]",
+                form.billable_groups.data,
+            )
+            flash("Billable groups adding failed", "danger")
+            return redirect(url_for("inbound_order.get_all"))
+        if not groups:
+            log(log.ERROR, "No billable groups in ship request")
+            flash("No billable groups in ship request", "danger")
+            return redirect(url_for("inbound_order.get_all"))
+
+        # delete all billable groups in inbound order
+        db.session.execute(
+            m.ShipRequestBillable.delete().where(
+                m.ShipRequestBillable.inbound_order_id == inbound_order.id
+            )
+        )
+        for group in groups.root:
+            billable_group = db.session.get(m.BillableGroup, group.billable_group_id)
+            if not billable_group:
+                log(
+                    log.ERROR, "Billable group not found: [%s]", group.billable_group_id
+                )
+                flash("Billable group not found", "danger")
+                return redirect(url_for("inbound_order.get_all"))
+            ship_request_billable = m.ShipRequestBillable(
+                inbound_order_id=inbound_order.id,
+                billable_group_id=billable_group.id,
+                quantity=group.quantity,
+                total=group.total,
+                incoming=True,
+            )
+            ship_request_billable.save()
+            inbound_order.ship_request_billables.append(ship_request_billable)
+        db.session.commit()
 
     history = set(history_modified).symmetric_difference(set(history_pure))
 

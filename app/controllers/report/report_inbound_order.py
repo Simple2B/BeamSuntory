@@ -42,6 +42,7 @@ class ReportDataInboundOrders(ReportData):
                     )
                 ),
                 m.InboundOrder.title.ilike(f"%{report_filter.q}%"),
+                m.InboundOrder.order_id.ilike(f"%{report_filter.q}%"),
             )
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)

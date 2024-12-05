@@ -4,6 +4,7 @@ import { initAddInboundOrderModal } from './add';
 import { initEditOrderModal } from './edit';
 import { easepick } from '@easepick/bundle';
 import Datepicker from 'flowbite-datepicker/Datepicker';
+import { addDeleteEvent, addSearchEvent } from '../utils';
 
 //global variables for datepicker
 const currentDate = new Date();
@@ -27,31 +28,17 @@ const timepickerMaxMin = new Timepicker(pickerInline, {
 // search flow
 const searchInput: HTMLInputElement = document.querySelector('#table-search-inbound-orders');
 const searchInputButton = document.querySelector('#table-search-inbound-order-button');
-if (searchInputButton && searchInput) {
-  searchInputButton.addEventListener('click', () => {
-    window.location.href = `${window.location.origin}${window.location.pathname}?q=${searchInput.value}`;
-  });
-}
+addSearchEvent(searchInput, searchInputButton);
+
 const deleteButtons = document.querySelectorAll('.delete-inbound-order-btn');
 
 deleteButtons.forEach((e) => {
-  e.addEventListener('click', async () => {
-    if (confirm('Are sure?')) {
-      let id = e.getAttribute('data-inbound-order-id');
-      const response = await fetch(`/inbound_order/delete/${id}`, {
-        method: 'DELETE',
-      });
-      if (response.status == 200 || response.status == 404) {
-        location.reload();
-      }
-    }
-  });
+  addDeleteEvent(e, `/inbound_order/delete/${e.getAttribute('data-inbound-order-id')}`);
 });
 
 const openCurrentOrder = () => {
   const urlParams = new URLSearchParams(window.location.search);
   const orderUuid = urlParams.get('current_order_uuid');
-  console.log(orderUuid);
   if (!orderUuid) {
     return;
   }

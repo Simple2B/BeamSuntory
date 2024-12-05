@@ -176,6 +176,7 @@
             </div>
           </div>
         </div>
+        {% include 'outgoing_stock/outgoing_stock_billable_groups.html' %}
         <!-- Modal footer -->
         <form class="overflow-x-auto" method="post" action="{{ url_for('outgoing_stock.save') }}"
           id="outgoing-stock-dispatch-goods">
@@ -258,6 +259,14 @@
         </form>
         <div class="w-full flex justify-between p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
           <div>
+            <button type="button" onclick="onClickApplyBillable(this)"
+              class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-600 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900">
+              <svg class="w-4 h-4 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M10 12v1h4v-1m4 7H6a1 1 0 0 1-1-1V9h14v9a1 1 0 0 1-1 1ZM4 5h16a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/>
+              </svg>
+
+              Apply billable
+            </button>
             <button type="button" onclick="onClickSubmitNotes(this)"
               class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-green-600 hover:bg-green-800 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900">
               <svg class="w-4 h-4 mr-2" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
@@ -368,5 +377,105 @@
       window.print();
       location.reload();
     }
+
+    function checkIfAllNeededFieldsAreFilled(){
+      const groups = document.querySelectorAll('.group-container');
+      let allFilled = true;
+      groups.forEach((group) => {
+        const masterGroupIdSelector = group.querySelector('.master_billable_group_selector');
+        const masterGroupId = masterGroupIdSelector.value;
+        const billableGroupIdSelector = group.querySelector('.billable_group_selector');
+        const billableGroupId = billableGroupIdSelector.value;
+        const billableQuantity = group.querySelector('.quantity').value;
+        const billableTotal = group.querySelector('.total').value;
+        if(masterGroupId == '' || billableGroupId == '' || billableQuantity == '' || billableTotal == ''){
+          allFilled = false;
+        }
+      });
+      if(!allFilled){
+        alert('Please fill all fields in the billable groups');
+        return false;
+      }
+      else{
+        return true;
+      }
+    }
+
+    function onClickApplyBillable(e){
+        if (!checkIfAllNeededFieldsAreFilled()){
+          return;
+        }
+        const groups = document.querySelectorAll('.group-container');
+        const gatheredGroups = [];
+        groups.forEach((group) => {
+          const masterGroupIdSelector = group.querySelector('.master_billable_group_selector');
+          const masterGroupId = masterGroupIdSelector.value;
+          const billableGroupIdSelector = group.querySelector('.billable_group_selector');
+          const billableGroupId = billableGroupIdSelector.value;
+          const billableQuantity = group.querySelector('.quantity').value;
+          const billableTotal = group.querySelector('.total').value;
+          const total = parseFloat(billableTotal.replace('$', ''))
+          const billableGroupInfo = {
+            master_billable_group_id:masterGroupId,
+            billable_group_id:billableGroupId,
+            quantity:billableQuantity,
+            total:total
+          }
+          gatheredGroups.push(billableGroupInfo);
+        });
+        const groupsInput = document.querySelector('#outgoing-stock-billable-add-groups')
+        groupsInput.value = JSON.stringify(gatheredGroups);
+        const billable_form = document.querySelector('#outgoing-stock-add-billable-groups');
+        billable_form.submit();
+        e.disabled = true;
+    }
+    function recalculateGrandTotal() {
+      const totalInputs = document.querySelectorAll('.total');
+      let grandTotal = 0;
+      totalInputs.forEach((totalInput) => {
+        grandTotal += parseFloat(totalInput.value);
+      });
+      const grandTotalElement = document.querySelector('#grand-total');
+      grandTotalElement.value = `${grandTotal.toFixed(2).toString()} $`;
+    }
+    function deleteAllocatedGroup(e) {
+        const groupAllocatedContainer = (e.currentTarget).closest('.group-container');
+          groupAllocatedContainer.remove();
+          const groupsDiv = document.querySelector('.group-allocated');
+          if (groupsDiv.children.length === 0) {
+            const grandTotal = document.querySelector('#grand-total');
+            grandTotal.classList.add('invisible');
+          }
+          recalculateGrandTotal();
+        }
+    function initRecalculate(){
+      const groupsDiv = document.querySelector('.group-allocated');
+      if (groupsDiv.children.length != 0) {
+        const grandTotal = document.querySelector('#grand-total');
+        grandTotal.classList.remove('invisible');
+      }
+      const deleteButtons = document.querySelectorAll('.group-allocated-delete-button');
+      deleteButtons.forEach((button) => {
+        button.addEventListener('click', deleteAllocatedGroup);
+      });
+      recalculateGrandTotal();
+      const quantityInputs = document.querySelectorAll('.quantity');
+      quantityInputs.forEach((quantityInput) => {
+        const totalInput = quantityInput.closest('.group-container').querySelector('.total');
+
+        quantityInput.addEventListener('input', (e) => {
+          const qty = e.currentTarget;
+          const rate = parseFloat(totalInput.getAttribute('data-rate'))
+            ? parseFloat(totalInput.getAttribute('data-rate'))
+            : 0;
+          const quantity = parseFloat(qty.value);
+          if (quantity > 0) {
+            totalInput.value = `${(quantity * rate).toFixed(2).toString()} $`;
+          }
+          recalculateGrandTotal();
+        });
+  });
+    }
+    initRecalculate();
   </script>
 </div>

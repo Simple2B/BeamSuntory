@@ -1,5 +1,6 @@
 from datetime import datetime, date
 import os
+from typing import TYPE_CHECKING
 
 import sqlalchemy as sa
 from sqlalchemy import orm
@@ -12,6 +13,9 @@ from .warehouse import Warehouse
 from .product_allocated import ProductAllocated
 from .report_inventory import ReportInventoryList
 from .utils import START_ORDER_NUMBER
+
+if TYPE_CHECKING:
+    from .ship_request_billable import ShipRequestBillable
 
 
 class InboundOrder(db.Model, ModelMixin):
@@ -54,6 +58,9 @@ class InboundOrder(db.Model, ModelMixin):
     created_at: orm.Mapped[datetime] = orm.mapped_column(
         sa.DateTime,
         default=datetime.now,
+    )
+    ship_request_billables: orm.Mapped[list["ShipRequestBillable"]] = orm.relationship(
+        "ShipRequestBillable", back_populates="inbound_order"
     )
 
     # Relationships

@@ -45,6 +45,7 @@ class InboundOrderBaseForm(FlaskForm):
 
 class InboundOrderCreateForm(InboundOrderBaseForm):
     products = StringField("Products", [DataRequired()])
+    billable_groups = StringField("Billable Groups", [Optional()])
 
 
 class InboundOrderUpdateForm(InboundOrderBaseForm):
@@ -63,6 +64,7 @@ class InboundOrderUpdateForm(InboundOrderBaseForm):
         ],
     )
     product_groups = StringField("Product Groups", [DataRequired()])
+    billable_groups = StringField("Billable Groups", [Optional()])
 
 
 class SortByStatusInboundOrderForm(FlaskForm):
