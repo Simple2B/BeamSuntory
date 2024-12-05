@@ -11,6 +11,7 @@ class GroupAllocated(BaseModel):
     rate: float
     assigned_to_inbound: bool
     assigned_to_outbound: bool
+    excluded_from_global_increase: bool
 
     def validate_name(self, field):
         query = m.BillableGroup.select().where(m.BillableGroup.name == field.data)

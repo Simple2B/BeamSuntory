@@ -21,6 +21,7 @@ class BillableGroupForm(FlaskForm):
 
     assigned_to_inbound = BooleanField("Assigned To Inbound")
     assigned_to_outbound = BooleanField("Assigned To Outbound")
+    excluded_from_global_increase = BooleanField("Excluded from global increase")
 
     submit = SubmitField("Add group")
 
@@ -41,6 +42,7 @@ class NewBillableGroupForm(FlaskForm):
 
     assigned_to_inbound = BooleanField("Assigned To Inbound")
     assigned_to_outbound = BooleanField("Assigned To Outbound")
+    excluded_from_global_increase = BooleanField("Excluded from global increase")
 
     submit = SubmitField("Add group")
 

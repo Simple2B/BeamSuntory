@@ -11,6 +11,7 @@ class BillableGroup(BaseModel):
     master_billable_group_id: int
     assigned_to_inbound: bool
     assigned_to_outbound: bool
+    excluded_from_global_increase: bool
 
 
 class BillableGroupIncreaseCostRequest(BaseModel):
@@ -29,3 +30,4 @@ class Billable(BaseModel):
     created_at: datetime = Field(alias="createdAt")
     assigned_to_inbound: bool
     assigned_to_outbound: bool
+    excluded_from_global_increase: bool

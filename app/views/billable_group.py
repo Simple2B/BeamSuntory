@@ -30,11 +30,11 @@ def get_all():
 
     master_group = aliased(m.MasterBillableGroup)
     q = request.args.get("q", type=str, default=None)
-    query = m.BillableGroup.select().order_by(m.BillableGroup.name.asc())
+    query = sa.select(m.BillableGroup).order_by(m.BillableGroup.name.asc())
     count_query = sa.select(sa.func.count()).select_from(m.BillableGroup)
     if q:
         query = (
-            m.BillableGroup.select()
+            sa.select(m.BillableGroup)
             .join(
                 master_group,
                 m.BillableGroup.master_billable_group_id == master_group.id,
@@ -58,8 +58,6 @@ def get_all():
 
     pagination = create_pagination(total=db.session.scalar(count_query))
     master_billable_groups = db.session.scalars(sa.select(m.MasterBillableGroup)).all()
-    master_groups_rows_objs = db.session.execute(m.MasterBillableGroup.select()).all()
-    master_groups = [row[0] for row in master_groups_rows_objs]
 
     return render_template(
         "billable_group/billable_groups.html",
@@ -70,8 +68,6 @@ def get_all():
         ).scalars(),
         page=pagination,
         search_query=q,
-        master_groups=master_groups,
-        main_master_groups=master_groups,
         form_create=form_create,
         form_edit=form_edit,
         master_billable_groups=master_billable_groups,
@@ -98,6 +94,7 @@ def create():
         rate=form.rate.data,
         assigned_to_inbound=form.assigned_to_inbound.data,
         assigned_to_outbound=form.assigned_to_outbound.data,
+        excluded_from_global_increase=form.excluded_from_global_increase.data,
     )
     log(log.INFO, "Form submitted. master_group: [%s]", master_group)
     billable_group.save()
@@ -131,6 +128,9 @@ def save():
     billable_group.rate = form.rate.data
     billable_group.assigned_to_inbound = form.assigned_to_inbound.data
     billable_group.assigned_to_outbound = form.assigned_to_outbound.data
+    billable_group.excluded_from_global_increase = (
+        form.excluded_from_global_increase.data
+    )
     billable_group.master_billable_group = master_group
     billable_group.save()
     return redirect(url_for("billable_group.get_all"))
@@ -185,6 +185,7 @@ def create_many():
             rate=group_data.rate,
             assigned_to_inbound=group_data.assigned_to_inbound,
             assigned_to_outbound=group_data.assigned_to_outbound,
+            excluded_from_global_increase=group_data.excluded_from_global_increase,
         )
         log(log.INFO, "Billable group created. master_group: [%s]", master_group)
         billable_group.save()
@@ -209,6 +210,8 @@ def increase_costs():
         flash("There is no billable groups", "danger")
         return "no billable groups", 404
     for group in billable_groups:
+        if group.excluded_from_global_increase:
+            continue
         group.rate *= 1 + cost / 100
         group.rate = round(group.rate, 2)
         group.save()

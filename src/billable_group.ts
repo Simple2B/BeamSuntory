@@ -7,6 +7,7 @@ interface IBillableGroup {
   rate: number;
   assigned_to_inbound: boolean;
   assigned_to_outbound: boolean;
+  excluded_from_global_increase: boolean;
 }
 
 export interface IGroupAllocatedBase {
@@ -58,6 +59,8 @@ function editBillableGroup(billableGroup: IBillableGroup) {
   input.checked = billableGroup.assigned_to_inbound;
   input = document.querySelector('#billable-group-edit-assigned-to-outbound');
   input.checked = billableGroup.assigned_to_outbound;
+  input = document.querySelector('#billable-group-edit-excluded-from-global-increase');
+  input.checked = billableGroup.excluded_from_global_increase;
   let select: HTMLSelectElement = document.querySelector('#master_billable_group_id');
   select.value = billableGroup.master_billable_group_id.toString();
   modal.show();

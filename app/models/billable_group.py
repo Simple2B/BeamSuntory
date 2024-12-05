@@ -34,6 +34,9 @@ class BillableGroup(db.Model, ModelMixin):
     assigned_to_outbound: orm.Mapped[bool] = orm.mapped_column(
         sa.Boolean, default=False
     )
+    excluded_from_global_increase: orm.Mapped[bool] = orm.mapped_column(
+        sa.Boolean, default=False, server_default=sa.sql.expression.false()
+    )
 
     master_billable_group_id: orm.Mapped[int] = orm.mapped_column(
         sa.ForeignKey("master_billable_groups.id")

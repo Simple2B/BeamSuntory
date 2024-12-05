@@ -112,6 +112,7 @@ def test_edit_group(client: FlaskClient):
             name="Small Box1",
             master_billable_group_id="1",
             rate="20",
+            excluded_from_global_increase=True,
         ),
     )
 
@@ -120,6 +121,7 @@ def test_edit_group(client: FlaskClient):
     assert len(billable_groups) == 1
     assert billable_groups[0][0].name == "Small Box1"
     assert billable_groups[0][0].rate == 20
+    assert billable_groups[0][0].excluded_from_global_increase
 
 
 def test_increase_costs(client: FlaskClient):
