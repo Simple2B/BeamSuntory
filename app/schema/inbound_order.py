@@ -1,6 +1,7 @@
 from enum import Enum
 from datetime import datetime, date
 from pydantic import BaseModel, Field, ConfigDict
+
 from .supplier import Supplier
 from .warehouse import Warehouse
 from .product_allocated import ProductAllocatedOut
@@ -12,6 +13,15 @@ class InboundOrderStatus(Enum):
     delivered = "Delivered"
     in_transit = "In transit"
     cancelled = "Cancelled"
+
+
+class InboundBillableOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    master_billable_group_name: str
+    billable_group_name: str
+    quantity: int
+    total: float
 
 
 class InboundOrder(BaseModel):
@@ -31,6 +41,9 @@ class InboundOrder(BaseModel):
     warehouse: Warehouse
 
     products_allocated: list[ProductAllocatedOut] = Field(alias="productsAllocated")
+    ship_request_billables: list[InboundBillableOut] | None = Field(
+        alias="shipRequestBillables"
+    )
 
     supplier_id: int
     warehouse_id: int

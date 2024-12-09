@@ -77,6 +77,25 @@ const masterGroupConfig = {
   },
 };
 
+const masterBillableGroupConfig = {
+  entry: {
+    main: './src/master_billable_group.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/master_billable_group.js', // <--- Will be compiled to this single file
+  },
+};
+const billableGroupConfig = {
+  entry: {
+    main: './src/billable_group.ts',
+  },
+  output: {
+    path: path.resolve(__dirname, './app/static'),
+    filename: 'js/billable_group.js', // <--- Will be compiled to this single file
+  },
+};
+
 const productConfig = {
   entry: {
     main: './src/product.ts',
@@ -335,8 +354,35 @@ const bulkAssignConfig = [
   },
 ];
 
+const outgoingBillableGroupsConfig = [
+  {
+    entry: {
+      main: './src/outgoing_stock_billable_groups_add.ts',
+    },
+    output: {
+      path: path.resolve(__dirname, './app/static'),
+      filename: 'js/outgoing_stock_billable_groups_add.js', // <--- Will be compiled to this single file
+    },
+  },
+];
+
+const inboundOrderBillableGroupsAddConfig = [
+  {
+    entry: {
+      main: './src/inbound_order_billable_groups_add.ts',
+    },
+    output: {
+      path: path.resolve(__dirname, './app/static'),
+      filename: 'js/inbound_order_billable_groups_add.js', // <--- Will be compiled to this single file
+    },
+  },
+];
 const configs = [
+  ...outgoingBillableGroupsConfig,
+  ...inboundOrderBillableGroupsAddConfig,
   baseConfig,
+  masterBillableGroupConfig,
+  billableGroupConfig,
   ...userConfig,
   groupConfig,
   masterGroupConfig,

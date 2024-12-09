@@ -286,6 +286,7 @@ current_user.role_obj.role_name %}
                 <span class="flex-1 ml-4 whitespace-nowrap">Product Groups</span>
               </a>
             </li>
+
           </ul>
         </div>
       </li>
@@ -346,6 +347,22 @@ current_user.role_obj.role_name %}
         </div>
       </li>
       {% endif %}
+            {% if user_role == 'warehouse_manager' %}
+      <li>
+        <!-- prettier-ignore -->
+        <a href="{{ url_for('master_billable_group.get_all') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+         {% include "icon/group.html" %}
+          <span class="flex-1 ml-4 whitespace-nowrap">Master Billable Groups</span>
+        </a>
+      </li>
+      <li>
+        <!-- prettier-ignore -->
+        <a href="{{ url_for('billable_group.get_all') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+          {% include "icon/group.html" %}
+          <span class="flex-1 ml-4 whitespace-nowrap">Billable Groups</span>
+        </a>
+      </li>
+      {% endif %}
       <!-- prettier-ignore -->
        {% if user_role in warehouse_roles %}
       <li>
@@ -391,6 +408,7 @@ current_user.role_obj.role_name %}
         </a>
       </li>
       {% endif %}
+
     </ul>
   </div>
 </aside>
