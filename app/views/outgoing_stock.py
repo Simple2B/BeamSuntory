@@ -587,11 +587,11 @@ def get_billable_group_for_outgoing(id: int):
 
 
 @outgoing_stock_blueprint.route(
-    "/get_billable_group_for_incoming/<int:id>", methods=["GET"]
+    "/get_billable_group_for_inbound/<int:id>", methods=["GET"]
 )
 @login_required
 @role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
-def get_billable_group_for_incoming(id: int):
+def get_billable_group_for_inbound(id: int):
     master_billable_group = db.session.scalar(
         sa.select(m.MasterBillableGroup).where(m.MasterBillableGroup.id == id)
     )

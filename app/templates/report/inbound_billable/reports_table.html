@@ -6,13 +6,10 @@
       <!-- prettier-ignore -->
       <tr>
         <th scope="col" class="px-6 py-3">#</th>
-        <th scope="col" class="px-6 py-3">Master billable group</th>
-        <th scope="col" class="px-6 py-3">Billable group</th>
-        <th scope="col" class="px-6 py-3">Rate</th>
-        <th scope="col" class="px-6 py-3">
-         Assigned to inbound
-        </th>
-        <th scope="col" class="px-6 py-3">Assigned to outbound</th>
+        <th scope="col" class="px-6 py-3">Inbound order</th>
+        <th scope="col" class="px-6 py-3">Brand</th>
+        <th scope="col" class="px-6 py-3">Created At</th>
+        <th scope="col" class="px-6 py-3">Total</th>
         <th scope="col" class="px-6 py-3">Action</th>
       </tr>
     </thead>
@@ -28,34 +25,29 @@
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.master_billable_group_name }}</div>
+            <div class="text-base font-semibold">{{ report.title }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-normal dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.name }} {{report.id}}</div>
+            <div class="text-base font-semibold">{{ report.brand }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.rate }} $</div>
+            <div class="text-base font-semibold">{{ report.created_at.strftime('%m/%d/%Y') }}</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
-            <div class="text-base font-semibold"> {{report.assigned_to_inbound}} </div>
-          </div>
-        </td>
-        <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-          <div class="pl-3">
-            <div class="text-base font-semibold">{{ report.assigned_to_outbound }}</div>
+            <div class="text-base font-semibold"> {{report.total}} $</div>
           </div>
         </td>
         <td scope="row" class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
           <div class="pl-3">
             <div class="text-base font-semibold">
               <button type="button" hx-trigger="click" hx-target="body" hx-swap="beforeend" hx-indicator="#htmx-spinner"
-                hx-get="{{ url_for('report_billable.detail_modal', group_id=report.id) }}"
+                hx-get="{{ url_for('report_inbound_billable.detail_modal', inbound_id=report.id, brand = report.brand) }}"
                 class="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Details</button>
             </div>
           </div>

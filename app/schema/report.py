@@ -26,7 +26,8 @@ class ReportType(Enum):
     INBOUND_ORDER: str = "inbound_order"
     SHIPPING: str = "shipping"
     SHELF_LIFE: str = "shelf_life"
-    BILLABLE: str = "billable"
+    INBOUND_BILLABLE: str = "inbound_billable"
+    OUTBOUND_BILLABLE: str = "outbound_billable"
 
 
 class CalendarFilters(BaseModel):

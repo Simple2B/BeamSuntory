@@ -91,7 +91,8 @@ const filtersMap: IFilterMap = {
     'filter-group-categories',
     'shelf-life-filter-expire-in',
   ],
-  billable: [],
+  inbound_billable: ['filter-start-date', 'filter-end-date', 'filter-group-brand'],
+  outbound_billable: ['filter-start-date', 'filter-end-date', 'filter-group-brand'],
 };
 
 const filtersIds = [

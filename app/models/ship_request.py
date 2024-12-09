@@ -113,6 +113,76 @@ class ShipRequest(db.Model, ModelMixin):
         else:
             self.order_numb = f"Beam-OB-{START_ORDER_NUMBER + self.id}"
 
+    @property
+    def cost_for_billable_by_brand(self):
+        if not self.carts or not self.ship_request_billables:
+            return {}
+
+        costs_by_brand = {}
+        total_quantity_of_allocated_products = 0
+
+        # Обчислити загальну кількість продуктів для кожного бренду
+        for cart in self.carts:
+            brand = cart.product.brand
+            quantity = cart.quantity
+            if brand in costs_by_brand:
+                costs_by_brand[brand] += quantity
+            else:
+                costs_by_brand[brand] = quantity
+            total_quantity_of_allocated_products += quantity
+
+        # Обчислити загальну вартість billables
+        total_cost_of_billables = sum(
+            billable.total for billable in self.ship_request_billables
+        )
+
+        # Обчислити середню вартість одного продукту
+        av_cost = total_cost_of_billables / total_quantity_of_allocated_products
+
+        # Розподілити вартість між брендами
+        for brand in costs_by_brand:
+            costs_by_brand[brand] = round(costs_by_brand[brand] * av_cost, 2)
+
+        # Переконатися, що загальна вартість розподілена без залишку
+        distributed_total_cost = sum(costs_by_brand.values())
+        difference = round(total_cost_of_billables - distributed_total_cost, 2)
+
+        if difference != 0:
+            # Додати різницю до першого бренду, щоб уникнути залишку
+            first_brand = next(iter(costs_by_brand))
+            costs_by_brand[first_brand] += difference
+
+        return costs_by_brand
+
+    @property
+    def cost_for_billable_by_product(self):
+        if not self.carts or not self.ship_request_billables:
+            return {}
+
+        # Загальна кількість товарів у замовленні
+        total_quantity_of_allocated_products = sum(cart.quantity for cart in self.carts)
+
+        # Розрахунок вартості пакування на одиницю товару для кожного типу пакування
+        per_unit_costs = {
+            billable.billable_group_name: billable.total
+            / total_quantity_of_allocated_products
+            for billable in self.ship_request_billables
+        }
+
+        # Розподіл витрат по кожній позиції товарів
+        costs_billable_by_product = {}
+        for cart in self.carts:
+            product_brand = cart.product.brand
+            quantity = cart.quantity
+            costs_billable_by_product[product_brand] = {
+                billable.billable_group_name: round(
+                    per_unit_costs[billable.billable_group_name] * quantity, 2
+                )
+                for billable in self.ship_request_billables
+            }
+
+        return costs_billable_by_product
+
     def __repr__(self):
         return f"<{self.id}: {self.order_numb}>"
 

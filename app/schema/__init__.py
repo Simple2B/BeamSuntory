@@ -131,3 +131,4 @@ from .group_allocated import (
     OutgoingStockBillableGroupList,
 )
 from .report_billable import ReportBillableResponse
+from .report_inbound_billable import ReportInboundBillable
