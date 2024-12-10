@@ -1,3 +1,4 @@
+# flake8: noqa: E203
 from datetime import datetime
 from typing import Tuple, Type
 
