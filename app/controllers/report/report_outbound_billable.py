@@ -105,6 +105,12 @@ class ReportDataOutboundBillable(ReportData):
 
         pagination = create_pagination(total=len(reports))
 
+        reports = reports[
+            (pagination.page - 1)
+            * pagination.per_page : pagination.page
+            * pagination.per_page
+        ]
+
         return pagination, reports
 
     @classmethod
