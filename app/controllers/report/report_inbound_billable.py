@@ -137,20 +137,51 @@ class ReportDataInboundBillable(ReportData):
             "Total": [],
         }  # type: dict[str, list]
 
-        for report in db.session.scalars(query):
+        inbounds = db.session.scalars(query)
+
+        reports = []
+        for inbound in inbounds:
+            if not inbound.products_allocated or not inbound.ship_request_billables:
+                continue
+            for product_allocated in inbound.products_allocated:
+                reports.append(
+                    s.ReportInboundBillable(
+                        id=inbound.id,
+                        title=inbound.title,
+                        brand=product_allocated.product.brand,
+                        created_at=inbound.created_at,
+                        total=inbound.cost_for_billable_by_brand[
+                            product_allocated.product.brand
+                        ],
+                    )
+                )
+
+        for report in reports:
             dataset = add_dataset_row(dataset, report)
         return dataset
 
 
-def add_dataset_row(dataset: dict[str, list], report: m.InboundOrder):
-    for product_allocated in report.products_allocated:
-        dataset["№"].append(report.id)
-        dataset["Inbound order"].append(report.title)
-        dataset["Brand"].append(product_allocated.product.brand)
-        dataset["Created At"].append(report.created_at.strftime("%m/%d/%Y %H:%M:%S"))
-        dataset["Total"].append(
-            report.cost_for_billable_by_brand[product_allocated.product.brand]
-        )
+def add_dataset_row(dataset: dict[str, list], report: s.ReportInboundBillable):
+    dataset["№"].append(report.id)
+    dataset["Inbound order"].append(report.title)
+    dataset["Brand"].append(report.brand)
+    dataset["Created At"].append(report.created_at.strftime("%m/%d/%Y %H:%M:%S"))
+    dataset["Total"].append(report.total)
+
+    inbound_order = db.session.get(m.InboundOrder, report.id)
+    for brands, products in inbound_order.cost_for_billable_by_product.items():
+        if brands == report.brand:
+            for product_name, cost in products.items():
+                if product_name not in dataset:
+                    dataset[product_name] = [""] * (
+                        len(dataset["№"]) - 1
+                    )  # Ініціалізуйте список з порожніми значеннями
+                dataset[product_name].append(cost)
+
+    # Додайте порожні значення для нових полів у всіх інших рядках
+    for key in dataset.keys():
+        if len(dataset[key]) < len(dataset["№"]):
+            dataset[key].append("")
 
     return dataset
 
