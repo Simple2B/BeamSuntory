@@ -13,6 +13,7 @@ from .report_data import (
     add_product_groups,
     add_product_exta_fields,
     order_fields_dataset,
+    add_billable_data_fields,
 )
 
 
@@ -240,6 +241,7 @@ def create_shipping_modal_dataset(
         if download:
             add_product_groups(dataset, cart.product, master_groups)
             add_product_exta_fields(dataset, cart.product)
+            add_billable_data_fields(dataset, report, cart.product)
         else:
             dataset["Brand"].append(cart.product.brand)
 
