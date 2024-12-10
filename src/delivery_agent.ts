@@ -1,12 +1,4 @@
-import {Modal} from 'flowbite';
-import type {ModalOptions, ModalInterface} from 'flowbite';
-
-// /*
-//  * $editDeliveryAgentModal: required
-//  * options: optional
-//  */
-
-// // For your js code
+import { addDeleteEvent, addSearchEvent, initModal } from './utils';
 
 interface IDeliveryAgent {
   id: number;
@@ -19,82 +11,39 @@ interface IDeliveryAgent {
   active: boolean;
 }
 
-const $modalElement: HTMLElement = document.querySelector(
-  '#editDeliveryAgentModal',
-);
-const $addDeliveryAgentModalElement: HTMLElement = document.querySelector(
-  '#add-delivery-agent-modal',
-);
+const $modalElement: HTMLElement = document.querySelector('#editDeliveryAgentModal');
+const $addDeliveryAgentModalElement: HTMLElement = document.querySelector('#add-delivery-agent-modal');
 
-const modalOptions: ModalOptions = {
-  placement: 'bottom-right',
-  backdrop: 'dynamic',
-  backdropClasses:
-    'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
-  closable: true,
-  onHide: () => {
-    console.log('modal is hidden');
-  },
-  onShow: () => {
-    console.log('delivery-agent id: ');
-  },
-  onToggle: () => {
-    console.log('modal has been toggled');
-  },
-};
+const modal = initModal($modalElement);
+const addModal = initModal($addDeliveryAgentModalElement);
 
-const modal: ModalInterface = new Modal($modalElement, modalOptions);
-const addModal: ModalInterface = new Modal(
-  $addDeliveryAgentModalElement,
-  modalOptions,
+const editDeliveryAgentCloseModalButton: HTMLButtonElement = document.querySelector(
+  '#edit-delivery-agent-modal-close-btn'
 );
-
-const editDeliveryAgentCloseModalButton: HTMLButtonElement = document.querySelector('#edit-delivery-agent-modal-close-btn');
 editDeliveryAgentCloseModalButton.addEventListener('click', () => {
   modal.hide();
 });
 
-const $buttonElements = document.querySelectorAll(
-  '.delivery-agent-edit-button',
-);
-$buttonElements.forEach(e =>
+const $buttonElements = document.querySelectorAll('.delivery-agent-edit-button');
+$buttonElements.forEach((e) =>
   e.addEventListener('click', () => {
     editDeliveryAgent(JSON.parse(e.getAttribute('data-target')));
-  }),
+  })
 );
 
 // search flow
-const searchInput: HTMLInputElement = document.querySelector(
-  '#table-search-delivery-agents',
-);
-const searchInputButton = document.querySelector(
-  '#table-search-delivery-agent-button',
-);
-if (searchInputButton && searchInput) {
-  searchInputButton.addEventListener('click', () => {
-    window.location.href = `${window.location.origin}${window.location.pathname}?q=${searchInput.value}`;
-  });
-}
+const searchInput: HTMLInputElement = document.querySelector('#table-search-delivery-agents');
+const searchInputButton = document.querySelector('#table-search-delivery-agent-button');
+addSearchEvent(searchInput, searchInputButton);
+
 const deleteButtons = document.querySelectorAll('.delete-delivery-agent-btn');
 
-deleteButtons.forEach(e => {
-  e.addEventListener('click', async () => {
-    if (confirm('Are sure?')) {
-      let id = e.getAttribute('data-delivery-agent-id');
-      const response = await fetch(`/delivery_agent/delete/${id}`, {
-        method: 'DELETE',
-      });
-      if (response.status == 200) {
-        location.reload();
-      }
-    }
-  });
+deleteButtons.forEach((e) => {
+  addDeleteEvent(e, `/delivery_agent/delete/${e.getAttribute('data-delivery-agent-id')}`);
 });
 
 function editDeliveryAgent(deliveryAgent: IDeliveryAgent) {
-  let input: HTMLInputElement = document.querySelector(
-    '#delivery-agent-edit-username',
-  );
+  let input: HTMLInputElement = document.querySelector('#delivery-agent-edit-username');
   input.value = deliveryAgent.username;
   input = document.querySelector('#delivery-agent-edit-id');
   input.value = deliveryAgent.id.toString();

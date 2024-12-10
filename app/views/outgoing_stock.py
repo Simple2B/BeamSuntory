@@ -6,6 +6,7 @@ from flask import (
     render_template,
     flash,
     redirect,
+    request,
     url_for,
 )
 from flask_login import login_required, current_user
@@ -175,7 +176,10 @@ def ship_request_edit_view(ship_request_id: int):
     warehouses = db.session.scalars(
         sa.select(m.Warehouse).where(m.Warehouse.id.in_(list(warehouse_product_ids)))
     ).all()
-
+    # Billable groups logic
+    billable_form = f.BillableGroupOutgoingStockForm()
+    master_billable_groups = db.session.scalars(sa.select(m.MasterBillableGroup)).all()
+    billable_groups = db.session.scalars(sa.select(m.BillableGroup)).all()
     return render_template(
         "outgoing_stock/modal_edit.html",
         form=form,
@@ -184,6 +188,9 @@ def ship_request_edit_view(ship_request_id: int):
         ship_request=ship_request,
         warehouses=warehouses,
         status=s.ShipRequestStatus.waiting_for_warehouse.value,
+        billable_form=billable_form,
+        master_billable_groups=master_billable_groups,
+        billable_groups=billable_groups,
     )
 
 
@@ -504,6 +511,11 @@ def print(query: s.OutgoingStockQueryParamsDownload):
         ]
     )
     total_value = round(total_value, 2)
+    for ship_request in ship_requests:
+        if ship_request.ship_request_billables:
+            total_value += sum(
+                [billable.total for billable in ship_request.ship_request_billables]
+            )
     return render_template(
         "outgoing_stock/pdf_template.html",
         ship_requests=ship_requests,
@@ -540,3 +552,144 @@ def delete_cart(cart_id: int):
     return render_template(
         "toast.html", message="Product item deleted!", category="success"
     )
+
+
+@outgoing_stock_blueprint.route("/get_master_billable_groups", methods=["GET"])
+@login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+def get_master_billable_groups():
+    master_billable_groups = db.session.scalars(sa.select(m.MasterBillableGroup)).all()
+    groups_json = [
+        {"id": f"{group.id}", "name": f"{group.name}"}
+        for group in master_billable_groups
+    ]
+    return groups_json
+
+
+@outgoing_stock_blueprint.route(
+    "/get_billable_group_for_outgoing/<int:id>", methods=["GET"]
+)
+@login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+def get_billable_group_for_outgoing(id: int):
+    master_billable_group = db.session.scalar(
+        sa.select(m.MasterBillableGroup).where(m.MasterBillableGroup.id == id)
+    )
+    if not master_billable_group:
+        log(log.ERROR, "Master Billable Group not found: [%s]", id)
+        return "Master Billable Group not found", 404
+    groups_json = [
+        {"id": f"{group.id}", "name": f"{group.name}", "rate": f"{group.rate}"}
+        for group in master_billable_group.billable_groups
+        if group.assigned_to_outbound
+    ]
+    return groups_json
+
+
+@outgoing_stock_blueprint.route(
+    "/get_billable_group_for_inbound/<int:id>", methods=["GET"]
+)
+@login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+def get_billable_group_for_inbound(id: int):
+    master_billable_group = db.session.scalar(
+        sa.select(m.MasterBillableGroup).where(m.MasterBillableGroup.id == id)
+    )
+    if not master_billable_group:
+        log(log.ERROR, "Master Billable Group not found: [%s]", id)
+        return "Master Billable Group not found", 404
+    groups_json = [
+        {"id": f"{group.id}", "name": f"{group.name}", "rate": f"{group.rate}"}
+        for group in master_billable_group.billable_groups
+        if group.assigned_to_inbound
+    ]
+    return groups_json
+
+
+@outgoing_stock_blueprint.route("/get_billable_group_by_name", methods=["GET"])
+@login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+def get_billable_group_by_name():
+    name = request.args.get("master_group_name")
+    master_billable_group = db.session.scalar(
+        sa.select(m.MasterBillableGroup).where(m.MasterBillableGroup.name == name)
+    )
+    if not master_billable_group:
+        log(log.ERROR, "Master Billable Group not found: [%s]", name)
+        return "Master Billable Group not found", 404
+    groups_json = [
+        {"id": f"{group.id}", "name": f"{group.name}", "rate": f"{group.rate}"}
+        for group in master_billable_group.billable_groups
+    ]
+    return groups_json
+
+
+@outgoing_stock_blueprint.route("/save_billable", methods=["POST"])
+@login_required
+@role_required([s.UserRole.ADMIN.value, s.UserRole.WAREHOUSE_MANAGER.value])
+def save_billable():
+    form: f.BillableGroupOutgoingStockForm = f.BillableGroupOutgoingStockForm()
+    if not form.validate_on_submit():
+        log(log.ERROR, "Billable group save errors: [%s]", form.errors)
+        flash(f"{form.errors}", "danger")
+        return redirect(url_for("outgoing_stock.get_all"))
+    ship_request = db.session.get(m.ShipRequest, form.ship_request_id.data)
+    if not ship_request:
+        log(
+            log.ERROR,
+            "Not found ship request item by id : [%s]",
+            form.ship_request_id.data,
+        )
+        flash("Cannot save item data", "danger")
+        return redirect(url_for("outgoing_stock.get_all"))
+
+    if ship_request.status == s.ShipRequestStatus.assigned:
+        log(
+            log.ERROR,
+            "Cannot save item data. Ship Request already Dispatched: [%s]",
+            ship_request,
+        )
+        flash("Cannot save item data. Ship Request already Dispatched", "danger")
+        return redirect(url_for("outgoing_stock.get_all"))
+    # delete all billable groups if they exist
+    existing_ship_request_billables = db.session.scalars(
+        sa.select(m.ShipRequestBillable).where(
+            m.ShipRequestBillable.ship_request_id == ship_request.id,
+            m.ShipRequestBillable.incoming.is_(False),
+        )
+    ).all()
+    for billable in existing_ship_request_billables:
+        db.session.delete(billable)
+    db.session.commit()
+    try:
+        groups = s.OutgoingStockBillableGroupList.model_validate_json(form.groups.data)
+    except ValidationError:
+        log(
+            log.INFO,
+            "Billable groups adding failed: [%s]",
+            form.groups.data,
+        )
+        flash("Billable groups adding failed", "danger")
+        return redirect(url_for("outgoing_stock.get_all"))
+    if not groups:
+        log(log.ERROR, "No billable groups in ship request")
+        flash("No billable groups in ship request", "danger")
+        return redirect(url_for("outgoing_stock.get_all"))
+    for group in groups.root:
+        billable_group = db.session.get(m.BillableGroup, group.billable_group_id)
+        if not billable_group:
+            log(log.ERROR, "Billable group not found: [%s]", group.billable_group_id)
+            flash("Billable group not found", "danger")
+            return redirect(url_for("outgoing_stock.get_all"))
+        ship_request_billable = m.ShipRequestBillable(
+            ship_request_id=ship_request.id,
+            billable_group_id=billable_group.id,
+            quantity=group.quantity,
+            total=group.total,
+            incoming=False,
+        )
+        ship_request_billable.save()
+        ship_request.ship_request_billables.append(ship_request_billable)
+    db.session.commit()
+    flash("Billable successfully created", "success")
+    return redirect(url_for("outgoing_stock.get_all"))

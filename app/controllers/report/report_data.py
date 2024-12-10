@@ -163,3 +163,16 @@ def order_fields_dataset(dataset: dict[str, list]):
     sorted_dataset = {k: dataset[k] for k in sorted_keys}
 
     return sorted_dataset
+
+
+def add_billable_data_fields(
+    dataset: dict[str, list],
+    report: m.InboundOrder,
+    product: m.Product,
+):
+    for key, value in report.cost_for_billable_by_product.items():
+        if key == product.brand:
+            for product_name, cost in value.items():
+                if product_name not in dataset:
+                    dataset[product_name] = []
+                dataset[product_name].append(cost)

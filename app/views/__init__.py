@@ -35,6 +35,10 @@ from .report_shelf_life import report_shelf_life_blueprint
 from .incoming_stock_notification import incoming_stock_notifications_bp
 from .bulk_ship import bulk_ship_bp
 from .bulk_assign import bulk_assign_bp
+from .master_billable_group import master_billable_group_bp
+from .billable_group import billable_group_bp
+from .report_inbound_billable import report_inbound_billable_blueprint
+from .report_outbound_billable import report_outbound_billable_blueprint
 
 BLUEPRINTS = (
     main_blueprint,
@@ -73,4 +77,8 @@ BLUEPRINTS = (
     incoming_stock_notifications_bp,
     bulk_ship_bp,
     bulk_assign_bp,
+    master_billable_group_bp,
+    billable_group_bp,
+    report_inbound_billable_blueprint,
+    report_outbound_billable_blueprint,
 )
