@@ -15,6 +15,7 @@ export interface IGroupAllocatedBase {
   rate: number;
   assigned_to_inbound: boolean;
   assigned_to_outbound: boolean;
+  excluded_from_global_increase: boolean;
 }
 
 const $modalElement: HTMLElement = document.querySelector('#editBillableGroupModal');
@@ -164,17 +165,23 @@ const createMultipleBillableGroupsHandler = () => {
         '.group-allocated-assign-to-outbound'
       ) as HTMLInputElement;
 
+      const groupAllocatedExcludedFromGlobalIncreaseCheckbox = groupContainer.querySelector(
+        '.group-allocated-excluded-from-global-increase'
+      ) as HTMLInputElement;
+
       // Retrieve values from Nodes
       const groupAllocatedName = groupAllocatedNameInput.value;
       const groupAllocatedRate = parseFloat(groupAllocatedRateInput.value);
       const groupAllocatedAssignToInbound = groupAllocatedAssignToInboundCheckbox.checked;
       const groupAllocatedAssignToOutbound = groupAllocatedAssignToOutboundCheckbox.checked;
+      const groupAllocatedExcludedFromGlobalIncrease = groupAllocatedExcludedFromGlobalIncreaseCheckbox.checked;
 
       allocatedGroupsData.push({
         name: groupAllocatedName,
         rate: groupAllocatedRate,
         assigned_to_inbound: groupAllocatedAssignToInbound,
         assigned_to_outbound: groupAllocatedAssignToOutbound,
+        excluded_from_global_increase: groupAllocatedExcludedFromGlobalIncrease,
       });
     });
 

@@ -133,6 +133,17 @@ def save():
     )
     billable_group.master_billable_group = master_group
     billable_group.save()
+
+    # recalculate total costs for all ship request billables where billable group that was increased took part
+    ship_request_billables = db.session.scalars(
+        sa.select(m.ShipRequestBillable).where(
+            m.ShipRequestBillable.billable_group_id == billable_group.id
+        )
+    ).all()
+    for billable in ship_request_billables:
+        billable.total = billable.quantity * billable_group.rate
+        billable.save()
+    db.session.commit()
     return redirect(url_for("billable_group.get_all"))
 
 
@@ -209,11 +220,28 @@ def increase_costs():
         log(log.INFO, "There is no billable groups")
         flash("There is no billable groups", "danger")
         return "no billable groups", 404
+    billable_groups_ids = []
     for group in billable_groups:
         if group.excluded_from_global_increase:
             continue
         group.rate *= 1 + cost / 100
         group.rate = round(group.rate, 2)
         group.save()
+        billable_groups_ids.append(group.id)
+    db.session.commit()
+
+    # recalculate total costs for all ship request billables where billable group that was increased took part
+    for billable_group_id in billable_groups_ids:
+        group = db.session.scalar(
+            sa.select(m.BillableGroup).where(m.BillableGroup.id == billable_group_id)
+        )
+        ship_request_billables = db.session.scalars(
+            sa.select(m.ShipRequestBillable).where(
+                m.ShipRequestBillable.billable_group_id == billable_group_id
+            )
+        ).all()
+        for billable in ship_request_billables:
+            billable.total = billable.quantity * group.rate
+            billable.save()
     db.session.commit()
     return "ok", 200
