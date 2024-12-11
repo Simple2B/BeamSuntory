@@ -24,7 +24,12 @@ class ReportDataInboundBillable(ReportData):
 
         query = (
             sa.select(m.InboundOrder)
-            .where(m.InboundOrder.status != s.InboundOrderStatus.cancelled)
+            .where(
+                m.InboundOrder.status != s.InboundOrderStatus.cancelled,
+                sa.exists().where(
+                    m.ShipRequestBillable.inbound_order_id == m.InboundOrder.id
+                ),
+            )
             .order_by(m.InboundOrder.created_at.desc())
         )
         count_query = sa.select(sa.func.count()).select_from(m.InboundOrder)
@@ -53,28 +58,39 @@ class ReportDataInboundBillable(ReportData):
             count_query = count_query.where(where_stmt)
 
         if report_filter.start_date:
-            where_stmt = m.BillableGroup.created_at >= datetime.strptime(
+            where_stmt = m.InboundOrder.created_at >= datetime.strptime(
                 report_filter.start_date, "%m/%d/%Y"
             )
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)
 
         if report_filter.start_date_to:
-            where_stmt = m.BillableGroup.created_at <= datetime.strptime(
+            where_stmt = m.InboundOrder.created_at <= datetime.strptime(
                 report_filter.start_date_to, "%m/%d/%Y"
             )
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)
 
-        if report_filter.brand:
-            where_stmt = m.InboundOrder.products_allocated.any(
-                m.ProductAllocated.product.has(
-                    m.Product.groups.any(m.GroupProduct.name == report_filter.brand)
-                )
-            )
+        master_groups = [
+            report_filter.brand,
+        ]
 
-            query = query.where(where_stmt)
-            count_query = count_query.where(where_stmt)
+        if master_groups.count(None) != len(master_groups):
+            for group in master_groups:
+                if not group:
+                    continue
+                where_stmt = m.InboundOrder.products_allocated.any(
+                    m.ProductAllocated.product.has(
+                        m.Product.product_groups.any(
+                            m.ProductGroup.parent.has(
+                                m.GroupProduct.name.ilike(f"%{group}%")
+                            )
+                        )
+                    )
+                )
+                query = query.where(where_stmt)
+
+                count_query = count_query.where(where_stmt)
 
         return query, count_query
 
@@ -102,6 +118,20 @@ class ReportDataInboundBillable(ReportData):
                         ],
                     )
                 )
+
+        master_groups = [
+            report_filter.brand,
+        ]
+
+        if master_groups.count(None) != len(master_groups):
+            filtered_reports = []
+            for group in master_groups:
+                if not group:
+                    continue
+                for report in reports:
+                    if report.brand == group:
+                        filtered_reports.append(report)
+            reports = filtered_reports
 
         pagination = create_pagination(total=len(reports))
 
