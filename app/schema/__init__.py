@@ -122,3 +122,13 @@ from .bulk_ship import (
     ValidateBulkShipResult,
 )
 from .bulk_assign import BulkAssign, ValidateBulkAssignResult, BulkAssignFields
+from .master_billable_group import MasterBillableGroup
+from .billable_group import BillableGroup, BillableGroupIncreaseCostRequest, Billable
+from .group_allocated import (
+    GroupAllocated,
+    GroupAllocatedList,
+    OutgoingStockBillableGroup,
+    OutgoingStockBillableGroupList,
+)
+from .report_billable import ReportBillableResponse
+from .report_inbound_billable import ReportInboundBillable

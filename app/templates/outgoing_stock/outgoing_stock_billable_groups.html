@@ -1,0 +1,79 @@
+<!-- Billable adding -->
+<!-- prettier-ignore -->
+<form method="post" action="{{ url_for('outgoing_stock.save_billable') }}" id="outgoing-stock-add-billable-groups" >
+    {{ billable_form.hidden_tag() }}
+    <input type="hidden" name="ship_request_id" value={{ ship_request.id }} />
+    <input type="hidden" name="groups" id="outgoing-stock-billable-add-groups" value="" />
+  <div class="p-6 space-y-6 border-t flex justify-center flex-col" >
+    <span>Add billable</span>
+    <button type="button" data-target="" id="outgoing-stock-billable-groups-allocate-btn" class="inbound-order-add-item-btn inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-red-300 justify-center w-full" >
+      <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg" > <path d="M64 80c-8.8 0-16 7.2-16 16V416c0 8.8 7.2 16 16 16H384c8.8 0 16-7.2 16-16V96c0-8.8-7.2-16-16-16H64zM0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96zM200 344V280H136c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H248v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z" ></path> </svg>
+    </button>
+  </div>
+  <div  class="group-allocated" >
+    {% for billable in ship_request.ship_request_billables if not billable.incoming %}
+    <div class="p-6 border relative group-container">
+      <div  class="group-allocated-delete-button absolute top-[15%] left-[97%] bg-red-600 hover:bg-red-800 rounded-lg cursor-pointer">
+        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M6.99486 7.00636C6.60433 7.39689 6.60433 8.03005 6.99486 8.42058L10.58 12.0057L6.99486 15.5909C6.60433 15.9814 6.60433 16.6146 6.99486 17.0051C7.38538 17.3956 8.01855 17.3956 8.40907 17.0051L11.9942 13.4199L15.5794 17.0051C15.9699 17.3956 16.6031 17.3956 16.9936 17.0051C17.3841 16.6146 17.3841 15.9814 16.9936 15.5909L13.4084 12.0057L16.9936 8.42059C17.3841 8.03007 17.3841 7.3969 16.9936 7.00638C16.603 6.61585 15.9699 6.61585 15.5794 7.00638L11.9942 10.5915L8.40907 7.00636C8.01855 6.61584 7.38538 6.61584 6.99486 7.00636Z" fill="#ffffff"></path>
+        </svg>
+      </div>
+      <div class="flex gap-6">
+        <!--billable selectors  -->
+        <select onchange="masterGroupChange(this)" name="master_billable_group_id" class="master_billable_group_selector w-1/4 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+          <option value="">Select Master Billable Group</option>
+          {% for master_billable_group in master_billable_groups %}
+          <option value="{{ master_billable_group.id }}" {% if master_billable_group.id == billable.master_billable_group_id %} selected {% endif %} >{{ master_billable_group.name }}</option>
+          {% endfor %}
+        </select>
+        <select onchange="billableGroupChange(this)" name="billable_group_id" class="billable_group_selector w-1/4 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+          <option value="">Select Billable Group</option>
+          {% for billable_group in billable_groups %}
+          <option value="{{ billable_group.id }}" {% if billable_group.id == billable.billable_group_id %} selected {% endif %} >{{ billable_group.name }}</option>
+          {% endfor %}
+          <!--billable groups  -->
+        </select>
+        <!--billable selectors  -->
+        <input type="number" class="w-1/6 quantity bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Quantity" value="{{billable.quantity}}" min="1" step="1" disabled />
+        <input type="text" class="total w-1/6 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Total" value="{{billable.total}} $" disabled />
+      </div>
+    </div>
+    {% endfor %}
+    <!-- here will be groups -->
+  </div>
+      <input id="grand-total" type="text" class="flex-1 ml-auto m-4 items-end invisible w-1/6 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Grand total" disabled />
+</form>
+<!-- prettier-ignore -->
+<script src="{{ url_for('static', filename='js/outgoing_stock_billable_groups_add.js') }}" type="text/javascript" defer></script>
+<!-- prettier-ignore -->
+<script>
+    function masterGroupChange(select) {
+        let master_billable_group_id = select.value;
+        let url = `/outgoing_stock/get_billable_group_for_outgoing/${master_billable_group_id}`;
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                let parentElement = select.closest('.group-container');
+                let billable_group_select = parentElement.querySelector('.billable_group_selector');
+                billable_group_select.innerHTML = '';
+                billable_group_select.add(new Option('Select Billable Group', ''));
+                data.forEach(billable_group => {
+                    let option = document.createElement('option');
+                    option.value = billable_group.id;
+                    option.text = billable_group.name;
+                    option.setAttribute('data-rate', billable_group.rate);
+                    billable_group_select.add(option);
+                });
+            });
+    }
+
+    function billableGroupChange(select) {
+        let billable_group_id = select.value;
+        let parentElement = select.closest('.group-container');
+        let quantityInput = parentElement.querySelector('.quantity');
+        quantityInput.removeAttribute('disabled');
+        let totalInput = parentElement.querySelector('.total');
+        totalInput.setAttribute('data-rate', select.options[select.selectedIndex].getAttribute('data-rate'));
+        totalInput.removeAttribute('disabled');
+    }
+</script>

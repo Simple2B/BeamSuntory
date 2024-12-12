@@ -1,6 +1,4 @@
-import { create } from '@easepick/bundle';
-import { Modal } from 'flowbite';
-import type { ModalOptions, ModalInterface } from 'flowbite';
+import { addSearchEvent, initModal } from './utils';
 
 interface IAdjust {
   id: number;
@@ -41,21 +39,7 @@ const defaultBrandImage =
 // adjust modals
 const $viewAdjustModalElement: HTMLElement = document.querySelector('#view-adjust-modal');
 
-const modalOptions: ModalOptions = {
-  placement: 'bottom-right',
-  backdrop: 'dynamic',
-  backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
-  closable: true,
-  onHide: () => {
-    const GroupQtyContainer = document.querySelector('#adjust-view-group-quantity-container');
-    GroupQtyContainer.innerHTML = '';
-  },
-  onShow: () => {},
-  onToggle: () => {
-    console.log('modal has been toggled');
-  },
-};
-const viewModal: ModalInterface = new Modal($viewAdjustModalElement, modalOptions);
+const viewModal = initModal($viewAdjustModalElement);
 
 const $viewButtonElements = document.querySelectorAll('.adjust-view-button');
 $viewButtonElements.forEach((e) =>
@@ -66,8 +50,6 @@ $viewButtonElements.forEach((e) =>
 
 // ----view adjust modal-----
 function viewAdjust(adjust: IAdjust) {
-  console.log(adjust);
-
   let div: HTMLDivElement = document.querySelector('#adjust-view-product-name');
   div.innerHTML = adjust.product.name;
   div = document.querySelector('#adjust-view-product-SKU');
@@ -136,10 +118,4 @@ function createGroupQtyItem(groupQty: IAdjustGroupQty) {
 // search flow
 const searchAdjustInput: HTMLInputElement = document.querySelector('#table-search-adjust');
 const searchAdjustInputButton = document.querySelector('#table-search-adjust-button');
-if (searchAdjustInputButton && searchAdjustInput) {
-  searchAdjustInputButton.addEventListener('click', () => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('q', searchAdjustInput.value);
-    window.location.href = `${url.href}`;
-  });
-}
+addSearchEvent(searchAdjustInput, searchAdjustInputButton);

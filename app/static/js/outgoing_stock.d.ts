@@ -1,4 +1,4 @@
-import { IGroup } from "./types";
+import { IGroup } from './types';
 interface IEvent {
     dateFrom: string;
     dateTo: string;

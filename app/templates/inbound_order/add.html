@@ -9,6 +9,7 @@
     <form action="{{url_for('inbound_order.create')}}" method="post" autocomplete="off"
       class="relative bg-white rounded-lg shadow dark:bg-gray-700">
       <input type="hidden" name="products" id="inbound-order-add-products" value="" />
+      <input type="hidden" name="billable_groups" id="inbound-order-add-billable-groups" value="" />
       {{ form_create.hidden_tag() }}
       <!-- Modal header -->
       <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
@@ -87,6 +88,9 @@
             </select>
           </div>
         </div>
+        <!-- Add billable here -->
+         {% include 'inbound_order/add_billable.html' %}
+        <!-- End of add billable -->
         <div id="inbound-order-add-add-container">
           <div class="pb-6 space-y-6 border-t relative">
             <div

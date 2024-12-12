@@ -1,13 +1,16 @@
-
-
 interface IFilterMap {
   [index: string]: string[] | HTMLElement[];
 }
 
-
-
 const filtersMap: IFilterMap = {
-  events: ['user-select', 'filter-start-date', 'filter-start-date-to', 'filter-end-date', 'filter-end-date-to', 'filter-group-brand'],
+  events: [
+    'user-select',
+    'filter-start-date',
+    'filter-start-date-to',
+    'filter-end-date',
+    'filter-end-date-to',
+    'filter-group-brand',
+  ],
   request_share: [
     'user-select',
     'filter-start-date',
@@ -63,7 +66,6 @@ const filtersMap: IFilterMap = {
     'filter-group-brand',
     'filter-group-premises',
     'filter-group-categories',
-
   ],
   shipping: [
     'division-select',
@@ -89,9 +91,9 @@ const filtersMap: IFilterMap = {
     'filter-group-categories',
     'shelf-life-filter-expire-in',
   ],
+  inbound_billable: ['filter-start-date', 'filter-end-date', 'filter-group-brand'],
+  outbound_billable: ['filter-start-date', 'filter-end-date', 'filter-group-brand'],
 };
-
-
 
 const filtersIds = [
   'request-share-type',
@@ -127,9 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const searchQueryHTML = document.getElementById('search-query') as HTMLInputElement;
   const searchSkuHTML = document.getElementById('search-sku') as HTMLInputElement;
 
-
-
-
   for (const [reportType, filters] of Object.entries(filtersMap)) {
     filtersMap[reportType] = filters.map((id) => document.getElementById(id as string)) as HTMLElement[];
   }
@@ -139,12 +138,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // clearFilters();
     const selectHTML = e.target as HTMLSelectElement;
 
-    allFiltersHTML.forEach((filterHTML) => !filterHTML.classList.contains("hidden") && filterHTML.classList.add('hidden'));
+    allFiltersHTML.forEach(
+      (filterHTML) => !filterHTML.classList.contains('hidden') && filterHTML.classList.add('hidden')
+    );
     const visibleFilters = filtersMap[selectHTML.value] as HTMLElement[];
     visibleFilters.forEach((filterHTML) => filterHTML.classList.remove('hidden'));
   }
   reportTypeSelectHTML.addEventListener('change', changeReportType);
-  allFiltersHTML.forEach((filterHTML) => !filterHTML.classList.contains("hidden") && filterHTML.classList.add('hidden'));
+  allFiltersHTML.forEach(
+    (filterHTML) => !filterHTML.classList.contains('hidden') && filterHTML.classList.add('hidden')
+  );
   const visibleFilters = filtersMap[reportTypeSelectHTML.value] as HTMLElement[];
   visibleFilters.forEach((filterHTML) => filterHTML.classList.remove('hidden'));
 
@@ -159,7 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
   groupSelect.addEventListener('change', getSubGroups);
 
   function clearFilters() {
-
     const allInputs = filtersIds.map((id) => document.getElementById(id));
     allInputs.forEach((filterHTML) => {
       if (!filterHTML) {

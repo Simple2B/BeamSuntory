@@ -1,14 +1,12 @@
-import 'flowbite';
+import HTMXDispatcher from './htmx';
 import { Dismiss } from 'flowbite';
 import type { DismissOptions, DismissInterface } from 'flowbite';
-import { Modal } from 'flowbite';
-import type { ModalOptions, ModalInterface } from 'flowbite';
+import { initModal } from './utils';
 
 const themeToggleDarkIcons = document.querySelectorAll('#theme-toggle-dark-icon');
 const themeToggleLightIcons = document.querySelectorAll('#theme-toggle-light-icon');
 export const defaultBrandImage =
   'https://raw.githubusercontent.com/Simple2B/BeamSuntory/develop/app/static/img/no_picture_default.png';
-import HTMXDispatcher from './htmx';
 
 // Change the icons inside the button based on previous settings
 if (
@@ -76,9 +74,7 @@ const options: DismissOptions = {
   timing: 'ease-out',
 
   // callback functions
-  onHide: (context, targetEl) => {
-    console.log('element has been dismissed');
-  },
+  onHide: (context, targetEl) => {},
 };
 
 /*
@@ -101,21 +97,9 @@ if ($targetEl && $triggerEl) {
 // -------full product image modal-------
 const $viewImageModalElement: HTMLElement = document.querySelector('#product-image-modal');
 const $spinnerModalElement: HTMLElement = document.querySelector('#spinner-modal');
-const modalOptions: ModalOptions = {
-  placement: 'bottom-right',
-  backdrop: 'dynamic',
-  backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
-  closable: true,
-  onHide: () => {
-    console.log('modal has been hidden');
-  },
-  onShow: () => { },
-  onToggle: () => {
-    console.log('modal has been toggled');
-  },
-};
-const viewModal: ModalInterface = new Modal($viewImageModalElement, modalOptions);
-const spinnerModal: ModalInterface = new Modal($spinnerModalElement, modalOptions);
+
+const viewModal = initModal($viewImageModalElement);
+const spinnerModal = initModal($spinnerModalElement);
 
 const productImageAnchors = document.querySelectorAll('.product-full-image-anchor');
 productImageAnchors.forEach((e) => {
@@ -172,7 +156,6 @@ document.querySelector('#product-upload-save-products-btn').addEventListener('cl
 
 const dropdownSidebar = document.querySelectorAll('.dropdown-btn');
 
-
 dropdownSidebar.forEach((btn) => {
   const btnElement = btn as HTMLElement;
 
@@ -217,17 +200,15 @@ dropdownSidebar.forEach((btn) => {
 });
 
 // bell notification dropdown
-const bell = document.querySelector("#bell-notification-red-dot")
-const notification = document.querySelector("#dropdownNotificationButton")
+const bell = document.querySelector('#bell-notification-red-dot');
+const notification = document.querySelector('#dropdownNotificationButton');
 if (bell && notification) {
-  notification.addEventListener("click", () => {
-    if (!bell.classList.contains("invisible")) {
-      bell.classList.add("invisible")
+  notification.addEventListener('click', () => {
+    if (!bell.classList.contains('invisible')) {
+      bell.classList.add('invisible');
     }
-  })
+  });
 }
-
-
 
 window.addEventListener('htmx:afterSwap', (event) => {
   const eventTarget = event.target as HTMLElement;
@@ -239,7 +220,6 @@ window.addEventListener('htmx:afterSwap', (event) => {
     });
   });
 });
-
 
 const spinner = `<div tabindex="-1"
     class="fixed bg-opacity-40 z-100 bg-white top-0 left-0 right-0 z-50 items-center justify-center w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full max-h-full justify-end items-end flex">
@@ -260,7 +240,6 @@ const spinner = `<div tabindex="-1"
 window.addEventListener('submit', (event: Event) => {
   const target = event.target as HTMLFormElement;
   const method = target.method;
-  console.log(target);
-  if (method.toLocaleLowerCase() === "get" || target.hasAttribute("hx-post")) return;
+  if (method.toLocaleLowerCase() === 'get' || target.hasAttribute('hx-post')) return;
   document.body.insertAdjacentHTML('beforeend', spinner);
 });

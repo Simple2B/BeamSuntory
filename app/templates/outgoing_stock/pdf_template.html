@@ -37,6 +37,40 @@
         <div class="text-lg">{{ ship_request.store.phone_numb }}</div>
         <div class="w-full text-md">Comments: {{ ship_request.wm_notes if ship_request.wm_notes else 'No notes' }}</div>
       </div>
+      {% if ship_request.ship_request_billables | length >0 %}
+      <div>
+        Billables
+        <div>
+          <table class="h-full w-full border-collapse mb-1 text-base">
+            <thead class="text-md border-black uppercase ">
+              <tr>
+                <th scope="col" class="border border-black px-6 py-3">Master billable group</th>
+                <th scope="col" class="border border-black px-6 py-3">Billable group</th>
+                <th scope="col" class="border border-black px-6 py-3">Quantity</th>
+                <th scope="col" class="border border-black px-6 py-3">Total</th>
+              </tr>
+            </thead>
+            <tbody class="text-md border">
+              {% for billable in ship_request.ship_request_billables %}
+              <tr class="border border-black">
+                <td class="h-full flex flex-col justify-center items-center">
+                  {{ billable.master_billable_group_name }}
+                </td>
+                <td class="border border-black p-2 text-center">
+                  {{ billable.billable_group_name }}
+                </td>
+                <td class="border border-black p-2 text-center">
+                  {{ billable.quantity }}
+                </td>
+                <td class="border border-black p-2 text-center">
+                  {{ billable.total }} $
+                </td>
+                {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
       <div class="">
         <table class="h-full w-full border-collapse mb-1 text-base">
           <thead class="text-md border-black uppercase ">

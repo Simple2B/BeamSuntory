@@ -12,6 +12,7 @@ from .report_data import (
     add_product_groups,
     order_fields_dataset,
     add_product_exta_fields,
+    add_billable_data_fields,
 )
 
 
@@ -42,6 +43,7 @@ class ReportDataInboundOrders(ReportData):
                     )
                 ),
                 m.InboundOrder.title.ilike(f"%{report_filter.q}%"),
+                m.InboundOrder.order_id.ilike(f"%{report_filter.q}%"),
             )
             query = query.where(where_stmt)
             count_query = count_query.where(where_stmt)
@@ -236,6 +238,7 @@ def create_inbound_order_dataset(
             if download:
                 add_product_groups(data, product_allocated.product, master_groups)
                 add_product_exta_fields(data, product_allocated.product)
+                add_billable_data_fields(data, report, product_allocated.product)
             else:
                 data["Supplier"].append(report.supplier.name)
                 data["Brand"].append(product_allocated.product.brand)

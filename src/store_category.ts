@@ -1,12 +1,4 @@
-import {Modal} from 'flowbite';
-import type {ModalOptions, ModalInterface} from 'flowbite';
-
-// /*
-//  * $editStoreCategoryModal: required
-//  * options: optional
-//  */
-
-// // For your js code
+import { addDeleteEvent, addSearchEvent, initModal } from './utils';
 
 interface IStoreCategory {
   id: number;
@@ -16,86 +8,39 @@ interface IStoreCategory {
   active: boolean;
 }
 
-const $modalElement: HTMLElement = document.querySelector(
-  '#editStoreCategoryModal',
-);
-const $addStoreCategoryModalElement: HTMLElement = document.querySelector(
-  '#add-store-category-modal',
-);
+const $modalElement: HTMLElement = document.querySelector('#editStoreCategoryModal');
+const $addStoreCategoryModalElement: HTMLElement = document.querySelector('#add-store-category-modal');
 
-const modalOptions: ModalOptions = {
-  placement: 'bottom-right',
-  backdrop: 'dynamic',
-  backdropClasses:
-    'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
-  closable: true,
-  onHide: () => {
-    console.log('modal is hidden');
-  },
-  onShow: () => {
-    console.log('store-category id: ');
-  },
-  onToggle: () => {
-    console.log('modal has been toggled');
-  },
-};
+const modal = initModal($modalElement);
+const addModal = initModal($addStoreCategoryModalElement);
 
-const modal: ModalInterface = new Modal($modalElement, modalOptions);
-const addModal: ModalInterface = new Modal(
-  $addStoreCategoryModalElement,
-  modalOptions,
-);
-
-const $buttonElements = document.querySelectorAll(
-  '.store-category-edit-button',
-);
-$buttonElements.forEach(e =>
+const $buttonElements = document.querySelectorAll('.store-category-edit-button');
+$buttonElements.forEach((e) =>
   e.addEventListener('click', () => {
     editStoreCategory(JSON.parse(e.getAttribute('data-target')));
-  }),
+  })
 );
 
 // search flow
-const searchInput: HTMLInputElement = document.querySelector(
-  '#table-search-store-categories',
-);
-const searchInputButton = document.querySelector(
-  '#table-search-store-category-button',
-);
-if (searchInputButton && searchInput) {
-  searchInputButton.addEventListener('click', () => {
-    window.location.href = `${window.location.origin}${window.location.pathname}?q=${searchInput.value}`;
-  });
-}
+const searchInput: HTMLInputElement = document.querySelector('#table-search-store-categories');
+const searchInputButton = document.querySelector('#table-search-store-category-button');
+addSearchEvent(searchInput, searchInputButton);
+
 const deleteButtons = document.querySelectorAll('.delete-store-category-btn');
 
-deleteButtons.forEach(e => {
-  e.addEventListener('click', async () => {
-    if (confirm('Are sure?')) {
-      let id = e.getAttribute('data-store-category-id');
-      const response = await fetch(`/store_category/delete/${id}`, {
-        method: 'DELETE',
-      });
-      if (response.status == 200) {
-        location.reload();
-      }
-    }
-  });
+deleteButtons.forEach((e) => {
+  addDeleteEvent(e, `/store_category/delete/${e.getAttribute('data-store-category-id')}`);
 });
 
 const defaultCategoryImage =
   'https://github.com/Simple2B/BeamSuntory/blob/develop/app/static/img/logo-mini.png?raw=true';
 
 function editStoreCategory(storeCategory: IStoreCategory) {
-  const img: HTMLImageElement = document.querySelector(
-    '#store-category-edit-image',
-  );
+  const img: HTMLImageElement = document.querySelector('#store-category-edit-image');
   storeCategory.image.length > 100
     ? (img.src = `data:image/png;base64, ${storeCategory.image}`)
     : (img.src = defaultCategoryImage);
-  let input: HTMLInputElement = document.querySelector(
-    '#store-category-edit-name',
-  );
+  let input: HTMLInputElement = document.querySelector('#store-category-edit-name');
   input.value = storeCategory.name;
   input = document.querySelector('#store-category-edit-id');
   input.value = storeCategory.id.toString();

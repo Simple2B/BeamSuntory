@@ -1,10 +1,13 @@
-from sqlalchemy import select
 from datetime import datetime
-from flask import current_app as app
+
 import sqlalchemy as sa
-from flask.testing import FlaskClient, FlaskCliRunner
 from click.testing import Result
-from app import models as m, db
+from flask import current_app as app
+from flask.testing import FlaskClient, FlaskCliRunner
+from sqlalchemy import select
+
+from app import db
+from app import models as m
 from app import schema as s
 from tests.utils import login, register
 

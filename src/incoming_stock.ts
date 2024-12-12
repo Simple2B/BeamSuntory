@@ -1,14 +1,10 @@
-import { Modal } from 'flowbite';
-
+import { addSearchEvent } from './utils';
 
 // search flow
 const searchInput: HTMLInputElement = document.querySelector('#table-search-incoming-stocks');
 const searchInputButton = document.querySelector('#table-search-incoming-stock-button');
-if (searchInputButton && searchInput) {
-  searchInputButton.addEventListener('click', () => {
-    window.location.href = `${window.location.origin}${window.location.pathname}?q=${searchInput.value}`;
-  });
-}
+addSearchEvent(searchInput, searchInputButton);
+
 const cancelOrderButtons = document.querySelectorAll('.cancel-incoming-stock-btn');
 
 cancelOrderButtons.forEach((e) => {
@@ -25,7 +21,6 @@ cancelOrderButtons.forEach((e) => {
   });
 });
 
-
 const filterButton = document.querySelector('#incoming-stock-filter-button') as HTMLButtonElement;
 const orderFilterInputs = document.querySelectorAll('.incoming-stock-filter-input');
 const hiddenInput = document.querySelector('#sort_by') as HTMLInputElement;
@@ -37,4 +32,3 @@ filterButton.addEventListener('click', () => {
     }
   });
 });
-

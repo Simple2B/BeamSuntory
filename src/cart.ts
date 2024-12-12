@@ -1,4 +1,5 @@
 import { easepick } from '@easepick/bundle';
+import { addDeleteEvent } from './utils';
 
 interface ICart {
   id: number;
@@ -93,21 +94,8 @@ deliverToStoreBtn.addEventListener('click', () => {
 const deleteButtons = document.querySelectorAll('.delete-cart-item-btn');
 
 deleteButtons.forEach((e) => {
-  e.addEventListener('click', async () => {
-    if (confirm('Are sure?')) {
-      let id = e.getAttribute('data-cart-item-id');
-      const response = await fetch(`/cart/delete/${id}`, {
-        method: 'DELETE',
-      });
-      if (response.status == 200 || response.status == 404) {
-        location.reload();
-      }
-    }
-  });
+  addDeleteEvent(e, `/cart/delete/${e.getAttribute('data-cart-item-id')}`);
 });
-
-
-
 
 const eventButtons = document.querySelectorAll('.cart-item-event-button');
 eventButtons.forEach((btn) => {

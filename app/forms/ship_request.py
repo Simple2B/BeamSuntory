@@ -81,3 +81,9 @@ class ShipRequestForm(FlaskForm):
 class SortByStatusShipRequestForm(FlaskForm):
     sort_by = StringField("Sort by", [DataRequired()])
     submit = SubmitField("Submit")
+
+
+class BillableGroupOutgoingStockForm(FlaskForm):
+    ship_request_id = StringField("ship_request_id", [DataRequired()])
+    groups = StringField("Groups")
+    submit = SubmitField("Save")

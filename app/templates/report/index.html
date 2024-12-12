@@ -48,6 +48,8 @@
             <option value="request_share">Share request</option>
             <option value="shelf_life">Shelf Life</option>
             <option value="shipping">Shipping</option>
+            <option value="inbound_billable">Inbound billable</option>
+            <option value="outbound_billable">Outbound billable</option>
           </select>
         </div>
         <div class="flex flex-wrap py-4 bg-white dark:bg-gray-800 hidden" id="division-select">
@@ -278,6 +280,7 @@
       </select>
     </div>
     {% endfor %}
+
     <div class="flex flex-wrap py-1 bg-white dark:bg-gray-800"  >
       <!-- prettier-ignore -->
       <select  hx-trigger="change" hx-swap="innerHTML" hx-target="#reports-table"  id="shelf-life-filter-expire-in"
